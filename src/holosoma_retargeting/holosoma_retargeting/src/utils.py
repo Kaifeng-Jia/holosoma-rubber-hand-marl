@@ -7,6 +7,7 @@ from __future__ import annotations
 import os
 import pickle
 import re
+import xml.etree.ElementTree as ET
 from pathlib import Path
 
 import numpy as np
@@ -634,6 +635,68 @@ def create_scaled_multi_boxes_urdf(
         f.write(content)
 
     return output_path
+
+
+def create_uniformly_scaled_object_scene_xml(
+    xml_path: str | Path,
+    object_name: str,
+    scale: float,
+    output_path: str | Path,
+) -> str:
+    """Create a temporary MuJoCo scene with one object uniformly scaled.
+
+    Only the named object's body subtree and mesh assets referenced by that
+    subtree are changed. Robot and ground geometry remain untouched.
+    """
+    xml_path = Path(xml_path).resolve()
+    output_path = Path(output_path)
+    tree = ET.parse(xml_path)
+    root = tree.getroot()
+
+    compiler = root.find("compiler")
+    if compiler is not None and compiler.get("meshdir"):
+        meshdir = Path(compiler.get("meshdir", ""))
+        if not meshdir.is_absolute():
+            compiler.set("meshdir", str((xml_path.parent / meshdir).resolve()))
+
+    object_body = next(
+        (body for body in root.findall(".//body") if object_name in body.get("name", "")),
+        None,
+    )
+    if object_body is None:
+        raise ValueError(f"Object body containing '{object_name}' not found in {xml_path}")
+
+    def scale_attribute(element: ET.Element, attribute: str, factor: float) -> None:
+        value = element.get(attribute)
+        if value is None:
+            return
+        numbers = [float(item) * factor for item in value.split()]
+        element.set(attribute, " ".join(f"{number:.12g}" for number in numbers))
+
+    referenced_meshes: set[str] = set()
+    for element in object_body.iter():
+        if element.tag in {"body", "geom", "site", "joint", "inertial"}:
+            scale_attribute(element, "pos", scale)
+        if element.tag in {"geom", "site"}:
+            scale_attribute(element, "size", scale)
+            scale_attribute(element, "fromto", scale)
+        if element.tag == "inertial":
+            scale_attribute(element, "diaginertia", scale**2)
+            scale_attribute(element, "fullinertia", scale**2)
+        if element.tag == "geom" and element.get("mesh"):
+            referenced_meshes.add(element.get("mesh", ""))
+
+    for mesh in root.findall(".//asset/mesh"):
+        if mesh.get("name") not in referenced_meshes:
+            continue
+        current_scale = [float(item) for item in mesh.get("scale", "1 1 1").split()]
+        if len(current_scale) != 3:
+            raise ValueError(f"Expected a 3D mesh scale for {mesh.get('name')}")
+        mesh.set("scale", " ".join(f"{item * scale:.12g}" for item in current_scale))
+
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    tree.write(output_path, encoding="unicode")
+    return str(output_path)
 
 
 def create_scaled_multi_boxes_xml(

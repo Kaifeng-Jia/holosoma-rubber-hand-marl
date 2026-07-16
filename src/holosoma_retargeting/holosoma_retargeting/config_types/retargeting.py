@@ -44,6 +44,14 @@ class RetargetingConfig:
     augmentation: bool = False
     """Whether to use augmentation."""
 
+    fixed_object_size_adaptation: bool = False
+    """Run a two-stage retarget for a grounded, fixed-size interaction object.
+
+    The nominal stage scales the demonstration object with the human. The
+    adaptation stage keeps that nominal motion as a reference while solving
+    against the real-size target object.
+    """
+
     # --- Nested configs ---
     robot_config: RobotConfig = field(default_factory=lambda: RobotConfig(robot_type="g1"))
     """Robot configuration (nested - can override robot_urdf_file, robot_dof, etc.

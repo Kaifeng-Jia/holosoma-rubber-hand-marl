@@ -16,7 +16,11 @@ from scipy.spatial.transform import Rotation  # type: ignore[import-untyped]
 from tqdm import tqdm
 from viser.extras import ViserUrdf  # type: ignore[import-not-found]
 
-from holosoma_retargeting.config_types.retargeter import FootLockConfig, SelfCollisionConfig
+from holosoma_retargeting.config_types.retargeter import (
+    FootLockConfig,
+    HandOrientationConfig,
+    SelfCollisionConfig,
+)
 
 # Add src to path for direct execution
 src_path = Path(__file__).parent.parent / "src"
@@ -61,6 +65,10 @@ class InteractionMeshRetargeter:
         debug: bool = False,
         w_nominal_tracking_init: float = 5.0,
         nominal_tracking_tau: float = 10.0,
+        scene_xml_path: str | None = None,
+        anchor_nominal_foot_height: bool = False,
+        nominal_foot_height_tolerance: float = 5e-3,
+        hand_orientation: HandOrientationConfig | None = None,
     ):
         """This kinematic retargeter solves the diffIK problem with hard constraints in SQP style.
         During each SQP iteration, the problem is solved with the following constraints and costs:
@@ -107,15 +115,20 @@ class InteractionMeshRetargeter:
         self.smooth_weight = 0.2
         # Tolerance for foot sticking constraints in x, y.
         self.foot_sticking_tolerance = foot_sticking_tolerance
+        self.anchor_nominal_foot_height = anchor_nominal_foot_height
+        self.nominal_foot_height_tolerance = nominal_foot_height_tolerance
         self._init_foot_lock(foot_lock)
         self._self_collision_config = self_collision
+        self.hand_orientation = hand_orientation or HandOrientationConfig()
 
         # Setup visualization if requested
         if self.visualize:
             self._setup_visualization()
 
         # Load Mujoco model
-        if self.object_name == "ground":
+        if scene_xml_path is not None:
+            robot_xml_path = scene_xml_path
+        elif self.object_name == "ground":
             robot_xml_path = self.robot_model_path.replace(".urdf", ".xml")
         elif self.object_name == "multi_boxes":
             robot_xml_path = self.task_constants.SCENE_XML_FILE
@@ -163,6 +176,8 @@ class InteractionMeshRetargeter:
             self.task_constants.MANUAL_UB.values()
         )
 
+        self._init_hand_orientation()
+
         # Prevent too much waist twist
         self.Q_diag = np.zeros(self.nq_a) * 1e-3
         self.Q_diag[np.array(list(self.task_constants.MANUAL_COST.keys())).astype(int)] = list(
@@ -172,6 +187,71 @@ class InteractionMeshRetargeter:
         self.w_nominal_tracking_init = w_nominal_tracking_init
         self.nominal_tracking_tau = nominal_tracking_tau
         self.track_nominal_indices = task_constants.NOMINAL_TRACKING_INDICES
+
+    def _init_hand_orientation(self) -> None:
+        """Resolve the hand links and upper-limb joints for the optional objective."""
+        self._hand_orientation_specs: list[dict[str, object]] = []
+        if not self.hand_orientation.enable:
+            return
+        if not self.has_dynamic_object:
+            raise ValueError("Hand orientation requires a dynamic interaction object")
+
+        candidates = {
+            "left": ("L_Wrist", "LeftHand"),
+            "right": ("R_Wrist", "RightHand"),
+        }
+        palm_normals = {
+            "left": np.array([-0.07513681, -0.99540367, -0.05938011]),
+            "right": np.array([-0.07514936, 0.99540878, -0.05927846]),
+        }
+        for side, demo_candidates in candidates.items():
+            demo_joint = next(
+                (name for name in demo_candidates if name in self.laplacian_match_links),
+                None,
+            )
+            if demo_joint is None:
+                raise ValueError(f"No mapped {side} wrist joint is available for hand orientation")
+            link_name = self.laplacian_match_links[demo_joint]
+            body_id = mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_BODY, link_name)
+            if body_id < 0:
+                raise ValueError(f"Hand link '{link_name}' was not found in the MuJoCo model")
+            self._hand_orientation_specs.append(
+                {
+                    "side": side,
+                    "demo_joint_idx": self.demo_joints.index(demo_joint),
+                    "link_name": link_name,
+                    "body_id": body_id,
+                    "palm_normal": palm_normals[side],
+                }
+            )
+
+        for spec in self._hand_orientation_specs:
+            side = str(spec["side"])
+            arm_joint_suffixes = (
+                "shoulder_pitch",
+                "shoulder_roll",
+                "shoulder_yaw",
+                "elbow",
+                "wrist_roll",
+                "wrist_pitch",
+                "wrist_yaw",
+            )
+            arm_indices = []
+            for suffix in arm_joint_suffixes:
+                joint_name = f"{side}_{suffix}_joint"
+                joint_id = mujoco.mj_name2id(
+                    self.robot_model,
+                    mujoco.mjtObj.mjOBJ_JOINT,
+                    joint_name,
+                )
+                if joint_id < 0:
+                    raise ValueError(f"Joint '{joint_name}' was not found in the MuJoCo model")
+                qpos_idx = int(self.robot_model.jnt_qposadr[joint_id])
+                local_idx = np.flatnonzero(self.q_a_indices == qpos_idx)
+                if local_idx.size != 1:
+                    raise ValueError(f"Joint '{joint_name}' is outside the optimized configuration")
+                arm_indices.append(int(local_idx[0]))
+            spec["arm_orientation_indices"] = np.asarray(arm_indices, dtype=int)
 
     def _init_foot_lock(self, foot_lock: FootLockConfig | None) -> None:
         """Initialize foot lock configuration and normalize window mappings."""
@@ -404,6 +484,17 @@ class InteractionMeshRetargeter:
         q = np.copy(q_locked_list[0])
         retargeted_motions = [q]
 
+        hand_orientation_weights = self._compute_hand_orientation_weights(
+            human_joint_motions,
+            object_poses,
+            object_points_local_demo,
+        )
+        hand_palm_targets, hand_finger_targets = self._compute_fixed_push_hand_orientation_targets(
+            human_joint_motions,
+            object_poses,
+            object_poses_augmented,
+            hand_orientation_weights,
+        )
         tetrahedra = []
         obj_pts_demo_list = []  # scaled object pts
         obj_pts_list = []  # original size object pts
@@ -473,6 +564,9 @@ class InteractionMeshRetargeter:
                     init_t=i == 0,
                     n_iter=50 if i == 0 else 10,
                     frame_idx=i,
+                    hand_orientation_weights=hand_orientation_weights[i],
+                    hand_palm_targets=hand_palm_targets[i],
+                    hand_finger_targets=hand_finger_targets[i],
                 )
                 if self.debug:
                     robot_link_positions = self._get_robot_link_positions(
@@ -550,6 +644,125 @@ class InteractionMeshRetargeter:
             tetrahedra,
         )
 
+    def _compute_hand_orientation_weights(
+        self,
+        human_joint_motions: np.ndarray,
+        object_poses: np.ndarray,
+        object_points_local_demo: np.ndarray,
+    ) -> np.ndarray:
+        """Detect demo wrist/object contact and fade the optional objective."""
+        num_frames = human_joint_motions.shape[0]
+        num_hands = len(self._hand_orientation_specs)
+        weights = np.zeros((num_frames, num_hands), dtype=float)
+        if not self.hand_orientation.enable:
+            return weights
+
+        contact = np.zeros_like(weights, dtype=bool)
+        for frame_idx in range(num_frames):
+            object_quat = object_poses[frame_idx, 3:]
+            object_trans = object_poses[frame_idx, :3]
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                wrist_world = human_joint_motions[frame_idx, int(spec["demo_joint_idx"])]
+                wrist_local = transform_points_world_to_local(
+                    object_quat,
+                    object_trans,
+                    wrist_world[None, :],
+                )[0]
+                distance = np.linalg.norm(object_points_local_demo - wrist_local, axis=1).min()
+                contact[frame_idx, hand_idx] = distance <= self.hand_orientation.contact_distance
+
+        fade_frames = max(0, int(self.hand_orientation.fade_frames))
+        for hand_idx in range(num_hands):
+            active_frames = np.flatnonzero(contact[:, hand_idx])
+            if active_frames.size == 0:
+                continue
+            split_points = np.flatnonzero(np.diff(active_frames) > 1) + 1
+            for run in np.split(active_frames, split_points):
+                start, end = int(run[0]), int(run[-1])
+                for frame_idx in range(start, end + 1):
+                    if fade_frames == 0:
+                        weights[frame_idx, hand_idx] = 1.0
+                        continue
+                    fade_in = (frame_idx - start + 1) / (fade_frames + 1)
+                    fade_out = (end - frame_idx + 1) / (fade_frames + 1)
+                    weights[frame_idx, hand_idx] = min(1.0, fade_in, fade_out)
+
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            active = np.flatnonzero(weights[:, hand_idx] > 0)
+            if active.size:
+                print(
+                    f"Hand orientation ({spec['side']}): frames "
+                    f"{active[0]}..{active[-1]} (including fade)"
+                )
+        return weights
+
+    def _compute_fixed_push_hand_orientation_targets(
+        self,
+        human_joint_motions: np.ndarray,
+        object_poses: np.ndarray,
+        object_poses_augmented: np.ndarray,
+        hand_orientation_weights: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Create a palm-forward, long-axis-along-edge rigid pushing pose."""
+        num_frames = human_joint_motions.shape[0]
+        targets_shape = (num_frames, len(self._hand_orientation_specs), 3)
+        palm_targets = np.zeros(targets_shape, dtype=float)
+        finger_targets = np.zeros_like(palm_targets)
+        if not self.hand_orientation.enable:
+            return palm_targets, finger_targets
+
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            active_frames = np.flatnonzero(hand_orientation_weights[:, hand_idx] > 0.0)
+            if active_frames.size == 0:
+                continue
+
+            # Determine which side of the object this hand pushes from, then
+            # keep that direction constant in the object's local frame.
+            inward_directions_local = []
+            wrist_idx = int(spec["demo_joint_idx"])
+            for frame_idx in active_frames:
+                demo_quat = object_poses[frame_idx, 3:]
+                demo_rotation = Rotation.from_quat(
+                    [demo_quat[1], demo_quat[2], demo_quat[3], demo_quat[0]]
+                ).as_matrix()
+                inward_world = (
+                    object_poses[frame_idx, :3]
+                    - human_joint_motions[frame_idx, wrist_idx]
+                )
+                inward_world[2] = 0.0
+                inward_norm = np.linalg.norm(inward_world)
+                if inward_norm > 1e-8:
+                    inward_directions_local.append(
+                        demo_rotation.T @ (inward_world / inward_norm)
+                    )
+
+            if not inward_directions_local:
+                raise ValueError(
+                    f"Cannot determine the {spec['side']} hand pushing direction"
+                )
+            inward_local = np.mean(inward_directions_local, axis=0)
+            inward_local /= np.linalg.norm(inward_local)
+
+            for frame_idx in range(num_frames):
+                target_quat = object_poses_augmented[frame_idx, 3:]
+                target_rotation = Rotation.from_quat(
+                    [target_quat[1], target_quat[2], target_quat[3], target_quat[0]]
+                ).as_matrix()
+                inward_world = target_rotation @ inward_local
+                inward_world[2] = 0.0
+                inward_norm = np.linalg.norm(inward_world)
+                if inward_norm < 1e-8:
+                    raise ValueError("Fixed pushing direction is parallel to world up")
+                inward_world /= inward_norm
+                world_up = np.array([0.0, 0.0, 1.0])
+                lateral_world = np.cross(world_up, inward_world)
+                lateral_world /= np.linalg.norm(lateral_world)
+
+                finger_targets[frame_idx, hand_idx] = lateral_world
+                palm_targets[frame_idx, hand_idx] = inward_world
+
+        return palm_targets, finger_targets
+
     def solve_single_iteration(
         self,
         q_locked: np.ndarray,
@@ -564,6 +777,9 @@ class InteractionMeshRetargeter:
         verbose=False,
         init_t=False,
         frame_idx: int = 0,
+        hand_orientation_weights: np.ndarray | None = None,
+        hand_palm_targets: np.ndarray | None = None,
+        hand_finger_targets: np.ndarray | None = None,
     ):
         """The main function to solve a single iteration of the DiffIK problem.
         Args:
@@ -628,8 +844,28 @@ class InteractionMeshRetargeter:
         # Foot constraints (sticking + foot lock window Z pinning)
         apply_foot_sticking = (self.q_a_init_idx < 12) and self.activate_foot_sticking
         apply_foot_lock = (self.q_a_init_idx < 12) and self.foot_lock.enable
-        if apply_foot_sticking or apply_foot_lock:
+        apply_nominal_foot_height = (
+            (self.q_a_init_idx < 12)
+            and self.anchor_nominal_foot_height
+            and q_a_nominal is not None
+        )
+        if apply_foot_sticking or apply_foot_lock or apply_nominal_foot_height:
             J_WF_dict, p_WF_dict, _ = self._calc_manipulator_jacobians(q, links=self.foot_links, obj_frame=False)
+
+            if apply_nominal_foot_height:
+                q_nominal = np.copy(q)
+                q_nominal[self.q_a_indices] = q_a_nominal
+                _, p_WF_nominal_dict, _ = self._calc_manipulator_jacobians(
+                    q_nominal, links=self.foot_links, obj_frame=False
+                )
+                tolerance = self.nominal_foot_height_tolerance
+                for key, J_WF in J_WF_dict.items():
+                    z_delta = p_WF_nominal_dict[key][2] - p_WF_dict[key][2]
+                    Jz = J_WF[2, self.q_a_indices]
+                    constraints += [
+                        Jz @ dqa >= z_delta - tolerance,
+                        Jz @ dqa <= z_delta + tolerance,
+                    ]
 
             # Foot sticking: constrain XY to stay near previous frame position
             if apply_foot_sticking:
@@ -714,6 +950,45 @@ class InteractionMeshRetargeter:
         # Q_diag cost
         Qd = np.asarray(self.Q_diag, dtype=float).reshape(-1)
         obj_terms.append(cp.sum_squares(cp.multiply(np.sqrt(Qd), dqa + q_a_n_last)))
+
+        if (
+            self.hand_orientation.enable
+            and hand_orientation_weights is not None
+            and hand_palm_targets is not None
+            and hand_finger_targets is not None
+        ):
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                fade_weight = float(hand_orientation_weights[hand_idx])
+                rotation, angular_jacobian, _ = self._calc_body_orientation_linearization(
+                    q,
+                    int(spec["body_id"]),
+                )
+                arm_indices = np.asarray(spec["arm_orientation_indices"], dtype=int)
+
+                if fade_weight > 0.0:
+                    finger_direction = rotation[:, 0]
+                    finger_jacobian = (
+                        -self._skew(finger_direction) @ angular_jacobian[:, arm_indices]
+                    )
+                    finger_linear = finger_direction + finger_jacobian @ dqa[arm_indices]
+                    finger_target = np.asarray(hand_finger_targets[hand_idx], dtype=float)
+                    obj_terms.append(
+                        self.hand_orientation.finger_direction_weight
+                        * fade_weight
+                        * cp.sum_squares(finger_linear - finger_target)
+                    )
+
+                    palm_normal = rotation @ np.asarray(spec["palm_normal"], dtype=float)
+                    palm_jacobian = (
+                        -self._skew(palm_normal) @ angular_jacobian[:, arm_indices]
+                    )
+                    palm_linear = palm_normal + palm_jacobian @ dqa[arm_indices]
+                    palm_target = np.asarray(hand_palm_targets[hand_idx], dtype=float)
+                    obj_terms.append(
+                        self.hand_orientation.palm_direction_weight
+                        * fade_weight
+                        * cp.sum_squares(palm_linear - palm_target)
+                    )
 
         # Smoothness cost
         dqa_smooth = q_t_last[self.q_a_indices] - q_a_n_last
@@ -830,6 +1105,9 @@ class InteractionMeshRetargeter:
         init_t: bool = False,
         n_iter: int = 10,
         frame_idx: int = 0,
+        hand_orientation_weights: np.ndarray | None = None,
+        hand_palm_targets: np.ndarray | None = None,
+        hand_finger_targets: np.ndarray | None = None,
     ):
         """Iterate the solver for multiple iterations."""
         last_cost = np.inf
@@ -847,11 +1125,45 @@ class InteractionMeshRetargeter:
                 w_nominal_tracking=w_nominal_tracking,
                 init_t=init_t,
                 frame_idx=frame_idx,
+                hand_orientation_weights=hand_orientation_weights,
+                hand_palm_targets=hand_palm_targets,
+                hand_finger_targets=hand_finger_targets,
             )
             if np.isclose(cost, last_cost):
                 break
             last_cost = cost
         return q_n, cost
+
+    @staticmethod
+    def _skew(vector: np.ndarray) -> np.ndarray:
+        """Return the matrix whose product with x is vector cross x."""
+        x, y, z = vector
+        return np.array([[0.0, -z, y], [z, 0.0, -x], [-y, x, 0.0]])
+
+    def _calc_body_orientation_linearization(
+        self,
+        q: np.ndarray,
+        body_id: int,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Return body rotation, angular Jacobian, and position in world coordinates."""
+        self.robot_data.qpos[:] = q
+        mujoco.mj_forward(self.robot_model, self.robot_data)
+
+        position = np.array(self.robot_data.xpos[body_id], dtype=float, copy=True)
+        rotation = np.array(self.robot_data.xmat[body_id], dtype=float, copy=True).reshape(3, 3)
+        jacobian_pos = np.zeros((3, self.robot_model.nv), dtype=np.float64, order="C")
+        jacobian_rot = np.zeros((3, self.robot_model.nv), dtype=np.float64, order="C")
+        mujoco.mj_jac(
+            self.robot_model,
+            self.robot_data,
+            jacobian_pos,
+            jacobian_rot,
+            position.reshape(3, 1),
+            body_id,
+        )
+        qdot_to_qvel = self._build_transform_qdot_to_qvel_fast()
+        angular_jacobian = (jacobian_rot @ qdot_to_qvel)[:, self.q_a_indices]
+        return rotation, angular_jacobian, position
 
     def _draw_self_collision_geoms(self):
         """Draw collision cylinders for self-collision geom pairs in viser."""

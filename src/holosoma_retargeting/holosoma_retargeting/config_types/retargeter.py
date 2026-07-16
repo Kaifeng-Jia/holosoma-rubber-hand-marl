@@ -44,6 +44,25 @@ class SelfCollisionConfig:
 
 
 @dataclass(frozen=True)
+class HandOrientationConfig:
+    """Optional standardized G1 rubber-hand pushing pose."""
+
+    enable: bool = False
+    """Whether to use the fixed palm-forward, fingers-up pose near the object."""
+
+    contact_distance: float = 0.10
+    """Demo wrist-to-object distance (meters) used to detect contact."""
+
+    fade_frames: int = 8
+    """Number of frames used to fade the objective in and out around contact."""
+
+    palm_direction_weight: float = 5.0
+    """Weight for pointing the palm toward the object during contact."""
+
+    finger_direction_weight: float = 0.0
+    """Optional roll-stabilization weight; zero preserves the stable palm-only solution."""
+
+@dataclass(frozen=True)
 class RetargeterConfig:
     """Configuration for retargeter parameters.
 
@@ -84,6 +103,9 @@ class RetargeterConfig:
 
     self_collision: SelfCollisionConfig = field(default_factory=SelfCollisionConfig)
     """Configuration for self-collision avoidance."""
+
+    hand_orientation: HandOrientationConfig = field(default_factory=HandOrientationConfig)
+    """Optional contact-phase hand orientation for fixed-size object adaptation."""
 
     w_nominal_tracking_init: float = 5.0
     """Initial weight for nominal tracking cost."""

@@ -10,6 +10,8 @@ from __future__ import annotations
 import logging
 import os
 import sys
+import tempfile
+from dataclasses import replace
 from pathlib import Path
 from types import SimpleNamespace
 from typing import Literal
@@ -33,6 +35,7 @@ from holosoma_retargeting.src.utils import (  # noqa: E402
     augment_object_poses,
     calculate_scale_factor,
     create_new_scene_xml_file,
+    create_uniformly_scaled_object_scene_xml,
     create_scaled_multi_boxes_urdf,
     create_scaled_multi_boxes_xml,
     estimate_human_orientation,
@@ -154,6 +157,14 @@ def validate_config(cfg: RetargetingConfig) -> None:
         raise ValueError("Climbing task requires 'mocap' data format")
     if cfg.task_type == "object_interaction" and cfg.data_format not in (None, "smplh"):
         raise ValueError("Object interaction requires 'smplh' data format")
+    if cfg.fixed_object_size_adaptation and cfg.task_type != "object_interaction":
+        raise ValueError("Fixed object size adaptation is only available for object_interaction")
+    if cfg.fixed_object_size_adaptation and cfg.augmentation:
+        raise ValueError("Fixed object size adaptation and pose augmentation cannot be enabled together")
+    if cfg.retargeter.hand_orientation.enable and not cfg.fixed_object_size_adaptation:
+        raise ValueError("Hand orientation is only available with fixed object size adaptation")
+    if cfg.retargeter.hand_orientation.enable and cfg.robot != "g1":
+        raise ValueError("Hand orientation currently supports the G1 rubber hands only")
     # robot_only accepts any format in the registry (already validated above)
 
 
@@ -444,6 +455,19 @@ def convert_object_poses_to_mujoco_order(object_poses: np.ndarray) -> np.ndarray
     return object_poses[:, [4, 5, 6, 0, 1, 2, 3]]
 
 
+def create_grounded_nominal_object_poses(object_poses: np.ndarray, scale: float) -> np.ndarray:
+    """Scale a grounded object's height about the ground plane.
+
+    ``preprocess_motion_data`` has already scaled XY and vertical motion, but
+    intentionally preserves the initial object height. The nominal object is
+    uniformly smaller, so its initial origin height must be scaled as well.
+    """
+    nominal_poses = object_poses.copy()
+    initial_height = float(object_poses[0, -1])
+    nominal_poses[:, -1] -= (1.0 - scale) * initial_height
+    return nominal_poses
+
+
 def build_retargeter_kwargs_from_config(
     retargeter_config: RetargeterConfig,
     constants: SimpleNamespace,
@@ -472,6 +496,7 @@ def build_retargeter_kwargs_from_config(
         "penetration_tolerance": retargeter_config.penetration_tolerance,
         "foot_sticking_tolerance": retargeter_config.foot_sticking_tolerance,
         "self_collision": retargeter_config.self_collision,
+        "hand_orientation": retargeter_config.hand_orientation,
         "step_size": retargeter_config.step_size,
         "visualize": retargeter_config.visualize,
         "debug": retargeter_config.debug,
@@ -628,8 +653,6 @@ def main(cfg: RetargetingConfig) -> None:
 
     # Task-specific object setup: set default object_dir for climbing if not provided
     if task_type == "climbing" and cfg.task_config.object_dir is None:
-        from dataclasses import replace
-
         cfg.task_config = replace(cfg.task_config, object_dir=data_path / task_name)
 
     constants = create_task_constants(
@@ -660,6 +683,9 @@ def main(cfg: RetargetingConfig) -> None:
 
     # Create retargeter
     retargeter_kwargs = build_retargeter_kwargs_from_config(cfg.retargeter, constants, object_urdf_path, task_type)
+    if cfg.fixed_object_size_adaptation:
+        retargeter_kwargs["nominal_tracking_tau"] = cfg.retargeter.nominal_tracking_tau
+        retargeter_kwargs["anchor_nominal_foot_height"] = True
     retargeter = InteractionMeshRetargeter(**retargeter_kwargs)
     logger.info("Retargeter created")
 
@@ -674,6 +700,137 @@ def main(cfg: RetargetingConfig) -> None:
             scale=smpl_scale,
             object_poses=object_poses,
         )
+
+    # Fixed-size interaction objects require two solves. An optional third
+    # pass refines the upper limbs toward a standardized pushing-hand pose.
+    if cfg.fixed_object_size_adaptation:
+        if object_local_pts is None or object_local_pts_demo is None:
+            raise ValueError("Fixed object size adaptation requires object points")
+
+        nominal_object_poses = create_grounded_nominal_object_poses(object_poses, smpl_scale)
+        q_init_nominal = _compute_q_init_base(
+            task_type,
+            data_format,
+            human_joints,
+            nominal_object_poses,
+            constants,
+        )
+        nominal_object_poses_mj = convert_object_poses_to_mujoco_order(nominal_object_poses)
+        physical_object_poses_mj = convert_object_poses_to_mujoco_order(object_poses)
+
+        foot_sticking_sequences = extract_foot_sticking_sequence_velocity(
+            human_joints, retargeter.demo_joints, toe_names
+        )
+        foot_sticking_sequences[0][toe_names[0]] = False
+        foot_sticking_sequences[0][toe_names[1]] = False
+
+        nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
+        final_result_path = save_dir / f"{task_name}_fixed_object.npz"
+        refine_hand_orientation = cfg.retargeter.hand_orientation.enable
+        fixed_base_result_path = (
+            save_dir / f"{task_name}_fixed_object_base.npz"
+            if refine_hand_orientation
+            else final_result_path
+        )
+        scene_xml_path = constants.ROBOT_URDF_FILE.replace(
+            ".urdf", f"_w_{constants.OBJECT_NAME}.xml"
+        )
+
+        with tempfile.TemporaryDirectory(prefix="holosoma_scaled_object_") as temp_dir:
+            scaled_scene_path = create_uniformly_scaled_object_scene_xml(
+                scene_xml_path,
+                constants.OBJECT_NAME,
+                smpl_scale,
+                Path(temp_dir) / Path(scene_xml_path).name,
+            )
+            nominal_config = replace(
+                cfg.retargeter,
+                visualize=False,
+                debug=False,
+                hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+            )
+            nominal_kwargs = build_retargeter_kwargs_from_config(
+                nominal_config, constants, object_urdf_path, task_type
+            )
+            nominal_kwargs["nominal_tracking_tau"] = nominal_config.nominal_tracking_tau
+            nominal_kwargs["scene_xml_path"] = scaled_scene_path
+            nominal_retargeter = InteractionMeshRetargeter(**nominal_kwargs)
+
+            stage_count = 3 if refine_hand_orientation else 2
+            logger.info("Stage 1/%d: retargeting in the scaled nominal scene", stage_count)
+            q_nominal, _, _, _ = nominal_retargeter.retarget_motion(
+                human_joint_motions=human_joints,
+                object_poses=nominal_object_poses_mj,
+                object_poses_augmented=nominal_object_poses_mj,
+                object_points_local_demo=object_local_pts_demo,
+                object_points_local=object_local_pts_demo,
+                foot_sticking_sequences=foot_sticking_sequences,
+                q_a_init=q_init_nominal,
+                q_nominal_list=None,
+                original=True,
+                dest_res_path=str(nominal_result_path),
+            )
+
+        if refine_hand_orientation:
+            fixed_base_config = replace(
+                cfg.retargeter,
+                visualize=False,
+                debug=False,
+                hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+            )
+            fixed_base_kwargs = build_retargeter_kwargs_from_config(
+                fixed_base_config, constants, object_urdf_path, task_type
+            )
+            fixed_base_kwargs["nominal_tracking_tau"] = fixed_base_config.nominal_tracking_tau
+            fixed_base_kwargs["anchor_nominal_foot_height"] = True
+            fixed_base_retargeter = InteractionMeshRetargeter(**fixed_base_kwargs)
+        else:
+            fixed_base_retargeter = retargeter
+
+        logger.info(
+            "Stage 2/%d: adapting the nominal motion to the real-size object",
+            stage_count,
+        )
+        q_fixed_base, _, _, _ = fixed_base_retargeter.retarget_motion(
+            human_joint_motions=human_joints,
+            object_poses=nominal_object_poses_mj,
+            object_poses_augmented=physical_object_poses_mj,
+            object_points_local_demo=object_local_pts_demo,
+            object_points_local=object_local_pts,
+            foot_sticking_sequences=foot_sticking_sequences,
+            q_a_init=q_nominal[0],
+            q_nominal_list=q_nominal,
+            original=False,
+            dest_res_path=str(fixed_base_result_path),
+        )
+
+        if refine_hand_orientation:
+            logger.info(
+                "Stage 3/3: adapting the nominal motion with the standardized pushing-hand pose"
+            )
+            retargeter.retarget_motion(
+                human_joint_motions=human_joints,
+                object_poses=nominal_object_poses_mj,
+                object_poses_augmented=physical_object_poses_mj,
+                object_points_local_demo=object_local_pts_demo,
+                object_points_local=object_local_pts,
+                foot_sticking_sequences=foot_sticking_sequences,
+                q_a_init=q_nominal[0],
+                q_nominal_list=q_nominal,
+                original=False,
+                dest_res_path=str(final_result_path),
+            )
+            logger.info(
+                "Three-stage retargeting complete. Base: %s; refined: %s",
+                fixed_base_result_path,
+                final_result_path,
+            )
+        else:
+            logger.info("Two-stage retargeting complete. Final result: %s", final_result_path)
+
+        if cfg.retargeter.debug:
+            input("Press Enter to exit ...")
+        return
 
     # Initialize robot pose
     q_init, q_nominal, object_poses_augmented, human_joints, object_poses = initialize_robot_pose(
