@@ -20,6 +20,7 @@ from viser.extras import ViserUrdf  # type: ignore[import-not-found]
 from holosoma_retargeting.config_types.retargeter import (
     FootLockConfig,
     HandOrientationConfig,
+    PlanBPalmContactConfig,
     PTWristOrientationConfig,
     SelfCollisionConfig,
 )
@@ -79,6 +80,7 @@ class InteractionMeshRetargeter:
         anchor_nominal_foot_height: bool = False,
         nominal_foot_height_tolerance: float = 5e-3,
         hand_orientation: HandOrientationConfig | None = None,
+        plan_b_palm_contact: PlanBPalmContactConfig | None = None,
         pt_wrist_orientation: PTWristOrientationConfig | None = None,
     ):
         """This kinematic retargeter solves the diffIK problem with hard constraints in SQP style.
@@ -131,9 +133,27 @@ class InteractionMeshRetargeter:
         self._init_foot_lock(foot_lock)
         self._self_collision_config = self_collision
         self.hand_orientation = hand_orientation or HandOrientationConfig()
+        self.plan_b_palm_contact = plan_b_palm_contact or PlanBPalmContactConfig()
         self.pt_wrist_orientation = pt_wrist_orientation or PTWristOrientationConfig()
-        if self.hand_orientation.enable and self.pt_wrist_orientation.enable:
-            raise ValueError("Legacy fixed hand orientation and PT wrist orientation cannot be enabled together")
+        if self.plan_b_palm_contact.enable:
+            self.penetration_tolerance = (
+                self.plan_b_palm_contact.penetration_tolerance
+            )
+            self.smooth_weight = (
+                self.plan_b_palm_contact.temporal_smooth_weight
+            )
+        enabled_hand_modes = sum(
+            (
+                self.hand_orientation.enable,
+                self.plan_b_palm_contact.enable,
+                self.pt_wrist_orientation.enable,
+            )
+        )
+        if enabled_hand_modes > 1:
+            raise ValueError(
+                "Legacy hand orientation, Plan B palm contact, and A.1 PT wrist "
+                "orientation are mutually exclusive"
+            )
 
         # Setup visualization if requested
         if self.visualize:
@@ -191,6 +211,7 @@ class InteractionMeshRetargeter:
         )
 
         self._init_hand_orientation()
+        self._init_plan_b_tabletop()
 
         # Prevent too much waist twist
         self.Q_diag = np.zeros(self.nq_a) * 1e-3
@@ -205,7 +226,11 @@ class InteractionMeshRetargeter:
     def _init_hand_orientation(self) -> None:
         """Resolve hand links, palm frames, and upper-limb optimization joints."""
         self._hand_orientation_specs: list[dict[str, object]] = []
-        if not (self.hand_orientation.enable or self.pt_wrist_orientation.enable):
+        if not (
+            self.hand_orientation.enable
+            or self.plan_b_palm_contact.enable
+            or self.pt_wrist_orientation.enable
+        ):
             return
         if not self.has_dynamic_object:
             raise ValueError("Hand orientation requires a dynamic interaction object")
@@ -250,6 +275,16 @@ class InteractionMeshRetargeter:
             spec["palm_basis"] = np.column_stack(
                 [finger_direction, across_direction, palm_normal]
             )
+            if self.plan_b_palm_contact.enable:
+                spec["palm_contact_point"] = self._derive_palm_contact_point(
+                    str(spec["side"]),
+                    palm_normal,
+                )
+                spec["palm_geom_id"] = mujoco.mj_name2id(
+                    self.robot_model,
+                    mujoco.mjtObj.mjOBJ_GEOM,
+                    f"{spec['side']}_rubber_hand_link",
+                )
 
             side = str(spec["side"])
             arm_joint_suffixes = (
@@ -292,6 +327,177 @@ class InteractionMeshRetargeter:
             spec["pt_wrist_upper_limits"] = _select_pt_wrist_orientation_indices(
                 np.asarray(arm_upper_limits, dtype=float)
             )
+            if self.plan_b_palm_contact.enable:
+                wrist_indices = np.asarray(arm_indices[-3:], dtype=int)
+                self.q_a_lb[wrist_indices] = np.asarray(
+                    arm_lower_limits[-3:],
+                    dtype=float,
+                )
+                self.q_a_ub[wrist_indices] = np.asarray(
+                    arm_upper_limits[-3:],
+                    dtype=float,
+                )
+
+    def _derive_palm_contact_point(
+        self,
+        side: str,
+        palm_normal: np.ndarray,
+    ) -> np.ndarray:
+        """Derive a stable palm support point from the rubber-hand collision mesh."""
+        geom_name = f"{side}_rubber_hand_link"
+        geom_id = mujoco.mj_name2id(
+            self.robot_model,
+            mujoco.mjtObj.mjOBJ_GEOM,
+            geom_name,
+        )
+        if geom_id < 0:
+            raise ValueError(f"Plan B requires collision geom '{geom_name}'")
+        mesh_id = int(self.robot_model.geom_dataid[geom_id])
+        if mesh_id < 0:
+            raise ValueError(f"Plan B palm geom '{geom_name}' must be a mesh")
+
+        vertex_start = int(self.robot_model.mesh_vertadr[mesh_id])
+        vertex_count = int(self.robot_model.mesh_vertnum[mesh_id])
+        vertices = np.asarray(
+            self.robot_model.mesh_vert[vertex_start : vertex_start + vertex_count],
+            dtype=float,
+        )
+        geom_quat = self.robot_model.geom_quat[geom_id]
+        geom_rotation = Rotation.from_quat(
+            [geom_quat[1], geom_quat[2], geom_quat[3], geom_quat[0]]
+        ).as_matrix()
+        vertices_body = (
+            vertices @ geom_rotation.T + self.robot_model.geom_pos[geom_id]
+        )
+
+        normal = np.asarray(palm_normal, dtype=float)
+        normal /= np.linalg.norm(normal)
+        support = float(np.max(vertices_body @ normal))
+        center = 0.5 * (
+            np.min(vertices_body, axis=0) + np.max(vertices_body, axis=0)
+        )
+        return center + (support - float(center @ normal)) * normal
+
+    def _init_plan_b_tabletop(self) -> None:
+        """Resolve the tabletop side used by the independent Plan B stage."""
+        self._plan_b_tabletop_spec: dict[str, object] | None = None
+        if not self.plan_b_palm_contact.enable:
+            return
+        if not self.has_dynamic_object:
+            raise ValueError("Plan B palm contact requires a dynamic interaction object")
+
+        cfg = self.plan_b_palm_contact
+        axes = (cfg.face_axis, cfg.vertical_axis, cfg.lateral_axis)
+        if sorted(axes) != [0, 1, 2]:
+            raise ValueError(
+                "Plan B face_axis, vertical_axis, and lateral_axis must be "
+                "distinct values from {0, 1, 2}"
+            )
+        if cfg.face_sign not in (-1, 1):
+            raise ValueError("Plan B face_sign must be -1 or +1")
+        if cfg.hand_spacing <= 0:
+            raise ValueError("Plan B hand_spacing must be positive")
+        if (
+            cfg.surface_gap < 0
+            or cfg.approach_clearance < 0
+        ):
+            raise ValueError("Plan B clearances must be non-negative")
+        if cfg.max_sqp_iterations <= 0:
+            raise ValueError("Plan B max_sqp_iterations must be positive")
+        if cfg.temporal_smooth_weight < 0:
+            raise ValueError("Plan B temporal_smooth_weight must be non-negative")
+        if (
+            cfg.fade_frames < 0
+            or cfg.release_frames < 0
+        ):
+            raise ValueError(
+                "Plan B fade/release frame counts must be non-negative"
+            )
+
+        geom_id = mujoco.mj_name2id(
+            self.robot_model,
+            mujoco.mjtObj.mjOBJ_GEOM,
+            cfg.tabletop_geom_name,
+        )
+        if geom_id < 0:
+            raise ValueError(
+                f"Plan B tabletop geom '{cfg.tabletop_geom_name}' was not found"
+            )
+        if int(self.robot_model.geom_type[geom_id]) != int(mujoco.mjtGeom.mjGEOM_BOX):
+            raise ValueError("Plan B tabletop contact currently requires a box geom")
+
+        half_size = np.asarray(self.robot_model.geom_size[geom_id], dtype=float)
+        if 0.5 * cfg.hand_spacing >= half_size[cfg.lateral_axis]:
+            raise ValueError("Plan B hand targets lie outside the tabletop side")
+        if abs(cfg.vertical_offset) >= half_size[cfg.vertical_axis]:
+            raise ValueError("Plan B vertical target lies outside the tabletop side")
+
+        geom_quat = self.robot_model.geom_quat[geom_id]
+        geom_rotation = Rotation.from_quat(
+            [geom_quat[1], geom_quat[2], geom_quat[3], geom_quat[0]]
+        ).as_matrix()
+        outward_geom = np.zeros(3)
+        outward_geom[cfg.face_axis] = float(cfg.face_sign)
+        vertical_geom = np.zeros(3)
+        vertical_geom[cfg.vertical_axis] = 1.0
+
+        target_points_body = {}
+        downward_body = -geom_rotation @ vertical_geom
+        for side, lateral_sign in (("left", 1.0), ("right", -1.0)):
+            point_geom = np.zeros(3)
+            point_geom[cfg.face_axis] = (
+                float(cfg.face_sign) * half_size[cfg.face_axis]
+            )
+            point_geom[cfg.vertical_axis] = cfg.vertical_offset
+            point_geom[cfg.lateral_axis] = lateral_sign * 0.5 * cfg.hand_spacing
+            target_points_body[side] = (
+                self.robot_model.geom_pos[geom_id] + geom_rotation @ point_geom
+            )
+
+        self._plan_b_tabletop_spec = {
+            "geom_id": geom_id,
+            "target_points_body": target_points_body,
+            "outward_body": geom_rotation @ outward_geom,
+            "twist_direction_body": downward_body,
+        }
+        posture_joint_names = [
+            "waist_yaw_joint",
+            "waist_roll_joint",
+            "waist_pitch_joint",
+        ]
+        for side in ("left", "right"):
+            posture_joint_names.extend(
+                [
+                    f"{side}_shoulder_pitch_joint",
+                    f"{side}_shoulder_roll_joint",
+                    f"{side}_shoulder_yaw_joint",
+                    f"{side}_elbow_joint",
+                    f"{side}_wrist_roll_joint",
+                    f"{side}_wrist_pitch_joint",
+                    f"{side}_wrist_yaw_joint",
+                ]
+            )
+        posture_indices = []
+        posture_weights = []
+        for joint_name in posture_joint_names:
+            joint_id = mujoco.mj_name2id(
+                self.robot_model,
+                mujoco.mjtObj.mjOBJ_JOINT,
+                joint_name,
+            )
+            qpos_idx = int(self.robot_model.jnt_qposadr[joint_id])
+            local_idx = np.flatnonzero(self.q_a_indices == qpos_idx)
+            if local_idx.size != 1:
+                raise ValueError(
+                    f"Plan B full-body optimization requires joint '{joint_name}'"
+                )
+            posture_indices.append(int(local_idx[0]))
+            weight = cfg.posture_weight
+            if joint_name in {"waist_yaw_joint", "waist_roll_joint"}:
+                weight += cfg.waist_yaw_roll_weight
+            posture_weights.append(weight)
+        self._plan_b_posture_indices = np.asarray(posture_indices, dtype=int)
+        self._plan_b_posture_weights = np.asarray(posture_weights, dtype=float)
 
     def _init_foot_lock(self, foot_lock: FootLockConfig | None) -> None:
         """Initialize foot lock configuration and normalize window mappings."""
@@ -535,6 +741,26 @@ class InteractionMeshRetargeter:
             object_poses_augmented,
             hand_orientation_weights,
         )
+        plan_b_weights = self._compute_plan_b_contact_weights(
+            human_joint_motions,
+            object_poses,
+            object_points_local_demo,
+        )
+        (
+            plan_b_position_task_weights,
+            plan_b_position_weights,
+        ) = self._compute_plan_b_phase_weights(
+            plan_b_weights,
+            self.plan_b_palm_contact.fade_frames,
+        )
+        (
+            plan_b_position_targets,
+            plan_b_normal_targets,
+            plan_b_twist_targets,
+        ) = self._compute_plan_b_palm_targets(
+            object_poses_augmented,
+            plan_b_position_weights,
+        )
         tetrahedra = []
         obj_pts_demo_list = []  # scaled object pts
         obj_pts_list = []  # original size object pts
@@ -602,11 +828,27 @@ class InteractionMeshRetargeter:
                     w_nominal_tracking=w_nominal_tracking,
                     q_a_nominal=(q_nominal_list[i, self.q_a_indices] if q_nominal_list is not None else None),
                     init_t=i == 0,
-                    n_iter=50 if i == 0 else 10,
+                    n_iter=(
+                        50
+                        if i == 0
+                        else (
+                            self.plan_b_palm_contact.max_sqp_iterations
+                            if self.plan_b_palm_contact.enable
+                            else 10
+                        )
+                    ),
                     frame_idx=i,
                     hand_orientation_weights=hand_orientation_weights[i],
                     hand_palm_targets=hand_palm_targets[i],
                     hand_finger_targets=hand_finger_targets[i],
+                    plan_b_weights=plan_b_weights[i],
+                    plan_b_position_task_weights=(
+                        plan_b_position_task_weights[i]
+                    ),
+                    plan_b_position_weights=plan_b_position_weights[i],
+                    plan_b_position_targets=plan_b_position_targets[i],
+                    plan_b_normal_targets=plan_b_normal_targets[i],
+                    plan_b_twist_targets=plan_b_twist_targets[i],
                 )
                 if self.debug:
                     robot_link_positions = self._get_robot_link_positions(
@@ -691,11 +933,91 @@ class InteractionMeshRetargeter:
         object_points_local_demo: np.ndarray,
     ) -> np.ndarray:
         """Detect demo wrist/object contact and fade the optional objective."""
+        if not self.hand_orientation.enable:
+            return np.zeros(
+                (human_joint_motions.shape[0], len(self._hand_orientation_specs)),
+                dtype=float,
+            )
+        return self._compute_proximity_contact_weights(
+            human_joint_motions,
+            object_poses,
+            object_points_local_demo,
+            contact_distance=self.hand_orientation.contact_distance,
+            fade_frames=self.hand_orientation.fade_frames,
+            label="Hand orientation",
+            extend_fade=False,
+        )
+
+    def _compute_plan_b_contact_weights(
+        self,
+        human_joint_motions: np.ndarray,
+        object_poses: np.ndarray,
+        object_points_local_demo: np.ndarray,
+    ) -> np.ndarray:
+        """Detect the demonstrated contact phase used by Plan B."""
+        if not self.plan_b_palm_contact.enable:
+            return np.zeros(
+                (human_joint_motions.shape[0], len(self._hand_orientation_specs)),
+                dtype=float,
+            )
+        return self._compute_proximity_contact_weights(
+            human_joint_motions,
+            object_poses,
+            object_points_local_demo,
+            contact_distance=self.plan_b_palm_contact.contact_distance,
+            fade_frames=self.plan_b_palm_contact.fade_frames,
+            release_frames=self.plan_b_palm_contact.release_frames,
+            label="Plan B palm contact",
+            extend_fade=True,
+        )
+
+    @staticmethod
+    def _compute_plan_b_phase_weights(
+        orientation_weights: np.ndarray,
+        delay_frames: int,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Split Plan B into early retraction and delayed approach phases.
+
+        The position task starts one delay before orientation so the hands can
+        move to their clearance poses first. The approach progress starts one
+        delay after orientation so rotation happens while clearance is held.
+        """
+        orientation_weights = np.asarray(orientation_weights, dtype=float)
+        position_task_weights = orientation_weights.copy()
+        approach_weights = np.zeros_like(orientation_weights)
+        delay = max(0, int(delay_frames))
+        if delay == 0:
+            approach_weights[:] = orientation_weights
+            return position_task_weights, approach_weights
+        if delay >= orientation_weights.shape[0]:
+            return position_task_weights, approach_weights
+
+        position_task_weights[:-delay] = np.maximum(
+            position_task_weights[:-delay],
+            orientation_weights[delay:],
+        )
+        approach_weights[delay:] = np.minimum(
+            orientation_weights[delay:],
+            orientation_weights[:-delay],
+        )
+        return position_task_weights, approach_weights
+
+    def _compute_proximity_contact_weights(
+        self,
+        human_joint_motions: np.ndarray,
+        object_poses: np.ndarray,
+        object_points_local_demo: np.ndarray,
+        *,
+        contact_distance: float,
+        fade_frames: int,
+        release_frames: int | None = None,
+        label: str,
+        extend_fade: bool,
+    ) -> np.ndarray:
+        """Detect wrist/object proximity runs and add symmetric temporal fades."""
         num_frames = human_joint_motions.shape[0]
         num_hands = len(self._hand_orientation_specs)
         weights = np.zeros((num_frames, num_hands), dtype=float)
-        if not self.hand_orientation.enable:
-            return weights
 
         contact = np.zeros_like(weights, dtype=bool)
         for frame_idx in range(num_frames):
@@ -709,9 +1031,14 @@ class InteractionMeshRetargeter:
                     wrist_world[None, :],
                 )[0]
                 distance = np.linalg.norm(object_points_local_demo - wrist_local, axis=1).min()
-                contact[frame_idx, hand_idx] = distance <= self.hand_orientation.contact_distance
+                contact[frame_idx, hand_idx] = distance <= contact_distance
 
-        fade_frames = max(0, int(self.hand_orientation.fade_frames))
+        fade_frames = max(0, int(fade_frames))
+        release_frames = (
+            fade_frames
+            if release_frames is None
+            else max(0, int(release_frames))
+        )
         for hand_idx in range(num_hands):
             active_frames = np.flatnonzero(contact[:, hand_idx])
             if active_frames.size == 0:
@@ -719,6 +1046,23 @@ class InteractionMeshRetargeter:
             split_points = np.flatnonzero(np.diff(active_frames) > 1) + 1
             for run in np.split(active_frames, split_points):
                 start, end = int(run[0]), int(run[-1])
+                if extend_fade:
+                    for frame_idx in range(start, end + 1):
+                        weights[frame_idx, hand_idx] = min(
+                            1.0,
+                            (frame_idx - start + 1) / (fade_frames + 1),
+                        )
+                    for offset in range(1, release_frames + 1):
+                        fade_weight = (release_frames - offset + 1) / (
+                            release_frames + 1
+                        )
+                        after = end + offset
+                        if after < num_frames:
+                            weights[after, hand_idx] = max(
+                                weights[after, hand_idx],
+                                fade_weight,
+                            )
+                    continue
                 for frame_idx in range(start, end + 1):
                     if fade_frames == 0:
                         weights[frame_idx, hand_idx] = 1.0
@@ -731,7 +1075,7 @@ class InteractionMeshRetargeter:
             active = np.flatnonzero(weights[:, hand_idx] > 0)
             if active.size:
                 print(
-                    f"Hand orientation ({spec['side']}): frames "
+                    f"{label} ({spec['side']}): frames "
                     f"{active[0]}..{active[-1]} (including fade)"
                 )
         return weights
@@ -916,6 +1260,70 @@ class InteractionMeshRetargeter:
 
         return palm_targets, finger_targets
 
+    def _compute_plan_b_palm_targets(
+        self,
+        object_poses_augmented: np.ndarray,
+        contact_weights: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        """Build table-local Plan B contact points and orientations in world coordinates."""
+        num_frames = object_poses_augmented.shape[0]
+        num_hands = len(self._hand_orientation_specs)
+        target_shape = (num_frames, num_hands, 3)
+        position_targets = np.zeros(target_shape, dtype=float)
+        normal_targets = np.zeros(target_shape, dtype=float)
+        twist_targets = np.zeros(target_shape, dtype=float)
+        if not self.plan_b_palm_contact.enable:
+            return position_targets, normal_targets, twist_targets
+        if self._plan_b_tabletop_spec is None:
+            raise RuntimeError("Plan B tabletop geometry was not initialized")
+
+        target_points_body = self._plan_b_tabletop_spec["target_points_body"]
+        outward_body = np.asarray(
+            self._plan_b_tabletop_spec["outward_body"],
+            dtype=float,
+        )
+        twist_direction_body = np.asarray(
+            self._plan_b_tabletop_spec["twist_direction_body"],
+            dtype=float,
+        )
+        cfg = self.plan_b_palm_contact
+
+        for frame_idx in range(num_frames):
+            object_position = object_poses_augmented[frame_idx, :3]
+            object_quat = object_poses_augmented[frame_idx, 3:]
+            object_rotation = Rotation.from_quat(
+                [
+                    object_quat[1],
+                    object_quat[2],
+                    object_quat[3],
+                    object_quat[0],
+                ]
+            ).as_matrix()
+            outward_world = object_rotation @ outward_body
+            outward_world /= np.linalg.norm(outward_world)
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                side = str(spec["side"])
+                face_point_world = (
+                    object_position
+                    + object_rotation @ np.asarray(target_points_body[side], dtype=float)
+                )
+                weight = float(contact_weights[frame_idx, hand_idx])
+                clearance = (
+                    cfg.surface_gap
+                    + cfg.approach_clearance * (1.0 - weight)
+                )
+                position_targets[frame_idx, hand_idx] = (
+                    face_point_world + clearance * outward_world
+                )
+                normal_targets[frame_idx, hand_idx] = -outward_world
+                twist_world = object_rotation @ twist_direction_body
+                twist_world -= float(twist_world @ outward_world) * outward_world
+                twist_targets[frame_idx, hand_idx] = (
+                    twist_world / np.linalg.norm(twist_world)
+                )
+
+        return position_targets, normal_targets, twist_targets
+
     def solve_single_iteration(
         self,
         q_locked: np.ndarray,
@@ -933,6 +1341,12 @@ class InteractionMeshRetargeter:
         hand_orientation_weights: np.ndarray | None = None,
         hand_palm_targets: np.ndarray | None = None,
         hand_finger_targets: np.ndarray | None = None,
+        plan_b_weights: np.ndarray | None = None,
+        plan_b_position_task_weights: np.ndarray | None = None,
+        plan_b_position_weights: np.ndarray | None = None,
+        plan_b_position_targets: np.ndarray | None = None,
+        plan_b_normal_targets: np.ndarray | None = None,
+        plan_b_twist_targets: np.ndarray | None = None,
     ):
         """The main function to solve a single iteration of the DiffIK problem.
         Args:
@@ -1143,6 +1557,140 @@ class InteractionMeshRetargeter:
                         * cp.sum_squares(palm_linear - palm_target)
                     )
 
+        if (
+            self.plan_b_palm_contact.enable
+            and plan_b_weights is not None
+            and plan_b_position_task_weights is not None
+            and plan_b_position_weights is not None
+            and plan_b_position_targets is not None
+            and plan_b_normal_targets is not None
+            and plan_b_twist_targets is not None
+        ):
+            cfg = self.plan_b_palm_contact
+            if q_a_nominal is not None:
+                posture_indices = self._plan_b_posture_indices
+                posture_delta = dqa[posture_indices] - (
+                    q_a_nominal[posture_indices]
+                    - q_a_n_last[posture_indices]
+                )
+                obj_terms.append(
+                    cp.sum_squares(
+                        cp.multiply(
+                            np.sqrt(self._plan_b_posture_weights),
+                            posture_delta,
+                        )
+                    )
+                )
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                fade_weight = float(plan_b_weights[hand_idx])
+                if fade_weight <= 0.0:
+                    continue
+                orientation_task_weight = fade_weight**3
+                position_task_weight = (
+                    float(plan_b_position_task_weights[hand_idx]) ** 3
+                )
+                approach_weight = float(
+                    plan_b_position_weights[hand_idx]
+                )
+                contact_task_weight = approach_weight**3
+                palm_geom_id = int(spec["palm_geom_id"])
+                tabletop_geom_id = int(
+                    self._plan_b_tabletop_spec["geom_id"]
+                )
+                contact_pair = None
+                for pair in (
+                    (palm_geom_id, tabletop_geom_id),
+                    (tabletop_geom_id, palm_geom_id),
+                ):
+                    if pair in phis:
+                        contact_pair = pair
+                        break
+                normal_point_blend = (
+                    (1.0 - approach_weight) ** 2
+                    if contact_pair is not None
+                    else 1.0
+                )
+
+                (
+                    contact_position,
+                    position_jacobian,
+                    rotation,
+                    angular_jacobian,
+                ) = self._calc_body_point_linearization(
+                    q,
+                    int(spec["body_id"]),
+                    np.asarray(spec["palm_contact_point"], dtype=float),
+                )
+                position_target = np.asarray(
+                    plan_b_position_targets[hand_idx],
+                    dtype=float,
+                )
+                normal_target = np.asarray(
+                    plan_b_normal_targets[hand_idx],
+                    dtype=float,
+                )
+                position_error = (
+                    contact_position
+                    + position_jacobian @ dqa
+                    - position_target
+                )
+                tangent_projector = np.eye(3) - np.outer(
+                    normal_target,
+                    normal_target,
+                )
+                obj_terms.append(
+                    cfg.normal_position_weight
+                    * position_task_weight
+                    * normal_point_blend
+                    * cp.sum_squares(normal_target @ position_error)
+                )
+                obj_terms.append(
+                    cfg.tangent_position_weight
+                    * position_task_weight
+                    * cp.sum_squares(tangent_projector @ position_error)
+                )
+
+                palm_normal_local = np.asarray(spec["palm_normal"], dtype=float)
+                palm_normal_world = rotation @ palm_normal_local
+                palm_normal_jacobian = (
+                    -self._skew(palm_normal_world) @ angular_jacobian
+                )
+                palm_normal_linear = (
+                    palm_normal_world + palm_normal_jacobian @ dqa
+                )
+                obj_terms.append(
+                    cfg.palm_normal_weight
+                    * orientation_task_weight
+                    * cp.sum_squares(palm_normal_linear - normal_target)
+                )
+
+                long_axis_local = np.asarray(spec["palm_basis"], dtype=float)[:, 0]
+                long_axis_world = rotation @ long_axis_local
+                long_axis_jacobian = (
+                    -self._skew(long_axis_world) @ angular_jacobian
+                )
+                long_axis_linear = long_axis_world + long_axis_jacobian @ dqa
+                twist_target = np.asarray(
+                    plan_b_twist_targets[hand_idx],
+                    dtype=float,
+                )
+                obj_terms.append(
+                    cfg.twist_weight
+                    * orientation_task_weight
+                    * cp.sum_squares(long_axis_linear - twist_target)
+                )
+                if contact_pair is not None and contact_task_weight > 0.0:
+                    distance_jacobian = Js[contact_pair][self.q_a_indices]
+                    distance_linear = (
+                        phis[contact_pair]
+                        + distance_jacobian @ dqa
+                    )
+                    obj_terms.append(
+                        cfg.contact_distance_weight
+                        * contact_task_weight
+                        * cp.sum_squares(distance_linear)
+                    )
+
         # Smoothness cost
         dqa_smooth = q_t_last[self.q_a_indices] - q_a_n_last
         if np.isscalar(self.smooth_weight):
@@ -1160,7 +1708,10 @@ class InteractionMeshRetargeter:
         # -------- Solve with Clarabel --------
         solver_kwargs = {"verbose": verbose}
         problem.solve(solver=cp.CLARABEL, **solver_kwargs)
-        if (problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE)) and init_t:
+        if (
+            problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE)
+            and (init_t or self.plan_b_palm_contact.enable)
+        ):
             constraints = [c for c in constraints if not isinstance(c, cp.constraints.second_order.SOC)]
             problem = cp.Problem(cp.Minimize(cp.sum(obj_terms)), constraints)
             problem.solve(solver=cp.CLARABEL, **solver_kwargs)
@@ -1261,9 +1812,17 @@ class InteractionMeshRetargeter:
         hand_orientation_weights: np.ndarray | None = None,
         hand_palm_targets: np.ndarray | None = None,
         hand_finger_targets: np.ndarray | None = None,
+        plan_b_weights: np.ndarray | None = None,
+        plan_b_position_task_weights: np.ndarray | None = None,
+        plan_b_position_weights: np.ndarray | None = None,
+        plan_b_position_targets: np.ndarray | None = None,
+        plan_b_normal_targets: np.ndarray | None = None,
+        plan_b_twist_targets: np.ndarray | None = None,
     ):
         """Iterate the solver for multiple iterations."""
         last_cost = np.inf
+        object_collision_feasible = True
+        minimum_object_collision: tuple[tuple[int, int], float] | None = None
         for _ in range(n_iter):
             q_a_n_last = q_n[self.q_a_indices]
             q_n, cost = self.solve_single_iteration(
@@ -1281,10 +1840,195 @@ class InteractionMeshRetargeter:
                 hand_orientation_weights=hand_orientation_weights,
                 hand_palm_targets=hand_palm_targets,
                 hand_finger_targets=hand_finger_targets,
+                plan_b_weights=plan_b_weights,
+                plan_b_position_task_weights=plan_b_position_task_weights,
+                plan_b_position_weights=plan_b_position_weights,
+                plan_b_position_targets=plan_b_position_targets,
+                plan_b_normal_targets=plan_b_normal_targets,
+                plan_b_twist_targets=plan_b_twist_targets,
             )
-            if np.isclose(cost, last_cost):
+            object_collision_feasible = True
+            if self.plan_b_palm_contact.enable:
+                _, collision_distances = (
+                    self._update_jacobians_and_phis_from_q(q_n)
+                )
+                object_distances = [
+                    distance
+                    for (geom_a, geom_b), distance in collision_distances.items()
+                    if (
+                        self.object_name in self._geom_names[geom_a]
+                        or self.object_name in self._geom_names[geom_b]
+                    )
+                ]
+                if object_distances:
+                    minimum_object_collision = min(
+                        (
+                            (pair, distance)
+                            for pair, distance in collision_distances.items()
+                            if (
+                                self.object_name in self._geom_names[pair[0]]
+                                or self.object_name in self._geom_names[pair[1]]
+                            )
+                        ),
+                        key=lambda item: item[1],
+                    )
+                    object_collision_feasible = (
+                        minimum_object_collision[1]
+                        >= -self.penetration_tolerance
+                        - self.plan_b_palm_contact.collision_validation_tolerance
+                    )
+            if np.isclose(cost, last_cost) and object_collision_feasible:
                 break
             last_cost = cost
+        if self.plan_b_palm_contact.enable and not object_collision_feasible:
+            pair_text = "unknown pair"
+            distance_text = "unknown distance"
+            task_error_text = ""
+            if minimum_object_collision is not None:
+                (geom_a, geom_b), distance = minimum_object_collision
+                pair_text = (
+                    f"{self._geom_names[geom_a]} / {self._geom_names[geom_b]}"
+                )
+                distance_text = f"{distance:.9f}m"
+            if (
+                plan_b_position_targets is not None
+                and plan_b_normal_targets is not None
+                and plan_b_twist_targets is not None
+            ):
+                task_errors = []
+                for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                    (
+                        contact_position,
+                        _,
+                        rotation,
+                        _,
+                    ) = self._calc_body_point_linearization(
+                        q_n,
+                        int(spec["body_id"]),
+                        np.asarray(spec["palm_contact_point"], dtype=float),
+                    )
+                    palm_normal = rotation @ np.asarray(
+                        spec["palm_normal"],
+                        dtype=float,
+                    )
+                    long_axis = rotation @ np.asarray(
+                        spec["palm_basis"],
+                        dtype=float,
+                    )[:, 0]
+                    position_error_vector = (
+                        contact_position
+                        - np.asarray(plan_b_position_targets[hand_idx], dtype=float)
+                    )
+                    normal_target = np.asarray(
+                        plan_b_normal_targets[hand_idx],
+                        dtype=float,
+                    )
+                    signed_normal_error = float(
+                        normal_target @ position_error_vector
+                    )
+                    tangent_error = np.linalg.norm(
+                        position_error_vector
+                        - signed_normal_error * normal_target
+                    )
+                    normal_error = np.degrees(
+                        np.arccos(
+                            np.clip(
+                                palm_normal
+                                @ np.asarray(
+                                    plan_b_normal_targets[hand_idx],
+                                    dtype=float,
+                                ),
+                                -1.0,
+                                1.0,
+                            )
+                        )
+                    )
+                    twist_error = np.degrees(
+                        np.arccos(
+                            np.clip(
+                                long_axis
+                                @ np.asarray(
+                                    plan_b_twist_targets[hand_idx],
+                                    dtype=float,
+                                ),
+                                -1.0,
+                                1.0,
+                            )
+                        )
+                    )
+                    palm_geom_id = mujoco.mj_name2id(
+                        self.robot_model,
+                        mujoco.mjtObj.mjOBJ_GEOM,
+                        f"{spec['side']}_rubber_hand_link",
+                    )
+                    palm_mesh_id = int(
+                        self.robot_model.geom_dataid[palm_geom_id]
+                    )
+                    vertex_start = int(
+                        self.robot_model.mesh_vertadr[palm_mesh_id]
+                    )
+                    vertex_count = int(
+                        self.robot_model.mesh_vertnum[palm_mesh_id]
+                    )
+                    vertices_geom = np.asarray(
+                        self.robot_model.mesh_vert[
+                            vertex_start : vertex_start + vertex_count
+                        ],
+                        dtype=float,
+                    )
+                    palm_geom_rotation = np.asarray(
+                        self.robot_data.geom_xmat[palm_geom_id],
+                        dtype=float,
+                    ).reshape(3, 3)
+                    vertices_world = (
+                        vertices_geom @ palm_geom_rotation.T
+                        + self.robot_data.geom_xpos[palm_geom_id]
+                    )
+                    tabletop_geom_id = int(
+                        self._plan_b_tabletop_spec["geom_id"]
+                    )
+                    tabletop_rotation = np.asarray(
+                        self.robot_data.geom_xmat[tabletop_geom_id],
+                        dtype=float,
+                    ).reshape(3, 3)
+                    vertices_tabletop = (
+                        vertices_world
+                        - self.robot_data.geom_xpos[tabletop_geom_id]
+                    ) @ tabletop_rotation
+                    contact_tabletop = (
+                        contact_position
+                        - self.robot_data.geom_xpos[tabletop_geom_id]
+                    ) @ tabletop_rotation
+                    normal_tabletop = (
+                        tabletop_rotation.T @ normal_target
+                    )
+                    support_delta = float(
+                        np.max(vertices_world @ normal_target)
+                        - contact_position @ normal_target
+                    )
+                    bounds_min = vertices_tabletop.min(axis=0)
+                    bounds_max = vertices_tabletop.max(axis=0)
+                    task_errors.append(
+                        f"{spec['side']}: normal_position="
+                        f"{signed_normal_error:+.6f}m, "
+                        f"tangent_position={tangent_error:.6f}m, "
+                        f"normal={normal_error:.3f}deg, "
+                        f"twist={twist_error:.3f}deg, "
+                        f"tabletop_local_bounds="
+                        f"{np.array2string(bounds_min, precision=5)}.."
+                        f"{np.array2string(bounds_max, precision=5)}, "
+                        f"contact_local="
+                        f"{np.array2string(contact_tabletop, precision=5)}, "
+                        f"normal_local="
+                        f"{np.array2string(normal_tabletop, precision=5)}, "
+                        f"support_delta={support_delta:+.6f}m"
+                    )
+                task_error_text = "; task errors: " + "; ".join(task_errors)
+            raise RuntimeError(
+                "Plan B SQP did not reach a collision-free configuration "
+                f"within {n_iter} iterations: {pair_text}, {distance_text}"
+                f"{task_error_text}"
+            )
         return q_n, cost
 
     @staticmethod
@@ -1317,6 +2061,29 @@ class InteractionMeshRetargeter:
         qdot_to_qvel = self._build_transform_qdot_to_qvel_fast()
         angular_jacobian = (jacobian_rot @ qdot_to_qvel)[:, self.q_a_indices]
         return rotation, angular_jacobian, position
+
+    def _calc_body_point_linearization(
+        self,
+        q: np.ndarray,
+        body_id: int,
+        point_body: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+        """Return a body-fixed point and its full-body position/orientation Jacobians."""
+        rotation, angular_jacobian, body_position = (
+            self._calc_body_orientation_linearization(q, body_id)
+        )
+        point_body = np.asarray(point_body, dtype=float)
+        point_world = body_position + rotation @ point_body
+        point_jacobian = self._calc_contact_jacobian_from_point(
+            body_id,
+            point_body,
+        )[:, self.q_a_indices]
+        return (
+            np.asarray(point_world, dtype=float),
+            np.asarray(point_jacobian, dtype=float),
+            rotation,
+            angular_jacobian,
+        )
 
     def _draw_self_collision_geoms(self):
         """Draw collision cylinders for self-collision geom pairs in viser."""

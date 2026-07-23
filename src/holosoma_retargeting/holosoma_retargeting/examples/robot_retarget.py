@@ -167,10 +167,26 @@ def validate_config(cfg: RetargetingConfig) -> None:
         raise ValueError("Hand orientation is only available with fixed object size adaptation")
     if cfg.retargeter.hand_orientation.enable and cfg.robot != "g1":
         raise ValueError("Hand orientation currently supports the G1 rubber hands only")
+    if cfg.retargeter.plan_b_palm_contact.enable and not cfg.fixed_object_size_adaptation:
+        raise ValueError("Plan B palm contact requires fixed object size adaptation")
+    if cfg.retargeter.plan_b_palm_contact.enable and cfg.robot != "g1":
+        raise ValueError("Plan B palm contact currently supports the G1 rubber hands only")
+    if cfg.retargeter.plan_b_palm_contact.enable and cfg.retargeter.q_a_init_idx != -7:
+        raise ValueError("Plan B palm contact requires full-body q_a_init_idx=-7")
     if cfg.retargeter.pt_wrist_orientation.enable and not cfg.fixed_object_size_adaptation:
         raise ValueError("A.1 PT wrist orientation requires fixed object size adaptation")
     if cfg.retargeter.pt_wrist_orientation.enable and cfg.robot != "g1":
         raise ValueError("A.1 PT wrist orientation currently supports the G1 rubber hands only")
+    if (
+        int(cfg.retargeter.hand_orientation.enable)
+        + int(cfg.retargeter.plan_b_palm_contact.enable)
+        + int(cfg.retargeter.pt_wrist_orientation.enable)
+        > 1
+    ):
+        raise ValueError(
+            "Legacy hand orientation, Plan B palm contact, and A.1 PT wrist "
+            "orientation are mutually exclusive"
+        )
     # robot_only accepts any format in the registry (already validated above)
 
 
@@ -503,6 +519,7 @@ def build_retargeter_kwargs_from_config(
         "foot_sticking_tolerance": retargeter_config.foot_sticking_tolerance,
         "self_collision": retargeter_config.self_collision,
         "hand_orientation": retargeter_config.hand_orientation,
+        "plan_b_palm_contact": retargeter_config.plan_b_palm_contact,
         "pt_wrist_orientation": retargeter_config.pt_wrist_orientation,
         "step_size": retargeter_config.step_size,
         "visualize": retargeter_config.visualize,
@@ -729,8 +746,8 @@ def main(cfg: RetargetingConfig) -> None:
             calibration_errors[1],
         )
 
-    # Fixed-size interaction objects require two solves. An optional third
-    # stage applies either the legacy pushing pose or A.1 wrist-only tracking.
+    # Fixed-size interaction objects require two solves. An optional independent
+    # third stage applies the legacy pose, Plan B, or A.1 wrist-only tracking.
     if cfg.fixed_object_size_adaptation:
         if object_local_pts is None or object_local_pts_demo is None:
             raise ValueError("Fixed object size adaptation requires object points")
@@ -753,10 +770,19 @@ def main(cfg: RetargetingConfig) -> None:
         foot_sticking_sequences[0][toe_names[1]] = False
 
         nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
-        final_result_path = save_dir / f"{task_name}_fixed_object.npz"
+        refine_plan_b = cfg.retargeter.plan_b_palm_contact.enable
+        final_result_path = save_dir / (
+            f"{task_name}_fixed_object_plan_b.npz"
+            if refine_plan_b
+            else f"{task_name}_fixed_object.npz"
+        )
         refine_hand_orientation = cfg.retargeter.hand_orientation.enable
         refine_pt_wrist_orientation = cfg.retargeter.pt_wrist_orientation.enable
-        refine_orientation = refine_hand_orientation or refine_pt_wrist_orientation
+        refine_orientation = (
+            refine_hand_orientation
+            or refine_plan_b
+            or refine_pt_wrist_orientation
+        )
         fixed_base_result_path = (
             save_dir / f"{task_name}_fixed_object_base.npz"
             if refine_orientation
@@ -778,6 +804,10 @@ def main(cfg: RetargetingConfig) -> None:
                 visualize=False,
                 debug=False,
                 hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+                plan_b_palm_contact=replace(
+                    cfg.retargeter.plan_b_palm_contact,
+                    enable=False,
+                ),
                 pt_wrist_orientation=replace(
                     cfg.retargeter.pt_wrist_orientation,
                     enable=False,
@@ -811,6 +841,10 @@ def main(cfg: RetargetingConfig) -> None:
                 visualize=False,
                 debug=False,
                 hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+                plan_b_palm_contact=replace(
+                    cfg.retargeter.plan_b_palm_contact,
+                    enable=False,
+                ),
                 pt_wrist_orientation=replace(
                     cfg.retargeter.pt_wrist_orientation,
                     enable=False,
@@ -842,7 +876,28 @@ def main(cfg: RetargetingConfig) -> None:
             dest_res_path=str(fixed_base_result_path),
         )
 
-        if refine_hand_orientation:
+        if refine_plan_b:
+            logger.info(
+                "Stage 3/3: optimizing independent Plan B full-body palm contact"
+            )
+            retargeter.retarget_motion(
+                human_joint_motions=human_joints,
+                object_poses=nominal_object_poses_mj,
+                object_poses_augmented=physical_object_poses_mj,
+                object_points_local_demo=object_local_pts_demo,
+                object_points_local=object_local_pts,
+                foot_sticking_sequences=foot_sticking_sequences,
+                q_a_init=q_fixed_base[0],
+                q_nominal_list=q_fixed_base,
+                original=False,
+                dest_res_path=str(final_result_path),
+            )
+            logger.info(
+                "Three-stage Plan B retargeting complete. Baseline: %s; Plan B: %s",
+                fixed_base_result_path,
+                final_result_path,
+            )
+        elif refine_hand_orientation:
             logger.info(
                 "Stage 3/3: adapting the nominal motion with the standardized pushing-hand pose"
             )

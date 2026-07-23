@@ -64,6 +64,83 @@ class HandOrientationConfig:
 
 
 @dataclass(frozen=True)
+class PlanBPalmContactConfig:
+    """Task-space palm contact used by the rubber-hand Plan B pipeline."""
+
+    enable: bool = False
+    """Whether to optimize a collision-safe, full-body palm pushing pose."""
+
+    tabletop_geom_name: str = "largetable_tabletop"
+    """MuJoCo box geom whose vertical side is used as the pushing surface."""
+
+    face_axis: int = 2
+    """Tabletop geom-local axis normal to the contact face (0=x, 1=y, 2=z)."""
+
+    face_sign: int = -1
+    """Signed side of ``face_axis`` facing the robot; must be -1 or +1."""
+
+    vertical_axis: int = 1
+    """Tabletop geom-local vertical axis."""
+
+    lateral_axis: int = 0
+    """Tabletop geom-local axis along which the two palms are separated."""
+
+    hand_spacing: float = 0.24
+    """Distance in meters between the left and right palm target centers."""
+
+    vertical_offset: float = 0.0
+    """Contact-center offset from the tabletop side center along the vertical axis."""
+
+    surface_gap: float = 1e-3
+    """Numerical offset retained in the virtual contact target."""
+
+    penetration_tolerance: float = 0.0
+    """Plan B robot/object penetration tolerance; zero enforces separation."""
+
+    collision_validation_tolerance: float = 1e-4
+    """Numerical tolerance used only to validate MuJoCo mesh signed distances."""
+
+    approach_clearance: float = 0.05
+    """Extra clearance at the beginning and end of a faded contact window."""
+
+    contact_distance: float = 0.10
+    """Demo wrist-to-object distance used to identify the contact phase."""
+
+    fade_frames: int = 24
+    """Frames over which the Plan B task fades in and out."""
+
+    release_frames: int = 36
+    """Frames used only to release Plan B after demonstrated contact ends."""
+
+    normal_position_weight: float = 10000.0
+    """Weight for placing the palm support point on the side plane."""
+
+    contact_distance_weight: float = 100000.0
+    """Weight for driving the real palm/table signed distance to zero."""
+
+    tangent_position_weight: float = 300.0
+    """Weight for placing the palm at the requested side-face coordinates."""
+
+    palm_normal_weight: float = 1000.0
+    """Weight for pointing the palm normal into the table."""
+
+    twist_weight: float = 100.0
+    """Weight for pointing both rubber-hand long axes downward."""
+
+    posture_weight: float = 0.5
+    """Weak Baseline tracking weight for waist and upper-body joints."""
+
+    waist_yaw_roll_weight: float = 5.0
+    """Additional Baseline tracking weight for waist yaw and roll."""
+
+    max_sqp_iterations: int = 60
+    """Maximum SQP iterations per Plan B frame before strict validation fails."""
+
+    temporal_smooth_weight: float = 0.2
+    """Plan B cost weight for staying close to the previous frame."""
+
+
+@dataclass(frozen=True)
 class PTWristOrientationConfig:
     """Optional A.1 raw-PT wrist orientation post-processing."""
 
@@ -121,6 +198,9 @@ class RetargeterConfig:
 
     hand_orientation: HandOrientationConfig = field(default_factory=HandOrientationConfig)
     """Optional contact-phase hand orientation for fixed-size object adaptation."""
+
+    plan_b_palm_contact: PlanBPalmContactConfig = field(default_factory=PlanBPalmContactConfig)
+    """Plan B collision-safe palm contact and full-body pose optimization."""
 
     pt_wrist_orientation: PTWristOrientationConfig = field(default_factory=PTWristOrientationConfig)
     """A.1 raw-PT wrist-only orientation post-processing for rigid robot hands."""
