@@ -33,6 +33,7 @@ from holosoma_retargeting.src.interaction_mesh_retargeter import (  # noqa: E402
 )
 from holosoma_retargeting.src.utils import (  # noqa: E402
     augment_object_poses,
+    build_pt_wrist_palm_orientation_targets,
     calculate_scale_factor,
     create_new_scene_xml_file,
     create_uniformly_scaled_object_scene_xml,
@@ -42,6 +43,7 @@ from holosoma_retargeting.src.utils import (  # noqa: E402
     extract_foot_sticking_sequence_velocity,
     extract_object_first_moving_frame,
     load_intermimic_data,
+    load_intermimic_wrist_quaternions,
     load_object_data,
     preprocess_motion_data,
     transform_from_human_to_world,
@@ -165,6 +167,10 @@ def validate_config(cfg: RetargetingConfig) -> None:
         raise ValueError("Hand orientation is only available with fixed object size adaptation")
     if cfg.retargeter.hand_orientation.enable and cfg.robot != "g1":
         raise ValueError("Hand orientation currently supports the G1 rubber hands only")
+    if cfg.retargeter.pt_wrist_orientation.enable and not cfg.fixed_object_size_adaptation:
+        raise ValueError("A.1 PT wrist orientation requires fixed object size adaptation")
+    if cfg.retargeter.pt_wrist_orientation.enable and cfg.robot != "g1":
+        raise ValueError("A.1 PT wrist orientation currently supports the G1 rubber hands only")
     # robot_only accepts any format in the registry (already validated above)
 
 
@@ -497,6 +503,7 @@ def build_retargeter_kwargs_from_config(
         "foot_sticking_tolerance": retargeter_config.foot_sticking_tolerance,
         "self_collision": retargeter_config.self_collision,
         "hand_orientation": retargeter_config.hand_orientation,
+        "pt_wrist_orientation": retargeter_config.pt_wrist_orientation,
         "step_size": retargeter_config.step_size,
         "visualize": retargeter_config.visualize,
         "debug": retargeter_config.debug,
@@ -701,8 +708,29 @@ def main(cfg: RetargetingConfig) -> None:
             object_poses=object_poses,
         )
 
+    pt_wrist_palm_orientations = None
+    if cfg.retargeter.pt_wrist_orientation.enable:
+        if data_format != "smplh":
+            raise ValueError("PT wrist orientation tracking currently requires the smplh InterMimic format")
+        if cfg.augmentation:
+            raise ValueError("PT wrist orientation tracking is not yet supported with motion augmentation")
+
+        pt_path = data_path / f"{task_name}.pt"
+        wrist_quaternions = load_intermimic_wrist_quaternions(pt_path)
+        pt_wrist_palm_orientations, calibration_errors = build_pt_wrist_palm_orientation_targets(
+            human_joints,
+            wrist_quaternions,
+            retargeter.demo_joints,
+            max_calibration_error_deg=cfg.retargeter.pt_wrist_orientation.max_calibration_error_deg,
+        )
+        logger.info(
+            "PT wrist-to-palm calibration p90 error: left=%.6f deg, right=%.6f deg",
+            calibration_errors[0],
+            calibration_errors[1],
+        )
+
     # Fixed-size interaction objects require two solves. An optional third
-    # pass refines the upper limbs toward a standardized pushing-hand pose.
+    # stage applies either the legacy pushing pose or A.1 wrist-only tracking.
     if cfg.fixed_object_size_adaptation:
         if object_local_pts is None or object_local_pts_demo is None:
             raise ValueError("Fixed object size adaptation requires object points")
@@ -727,9 +755,11 @@ def main(cfg: RetargetingConfig) -> None:
         nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
         final_result_path = save_dir / f"{task_name}_fixed_object.npz"
         refine_hand_orientation = cfg.retargeter.hand_orientation.enable
+        refine_pt_wrist_orientation = cfg.retargeter.pt_wrist_orientation.enable
+        refine_orientation = refine_hand_orientation or refine_pt_wrist_orientation
         fixed_base_result_path = (
             save_dir / f"{task_name}_fixed_object_base.npz"
-            if refine_hand_orientation
+            if refine_orientation
             else final_result_path
         )
         scene_xml_path = constants.ROBOT_URDF_FILE.replace(
@@ -748,6 +778,10 @@ def main(cfg: RetargetingConfig) -> None:
                 visualize=False,
                 debug=False,
                 hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+                pt_wrist_orientation=replace(
+                    cfg.retargeter.pt_wrist_orientation,
+                    enable=False,
+                ),
             )
             nominal_kwargs = build_retargeter_kwargs_from_config(
                 nominal_config, constants, object_urdf_path, task_type
@@ -756,7 +790,7 @@ def main(cfg: RetargetingConfig) -> None:
             nominal_kwargs["scene_xml_path"] = scaled_scene_path
             nominal_retargeter = InteractionMeshRetargeter(**nominal_kwargs)
 
-            stage_count = 3 if refine_hand_orientation else 2
+            stage_count = 3 if refine_orientation else 2
             logger.info("Stage 1/%d: retargeting in the scaled nominal scene", stage_count)
             q_nominal, _, _, _ = nominal_retargeter.retarget_motion(
                 human_joint_motions=human_joints,
@@ -771,12 +805,16 @@ def main(cfg: RetargetingConfig) -> None:
                 dest_res_path=str(nominal_result_path),
             )
 
-        if refine_hand_orientation:
+        if refine_orientation:
             fixed_base_config = replace(
                 cfg.retargeter,
                 visualize=False,
                 debug=False,
                 hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+                pt_wrist_orientation=replace(
+                    cfg.retargeter.pt_wrist_orientation,
+                    enable=False,
+                ),
             )
             fixed_base_kwargs = build_retargeter_kwargs_from_config(
                 fixed_base_config, constants, object_urdf_path, task_type
@@ -822,6 +860,38 @@ def main(cfg: RetargetingConfig) -> None:
             )
             logger.info(
                 "Three-stage retargeting complete. Base: %s; refined: %s",
+                fixed_base_result_path,
+                final_result_path,
+            )
+        elif refine_pt_wrist_orientation:
+            if pt_wrist_palm_orientations is None:
+                raise RuntimeError("A.1 requires PT wrist palm orientation targets")
+
+            logger.info(
+                "Stage 3/3: applying A.1 wrist-only PT orientation post-processing"
+            )
+            q_final, solver_errors_deg = retargeter.apply_pt_wrist_orientation_postprocess(
+                q_fixed_base,
+                pt_wrist_palm_orientations,
+            )
+            with np.load(fixed_base_result_path, allow_pickle=True) as fixed_base_result:
+                np.savez(
+                    final_result_path,
+                    qpos=q_final,
+                    human_joints=fixed_base_result["human_joints"],
+                    fps=fixed_base_result["fps"],
+                    cost=fixed_base_result["cost"],
+                )
+            logger.info(
+                "A.1 wrist orientation error: left p90/max=%.9f/%.9f deg; "
+                "right p90/max=%.9f/%.9f deg",
+                np.percentile(solver_errors_deg[:, 0], 90),
+                solver_errors_deg[:, 0].max(),
+                np.percentile(solver_errors_deg[:, 1], 90),
+                solver_errors_deg[:, 1].max(),
+            )
+            logger.info(
+                "Three-stage A.1 retargeting complete. Base: %s; A.1: %s",
                 fixed_base_result_path,
                 final_result_path,
             )

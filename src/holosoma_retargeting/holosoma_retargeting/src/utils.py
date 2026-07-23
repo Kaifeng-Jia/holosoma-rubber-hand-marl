@@ -19,6 +19,10 @@ from scipy.spatial import Delaunay  # type: ignore[import-untyped]
 from scipy.spatial.transform import Rotation as R  # type: ignore[import-untyped]  # noqa: N817
 
 
+_INTERMIMIC_GLOBAL_QUAT_SLICE = slice(383, 591)
+_INTERMIMIC_WRIST_INDICES = (17, 36)
+
+
 def load_intermimic_data(file_path):
     """
     Load and preprocess InterMimic data.
@@ -34,6 +38,122 @@ def load_intermimic_data(file_path):
     # Reorder quaternion from [qx, qy, qz, qw] to [qw, qx, qy, qz]
     object_poses = intermimic_data[:, 318:325][:, [6, 3, 4, 5, 0, 1, 2]]
     return human_joints, object_poses
+
+
+def normalize_quaternion_sequences_xyzw(quaternions: np.ndarray) -> np.ndarray:
+    """Normalize xyzw quaternion sequences and make their signs time-continuous.
+
+    The first dimension is interpreted as time. Any dimensions between time
+    and the final quaternion dimension are treated as independent sequences.
+    """
+    normalized = np.asarray(quaternions, dtype=float).copy()
+    if normalized.ndim < 2 or normalized.shape[-1] != 4:
+        raise ValueError(f"Expected quaternion data with shape (T, ..., 4), got {normalized.shape}")
+
+    norms = np.linalg.norm(normalized, axis=-1, keepdims=True)
+    if np.any(norms < 1e-8):
+        raise ValueError("Encountered a zero-norm quaternion in the PT wrist data")
+    normalized /= norms
+
+    sequences = normalized.reshape(normalized.shape[0], -1, 4)
+    for frame_idx in range(1, sequences.shape[0]):
+        flip = np.sum(sequences[frame_idx] * sequences[frame_idx - 1], axis=-1) < 0.0
+        sequences[frame_idx, flip] *= -1.0
+    return normalized
+
+
+def load_intermimic_wrist_quaternions(file_path: str | Path) -> np.ndarray:
+    """Load global left/right wrist quaternions from a 591D InterMimic PT file.
+
+    Returns:
+        Array with shape ``(T, 2, 4)`` in ``xyzw`` order. Hand index 0 is
+        left and hand index 1 is right.
+    """
+    intermimic_data = torch.load(file_path, map_location="cpu").detach().numpy()
+    if intermimic_data.ndim != 2 or intermimic_data.shape[1] < _INTERMIMIC_GLOBAL_QUAT_SLICE.stop:
+        raise ValueError(f"Expected InterMimic data with at least 591 columns, got {intermimic_data.shape}")
+
+    global_quaternions = intermimic_data[:, _INTERMIMIC_GLOBAL_QUAT_SLICE].reshape(-1, 52, 4)
+    wrist_quaternions = global_quaternions[:, _INTERMIMIC_WRIST_INDICES, :]
+    return normalize_quaternion_sequences_xyzw(wrist_quaternions)
+
+
+def build_pt_wrist_palm_orientation_targets(
+    human_joints: np.ndarray,
+    wrist_quaternions_xyzw: np.ndarray,
+    joint_names: list[str],
+    max_calibration_error_deg: float = 1.0,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Calibrate PT wrist frames to anatomical palm frames.
+
+    Stable palm frames are constructed from the wrist and the index, middle,
+    and pinky metacarpal joints. A constant per-hand wrist-to-palm rotation is
+    estimated over the full sequence, after which the time-varying targets are
+    driven by the raw PT wrist quaternions.
+
+    Returns:
+        ``(palm_rotations, calibration_error_deg)`` where palm rotations have
+        shape ``(T, 2, 3, 3)`` and errors contain the per-hand 90th percentile.
+    """
+    human_joints = np.asarray(human_joints, dtype=float)
+    wrist_quaternions_xyzw = normalize_quaternion_sequences_xyzw(wrist_quaternions_xyzw)
+    if human_joints.ndim != 3 or human_joints.shape[-1] != 3:
+        raise ValueError(f"Expected human joints with shape (T, J, 3), got {human_joints.shape}")
+    if wrist_quaternions_xyzw.shape != (human_joints.shape[0], 2, 4):
+        raise ValueError(
+            "Expected left/right wrist quaternions with shape "
+            f"({human_joints.shape[0]}, 2, 4), got {wrist_quaternions_xyzw.shape}"
+        )
+
+    hand_specs = (
+        ("left", "L_Wrist", "L_Index1", "L_Middle1", "L_Pinky1", 1.0),
+        ("right", "R_Wrist", "R_Index1", "R_Middle1", "R_Pinky1", -1.0),
+    )
+    palm_targets = np.empty((human_joints.shape[0], 2, 3, 3), dtype=float)
+    calibration_errors_deg = np.empty(2, dtype=float)
+
+    for hand_idx, (side, wrist_name, index_name, middle_name, pinky_name, across_sign) in enumerate(hand_specs):
+        try:
+            wrist_idx = joint_names.index(wrist_name)
+            index_idx = joint_names.index(index_name)
+            middle_idx = joint_names.index(middle_name)
+            pinky_idx = joint_names.index(pinky_name)
+        except ValueError as exc:
+            raise ValueError(f"Missing a required {side} palm landmark in the motion joint names") from exc
+
+        forward = human_joints[:, middle_idx] - human_joints[:, wrist_idx]
+        forward_norm = np.linalg.norm(forward, axis=1, keepdims=True)
+        if np.any(forward_norm < 1e-8):
+            raise ValueError(f"Degenerate {side} wrist-to-middle-finger direction")
+        forward /= forward_norm
+
+        across = across_sign * (human_joints[:, index_idx] - human_joints[:, pinky_idx])
+        across -= np.sum(across * forward, axis=1, keepdims=True) * forward
+        across_norm = np.linalg.norm(across, axis=1, keepdims=True)
+        if np.any(across_norm < 1e-8):
+            raise ValueError(f"Degenerate {side} index-to-pinky palm direction")
+        across /= across_norm
+
+        palm_normal = np.cross(forward, across)
+        palm_normal /= np.linalg.norm(palm_normal, axis=1, keepdims=True)
+        across = np.cross(palm_normal, forward)
+
+        landmark_rotation = R.from_matrix(np.stack([forward, across, palm_normal], axis=2))
+        wrist_rotation = R.from_quat(wrist_quaternions_xyzw[:, hand_idx])
+        wrist_to_palm_samples = wrist_rotation.inv() * landmark_rotation
+        wrist_to_palm = wrist_to_palm_samples.mean()
+
+        calibration_error = (wrist_to_palm.inv() * wrist_to_palm_samples).magnitude()
+        calibration_errors_deg[hand_idx] = float(np.degrees(np.percentile(calibration_error, 90)))
+        if calibration_errors_deg[hand_idx] > max_calibration_error_deg:
+            raise ValueError(
+                f"{side} wrist-to-palm calibration error is {calibration_errors_deg[hand_idx]:.3f} deg "
+                f"(limit {max_calibration_error_deg:.3f} deg)"
+            )
+
+        palm_targets[:, hand_idx] = (wrist_rotation * wrist_to_palm).as_matrix()
+
+    return palm_targets, calibration_errors_deg
 
 
 def calculate_scale_factor(task_name, robot_height):

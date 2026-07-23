@@ -62,6 +62,21 @@ class HandOrientationConfig:
     finger_direction_weight: float = 0.0
     """Optional roll-stabilization weight; zero preserves the stable palm-only solution."""
 
+
+@dataclass(frozen=True)
+class PTWristOrientationConfig:
+    """Optional A.1 raw-PT wrist orientation post-processing."""
+
+    enable: bool = False
+    """Whether to replace only wrist roll/pitch/yaw with the demonstrated orientation."""
+
+    max_calibration_error_deg: float = 1.0
+    """Maximum allowed 90th-percentile wrist-to-palm calibration error in degrees."""
+
+    max_solver_error_deg: float = 0.01
+    """Maximum allowed per-frame robot hand-link orientation error in degrees."""
+
+
 @dataclass(frozen=True)
 class RetargeterConfig:
     """Configuration for retargeter parameters.
@@ -106,6 +121,9 @@ class RetargeterConfig:
 
     hand_orientation: HandOrientationConfig = field(default_factory=HandOrientationConfig)
     """Optional contact-phase hand orientation for fixed-size object adaptation."""
+
+    pt_wrist_orientation: PTWristOrientationConfig = field(default_factory=PTWristOrientationConfig)
+    """A.1 raw-PT wrist-only orientation post-processing for rigid robot hands."""
 
     w_nominal_tracking_init: float = 5.0
     """Initial weight for nominal tracking cost."""

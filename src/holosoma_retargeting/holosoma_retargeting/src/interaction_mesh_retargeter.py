@@ -12,6 +12,7 @@ import trimesh
 import viser  # type: ignore[import-not-found]
 import yourdfpy  # type: ignore[import-untyped]
 from scipy import sparse as sp  # type: ignore[import-untyped]
+from scipy.optimize import least_squares  # type: ignore[import-untyped]
 from scipy.spatial.transform import Rotation  # type: ignore[import-untyped]
 from tqdm import tqdm
 from viser.extras import ViserUrdf  # type: ignore[import-not-found]
@@ -19,6 +20,7 @@ from viser.extras import ViserUrdf  # type: ignore[import-not-found]
 from holosoma_retargeting.config_types.retargeter import (
     FootLockConfig,
     HandOrientationConfig,
+    PTWristOrientationConfig,
     SelfCollisionConfig,
 )
 
@@ -39,6 +41,14 @@ from utils import (  # type: ignore[import-not-found,no-redef]  # noqa: E402
     transform_points_world_to_local,
 )
 from viser_utils import create_motion_control_sliders  # type: ignore[import-not-found,no-redef]  # noqa: E402
+
+
+def _select_pt_wrist_orientation_indices(arm_indices: np.ndarray) -> np.ndarray:
+    """Select the wrist roll/pitch/yaw entries from an ordered arm group."""
+    arm_indices = np.asarray(arm_indices)
+    if arm_indices.shape != (7,):
+        raise ValueError(f"Expected seven ordered arm indices, got shape {arm_indices.shape}")
+    return arm_indices[-3:].copy()
 
 
 class InteractionMeshRetargeter:
@@ -69,6 +79,7 @@ class InteractionMeshRetargeter:
         anchor_nominal_foot_height: bool = False,
         nominal_foot_height_tolerance: float = 5e-3,
         hand_orientation: HandOrientationConfig | None = None,
+        pt_wrist_orientation: PTWristOrientationConfig | None = None,
     ):
         """This kinematic retargeter solves the diffIK problem with hard constraints in SQP style.
         During each SQP iteration, the problem is solved with the following constraints and costs:
@@ -120,6 +131,9 @@ class InteractionMeshRetargeter:
         self._init_foot_lock(foot_lock)
         self._self_collision_config = self_collision
         self.hand_orientation = hand_orientation or HandOrientationConfig()
+        self.pt_wrist_orientation = pt_wrist_orientation or PTWristOrientationConfig()
+        if self.hand_orientation.enable and self.pt_wrist_orientation.enable:
+            raise ValueError("Legacy fixed hand orientation and PT wrist orientation cannot be enabled together")
 
         # Setup visualization if requested
         if self.visualize:
@@ -189,9 +203,9 @@ class InteractionMeshRetargeter:
         self.track_nominal_indices = task_constants.NOMINAL_TRACKING_INDICES
 
     def _init_hand_orientation(self) -> None:
-        """Resolve the hand links and upper-limb joints for the optional objective."""
+        """Resolve hand links, palm frames, and upper-limb optimization joints."""
         self._hand_orientation_specs: list[dict[str, object]] = []
-        if not self.hand_orientation.enable:
+        if not (self.hand_orientation.enable or self.pt_wrist_orientation.enable):
             return
         if not self.has_dynamic_object:
             raise ValueError("Hand orientation requires a dynamic interaction object")
@@ -226,6 +240,17 @@ class InteractionMeshRetargeter:
             )
 
         for spec in self._hand_orientation_specs:
+            palm_normal = np.asarray(spec["palm_normal"], dtype=float)
+            palm_normal /= np.linalg.norm(palm_normal)
+            finger_direction = np.array([1.0, 0.0, 0.0])
+            finger_direction -= np.dot(finger_direction, palm_normal) * palm_normal
+            finger_direction /= np.linalg.norm(finger_direction)
+            across_direction = np.cross(palm_normal, finger_direction)
+            across_direction /= np.linalg.norm(across_direction)
+            spec["palm_basis"] = np.column_stack(
+                [finger_direction, across_direction, palm_normal]
+            )
+
             side = str(spec["side"])
             arm_joint_suffixes = (
                 "shoulder_pitch",
@@ -237,6 +262,9 @@ class InteractionMeshRetargeter:
                 "wrist_yaw",
             )
             arm_indices = []
+            arm_qpos_indices = []
+            arm_lower_limits = []
+            arm_upper_limits = []
             for suffix in arm_joint_suffixes:
                 joint_name = f"{side}_{suffix}_joint"
                 joint_id = mujoco.mj_name2id(
@@ -251,7 +279,19 @@ class InteractionMeshRetargeter:
                 if local_idx.size != 1:
                     raise ValueError(f"Joint '{joint_name}' is outside the optimized configuration")
                 arm_indices.append(int(local_idx[0]))
+                arm_qpos_indices.append(qpos_idx)
+                arm_lower_limits.append(float(self.robot_model.jnt_range[joint_id, 0]))
+                arm_upper_limits.append(float(self.robot_model.jnt_range[joint_id, 1]))
             spec["arm_orientation_indices"] = np.asarray(arm_indices, dtype=int)
+            spec["pt_wrist_qpos_indices"] = _select_pt_wrist_orientation_indices(
+                np.asarray(arm_qpos_indices, dtype=int)
+            )
+            spec["pt_wrist_lower_limits"] = _select_pt_wrist_orientation_indices(
+                np.asarray(arm_lower_limits, dtype=float)
+            )
+            spec["pt_wrist_upper_limits"] = _select_pt_wrist_orientation_indices(
+                np.asarray(arm_upper_limits, dtype=float)
+            )
 
     def _init_foot_lock(self, foot_lock: FootLockConfig | None) -> None:
         """Initialize foot lock configuration and normalize window mappings."""
@@ -695,6 +735,119 @@ class InteractionMeshRetargeter:
                     f"{active[0]}..{active[-1]} (including fade)"
                 )
         return weights
+
+    def _map_pt_palm_orientations_to_robot_links(
+        self,
+        palm_orientations: np.ndarray | None,
+        num_frames: int,
+    ) -> np.ndarray:
+        """Convert anatomical PT palm frames to robot hand-link rotations."""
+        num_hands = len(self._hand_orientation_specs)
+        targets = np.zeros((num_frames, num_hands, 3, 3), dtype=float)
+        if not self.pt_wrist_orientation.enable:
+            return targets
+        if palm_orientations is None:
+            raise ValueError("PT wrist orientation tracking requires palm orientation targets")
+
+        palm_orientations = np.asarray(palm_orientations, dtype=float)
+        if palm_orientations.shape != (num_frames, 2, 3, 3):
+            raise ValueError(
+                "Expected PT palm orientations with shape "
+                f"({num_frames}, 2, 3, 3), got {palm_orientations.shape}"
+            )
+
+        source_indices = {"left": 0, "right": 1}
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            source_idx = source_indices[str(spec["side"])]
+            palm_basis = np.asarray(spec["palm_basis"], dtype=float)
+            targets[:, hand_idx] = palm_orientations[:, source_idx] @ palm_basis.T
+        return targets
+
+    def apply_pt_wrist_orientation_postprocess(
+        self,
+        qpos_sequence: np.ndarray,
+        palm_orientations: np.ndarray,
+    ) -> tuple[np.ndarray, np.ndarray]:
+        """Apply A.1 by solving only wrist roll/pitch/yaw in every frame.
+
+        All floating-base, leg, waist, shoulder, elbow, and object coordinates
+        are copied unchanged from the fixed-object baseline. Object collision
+        constraints are intentionally not re-solved in this final stage: A.1
+        preserves the demonstrated rigid-hand orientation as the training
+        reference, even when the larger rubber-hand mesh visually overlaps the
+        demonstration object.
+
+        Returns:
+            ``(qpos, orientation_errors_deg)``. Errors have shape ``(T, 2)``
+            in left/right hand order.
+        """
+        if not self.pt_wrist_orientation.enable:
+            raise ValueError("PT wrist orientation post-processing is disabled")
+
+        result = np.asarray(qpos_sequence, dtype=float).copy()
+        if result.ndim != 2 or result.shape[1] != self.nq:
+            raise ValueError(
+                f"Expected qpos with shape (T, {self.nq}), got {result.shape}"
+            )
+
+        targets = self._map_pt_palm_orientations_to_robot_links(
+            palm_orientations,
+            result.shape[0],
+        )
+        errors_deg = np.zeros((result.shape[0], len(self._hand_orientation_specs)))
+        previous_solutions = [
+            result[0, np.asarray(spec["pt_wrist_qpos_indices"], dtype=int)].copy()
+            for spec in self._hand_orientation_specs
+        ]
+
+        for frame_idx in range(result.shape[0]):
+            frame_q = result[frame_idx].copy()
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                qpos_indices = np.asarray(spec["pt_wrist_qpos_indices"], dtype=int)
+                lower = np.asarray(spec["pt_wrist_lower_limits"], dtype=float)
+                upper = np.asarray(spec["pt_wrist_upper_limits"], dtype=float)
+                body_id = int(spec["body_id"])
+                target_rotation = targets[frame_idx, hand_idx]
+
+                def orientation_residual(wrist_qpos: np.ndarray) -> np.ndarray:
+                    self.robot_data.qpos[:] = frame_q
+                    self.robot_data.qpos[qpos_indices] = wrist_qpos
+                    mujoco.mj_forward(self.robot_model, self.robot_data)
+                    current_rotation = self.robot_data.xmat[body_id].reshape(3, 3)
+                    return Rotation.from_matrix(
+                        target_rotation @ current_rotation.T
+                    ).as_rotvec()
+
+                initial = np.clip(
+                    previous_solutions[hand_idx],
+                    lower + 1e-9,
+                    upper - 1e-9,
+                )
+                solution = least_squares(
+                    orientation_residual,
+                    initial,
+                    bounds=(lower, upper),
+                    xtol=1e-13,
+                    ftol=1e-13,
+                    gtol=1e-13,
+                    max_nfev=120,
+                )
+                frame_q[qpos_indices] = solution.x
+                previous_solutions[hand_idx] = solution.x.copy()
+                errors_deg[frame_idx, hand_idx] = np.degrees(
+                    np.linalg.norm(orientation_residual(solution.x))
+                )
+
+            result[frame_idx] = frame_q
+
+        max_error = float(errors_deg.max(initial=0.0))
+        if max_error > self.pt_wrist_orientation.max_solver_error_deg:
+            raise RuntimeError(
+                "A.1 wrist solve exceeded the configured orientation error: "
+                f"{max_error:.6f} deg > "
+                f"{self.pt_wrist_orientation.max_solver_error_deg:.6f} deg"
+            )
+        return result, errors_deg
 
     def _compute_fixed_push_hand_orientation_targets(
         self,
