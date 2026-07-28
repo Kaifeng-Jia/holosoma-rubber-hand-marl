@@ -186,6 +186,14 @@ This result authorizes the 8,000-iteration single-seed comparison gate. It does
 not authorize an A1-versus-Plan-B quality conclusion without fixed
 physics-based evaluation metrics.
 
+The fixed recorder, metrics, attempt definition, thresholds, and paired
+evaluation procedure are documented in
+[`STEP1_PHYSICS_EVAL.md`](STEP1_PHYSICS_EVAL.md). Validation on the two
+500-iteration checkpoints confirms that the policies can be evaluated with
+actual table state and rubber-hand contact-sensor data. It also shows high
+early-termination rates, reinforcing that these checkpoints are pipeline
+pilots rather than converged policies.
+
 ## Later training gates
 
 ```text

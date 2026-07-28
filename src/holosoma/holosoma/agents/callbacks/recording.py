@@ -1,7 +1,10 @@
 """Eval callback that records per-step trajectory data to an NPZ file.
 
-Records joint positions, velocities, torques, body poses, and root state
-for later visualization with viser_eval_viewer.py.
+Besides the post-step robot state used by ``viser_eval_viewer.py``, WBT
+evaluations record the pre-step reference/physical state.  The latter is
+important because the environment resets a failed environment inside
+``env.step``; reading only the post-step tensors would otherwise replace the
+failure state with the next attempt's initial state.
 """
 
 from __future__ import annotations
@@ -39,6 +42,7 @@ class EvalRecordingCallback(RLEvalCallback):
         self._buffers: dict[str, list[np.ndarray]] = {}
         self._metadata: dict[str, Any] = {}
         self._step_count = 0
+        self._pre_step_count = 0
 
     def _get_env(self):
         """Get the unwrapped BaseTask environment."""
@@ -109,7 +113,123 @@ class EvalRecordingCallback(RLEvalCallback):
         for name in channel_names:
             self._buffers[name] = []
 
+        motion_command = self._get_motion_command(env)
+        if motion_command is not None:
+            tracked_body_names = list(motion_command.motion_cfg.body_names_to_track)
+            self._metadata["tracked_body_names"] = tracked_body_names
+            self._metadata["tracked_body_indexes"] = [
+                int(index) for index in motion_command.tracked_body_indexes.detach().cpu().tolist()
+            ]
+            self._metadata["motion_fps"] = int(motion_command.motion.fps)
+            self._metadata["motion_time_step_total"] = int(motion_command.motion.time_step_total)
+            self._metadata["motion_has_object"] = bool(motion_command.motion.has_object)
+            self._metadata["contact_force_semantics"] = (
+                "Net external force on each contact-sensor body. Rubber-hand links are recorded "
+                "directly when present. These are body-level net forces, not pairwise hand-object "
+                "contact reports."
+            )
+            if hasattr(sim, "contact_sensor") and hasattr(sim.contact_sensor, "body_names"):
+                self._metadata["contact_sensor_body_names"] = list(sim.contact_sensor.body_names)
+
+            pre_step_channels = [
+                "motion_time_step",
+                "motion_id",
+                "episode_step",
+                "ref_joint_pos",
+                "ref_joint_vel",
+                "pre_dof_pos",
+                "pre_dof_vel",
+                "ref_body_pos_w",
+                "ref_body_quat_xyzw",
+                "pre_tracked_body_pos_w",
+                "pre_tracked_body_quat_xyzw",
+                "ref_root_pos_w",
+                "ref_root_quat_xyzw",
+                "pre_root_pos",
+                "pre_root_quat_xyzw",
+                "contact_forces_w",
+                "contact_forces_history_w",
+            ]
+            if hasattr(sim, "contact_sensor"):
+                pre_step_channels.extend(
+                    [
+                        "contact_sensor_forces_w",
+                        "contact_sensor_forces_history_w",
+                    ]
+                )
+            if motion_command.motion.has_object:
+                pre_step_channels.extend(
+                    [
+                        "ref_object_pos_w",
+                        "ref_object_quat_xyzw",
+                        "ref_object_lin_vel_w",
+                        "object_pos_w",
+                        "object_quat_xyzw",
+                        "object_lin_vel_w",
+                    ]
+                )
+            for name in pre_step_channels:
+                self._buffers[name] = []
+
+        for name in ("reward", "done", "timeout", "terminated"):
+            self._buffers[name] = []
+
         logger.info(f"EvalRecordingCallback: recording env_id={self.env_id}, output={self.output_path}")
+
+    def on_pre_eval_env_step(self, actor_state: dict) -> dict:
+        """Record the state used to compute the current action.
+
+        PPO calls the pre-step hook once before entering the evaluation loop.
+        That warm-up call has no ``step`` key and is deliberately ignored.
+        """
+        if "step" not in actor_state:
+            return actor_state
+
+        env = self._get_env()
+        motion_command = self._get_motion_command(env)
+        if motion_command is None:
+            return actor_state
+
+        sim = env.simulator
+        eid = self.env_id
+
+        def _to_np(t: torch.Tensor) -> np.ndarray:
+            return t.detach().cpu().numpy().copy()
+
+        def _append(name: str, value: torch.Tensor) -> None:
+            self._buffers[name].append(_to_np(value))
+
+        _append("motion_time_step", motion_command.time_steps[eid])
+        _append("motion_id", motion_command.motion_ids[eid])
+        _append("episode_step", env.episode_length_buf[eid])
+        _append("ref_joint_pos", motion_command.joint_pos[eid])
+        _append("ref_joint_vel", motion_command.joint_vel[eid])
+        _append("pre_dof_pos", sim.dof_pos[eid])
+        _append("pre_dof_vel", sim.dof_vel[eid])
+        _append("ref_body_pos_w", motion_command.body_pos_relative_w[eid])
+        _append("ref_body_quat_xyzw", motion_command.body_quat_relative_w[eid])
+        _append("pre_tracked_body_pos_w", motion_command.robot_body_pos_w[eid])
+        _append("pre_tracked_body_quat_xyzw", motion_command.robot_body_quat_w[eid])
+        _append("ref_root_pos_w", motion_command.root_pos_w[eid])
+        _append("ref_root_quat_xyzw", motion_command.root_quat_w[eid])
+        _append("pre_root_pos", sim.robot_root_states[eid, :3])
+        _append("pre_root_quat_xyzw", sim.robot_root_states[eid, 3:7])
+        _append("contact_forces_w", sim.contact_forces[eid])
+        _append("contact_forces_history_w", sim.contact_forces_history[eid])
+        if hasattr(sim, "contact_sensor"):
+            _append("contact_sensor_forces_w", sim.contact_sensor.data.net_forces_w[eid])
+            _append("contact_sensor_forces_history_w", sim.contact_sensor.data.net_forces_w_history[eid])
+
+        if motion_command.motion.has_object:
+            _append("ref_object_pos_w", motion_command.object_pos_w[eid])
+            _append("ref_object_quat_xyzw", motion_command.object_quat_w[eid])
+            _append("ref_object_lin_vel_w", motion_command.object_lin_vel_w[eid])
+            _append("object_pos_w", motion_command.simulator_object_pos_w[eid])
+            _append("object_quat_xyzw", motion_command.simulator_object_quat_w[eid])
+            _append("object_lin_vel_w", motion_command.simulator_object_lin_vel_w[eid])
+
+        self._pre_step_count += 1
+        return actor_state
 
     def on_post_eval_env_step(self, actor_state: dict) -> dict:
         env = self._get_env()
@@ -154,8 +274,30 @@ class EvalRecordingCallback(RLEvalCallback):
             except (AttributeError, IndexError):
                 pass
 
+        reward = actor_state["rewards"][eid]
+        done = actor_state["dones"][eid].to(dtype=torch.bool)
+        timeouts = actor_state.get("extras", {}).get("time_outs")
+        timeout = (
+            timeouts[eid].to(dtype=torch.bool)
+            if isinstance(timeouts, torch.Tensor)
+            else torch.zeros((), dtype=torch.bool, device=done.device)
+        )
+        self._buffers["reward"].append(_to_np(reward))
+        self._buffers["done"].append(_to_np(done))
+        self._buffers["timeout"].append(_to_np(timeout))
+        self._buffers["terminated"].append(_to_np(done & ~timeout))
+
         self._step_count += 1
         return actor_state
+
+    @staticmethod
+    def _get_motion_command(env: Any) -> Any | None:
+        if not hasattr(env, "command_manager") or env.command_manager is None:
+            return None
+        try:
+            return env.command_manager.get_state("motion_command")
+        except (KeyError, AttributeError):
+            return None
 
     def _extract_dof_pos_target(self, env: Any, env_id: int) -> torch.Tensor:
         """Extract desired target joint positions from the action manager's joint control term.
@@ -189,4 +331,9 @@ class EvalRecordingCallback(RLEvalCallback):
         raise RuntimeError("No action term with torques_substep found")
 
     def on_post_evaluate_policy(self) -> None:
+        if self._pre_step_count not in (0, self._step_count):
+            raise RuntimeError(
+                "EvalRecordingCallback recorded mismatched pre/post step counts: "
+                f"{self._pre_step_count} pre-step states versus {self._step_count} transitions"
+            )
         self._save()
