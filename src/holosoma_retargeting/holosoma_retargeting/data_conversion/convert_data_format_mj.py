@@ -133,11 +133,35 @@ class MotionLoader:
         self._interpolate_motion()
         self._compute_velocities()
 
+    @staticmethod
+    def _resolve_input_fps(stored_value: object) -> float:
+        """Resolve either an FPS value or a legacy seconds-per-frame value."""
+        value_array = np.asarray(stored_value)
+        if value_array.size != 1:
+            raise ValueError(
+                "Motion 'fps' metadata must be a scalar, "
+                f"got shape {value_array.shape}"
+            )
+        value = float(value_array.reshape(()))
+        if not np.isfinite(value) or value <= 0.0:
+            raise ValueError(
+                f"Motion 'fps' metadata must be finite and positive, got {value}"
+            )
+
+        # Older retargeted files stored seconds per frame under the ``fps`` key,
+        # while current files store the actual frame rate.
+        resolved_fps = 1.0 / value if value <= 1.0 else value
+        if not np.isfinite(resolved_fps) or resolved_fps <= 0.0:
+            raise ValueError(f"Resolved input FPS must be positive, got {resolved_fps}")
+        return resolved_fps
+
     def _load_motion(self):
         """Loads the motion from the csv file."""
         if self.motion_file.endswith(".npz"):
             data = np.load(self.motion_file)
-            self.input_fps = round(1 / data.get("fps", 1 / self.input_fps))
+            stored_fps = data["fps"] if "fps" in data else self.input_fps
+            self.input_fps = self._resolve_input_fps(stored_fps)
+            self.input_dt = 1.0 / self.input_fps
             motion = torch.from_numpy(data["qpos"]).to(torch.float32)
         else:
             raise ValueError("Unsupported motion file format. Use .csv or .npz.")
