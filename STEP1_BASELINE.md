@@ -118,6 +118,74 @@ A pilot passes the pipeline gate when:
 
 A pass does not mean the policy has converged.
 
+## Pilot results
+
+Both pilots completed on 2026-07-28 and processed the full frozen budget:
+
+```text
+A1:
+  logs/WholeBodyTracking/20260728_031249-rubberhand_a1_pilot_seed42-locomotion
+
+Plan B:
+  logs/WholeBodyTracking/20260728_035030-rubberhand_plan_b_pilot_seed42-locomotion
+
+iterations per run: 500
+transitions per run: 49,152,000
+device: cuda:0
+```
+
+The saved `holosoma_config.yaml` files were compared in full. Their only
+differences are the expected run `name` and `motion_file`.
+
+Both runs wrote checkpoints and ONNX exports at iterations 0, 100, 200, 300,
+400, and 499. All 500 recorded values of every metric below are finite.
+
+The following table reports the mean over the final 20 iterations. These are
+training diagnostics, not deterministic policy-evaluation scores.
+
+| Metric | A1 | Plan B |
+|---|---:|---:|
+| Mean reward | 14.6870 | 16.2368 |
+| Mean episode length | 244.503 | 283.897 |
+| Global reference position error | 0.175157 | 0.195329 |
+| Global reference rotation error | 0.187159 | 0.193931 |
+| Relative body position error | 0.074190 | 0.078144 |
+| Relative body rotation error | 0.338084 | 0.345862 |
+| Joint position error | 1.39447 | 1.53521 |
+| Joint velocity error | 13.4723 | 13.8109 |
+| Raw episode object-position reward | 11.2243 | 12.6206 |
+| Raw episode object-orientation reward | 10.7764 | 12.0680 |
+
+Plan B's larger raw episode object rewards partly reflect its longer episodes;
+they must not be interpreted as lower instantaneous table error. At this early
+gate, A1 has lower tracking errors while Plan B has longer episodes and a
+higher aggregate reward. The runs are not converged, so this is a diagnostic
+tradeoff rather than a winner selection.
+
+The final checkpoints were also loaded through `eval_agent.py` with one
+environment, evaluation phase fixed to the start of the motion, and 309 control
+steps:
+
+```text
+A1 model_00499.pt: passed
+Plan B model_00499.pt: passed
+```
+
+Both evaluations loaded the saved experiment configuration, selected
+`cuda:0`, loaded the correct motion file, executed all requested steps, and
+shut down normally.
+
+Pilot gate result:
+
+```text
+A1: passed
+Plan B: passed
+```
+
+This result authorizes the 8,000-iteration single-seed comparison gate. It does
+not authorize an A1-versus-Plan-B quality conclusion without fixed
+physics-based evaluation metrics.
+
 ## Later training gates
 
 ```text
