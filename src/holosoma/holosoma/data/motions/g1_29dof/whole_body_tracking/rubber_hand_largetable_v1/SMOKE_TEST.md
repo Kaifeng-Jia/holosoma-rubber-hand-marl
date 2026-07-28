@@ -95,21 +95,42 @@ The reward and error values above are diagnostics from an initial stochastic
 rollout. They must not be interpreted as evidence that one motion is easier to
 learn or yields a better policy.
 
-## Current machine limitation
+## CUDA recovery
 
-Isaac Sim reported:
+The original paired smoke tests above ran through Isaac Sim's CPU fallback
+because the host had loaded NVIDIA kernel module `580.159.03` while the
+installed userspace libraries were `580.173.02`.
+
+After rebooting on 2026-07-27, the host selected kernel `6.8.0-136-generic` and
+loaded NVIDIA kernel module `580.173.02`. Recovery was verified at three
+levels:
 
 ```text
-NVML_ERROR_LIB_RM_VERSION_MISMATCH
-CUDA error 804: forward compatibility was attempted on non supported HW
-No CUDA devices found
-Environment device: cpu
+nvidia-smi:
+  driver 580.173.02
+  GPU NVIDIA GeForce RTX 5070 Laptop GPU
+
+PyTorch 2.7.0+cu128:
+  torch.cuda.is_available() = True
+  CUDA tensor computation on cuda:0 = passed
+
+Isaac Sim A1 smoke:
+  Environment device = cuda:0
+  environments = 1
+  learning iterations = 1
+  timesteps = 24
+  PPO update and checkpoint export = passed
 ```
 
-The smoke tests therefore validate the code, data, environment, and PPO path
-through Isaac Sim's CPU fallback. They do not validate GPU training readiness
-or representative throughput. Resolve the host NVIDIA driver/library mismatch
-and confirm that Isaac Sim selects a CUDA device before starting a long run.
+The GPU verification run is stored in the gitignored directory:
+
+```text
+logs/WholeBodyTracking/20260728_023539-g1_29dof_wbt_manager-locomotion
+```
+
+This confirms that the earlier NVML mismatch, CUDA error 804, and CPU fallback
+are resolved. It is still only a pipeline smoke test, not a long-duration GPU
+stability or throughput benchmark.
 
 ## Non-blocking warnings observed
 
@@ -117,8 +138,9 @@ and confirm that Isaac Sim selects a CUDA device before starting a long run.
 - Isaac Sim joint-name ordering warning;
 - inability to modify articulation-root properties below an instanced object
   prim; and
-- CPU collision-filtering warning caused by the fallback execution mode.
+- CPU collision-filtering warning in the original fallback runs.
 
-These warnings did not prevent either smoke test from completing. The
-articulation and collision warnings should be rechecked once GPU execution is
-restored and before treating a long training result as the baseline.
+These warnings did not prevent the original paired smoke tests from
+completing. The visual-reference, joint-ordering, and instanced-object
+articulation warnings also appeared in the GPU smoke and should be tracked
+during the first longer baseline run.
