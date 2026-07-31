@@ -194,6 +194,14 @@ actual table state and rubber-hand contact-sensor data. It also shows high
 early-termination rates, reinforcing that these checkpoints are pipeline
 pilots rather than converged policies.
 
+The paired 8,000-iteration checkpoints and their three-seed physics evaluation
+are documented in
+[`STEP1_8000_EVAL_RESULTS.md`](STEP1_8000_EVAL_RESULTS.md). Both policies pass
+the progression gate and improve substantially over their 500-iteration
+pilots. A1 is currently more stable across evaluation seeds, while Plan B has
+lower table-orientation error and mean torque utilization. Neither result is
+treated as final Step 1 convergence.
+
 ## Later training gates
 
 ```text
