@@ -54,6 +54,7 @@ g1_29dof_wbt_reward = RewardManagerCfg(
                 "undesired_contacts_body_names": (
                     "^(?!left_foot_contact_point$)(?!right_foot_contact_point$)"
                     "(?!left_wrist_yaw_link$)(?!right_wrist_yaw_link$)"
+                    "(?!left_rubber_hand_link$)(?!right_rubber_hand_link$)"
                     "(?!left_ankle_roll_link$)(?!right_ankle_roll_link$).+$"
                 ),
             },

@@ -126,6 +126,45 @@ rubber-hand sensor. The body-level net-force signal still cannot distinguish
 self-collision, table contact, and ground contact without pairwise PhysX
 reports, so visual replay of representative failed attempts remains necessary.
 
+## Post-evaluation visual audit
+
+Visual replay changed the interpretation of Plan B's task-level completion
+metric. In the seed-43 attempt 13 replay, the robot maintained hand contact but
+also braced or pushed the table with its leg/hip region. The attempt completed
+the table trajectory, but it did not reproduce the intended hand-dominant Plan
+B technique.
+
+The recording supports this diagnosis without proving pairwise contact: the
+`right_hip_yaw_link` exceeded 5 N in 33.1% of the attempt and overlapped table
+motion in 32.8% of the attempt. Both rubber hands also carried external force.
+Consequently, the current `hand contact + object motion` interaction proxy
+detects temporal coincidence, not which body caused the table displacement.
+Plan B's reported completion rate must therefore not be presented as a
+hand-push success rate.
+
+The audit also found an asset/reward semantic mismatch in the exact-main
+control. The original allowed-contact expression excluded
+`left_wrist_yaw_link` and `right_wrist_yaw_link` from the undesired-contact
+penalty, while the added collision bodies are named `left_rubber_hand_link`
+and `right_rubber_hand_link`. The two rubber-hand bodies were consequently
+penalized during these 8,000-iteration runs.
+
+The post-audit semantic recovery only adds those two rubber-hand body names to
+the allowed-contact expression. It does not add a special leg, knee, hip, or
+torso penalty and does not change any reward weight or formula. The six results
+in this document remain the unmodified exact-main control; training after the
+semantic recovery must be reported separately.
+
+Evaluation should primarily measure similarity to each frozen retargeted ideal
+motion: robot joint/body tracking, rubber-hand pose relative to the table,
+table trajectory, and standing stability. Contact channels remain diagnostic
+unless pairwise contact attribution is added.
+
+The table mass remains frozen at 0.1 kg for this low-resistance stage. This is
+appropriate for testing stable stance, reference imitation, and a short initial
+push, but it is not evidence of load-robust pushing. Heavier-table tests belong
+to a later, separately reported robustness stage.
+
 ## Interpretation
 
 A1 currently has:
@@ -146,7 +185,9 @@ Plan B currently has:
 These are complementary tradeoffs. The result does not justify deleting
 either reference or declaring that training reward selected a universal
 winner. It does show that A1 is presently the more stable all-round tracking
-baseline, while Plan B retains useful object-orientation and torque behavior.
+baseline. Plan B retains useful object-orientation and torque behavior, but its
+task completion cannot be treated as correct hand-push technique after the
+visual audit.
 
 ## Gate decision and next question
 
@@ -158,7 +199,6 @@ learning progress for both policies. It is not yet the final strong baseline:
 - hip/knee invalid contacts remain frequent.
 
 Before starting the full 30,000-iteration runs, freeze the final numeric
-acceptance thresholds and decide whether the exact-main baseline should first
-continue unchanged or whether invalid-contact failure visualization warrants a
-separately reported corrective variant. Any reward/contact modification must
+acceptance thresholds and validate the rubber-hand semantic-recovery variant at
+a smaller gate. Any result produced after the allowed-contact correction must
 remain separate from the exact-main control.

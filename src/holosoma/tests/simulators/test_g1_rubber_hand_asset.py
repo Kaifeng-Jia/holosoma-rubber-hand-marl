@@ -1,8 +1,11 @@
 from __future__ import annotations
 
+import re
 import xml.etree.ElementTree as ET
 from math import isclose
 from pathlib import Path
+
+from holosoma.config_values.wbt.g1.reward import g1_29dof_wbt_reward
 
 
 PACKAGE_ROOT = Path(__file__).resolve().parents[2]
@@ -65,6 +68,24 @@ def test_object_interaction_g1_uses_rubber_hand_asset() -> None:
     config_source = ROBOT_CONFIG.read_text()
     assert 'urdf_file="g1/main_mesh_collision_rubberhand.urdf"' in config_source
     assert 'urdf_file="g1/main_mesh_collision_halfspherehand.urdf"' not in config_source
+
+
+def test_wbt_reward_allows_rubber_hand_contacts() -> None:
+    pattern = g1_29dof_wbt_reward.terms["undesired_contacts"].params[
+        "undesired_contacts_body_names"
+    ]
+
+    allowed_contact_bodies = {
+        "left_wrist_yaw_link",
+        "right_wrist_yaw_link",
+        "left_rubber_hand_link",
+        "right_rubber_hand_link",
+    }
+    for body_name in allowed_contact_bodies:
+        assert re.match(pattern, body_name) is None
+
+    for body_name in {"left_knee_link", "right_hip_yaw_link", "torso_link"}:
+        assert re.match(pattern, body_name) is not None
 
 
 def test_rubber_hand_asset_has_matching_visual_and_collision_geometry() -> None:
