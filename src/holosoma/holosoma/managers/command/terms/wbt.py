@@ -40,6 +40,8 @@ class MotionLoader:
     ):
         # Resolve the motion file path using importlib.resources
         motion_file = resolve_data_file_path(motion_file)
+        self.motion_files = [motion_file]
+        self.motion_names = [Path(motion_file).stem]
 
         logger.info(f"Loading motion file: {motion_file}")
         body_names_in_motion_data, joint_names_in_motion_data = self._load_data_from_motion_npz(motion_file, device)
@@ -243,29 +245,43 @@ class MultiMotionLoader:
         robot_body_names: list[str],
         robot_joint_names: list[str],
         device: str = "cpu",
+        motion_files: list[str] | None = None,
     ):
-        # Support comma-separated directories for combining multiple datasets
-        dirs = [d.strip() for d in motion_dir.split(",")]
-        motion_files = []
-        for d in dirs:
-            expanded = os.path.expanduser(d)
-            files = sorted(str(p) for p in Path(expanded).glob("*.npz"))
-            logger.info(f"MultiMotionLoader: found {len(files)} .npz files in {expanded}")
-            motion_files.extend(files)
-        assert len(motion_files) > 0, f"No .npz files found in {motion_dir}"
-        logger.info(f"MultiMotionLoader: loading {len(motion_files)} total motion files")
+        explicit_motion_files = bool(motion_files)
+        if explicit_motion_files:
+            resolved_motion_files = [resolve_data_file_path(path) for path in motion_files or []]
+            if len(set(resolved_motion_files)) != len(resolved_motion_files):
+                raise ValueError("motion_files must not contain duplicate paths")
+        else:
+            # Support comma-separated directories for combining multiple datasets.
+            dirs = [d.strip() for d in motion_dir.split(",") if d.strip()]
+            resolved_motion_files = []
+            for directory in dirs:
+                expanded = os.path.expanduser(directory)
+                files = sorted(str(path) for path in Path(expanded).glob("*.npz"))
+                logger.info(f"MultiMotionLoader: found {len(files)} .npz files in {expanded}")
+                resolved_motion_files.extend(files)
+
+        if not resolved_motion_files:
+            source = "motion_files" if explicit_motion_files else motion_dir
+            raise ValueError(f"No .npz motion files found in {source}")
+        logger.info(f"MultiMotionLoader: loading {len(resolved_motion_files)} total motion files")
 
         loaders = []
+        loaded_motion_files = []
         skipped = 0
-        for mf in motion_files:
+        for motion_path in resolved_motion_files:
             try:
-                loader = MotionLoader(mf, robot_body_names, robot_joint_names, device=device)
+                loader = MotionLoader(motion_path, robot_body_names, robot_joint_names, device=device)
                 loaders.append(loader)
+                loaded_motion_files.append(motion_path)
             except (KeyError, AssertionError, ValueError) as e:  # noqa: PERF203
+                if explicit_motion_files:
+                    raise ValueError(f"Failed to load frozen motion file '{motion_path}': {e}") from e
                 # Skip files with incompatible format (e.g., missing body_names, wrong body count)
                 skipped += 1
                 if skipped <= 3:
-                    logger.warning(f"MultiMotionLoader: skipping {mf}: {e}")
+                    logger.warning(f"MultiMotionLoader: skipping {motion_path}: {e}")
         if skipped > 3:
             logger.warning(f"MultiMotionLoader: skipped {skipped} files total due to format issues")
         assert len(loaders) > 0, f"No compatible motion files found (skipped {skipped})"
@@ -276,6 +292,8 @@ class MultiMotionLoader:
         self._motion_start_idx = torch.cat([torch.tensor([0], dtype=torch.long, device=device), cumulative[:-1]])
         self._motion_end_idx = cumulative
         self._num_motions = len(loaders)
+        self.motion_files = loaded_motion_files
+        self.motion_names = [Path(path).stem for path in loaded_motion_files]
 
         # Concatenate all motion data
         self._joint_pos = torch.cat([ld._joint_pos for ld in loaders], dim=0)
@@ -288,11 +306,18 @@ class MultiMotionLoader:
         # Use indexes from first loader (all loaders share the same robot)
         self._joint_indexes = loaders[0]._joint_indexes
         self._body_indexes = loaders[0]._body_indexes
+        motion_fps = [int(np.asarray(loader.fps).reshape(-1)[0]) for loader in loaders]
+        if len(set(motion_fps)) != 1:
+            raise ValueError(f"All motions must use the same FPS, got {motion_fps}")
         self.fps = loaders[0].fps
         self.time_step_total = self._joint_pos.shape[0]
 
-        # Object support: only if ALL motions have objects
-        self.has_object = all(ld.has_object for ld in loaders)
+        # Object support: frozen explicit libraries must not silently mix object
+        # and robot-only clips. Preserve the legacy directory behavior otherwise.
+        object_presence = [loader.has_object for loader in loaders]
+        if explicit_motion_files and len(set(object_presence)) != 1:
+            raise ValueError(f"Explicit motion_files must agree on object channels, got {object_presence}")
+        self.has_object = all(object_presence)
         if self.has_object:
             self._object_pos_w = torch.cat([ld._object_pos_w for ld in loaders], dim=0)
             self._object_quat_w = torch.cat([ld._object_quat_w for ld in loaders], dim=0)
@@ -390,6 +415,8 @@ class MultiMotionLoader:
             self._motion_end_idx = torch.cat(
                 [torch.tensor([added_frames], dtype=torch.long, device=dev), self._motion_end_idx]
             )
+            self.motion_files.insert(0, "<generated_default_pose_prepend>")
+            self.motion_names.insert(0, "generated_default_pose_prepend")
         else:
             old_total = self.time_step_total
             dev = self._motion_start_idx.device
@@ -399,6 +426,8 @@ class MultiMotionLoader:
             self._motion_end_idx = torch.cat(
                 [self._motion_end_idx, torch.tensor([old_total + added_frames], dtype=torch.long, device=dev)]
             )
+            self.motion_files.append("<generated_default_pose_append>")
+            self.motion_names.append("generated_default_pose_append")
 
         self.time_step_total = self._joint_pos.shape[0]
         self._num_motions = len(self._motion_start_idx)
@@ -509,6 +538,120 @@ class AdaptiveTimestepsSampler:
         self.metrics["sampling_top1_bin"] = imax.float() / self.num_bins
 
 
+def normalize_motion_sampling_weights(
+    weights: list[float],
+    num_motions: int,
+    device: str,
+) -> torch.Tensor:
+    """Validate and normalize explicit per-motion sampling weights."""
+    if len(weights) != num_motions:
+        raise ValueError(
+            "motion_sampling_weights must contain exactly one value per loaded motion: "
+            f"got {len(weights)} weights for {num_motions} motions"
+        )
+
+    probabilities = torch.tensor(weights, dtype=torch.float32, device=device)
+    if not torch.all(torch.isfinite(probabilities)):
+        raise ValueError("motion_sampling_weights must contain only finite values")
+    if torch.any(probabilities < 0.0):
+        raise ValueError("motion_sampling_weights must be non-negative")
+
+    total = probabilities.sum()
+    if total <= 0.0:
+        raise ValueError("motion_sampling_weights must contain at least one positive value")
+    return probabilities / total
+
+
+class HierarchicalAdaptiveTimestepsSampler:
+    """Sample a motion by fixed weight, then adaptively sample only inside it.
+
+    Keeping one adaptive sampler per motion prevents failure-heavy segments in
+    one action category from changing the frozen probability of another action
+    category. Global frame indices are returned for compatibility with
+    ``MotionLoader`` and ``MultiMotionLoader`` tensors.
+    """
+
+    def __init__(
+        self,
+        motion_start_idx: torch.Tensor,
+        motion_end_idx: torch.Tensor,
+        motion_sampling_weights: torch.Tensor,
+        device: str,
+        env_fps: int,
+    ):
+        if motion_start_idx.shape != motion_end_idx.shape:
+            raise ValueError("motion_start_idx and motion_end_idx must have matching shapes")
+        if motion_start_idx.numel() != motion_sampling_weights.numel():
+            raise ValueError("motion boundaries and sampling weights must have matching lengths")
+
+        motion_lengths = motion_end_idx - motion_start_idx
+        if torch.any(motion_lengths < 2):
+            raise ValueError("Every motion must contain at least two frames")
+
+        self.device = device
+        self.motion_start_idx = motion_start_idx.clone()
+        self.motion_end_idx = motion_end_idx.clone()
+        self.motion_sampling_weights = motion_sampling_weights.clone()
+        self.samplers = [
+            AdaptiveTimestepsSampler(int(length.item()), device, env_fps) for length in motion_lengths
+        ]
+        self.metrics: dict[str, torch.Tensor] = {}
+        self.per_motion_metrics: list[dict[str, torch.Tensor]] = []
+
+    def init_buffers(self) -> None:
+        for sampler in self.samplers:
+            sampler.init_buffers()
+
+    def update_current_bin_failed_count(
+        self,
+        failed_motion_ids: torch.Tensor,
+        failed_at_time_step: torch.Tensor,
+    ) -> None:
+        """Attribute failures to the selected motion's local frame bins."""
+        for motion_id, sampler in enumerate(self.samplers):
+            mask = failed_motion_ids == motion_id
+            if not torch.any(mask):
+                continue
+            local_time_steps = failed_at_time_step[mask] - self.motion_start_idx[motion_id]
+            sampler.update_current_bin_failed_count(local_time_steps)
+
+    def update_bin_failed_count(self) -> None:
+        for sampler in self.samplers:
+            sampler.update_bin_failed_count()
+
+    def sample(self, num_samples: int) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return ``(motion_ids, global_time_steps)`` for a reset batch."""
+        motion_ids = torch.multinomial(self.motion_sampling_weights, num_samples, replacement=True)
+        global_time_steps = torch.empty(num_samples, dtype=torch.long, device=self.device)
+
+        for motion_id, sampler in enumerate(self.samplers):
+            mask = motion_ids == motion_id
+            count = int(mask.sum().item())
+            if count == 0:
+                continue
+            local_time_steps = sampler.sample_global_time_steps(count)
+            global_time_steps[mask] = self.motion_start_idx[motion_id] + local_time_steps
+
+        return motion_ids, global_time_steps
+
+    def get_stats(self) -> None:
+        self.per_motion_metrics = []
+        for sampler in self.samplers:
+            sampler.get_stats()
+            self.per_motion_metrics.append(dict(sampler.metrics))
+
+        entropies = torch.stack([metrics["sampling_entropy"] for metrics in self.per_motion_metrics])
+        top1_probabilities = torch.stack(
+            [metrics["sampling_top1_prob"] for metrics in self.per_motion_metrics]
+        )
+        top1_bins = torch.stack([metrics["sampling_top1_bin"] for metrics in self.per_motion_metrics])
+        top_motion = torch.argmax(top1_probabilities)
+
+        self.metrics["sampling_entropy"] = torch.sum(self.motion_sampling_weights * entropies)
+        self.metrics["sampling_top1_prob"] = top1_probabilities[top_motion]
+        self.metrics["sampling_top1_bin"] = top1_bins[top_motion]
+
+
 #########################################################################################################
 ## Helper functions
 #########################################################################################################
@@ -548,16 +691,17 @@ class MotionCommand(CommandTermBase):
         robot_joint_names = self._env.simulator.dof_names  # type: ignore[attr-defined]
 
         # 1. load motion data
-        assert self.motion_cfg.motion_file or self.motion_cfg.motion_dir, (
-            "Either motion_file or motion_dir must be set in MotionConfig"
+        assert self.motion_cfg.motion_file or self.motion_cfg.motion_dir or self.motion_cfg.motion_files, (
+            "One of motion_file, motion_dir, or motion_files must be set in MotionConfig"
         )
         self.motion: MotionLoader | MultiMotionLoader
-        if self.motion_cfg.motion_dir:
+        if self.motion_cfg.motion_files or self.motion_cfg.motion_dir:
             self.motion = MultiMotionLoader(
                 self.motion_cfg.motion_dir,
                 robot_body_names_alias,
                 robot_joint_names,
                 device=self.device,
+                motion_files=self.motion_cfg.motion_files,
             )
         else:
             self.motion = MotionLoader(
@@ -577,6 +721,23 @@ class MotionCommand(CommandTermBase):
         # Maybe append interpolated transition back to default pose
         self._maybe_add_default_pose_transition(prepend=False)
 
+        # Explicit weights are opt-in. With no weights, preserve the legacy
+        # uniform/global-concatenated sampling behavior exactly.
+        self.has_explicit_motion_sampling_weights = bool(self.motion_cfg.motion_sampling_weights)
+        if self.has_explicit_motion_sampling_weights:
+            self.motion_sampling_probabilities = normalize_motion_sampling_weights(
+                self.motion_cfg.motion_sampling_weights,
+                self.motion.num_motions,
+                self.device,
+            )
+        else:
+            self.motion_sampling_probabilities = torch.full(
+                (self.motion.num_motions,),
+                1.0 / self.motion.num_motions,
+                dtype=torch.float32,
+                device=self.device,
+            )
+
         # 2. get the indexes of the root link and the tracked links
         self.ref_body_index = robot_body_names.index(self.motion_cfg.body_name_ref[0])  # int
         self.tracked_body_indexes = self._get_index_of_a_in_b(
@@ -595,9 +756,19 @@ class MotionCommand(CommandTermBase):
 
         # 4. get the adaptive timesteps sampler
         if self.motion_cfg.use_adaptive_timesteps_sampler:
-            self.adaptive_timesteps_sampler = AdaptiveTimestepsSampler(
-                self.motion.time_step_total, self.device, int(1 / (self._env.dt))
-            )
+            if self.has_explicit_motion_sampling_weights and self.motion.num_motions > 1:
+                self.adaptive_timesteps_sampler: AdaptiveTimestepsSampler | HierarchicalAdaptiveTimestepsSampler
+                self.adaptive_timesteps_sampler = HierarchicalAdaptiveTimestepsSampler(
+                    self.motion.motion_start_idx,
+                    self.motion.motion_end_idx,
+                    self.motion_sampling_probabilities,
+                    self.device,
+                    int(1 / self._env.dt),
+                )
+            else:
+                self.adaptive_timesteps_sampler = AdaptiveTimestepsSampler(
+                    self.motion.time_step_total, self.device, int(1 / self._env.dt)
+                )
 
         # 5. metrics
         self.metrics: dict[str, torch.Tensor] = {}
@@ -619,6 +790,7 @@ class MotionCommand(CommandTermBase):
 
         # 0. Sample the time steps (and, for the adaptive sampler, the motion id).
         adaptive_global_idx = None
+        adaptive_motion_ids = None
         if self.motion_cfg.use_adaptive_timesteps_sampler:
             # Match BeyondMimic behavior: update failed bins from environments
             # that terminated before this reset, then sample new phases.
@@ -629,12 +801,21 @@ class MotionCommand(CommandTermBase):
                 episode_failed = self._env.termination_manager.terminated[env_ids]
                 if torch.any(episode_failed):
                     failed_at_time_step = self.time_steps[env_ids][episode_failed]
-                    self.adaptive_timesteps_sampler.update_current_bin_failed_count(failed_at_time_step)
-            # The sampler bins failures over the GLOBAL concatenated-motion frame
-            # axis, so it must return a global frame index here. The motion id is
-            # then derived from that index (NOT chosen independently), keeping the
-            # failure-prioritized phase attached to the motion it was recorded on.
-            adaptive_global_idx = self.adaptive_timesteps_sampler.sample_global_time_steps(n)
+                    if isinstance(self.adaptive_timesteps_sampler, HierarchicalAdaptiveTimestepsSampler):
+                        failed_motion_ids = self.motion_ids[env_ids][episode_failed]
+                        self.adaptive_timesteps_sampler.update_current_bin_failed_count(
+                            failed_motion_ids,
+                            failed_at_time_step,
+                        )
+                    else:
+                        self.adaptive_timesteps_sampler.update_current_bin_failed_count(failed_at_time_step)
+
+            if isinstance(self.adaptive_timesteps_sampler, HierarchicalAdaptiveTimestepsSampler):
+                adaptive_motion_ids, adaptive_global_idx = self.adaptive_timesteps_sampler.sample(n)
+            else:
+                # Legacy behavior: bins live on the GLOBAL concatenated-motion
+                # frame axis, and the sampled frame determines the motion id.
+                adaptive_global_idx = self.adaptive_timesteps_sampler.sample_global_time_steps(n)
             phase = None
         else:
             phase = torch.rand(n, device=self.device)
@@ -647,18 +828,29 @@ class MotionCommand(CommandTermBase):
             adaptive_global_idx = None  # eval starts every env at its motion's first frame
 
         if adaptive_global_idx is not None:
-            # Map global frame index -> (motion_id, time_step). searchsorted on the
-            # per-motion end indices yields the clip whose [start, end) contains it.
-            motion_ids = torch.searchsorted(self.motion.motion_end_idx, adaptive_global_idx, right=True)
-            motion_ids = motion_ids.clamp_(0, num_motions - 1)
+            if adaptive_motion_ids is None:
+                # Legacy global adaptive path: derive the clip containing the
+                # sampled global frame.
+                motion_ids = torch.searchsorted(self.motion.motion_end_idx, adaptive_global_idx, right=True)
+                motion_ids = motion_ids.clamp_(0, num_motions - 1)
+            else:
+                motion_ids = adaptive_motion_ids
             self.motion_ids[env_ids] = motion_ids
             start_idx = self.motion.motion_start_idx[motion_ids]
             end_idx = self.motion.motion_end_idx[motion_ids]
             self.time_steps[env_ids] = adaptive_global_idx.clamp(start_idx, end_idx - 1)
         else:
-            # Uniform path (or eval): randomly assign each env to a motion, sample
-            # a phase within that motion's range.
-            self.motion_ids[env_ids] = torch.randint(0, num_motions, (n,), device=self.device)
+            # Non-adaptive path (or eval): use explicit weights only when opted
+            # in; otherwise preserve legacy uniform motion selection.
+            if self.has_explicit_motion_sampling_weights:
+                sampled_motion_ids = torch.multinomial(
+                    self.motion_sampling_probabilities,
+                    n,
+                    replacement=True,
+                )
+            else:
+                sampled_motion_ids = torch.randint(0, num_motions, (n,), device=self.device)
+            self.motion_ids[env_ids] = sampled_motion_ids
             start_idx = self.motion.motion_start_idx[self.motion_ids[env_ids]]
             end_idx = self.motion.motion_end_idx[self.motion_ids[env_ids]]
             motion_len = end_idx - start_idx
@@ -678,6 +870,13 @@ class MotionCommand(CommandTermBase):
         # Otherwise, update_tasks_callback will advance the timestep to the next timestep -> out of bounds error.
         already_last_timestep_mask = self.time_steps[env_ids] >= end_idx - 1
         self.time_steps[env_ids] = torch.where(already_last_timestep_mask, end_idx - 2, self.time_steps[env_ids])
+
+        if self.has_explicit_motion_sampling_weights:
+            self.motion_reset_counts += torch.bincount(
+                self.motion_ids[env_ids],
+                minlength=num_motions,
+            ).float()
+            self.motion_reset_total += n
 
         # 1. Get the root/body poses from the motion data
         root_pos = self.root_pos_w[env_ids].clone()
@@ -1029,6 +1228,8 @@ class MotionCommand(CommandTermBase):
     def init_buffers(self):
         self.time_steps = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
         self.motion_ids = torch.zeros(self.num_envs, dtype=torch.long, device=self.device)
+        self.motion_reset_counts = torch.zeros(self.motion.num_motions, dtype=torch.float32, device=self.device)
+        self.motion_reset_total = torch.tensor(0.0, dtype=torch.float32, device=self.device)
         self.body_pos_relative_w = torch.zeros(
             self.num_envs, len(self.motion_cfg.body_names_to_track), 3, device=self.device
         )  # type: ignore[arg-type]
@@ -1065,6 +1266,19 @@ class MotionCommand(CommandTermBase):
         self.metrics["motion/error_joint_pos"] = torch.norm(self.joint_pos - self.robot_joint_pos, dim=-1)
         self.metrics["motion/error_joint_vel"] = torch.norm(self.joint_vel - self.robot_joint_vel, dim=-1)
 
+        if self.has_explicit_motion_sampling_weights:
+            for motion_id, motion_name in enumerate(self.motion.motion_names):
+                metric_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", motion_name)
+                prefix = f"motion/sampling/{motion_id:02d}_{metric_name}"
+                self.metrics[f"{prefix}/configured_probability"] = self.motion_sampling_probabilities[motion_id]
+                self.metrics[f"{prefix}/occupancy_fraction"] = (
+                    self.motion_ids == motion_id
+                ).float()
+                self.metrics[f"{prefix}/reset_fraction"] = self.motion_reset_counts[motion_id] / torch.clamp(
+                    self.motion_reset_total,
+                    min=1.0,
+                )
+
         if self.motion_cfg.use_adaptive_timesteps_sampler:
             self.adaptive_timesteps_sampler.get_stats()
             self.metrics["motion/adaptive_timesteps_sampler_entropy"] = self.adaptive_timesteps_sampler.metrics[
@@ -1076,6 +1290,15 @@ class MotionCommand(CommandTermBase):
             self.metrics["motion/adaptive_timesteps_sampler_top1_bin"] = self.adaptive_timesteps_sampler.metrics[
                 "sampling_top1_bin"
             ]
+            if isinstance(self.adaptive_timesteps_sampler, HierarchicalAdaptiveTimestepsSampler):
+                for motion_id, (motion_name, sampler_metrics) in enumerate(
+                    zip(self.motion.motion_names, self.adaptive_timesteps_sampler.per_motion_metrics)
+                ):
+                    metric_name = re.sub(r"[^A-Za-z0-9_.-]+", "_", motion_name)
+                    prefix = f"motion/adaptive/{motion_id:02d}_{metric_name}"
+                    self.metrics[f"{prefix}/entropy"] = sampler_metrics["sampling_entropy"]
+                    self.metrics[f"{prefix}/top1_prob"] = sampler_metrics["sampling_top1_prob"]
+                    self.metrics[f"{prefix}/top1_bin"] = sampler_metrics["sampling_top1_bin"]
 
     #########################################################################################
     ## Internal helpers

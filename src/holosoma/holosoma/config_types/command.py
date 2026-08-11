@@ -97,7 +97,23 @@ class MotionConfig:
 
     motion_dir: str = ""
     """Directory (or comma-separated directories) of .npz motion files.
-    When non-empty, takes precedence over motion_file."""
+    When non-empty, takes precedence over motion_file unless motion_files is set."""
+
+    motion_files: list[str] = field(default_factory=list)
+    """Explicit ordered list of .npz motion files.
+
+    When non-empty, takes precedence over motion_dir and motion_file. Prefer this
+    for frozen motion libraries so adding a file to a directory cannot silently
+    change the training set.
+    """
+
+    motion_sampling_weights: list[float] = field(default_factory=list)
+    """Optional per-motion reset probabilities aligned with motion_files/load order.
+
+    An empty list preserves the legacy sampling behavior. When provided, values
+    must be finite, non-negative, contain at least one positive entry, and have
+    exactly one element per loaded motion. The values are normalized at runtime.
+    """
 
     # motion sampling related
     use_adaptive_timesteps_sampler: bool = False

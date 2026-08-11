@@ -14,6 +14,32 @@ The pilot answers:
 It does not establish convergence and must not be used as the final A1 versus
 Plan B comparison.
 
+The single-motion push pilot was formally closed on 2026-08-05. A1 is retained
+as the accepted push prior, while Plan B is retained as a distinct behavioral
+prior whose palm-edge reference was not reproduced by the learned policy.
+Neither policy is scheduled for additional single-motion training.
+
+## Four-action WBT milestone
+
+The warm-start/pre-training milestone was completed on 2026-08-07. Four
+separate 8,000-iteration WBT checkpoints are preserved for downstream task
+learning:
+
+| Prior | Frozen checkpoint | SHA-256 | Interpretation |
+|---|---|---|---|
+| Push A1 | `logs/WholeBodyTracking/20260728_051638-rubberhand_a1_8000_seed42-locomotion/model_07999.pt` | `54fbfa4b38ee69ac1be33da8b5d3f6849e587b6bd02da3f407b0b27844be3c25` | Accepted push prior |
+| Push Plan B | `logs/WholeBodyTracking/20260728_132654-rubberhand_plan_b_8000_seed42-locomotion/model_07999.pt` | `5ba3d28bfb862321812e1f9475f69371b40ee657d639ef0a3488fbccc4a5e89e` | Distinct push/contact prior with documented palm-edge mismatch |
+| Kick | `logs/WholeBodyTracking/20260806_055921-rubberhand_kick_sub16_028_8000_seed42-locomotion/model_07999.pt` | `a84928cf4a8ba6ca91905a4105ff82bdb331f11ac0acb6ab56a034f5b6660e47` | Directionally effective kick/leg-contact prior |
+| Pull | `logs/WholeBodyTracking/20260807_071217-rubberhand_pull_sub3_010_8000_seed42-locomotion/model_07999.pt` | `fc5a5d3b66bc076598b28f6c1e8ad822798ce6ce44c9f0370056dc8ad44495dd` | Feasible pull prior with accepted leg/corner variants |
+
+Here, "completed WBT" means that all four retained reference motions have a
+reproducible full-length PPO pre-training checkpoint suitable for warm-starting
+later experiments. It does not mean that every checkpoint passed the stricter
+goal-conditioned expert gate, nor that each learned policy uses only the body
+part implied by its action label. The exact motions, evaluations, known
+mismatches, artifact paths, and hashes are frozen in
+[`STEP1_MOTION_MANIFEST.yaml`](STEP1_MOTION_MANIFEST.yaml).
+
 ## Frozen source state
 
 ```text
@@ -26,6 +52,8 @@ experiment: exp:g1-29dof-wbt-w-object
 reward design: inherited from main without modification
 robot: G1 29-DoF with rubber hands
 object: objects_largetable.urdf
+table base mass: 0.1 kg
+training mass randomization: add 1--4 kg (effective approximately 1.1--4.1 kg)
 ```
 
 ## GPU capacity calibration
@@ -202,7 +230,30 @@ pilots. A1 is currently more stable across evaluation seeds, while Plan B has
 lower table-orientation error and mean torque utilization. Neither result is
 treated as final Step 1 convergence.
 
-## Later training gates
+The frozen checkpoints, evaluation recordings, tensor-equivalence evidence,
+motion assets, and hashes are indexed in
+[`STEP1_PUSH_PILOT_ARTIFACT_INDEX.md`](STEP1_PUSH_PILOT_ARTIFACT_INDEX.md).
+
+## Pilot closure decision
+
+The push pilot established the required engineering result:
+
+- the A1 and Plan B retargeted motions can train under the inherited PPO WBT
+  pipeline;
+- the policies execute physically coupled robot/table trajectories;
+- A1 is the more stable all-round push prior;
+- Plan B exposes objective ambiguity: its valid palm-edge reference leads to a
+  policy that often uses top contact and leg/hip bracing instead;
+- the later rubber-hand allowed-contact regex change is behaviorally inert
+  because the reward body list excludes the fixed rubber-hand links;
+- completion and hand-force coincidence do not identify which body caused
+  object motion.
+
+These findings are sufficient to proceed to the multi-behavior prior library.
+Perfect palm-edge imitation and advanced object-structure understanding are not
+prerequisites for the multi-agent research direction.
+
+## Historical training gates
 
 ```text
 500 iterations:
@@ -219,5 +270,7 @@ treated as final Step 1 convergence.
 ```
 
 At 4,096 environments, 30,000 iterations equal 2,949,120,000 simulated
-transitions per run. Multiple seeds are started only after the paired
-single-seed pilots and the 8,000-iteration gate pass.
+transitions per run. This historical budget is no longer scheduled for the A1
+or Plan B single-motion push policies. New skills use staged 50, 500, 2,000,
+and 8,000-iteration gates, and advance only while both numeric and semantic
+checks pass.

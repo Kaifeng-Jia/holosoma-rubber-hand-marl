@@ -3,6 +3,7 @@
 ## Status and scope
 
 - Evaluation date: 2026-07-31
+- Pilot closure date: 2026-08-05
 - Protocol: [`STEP1_PHYSICS_EVAL.md`](STEP1_PHYSICS_EVAL.md), schema `holosoma.wbt_physics_eval.v1`
 - Training seed: 42 for both checkpoints
 - Evaluation seeds: 42, 43, 44
@@ -142,28 +143,33 @@ detects temporal coincidence, not which body caused the table displacement.
 Plan B's reported completion rate must therefore not be presented as a
 hand-push success rate.
 
-The audit also found an asset/reward semantic mismatch in the exact-main
-control. The original allowed-contact expression excluded
-`left_wrist_yaw_link` and `right_wrist_yaw_link` from the undesired-contact
-penalty, while the added collision bodies are named `left_rubber_hand_link`
-and `right_rubber_hand_link`. The two rubber-hand bodies were consequently
-penalized during these 8,000-iteration runs.
+The audit initially suspected an asset/reward semantic mismatch because the
+allowed-contact expression named the wrist-yaw links rather than the fixed
+rubber-hand links. Follow-up inspection disproved that interpretation.
+`UndesiredContacts` selects bodies from the simulator's 32 articulation-body
+list, which does not contain `left_rubber_hand_link` or
+`right_rubber_hand_link`. The 39-body contact sensor records those fixed links,
+but the reward term never indexes them. Therefore, the exact-main runs did not
+directly penalize rubber-hand contact through this term.
 
-The post-audit semantic recovery only adds those two rubber-hand body names to
-the allowed-contact expression. It does not add a special leg, knee, hip, or
-torso penalty and does not change any reward weight or formula. The six results
-in this document remain the unmodified exact-main control; training after the
-semantic recovery must be reported separately.
+The later regex change that explicitly excluded both rubber-hand names was a
+no-op for training behavior. From-scratch 8,000-iteration reruns saved the
+changed configuration, but all 76 checkpoint tensors were identical to the
+corresponding exact-main checkpoint. Their seed-43 evaluation recordings were
+also byte-identical. These reruns are reproducibility confirmations, not a
+separate "semantic recovery" method. Artifact paths and hashes are frozen in
+[`STEP1_PUSH_PILOT_ARTIFACT_INDEX.md`](STEP1_PUSH_PILOT_ARTIFACT_INDEX.md).
 
 Evaluation should primarily measure similarity to each frozen retargeted ideal
 motion: robot joint/body tracking, rubber-hand pose relative to the table,
 table trajectory, and standing stability. Contact channels remain diagnostic
 unless pairwise contact attribution is added.
 
-The table mass remains frozen at 0.1 kg for this low-resistance stage. This is
-appropriate for testing stable stance, reference imitation, and a short initial
-push, but it is not evidence of load-robust pushing. Heavier-table tests belong
-to a later, separately reported robustness stage.
+The table URDF base mass is 0.1 kg, but the object randomizer uses an additive
+mass operation with parameters `[1.0, 4.0]`. The effective training mass range
+is therefore approximately 1.1--4.1 kg, not a fixed 0.1 kg. These results test
+the inherited exact-main mass distribution. Any future fixed-mass or expanded
+robustness experiment must be labeled as a different configuration.
 
 ## Interpretation
 
@@ -184,21 +190,25 @@ Plan B currently has:
 
 These are complementary tradeoffs. The result does not justify deleting
 either reference or declaring that training reward selected a universal
-winner. It does show that A1 is presently the more stable all-round tracking
-baseline. Plan B retains useful object-orientation and torque behavior, but its
-task completion cannot be treated as correct hand-push technique after the
-visual audit.
+winner. A1 is accepted as the current push-motion prior. Plan B is retained as
+a distinct behavioral prior and as evidence that a kinematically valid
+palm-edge target does not uniquely determine the learned physical technique.
+Its task completion cannot be treated as correct hand-push imitation, but its
+alternative hand, leg, and hip behavior remains relevant to later multi-agent
+emergence experiments.
 
-## Gate decision and next question
+## Gate decision and pilot closure
 
 The 8,000-iteration progression gate passes technically and shows substantial
-learning progress for both policies. It is not yet the final strong baseline:
+learning progress for both policies. It is not the final mixed-data Step 1
+baseline:
 
 - mean completion remains below 90%;
 - Plan B has a 60% worst-seed completion result; and
 - hip/knee invalid contacts remain frequent.
 
-Before starting the full 30,000-iteration runs, freeze the final numeric
-acceptance thresholds and validate the rubber-hand semantic-recovery variant at
-a smaller gate. Any result produced after the allowed-contact correction must
-remain separate from the exact-main control.
+The single-motion push pilot is now closed. No further A1 or Plan B training is
+scheduled: additional iterations would not resolve the reference/contact
+ambiguity demonstrated by the visual and geometric audit. The next active work
+is to build a versioned behavior-prior library, beginning with kick and a
+bounded pull feasibility check, before training the shared mixed-motion prior.

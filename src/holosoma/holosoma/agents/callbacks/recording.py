@@ -123,6 +123,15 @@ class EvalRecordingCallback(RLEvalCallback):
             self._metadata["motion_fps"] = int(motion_command.motion.fps)
             self._metadata["motion_time_step_total"] = int(motion_command.motion.time_step_total)
             self._metadata["motion_has_object"] = bool(motion_command.motion.has_object)
+            self._metadata["motion_files"] = list(motion_command.motion.motion_files)
+            self._metadata["motion_names"] = list(motion_command.motion.motion_names)
+            self._metadata["motion_sampling_probabilities"] = [
+                float(value)
+                for value in motion_command.motion_sampling_probabilities.detach().cpu().tolist()
+            ]
+            self._metadata["motion_sampling_weights_explicit"] = bool(
+                motion_command.has_explicit_motion_sampling_weights
+            )
             self._metadata["contact_force_semantics"] = (
                 "Net external force on each contact-sensor body. Rubber-hand links are recorded "
                 "directly when present. These are body-level net forces, not pairwise hand-object "
