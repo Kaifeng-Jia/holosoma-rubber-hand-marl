@@ -138,4 +138,41 @@ g1_29dof_wbt_observation_w_object = ObservationManagerCfg(
     },
 )
 
-__all__ = ["g1_29dof_wbt_observation", "g1_29dof_wbt_observation_w_object"]
+teammate_obs_marl_compat = ObsGroupCfg(
+    concatenate=True,
+    enable_noise=False,
+    history_length=1,
+    terms={
+        "relative_position_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:teammate_relative_position_b",
+            scale=1.0,
+            noise=0.0,
+            clip=(-1.0, 1.0),
+        ),
+        "relative_velocity_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:teammate_relative_velocity_b",
+            scale=1.0,
+            noise=0.0,
+            clip=(-1.0, 1.0),
+        ),
+    },
+)
+
+g1_29dof_wbt_observation_w_object_marl_compat = ObservationManagerCfg(
+    groups={
+        "actor_obs": actor_obs_shared,
+        "teammate_obs": teammate_obs_marl_compat,
+        "critic_obs": ObsGroupCfg(
+            concatenate=True,
+            enable_noise=False,
+            history_length=1,
+            terms=critic_obs_w_object_terms,
+        ),
+    },
+)
+
+__all__ = [
+    "g1_29dof_wbt_observation",
+    "g1_29dof_wbt_observation_w_object",
+    "g1_29dof_wbt_observation_w_object_marl_compat",
+]

@@ -216,6 +216,8 @@ separate evaluation concepts.
 
 ### Stage 1A -- Build the lossless MARL-compatible A1 interface
 
+Status: **passed on 2026-08-15**.
+
 #### Work
 
 1. Audit the exact A1 actor observation and checkpoint tensor shapes.
@@ -237,6 +239,41 @@ separate evaluation concepts.
 - the conversion records the source checkpoint hash and all added dimensions;
 - no training is required to claim lossless interface conversion.
 
+#### Recorded result
+
+- source checkpoint:
+  `logs/WholeBodyTracking/20260728_051638-rubberhand_a1_8000_seed42-locomotion/model_07999.pt`
+  in the frozen `holosoma-rubber-hand-largetable` worktree;
+- source SHA-256:
+  `54fbfa4b38ee69ac1be33da8b5d3f6849e587b6bd02da3f407b0b27844be3c25`;
+- converted checkpoint:
+  `logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt`;
+- converted SHA-256:
+  `11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224`;
+- reproducible manifest:
+  `logs/WholeBodyTracking/marl_compat_a1_v1/conversion_manifest.json`;
+- actor first layer: `512 x 154 -> 512 x 158`;
+- actor normalizer: `154 -> 158`, with all original statistics and the scalar
+  count `786432000` preserved exactly;
+- critic first layer: unchanged at `512 x 298`;
+- new Actor columns: exactly zero;
+- optimizer state: removed; the embedded configuration sets
+  `load_optimizer=False`;
+- maximum deterministic output error over 257 random old observations and
+  random teammate inputs: `0.0` with an acceptance tolerance of `1e-6`;
+- runtime gate: the standard `eval_agent` path loaded the embedded config,
+  explicit ghost manager, 158-D Actor, 298-D Critic, and rubber-hand A1 assets,
+  then completed two Isaac Sim evaluation steps with one environment.
+
+The existing empirical normalizer uses one scalar count shared by all input
+dimensions. Resetting it would damage the frozen 154-D statistics, while
+preserving it means the four new dimensions will not acquire useful empirical
+statistics during short adaptation. Therefore `teammate_obs` uses a fixed
+physical scale before the normalizer: planar relative position in metres and
+planar relative velocity in metres per second, both clipped to `[-1, 1]`; its
+new normalizer entries are identity statistics (`mean=0`, `var=std=1`). This is
+an explicit baseline contract rather than an accidental normalizer behavior.
+
 ### Geometry preflight -- Freeze the wide-table partner layout
 
 This is a bounded dependency between Stage 1A and Stage 1B, not a new research
@@ -255,8 +292,8 @@ layout rather than arbitrary numbers.
    reference offsets.
 6. Validate visual geometry in Viser and actual collisions and stability in
    Isaac Sim.
-7. Freeze the minimum adequate table width, agent center spacing, and bounded
-   teammate state range.
+7. Freeze the baseline-v1 table width and agent center spacing, and measure the
+   nominal teammate-state envelope used to design the Stage 1B variation.
 
 Mass and friction are explicitly not selected by this geometry preflight. A
 temporary inertial value may be used for static validation, but it is not a
@@ -271,8 +308,9 @@ friction are frozen only after the Stage 4 capacity calibration.
 - visual and collision primitives agree;
 - the table origin and push-direction contact geometry remain compatible with
   the frozen A1 object trajectory;
-- a concrete symmetric partner offset and teammate observation range are
-  recorded in `WIDETABLE_GEOMETRY_DESIGN_CN.md`.
+- a concrete symmetric partner offset and measured nominal teammate envelope
+  are recorded before Stage 1B; the reset-variation range is frozen in Stage
+  1B rather than guessed during geometry preflight.
 
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
@@ -460,13 +498,16 @@ Completed at the current checkpoint:
 - an Isaac Sim dual-A1 frame-0 reset collision gate with explicit far-away
   controls: 0 N excess contact force, no table drift, and rubber-hand bodies
   present in both articulations and contact sensors.
+- the lossless Stage 1A checkpoint conversion, strict model/normalizer loads,
+  zero deterministic output error, and a two-step Isaac Sim runtime smoke.
 
 The next gates are:
 
-1. Freeze the bounded ghost-teammate range around the accepted 1.4 m / 0.8 m
-   geometry contract.
-2. Implement and test the lossless four-channel teammate interface.
-3. Produce the Stage 1B A1 retention comparison.
+1. Freeze the bounded ghost-teammate reset range around the accepted 1.4 m /
+   0.8 m geometry contract and measured nominal A1 envelope.
+2. Produce the no-training Stage 1B A1 retention comparison.
+3. Authorize a 50-iteration smoke only if no-training retention reveals a need
+   for adaptation; do not schedule 500 iterations by default.
 4. Begin the full two-agent environment only after Stage 1B passes its gate.
 
 The Isaac Gym runtime asset check remains pending because the local machine has
