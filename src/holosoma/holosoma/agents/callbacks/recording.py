@@ -79,6 +79,10 @@ class EvalRecordingCallback(RLEvalCallback):
         self._metadata["sim_fps"] = round(1.0 / float(env.sim_dt))
         self._metadata["control_decimation"] = env.simulator.simulator_config.sim.control_decimation
         self._metadata["env_id"] = self.env_id
+        actor_obs_keys = list(getattr(self.training_loop, "actor_obs_keys", []))
+        if actor_obs_keys:
+            self._metadata["actor_obs_keys"] = actor_obs_keys
+            self._buffers["policy_actor_obs"] = []
         if hasattr(sim, "dof_names"):
             self._metadata["dof_names"] = list(sim.dof_names)
         if hasattr(sim, "body_names"):
@@ -123,6 +127,14 @@ class EvalRecordingCallback(RLEvalCallback):
             )
             self._buffers["teammate_relative_position_b"] = []
             self._buffers["teammate_relative_velocity_b"] = []
+
+        stage1b_diagnostics = getattr(env, "stage1b_termination_diagnostics", None)
+        if isinstance(stage1b_diagnostics, dict):
+            diagnostic_metadata = dict(getattr(env, "stage1b_termination_diagnostic_metadata", {}))
+            diagnostic_metadata["channels"] = list(stage1b_diagnostics)
+            self._metadata["stage1b_termination_diagnostics"] = diagnostic_metadata
+            for name in stage1b_diagnostics:
+                self._buffers[name] = []
 
         motion_command = self._get_motion_command(env)
         if motion_command is not None:
@@ -219,6 +231,13 @@ class EvalRecordingCallback(RLEvalCallback):
         def _append(name: str, value: torch.Tensor) -> None:
             self._buffers[name].append(_to_np(value))
 
+        if "policy_actor_obs" in self._buffers:
+            actor_obs = torch.cat(
+                [actor_state["obs"][key] for key in self._metadata["actor_obs_keys"]],
+                dim=1,
+            )
+            _append("policy_actor_obs", actor_obs[eid])
+
         _append("motion_time_step", motion_command.time_steps[eid])
         _append("motion_id", motion_command.motion_ids[eid])
         _append("episode_step", env.episode_length_buf[eid])
@@ -309,6 +328,19 @@ class EvalRecordingCallback(RLEvalCallback):
         self._buffers["done"].append(_to_np(done))
         self._buffers["timeout"].append(_to_np(timeout))
         self._buffers["terminated"].append(_to_np(done & ~timeout))
+
+        stage1b_diagnostics = getattr(env, "stage1b_termination_diagnostics", None)
+        if isinstance(stage1b_diagnostics, dict):
+            expected = set(self._metadata.get("stage1b_termination_diagnostics", {}).get("channels", []))
+            if not expected:
+                expected = {name for name in self._buffers if name.startswith("stage1b_")}
+            if set(stage1b_diagnostics) != expected:
+                raise RuntimeError(
+                    "Stage 1B termination diagnostic channels changed during evaluation: "
+                    f"expected {sorted(expected)}, got {sorted(stage1b_diagnostics)}"
+                )
+            for name, value in stage1b_diagnostics.items():
+                self._buffers[name].append(_to_np(value[eid]))
 
         self._step_count += 1
         return actor_state

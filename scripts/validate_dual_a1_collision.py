@@ -60,6 +60,8 @@ def parse_args() -> argparse.Namespace:
     """Parse preflight and Isaac Sim launcher arguments."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--motion-npz", type=Path, default=DEFAULT_MOTION)
+    parser.add_argument("--left-motion-npz", type=Path)
+    parser.add_argument("--right-motion-npz", type=Path)
     parser.add_argument("--robot-urdf", type=Path, default=DEFAULT_ROBOT_URDF)
     parser.add_argument("--table-urdf", type=Path, default=DEFAULT_TABLE_URDF)
     parser.add_argument("--frame-index", type=int, default=0)
@@ -209,12 +211,16 @@ def _make_sensor(name: str) -> ContactSensor:
     )
 
 
-def _validate_inputs(joint_pos: np.ndarray) -> int:
-    for path in (ARGS.motion_npz, ARGS.robot_urdf, ARGS.table_urdf):
+def _validate_inputs(frame_counts: list[int]) -> int:
+    explicit_motion_paths = [ARGS.left_motion_npz, ARGS.right_motion_npz]
+    if (ARGS.left_motion_npz is None) != (ARGS.right_motion_npz is None):
+        raise ValueError("--left-motion-npz and --right-motion-npz must be provided together")
+    motion_paths = explicit_motion_paths if ARGS.left_motion_npz is not None else [ARGS.motion_npz]
+    for path in (*motion_paths, ARGS.robot_urdf, ARGS.table_urdf):
         if not path.is_file():
             raise FileNotFoundError(path)
-    if not 0 <= ARGS.frame_index < joint_pos.shape[0]:
-        raise ValueError(f"frame-index {ARGS.frame_index} outside [0, {joint_pos.shape[0] - 1}]")
+    if any(not 0 <= ARGS.frame_index < frame_count for frame_count in frame_counts):
+        raise ValueError(f"frame-index {ARGS.frame_index} outside one or more motion trajectories")
     if ARGS.steps <= 0:
         raise ValueError("steps must be positive")
     if ARGS.control_offset_m <= ARGS.lateral_spacing:
@@ -241,8 +247,19 @@ def _max_force(sensor: ContactSensor) -> tuple[float, str]:
 
 
 def run_preflight() -> tuple[dict[str, object], bool]:
-    joint_pos, object_pos, object_quat, _ = load_a1_motion(ARGS.motion_npz)
-    frame = _validate_inputs(joint_pos)
+    if (ARGS.left_motion_npz is None) != (ARGS.right_motion_npz is None):
+        raise ValueError("--left-motion-npz and --right-motion-npz must be provided together")
+    explicit_pair = ARGS.left_motion_npz is not None
+    if explicit_pair:
+        assert ARGS.left_motion_npz is not None and ARGS.right_motion_npz is not None
+        left_joint_pos, object_pos, object_quat, _ = load_a1_motion(ARGS.left_motion_npz)
+        right_joint_pos, right_object_pos, right_object_quat, _ = load_a1_motion(ARGS.right_motion_npz)
+        if not np.array_equal(object_pos, right_object_pos) or not np.array_equal(object_quat, right_object_quat):
+            raise ValueError("Explicit left/right references must contain identical object trajectories")
+        frame = _validate_inputs([len(left_joint_pos), len(right_joint_pos)])
+    else:
+        joint_pos, object_pos, object_quat, _ = load_a1_motion(ARGS.motion_npz)
+        frame = _validate_inputs([len(joint_pos)])
 
     sim = sim_utils.SimulationContext(
         sim_utils.SimulationCfg(
@@ -286,21 +303,33 @@ def run_preflight() -> tuple[dict[str, object], bool]:
         for name in ROBOT_NAMES
     )
 
-    qpos = joint_pos[frame]
-    desired_0, desired_1 = shifted_robot_positions(
-        qpos[:3],
-        object_quat[frame],
-        ARGS.lateral_spacing,
-    )
+    if explicit_pair:
+        desired_qpos = {
+            "desired_0": left_joint_pos[frame],
+            "desired_1": right_joint_pos[frame],
+        }
+    else:
+        qpos = joint_pos[frame]
+        desired_0, desired_1 = shifted_robot_positions(
+            qpos[:3],
+            object_quat[frame],
+            ARGS.lateral_spacing,
+        )
+        desired_qpos = {
+            "desired_0": np.concatenate((desired_0, qpos[3:])),
+            "desired_1": np.concatenate((desired_1, qpos[3:])),
+        }
     roots = {
-        "desired_0": desired_0,
-        "desired_1": desired_1,
-        "control_0": desired_0 + np.array([ARGS.control_offset_m, 0.0, 0.0]),
-        "control_1": desired_1 + np.array([-ARGS.control_offset_m, 0.0, 0.0]),
+        "desired_0": desired_qpos["desired_0"][:3],
+        "desired_1": desired_qpos["desired_1"][:3],
+        "control_0": desired_qpos["desired_0"][:3] + np.array([ARGS.control_offset_m, 0.0, 0.0]),
+        "control_1": desired_qpos["desired_1"][:3] + np.array([-ARGS.control_offset_m, 0.0, 0.0]),
     }
     initial_roots = {name: value.copy() for name, value in roots.items()}
     for name, robot in robots.items():
-        _set_robot_state(robot, np.concatenate((roots[name], qpos[3:7])), qpos[7:])
+        source_name = "desired_0" if name.endswith("0") else "desired_1"
+        source_qpos = desired_qpos[source_name]
+        _set_robot_state(robot, np.concatenate((roots[name], source_qpos[3:7])), source_qpos[7:])
     table_pose = torch.as_tensor(
         np.concatenate((object_pos[frame], object_quat[frame])),
         dtype=torch.float32,
@@ -365,6 +394,9 @@ def run_preflight() -> tuple[dict[str, object], bool]:
         "robot_rubber_hand_bodies": robot_body_contract,
         "sensor_rubber_hand_bodies": sensor_body_contract,
         "lateral_spacing_m": ARGS.lateral_spacing,
+        "explicit_left_right_references": explicit_pair,
+        "left_motion_npz": str(ARGS.left_motion_npz.resolve()) if explicit_pair else None,
+        "right_motion_npz": str(ARGS.right_motion_npz.resolve()) if explicit_pair else None,
         "robot_urdf": str(ARGS.robot_urdf.resolve()),
         "table_urdf": str(ARGS.table_urdf.resolve()),
         "thresholds": {

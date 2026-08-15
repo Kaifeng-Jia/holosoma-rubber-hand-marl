@@ -366,13 +366,31 @@ inputs exactly as designed; ghost values are not the cause of the left-side
 failure. The left side retained only 6.25% of the original completion rate,
 far below the required 90%. No 50- or 500-iteration adaptation is authorized.
 
-The current evidence points to a one-sided physical/reference mismatch:
-translation-only copies preserve the non-mirrored A1 body motion, while moving
-its contact point away from the table center. This changes the table force and
-yaw moment. Pre-transition recordings show left-side failures concentrated
-near or beyond the 0.25 m object-position gate, while robot pose tracking
-changes only modestly. Exact post-physics termination attribution and a
-centerline/mirroring audit are required before changing the layout contract.
+Exact post-physics termination attribution and the geometry audit are now
+complete. Left failures are dominated by the object-position/orientation
+gates rather than robot collapse. Centering at `+/-0.4 m`, reducing spacing to
+0.7 m, reference-only mirroring, dynamic policy-I/O mirroring, and a fixed
+mirror-plane candidate all failed to make the frozen one-sided actor reliable.
+An offline sensitivity audit reproduced checkpoint actions within `7.6e-6`
+and isolated the initial left/right action difference almost entirely to the
+three-dimensional base-angular-velocity observation, but making that initial
+observation match did not improve the closed-loop rollout. The remaining gap
+is therefore distributional: the one-sided A1 actor was not trained to retain
+the skill on the opposite side.
+
+This result authorizes a bounded left-side adaptation ladder, not Stage 2:
+
+1. freeze a table-centered `+/-0.4 m` layout contract;
+2. initialize from `model_07999_actor158.pt` and run a 50-iteration left-side
+   WBT adaptation smoke without changing reward, termination, table physics,
+   or teammate-column weights;
+3. proceed to 500 iterations only if the smoke improves the exact metrics;
+4. evaluate the resulting frozen checkpoint on both sides for 20 attempts;
+5. require at least `15/20` on each side before Stage 1B-2/Stage 2.
+
+If 500 iterations cannot pass both sides, the next fallback is training-time
+symmetry augmentation or mixed left/right references, not another deployment
+geometry patch.
 
 The raw right-side teammate position reaches 1.0902 m and velocity reaches
 1.0600 m/s in the formal rollout. The current `[-1, 1]` observation clip is
