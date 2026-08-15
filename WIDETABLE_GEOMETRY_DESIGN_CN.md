@@ -2,7 +2,7 @@
 
 ## 1. 文档状态
 
-- 状态：几何预检设计，坐标轴审计进行中
+- 状态：坐标轴与加载路径审计完成，等待创建候选资产
 - 建立日期：2026-08-14
 - 所属主线：`rubber_hand_marl_baseline`
 - 上位路线：`MULTI_AGENT_EMERGENCE_ROADMAP.md`
@@ -53,22 +53,49 @@
 - link origin 不等同于 COM；当前 inertial origin 恰好写在 link origin，
   但不应把这一旧设置当作新桌的物理依据。
 
-当前坐标解释是假设：local Y 为资产竖直轴，local X 和 local Z 为桌面
-平面。Isaac Sim 中经过 reference quaternion 后的实际世界映射必须在
-创建新资产前完成只读确认。
+### 3.1 A1 坐标轴实测
+
+对冻结 A1 文件
+`sub6_largetable_033_a1_mj_fps50_w_obj.npz` 的 309 帧 object pose
+进行了只读解析。首帧结果为：
+
+```text
+object position world xyz = (-0.172678, 0.621211, 0.367253)
+object quaternion wxyz    = (0.71296030, 0.70116943, 0.00222954, 0.00664818)
+```
+
+该 quaternion 将三个桌子局部单位轴映射到世界坐标：
+
+```text
+local X -> world ( 0.999902,  0.012606, 0.006144)
+local Y -> world (-0.006353,  0.016634, 0.999842)
+local Z -> world ( 0.012502, -0.999782, 0.016713)
+```
+
+A1 桌子从首帧到末帧的世界位移为：
+
+```text
+(-0.005547, -1.505806, 0.000934) m
+```
+
+因此已确认：
+
+- local Y 是竖直轴；
+- local Z 是 A1 推动方向轴；
+- local X 是与推动方向垂直的横向轴，也是唯一应加宽的轴；
+- 原桌的 local Y 最低点约为 `-0.368 m`，与首帧 root 世界高度
+  `0.367253 m` 相抵后接近地面；
+- local Y 桌面顶部 `0.06 m` 对应首帧世界高度约 `0.42724 m`；
+- 这个 object root 是几何和轨迹参考原点，不是由质量分布求出的 COM。
 
 ## 4. 加宽原则
 
-只沿与 A1 推动方向垂直的局部横向轴加宽。若坐标审计确认该轴为
-local X，则候选桌面为：
+只沿与 A1 推动方向垂直的 local X 加宽。首个候选桌面为：
 
 ```text
 tabletop size = (W, 0.04745, 0.5219528)
 tabletop center = (0, 0.036275, 0)
 ```
-
-若审计表明横向轴不是 local X，则必须先更新本文和主路线，再修改
-资产。禁止通过猜测直接缩放世界坐标轴。
 
 桌腿保持 `0.05 m × 0.3793 m × 0.05 m`，只对称向外移动。保留当前
 桌腿外边缘距离桌面边缘约 `0.000726 m` 的几何关系时，local X 桌腿
@@ -79,6 +106,18 @@ x_leg = ±(W / 2 - 0.0257264)
 ```
 
 前后桌腿的 local Z 中心继续保持 `±0.23525 m`。
+
+对 `W = 1.4 m`，首个候选的精确碰撞与视觉几何为：
+
+```text
+tabletop center = (0, 0.036275, 0)
+tabletop size   = (1.4, 0.04745, 0.5219528)
+
+leg centers x  = ±0.6742736
+leg centers y  = -0.17835
+leg centers z  = ±0.23525
+leg size        = (0.05, 0.3793, 0.05)
+```
 
 ## 5. 宽度候选
 
@@ -112,13 +151,18 @@ x_leg = ±(W / 2 - 0.0257264)
 - 接触边位置；
 - Viser/Isaac 显示与实际碰撞是否一致。
 
-如果现有 Viser 只接受 OBJ 而不能显示 URDF primitive，必须先记录加载
-限制，再选择以下最小方案之一：
+加载路径审计已确认不需要额外 OBJ：
 
-1. 为宽桌增加一个与 collision 完全一致的简单 OBJ；
-2. 对 viewer 增加 URDF primitive 支持。
+- Retargeting/回放 Viser 通过 `yourdfpy.URDF.load(...,
+  load_meshes=True, build_scene_graph=True)` 读取 object URDF，再交给
+  `ViserUrdf`；
+- 当前环境的 `yourdfpy 0.0.60` 会把 URDF `<box>` 直接转换为
+  `trimesh.primitives.Box`，并纳入 visual scene；
+- Isaac Sim 通过 `UrdfFileCfg` 直接导入配置指定的 object URDF；
+- Isaac Gym 通过 `gym.load_asset` 读取相同类型的 URDF。
 
-在加载路径审计完成前不选择方案。
+这里证明的是代码和依赖支持。候选资产建立后，仍必须分别执行 Viser、
+Isaac Sim 和 Isaac Gym 的运行时检查，不能用静态源码审计替代实际验证。
 
 ## 7. 原点、COM 与惯量
 
@@ -205,9 +249,13 @@ axis 直接写入 Actor 观测。
 
 | 项目 | 状态 | 结果 |
 |---|---|---|
-| A1 object local/world 轴审计 | pending | - |
-| Viser 对 URDF primitive 的支持 | pending | - |
-| Isaac Sim 对宽桌 primitive 的加载 | pending | - |
+| A1 object local/world 轴审计 | passed | local X 横向，local Y 竖直，local Z 沿 A1 推动方向 |
+| Viser 对 URDF primitive 的静态支持 | passed | `yourdfpy 0.0.60` 将 box 构造成 visual scene |
+| Isaac Sim object URDF 加载路径审计 | passed | `UrdfFileCfg` 直接加载，A1 pose 在 reset 时写入 |
+| Isaac Gym object URDF 加载路径审计 | passed | `gym.load_asset` 直接加载对象 URDF |
+| Viser 1.4 m 候选运行时显示 | pending | - |
+| Isaac Sim 1.4 m 候选运行时加载 | pending | - |
+| Isaac Gym 1.4 m 候选运行时加载 | pending | - |
 | 1.4 m 候选视觉检查 | pending | - |
 | 1.4 m 候选 collision 检查 | pending | - |
 | 最终桌宽 | pending | - |
@@ -217,8 +265,9 @@ axis 直接写入 Actor 观测。
 
 ## 12. 下一步
 
-1. 只读解析 A1 NPZ 的首帧 object quaternion 和轨迹方向。
-2. 核对 Isaac Sim URDF 导入和坐标变换。
-3. 核对 Viser 的对象 visual 加载路径。
-4. 在新增资产前报告确认后的横向局部轴。
-5. 经确认后创建首个 1.4 m primitive 宽桌候选。
+1. 向用户报告确认后的 local X 加宽方向和精确候选几何。
+2. 经确认后新增 `objects_widetable.urdf`，不修改旧资产。
+3. 用结构化测试检查五组 visual/collision box 的中心和尺寸。
+4. 在 Viser 中检查外观、A1 reference 和双机器人横向布局。
+5. 在 Isaac Sim 与 Isaac Gym 中分别执行加载、碰撞和静止稳定性 smoke test。
+6. 只在 1.4 m 布局失败时比较 1.2 m 或 1.6 m。
