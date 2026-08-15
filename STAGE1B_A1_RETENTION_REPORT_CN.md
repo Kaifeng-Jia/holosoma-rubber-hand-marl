@@ -3,8 +3,9 @@
 日期：2026-08-15
 
 分支：`rubber_hand_marl_baseline`
-结论：**名义左右侧 gate 未通过；几何与镜像排查已完成。下一步允许进行有界的左侧
-A1 适应训练，但在双侧重新通过 gate 前仍不得进入双实体 Stage 1B-2/Stage 2。**
+结论：**名义左右侧 gate 未通过；几何与镜像排查已完成。2026-08-15 执行的
+50-iteration 单左侧 A1 适应 smoke 同样未通过，并严重损害右侧保持性。不得继续
+500 iterations，也不得进入双实体 Stage 1B-2/Stage 2。**
 
 ## 1. 本阶段要回答的问题
 
@@ -289,30 +290,75 @@ checkpoint 推理能够以不超过 `7.6e-6` 的误差复现录制动作。
 
 本阶段不擅自冻结该选择。
 
-## 10. Gate 后的下一步
+## 10. 50-iteration 单左侧适应 smoke
 
-当前仍不应：
+### 10.1 冻结配置
 
-- 加入 ghost 随机化；
-- 进入两个实体机器人或正式 MARL。
+- 初始化：`model_07999_actor158.pt`；
+- 布局：桌心严格 `±0.4 m`，训练使用 centered left reference；
+- 环境：4096 个并行环境、24 steps/environment/update、seed 42；
+- 预算：50 PPO iterations，共 `4,915,200` transitions；
+- 宽桌、WBT reward、termination 与原 WBT randomization 保持不变；
+- teammate position/velocity observation scale 都设为 0；
+- checkpoint 不加载旧 optimizer，使用新 optimizer；
+- actor 新增四列在训练后仍严格为 0，最大绝对值为 `0.0`。
 
-几何诊断已经完成，下一轮应依次执行：
+训练产物仅作为失败诊断保留：
 
-1. 冻结一个明确的训练布局；推荐桌心严格 `±0.4 m`，因为它是未来双机器人
-   布局的直接契约，而不是因为冻结 actor 已在该布局通过；
-2. 从 `model_07999_actor158.pt` 初始化，只对 left/reference 做 50-iteration
-   适应 smoke；保持宽桌 `0.1 kg`、WBT reward、termination 和 teammate 零权重
-   不变；
-3. 50 iterations 无数值/reset 异常且 left 指标改善时，才运行 500 iterations；
-4. 用同一个冻结 checkpoint 分别执行 left/right 各 20-attempt nominal gate，
-   防止修好左侧却遗忘右侧；
-5. 双侧都达到至少 `15/20` 后，再冻结观测缩放与 reset variation，并进入
-   Stage 1B-2/Stage 2；
-6. 若 500 iterations 仍不能通过，则改用训练期 symmetry augmentation 或
-   左右 reference 混合训练，而不再增加部署时几何补丁。
+```text
+logs/WholeBodyTracking/20260815_191438-stage1b_a1_left_adapt50_seed42-locomotion/model_08048.pt
+SHA-256: 444fba042c31d2478cb531e5d4216632c7bd0bc98b7eab108302e85611c5d615
+```
 
-这里的 50/500 是保留能力的有界适应，不是正式 MARL，也不是重新训练
-8,000 iterations 的动作库。
+### 10.2 在线信号与正式 gate
+
+在线训练的 mean reward 从 `1.05` 增加到 `10.04`，末段 mean episode length
+达到 `174.93`。这些信号看似改善，但不能替代冻结 checkpoint 的完整轨迹测试。
+首次 PPO update 的 KL 为 `10.321`，随后 adaptive schedule 才把 KL 拉回约
+`0.01`；这表明首次更新已经发生过大的 policy drift。
+
+同一 `model_08048.pt`、seed 42、单环境、6500 steps、前 20 个 closed attempts：
+
+| 指标 | centered left | centered right |
+|---|---:|---:|
+| completed | 2/20 | 2/20 |
+| completion rate | 10% | 10% |
+| early termination rate | 90% | 90% |
+| fall proxy rate | 85% | 90% |
+| joint position RMSE | 0.2743 rad | 0.2737 rad |
+| key-body position RMSE | 0.0731 m | 0.0758 m |
+| object position RMSE | 0.0756 m | 0.0706 m |
+| object orientation mean error | 12.31 deg | 11.63 deg |
+| hand-contact attempt rate | 90% | 95% |
+| interaction proxy success | 80% | 80% |
+
+前 20 attempts 的精确终止原因计数如下；同一 attempt 可以同时触发多个原因：
+
+| 原因 | left | right |
+|---|---:|---:|
+| reference root position | 2 | 4 |
+| reference root orientation | 0 | 0 |
+| key-body position | 1 | 0 |
+| object position | 12 | 14 |
+| object orientation | 3 | 0 |
+
+相同 centered 布局的 650-step 回归更直接：冻结 checkpoint 为 left 3 resets、
+right 0 resets；适配 checkpoint 变为 left 4 resets、right 7 resets。单左侧适配
+没有改善同协议左侧短 rollout，并明确破坏了右侧能力。
+
+### 10.3 决策
+
+- `model_08048.pt` 不升级为 baseline；
+- 不从它继续 500 iterations；
+- 冻结基线仍是 `model_07999_actor158.pt`；
+- 不加入实体队友、ghost 随机化或正式 MARL；
+- 下一次适配必须从 `07999` 重新开始，同时保留 centered left/right 训练分布，
+  并在实施前冻结更严格的首次更新约束；
+- 下一轮采用逐级微型 gate，而不是把“50 iterations”继续当成小预算：先验证
+  单次更新的 KL、左右 650-step 回归，再决定是否增加更新次数。
+
+具体采用左右 reference 混合、原侧 replay 比例、actor anchor 或更低且有上限的
+学习率，属于下一轮实现决策；在讨论并冻结配置前不擅自选择。
 
 ## 11. 持久化产物
 

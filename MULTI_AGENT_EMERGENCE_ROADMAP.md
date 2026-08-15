@@ -317,8 +317,8 @@ friction are frozen only after the Stage 4 capacity calibration.
 
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
-Status: **nominal left/right gate failed on 2026-08-15; do not train or enter
-Stage 2 yet**.
+Status: **nominal left/right gate and the bounded single-left adaptation smoke
+failed on 2026-08-15; do not continue to 500 iterations or enter Stage 2**.
 
 #### Work
 
@@ -364,7 +364,8 @@ trajectory-ghost run had exactly `0.0` maximum difference in actions, joint
 states, and object positions. The frozen actor therefore ignores the new
 inputs exactly as designed; ghost values are not the cause of the left-side
 failure. The left side retained only 6.25% of the original completion rate,
-far below the required 90%. No 50- or 500-iteration adaptation is authorized.
+far below the required 90%. Adaptation was withheld until the exact termination
+and geometry audits below were complete.
 
 Exact post-physics termination attribution and the geometry audit are now
 complete. Left failures are dominated by the object-position/orientation
@@ -378,7 +379,8 @@ observation match did not improve the closed-loop rollout. The remaining gap
 is therefore distributional: the one-sided A1 actor was not trained to retain
 the skill on the opposite side.
 
-This result authorizes a bounded left-side adaptation ladder, not Stage 2:
+The completed audit authorized one bounded left-side adaptation smoke, not
+Stage 2:
 
 1. freeze a table-centered `+/-0.4 m` layout contract;
 2. initialize from `model_07999_actor158.pt` and run a 50-iteration left-side
@@ -388,9 +390,22 @@ This result authorizes a bounded left-side adaptation ladder, not Stage 2:
 4. evaluate the resulting frozen checkpoint on both sides for 20 attempts;
 5. require at least `15/20` on each side before Stage 1B-2/Stage 2.
 
-If 500 iterations cannot pass both sides, the next fallback is training-time
-symmetry augmentation or mixed left/right references, not another deployment
-geometry patch.
+The 50-iteration smoke was run from `model_07999_actor158.pt` with teammate
+inputs scaled to zero. It consumed 4,915,200 transitions. Although online
+reward and episode length improved, the first PPO update reached KL `10.321`.
+The frozen `model_08048.pt` then completed only `2/20` centered-left and `2/20`
+centered-right attempts, with 85% and 90% fall-proxy rates. On the same
+centered 650-step layouts, reset counts changed from frozen `left=3, right=0`
+to adapted `left=4, right=7`. The smoke therefore failed and exposed severe
+right-side forgetting; `model_08048.pt` is a diagnostic artifact, not a new
+baseline.
+
+Do not continue this run to 500 iterations. Restart any further adaptation
+from `model_07999_actor158.pt`, include both centered left and right training
+distributions (mixed references or explicit original-side replay), and freeze
+a much tighter first-update constraint before execution. The next gate is one
+update followed by left/right 650-step regression; only a passing micro-gate
+may increase the update budget. Do not add another deployment geometry patch.
 
 The raw right-side teammate position reaches 1.0902 m and velocity reaches
 1.0600 m/s in the formal rollout. The current `[-1, 1]` observation clip is
