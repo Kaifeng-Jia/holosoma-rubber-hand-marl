@@ -2,7 +2,7 @@
 
 ## 1. 文档状态
 
-- 状态：坐标轴与加载路径审计完成，等待创建候选资产
+- 状态：1.4 m 候选已建立，等待双机器人视觉布局确认
 - 建立日期：2026-08-14
 - 所属主线：`rubber_hand_marl_baseline`
 - 上位路线：`MULTI_AGENT_EMERGENCE_ROADMAP.md`
@@ -201,6 +201,33 @@ shared_table_reference = original A1 object reference
 其中 `d` 是几何预检后冻结的机器人中心间距。桌子 reference 只有
 一条，两台机器人不能分别控制两条互相冲突的桌子轨迹。
 
+首个 Viser 布局使用 `d = 0.8 m`，即两台机器人逐帧沿桌子 local X
+分别平移 `-0.4 m` 和 `+0.4 m`。该变换直接使用每一帧的 object
+quaternion 计算 local X 的世界方向，不把 local X 错写成固定 world X。
+
+只读数值预检结果：
+
+- 309 帧中两个 root 的中心距离始终为 `0.8 m`，数值误差小于
+  `3e-16 m`；
+- 两个 root 的中点逐帧严格等于原始 A1 root；
+- 两套机器人 body center 的逐帧横向 AABB 最小间隔约为 `0.256 m`；
+- 两套橡胶手 body center 的完整轨迹均位于 `[-0.7, +0.7] m` 桌宽内；
+- 最小 body-center 边缘余量约 `0.0037 m`，出现在末段离开接触区时，
+  因此仍需 Viser 检查真实 mesh 边界，不能仅凭 body center 冻结间距。
+
+独立查看器为
+`src/holosoma_retargeting/holosoma_retargeting/viser_dual_a1_player.py`。
+它不修改 NPZ，只在显示时复制 A1 并施加横向刚性平移。运行命令：
+
+```bash
+/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting/bin/python \
+  src/holosoma_retargeting/holosoma_retargeting/viser_dual_a1_player.py \
+  --port 8080
+```
+
+页面的 `Agent center spacing (m)` 可在 `0.4–1.2 m` 范围内临时调整，
+但只有写回本文并通过 collision preflight 的数值才是冻结配置。
+
 ## 9. Ghost teammate 分布
 
 Ghost 分布只能在 `d` 冻结后确定。两台机器人朝向大致相同时，左右
@@ -253,10 +280,11 @@ axis 直接写入 Actor 观测。
 | Viser 对 URDF primitive 的静态支持 | passed | `yourdfpy 0.0.60` 将 box 构造成 visual scene |
 | Isaac Sim object URDF 加载路径审计 | passed | `UrdfFileCfg` 直接加载，A1 pose 在 reset 时写入 |
 | Isaac Gym object URDF 加载路径审计 | passed | `gym.load_asset` 直接加载对象 URDF |
-| Viser 1.4 m 候选运行时显示 | pending | - |
-| Isaac Sim 1.4 m 候选运行时加载 | pending | - |
-| Isaac Gym 1.4 m 候选运行时加载 | pending | - |
-| 1.4 m 候选视觉检查 | pending | - |
+| Viser 1.4 m 候选运行时加载 | passed | 两台 rubber-hand G1、一个 shared table、309 帧、50 FPS |
+| Viser 1.4 m 双机器人视觉布局 | pending | 服务运行于 8080，等待 mesh/站位人工确认 |
+| Isaac Sim 1.4 m 候选运行时加载 | passed | cuda:0，1 env，24 steps，1 PPO update，无 NaN/CUDA/PhysX failure |
+| Isaac Gym 1.4 m 候选运行时加载 | blocked | 本机没有 `hsgym` 环境，`hssim` 也未安装 `isaacgym` |
+| 1.4 m 候选视觉检查 | pending | 等待 8080 人工确认 |
 | 1.4 m 候选 collision 检查 | pending | - |
 | 最终桌宽 | pending | - |
 | 最终机器人中心间距 | pending | - |
@@ -265,9 +293,23 @@ axis 直接写入 Actor 观测。
 
 ## 12. 下一步
 
-1. 向用户报告确认后的 local X 加宽方向和精确候选几何。
-2. 经确认后新增 `objects_widetable.urdf`，不修改旧资产。
-3. 用结构化测试检查五组 visual/collision box 的中心和尺寸。
-4. 在 Viser 中检查外观、A1 reference 和双机器人横向布局。
-5. 在 Isaac Sim 与 Isaac Gym 中分别执行加载、碰撞和静止稳定性 smoke test。
-6. 只在 1.4 m 布局失败时比较 1.2 m 或 1.6 m。
+1. 用户在 8080 检查 1.4 m 桌面、两套橡胶手 A1 和 `d = 0.8 m` 布局。
+2. 若视觉布局通过，构建真正的双机器人 collision preflight；若失败，
+   先在 viewer 中有界调整 `d`，仍不重新 retarget A1。
+3. collision preflight 通过后冻结最小充分桌宽和中心间距。
+4. Isaac Gym 检查延后至 `hsgym` 环境可用，不阻塞当前 Isaac Sim 主线。
+5. 只在 1.4 m 布局失败时比较 1.2 m 或 1.6 m。
+6. 几何冻结后继续 Stage 1A 的 154→158 lossless actor interface。
+
+Isaac Sim smoke 的可复现日志位于（gitignored）：
+
+```text
+logs/WholeBodyTracking/20260815_032943-widetable_geometry_preflight_smoke-locomotion
+```
+
+保存的配置明确记录：
+
+```text
+robot URDF = g1/main_mesh_collision_rubberhand.urdf
+object URDF = objects_widetable.urdf
+```

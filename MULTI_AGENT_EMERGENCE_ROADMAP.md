@@ -443,12 +443,26 @@ corresponding long-running experiment begins.
 
 ## 8. Immediate next steps
 
-1. Record the completed A1 actor/checkpoint/reward audit.
-2. Complete the read-only A1 table-axis and object-loader audit.
-3. Present the exact wide-table local axis and geometry before creating the
-   asset.
-4. Implement and visually validate the primitive 1.4 m candidate.
-5. Freeze the minimum adequate table width and symmetric partner offset.
-6. Implement and test the lossless four-channel teammate interface.
-7. Produce the Stage 1B A1 retention comparison.
-8. Begin the two-agent environment only after Stage 1B passes its gate.
+Completed at the current checkpoint:
+
+- the A1 actor/checkpoint/reward audit;
+- the A1 object-axis and loader audit;
+- the separate primitive 1.4 m candidate URDF and structural tests;
+- a two-copy A1 Viser preview with an adjustable 0.8 m initial spacing;
+- a one-environment Isaac Sim import/reset/24-step smoke test on CUDA.
+
+The next gates are:
+
+1. Complete the human visual review of the 1.4 m table and 0.8 m two-agent
+   layout in Viser.
+2. Build the actual two-robot collision preflight using the accepted visual
+   layout.
+3. Freeze the minimum adequate table width, symmetric partner offset, and
+   bounded ghost-teammate range.
+4. Implement and test the lossless four-channel teammate interface.
+5. Produce the Stage 1B A1 retention comparison.
+6. Begin the full two-agent environment only after Stage 1B passes its gate.
+
+The Isaac Gym runtime asset check remains pending because the local machine has
+no `hsgym` environment. It does not block the current Isaac Sim baseline, but
+must not be reported as validated.

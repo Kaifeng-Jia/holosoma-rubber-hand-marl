@@ -22,6 +22,7 @@ TRAINING_MOTION_DIR = (
 )
 TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_largetable.urdf"
 TRAINING_TABLE_MESH = TRAINING_MOTION_DIR / "largetable.obj"
+WIDE_TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable.urdf"
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -262,3 +263,50 @@ def test_retargeting_and_training_rubber_hand_kinematics_match() -> None:
 def test_training_and_retargeting_largetable_assets_are_identical() -> None:
     assert TRAINING_TABLE_URDF.read_bytes() == RETARGETING_TABLE_URDF.read_bytes()
     assert TRAINING_TABLE_MESH.read_bytes() == RETARGETING_TABLE_MESH.read_bytes()
+
+
+def test_widetable_uses_matching_symmetric_box_primitives() -> None:
+    root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    link = _required_element(root, "./link[@name='widetable_link']")
+
+    assert root.attrib["name"] == "widetable_geometry_preflight"
+    assert not link.findall(".//mesh")
+
+    expected_geometry = {
+        "widetable_tabletop": (
+            "0 0.036275 0",
+            "1.4 0.04745 0.5219528",
+        ),
+        "widetable_leg_neg_x_neg_z": (
+            "-0.6742736 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_neg_x_pos_z": (
+            "-0.6742736 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_pos_x_neg_z": (
+            "0.6742736 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_pos_x_pos_z": (
+            "0.6742736 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+    }
+
+    for name, (expected_xyz, expected_size) in expected_geometry.items():
+        visual = _required_element(link, f"./visual[@name='{name}']")
+        collision = _required_element(link, f"./collision[@name='{name}']")
+        visual_origin = _required_element(visual, "./origin")
+        collision_origin = _required_element(collision, "./origin")
+        visual_box = _required_element(visual, "./geometry/box")
+        collision_box = _required_element(collision, "./geometry/box")
+
+        _assert_float_sequence_equal(visual_origin.attrib["xyz"], expected_xyz)
+        _assert_float_sequence_equal(collision_origin.attrib["xyz"], expected_xyz)
+        _assert_float_sequence_equal(visual_box.attrib["size"], expected_size)
+        _assert_float_sequence_equal(collision_box.attrib["size"], expected_size)
+
+    assert len(link.findall("./visual")) == len(expected_geometry)
+    assert len(link.findall("./collision")) == len(expected_geometry)
