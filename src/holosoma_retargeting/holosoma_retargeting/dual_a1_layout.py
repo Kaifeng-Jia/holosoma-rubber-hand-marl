@@ -62,3 +62,83 @@ def shifted_robot_positions(
         raise ValueError(f"lateral_spacing must be positive, got {lateral_spacing}")
     half_offset = 0.5 * lateral_spacing * table_local_x_in_world(object_quat_wxyz)
     return root_pos - half_offset, root_pos + half_offset
+
+
+def lateral_offset_trajectory(
+    object_quat_wxyz: np.ndarray,
+    lateral_spacing: float,
+    observer_side: int,
+    fps: int,
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return one observer's world-frame lateral position and velocity offsets."""
+    if observer_side not in (-1, 1):
+        raise ValueError(f"observer_side must be -1 or +1, got {observer_side}")
+    if lateral_spacing <= 0.0:
+        raise ValueError(f"lateral_spacing must be positive, got {lateral_spacing}")
+    if fps <= 0:
+        raise ValueError(f"FPS must be positive, got {fps}")
+
+    axis = table_local_x_in_world(object_quat_wxyz)
+    if axis.ndim != 2:
+        raise ValueError(f"Expected object quaternion trajectory [T, 4], got {object_quat_wxyz.shape}")
+    offset = 0.5 * float(observer_side) * lateral_spacing * axis
+    edge_order = 2 if len(offset) > 2 else 1
+    offset_velocity = np.gradient(offset, 1.0 / float(fps), axis=0, edge_order=edge_order)
+    return offset, offset_velocity
+
+
+def shifted_robot_motion_channels(
+    *,
+    joint_pos: np.ndarray,
+    joint_vel: np.ndarray,
+    body_pos_w: np.ndarray,
+    body_lin_vel_w: np.ndarray,
+    object_quat_wxyz: np.ndarray,
+    lateral_spacing: float,
+    observer_side: int,
+    fps: int,
+) -> dict[str, np.ndarray]:
+    """Shift all robot translation channels while leaving the object unchanged."""
+    frame_count = joint_pos.shape[0]
+    expected = {
+        "joint_vel": joint_vel.shape[0],
+        "body_pos_w": body_pos_w.shape[0],
+        "body_lin_vel_w": body_lin_vel_w.shape[0],
+        "object_quat_wxyz": object_quat_wxyz.shape[0],
+    }
+    mismatched = {name: count for name, count in expected.items() if count != frame_count}
+    if mismatched:
+        raise ValueError(f"Motion channel frame counts do not match joint_pos={frame_count}: {mismatched}")
+    if joint_pos.ndim != 2 or joint_pos.shape[1] < 3:
+        raise ValueError(f"Expected joint_pos [T, >=3], got {joint_pos.shape}")
+    if joint_vel.ndim != 2 or joint_vel.shape[1] < 3:
+        raise ValueError(f"Expected joint_vel [T, >=3], got {joint_vel.shape}")
+    if body_pos_w.ndim != 3 or body_pos_w.shape[2] != 3:
+        raise ValueError(f"Expected body_pos_w [T, B, 3], got {body_pos_w.shape}")
+    if body_lin_vel_w.shape != body_pos_w.shape:
+        raise ValueError(
+            f"body_lin_vel_w must match body_pos_w shape {body_pos_w.shape}, got {body_lin_vel_w.shape}"
+        )
+
+    offset, offset_velocity = lateral_offset_trajectory(
+        object_quat_wxyz,
+        lateral_spacing,
+        observer_side,
+        fps,
+    )
+    shifted_joint_pos = np.array(joint_pos, copy=True)
+    shifted_joint_pos[:, :3] += offset
+    shifted_joint_vel = np.array(joint_vel, copy=True)
+    shifted_joint_vel[:, :3] += offset_velocity
+    shifted_body_pos = np.array(body_pos_w, copy=True)
+    shifted_body_pos += offset[:, None, :]
+    shifted_body_lin_vel = np.array(body_lin_vel_w, copy=True)
+    shifted_body_lin_vel += offset_velocity[:, None, :]
+    return {
+        "joint_pos": shifted_joint_pos,
+        "joint_vel": shifted_joint_vel,
+        "body_pos_w": shifted_body_pos,
+        "body_lin_vel_w": shifted_body_lin_vel,
+        "lateral_offset_w": offset,
+        "lateral_offset_velocity_w": offset_velocity,
+    }

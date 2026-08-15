@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from math import isclose
 from pathlib import Path
 
+import pytest
+
 from holosoma.config_values.wbt.g1.reward import g1_29dof_wbt_reward
 
 
@@ -23,6 +25,7 @@ TRAINING_MOTION_DIR = (
 TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_largetable.urdf"
 TRAINING_TABLE_MESH = TRAINING_MOTION_DIR / "largetable.obj"
 WIDE_TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable.urdf"
+WIDE_A1_RETENTION_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable_a1_retention.urdf"
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -310,3 +313,36 @@ def test_widetable_uses_matching_symmetric_box_primitives() -> None:
 
     assert len(link.findall("./visual")) == len(expected_geometry)
     assert len(link.findall("./collision")) == len(expected_geometry)
+
+
+def test_widetable_a1_retention_asset_preserves_geometry_and_a1_contact_contract() -> None:
+    preflight_root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    retention_root = ET.parse(WIDE_A1_RETENTION_TABLE_URDF).getroot()
+    preflight_link = _required_element(preflight_root, "./link[@name='widetable_link']")
+    retention_link = _required_element(retention_root, "./link[@name='widetable_link']")
+
+    assert retention_root.attrib["name"] == "widetable_a1_retention"
+    assert [ET.tostring(node) for node in preflight_link.findall("./visual")] == [
+        ET.tostring(node) for node in retention_link.findall("./visual")
+    ]
+    assert [ET.tostring(node) for node in preflight_link.findall("./collision")] == [
+        ET.tostring(node) for node in retention_link.findall("./collision")
+    ]
+
+    inertial = _required_element(retention_link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 0.1
+    _assert_float_sequence_equal(_required_element(inertial, "./origin").attrib["xyz"], "0 0.015111745244133 0")
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.0031387487608351)
+    assert float(inertia["iyy"]) == pytest.approx(0.0218020759603284)
+    assert float(inertia["izz"]) == pytest.approx(0.0197524457212314)
+
+    source_root = ET.parse(TRAINING_TABLE_URDF).getroot()
+    assert ET.tostring(_required_element(retention_root, "./dynamics")) == ET.tostring(
+        _required_element(source_root, "./dynamics")
+    )
+    source_contact = _required_element(_required_element(source_root, "./link"), "./contact")
+    retention_contact = _required_element(retention_link, "./contact")
+    assert [(child.tag, child.attrib) for child in retention_contact] == [
+        (child.tag, child.attrib) for child in source_contact
+    ]

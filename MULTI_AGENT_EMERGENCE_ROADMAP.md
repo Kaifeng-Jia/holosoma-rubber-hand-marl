@@ -148,9 +148,12 @@ excluded initially. Additional information requires evidence that the minimal
 interface is insufficient.
 
 During the compatibility stage, no physical teammate exists. A ghost teammate
-is sampled near the intended symmetric partner location, with bounded position
-and velocity variation. During MARL, these four values are replaced by the
-corresponding real teammate observations.
+follows the opposite shifted A1 reference. Its relative position and velocity
+are derived consistently from that reference and the observing robot's actual
+root state; they are not independently sampled or forced near zero. Bounded
+layout variation may be added only after the nominal left/right retention gate
+passes. During MARL, these four values are replaced by the corresponding real
+teammate observations.
 
 ### 5.4 Centralized critic
 
@@ -314,15 +317,19 @@ friction are frozen only after the Stage 4 capacity calibration.
 
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
+Status: **nominal left/right gate failed on 2026-08-15; do not train or enter
+Stage 2 yet**.
+
 #### Work
 
-1. Sample the ghost on either side of the robot using the frozen symmetric
-   partner offset and bounded reset variation.
-2. Keep ghost relative velocity centered near zero with a documented bounded
-   range.
+1. Evaluate each observer side separately on the 1.4 m table using the frozen
+   0.8 m partner spacing.
+2. Derive the ghost position and velocity from the opposite shifted A1
+   reference and express them in the observing robot's yaw frame.
 3. Evaluate the converted policy before any further training.
-4. Run a 50-iteration smoke test only after the no-training equivalence gate.
-5. Run a 500-iteration retention test only if the smoke gate passes and further
+4. Freeze bounded reset variation only after both nominal sides pass.
+5. Run a 50-iteration smoke test only after the no-training equivalence gate.
+6. Run a 500-iteration retention test only if the smoke gate passes and further
    WBT exposure is justified.
 
 #### Required comparisons
@@ -338,6 +345,40 @@ friction are frozen only after the Stage 4 capacity calibration.
 - fall and early-termination rates do not regress materially;
 - ghost-state variation does not cause policy collapse;
 - the same actor input schema can consume a real teammate state.
+
+#### Recorded nominal result
+
+The detailed protocol and per-channel evidence are recorded in
+`STAGE1B_A1_RETENTION_REPORT_CN.md`. The isolated retention table keeps the
+1.4 m geometry but preserves the frozen A1 table's 0.1 kg mass and contact
+parameters; its COM and inertia are recomputed from the five-box geometry.
+
+Twenty closed attempts at seed 42 produced:
+
+- original 0.522 m A1 table, zero ghost: `16/20 = 80%` completion;
+- 1.4 m table, left observer, trajectory ghost: `1/20 = 5%` completion;
+- 1.4 m table, right observer, trajectory ghost: `17/20 = 85%` completion.
+
+For both left and right sides, a paired 650-step zero-ghost versus
+trajectory-ghost run had exactly `0.0` maximum difference in actions, joint
+states, and object positions. The frozen actor therefore ignores the new
+inputs exactly as designed; ghost values are not the cause of the left-side
+failure. The left side retained only 6.25% of the original completion rate,
+far below the required 90%. No 50- or 500-iteration adaptation is authorized.
+
+The current evidence points to a one-sided physical/reference mismatch:
+translation-only copies preserve the non-mirrored A1 body motion, while moving
+its contact point away from the table center. This changes the table force and
+yaw moment. Pre-transition recordings show left-side failures concentrated
+near or beyond the 0.25 m object-position gate, while robot pose tracking
+changes only modestly. Exact post-physics termination attribution and a
+centerline/mirroring audit are required before changing the layout contract.
+
+The raw right-side teammate position reaches 1.0902 m and velocity reaches
+1.0600 m/s in the formal rollout. The current `[-1, 1]` observation clip is
+therefore slightly saturated on that side. Observation rescaling remains an
+open decision and must be resolved before teammate-aware training; it does not
+affect the frozen actor because all four new input columns are zero.
 
 ### Stage 2 -- Build the two-agent environment
 
@@ -503,12 +544,16 @@ Completed at the current checkpoint:
 
 The next gates are:
 
-1. Freeze the bounded ghost-teammate reset range around the accepted 1.4 m /
-   0.8 m geometry contract and measured nominal A1 envelope.
-2. Produce the no-training Stage 1B A1 retention comparison.
-3. Authorize a 50-iteration smoke only if no-training retention reveals a need
-   for adaptation; do not schedule 500 iterations by default.
-4. Begin the full two-agent environment only after Stage 1B passes its gate.
+1. Attribute left-side early terminations exactly at the post-physics failure
+   state and audit the off-center contact/yaw-moment mechanism.
+2. Compare the accepted midpoint-preserving layout with a table-centerline
+   symmetric placement and, only if justified, a mirrored-reference variant.
+3. Re-run the nominal left/right no-training gate after one geometry/reference
+   correction is explicitly approved.
+4. Decide the teammate position/velocity observation scale from the measured
+   envelope before any teammate-aware update.
+5. Do not freeze reset randomization, run a 50/500-iteration adaptation, or
+   begin the full two-agent environment until both nominal sides pass Stage 1B.
 
 The Isaac Gym runtime asset check remains pending because the local machine has
 no `hsgym` environment. It does not block the current Isaac Sim baseline, but

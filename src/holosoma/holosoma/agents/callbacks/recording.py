@@ -113,6 +113,17 @@ class EvalRecordingCallback(RLEvalCallback):
         for name in channel_names:
             self._buffers[name] = []
 
+        if hasattr(env, "teammate_relative_position_b") and hasattr(env, "teammate_relative_velocity_b"):
+            self._metadata["teammate_provider_class"] = type(env).__name__
+            self._metadata["teammate_observer_side"] = getattr(env, "observer_side", None)
+            self._metadata["teammate_lateral_spacing_m"] = getattr(env, "lateral_spacing_m", None)
+            self._metadata["teammate_observation_frame"] = "observing robot yaw frame"
+            self._metadata["teammate_observation_semantics"] = (
+                "Planar relative position in meters and planar relative velocity in meters per second."
+            )
+            self._buffers["teammate_relative_position_b"] = []
+            self._buffers["teammate_relative_velocity_b"] = []
+
         motion_command = self._get_motion_command(env)
         if motion_command is not None:
             tracked_body_names = list(motion_command.motion_cfg.body_names_to_track)
@@ -223,6 +234,9 @@ class EvalRecordingCallback(RLEvalCallback):
         _append("ref_root_quat_xyzw", motion_command.root_quat_w[eid])
         _append("pre_root_pos", sim.robot_root_states[eid, :3])
         _append("pre_root_quat_xyzw", sim.robot_root_states[eid, 3:7])
+        if "teammate_relative_position_b" in self._buffers:
+            _append("teammate_relative_position_b", env.teammate_relative_position_b[eid])
+            _append("teammate_relative_velocity_b", env.teammate_relative_velocity_b[eid])
         _append("contact_forces_w", sim.contact_forces[eid])
         _append("contact_forces_history_w", sim.contact_forces_history[eid])
         if hasattr(sim, "contact_sensor"):
