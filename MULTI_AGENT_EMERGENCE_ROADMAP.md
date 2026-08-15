@@ -116,6 +116,15 @@ The environment should make the intended cooperation easy to express. The
 research subject is what happens after compatible agents are placed together,
 not how to combine deliberately incompatible actions.
 
+The current `objects_largetable.urdf` tabletop is only about 0.522 m wide. It
+is retained as the frozen single-agent WBT asset, but it is not assumed to be
+wide enough for the first same-side two-agent layout. Before freezing the
+ghost-teammate distribution, the project must validate a separate symmetric
+wide-table asset. The push-direction depth, tabletop height, A1 contact edge,
+and object reference origin must remain unchanged while only the lateral span
+is widened. Detailed geometry decisions and validation results are maintained
+in `WIDETABLE_GEOMETRY_DESIGN_CN.md`.
+
 ### 5.2 Shared actor
 
 - Both agents use one parameter-shared actor.
@@ -205,17 +214,78 @@ separate evaluation concepts.
 - no object-goal bridge or teacher-annealing implementation is present;
 - the previous worktrees remain unchanged.
 
-### Stage 1 -- Build a MARL-compatible A1 prior
+### Stage 1A -- Build the lossless MARL-compatible A1 interface
 
 #### Work
 
 1. Audit the exact A1 actor observation and checkpoint tensor shapes.
-2. Append the four teammate observation channels.
+2. Preserve the original 154-dimensional `actor_obs` group and append a
+   separate four-dimensional `teammate_obs` group.
 3. Transfer the original input-layer weights exactly.
-4. Initialize the four new input columns to zero or a documented near-zero
-   value so the initial policy reproduces the old actor.
-5. Add bounded ghost-teammate sampling around the intended partner layout.
-6. Continue A1 WBT training only as needed to validate the new interface.
+4. Expand the empirical actor normalizer without changing the original 154
+   statistics.
+5. Initialize the four new input columns to zero so the converted policy
+   reproduces the old actor independently of teammate input.
+6. Keep the 298-dimensional WBT critic and the original WBT reward unchanged
+   during this compatibility stage.
+
+#### Exit gate
+
+- the expanded actor loads without silently dropping or reordering inputs;
+- deterministic converted-policy output matches the frozen A1 policy within a
+  documented numerical tolerance;
+- the conversion records the source checkpoint hash and all added dimensions;
+- no training is required to claim lossless interface conversion.
+
+### Geometry preflight -- Freeze the wide-table partner layout
+
+This is a bounded dependency between Stage 1A and Stage 1B, not a new research
+stage. It exists because ghost-teammate values must be based on the real future
+layout rather than arbitrary numbers.
+
+#### Work
+
+1. Confirm the A1 table local axes and runtime world transform.
+2. Create a separate primitive-based wide-table candidate without modifying the
+   frozen single-agent table asset.
+3. Preserve table depth, height, push-side contact edge, and object origin.
+4. Begin with a 1.4 m lateral-width candidate; use 1.2 m and 1.6 m only as
+   bounded alternatives if the first layout fails.
+5. Place two A1 robots on the same pushing side using symmetric lateral
+   reference offsets.
+6. Validate visual geometry in Viser and actual collisions and stability in
+   Isaac Sim.
+7. Freeze the minimum adequate table width, agent center spacing, and bounded
+   teammate state range.
+
+Mass and friction are explicitly not selected by this geometry preflight. A
+temporary inertial value may be used for static validation, but it is not a
+training asset or reported physical result. Final mass, COM, inertia, and
+friction are frozen only after the Stage 4 capacity calibration.
+
+#### Exit gate
+
+- both robots fit on the same pushing side without initial interpenetration;
+- both A1 hand-contact regions lie on the unchanged push-side surface;
+- feet and lower bodies are not blocked by table legs at reset;
+- visual and collision primitives agree;
+- the table origin and push-direction contact geometry remain compatible with
+  the frozen A1 object trajectory;
+- a concrete symmetric partner offset and teammate observation range are
+  recorded in `WIDETABLE_GEOMETRY_DESIGN_CN.md`.
+
+### Stage 1B -- Validate A1 retention with a ghost teammate
+
+#### Work
+
+1. Sample the ghost on either side of the robot using the frozen symmetric
+   partner offset and bounded reset variation.
+2. Keep ghost relative velocity centered near zero with a documented bounded
+   range.
+3. Evaluate the converted policy before any further training.
+4. Run a 50-iteration smoke test only after the no-training equivalence gate.
+5. Run a 500-iteration retention test only if the smoke gate passes and further
+   WBT exposure is justified.
 
 #### Required comparisons
 
@@ -225,7 +295,6 @@ separate evaluation concepts.
 
 #### Exit gate
 
-- the expanded actor loads without silently dropping or reordering inputs;
 - A1 completion retains at least 90% of the frozen checkpoint's measured
   completion performance;
 - fall and early-termination rates do not regress materially;
@@ -360,7 +429,11 @@ multi-agent baseline.
 - Critic: centralized and globally observed during training.
 - Reward: one shared team reward built from audited WBT components.
 - Direction: the fixed demonstrated push direction, not an arbitrary target.
-- First environment: symmetric or near-symmetric cooperative layout.
+- First environment: symmetric or near-symmetric same-side cooperative layout
+  using a separately validated wide table.
+- Wide-table geometry: 1.4 m is the first candidate, not a frozen final width;
+  depth, height, push-side contact geometry, and reference origin are preserved.
+- Ghost distribution: frozen only after the real two-agent geometry preflight.
 - Physics: easy smoke asset followed by a bounded capacity sweep and a frozen
   final mass/friction setting.
 - First full budget: 8,000 iterations after the earlier gates pass.
@@ -370,10 +443,12 @@ corresponding long-running experiment begins.
 
 ## 8. Immediate next steps
 
-1. Complete and verify Stage 0.
-2. Perform a read-only audit of the A1 actor observations, network input layer,
-   checkpoint format, and WBT reward configuration.
-3. Present the exact files and proposed Stage 1 code changes before editing.
-4. Implement and test the four-channel ghost-teammate interface.
-5. Produce the MARL-compatible A1 retention comparison.
-6. Begin the two-agent environment only after Stage 1 passes its gate.
+1. Record the completed A1 actor/checkpoint/reward audit.
+2. Complete the read-only A1 table-axis and object-loader audit.
+3. Present the exact wide-table local axis and geometry before creating the
+   asset.
+4. Implement and visually validate the primitive 1.4 m candidate.
+5. Freeze the minimum adequate table width and symmetric partner offset.
+6. Implement and test the lossless four-channel teammate interface.
+7. Produce the Stage 1B A1 retention comparison.
+8. Begin the two-agent environment only after Stage 1B passes its gate.
