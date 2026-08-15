@@ -431,8 +431,14 @@ multi-agent baseline.
 - Direction: the fixed demonstrated push direction, not an arbitrary target.
 - First environment: symmetric or near-symmetric same-side cooperative layout
   using a separately validated wide table.
-- Wide-table geometry: 1.4 m is the first candidate, not a frozen final width;
-  depth, height, push-side contact geometry, and reference origin are preserved.
+- Wide-table geometry: freeze 1.4 m width and 0.8 m symmetric agent spacing for
+  baseline v1; this is an accepted first-run geometry, not a claim of global
+  optimality or a mathematically minimal width. Depth, height, push-side
+  contact geometry, and reference origin are preserved.
+- A1 prior budget: reuse the frozen 8,000-iteration checkpoint; do not run a
+  new 8,000- or 30,000-iteration A1 job before MARL. Only a bounded 50/500
+  retention adaptation is allowed if the converted policy fails its measured
+  retention gate.
 - Ghost distribution: frozen only after the real two-agent geometry preflight.
 - Physics: easy smoke asset followed by a bounded capacity sweep and a frozen
   final mass/friction setting.
@@ -449,19 +455,19 @@ Completed at the current checkpoint:
 - the A1 object-axis and loader audit;
 - the separate primitive 1.4 m candidate URDF and structural tests;
 - a two-copy A1 Viser preview with an adjustable 0.8 m initial spacing;
+- human visual acceptance of the 1.4 m table and 0.8 m spacing;
 - a one-environment Isaac Sim import/reset/24-step smoke test on CUDA.
+- an Isaac Sim dual-A1 frame-0 reset collision gate with explicit far-away
+  controls: 0 N excess contact force, no table drift, and rubber-hand bodies
+  present in both articulations and contact sensors.
 
 The next gates are:
 
-1. Complete the human visual review of the 1.4 m table and 0.8 m two-agent
-   layout in Viser.
-2. Build the actual two-robot collision preflight using the accepted visual
-   layout.
-3. Freeze the minimum adequate table width, symmetric partner offset, and
-   bounded ghost-teammate range.
-4. Implement and test the lossless four-channel teammate interface.
-5. Produce the Stage 1B A1 retention comparison.
-6. Begin the full two-agent environment only after Stage 1B passes its gate.
+1. Freeze the bounded ghost-teammate range around the accepted 1.4 m / 0.8 m
+   geometry contract.
+2. Implement and test the lossless four-channel teammate interface.
+3. Produce the Stage 1B A1 retention comparison.
+4. Begin the full two-agent environment only after Stage 1B passes its gate.
 
 The Isaac Gym runtime asset check remains pending because the local machine has
 no `hsgym` environment. It does not block the current Isaac Sim baseline, but

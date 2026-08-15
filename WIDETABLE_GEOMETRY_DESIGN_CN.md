@@ -2,7 +2,7 @@
 
 ## 1. 文档状态
 
-- 状态：1.4 m 候选已建立，等待双机器人视觉布局确认
+- 状态：1.4 m / 0.8 m 几何基线 v1 已通过视觉与 Isaac Sim reset 碰撞门禁
 - 建立日期：2026-08-14
 - 所属主线：`rubber_hand_marl_baseline`
 - 上位路线：`MULTI_AGENT_EMERGENCE_ROADMAP.md`
@@ -281,25 +281,38 @@ axis 直接写入 Actor 观测。
 | Isaac Sim object URDF 加载路径审计 | passed | `UrdfFileCfg` 直接加载，A1 pose 在 reset 时写入 |
 | Isaac Gym object URDF 加载路径审计 | passed | `gym.load_asset` 直接加载对象 URDF |
 | Viser 1.4 m 候选运行时加载 | passed | 两台 rubber-hand G1、一个 shared table、309 帧、50 FPS |
-| Viser 1.4 m 双机器人视觉布局 | pending | 服务运行于 8080，等待 mesh/站位人工确认 |
+| Viser 1.4 m 双机器人视觉布局 | passed | 用户确认 1.4 m 桌宽和 0.8 m 中心间距布局优秀 |
 | Isaac Sim 1.4 m 候选运行时加载 | passed | cuda:0，1 env，24 steps，1 PPO update，无 NaN/CUDA/PhysX failure |
 | Isaac Gym 1.4 m 候选运行时加载 | blocked | 本机没有 `hsgym` 环境，`hssim` 也未安装 `isaacgym` |
-| 1.4 m 候选视觉检查 | pending | 等待 8080 人工确认 |
-| 1.4 m 候选 collision 检查 | pending | - |
-| 最终桌宽 | pending | - |
-| 最终机器人中心间距 | pending | - |
+| 1.4 m 候选视觉检查 | passed | 两套 rubber-hand A1 mesh、桌面和桌腿布局通过人工检查 |
+| 1.4 m 候选 collision 检查 | passed | A1 frame 0，gravity off，8×0.005 s；额外接触力 0 N，桌子漂移 0 m |
+| rubber-hand runtime contract | passed | 四台对照/目标机器人及其 contact sensor 均包含左右 `rubber_hand_link` |
+| 首轮桌宽 | frozen | 1.4 m；作为 baseline v1，不声称是全局最优或数学意义的最小宽度 |
+| 首轮机器人中心间距 | frozen | 0.8 m，对称分布在原 A1 root 两侧 |
 | Ghost 位置/速度范围 | pending | - |
 | 正式固定质量、COM、惯量和摩擦 | deferred | Stage 4 capacity sweep |
 
 ## 12. 下一步
 
-1. 用户在 8080 检查 1.4 m 桌面、两套橡胶手 A1 和 `d = 0.8 m` 布局。
-2. 若视觉布局通过，构建真正的双机器人 collision preflight；若失败，
-   先在 viewer 中有界调整 `d`，仍不重新 retarget A1。
-3. collision preflight 通过后冻结最小充分桌宽和中心间距。
-4. Isaac Gym 检查延后至 `hsgym` 环境可用，不阻塞当前 Isaac Sim 主线。
-5. 只在 1.4 m 布局失败时比较 1.2 m 或 1.6 m。
-6. 几何冻结后继续 Stage 1A 的 154→158 lossless actor interface。
+1. 以 1.4 m 桌面和 `d = 0.8 m` 冻结首轮几何基线；不把它表述为已经
+   证明的“最小充分宽度”。
+2. 继续 Stage 1A 的 154→158 lossless actor interface。
+3. Isaac Gym 检查延后至 `hsgym` 环境可用，不阻塞当前 Isaac Sim 主线。
+4. 只有后续真实双机器人 reset 或 rollout 暴露几何失败时才调整 `d`；
+   只有桌宽本身失败时才比较 1.2 m 或 1.6 m。
+
+独立 reset 碰撞门禁命令：
+
+```bash
+python scripts/validate_dual_a1_collision.py --headless --device cuda:0
+```
+
+该门禁只回答“初始摆位是否穿透”，不包含地面、重力、控制策略、任务奖励
+或正式桌子动力学，因此不能替代 Stage 2/4 的物理可行性验证。报告默认写入：
+
+```text
+/tmp/dual_a1_collision_report.json
+```
 
 Isaac Sim smoke 的可复现日志位于（gitignored）：
 
