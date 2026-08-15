@@ -145,6 +145,51 @@ def _finite_difference_by_clip(
     return derivative
 
 
+def _infer_observer_side_by_clip(
+    root_pos_w: torch.Tensor,
+    object_pos_w: torch.Tensor,
+    object_quat_xyzw: torch.Tensor,
+    starts: torch.Tensor,
+    ends: torch.Tensor,
+    *,
+    minimum_side_offset_m: float = 1.0e-4,
+) -> torch.Tensor:
+    """Infer a constant table-local-X observer side for each motion clip."""
+    if root_pos_w.shape != object_pos_w.shape or root_pos_w.ndim != 2 or root_pos_w.shape[1] != 3:
+        raise ValueError("Root and object positions must both have shape [T, 3]")
+    if object_quat_xyzw.shape != (root_pos_w.shape[0], 4):
+        raise ValueError("Object quaternion must have shape [T, 4]")
+    if minimum_side_offset_m <= 0.0:
+        raise ValueError("minimum_side_offset_m must be positive")
+
+    table_axis_w = _table_local_x_in_world_xyzw(object_quat_xyzw)
+    local_x = torch.sum((root_pos_w - object_pos_w) * table_axis_w, dim=-1)
+    observer_side = torch.zeros_like(local_x)
+    assigned = torch.zeros_like(local_x, dtype=torch.bool)
+    for start_tensor, end_tensor in zip(starts, ends, strict=True):
+        start = int(start_tensor.item())
+        end = int(end_tensor.item())
+        if end <= start:
+            raise ValueError(f"Motion clip must contain at least one frame, got [{start}, {end})")
+        clip_local_x = local_x[start:end]
+        clip_mean = torch.mean(clip_local_x)
+        if torch.abs(clip_mean) <= minimum_side_offset_m:
+            raise ValueError(
+                f"Cannot infer observer side for clip [{start}, {end}): "
+                f"mean table-local-X offset is {float(clip_mean):.6g} m"
+            )
+        clip_side = torch.sign(clip_mean)
+        if torch.any(clip_local_x * clip_side <= minimum_side_offset_m):
+            raise ValueError(
+                f"Observer crosses or approaches the table center plane in clip [{start}, {end})"
+            )
+        observer_side[start:end] = clip_side
+        assigned[start:end] = True
+    if not torch.all(assigned):
+        raise ValueError("Motion clip boundaries do not cover every reference frame")
+    return observer_side
+
+
 def _yaw_from_xyzw(quaternion: torch.Tensor) -> torch.Tensor:
     """Return world yaw for normalized xyzw quaternions."""
     norm = torch.linalg.vector_norm(quaternion, dim=-1, keepdim=True)
@@ -306,10 +351,11 @@ class TrajectoryGhostTeammateWholeBodyTrackingManager(GhostTeammateWholeBodyTrac
 
     observer_side: int = 0
     lateral_spacing_m: float = 0.8
+    infer_observer_side_from_reference: bool = False
 
     def _init_buffers(self) -> None:
         super()._init_buffers()
-        if self.observer_side not in (-1, 1):
+        if not self.infer_observer_side_from_reference and self.observer_side not in (-1, 1):
             raise ValueError(f"observer_side must be -1 or +1, got {self.observer_side}")
         if self.lateral_spacing_m <= 0.0:
             raise ValueError(f"lateral_spacing_m must be positive, got {self.lateral_spacing_m}")
@@ -394,7 +440,22 @@ class TrajectoryGhostTeammateWholeBodyTrackingManager(GhostTeammateWholeBodyTrac
             raise ValueError("trajectory ghost observations require an object reference")
 
         table_axis_w = _table_local_x_in_world_xyzw(motion.object_quat_w)
-        relative_position_w = -float(self.observer_side) * self.lateral_spacing_m * table_axis_w
+        if self.infer_observer_side_from_reference:
+            observer_side = _infer_observer_side_by_clip(
+                motion.body_pos_w[:, 0],
+                motion.object_pos_w,
+                motion.object_quat_w,
+                motion.motion_start_idx,
+                motion.motion_end_idx,
+            )
+        else:
+            observer_side = torch.full(
+                (motion.time_step_total,),
+                float(self.observer_side),
+                dtype=table_axis_w.dtype,
+                device=table_axis_w.device,
+            )
+        relative_position_w = -observer_side.unsqueeze(-1) * self.lateral_spacing_m * table_axis_w
         fps = int(torch.as_tensor(motion.fps).reshape(-1)[0].item())
         if fps <= 0:
             raise ValueError(f"Motion FPS must be positive, got {fps}")
@@ -454,6 +515,14 @@ class RightTrajectoryGhostTeammateWholeBodyTrackingManager(TrajectoryGhostTeamma
     """Trajectory ghost for the observer on table local positive X."""
 
     observer_side = 1
+
+
+class MixedSideTrajectoryGhostTeammateWholeBodyTrackingManager(
+    TrajectoryGhostTeammateWholeBodyTrackingManager
+):
+    """Infer each motion clip's observer side for balanced left/right training."""
+
+    infer_observer_side_from_reference = True
 
 
 class MirroredLeftTrajectoryGhostTeammateWholeBodyTrackingManager(

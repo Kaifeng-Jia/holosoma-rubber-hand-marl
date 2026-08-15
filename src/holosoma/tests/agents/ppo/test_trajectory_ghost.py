@@ -12,6 +12,7 @@ from holosoma.envs.wbt.wbt_marl_compat_manager import (
     RightSpacing070TrajectoryGhostTeammateWholeBodyTrackingManager,
     _compute_stage1b_termination_diagnostics,
     _finite_difference_by_clip,
+    _infer_observer_side_by_clip,
     _mirror_joint_tensor,
     _mirror_rotation_6d_xz,
     _mirror_teammate_observation,
@@ -70,6 +71,40 @@ def test_ghost_geometry_rejects_invalid_inputs() -> None:
         _table_local_x_in_world_xyzw(torch.zeros(4))
     with pytest.raises(ValueError, match="positive"):
         _finite_difference_by_clip(torch.zeros((2, 2)), torch.tensor([0]), torch.tensor([2]), dt=0.0)
+
+
+def test_observer_side_is_inferred_once_per_motion_clip() -> None:
+    object_pos = torch.zeros((6, 3))
+    object_quat = torch.tensor([[0.0, 0.0, 0.0, 1.0]]).expand(6, -1).clone()
+    root_pos = torch.tensor(
+        [
+            [-0.4, 0.0, 0.8],
+            [-0.3, 0.0, 0.8],
+            [-0.2, 0.0, 0.8],
+            [0.2, 0.0, 0.8],
+            [0.3, 0.0, 0.8],
+            [0.4, 0.0, 0.8],
+        ]
+    )
+    inferred = _infer_observer_side_by_clip(
+        root_pos,
+        object_pos,
+        object_quat,
+        torch.tensor([0, 3]),
+        torch.tensor([3, 6]),
+    )
+    torch.testing.assert_close(inferred, torch.tensor([-1.0, -1.0, -1.0, 1.0, 1.0, 1.0]))
+
+
+def test_observer_side_rejects_center_crossing_clip() -> None:
+    with pytest.raises(ValueError, match="Cannot infer|crosses or approaches"):
+        _infer_observer_side_by_clip(
+            torch.tensor([[-0.2, 0.0, 0.8], [0.2, 0.0, 0.8]]),
+            torch.zeros((2, 3)),
+            torch.tensor([[0.0, 0.0, 0.0, 1.0]]).expand(2, -1),
+            torch.tensor([0]),
+            torch.tensor([2]),
+        )
 
 
 def test_spacing_070_candidate_classes_preserve_side_contract() -> None:

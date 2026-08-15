@@ -449,3 +449,86 @@ logs/WholeBodyTracking/stage1b_a1_retention_v1/
 
 该目录不是 Git commit 的一部分，但应随 worktree 保留。代码、资产契约、
 测试和本报告进入 Git；`main` 与其他 worktree 不受影响。
+
+## 13. 双侧 observation 可辨识性审计
+
+方案 2 的进一步只读审计发现，centered left/right reference 只是世界坐标平移：
+
+- `ref_joint_pos`、`ref_joint_vel` 和 `ref_root_quat` 相同；
+- object reference 的相对运动和朝向相同；
+- 原 154 维 actor observation 不含绝对平面 root/object 位置；
+- teammate position/velocity scale 为零时，两侧初始 actor observation 和 action
+  逐元素相同，只有发生接触后才由不同物理反馈产生分叉。
+
+因此，一个 feed-forward actor 在接触前无法知道自己位于宽桌左侧还是右侧，
+也无法提前选择不同的抵消偏航策略。为消除这个混淆，新增 mixed-side trajectory
+ghost manager：它依据每条 reference 中 pelvis 相对桌面局部 X 轴的位置，为整条
+clip 推断固定的 observer side。实现会拒绝接近桌心、跨越桌心或缺少边界帧的
+reference，不改变现有固定 left/right manager。
+
+实际 centered reference 验证结果为：left 全部 `309/309` 帧属于 `-1` 侧，right
+全部 `309/309` 帧属于 `+1` 侧。训练时只启用 teammate relative position，velocity
+继续设为零。
+
+## 14. 带侧别信号的受控适配审计
+
+### 14.1 全网络保守适配
+
+从冻结 `model_07999_actor158.pt` 重新开始，保持方案 2 的双侧 0.5/0.5、
+`1e-5` 固定学习率、1 epoch、4 mini-batches 和 PPO clip `0.05`，但打开正确的
+per-clip teammate position。KL 约为 `0.0001--0.0003`，训练稳定；然而左侧
+650-step gate 仍未完成任何完整轨迹：
+
+| PPO updates | completed/closed | mean length (steps) | joint RMSE (rad) | object orientation mean |
+|---:|---:|---:|---:|---:|
+| 1 | 0/4 | 140.5 | 0.1868 | 11.92 deg |
+| 7 | 0/3 | 177.7 | 0.1809 | 11.78 deg |
+| 12 | 0/4 | 153.8 | 0.1887 | 10.44 deg |
+| 17 | 0/3 | 115.0 | 0.1990 | 7.09 deg |
+| 25 | 0/4 | 155.3 | 0.1989 | 8.67 deg |
+
+7 updates 是存活时间的局部最佳点；17/25 updates 虽降低桌面朝向平均误差，却
+开始牺牲身体动作跟踪。终止帧主要触发 object position `~0.25 m` 或 object
+orientation/yaw `~46 deg` 阈值，并同时记为 `bad_tracking`。这不是接触缺失：
+有效 attempts 基本都由 rubber hand 接触桌面并沿正确方向推动。
+
+### 14.2 冻结 A1 主干的输入列 adapter
+
+为区分“训练量不足”和“全网络漂移”，PPO 增加了默认关闭的
+`actor_input_adapter_groups`。启用 `teammate_obs` 时：
+
+- 只训练 actor 第一层中新 observation group 对应的输入列；
+- 原 154 列、第一层 bias、后续所有层和探索 `std` 全部冻结；
+- 要求 actor optimizer 的 weight decay 为零；
+- teammate 输入为零时，actor 与冻结 A1 严格等价。
+
+单元测试和真实 checkpoint 对比确认上述不变量。`1e-5` 的 25-update 扫描中，
+原 actor 参数最大变化严格为 `0.0`，position adapter 列最大变化从
+`7.88e-5` 增至 `9.10e-4`，velocity 列保持 `0.0`，KL 始终约 `1e-9--1e-8`。
+左侧冻结 gate 结果为：
+
+| adapter 配置 | completed/closed | mean length (steps) | 结论 |
+|---|---:|---:|---|
+| `1e-5`, 1 update | 0/3 | 180.3 | 安全，但修正不足 |
+| `1e-5`, 7 updates | 0/4 | 128.5 | 无改善 |
+| `1e-5`, 25 updates | 0/5 | 112.6 | 后续 reset 出现短 episode |
+| `1e-4`, 7 updates | 0/4 | 128.5 | 10 倍步长仍无改善 |
+
+`1e-4` 对照把 adapter 列增至 `2.71e-3`，KL 仍只有约 `2e-6--4e-6`，但
+首两段仍固定在约 186/181 帧终止。由此可排除“仅增加同配方 iterations 即可
+通过”的解释；只训练输入列的表达能力不足以修正这个闭环物理差异。
+
+### 14.3 质量解释与当前决策
+
+retention URDF 的基础质量确为 `0.1 kg`，但本轮继承的原 WBT startup
+randomization 会附加 `1--4 kg`，所以实际训练/评估质量约为 `1.1--4.1 kg`，
+并非恒定 `0.1 kg`。不能把左侧失败简单归因于“桌子只有 0.1 kg”。
+
+最终决策：
+
+- 带侧别信号的全网络适配和输入列 adapter 均不升级为 baseline；
+- 冻结 baseline 仍是 `model_07999_actor158.pt`；
+- 不再增加同类 PPO updates，也不通过放松 gate 隐藏失败；
+- mixed-side inference 和默认关闭的 adapter 作为可复现诊断能力保留；
+- 下一决策点是重新定义/生成物理兼容的侧端 reference，或明确引入第二实体的
+  受控作用，再重新验证 Stage 1B；在此之前不进入 Stage 2。

@@ -266,15 +266,59 @@ class PPO(BaseAlgo):
         if self.use_symmetry:
             self.symmetry_utils = SymmetryUtils(self.env)
 
+        self._configure_actor_input_adapter()
+
         # Synchronize model weights across GPUs after initialization
         if self.is_multi_gpu:
             self._synchronize_model_weights()
 
+        actor_parameters = [parameter for parameter in self.actor.parameters() if parameter.requires_grad]
         self.actor_optimizer = instantiate(
-            self.config.actor_optimizer, params=self.actor.parameters(), lr=self.actor_learning_rate
+            self.config.actor_optimizer, params=actor_parameters, lr=self.actor_learning_rate
         )
         self.critic_optimizer = instantiate(
             self.config.critic_optimizer, params=self.critic.parameters(), lr=self.critic_learning_rate
+        )
+
+    def _configure_actor_input_adapter(self) -> None:
+        """Freeze the actor except selected columns of its first linear layer."""
+        group_names = self.config.actor_input_adapter_groups
+        if group_names is None:
+            return
+        if not group_names:
+            raise ValueError("actor_input_adapter_groups must contain at least one observation group")
+        if self.config.actor_optimizer.weight_decay != 0.0:
+            raise ValueError("actor input adaptation requires actor optimizer weight_decay=0")
+
+        actor_module = self.actor.actor_module
+        if not isinstance(actor_module.module, nn.Sequential):
+            raise TypeError("actor input adaptation currently requires an MLP actor")
+        try:
+            first_linear = next(layer for layer in actor_module.module if isinstance(layer, nn.Linear))
+        except StopIteration as exc:
+            raise TypeError("actor input adaptation requires at least one linear actor layer") from exc
+
+        unknown_groups = sorted(set(group_names) - set(actor_module.input_indices_dict))
+        if unknown_groups:
+            raise ValueError(f"Unknown actor input adapter groups: {unknown_groups}")
+
+        trainable_mask = torch.zeros_like(first_linear.weight, dtype=torch.bool)
+        for group_name in group_names:
+            trainable_mask[:, actor_module.input_indices_dict[group_name]] = True
+        if not torch.any(trainable_mask):
+            raise ValueError("actor input adapter selected no first-layer weights")
+
+        for parameter in self.actor.parameters():
+            parameter.requires_grad_(False)
+        first_linear.weight.requires_grad_(True)
+        first_linear.weight.register_hook(lambda gradient: gradient.masked_fill(~trainable_mask, 0.0))
+
+        self._actor_input_adapter_mask = trainable_mask
+        logger.info(
+            "Actor input adapter enabled for groups {} ({} / {} first-layer weights trainable)",
+            group_names,
+            int(trainable_mask.sum().item()),
+            trainable_mask.numel(),
         )
 
     def _get_obs_dim(self, obs_keys: list[str]) -> int:

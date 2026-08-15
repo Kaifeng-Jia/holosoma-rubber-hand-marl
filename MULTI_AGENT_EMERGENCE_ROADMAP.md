@@ -442,6 +442,36 @@ therefore slightly saturated on that side. Observation rescaling remains an
 open decision and must be resolved before teammate-aware training; it does not
 affect the frozen actor because all four new input columns are zero.
 
+A subsequent identifiability audit found that the translated left/right
+references are indistinguishable in the original 154-D actor observation before
+physical contact. A mixed-side trajectory-ghost manager now infers a constant
+side per clip and supplies the correct relative teammate position. This removed
+the observation aliasing but did not pass the left-side gate. A 1/7/12/17/25
+update scan with the full actor reached a best short left mean episode length of
+177.7 steps at update 7, with zero completed trajectories; later updates traded
+better table orientation for worse body tracking.
+
+A second bounded audit froze the complete A1 backbone and trained only the
+first-layer columns belonging to the appended teammate observation. Checkpoint
+diffs confirmed exactly zero change in the original 154 input columns, all
+downstream actor layers, biases, and action noise. Neither 25 updates at
+`1e-5` nor 7 updates at `1e-4` completed a left trajectory; increasing the
+adapter learning rate by ten times left the first two termination points at
+approximately 186 and 181 steps. More iterations on either tested adaptation
+recipe are therefore not authorized by current evidence.
+
+The isolated retention URDF has a `0.1 kg` base mass, but inherited WBT startup
+randomization adds `1--4 kg`; the simulated run is approximately
+`1.1--4.1 kg`, not a fixed `0.1 kg`. Do not attribute the asymmetric failure to
+the URDF base mass alone.
+
+Stage 1B remains failed and `model_07999_actor158.pt` remains the frozen
+baseline. Before Stage 2, the project must choose and validate one physically
+explicit next contract: generate a side-end reference whose object motion is
+compatible with one-agent off-center contact, or introduce the second physical
+entity under a documented force/action contract. Do not silently relax the WBT
+object gate and do not promote any checkpoint from these diagnostic runs.
+
 ### Stage 2 -- Build the two-agent environment
 
 #### Work

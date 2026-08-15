@@ -171,6 +171,14 @@ class PPOConfig:
     load_optimizer: bool = True
     """Whether to load optimizer state."""
 
+    actor_input_adapter_groups: List[str] | None = None
+    """Optional actor observation groups whose first-layer input columns may be trained.
+
+    When set, all other actor parameters are frozen.  This provides a lossless
+    adapter for newly appended observation groups while preserving an existing
+    policy backbone.  The actor optimizer must use zero weight decay.
+    """
+
     init_noise_std: float = 0.8
     """Initial noise standard deviation."""
 
