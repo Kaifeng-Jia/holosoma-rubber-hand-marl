@@ -360,7 +360,86 @@ right 0 resets；适配 checkpoint 变为 left 4 resets、right 7 resets。单�
 具体采用左右 reference 混合、原侧 replay 比例、actor anchor 或更低且有上限的
 学习率，属于下一轮实现决策；在讨论并冻结配置前不擅自选择。
 
-## 11. 持久化产物
+## 11. 方案 2：双侧平衡、低更新幅度适配
+
+### 11.1 配置与训练稳定性
+
+本轮从冻结的 `model_07999_actor158.pt` 重新开始，不继承失败的
+`model_08048.pt`。配置为：
+
+- centered left/right reference 按 `0.5/0.5` 采样；
+- 4096 environments，24 steps/environment/update；
+- actor/critic learning rate 及上下限都固定为 `1e-5`；
+- 1 learning epoch、4 mini-batches、PPO clip `0.05`；
+- teammate position/velocity observation scale 仍为 0；
+- rubber-hand G1、1.4 m retention table、原 WBT reward/termination/randomization。
+
+第一次更新的左右 occupancy 为 `50.79%/49.21%`，KL 为 `0.0003`；
+扫描到第 5 次更新时 KL 一直约为 `0.0001--0.0003`。这说明方案 2
+解决了方案 1 首次更新 KL `10.321` 的 policy drift，也没有再出现
+右侧灾难性遗忘。
+
+### 11.2 0--5 次更新的 650-step 左侧扫描
+
+| PPO updates | resets | joint RMSE (rad) | key-body RMSE (m) | object RMSE (m) |
+|---:|---:|---:|---:|---:|
+| 0（冻结 `07999`） | 3 | 0.186177 | 0.064986 | 0.099534 |
+| 1 | 4 | 0.185756 | 0.065193 | 0.093381 |
+| 2 | 4 | 0.193578 | 0.094371 | 0.111405 |
+| 3 | 3 | 0.183393 | 0.063461 | 0.108613 |
+| 4 | 3 | 0.186553 | 0.064230 | 0.094722 |
+| 5 | 4 | 0.186891 | 0.063498 | 0.112345 |
+
+第 4 次更新 `model_08002.pt` 是短 gate 的最佳折中点：左侧 reset 数和
+类型与冻结基线一致，key-body 与 object RMSE 改善；右侧仍为 0 resets，
+object RMSE 从 `0.070519 m` 改善为 `0.067419 m`。其 SHA-256 为：
+
+```text
+cce6aad3a3906ed5d28e3610592ee284109f739f2fb141b42679c0d3e6c8cd69
+```
+
+### 11.3 `model_08002.pt` 的 6500-step 正式 gate
+
+同一 checkpoint、seed 42、单环境、无评估扰动，分别取前 20 个 closed
+attempts：
+
+| 指标 | centered left | centered right |
+|---|---:|---:|
+| completed | 0/20 | 18/20 |
+| completion rate | 0% | 90% |
+| early termination rate | 100% | 10% |
+| fall proxy rate | 5% | 10% |
+| joint position RMSE | 0.1900 rad | 0.1741 rad |
+| key-body position RMSE | 0.0427 m | 0.0318 m |
+| object position RMSE | 0.0612 m | 0.0644 m |
+| hand-contact attempt rate | 100% | 100% |
+| interaction proxy success | 85% | 100% |
+| correct displacement direction | 18/18 evaluable | 20/20 |
+| mean actual table displacement | 0.826 m | 1.516 m |
+
+前 20 attempts 的精确终止原因如下；同一 attempt 可以同时触发多个原因：
+
+| 原因 | left | right |
+|---|---:|---:|
+| reference root position | 1 | 0 |
+| reference root orientation | 0 | 0 |
+| key-body position | 1 | 0 |
+| object position | 7 | 2 |
+| object orientation | 11 | 0 |
+
+### 11.4 决策
+
+- 方案 2 在优化稳定性和右侧保留上成功，但双侧正式 gate 失败；
+- `model_08002.pt` 仅作为诊断候选，不升级为 baseline；
+- 冻结 baseline 仍是 `model_07999_actor158.pt`；
+- 不继续通过单纯增加 PPO updates 推进：0--5 次扫描已经证明指标非单调，
+  且第 4 次的正式左侧完成率为 0%；
+- 左侧失败不等于“不会推”：手接触、交互和位移方向都大部分正确，
+  主要是 object position/orientation WBT gate 无法跟随左侧 reference 到轨迹末端；
+- 下一轮应先重新审视左侧 reference/object trajectory 与 Stage 1B 成功定义的兼容性，
+  而不是继续扩大训练量。
+
+## 12. 持久化产物
 
 原始录制、JSON 指标和生成 reference 放在 gitignored 目录：
 

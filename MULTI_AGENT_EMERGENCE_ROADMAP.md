@@ -407,6 +407,35 @@ a much tighter first-update constraint before execution. The next gate is one
 update followed by left/right 650-step regression; only a passing micro-gate
 may increase the update budget. Do not add another deployment geometry patch.
 
+The balanced conservative adaptation audit is now complete. It restarted from
+`model_07999_actor158.pt`, sampled the centered left/right references at
+`0.5/0.5`, kept all teammate inputs scaled to zero, fixed actor and critic
+learning rates at `1e-5`, used one learning epoch, and reduced PPO clipping to
+`0.05`. KL remained between approximately `0.0001` and `0.0003`, so the severe
+first-update drift and right-side forgetting from the one-sided smoke were
+eliminated. A 0--5 update scan selected the fourth update, `model_08002.pt`, as
+the best short-gate candidate. Its SHA-256 is
+`cce6aad3a3906ed5d28e3610592ee284109f739f2fb141b42679c0d3e6c8cd69`.
+
+The 6500-step formal gate did not validate that candidate for bilateral use.
+Centered right passed with `18/20` completed attempts, but centered left
+completed `0/20`. On the left, all 20 attempts made rubber-hand contact, 17/20
+passed the interaction proxy, and all 18 direction-evaluable attempts moved
+the table in the correct direction, with 0.826 m mean displacement. The
+failure is therefore not absence of pushing behavior. It is dominated by the
+strict object position/orientation tracking gates (7 and 11 attributions,
+respectively), which prevent the physical left-side rollout from reaching the
+reference endpoint.
+
+Balanced conservative adaptation is recorded as a partial technical success,
+not a Stage 1B pass. `model_08002.pt` remains a diagnostic candidate and
+`model_07999_actor158.pt` remains the frozen baseline. Do not increase PPO
+iterations on this recipe: the 0--5 scan was non-monotonic and the best short
+candidate still failed the formal left gate. Before Stage 2, re-examine the
+compatibility among the centered-left object reference, physical object
+dynamics, and the Stage 1B completion/termination contract. Do not hide this
+failure by adding a body-part contact restriction or another geometry patch.
+
 The raw right-side teammate position reaches 1.0902 m and velocity reaches
 1.0600 m/s in the formal rollout. The current `[-1, 1]` observation clip is
 therefore slightly saturated on that side. Observation rescaling remains an
