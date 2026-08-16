@@ -315,10 +315,42 @@ friction are frozen only after the Stage 4 capacity calibration.
   are recorded before Stage 1B; the reset-variation range is frozen in Stage
   1B rather than guessed during geometry preflight.
 
+### Current-stage option register -- five plans
+
+The five plans below are alternative ways to move from the frozen single-agent
+A1 prior to a physically valid wide-table baseline. They are not five stages
+that must all be completed. A plan may be rejected without invalidating the A1
+checkpoint or the shared wide-table geometry.
+
+| Plan | Training unit | Reference contract | Status and decision |
+|---|---|---|---|
+| **1. Frozen side transfer** | one physical robot | shift the central A1 robot reference to each side; keep the original object reference | **Failed as a bilateral solution.** Right retained `17/20`, left retained `1/20`. No training was involved. |
+| **2. Single-agent side adaptation** | one physical robot | the same shifted left/right references and original object reference | **Failed the left gate.** Plan 2A conservatively updated the full actor; Plan 2B froze the A1 backbone and trained only appended teammate-input columns. Neither completed the left trajectory. Do not add more iterations to either tested recipe. |
+| **3. Reconstruct single-agent side references** | one physical robot | generate separate left/right references whose robot contact and object motion are dynamically validated for off-centre pushing | **Pending alternative.** This keeps a single-agent side stage, but requires new reference generation rather than another rigid translation. |
+| **4. Frozen two-entity mechanics diagnostic** | two physical robots, no joint learning | run documented frozen/prescribed policies synchronously to test whether opposite-side contact moments cancel | **Pending diagnostic only.** No artificial force is applied at the teammate location. This plan measures mechanics; it does not produce a jointly trained policy. |
+| **5. Paired-reference multi-agent WBT** | two physical robots with a shared actor and centralized critic | materialize the promising Viser layout as two synchronized robot references plus one shared object reference and one shared phase | **New candidate.** Skip the remaining single-agent side-adaptation gate, initialize both actor calls from the frozen A1 checkpoint, and train directly for the dual-robot pushing demonstration. |
+
+Plan 2 contains two implementation variants, not two additional top-level
+plans:
+
+- **2A:** balanced left/right PPO with conservative full-actor updates;
+- **2B:** a lossless A1 backbone with only the appended teammate-input columns
+  trainable.
+
+Plan 5 is reference-guided multi-agent reinforcement learning. Its current
+scope is deliberately narrow: reproduce the synchronized dual-robot pushing
+reference, maintain both robots' WBT behavior, track the one shared table
+trajectory, and test whether the two physical contact moments cancel. It does
+**not** include a target point, task reward, reference annealing, object
+navigation, autonomous skill selection, or task-oriented MARL. Those topics
+belong to a separate research direction and are not active here.
+
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
-Status: **nominal left/right gate and the bounded single-left adaptation smoke
-failed on 2026-08-15; do not continue to 500 iterations or enter Stage 2**.
+Status: **Plans 1 and 2 failed the bilateral single-agent gate on 2026-08-15.
+Do not continue either Plan 2 recipe to 500 iterations. Plan 5 may bypass the
+remaining single-agent side gate only by an explicit roadmap decision; this
+does not retroactively mark Stage 1B as passed.**
 
 #### Work
 
@@ -466,11 +498,11 @@ randomization adds `1--4 kg`; the simulated run is approximately
 the URDF base mass alone.
 
 Stage 1B remains failed and `model_07999_actor158.pt` remains the frozen
-baseline. Before Stage 2, the project must choose and validate one physically
-explicit next contract: generate a side-end reference whose object motion is
-compatible with one-agent off-center contact, or introduce the second physical
-entity under a documented force/action contract. Do not silently relax the WBT
-object gate and do not promote any checkpoint from these diagnostic runs.
+baseline. The current-stage option register now owns the next decision: Plan 3
+rebuilds single-agent side references, Plan 4 performs a frozen two-entity
+mechanics diagnostic, and Plan 5 directly trains against the synchronized
+dual-robot reference. Do not silently relax the WBT object gate and do not
+promote any checkpoint from the failed Plan 1/2 diagnostic runs.
 
 ### Stage 2 -- Build the two-agent environment
 
@@ -478,12 +510,18 @@ object gate and do not promote any checkpoint from these diagnostic runs.
 
 1. Instantiate two rubber-hand G1 agents and one table.
 2. Define mirrored or near-mirrored initial transforms.
-3. Transform the A1 reference consistently for each robot.
+3. Materialize the Viser construction as a paired reference asset containing
+   synchronized agent-0 and agent-1 trajectories, one shared table trajectory,
+   and one shared motion phase. Do not sample two independent single-agent
+   motions.
 4. Verify collision groups, resets, terminations, and recording.
 5. Verify that each actor sees self-local data plus real teammate position and
    velocity.
 6. Verify that the critic sees the intended global state.
 7. Implement one identical shared reward value for both agents.
+8. For Plan 5, initialize both calls to the shared 158-D actor from
+   `model_07999_actor158.pt`; initialize the dimensionally new centralized
+   critic separately.
 
 #### Exit gate
 
@@ -495,6 +533,10 @@ object gate and do not promote any checkpoint from these diagnostic runs.
 - no hemisphere-hand asset is active.
 
 ### Stage 3 -- Establish the MARL learning baseline
+
+Stage 3 remains reference-guided WBT in the current scope. It trains the paired
+dual-robot demonstration and is not a target-conditioned or task-oriented
+stage.
 
 #### Required experimental groups
 
