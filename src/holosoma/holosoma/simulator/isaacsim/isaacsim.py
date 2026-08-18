@@ -391,13 +391,16 @@ class IsaacSim(BaseSimulator):
 
         self.scene.articulations["robot"] = self._robot
 
-        self.contact_sensor = ContactSensor(contact_sensor_config)
-        self.scene.sensors["contact_sensor"] = self.contact_sensor
-
         self._setup_additional_robot_articulations(
             robot_articulation_config,
             contact_sensor_config,
         )
+
+        # Create the primary contact sensor only after every robot articulation
+        # has been added. Adding another articulation recomposes the stage and
+        # can invalidate a sensor registered earlier in the construction pass.
+        self.contact_sensor = ContactSensor(contact_sensor_config)
+        self.scene.sensors["contact_sensor"] = self.contact_sensor
 
         if height_scanner_config:
             self._height_scanner = RayCaster(height_scanner_config)
@@ -740,10 +743,10 @@ class IsaacSim(BaseSimulator):
         assert self.dof_names == self.robot_config.dof_names, "DOF names must match the config"
         assert self.body_names == self.robot_config.body_names, "Body names must match the config"
 
-        self._contact_to_robot_body_ids = torch.tensor(
-            [self.contact_sensor.body_names.index(body_name) for body_name in self.body_names],
-            device=self.sim_device,
-        )
+        # ContactSensor physics views may still be uninitialized while assets
+        # are being enumerated. Build this mapping in prepare_sim(), immediately
+        # before the first tensor refresh.
+        self._contact_to_robot_body_ids = None
 
         # return self.num_dof, self.num_bodies, self.dof_names, self.body_names
 
@@ -819,6 +822,7 @@ class IsaacSim(BaseSimulator):
         self.contact_forces_history = torch.zeros(
             self.num_envs, self.simulator_config.contact_sensor_history_length, self.num_bodies, 3, device=self.device
         )
+        self._initialize_contact_body_mapping()
 
         # Initialize virtual gantry system after object registry setup
         # Initialize virtual gantry using config
@@ -850,12 +854,40 @@ class IsaacSim(BaseSimulator):
         else:
             logger.debug("Bridge disabled: skipping acceleration computation tensors")
 
+    def _initialize_contact_body_mapping(self) -> None:
+        """Map configured robot body order to an initialized contact sensor."""
+        if not self.contact_sensor.is_initialized or self.contact_sensor.body_physx_view is None:
+            callback_exception = getattr(builtins, "ISAACLAB_CALLBACK_EXCEPTION", None)
+            if callback_exception is not None:
+                builtins.ISAACLAB_CALLBACK_EXCEPTION = None
+                raise RuntimeError("IsaacLab contact sensor initialization callback failed") from callback_exception
+            sensor_states = {
+                name: {
+                    "initialized": sensor.is_initialized,
+                    "has_physx_view": sensor.body_physx_view is not None,
+                }
+                for name, sensor in self.scene.sensors.items()
+                if hasattr(sensor, "body_physx_view")
+            }
+            raise RuntimeError(
+                "IsaacLab contact sensor did not initialize after simulation play: "
+                f"is_playing={self.sim.is_playing()}, is_stopped={self.sim.is_stopped()}, "
+                f"sensors={sensor_states}"
+            )
+        sensor_body_names = self.contact_sensor.body_names
+        self._contact_to_robot_body_ids = torch.tensor(
+            [sensor_body_names.index(body_name) for body_name in self.body_names],
+            device=self.sim_device,
+        )
+
     @property
     def dof_state(self):
         # This will always use the latest dof_pos and dof_vel
         return torch.cat([self.dof_pos[..., None], self.dof_vel[..., None]], dim=-1)
 
     def refresh_sim_tensors(self):
+        if self._contact_to_robot_body_ids is None:
+            raise RuntimeError("Contact body mapping must be initialized before refreshing simulator tensors")
         # Apply reset to recache new wyxz -> xyzw tensor
         self.robot_root_states.reset(self._robot.data.root_state_w)  # (num_envs, 13)
 

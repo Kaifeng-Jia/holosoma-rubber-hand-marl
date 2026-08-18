@@ -25,6 +25,9 @@ class SimulatorConfig:
     _instance: SimulatorConfig | None = None
     _simulator_type: SimulatorType | None = None
     _supported_simulator_names = {sim_type.value for sim_type in SimulatorType}
+    _target_type_aliases = {
+        "dualrobotisaacsim": SimulatorType.ISAACSIM.value,
+    }
 
     def __new__(cls):
         if cls._instance is None:
@@ -36,6 +39,7 @@ class SimulatorConfig:
         """Set the simulator type from config to use throughout the codebase."""
         simulator_type = config._target_
         simulator_type_name = simulator_type.split(".")[-1].lower()
+        simulator_type_name = cls._target_type_aliases.get(simulator_type_name, simulator_type_name)
         simulator_config_name = config.config.name
         if simulator_config_name != simulator_type_name:
             raise ValueError(
