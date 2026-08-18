@@ -150,3 +150,25 @@ def test_critic_only_update_preserves_actor_and_updates_critic() -> None:
     assert metrics.actor_grad_norm == 0.0
     assert learner.models.actor_optimizer.param_groups[0]["lr"] == actor_lr_before
     assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before
+
+
+@pytest.mark.parametrize(
+    ("kl", "actor_lr_factor"),
+    [(0.03, 1.0 / 1.5), (0.001, 1.5)],
+)
+def test_adaptive_policy_kl_changes_only_actor_learning_rate(
+    kl: float,
+    actor_lr_factor: float,
+) -> None:
+    learner = _learner()
+    actor_lr_before = learner.actor_learning_rate
+    critic_lr_before = learner.critic_learning_rate
+
+    learner._update_actor_learning_rate(torch.tensor(kl))
+
+    assert learner.actor_learning_rate == pytest.approx(actor_lr_before * actor_lr_factor)
+    assert learner.models.actor_optimizer.param_groups[0]["lr"] == pytest.approx(
+        actor_lr_before * actor_lr_factor
+    )
+    assert learner.critic_learning_rate == critic_lr_before
+    assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before

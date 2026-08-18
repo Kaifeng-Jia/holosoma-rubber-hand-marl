@@ -256,7 +256,7 @@ class Plan5PPO:
                 new_dist = Normal(self.models.actor.action_mean, self.models.actor.action_std)
                 kl = kl_divergence(old_dist, new_dist).sum(-1).mean()
                 if self.config.schedule == "adaptive" and self.config.desired_kl is not None:
-                    self._update_learning_rates(kl)
+                    self._update_actor_learning_rate(kl)
 
             self.models.actor_optimizer.zero_grad()
             actor_loss.backward()
@@ -300,7 +300,13 @@ class Plan5PPO:
             "critic_grad_norm": float(critic_grad_norm),
         }
 
-    def _update_learning_rates(self, kl: torch.Tensor) -> None:
+    def _update_actor_learning_rate(self, kl: torch.Tensor) -> None:
+        """Adapt only the policy optimizer to policy KL.
+
+        The centralized critic has an independent optimizer and objective. Its
+        learning rate must not be throttled by divergence between old and new
+        actor distributions.
+        """
         desired_kl = self.config.desired_kl
         if desired_kl is None:
             return
@@ -309,23 +315,13 @@ class Plan5PPO:
                 self.min_actor_learning_rate,
                 self.actor_learning_rate / 1.5,
             )
-            self.critic_learning_rate = max(
-                self.min_critic_learning_rate,
-                self.critic_learning_rate / 1.5,
-            )
         elif 0.0 < kl < desired_kl / 2.0:
             self.actor_learning_rate = min(
                 self.max_actor_learning_rate,
                 self.actor_learning_rate * 1.5,
             )
-            self.critic_learning_rate = min(
-                self.max_critic_learning_rate,
-                self.critic_learning_rate * 1.5,
-            )
         for group in self.models.actor_optimizer.param_groups:
             group["lr"] = self.actor_learning_rate
-        for group in self.models.critic_optimizer.param_groups:
-            group["lr"] = self.critic_learning_rate
 
     def training_state_dict(self, *, iteration: int) -> dict[str, Any]:
         """Return a resumable MAPPO checkpoint with an explicit compatibility contract."""
