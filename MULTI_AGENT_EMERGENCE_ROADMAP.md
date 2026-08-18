@@ -10,7 +10,7 @@
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
-- Active work item: post-Plan-2 side-reference dynamics feasibility audit
+- Active work item: reference-state collision replay and rubber-hand wrench-feasibility check
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
@@ -414,6 +414,59 @@ It must not claim mathematical impossibility from one failed PPO run.
   trajectories, reward, and termination logic unchanged during the initial
   read-only audit. Any later change requires a separate review.
 
+#### Read-only contact audit result -- 2026-08-17
+
+The opt-in Isaac Sim audit records the actual runtime object mass, inertia, COM,
+material properties, angular velocity, filtered table-to-all-robot contacts,
+and filtered table-to-rubber-hand contacts. The implementation is isolated in
+commits `042b85a7` and `8c96de33`; the default sensor graph remains unchanged
+when diagnostics are disabled. Seventeen related tests and a 24-step CUDA smoke
+passed before the fixed-physics evaluations.
+
+The bounded audit used seed 42, deterministic PPO inference, static and dynamic
+table friction `0.5`, restitution `0`, 650 evaluation steps per case, and total
+table masses `1.1`, `2.6`, and `4.1 kg`. The Plan-2 candidate was
+`model_08002.pt`; the exact frozen comparison was
+`marl_compat_a1_v1/model_07999_actor158.pt`. Raw NPZ recordings and generated
+JSON reports are stored under
+`logs/WholeBodyTracking/stage1b_a1_retention_v1/contact_audit_*`.
+
+| Policy | Mass | Side | Completed attempts | Endpoint-yaw pass | Median rubber-hand propulsion fraction | Dominant propulsive bodies |
+|---|---:|---|---:|---:|---:|---|
+| Plan 2 | 1.1 kg | left | 1/3 | 1/3 | 0.00045% | hips/knees |
+| Plan 2 | 1.1 kg | right | 2/2 | 2/2 | 0.01094% | hips/knees |
+| Plan 2 | 2.6 kg | left | 0/3 | 0/3 | 0.44680% | hips/knees |
+| Plan 2 | 2.6 kg | right | 2/2 | 0/2 | 0.00668% | hips/knees |
+| Plan 2 | 4.1 kg | left | 2/2 | 1/2 | 0.01493% | hips |
+| Plan 2 | 4.1 kg | right | 1/2 | 0/2 | 0.00096% | hips/knees |
+| Frozen A1 | 2.6 kg | left | 2/2 | 0/2 | 1.36875% | hips, then hands/knees |
+| Frozen A1 | 2.6 kg | right | 0/7 | 0/7 | 0.00000% | hips/knees/ankle |
+
+Completion and endpoint-yaw gates are reported separately from contact
+semantics. A completed rollout does not pass this audit when non-hand bodies
+supply the dominant positive propulsive impulse. None of the eight cases passed
+the rubber-hand-dominance requirement. Plan 2 changed the left/right completion
+distribution but did not create a rubber-hand-driven side push; it remains a
+diagnostic artifact and is not promoted.
+
+The dominant hip/knee contact points lie on the tabletop push-side vertical
+edge at table-local `z` approximately `-0.262 m`, matching half of the frozen
+`0.5219528 m` table depth. These contacts can begin as early as reference frame
+10. At sampled first-contact frames, the corresponding reference hip/knee body
+origins are farther from the edge than the physical rollout bodies. The current
+evidence therefore indicates rollout drift into an easier body-contact solution,
+but does not prove that the shifted reference itself is collision-free or that
+a single-robot side reference is dynamically impossible.
+
+The next bounded step is consequently a no-training reference-state collision
+replay followed, if collision-free, by a rubber-hand contact-wrench feasibility
+check. It must determine whether the exact reference states introduce table
+interpenetration, whether reachable palm contacts can supply the required
+translation and bounded yaw wrench, and what balance/actuator margin remains.
+Only after that evidence is reviewed may the project discuss Plan 3 or a frozen
+two-entity mechanics preflight. This result does not authorize Plan 4, Plan 5,
+new PPO iterations, hand-only rewards, or hidden support forces.
+
 A frozen two-entity mechanics preflight is not MARL and is not the rejected
 separate-checkpoint plan. It uses two physical robots with documented frozen
 policies, synchronized phase, no artificial teammate force, and no joint
@@ -432,9 +485,12 @@ belong to a separate research direction and are not active here.
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
 Status: **Plans 1 and 2 failed the bilateral single-agent gate on 2026-08-15.
-Do not continue either Plan 2 recipe. The post-Plan-2 dynamics feasibility
-audit is the active next gate. No later plan is selected, and selecting Plan 5
-would not retroactively mark Stage 1B as passed.**
+The 2026-08-17 read-only contact audit additionally showed that both the Plan-2
+candidate and frozen A1 comparison are dominated by hip/knee table propulsion
+in the shifted side layouts. Do not continue either Plan-2 recipe. The active
+next gate is the no-training reference-state collision/wrench-feasibility check.
+No later plan is selected, and selecting Plan 5 would not retroactively mark
+Stage 1B as passed.**
 
 #### Historical protocol (closed)
 
@@ -766,23 +822,27 @@ Completed at the current checkpoint:
 - the lossless Stage 1A checkpoint conversion, strict model/normalizer loads,
   zero deterministic output error, and a two-step Isaac Sim runtime smoke.
 
-The active next work is the post-Plan-2 single-agent side-reference dynamics
-feasibility audit. It proceeds in reviewable steps:
+The active next work remains the post-Plan-2 single-agent side-reference
+dynamics feasibility gate. Its read-only rollout-contact phase is complete and
+it proceeds in reviewable steps:
 
 1. **Apply the confirmed audit contract.** Cover the `1.1--4.1 kg` effective
    mass envelope, permit small natural yaw and incidental body contact, and
    recover the exact existing friction, actuator, reference, and termination
    values without changing them. Review the numerical yaw tolerance before it
    is used as a feasibility boundary.
-2. **Reuse existing recordings for a read-only wrench audit.** Compute the
+2. **Reuse existing recordings for a read-only wrench audit -- complete.** Compute the
    object-reference linear/yaw acceleration requirements, extract actual
    rubber-hand contact forces and moment arms, and compare required versus
    realized table force and yaw moment at the approach, first-contact, sustained
    push, and termination intervals.
-3. **Run a bounded contact-feasibility solve only if the recorded channels are
-   insufficient.** Test whether reachable hand contacts and admissible forces
-   can satisfy the reference wrench while respecting balance, friction, and
-   actuator limits. This is analysis, not PPO training.
+3. **Run a bounded reference-state collision and contact-feasibility check --
+   active.** Replay exact reference states against the frozen table collision
+   geometry, then test whether reachable rubber-hand contacts and admissible
+   forces can satisfy the reference wrench while respecting balance, friction,
+   and actuator limits. This is analysis, not PPO training. The current physical
+   rollouts are not a valid hand-wrench proof because hip/knee propulsion
+   dominates all audited cases.
 4. **Present one of three evidence-backed outcomes:** feasible with margin,
    feasible only near physical limits, or no acceptable solution under the
    frozen contract. Review uncertainties with the user before interpreting the
