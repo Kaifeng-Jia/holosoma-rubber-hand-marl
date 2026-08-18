@@ -2,7 +2,7 @@
 
 from dataclasses import replace
 
-from holosoma.config_types.observation import ObservationManagerCfg
+from holosoma.config_types.observation import ObservationManagerCfg, ObsGroupCfg, ObsTermCfg
 from holosoma.config_values.wbt.g1.observation import (
     actor_obs_shared,
     teammate_obs_marl_compat,
@@ -45,11 +45,56 @@ plan5_teammate_obs = replace(
     },
 )
 
-g1_29dof_plan5_actor_observation = ObservationManagerCfg(
+plan5_centralized_critic_obs = ObsGroupCfg(
+    concatenate=True,
+    enable_noise=False,
+    history_length=1,
+    terms={
+        "agent_actions": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_actions"
+        ),
+        "agent_base_ang_vel_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_base_ang_vel_b"
+        ),
+        "agent_base_lin_vel_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_base_lin_vel_b"
+        ),
+        "agent_body_ori_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_body_ori_b"
+        ),
+        "agent_body_pos_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_body_pos_b"
+        ),
+        "agent_dof_pos": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_dof_pos"
+        ),
+        "agent_dof_vel": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_dof_vel"
+        ),
+        "agent_motion_ref_ori_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_motion_ref_ori_b"
+        ),
+        "agent_motion_ref_pos_b": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_agent_motion_ref_pos_b"
+        ),
+        "shared_motion_command": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_shared_motion_command"
+        ),
+        "shared_object_tracking": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_shared_object_tracking"
+        ),
+        "shared_phase": ObsTermCfg(
+            func="holosoma.managers.observation.terms.marl:centralized_shared_phase"
+        ),
+    },
+)
+
+g1_29dof_plan5_observation = ObservationManagerCfg(
     groups={
         "actor_obs": plan5_actor_obs,
         "teammate_obs": plan5_teammate_obs,
+        "critic_obs": plan5_centralized_critic_obs,
     }
 )
 
-__all__ = ["g1_29dof_plan5_actor_observation"]
+__all__ = ["g1_29dof_plan5_observation", "plan5_centralized_critic_obs"]

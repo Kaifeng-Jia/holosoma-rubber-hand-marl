@@ -7,7 +7,7 @@ from types import SimpleNamespace
 
 import torch
 
-from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_actor_observation
+from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_observation
 from holosoma.config_values.wbt.g1.observation import (
     actor_obs_shared,
     teammate_obs_marl_compat,
@@ -34,25 +34,39 @@ def _yaw_quaternion(angle: float) -> torch.Tensor:
 def _make_env(num_envs: int = 1):
     num_agents = 2
     num_dof = 29
+    num_bodies = 14
     root_states = torch.zeros(num_envs, num_agents, 13)
     root_states[..., 6] = 1.0
     root_states[:, 1, 0] = 0.8
 
-    body_pos = torch.zeros(num_envs, num_agents, 1, 3)
-    body_quat = torch.zeros(num_envs, num_agents, 1, 4)
+    body_pos = torch.zeros(num_envs, num_agents, num_bodies, 3)
+    body_quat = torch.zeros(num_envs, num_agents, num_bodies, 4)
     body_quat[..., 3] = 1.0
+    all_root_states = torch.zeros(num_envs, 13)
+    all_root_states[..., 6] = 1.0
     simulator = SimpleNamespace(
         agent_root_states=root_states,
         agent_dof_pos=torch.zeros(num_envs, num_agents, num_dof),
         agent_dof_vel=torch.zeros(num_envs, num_agents, num_dof),
         agent_rigid_body_pos=body_pos,
         agent_rigid_body_rot=body_quat,
+        all_root_states=all_root_states,
     )
     command = SimpleNamespace(
         command=torch.zeros(num_envs, num_agents, num_dof * 2),
         ref_body_index=0,
         agent_ref_pos_w=body_pos[:, :, 0].clone(),
         agent_ref_quat_w=body_quat[:, :, 0].clone(),
+        simulator_agent_body_pos_w=body_pos,
+        simulator_agent_body_quat_w=body_quat,
+        simulator_object_pos_w=all_root_states[:, :3],
+        simulator_object_quat_w=all_root_states[:, 3:7],
+        object_pos_w=torch.zeros(num_envs, 3),
+        object_quat_w=torch.tensor([0.0, 0.0, 0.0, 1.0]).repeat(num_envs, 1),
+        object_lin_vel_w=torch.zeros(num_envs, 3),
+        object_indices_in_simulator=torch.arange(num_envs),
+        time_steps=torch.zeros(num_envs, dtype=torch.long),
+        reference=SimpleNamespace(num_frames=309),
     )
     env = SimpleNamespace(
         num_envs=num_envs,
@@ -84,15 +98,17 @@ def test_real_teammate_state_uses_each_observers_heading_frame() -> None:
 
 def test_plan5_observation_preserves_154_plus_4_actor_contract() -> None:
     env = _make_env(num_envs=3)
-    manager = ObservationManager(g1_29dof_plan5_actor_observation, env, "cpu")
+    manager = ObservationManager(g1_29dof_plan5_observation, env, "cpu")
 
     observations = manager.compute()
     combined = torch.cat((observations["actor_obs"], observations["teammate_obs"]), dim=-1)
 
     assert observations["actor_obs"].shape == (3, 2, 154)
     assert observations["teammate_obs"].shape == (3, 2, 4)
+    assert observations["critic_obs"].shape == (3, 527)
     assert combined.shape == (3, 2, 158)
     assert torch.isfinite(combined).all()
+    assert torch.isfinite(observations["critic_obs"]).all()
     torch.testing.assert_close(
         observations["teammate_obs"][:, 0, :2],
         -observations["teammate_obs"][:, 1, :2],
@@ -100,8 +116,8 @@ def test_plan5_observation_preserves_154_plus_4_actor_contract() -> None:
 
 
 def test_plan5_terms_only_replace_single_agent_data_providers() -> None:
-    plan5_actor = g1_29dof_plan5_actor_observation.groups["actor_obs"]
-    plan5_teammate = g1_29dof_plan5_actor_observation.groups["teammate_obs"]
+    plan5_actor = g1_29dof_plan5_observation.groups["actor_obs"]
+    plan5_teammate = g1_29dof_plan5_observation.groups["teammate_obs"]
 
     assert list(plan5_actor.terms) == list(actor_obs_shared.terms)
     assert list(plan5_teammate.terms) == list(teammate_obs_marl_compat.terms)
@@ -119,3 +135,31 @@ def test_plan5_terms_only_replace_single_agent_data_providers() -> None:
             assert plan5_term.scale == source_term.scale
             assert plan5_term.noise == source_term.noise
             assert plan5_term.clip == source_term.clip
+
+
+def test_centralized_critic_has_one_team_tensor_without_contact_terms() -> None:
+    env = _make_env(num_envs=2)
+    manager = ObservationManager(g1_29dof_plan5_observation, env, "cpu")
+    critic_group = g1_29dof_plan5_observation.groups["critic_obs"]
+
+    term_dims = {
+        name: manager._compute_term("critic_obs", name, cfg).shape[-1]
+        for name, cfg in critic_group.terms.items()
+    }
+
+    assert term_dims == {
+        "agent_actions": 58,
+        "agent_base_ang_vel_b": 6,
+        "agent_base_lin_vel_b": 6,
+        "agent_body_ori_b": 168,
+        "agent_body_pos_b": 84,
+        "agent_dof_pos": 58,
+        "agent_dof_vel": 58,
+        "agent_motion_ref_ori_b": 12,
+        "agent_motion_ref_pos_b": 6,
+        "shared_motion_command": 58,
+        "shared_object_tracking": 12,
+        "shared_phase": 1,
+    }
+    assert sum(term_dims.values()) == 527
+    assert all("contact" not in name and "role" not in name for name in critic_group.terms)

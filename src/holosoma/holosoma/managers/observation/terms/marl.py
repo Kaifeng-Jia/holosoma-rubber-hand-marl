@@ -28,19 +28,27 @@ def paired_motion_command(env: Any) -> torch.Tensor:
 
 def paired_motion_ref_ori_b(env: Any) -> torch.Tensor:
     """Return each reference-body orientation in its physical robot frame."""
+    _, relative_quat = _paired_motion_ref_transform_b(env)
+    matrix = quaternion_to_matrix(relative_quat, w_last=True)
+    return matrix[..., :2].reshape(env.num_envs, env.num_agents, 6)
+
+
+def _paired_motion_ref_transform_b(env: Any) -> tuple[torch.Tensor, torch.Tensor]:
     command = _paired_motion_command(env)
     actual_pos = env.simulator.agent_rigid_body_pos[:, :, command.ref_body_index]
     actual_quat = env.simulator.agent_rigid_body_rot[:, :, command.ref_body_index]
     reference_pos = command.agent_ref_pos_w
     reference_quat = command.agent_ref_quat_w
-    _, relative_quat = subtract_frame_transforms(
+    relative_pos, relative_quat = subtract_frame_transforms(
         actual_pos.flatten(0, 1),
         actual_quat.flatten(0, 1),
         reference_pos.flatten(0, 1),
         reference_quat.flatten(0, 1),
     )
-    matrix = quaternion_to_matrix(relative_quat, w_last=True)
-    return matrix[..., :2].reshape(env.num_envs, env.num_agents, 6)
+    return (
+        relative_pos.reshape(env.num_envs, env.num_agents, 3),
+        relative_quat.reshape(env.num_envs, env.num_agents, 4),
+    )
 
 
 def paired_base_ang_vel(env: Any) -> torch.Tensor:
@@ -67,6 +75,113 @@ def paired_dof_vel(env: Any) -> torch.Tensor:
 def paired_actions(env: Any) -> torch.Tensor:
     """Return the last action with an explicit agent axis."""
     return env.action_manager.action.reshape(env.num_envs, env.num_agents, env.num_dof)
+
+
+def centralized_shared_motion_command(env: Any) -> torch.Tensor:
+    """Return the homogeneous A1 joint reference once per physical environment."""
+    command = _paired_motion_command(env).command
+    return command[:, 0]
+
+
+def centralized_shared_phase(env: Any) -> torch.Tensor:
+    """Return the one shared motion phase normalized to ``[0, 1]``."""
+    command = _paired_motion_command(env)
+    denominator = max(command.reference.num_frames - 1, 1)
+    return (command.time_steps.float() / denominator).unsqueeze(-1)
+
+
+def centralized_agent_motion_ref_pos_b(env: Any) -> torch.Tensor:
+    """Return both reference-body position errors in their physical body frames."""
+    relative_pos, _ = _paired_motion_ref_transform_b(env)
+    return relative_pos.reshape(env.num_envs, -1)
+
+
+def centralized_agent_motion_ref_ori_b(env: Any) -> torch.Tensor:
+    """Return both reference-body orientation errors as first two matrix columns."""
+    return paired_motion_ref_ori_b(env).reshape(env.num_envs, -1)
+
+
+def _centralized_agent_body_transform_b(env: Any) -> tuple[torch.Tensor, torch.Tensor]:
+    command = _paired_motion_command(env)
+    body_pos = command.simulator_agent_body_pos_w
+    body_quat = command.simulator_agent_body_quat_w
+    num_bodies = body_pos.shape[2]
+    reference_pos = env.simulator.agent_rigid_body_pos[:, :, command.ref_body_index]
+    reference_quat = env.simulator.agent_rigid_body_rot[:, :, command.ref_body_index]
+    relative_pos, relative_quat = subtract_frame_transforms(
+        reference_pos[:, :, None].expand(-1, -1, num_bodies, -1).flatten(0, 2),
+        reference_quat[:, :, None].expand(-1, -1, num_bodies, -1).flatten(0, 2),
+        body_pos.flatten(0, 2),
+        body_quat.flatten(0, 2),
+    )
+    return (
+        relative_pos.reshape(env.num_envs, env.num_agents, num_bodies, 3),
+        relative_quat.reshape(env.num_envs, env.num_agents, num_bodies, 4),
+    )
+
+
+def centralized_agent_body_pos_b(env: Any) -> torch.Tensor:
+    """Return both robots' tracked body positions in their own reference-body frames."""
+    relative_pos, _ = _centralized_agent_body_transform_b(env)
+    return relative_pos.reshape(env.num_envs, -1)
+
+
+def centralized_agent_body_ori_b(env: Any) -> torch.Tensor:
+    """Return both robots' tracked body orientations in their reference-body frames."""
+    _, relative_quat = _centralized_agent_body_transform_b(env)
+    matrix = quaternion_to_matrix(relative_quat, w_last=True)
+    return matrix[..., :2].reshape(env.num_envs, -1)
+
+
+def centralized_agent_base_lin_vel_b(env: Any) -> torch.Tensor:
+    """Return both base linear velocities in their respective full base frames."""
+    root_states = env.simulator.agent_root_states
+    values = quat_rotate_inverse(
+        root_states[..., 3:7].flatten(0, 1),
+        root_states[..., 7:10].flatten(0, 1),
+        w_last=True,
+    )
+    return values.reshape(env.num_envs, -1)
+
+
+def centralized_agent_base_ang_vel_b(env: Any) -> torch.Tensor:
+    """Return both base angular velocities in their respective full base frames."""
+    return paired_base_ang_vel(env).reshape(env.num_envs, -1)
+
+
+def centralized_agent_dof_pos(env: Any) -> torch.Tensor:
+    return paired_dof_pos(env).reshape(env.num_envs, -1)
+
+
+def centralized_agent_dof_vel(env: Any) -> torch.Tensor:
+    return paired_dof_vel(env).reshape(env.num_envs, -1)
+
+
+def centralized_agent_actions(env: Any) -> torch.Tensor:
+    return paired_actions(env).reshape(env.num_envs, -1)
+
+
+def centralized_shared_object_tracking(env: Any) -> torch.Tensor:
+    """Return one table actual-vs-reference state in the reference table frame."""
+    command = _paired_motion_command(env)
+    actual_pos = command.simulator_object_pos_w
+    actual_quat = command.simulator_object_quat_w
+    reference_pos = command.object_pos_w
+    reference_quat = command.object_quat_w
+    relative_pos, relative_quat = subtract_frame_transforms(
+        reference_pos,
+        reference_quat,
+        actual_pos,
+        actual_quat,
+    )
+    relative_orientation = quaternion_to_matrix(relative_quat, w_last=True)[..., :2].reshape(env.num_envs, 6)
+    actual_velocity = env.simulator.all_root_states[command.object_indices_in_simulator][:, 7:10]
+    relative_velocity = quat_rotate_inverse(
+        reference_quat,
+        actual_velocity - command.object_lin_vel_w,
+        w_last=True,
+    )
+    return torch.cat((relative_pos, relative_orientation, relative_velocity), dim=-1)
 
 
 def _real_teammate_planar_state_b(env: Any) -> tuple[torch.Tensor, torch.Tensor]:
