@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 2 已通过；准备进入 Stage 3 的 stochastic rollout、team GAE 与 PPO update 闭环
+- 当前阶段：Stage 3 学习闭环已通过；下一项为 `50 iterations` 环境与数值 smoke
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -424,6 +424,7 @@ Push baseline 稳定后：
 
 ### 9.2 Stage 3——Push A1 训练 gate
 
+- [x] 打通 stochastic rollout、log-prob、team GAE、单次 PPO update 与 checkpoint round-trip。
 - [ ] `50 iterations`：环境与数值 smoke。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
@@ -729,3 +730,30 @@ Push baseline 稳定后：
 - 下一项：进入 Stage 3，先实现 stochastic action sampling、log-prob、team rollout storage、
   team return/GAE 与单次 PPO update 的闭环；通过无 NaN、shape、参数更新和 checkpoint
   round-trip gate 后，才启动 `50 iterations` 训练 smoke。
+
+#### 2026-08-18：MAPPO 随机 rollout 与单次更新闭环
+
+- commit：`44bbebb7`；
+- 随机策略：shared Gaussian actor 对 `[E,2,158]` 分别采样，每个 agent 独立记录
+  `action/log-prob/mean/sigma`，两组 29-D action 仍由 dual action routing 分发；
+- team 数据：central critic、shared reward、joint done、value、return 和 advantage 均只保存
+  一份 `[T,E,...]`，没有为两个 agent 复制 527-D privileged observation；
+- GAE：沿用原 WBT PPO 的 `gamma`、`lambda` 和 timeout bootstrap；joint done 截断整个 team
+  的递推，rollout 后才写入 return/advantage，未写入时 storage fail-closed；
+- PPO：每个 agent 单独计算 probability ratio；同一 team advantage 按 agent 顺序复制两次；
+  critic 每个 environment transition 只计算一次 value loss；沿用原 clipping、entropy、value
+  coefficient、gradient clipping 和 adaptive-KL 学习率规则；
+- checkpoint：保存 shared actor、central critic、两套 optimizer、冻结 actor normalizer、critic
+  normalizer 和 Plan 5 维度/来源哈希；metadata 不匹配时拒绝恢复；
+- 真实 CUDA/Isaac：`1 env × 2 agents × 4 steps`，无 reset；reward 范围
+  `[-0.0371,0.0154]`，log-prob 范围 `[-21.3032,-18.2103]`；actor/critic 最大参数变化
+  均为 `0.0010000`，actor normalizer 不变，checkpoint round-trip 通过；
+- 首次单 mini-batch 在更新前计算得到 `KL=0`、平均 surrogate 数值为 `0`，属于新旧策略
+  初始一致且标准化 advantage 均值为零的预期结果；actor gradient norm `87.45`，参数实际更新；
+- 测试：worktree 全套 `165 passed`，`compileall` 与 `git diff --check` 通过；Ruff 未安装，
+  未为此 gate 改动依赖；
+- gate：训练数据流、team GAE、actor/critic 更新和可恢复 checkpoint 均通过；这仍不是合作行为
+  或最终训练质量证据；
+- 下一项：建立有界的 `50 iterations` 训练入口、日志和 checkpoint 保存，使用当前已冻结的
+  paired A1 reference、shared WBT reward、joint reset、rubber-hand 双机器人和宽桌；训练后按
+  数值稳定性、reference tracking、桌面运动、双方稳定性与接触记录决定是否进入 500 iterations。
