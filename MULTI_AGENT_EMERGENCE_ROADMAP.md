@@ -407,7 +407,7 @@ Push baseline 稳定后：
 - [x] 建立 per-agent actor 数据与 per-environment team 数据分离的 rollout storage。
 - [x] 建立 opt-in 双机器人 ActionManager 控制项，把两组 `29-D` action 独立转换为 torque。
 - [x] 建立最小 Plan 5 environment shell，接通 paired command、dual action 和双实体 simulator。
-- [ ] 把 shared actor batch 和 action routing 接入在线环境。
+- [x] 把 shared actor batch 和 action routing 接入在线环境。
 - [x] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [x] 建立最小 centralized critic observation。
 - [x] 建立全新 centralized critic 网络、normalizer 和 optimizer。
@@ -419,7 +419,7 @@ Push baseline 稳定后：
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
 - [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
   reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
-  在线 actor、新 critic 网络与 reward sign 待完成。
+  在线 actor/critic 已通过；reward sign 和多步 rollout 待完成。
 - [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
@@ -631,3 +631,23 @@ Push baseline 稳定后：
 - gate：模型初始化与加载边界通过；
 - 下一项：实现最小 MAPPO rollout orchestration，使同一个 actor 对 `[E,2,158]` 逐 agent
   执行，并把两组 action 送入现有 dual action routing；critic 每个 environment 只评估一次。
+
+#### 2026-08-18：Shared actor 与 team critic 在线一步路由
+
+- commit：`0da986f8`；
+- 文件：`agents/mappo/runner.py`、runner 测试和升级后的 CUDA environment smoke；
+- actor 数据流：`actor_obs [E,2,154] + teammate_obs [E,2,4] -> [E,2,158] ->
+  [E×2,158] -> shared actor -> [E×2,29] -> [E,2,29]`；
+- critic 数据流：`critic_obs [E,527] -> team critic -> value [E,1]`，每个物理 environment
+  只评估一次，没有按 agent 复制 team value；
+- 环境边界：runner 通过 `env.step({"actions": [E,2,29]})` 进入既有 dual action term，
+  两台 articulation 仍分别计算和接收自己的 torque；
+- 测试：runner shape、fail-closed 和 fake environment action 捕获纳入相关回归，
+  `52 passed`，`py_compile` 与 `git diff --check` 通过；
+- 真实 CUDA/Isaac：冻结 A1 actor 输出 `[1,2,29]`，新 critic 输出 `[1,1]`，实际推进
+  一个 physics/control step 后状态全部有限且没有立即 reset，`passed: true`；
+- 边界：当前 runner 是确定性在线数据流 gate；尚未实现 stochastic rollout、log-prob、
+  shared reward、team return/GAE 或 PPO update；
+- gate：shared actor 和 centralized critic 在线路由通过；
+- 下一项：逐项映射原 WBT reward/termination 到 team 语义，先实现简单 shared reward 与
+  joint termination，再进行多步无更新 rollout。
