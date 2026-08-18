@@ -410,7 +410,8 @@ Push baseline 稳定后：
 - [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
 - [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
-- [ ] 把 paired A1 reference 接入在线环境 reset、phase 和 observation。
+- [x] 建立 paired command，共享环境级 phase，并联合 reset 两台机器人和一张桌子。
+- [ ] 把 paired A1 reference 接入每台机器人的在线 observation。
 - [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
@@ -525,3 +526,16 @@ Push baseline 稳定后：
   `29 passed`；首次测试因遗漏项目 `PYTHONPATH` 未进入收集，补齐既定源码路径后全部通过；
 - gate：控制项及纯张量路由通过，shared actor 与在线 environment 尚未接入；
 - 下一项：实现 paired phase/reset 的在线 command，使两台机器人和共享桌子可联合 reset。
+
+#### 2026-08-18：Paired A1 command（共享 phase 与联合 reset）
+
+- commit：`59f248c2`；
+- 文件：`managers/command/terms/marl.py`、独立 command preset 及单元测试；
+- 结果：每个物理 environment 只维护一个 frame index；同一 frame 同时生成两份
+  robot state，并仅生成和写入一份 object state；partial reset 只影响被选中的 environment；
+  首个 physics gate 使用精确 reference reset，不提前混入 pose noise 或 adaptive sampler；
+- 测试：paired command、原 WBT motion sampling、双机器人 action、paired reference 和
+  MAPPO 基础层合计 `35 passed`，并通过 `py_compile` 与 `git diff --check`；
+- gate：command 数据流通过；真实 Isaac Sim/CUDA joint reset 尚未执行，不计为 physical gate；
+- 下一项：建立最小 Plan 5 environment shell，把 `[env, 2, 29]` actor action、paired
+  command 和 DualRobotIsaacSim 接在一起，然后运行单环境 CUDA reset smoke。
