@@ -410,12 +410,12 @@ Push baseline 稳定后：
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [x] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [x] 建立最小 centralized critic observation。
-- [ ] 建立全新 centralized critic 网络、normalizer 和 optimizer。
+- [x] 建立全新 centralized critic 网络、normalizer 和 optimizer。
 - [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
 - [x] 建立 paired command，共享环境级 phase，并联合 reset 两台机器人和一张桌子。
 - [x] 把 paired A1 reference 接入每台机器人的在线 observation。
 - [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
-- [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
+- [x] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
 - [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
   reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
@@ -610,3 +610,24 @@ Push baseline 稳定后：
 - gate：centralized critic observation gate 通过；
 - 下一项：接通 shared actor batch、冻结 A1 actor normalizer、加载 `158-D` actor，
   并为 `527-D` 输入创建全新的 critic/normalizer/optimizer。
+
+#### 2026-08-18：A1 actor warm-start 与全新 critic 初始化
+
+- commit：`d5eb339f`；
+- 文件：`agents/mappo/initialization.py` 及真实 checkpoint 回归测试；
+- source：`model_07999_actor158.pt`，SHA256
+  `11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224`，iteration `7999`；
+- actor：严格加载完整 `158-D -> 29-D` state dict，新增四列保持零权重；所有 actor
+  参数可训练，不加载旧 optimizer；
+- actor normalizer：加载原 `158-D` mean/variance/count，强制 eval 且忽略 update 请求；
+- critic：创建全新 `527-D -> 1-D` MLP，不读取 checkpoint 中的旧 `298-D` critic；
+- critic normalizer/optimizer：均从零创建；actor optimizer 也从空 state 创建；
+- fail-closed：checkpoint SHA256 或 compatibility version 不符时拒绝加载；
+- 测试：真实 checkpoint、冻结统计量、全局 WBT config 不变、模型前向和空 optimizer
+  state 共 `50 passed`，`py_compile` 与 `git diff --check` 通过；
+- CUDA：actor `[4, 158] -> [4, 29]`、critic `[2, 527] -> [2, 1]` 前向均有限；
+  actor normalizer 保持冻结，critic normalizer 从 count `0` 开始更新；
+- 边界：模型 bundle 已正确建立，但尚未接入 environment rollout、team return/GAE 或 PPO update；
+- gate：模型初始化与加载边界通过；
+- 下一项：实现最小 MAPPO rollout orchestration，使同一个 actor 对 `[E,2,158]` 逐 agent
+  执行，并把两组 action 送入现有 dual action routing；critic 每个 environment 只评估一次。
