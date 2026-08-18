@@ -24,6 +24,7 @@ PARSER.add_argument("--steps-per-env", type=int, default=24)
 PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--actor-learning-rate", type=float, default=None)
 PARSER.add_argument("--critic-learning-rate", type=float, default=None)
+PARSER.add_argument("--critic-only", action="store_true")
 PARSER.add_argument(
     "--output-dir",
     type=Path,
@@ -165,6 +166,7 @@ def main() -> None:
             "action_dim_per_agent": 29,
             "actor_learning_rate": ppo_config.actor_learning_rate,
             "critic_learning_rate": ppo_config.critic_learning_rate,
+            "critic_only": ARGS.critic_only,
             "gamma": ppo_config.gamma,
             "lambda": ppo_config.lam,
             "clip_param": ppo_config.clip_param,
@@ -194,7 +196,7 @@ def main() -> None:
             timeouts = learner.storage.team("timeouts").clone()
             advantages = learner.storage.team("advantages").clone()
             reward_terms = _reward_term_snapshot(env)
-            update_metrics = learner.update()
+            update_metrics = learner.update(update_actor=not ARGS.critic_only)
             action_mean_after = learner.runner.decide(
                 fixed_observations,
                 update_critic_normalizer=False,

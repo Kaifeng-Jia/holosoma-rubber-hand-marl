@@ -125,3 +125,28 @@ def test_mappo_checkpoint_round_trip_and_metadata_fail_closed() -> None:
     bad_state["plan5_mappo"] = {**state["plan5_mappo"], "num_agents": 3}
     with pytest.raises(ValueError, match="metadata mismatch"):
         restored.load_training_state_dict(bad_state)
+
+
+def test_critic_only_update_preserves_actor_and_updates_critic() -> None:
+    torch.manual_seed(721)
+    learner = _learner()
+    actor_before = {key: value.clone() for key, value in learner.models.actor.state_dict().items()}
+    critic_before = {key: value.clone() for key, value in learner.models.critic.state_dict().items()}
+    actor_lr_before = learner.models.actor_optimizer.param_groups[0]["lr"]
+    critic_lr_before = learner.models.critic_optimizer.param_groups[0]["lr"]
+
+    learner.collect_rollout(FakeTeamEnvironment(2), _observations(2))
+    metrics = learner.update(update_actor=False)
+
+    for key, value in actor_before.items():
+        torch.testing.assert_close(value, learner.models.actor.state_dict()[key], rtol=0.0, atol=0.0)
+    assert any(
+        not torch.equal(value, learner.models.critic.state_dict()[key])
+        for key, value in critic_before.items()
+    )
+    assert metrics.surrogate_loss == 0.0
+    assert metrics.entropy == 0.0
+    assert metrics.kl == 0.0
+    assert metrics.actor_grad_norm == 0.0
+    assert learner.models.actor_optimizer.param_groups[0]["lr"] == actor_lr_before
+    assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before

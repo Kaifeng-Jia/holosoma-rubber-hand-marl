@@ -202,7 +202,7 @@ class Plan5PPO:
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1.0e-8)
         return returns, advantages
 
-    def update(self) -> Plan5PPOUpdateMetrics:
+    def update(self, *, update_actor: bool = True) -> Plan5PPOUpdateMetrics:
         """Apply PPO epochs to one full synchronized rollout."""
         totals = {
             "surrogate_loss": 0.0,
@@ -217,7 +217,7 @@ class Plan5PPO:
             num_mini_batches=self.config.num_mini_batches,
             num_epochs=self.config.num_learning_epochs,
         ):
-            metrics = self._update_minibatch(minibatch)
+            metrics = self._update_minibatch(minibatch, update_actor=update_actor)
             for key, value in metrics.items():
                 totals[key] += value
             updates += 1
@@ -229,24 +229,49 @@ class Plan5PPO:
     def _update_minibatch(
         self,
         minibatch: dict[str, dict[str, torch.Tensor]],
+        *,
+        update_actor: bool,
     ) -> dict[str, float]:
         agent = minibatch["agent"]
         team = minibatch["team"]
-        team_advantages = team["advantages"]
-        actor_advantages = team_advantages.repeat_interleave(self.layout.num_agents, dim=0)
+        if update_actor:
+            team_advantages = team["advantages"]
+            actor_advantages = team_advantages.repeat_interleave(self.layout.num_agents, dim=0)
 
-        self.models.actor.act({"actor_obs": agent["actor_obs"]})
-        action_log_probs = self.models.actor.get_actions_log_prob(agent["actions"]).unsqueeze(-1)
-        ratio = torch.exp(action_log_probs - agent["actions_log_prob"])
-        surrogate = -actor_advantages * ratio
-        surrogate_clipped = -actor_advantages * torch.clamp(
-            ratio,
-            1.0 - self.config.clip_param,
-            1.0 + self.config.clip_param,
-        )
-        surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
-        entropy = self.models.actor.entropy.mean()
-        actor_loss = surrogate_loss - self.config.entropy_coef * entropy
+            self.models.actor.act({"actor_obs": agent["actor_obs"]})
+            action_log_probs = self.models.actor.get_actions_log_prob(agent["actions"]).unsqueeze(-1)
+            ratio = torch.exp(action_log_probs - agent["actions_log_prob"])
+            surrogate = -actor_advantages * ratio
+            surrogate_clipped = -actor_advantages * torch.clamp(
+                ratio,
+                1.0 - self.config.clip_param,
+                1.0 + self.config.clip_param,
+            )
+            surrogate_loss = torch.max(surrogate, surrogate_clipped).mean()
+            entropy = self.models.actor.entropy.mean()
+            actor_loss = surrogate_loss - self.config.entropy_coef * entropy
+
+            with torch.no_grad():
+                old_dist = Normal(agent["action_mean"], agent["action_sigma"])
+                new_dist = Normal(self.models.actor.action_mean, self.models.actor.action_std)
+                kl = kl_divergence(old_dist, new_dist).sum(-1).mean()
+                if self.config.schedule == "adaptive" and self.config.desired_kl is not None:
+                    self._update_learning_rates(kl)
+
+            self.models.actor_optimizer.zero_grad()
+            actor_loss.backward()
+            actor_grad_norm = nn.utils.clip_grad_norm_(
+                self.models.actor.parameters(),
+                self.config.max_grad_norm,
+            )
+            self.models.actor_optimizer.step()
+        else:
+            self.models.actor_optimizer.zero_grad()
+            zero = torch.zeros((), device=team["critic_obs"].device)
+            surrogate_loss = zero
+            entropy = zero
+            kl = zero
+            actor_grad_norm = zero
 
         values = self.models.critic.evaluate({"critic_obs": team["critic_obs"]})
         value_clipped = team["values"] + (values - team["values"]).clamp(
@@ -257,21 +282,6 @@ class Plan5PPO:
         value_losses_clipped = (value_clipped - team["returns"]).pow(2)
         value_loss = torch.max(value_losses, value_losses_clipped).mean()
         critic_loss = self.config.value_loss_coef * value_loss
-
-        with torch.no_grad():
-            old_dist = Normal(agent["action_mean"], agent["action_sigma"])
-            new_dist = Normal(self.models.actor.action_mean, self.models.actor.action_std)
-            kl = kl_divergence(old_dist, new_dist).sum(-1).mean()
-            if self.config.schedule == "adaptive" and self.config.desired_kl is not None:
-                self._update_learning_rates(kl)
-
-        self.models.actor_optimizer.zero_grad()
-        actor_loss.backward()
-        actor_grad_norm = nn.utils.clip_grad_norm_(
-            self.models.actor.parameters(),
-            self.config.max_grad_norm,
-        )
-        self.models.actor_optimizer.step()
 
         self.models.critic_optimizer.zero_grad()
         critic_loss.backward()
