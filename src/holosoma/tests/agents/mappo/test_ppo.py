@@ -174,6 +174,21 @@ def test_adaptive_policy_kl_changes_only_actor_learning_rate(
     assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before
 
 
+def test_fixed_schedule_keeps_actor_and_critic_learning_rates_during_update() -> None:
+    learner = _learner()
+    learner.config = replace(learner.config, schedule="fixed")
+    actor_lr_before = learner.actor_learning_rate
+    critic_lr_before = learner.critic_learning_rate
+
+    learner.collect_rollout(FakeTeamEnvironment(2), _observations(2))
+    learner.update(teammate_input_only=True)
+
+    assert learner.actor_learning_rate == actor_lr_before
+    assert learner.critic_learning_rate == critic_lr_before
+    assert learner.models.actor_optimizer.param_groups[0]["lr"] == actor_lr_before
+    assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before
+
+
 def test_teammate_input_only_update_changes_only_four_new_input_columns() -> None:
     torch.manual_seed(721)
     learner = _learner()

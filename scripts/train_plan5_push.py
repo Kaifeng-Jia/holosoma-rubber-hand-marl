@@ -42,6 +42,8 @@ for name in ("actor_learning_rate", "critic_learning_rate"):
     value = getattr(ARGS, name)
     if value is not None and value <= 0.0:
         PARSER.error(f"--{name.replace('_', '-')} must be positive")
+if ARGS.teammate_input_only and ARGS.actor_learning_rate is None:
+    PARSER.error("--teammate-input-only requires an explicit --actor-learning-rate")
 
 from holosoma.config_values.marl.g1.experiment import g1_29dof_plan5_push_baseline
 from holosoma.utils.eval_utils import init_sim_imports
@@ -131,6 +133,8 @@ def main() -> None:
             ppo_overrides["actor_learning_rate"] = ARGS.actor_learning_rate
         if ARGS.critic_learning_rate is not None:
             ppo_overrides["critic_learning_rate"] = ARGS.critic_learning_rate
+        if ARGS.teammate_input_only:
+            ppo_overrides["schedule"] = "fixed"
         ppo_config = replace(g1_29dof_wbt_w_object.algo.config, **ppo_overrides)
         source_checkpoint = (
             REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
@@ -168,6 +172,7 @@ def main() -> None:
             "action_dim_per_agent": 29,
             "actor_learning_rate": ppo_config.actor_learning_rate,
             "critic_learning_rate": ppo_config.critic_learning_rate,
+            "learning_rate_schedule": ppo_config.schedule,
             "critic_only": ARGS.critic_only,
             "teammate_input_only": ARGS.teammate_input_only,
             "actor_update_mode": (
