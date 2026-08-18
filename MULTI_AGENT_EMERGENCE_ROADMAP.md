@@ -400,9 +400,10 @@ Push baseline 稳定后：
 ### 9.1 Stage 2——环境与数据流
 
 - [x] 只读审计 simulator、environment、PPO、rollout storage 和 recorder 的现有结构。
-- [~] 冻结精确的修改文件、模块边界和回退方案。
+- [x] 冻结精确的修改文件、模块边界和回退方案。
 - [ ] 建立两台 physical rubber-hand G1 和一张共享宽桌的单环境实体结构。
-- [ ] 实现 shared actor 批处理和两组 `29-D` action 的无串线分发。
+- [x] 定义 shared actor batch 与两组 `29-D` action 的纯张量 shape/routing 契约。
+- [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
 - [ ] 建立 paired A1 reference、共享 phase 和共享 object reference。
@@ -461,3 +462,13 @@ Push baseline 稳定后：
 - 测试：只读审计，无运行时修改；
 - gate：通过；
 - 下一项：冻结精确文件边界并实现无 Isaac 依赖的 shape/action-routing 基础层。
+
+#### 2026-08-18：Shared actor batch/action shape 基础层
+
+- commit：待本次代码提交；
+- 文件：`agents/mappo/batch_layout.py` 及其单元测试；
+- 结果：固定 `2 agents x 158-D observation x 29-D action` 契约；
+  `[env, agent, feature]` 与 shared-actor batch 可逆转换，agent 顺序不串线；
+- 测试：`7 passed`，并通过 `py_compile` 与 `git diff --check`；
+- gate：通过；
+- 下一项：实现区分 per-agent actor 数据和 per-environment team 数据的 rollout storage。
