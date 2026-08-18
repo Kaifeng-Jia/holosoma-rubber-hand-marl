@@ -379,18 +379,85 @@ Push baseline 稳定后：
 
 创新模块只在 baseline 暴露明确限制后选择。
 
-## 8. 当前下一步
+## 8. 已冻结的实施决策
 
-下一步不是继续旧单侧实验，也不是立即启动 8,000 iterations。首先讨论并冻结
-Stage 2 的最小技术设计：
+2026-08-18 已确认以下八项：
 
-1. 双机器人 environment/entity 数据结构；
-2. 两次 shared actor 调用与 58 维环境 action 的拆分方式；
-3. 158 维 actor observation 的真实 teammate 更新和随机化范围；
-4. centralized critic 的最小字段与维度；
-5. paired reference 的存储和 phase 同步；
-6. shared reward、joint reset 和 termination；
-7. checkpoint 加载与 normalizer 处理；
-8. 记录、可视化和最小验收测试。
+- [x] 单智能体随机 teammate 输入只做短程接口与鲁棒性检查，不做长期适应训练。
+- [x] 同一动作内使用 shared actor 和 decentralized execution；centralized critic 从零训练。
+- [x] 首版使用左右平移的 paired A1 robot reference 和一条共享桌子 reference。
+- [x] 使用简单 shared WBT reward，不加入显式分工、hand-only 或合作塑形奖励。
+- [x] 任一机器人失效时 joint reset；允许并记录偶发非手部接触。
+- [x] 冻结已有 actor normalizer，完整 actor 参与 MARL 更新。
+- [x] 训练采用 `50 -> 500 -> 2,000 -> 8,000 iterations` gate。
+- [x] `0.1 kg` 只用于环境 smoke；正式物理参数通过单/双机器人 capacity calibration 冻结。
 
-上述八项确认后，再列出精确修改文件并开始 Stage 2 实现。
+## 9. 执行清单与结果记录
+
+状态含义：`[ ]` 未开始，`[~]` 进行中，`[x]` 完成并通过 gate，`[!]` 完成但未通过。
+每个完成项必须在本节记录日期、commit、测试或产物、定量结果和结论。
+
+### 9.1 Stage 2——环境与数据流
+
+- [x] 只读审计 simulator、environment、PPO、rollout storage 和 recorder 的现有结构。
+- [~] 冻结精确的修改文件、模块边界和回退方案。
+- [ ] 建立两台 physical rubber-hand G1 和一张共享宽桌的单环境实体结构。
+- [ ] 实现 shared actor 批处理和两组 `29-D` action 的无串线分发。
+- [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
+- [ ] 建立最小 centralized critic observation 和全新 critic。
+- [ ] 建立 paired A1 reference、共享 phase 和共享 object reference。
+- [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
+- [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
+- [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
+- [ ] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试。
+- [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
+
+### 9.2 Stage 3——Push A1 训练 gate
+
+- [ ] `50 iterations`：环境与数值 smoke。
+- [ ] `500 iterations`：学习方向与稳定性检查。
+- [ ] `2,000 iterations`：初步合作与搭便车诊断。
+- [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
+
+每一级未通过时先记录失败层级和证据，不自动进入下一级或增加训练量。
+
+### 9.3 Stage 4——物理与合作真实性
+
+- [ ] 完成单机器人/双机器人 capacity calibration。
+- [ ] 冻结正式桌子质量、惯量、COM 和摩擦。
+- [ ] 完成 frozen-copy、scratch、WBT-initialized 三组双机器人对照。
+- [ ] 完成多 seed 正式评测。
+- [ ] 完成单 agent removal、接触 impulse、桌子功率贡献和非手接触报告。
+- [ ] 证明第二台机器人具有可量化的因果贡献。
+
+### 9.4 Stage 5——动作与场景扩展
+
+- [ ] 使用独立 Pull checkpoint 建立 Pull 合作 baseline。
+- [ ] 建立 competitive object-grabbing 环境。
+- [ ] 比较 WBT 初始化与从零训练。
+- [ ] 量化争抢、阻挡、让位、接触点切换和控制权变化。
+
+### 9.5 已完成记录
+
+#### 2026-08-18：实施决策冻结
+
+- commit：待与 Stage 2 只读审计结果一并提交；
+- 结果：八项技术决策全部确认，Plan 5 从概念讨论进入执行；
+- gate：通过；
+- 下一项：只读代码审计。
+
+#### 2026-08-18：Stage 2 只读代码审计
+
+- commit：待本次清单提交；
+- 检查范围：`BaseTask`、`WholeBodyTrackingManager`、Isaac Sim、`MotionCommand`、
+  action/observation/reward/termination managers、PPO、rollout storage、recorder 和训练入口；
+- 结果：现有框架以“每个环境一台 robot”为硬假设，不存在可直接启用的 MARL 路径；
+- 证据：simulator 只维护一个 `_robot` articulation，WBT 与 PPO 张量均以
+  `[num_envs, ...]` 表示一台机器人；已有双实体 mechanics preflight 证明两台
+  rubber-hand G1 与共享桌的 Isaac Lab 物理创建可行；
+- 决策：新增 Plan 5 专用双机器人 simulator/environment/MAPPO 适配层，保持原
+  单机器人 WBT、标准 PPO 和 `main` 路径不变；actor 使用 per-agent 样本，team
+  return/value 每个物理环境只计算一份；
+- 测试：只读审计，无运行时修改；
+- gate：通过；
+- 下一项：冻结精确文件边界并实现无 Isaac 依赖的 shape/action-routing 基础层。
