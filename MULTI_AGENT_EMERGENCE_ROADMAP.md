@@ -10,7 +10,7 @@
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
-- Active work item: table-only forward-dynamics validation of the side-reference yaw-wrench mismatch
+- Active work item: review a frozen two-entity mechanics preflight after classifying the translated side reference as brittle
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
@@ -355,7 +355,7 @@ explicitly rejected and is not an active plan.
 |---|---|---|
 | **1. Bounded left-side adaptation** | Initialize from `model_07999_actor158.pt`, preserve the shifted reference/object/WBT contract, run a 50-iteration left smoke, and continue to 500 only if the same checkpoint improves both left and right gates. | **Failed.** The 50-iteration run caused severe first-update drift and completed only `2/20` on each side. The 500-iteration continuation was not authorized. |
 | **2. Balanced left/right reference training** | Train one shared checkpoint with both shifted references and report per-side metrics rather than aggregate reward. | **Failed under the tested recipes.** The conservative full-actor variant preserved the right side but completed `0/20` left; the backbone-frozen teammate-input adapter also completed no left trajectory. Do not add iterations to either recipe. |
-| **3. Training-time symmetry augmentation** | Define strict left/right transforms for observation, reference, action, critic state, joints, bodies, and contact channels, then train one shared actor with symmetry-consistency supervision. | **Pending, blocked by the post-Plan-2 feasibility gate.** Symmetry training is justified only if the single-agent side-end reference is dynamically feasible. |
+| **3. Training-time symmetry augmentation** | Define strict left/right transforms for observation, reference, action, critic state, joints, bodies, and contact channels, then train one shared actor with symmetry-consistency supervision. | **Not selected for the current simply translated references.** The feasibility gate classified that reference construction as physically brittle. Revisit only if dynamically corrected single-side references are generated and reviewed. |
 | **4. Full symmetric A1 retraining** | Re-run the complete A1 WBT configuration with validated left/right references and symmetry support, potentially up to the full 8,000-iteration budget. | **Pending high-cost fallback.** Use only if Plan 3 is valid but insufficient; do not start directly. This was the original Plan 5 before removal of the rejected separate-checkpoint proposal. |
 | **5. Paired-reference multi-agent WBT** | Materialize the accepted Viser layout as two synchronized robot references, one shared table reference, and one shared phase; initialize a shared actor from A1 and train a centralized critic for the dual-robot pushing demonstration. | **New parallel candidate, not yet selected.** It bypasses the remaining single-agent side-adaptation stage but preserves the A1 prior. |
 
@@ -520,20 +520,49 @@ passes 30 degrees shortly afterward. Therefore the evidence does **not**
 support treating natural yaw as a minor correction to the translated central
 A1 object trajectory.
 
-This remains an optimistic table-side necessary-condition model, not a final
-infeasibility proof. It holds foot-slip directions near the frozen reference,
-uses projected rather than pairwise PhysX contact points, and does not yet test
-G1 balance or map hand forces through arm/wrist Jacobians. Once yaw has moved
-far from the reference, its linearized integration must not be interpreted as
-an endpoint prediction. The next bounded step is a table-only, no-training
-forward-dynamics validation that lets yaw and ground slip evolve. If that test
-also leaves the accepted yaw range rapidly, the project can classify the simple
-translated side reference as physically brittle before spending effort on a
-full whole-body actuator solution.
+The linear screen alone remains an optimistic table-side necessary-condition
+model, not an infeasibility proof. It holds foot-slip directions near the
+frozen reference, uses projected rather than pairwise PhysX contact points, and
+does not test G1 balance or map hand forces through arm/wrist Jacobians. Once
+yaw has moved far from the reference, its linearized integration must not be
+interpreted as an endpoint prediction. The minimal nonlinear validation below
+therefore checks the decision-relevant yaw/slip behavior before any unnecessary
+whole-body actuator layer is added.
 
-Only after that evidence is reviewed may the project discuss Plan 3 or a frozen
-two-entity mechanics preflight. This result does not authorize Plan 4, Plan 5,
-new PPO iterations, hand-only rewards, or hidden support forces.
+#### Minimal table-only forward-dynamics result -- 2026-08-17
+
+Commit `e6e0949d` applies the representative `2.6 kg`, hand friction `0.5`,
+and ground friction `0.5` case in a minimal planar rigid-table rollout. The
+force schedule is open loop and comes directly from the preceding wrench
+solver. Table position, velocity, yaw, yaw rate, foot-slip direction, and
+friction evolve freely. There is no robot, policy, reward, feedback controller,
+hidden support force, or yaw stabilizer. The rollout starts at the first valid
+sliding-contact frame so that an omitted low-speed approach is not confused
+with sustained-push dynamics.
+
+| Side | Reference displacement | Simulated displacement | Endpoint position error | Maximum absolute yaw error | First 15-degree yaw error | 30-degree yaw error |
+|---|---:|---:|---:|---:|---:|---:|
+| left | 1.503 m | 0.655 m | 0.849 m | 19.8 degrees | 1.02 s after rollout start | not reached |
+| right | 1.503 m | 0.664 m | 0.847 m | 23.4 degrees | 0.88 s after rollout start | not reached |
+
+This simpler nonlinear check is less pessimistic than the unbounded linearized
+yaw extrapolation, but it reaches the same decision-relevant result: both sides
+leave the accepted 15-degree yaw-error region quickly, and neither preserves
+the reference translation. The result therefore classifies the **simple
+translation of the central A1 reference** as physically brittle. It does not
+prove that every possible single-robot side push is impossible. A separately
+optimized reference that permits a different table path and natural yaw could
+still be studied later, but that is no longer a small adaptation of A1.
+
+Because the failure already occurs in an optimistic table-only model, a G1
+Jacobian/actuator calculation cannot rescue the current reference construction;
+it could only impose additional constraints. The gate therefore stops before
+adding that unnecessary layer. The evidence rejects more PPO iterations on
+Plans 1/2 and does not support Plan 3 on the same references.
+
+This evidence permits discussion of a frozen two-entity mechanics preflight but
+does not select Plan 5, reopen Plan 3 on the same references, or authorize Plan
+4, new PPO iterations, hand-only rewards, or hidden support forces.
 
 A frozen two-entity mechanics preflight is not MARL and is not the rejected
 separate-checkpoint plan. It uses two physical robots with documented frozen
@@ -905,25 +934,26 @@ it proceeds in reviewable steps:
    realized table force and yaw moment at the approach, first-contact, sustained
    push, and termination intervals.
 3. **Run a bounded reference-state collision and contact-feasibility check --
-   collision replay and planar wrench screen complete; forward-dynamics check
-   active.** The exact 309-frame replay
+   complete.** The exact 309-frame replay
    found no lower-body reference collision above `5 N`; every non-rubber-hand
    event came from a wrist-yaw link and remains separately reported incidental
    contact. The planar LP shows that matching the central reference yaw is not
    generally feasible and that its minimum yaw relaxation rapidly exceeds the
-   accepted linearization range. Next validate that result with table-only
-   forward dynamics in which yaw and ground slip evolve, then test G1
-   balance/actuator limits only if the table-side mechanics remain viable. This
-   is analysis, not PPO training. The current physical rollouts are not a valid
-   hand-wrench proof because hip/knee propulsion dominates all audited cases.
-4. **Present one of three evidence-backed outcomes:** feasible with margin,
-   feasible only near physical limits, or no acceptable solution under the
-   frozen contract. Review uncertainties with the user before interpreting the
-   outcome.
-5. **Choose the branch only after review.** A robust feasible result permits a
-   corrected-reference proposal and later discussion of Plan 3. An infeasible
-   or brittle result permits discussion of the frozen two-entity mechanics
-   preflight. Neither outcome automatically authorizes Plan 4 or Plan 5.
+   accepted linearization range. The table-only forward rollout independently
+   crossed 15 degrees on both sides and lost approximately `0.85 m` of the
+   required translation. This is analysis, not PPO training. The current
+   physical policy rollouts are not a valid hand-wrench proof because hip/knee
+   propulsion dominates all audited cases.
+4. **Present one of three evidence-backed outcomes -- complete.** The current
+   simple translation of the central A1 reference is **physically brittle**:
+   it is not a robust basis for further single-side PPO adaptation. This is not
+   a universal impossibility claim about all redesigned single-robot side
+   references.
+5. **Choose the branch only after review -- active.** The brittle result permits
+   discussion of the frozen two-entity mechanics preflight. It does not
+   automatically authorize Plan 4 or Plan 5. A corrected single-side reference
+   remains possible only as a larger, separately reviewed trajectory-design
+   effort.
 
 Until this gate is reviewed, do not edit reference trajectories, change table
 physics, add a second physical robot, modify reward/termination logic, or start
