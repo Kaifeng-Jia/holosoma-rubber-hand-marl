@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 3 tuned warm-start preflight 已通过；准备启动 `50 iterations` 数值 smoke
+- 当前阶段：Stage 3 的 `50 iterations` 数值 smoke 已完成；多 seed 行为方向 gate 未通过，暂不进入 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -427,7 +427,8 @@ Push baseline 稳定后：
 - [x] 打通 stochastic rollout、log-prob、team GAE、单次 PPO update 与 checkpoint round-trip。
 - [!] `1 iteration` 训练入口 preflight：管线通过，但原 WBT `1e-3` actor LR 的稳定性未通过。
 - [x] tuned preflight：`32 envs`、actor LR `1e-5`、fresh critic LR `1e-3` 通过 KL/drift gate。
-- [ ] `50 iterations`：环境与数值 smoke。
+- [x] `50 iterations`：环境与数值 smoke。
+- [!] `50 iterations` 后三 seed 行为方向 gate：数值稳定，但 A1 姿态/总 reward 平均退化。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -802,3 +803,30 @@ Push baseline 稳定后：
   更新前，因此这里只作为 frozen prior 的随机采样基线，不用于评价新 LR 的学习成效；
 - gate：冻结首个 50-iteration smoke 为 `seed=721, num_envs=32, steps_per_env=24,
   actor_lr=1e-5, critic_lr=1e-3`；当前结论仅适用于数值 smoke，不冻结正式物理训练参数。
+
+#### 2026-08-18：50-iteration 数值 smoke 与行为方向评测
+
+- 训练产物：`logs/Plan5Push/a1_mappo_smoke50_seed721_lr1e5_env32/`；50 行 JSONL、
+  `run_config.json`、`status.json`、初始与 iteration-50 resumable checkpoint 均完整；
+- checkpoint SHA256：初始 `02e3f8be6e7be57e7164823ceeedbd4273a7567b1c427412d474f372c29bccfa`；
+  iteration 50 `93d9cb36c69ad97ed213a71015b7e41c0094bbfde6081e44a906744159e297d0`；
+- 数值稳定性：所有指标有限；前 10→后 10 的 reward mean `-0.03918→-0.03538`，value
+  loss `0.10184→0.08507`，KL mean `0.01841→0.01855`；KL 全程范围
+  `[0.01536,0.02257]`；
+- 稳定性边界：tracking failures 前 10/后 10 分别为每轮 `43.8/44.1`，没有爆炸也没有
+  改善；actor LR 保持 `1e-5`，critic LR 最终被 adaptive-KL 联动降至 `1e-5`；
+- 评测支持 commit：`2b868082`；现有 CUDA smoke 可加载 MAPPO training checkpoint，报告
+  reward mean、各 term mean 和具体 termination count，并支持显式 seed；
+- deterministic 行为评测：seeds `721/722/723`，source 与 iteration 50 各运行 100 steps；
+  两者全部状态有限且仅发生 `joint_bad_tracking` reset；
+- 三 seed 平均 final−source：总 reward mean `-0.00424`，global body orientation
+  `-0.10098`，relative body orientation `-0.07360`，relative body position `-0.04950`，
+  object position `+0.01210`，object orientation `-0.01744`，undesired contacts `+0.10667`，
+  reset count `-0.33`；
+- 权重证据：teammate 四列从 L2 `0` 增至 `0.05505`，说明策略开始使用新输入；旧 154 列
+  的累计 delta L2 为 `0.27081`，整个 actor delta L2 为 `0.48854`，说明 A1 先验也发生了
+  不可忽略的累计漂移；
+- gate 结论：50-iteration “环境与数值 smoke”通过，但“行为学习方向”未通过；不得直接进入
+  500 iterations，也不能用更长训练量解释当前退化；
+- 待讨论：下一步必须优先限制 actor 对旧 A1 prior 的累计漂移，同时让 fresh central critic
+  获得足够学习速率；任何 actor/critic 分离调度、critic warm-up 或 KL early-stop 改动都需先确认。
