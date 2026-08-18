@@ -401,7 +401,8 @@ Push baseline 稳定后：
 
 - [x] 只读审计 simulator、environment、PPO、rollout storage 和 recorder 的现有结构。
 - [x] 冻结精确的修改文件、模块边界和回退方案。
-- [ ] 建立两台 physical rubber-hand G1 和一张共享宽桌的单环境实体结构。
+- [x] 建立 opt-in 双 articulation Isaac Sim 状态、接触、reset 与 torque 适配层。
+- [ ] 用真实 CUDA reset 验证两台 physical rubber-hand G1、共享宽桌和 collision graph。
 - [x] 定义 shared actor batch 与两组 `29-D` action 的纯张量 shape/routing 契约。
 - [x] 建立 per-agent actor 数据与 per-environment team 数据分离的 rollout storage。
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
@@ -484,3 +485,16 @@ Push baseline 稳定后：
   当前环境未安装 `ruff`，未新增依赖；
 - gate：通过；
 - 下一项：实现 Plan 5 专用 Isaac Sim 双 articulation 状态与控制适配层。
+
+#### 2026-08-18：双 articulation Isaac Sim 适配层（静态 gate）
+
+- commit：待本次代码提交；
+- 文件：`simulator/isaacsim/dual_robot_isaacsim.py`、Isaac Sim 扩展钩子、
+  独立 simulator 配置和配置测试；
+- 结果：普通 `isaacsim` 行为保持 opt-out；Plan 5 配置增加第二 articulation，
+  并公开 `[env, agent, ...]` root/DOF/body/contact 张量及双机器人写入接口；
+- 测试：MAPPO、配置和 rubber-hand 资产回归合计 `20 passed`，并通过
+  `py_compile` 与 `git diff --check`；
+- gate：静态 gate 通过，物理 gate 尚未执行；
+- 下一项：建立最小 Plan 5 environment，使 paired reset 与 action routing 可驱动
+  双 articulation，然后运行真实 CUDA reset smoke。

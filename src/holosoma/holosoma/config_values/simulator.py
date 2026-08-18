@@ -1,3 +1,5 @@
+from dataclasses import replace
+
 from holosoma.config_types.simulator import (
     MujocoBackend,
     PhysxConfig,
@@ -51,6 +53,11 @@ isaacsim = SimulatorConfig(
         ),
         contact_sensor_history_length=3,
     ),
+)
+
+isaacsim_dual_robot = replace(
+    isaacsim,
+    _target_="holosoma.simulator.isaacsim.dual_robot_isaacsim.DualRobotIsaacSim",
 )
 
 
@@ -109,6 +116,7 @@ mjwarp = SimulatorConfig(
 DEFAULTS = {
     "isaacgym": isaacgym,
     "isaacsim": isaacsim,
+    "isaacsim_dual_robot": isaacsim_dual_robot,
     "mujoco": mujoco,
     "mjwarp": mjwarp,
 }

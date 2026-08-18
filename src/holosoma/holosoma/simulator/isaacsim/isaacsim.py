@@ -194,6 +194,17 @@ class IsaacSim(BaseSimulator):
 
         logger.info("Completed setting up the environment...")
 
+    def _setup_additional_robot_articulations(
+        self,
+        robot_articulation_config: ArticulationCfg,
+        contact_sensor_config: ContactSensorCfg,
+    ) -> None:
+        """Hook for simulator subclasses that place more robots in each scene."""
+
+    def _robot_prim_path_expressions(self) -> list[str]:
+        """Return robot articulation roots used by filtered contact sensors."""
+        return ["/World/envs/env_.*/Robot"]
+
     def _setup_scene(self) -> None:
         self._load_scene_config()
 
@@ -383,6 +394,11 @@ class IsaacSim(BaseSimulator):
         self.contact_sensor = ContactSensor(contact_sensor_config)
         self.scene.sensors["contact_sensor"] = self.contact_sensor
 
+        self._setup_additional_robot_articulations(
+            robot_articulation_config,
+            contact_sensor_config,
+        )
+
         if height_scanner_config:
             self._height_scanner = RayCaster(height_scanner_config)
             self.scene.sensors["height_scanner"] = self._height_scanner
@@ -478,7 +494,9 @@ class IsaacSim(BaseSimulator):
                         # broad Robot/.* filter produced an all-zero aggregate
                         # even while the hand-specific filters reported force.
                         filter_prim_paths_expr=[
-                            f"/World/envs/env_.*/Robot/{body_name}" for body_name in robot_contact_body_names
+                            f"{robot_prim_path}/{body_name}"
+                            for robot_prim_path in self._robot_prim_path_expressions()
+                            for body_name in robot_contact_body_names
                         ],
                     )
                 )
@@ -488,8 +506,12 @@ class IsaacSim(BaseSimulator):
                     ContactSensorCfg(
                         **common_object_contact_sensor_kwargs,
                         filter_prim_paths_expr=[
-                            "/World/envs/env_.*/Robot/left_rubber_hand_link",
-                            "/World/envs/env_.*/Robot/right_rubber_hand_link",
+                            f"{robot_prim_path}/{body_name}"
+                            for robot_prim_path in self._robot_prim_path_expressions()
+                            for body_name in (
+                                "left_rubber_hand_link",
+                                "right_rubber_hand_link",
+                            )
                         ],
                     )
                 )
