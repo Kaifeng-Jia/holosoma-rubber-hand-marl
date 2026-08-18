@@ -106,3 +106,28 @@ def test_storage_rejects_invalid_sizes_and_duplicate_keys() -> None:
     storage = _storage()
     with pytest.raises(ValueError, match="already registered"):
         storage.register_team("actor_obs", (1,))
+
+
+def test_deferred_team_buffer_is_written_after_rollout() -> None:
+    storage = _storage()
+    storage.register_team("advantages", (1,), deferred=True)
+    _add_step(storage, 0)
+    _add_step(storage, 1)
+    advantages = torch.arange(4, dtype=torch.float).reshape(2, 2, 1)
+
+    storage.set_team("advantages", advantages)
+
+    torch.testing.assert_close(storage.team("advantages"), advantages)
+    next(storage.mini_batch_generator(num_mini_batches=1, num_epochs=1))
+    with pytest.raises(ValueError, match="not registered as deferred"):
+        storage.set_team("rewards", advantages)
+
+
+def test_unwritten_deferred_team_buffer_blocks_sampling() -> None:
+    storage = _storage()
+    storage.register_team("advantages", (1,), deferred=True)
+    _add_step(storage, 0)
+    _add_step(storage, 1)
+
+    with pytest.raises(RuntimeError, match="Deferred team buffers were not written"):
+        next(storage.mini_batch_generator(num_mini_batches=1, num_epochs=1))

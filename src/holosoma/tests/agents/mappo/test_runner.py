@@ -73,3 +73,25 @@ def test_runner_shape_contract_fails_closed() -> None:
 
     with pytest.raises(ValueError, match="actor_obs must have shape"):
         runner.decide(observations)
+
+
+def test_stochastic_runner_returns_per_agent_distribution_statistics() -> None:
+    models = initialize_plan5_model_bundle(
+        CHECKPOINT,
+        g1_29dof_wbt_w_object.algo.config,
+        device="cpu",
+    )
+    runner = Plan5PolicyRunner(models)
+
+    decision = runner.sample(_observations(num_envs=2))
+
+    assert decision.actions.shape == (2, 2, 29)
+    assert decision.action_log_probs is not None
+    assert decision.action_means is not None
+    assert decision.action_sigmas is not None
+    assert decision.action_log_probs.shape == (2, 2, 1)
+    assert decision.action_means.shape == (2, 2, 29)
+    assert decision.action_sigmas.shape == (2, 2, 29)
+    assert decision.normalized_actor_observations.shape == (2, 2, 158)
+    assert decision.normalized_critic_observations.shape == (2, 527)
+    assert torch.isfinite(decision.action_log_probs).all()
