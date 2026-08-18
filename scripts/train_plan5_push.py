@@ -22,6 +22,8 @@ PARSER.add_argument("--iterations", type=int, default=50)
 PARSER.add_argument("--num-envs", type=int, default=8)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
 PARSER.add_argument("--seed", type=int, default=721)
+PARSER.add_argument("--actor-learning-rate", type=float, default=None)
+PARSER.add_argument("--critic-learning-rate", type=float, default=None)
 PARSER.add_argument(
     "--output-dir",
     type=Path,
@@ -33,6 +35,10 @@ ARGS = PARSER.parse_args()
 for name in ("iterations", "num_envs", "steps_per_env", "save_interval"):
     if getattr(ARGS, name) < 1:
         PARSER.error(f"--{name.replace('_', '-')} must be at least 1")
+for name in ("actor_learning_rate", "critic_learning_rate"):
+    value = getattr(ARGS, name)
+    if value is not None and value <= 0.0:
+        PARSER.error(f"--{name.replace('_', '-')} must be positive")
 
 from holosoma.config_values.marl.g1.experiment import g1_29dof_plan5_push_baseline
 from holosoma.utils.eval_utils import init_sim_imports
@@ -117,10 +123,12 @@ def main() -> None:
                 high=int(env.max_episode_length),
             )
 
-        ppo_config = replace(
-            g1_29dof_wbt_w_object.algo.config,
-            num_steps_per_env=ARGS.steps_per_env,
-        )
+        ppo_overrides = {"num_steps_per_env": ARGS.steps_per_env}
+        if ARGS.actor_learning_rate is not None:
+            ppo_overrides["actor_learning_rate"] = ARGS.actor_learning_rate
+        if ARGS.critic_learning_rate is not None:
+            ppo_overrides["critic_learning_rate"] = ARGS.critic_learning_rate
+        ppo_config = replace(g1_29dof_wbt_w_object.algo.config, **ppo_overrides)
         source_checkpoint = (
             REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
         )
