@@ -95,6 +95,30 @@ def _median(values: list[float]) -> float | None:
     return float(np.median(finite)) if finite.size else None
 
 
+def _filter_body_names(metadata: dict[str, Any]) -> list[str]:
+    contact_metadata = metadata.get("object_robot_contact")
+    if not isinstance(contact_metadata, dict):
+        raise ValueError("Recording metadata is missing object_robot_contact")
+    expressions = contact_metadata.get("filter_prim_paths_expr")
+    if not isinstance(expressions, list) or not expressions:
+        raise ValueError("object_robot_contact metadata is missing filter_prim_paths_expr")
+    return [str(expression).rsplit("/", 1)[-1] for expression in expressions]
+
+
+def _per_filter_positive_propulsive_impulse(
+    force_history_w: np.ndarray,
+    direction: np.ndarray,
+    sim_dt: float,
+) -> np.ndarray:
+    if force_history_w.ndim != 5 or force_history_w.shape[-1] != 3:
+        raise ValueError(
+            "Expected filtered force history shaped [time, history, sensor_body, filter, xyz], "
+            f"got {force_history_w.shape}"
+        )
+    projected = np.einsum("thbfi,i->thbf", force_history_w, direction)
+    return np.sum(np.maximum(projected, 0.0), axis=(0, 1, 2)) * sim_dt
+
+
 def analyze_recording(
     recording: dict[str, np.ndarray],
     metadata: dict[str, Any],
@@ -151,6 +175,13 @@ def analyze_recording(
     nonhand_force_history = total_force_history - hand_force_history
 
     physics = metadata["object_physics"]
+    robot_contact_body_names = _filter_body_names(metadata)
+    robot_force_history = recording["object_robot_contact_force_matrix_history_w"]
+    if robot_force_history.shape[-2] != len(robot_contact_body_names):
+        raise ValueError(
+            "Robot contact filter metadata does not match force history: "
+            f"{len(robot_contact_body_names)} names vs {robot_force_history.shape[-2]} filters"
+        )
     com_pose_b = np.asarray(physics["com_pose_b"], dtype=np.float64).reshape(-1, 7)[0]
     com_offset_b = np.broadcast_to(com_pose_b[:3], recording["object_pos_w"].shape)
     com_pos_w = recording["object_pos_w"] + _rotate_xyzw(
@@ -200,6 +231,20 @@ def analyze_recording(
         hand_propulsive_impulse = _positive_propulsive_impulse(hand_force_history)
         nonhand_propulsive_impulse = _positive_propulsive_impulse(nonhand_force_history)
         attributable_propulsive_impulse = hand_propulsive_impulse + nonhand_propulsive_impulse
+        per_body_propulsive_impulse = _per_filter_positive_propulsive_impulse(
+            robot_force_history[attempt_slice],
+            direction,
+            sim_dt,
+        )
+        top_body_indices = np.argsort(per_body_propulsive_impulse)[::-1]
+        top_propulsive_contact_bodies = [
+            {
+                "body_name": robot_contact_body_names[int(body_index)],
+                "positive_propulsive_impulse_n_s": float(per_body_propulsive_impulse[body_index]),
+            }
+            for body_index in top_body_indices[:5]
+            if per_body_propulsive_impulse[body_index] > 1.0e-9
+        ]
         hand_fraction = (
             hand_propulsive_impulse / attributable_propulsive_impulse
             if attributable_propulsive_impulse > 1.0e-9
@@ -229,6 +274,7 @@ def analyze_recording(
                 "attributable_positive_propulsive_impulse_n_s": attributable_propulsive_impulse,
                 "hand_propulsion_fraction": hand_fraction,
                 "rubber_hand_propulsion_dominant": hand_fraction >= hand_dominance_fraction,
+                "top_propulsive_contact_bodies": top_propulsive_contact_bodies,
                 "total_yaw_moment_impulse_n_m_s": float(
                     np.sum(total_yaw_moment[attempt_slice]) * dt
                 ),
