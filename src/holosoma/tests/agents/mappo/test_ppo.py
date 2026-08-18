@@ -92,6 +92,7 @@ def test_single_mappo_update_changes_actor_and_critic_without_unfreezing_actor_n
     }
 
     learner.collect_rollout(environment, _observations(2))
+    assert not learner.storage.team("timeouts").any()
     metrics = learner.update()
 
     assert any(

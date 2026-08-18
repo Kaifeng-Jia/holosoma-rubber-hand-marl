@@ -88,6 +88,7 @@ class Plan5PPO:
         self.storage.register_team("critic_obs", (527,))
         self.storage.register_team("rewards", (1,))
         self.storage.register_team("dones", (1,), dtype=torch.bool)
+        self.storage.register_team("timeouts", (1,), dtype=torch.bool)
         self.storage.register_team("values", (1,))
         self.storage.register_team("returns", (1,), deferred=True)
         self.storage.register_team("advantages", (1,), deferred=True)
@@ -121,7 +122,14 @@ class Plan5PPO:
             rewards = self._column(rewards).to(self.device)
             dones = self._column(dones, dtype=torch.bool).to(self.device)
             time_outs = extras.get("time_outs")
-            if time_outs is not None and torch.as_tensor(time_outs).any():
+            timeout_mask = self._column(
+                torch.as_tensor(
+                    time_outs if time_outs is not None else torch.zeros_like(dones),
+                    device=self.device,
+                ),
+                dtype=torch.bool,
+            )
+            if timeout_mask.any():
                 final_observations = extras.get("final_observations")
                 if not isinstance(final_observations, dict) or "critic_obs" not in final_observations:
                     raise RuntimeError("Timeout bootstrap requires final_observations['critic_obs']")
@@ -130,10 +138,6 @@ class Plan5PPO:
                     update=False,
                 )
                 final_values = self.models.critic.evaluate({"critic_obs": final_critic_obs})
-                timeout_mask = self._column(
-                    torch.as_tensor(time_outs, device=self.device),
-                    dtype=torch.bool,
-                )
                 rewards = rewards + self.config.gamma * final_values * timeout_mask
 
             self.storage.add(
@@ -148,6 +152,7 @@ class Plan5PPO:
                     "critic_obs": decision.normalized_critic_observations,
                     "rewards": rewards,
                     "dones": dones,
+                    "timeouts": timeout_mask,
                     "values": decision.values,
                 },
             )
