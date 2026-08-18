@@ -7,7 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 3 的 `50 iterations` 数值 smoke 已完成；多 seed 行为方向 gate 未通过，暂不进入 500
+- 当前阶段：Stage 3 的 joint `50 iterations` 行为方向 gate 未通过；critic-only `50 iterations`
+  warm-up 已通过，下一步先冻结 actor 解冻与学习率调度设计，不直接进入 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -346,6 +347,10 @@ team reward
 
 任何阶段未通过 gate 时先诊断，不自动增加训练量。
 
+当前恢复策略：先让全新的 centralized critic 在 actor 严格冻结时拟合 team return，避免
+actor 在 critic 尚未形成有效估计时偏离 A1。critic-only warm-up 通过后，只允许进行短程、
+有 gate 的 actor 解冻试验；它不是自动晋升到 `500 iterations` 的许可。
+
 ### Stage 4——合作真实性与物理校准
 
 冻结或扫描：
@@ -429,6 +434,9 @@ Push baseline 稳定后：
 - [x] tuned preflight：`32 envs`、actor LR `1e-5`、fresh critic LR `1e-3` 通过 KL/drift gate。
 - [x] `50 iterations`：环境与数值 smoke。
 - [!] `50 iterations` 后三 seed 行为方向 gate：数值稳定，但 A1 姿态/总 reward 平均退化。
+- [x] centralized critic-only `50 iterations` warm-up：actor/normalizer 逐张量不变，critic
+  value loss 改善且数值稳定。
+- [ ] 冻结 actor 解冻策略，并完成短程联合更新 gate。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -830,3 +838,28 @@ Push baseline 稳定后：
   500 iterations，也不能用更长训练量解释当前退化；
 - 待讨论：下一步必须优先限制 actor 对旧 A1 prior 的累计漂移，同时让 fresh central critic
   获得足够学习速率；任何 actor/critic 分离调度、critic warm-up 或 KL early-stop 改动都需先确认。
+
+#### 2026-08-18：Centralized critic-only warm-up
+
+- 实现 commit：`242dc5e8`；`Plan5PPO.update(update_actor=False)` 在不执行 actor forward、
+  backward、optimizer step 或 adaptive-KL 调度的情况下，只训练 centralized critic；训练入口
+  通过 `--critic-only` 显式启用，默认联合训练路径保持不变；
+- 测试：单元测试证明 actor 参数逐张量不变、critic 参数发生更新、actor gradient 与 KL 为零，
+  actor/critic LR 不被联动调整；worktree 全套 `166 passed`；
+- 训练配置：从原 A1 warm-start 开始，seed `721`、`32 envs × 24 steps`、actor LR 字段
+  `1e-5`（冻结、无 optimizer state）、critic LR `1e-3`；先跑 10 iterations 验证，再从
+  `model_00010.pt` 原位恢复到 iteration 50；使用的 `0.1 kg` 宽桌仍只属于 smoke；
+- 产物：`logs/Plan5Push/a1_critic_warmup10_seed721_env32/`；共 50 行 JSONL，status
+  `passed: true`；iteration-50 checkpoint SHA256
+  `7615e80148ab136cfd3e569b60570c1ea75d797ec064f39e7c852fb0f7b83ffc`；
+- 参数证据：iteration 0→50 的 actor 和冻结 actor normalizer 逐张量严格相同；actor optimizer
+  state 始终为空；critic 参数 delta L2 `15.6118`、最大绝对变化 `0.26423`，critic optimizer
+  state 从 `0` 增至 `8`；
+- 数值证据：所有指标有限；value loss 前 10/后 10 均值 `0.07492→0.05631`，下降约
+  `24.8%`；critic grad norm 前 10/后 10 均值 `0.3122→0.4407`，全程有限；actor grad、
+  KL、mean/max policy drift 全程严格为 `0`，critic LR 保持 `1e-3`；
+- 行为边界：reward mean 前 10/后 10 为 `-0.03954→-0.03977`，tracking failure 每轮均值
+  `41.9→44.6`。这是预期的：actor 完全冻结，因此本阶段只验证 critic 学习，不宣称行为改善；
+- gate：critic-only warm-up 通过。下一步不是直接训练 500 iterations，而是先确认短程 actor
+  解冻方案，尤其要解决原 adaptive-KL 同时缩放 actor/critic LR、导致 critic LR 被 actor KL
+  拖到 `1e-5` 的耦合问题；确认后再从 iteration-50 critic-warmed checkpoint 做小型对照。
