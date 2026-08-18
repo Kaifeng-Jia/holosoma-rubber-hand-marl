@@ -10,7 +10,7 @@
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
-- Active work item: rubber-hand contact-wrench feasibility check after completed reference-state collision replay
+- Active work item: table-only forward-dynamics validation of the side-reference yaw-wrench mismatch
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
@@ -489,13 +489,51 @@ within friction, balance, and actuator limits. The all-frame diagnostic was
 added in commit `59471d90`; its default single-frame behavior and the training
 sensor graph remain unchanged.
 
-The next bounded step is consequently a no-training rubber-hand contact-wrench
-feasibility check. It must determine whether reachable rubber-hand contacts can
-supply the required translation and bounded yaw wrench, and what
-friction/balance/actuator margin remains, while reporting the wrist contact
-separately. Only after that evidence is reviewed may the project discuss Plan 3
-or a frozen two-entity mechanics preflight. This result does not authorize Plan
-4, Plan 5, new PPO iterations, hand-only rewards, or hidden support forces.
+#### Planar table-wrench necessary-condition result -- 2026-08-17
+
+Commit `6e7a54c1` adds a no-training offline linear-program screen. It uses the
+exact rubber-hand contact schedule from the collision replay, projects the hand
+origins to the frozen tabletop push face, applies passive sliding friction at
+the four actual leg locations, and solves for the minimum unilateral
+rubber-hand force needed to reproduce the table's planar acceleration and yaw
+moment. It scans total mass `1.1/2.6/4.1 kg`, fixed table-ground friction `0.5`,
+and effective hand-table friction `0.15/0.3/0.5/0.6/0.8`. Wrist-yaw contacts are
+excluded from usable hand propulsion.
+
+At the representative effective hand friction `0.5`:
+
+| Side | Mass | Strict reference-yaw frames | Frames feasible after minimum natural-yaw relaxation | P95 peak individual hand force | P95 yaw-moment relaxation | First 15-degree linearized deviation | First 30-degree linearized deviation |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| left | 1.1 kg | 136/204 | 203/204 | 5.99 N | 3.31 Nm | 1.56 s | 1.80 s |
+| left | 2.6 kg | 136/204 | 203/204 | 14.15 N | 7.82 Nm | 1.56 s | 1.80 s |
+| left | 4.1 kg | 136/204 | 203/204 | 22.32 N | 12.33 Nm | 1.56 s | 1.80 s |
+| right | 1.1 kg | 141/207 | 206/207 | 5.79 N | 3.81 Nm | 0.86 s | 0.96 s |
+| right | 2.6 kg | 141/207 | 206/207 | 13.70 N | 9.01 Nm | 0.86 s | 0.96 s |
+| right | 4.1 kg | 141/207 | 206/207 | 21.60 N | 14.22 Nm | 0.86 s | 0.96 s |
+
+Mass scales required forces and moments but does not change the feasible-frame
+ratios or the first linearized yaw-limit crossing. Raising effective hand
+friction above `0.3` removes all but one planar-force failure on each side, but
+does not make the required yaw relaxation small. The linearized estimate leaves
+the confirmed 15-degree validity region in under `1.6 s` on both sides and
+passes 30 degrees shortly afterward. Therefore the evidence does **not**
+support treating natural yaw as a minor correction to the translated central
+A1 object trajectory.
+
+This remains an optimistic table-side necessary-condition model, not a final
+infeasibility proof. It holds foot-slip directions near the frozen reference,
+uses projected rather than pairwise PhysX contact points, and does not yet test
+G1 balance or map hand forces through arm/wrist Jacobians. Once yaw has moved
+far from the reference, its linearized integration must not be interpreted as
+an endpoint prediction. The next bounded step is a table-only, no-training
+forward-dynamics validation that lets yaw and ground slip evolve. If that test
+also leaves the accepted yaw range rapidly, the project can classify the simple
+translated side reference as physically brittle before spending effort on a
+full whole-body actuator solution.
+
+Only after that evidence is reviewed may the project discuss Plan 3 or a frozen
+two-entity mechanics preflight. This result does not authorize Plan 4, Plan 5,
+new PPO iterations, hand-only rewards, or hidden support forces.
 
 A frozen two-entity mechanics preflight is not MARL and is not the rejected
 separate-checkpoint plan. It uses two physical robots with documented frozen
@@ -867,14 +905,17 @@ it proceeds in reviewable steps:
    realized table force and yaw moment at the approach, first-contact, sustained
    push, and termination intervals.
 3. **Run a bounded reference-state collision and contact-feasibility check --
-   collision replay complete; wrench check active.** The exact 309-frame replay
+   collision replay and planar wrench screen complete; forward-dynamics check
+   active.** The exact 309-frame replay
    found no lower-body reference collision above `5 N`; every non-rubber-hand
    event came from a wrist-yaw link and remains separately reported incidental
-   contact. Next test whether reachable rubber-hand contacts and admissible
-   forces can satisfy the reference wrench while respecting balance, friction,
-   and actuator limits. This is analysis, not PPO training. The current physical
-   rollouts are not a valid hand-wrench proof because hip/knee propulsion
-   dominates all audited cases.
+   contact. The planar LP shows that matching the central reference yaw is not
+   generally feasible and that its minimum yaw relaxation rapidly exceeds the
+   accepted linearization range. Next validate that result with table-only
+   forward dynamics in which yaw and ground slip evolve, then test G1
+   balance/actuator limits only if the table-side mechanics remain viable. This
+   is analysis, not PPO training. The current physical rollouts are not a valid
+   hand-wrench proof because hip/knee propulsion dominates all audited cases.
 4. **Present one of three evidence-backed outcomes:** feasible with margin,
    feasible only near physical limits, or no acceptable solution under the
    frozen contract. Review uncertainties with the user before interpreting the
