@@ -29,6 +29,7 @@ from isaaclab.terrains.utils import create_prim_from_mesh
 from isaaclab.utils.timer import Timer
 from loguru import logger
 from omegaconf import DictConfig
+from pxr import PhysxSchema
 
 from holosoma.utils.module_utils import get_holosoma_root
 from holosoma.utils.path import resolve_data_file_path
@@ -395,6 +396,12 @@ class IsaacSim(BaseSimulator):
 
         self.scene.filter_collisions(global_prim_paths=global_collision_prims)
 
+        # The filtered object-contact sensors are opt-in diagnostics. Keep
+        # explicit attributes so recorders can feature-detect them without
+        # changing the default simulator path.
+        self.object_robot_contact_sensor = None
+        self.object_hand_contact_sensor = None
+
         # add objects if object is provided
         if self.robot_config.object.object_urdf_path:
             # Resolve the object asset urdf path using importlib.resources
@@ -431,6 +438,62 @@ class IsaacSim(BaseSimulator):
             )
             self._object = RigidObject(object_cfg)
             self.scene.rigid_objects[object_name] = self._object
+
+            if self.simulator_config.enable_object_contact_diagnostics:
+                object_contact_body_names = [
+                    prim.GetPath().pathString.rsplit("/", 1)[-1]
+                    for prim in sim_utils.find_matching_prims("/World/envs/env_0/Object/.*")
+                    if prim.HasAPI(PhysxSchema.PhysxContactReportAPI)
+                ]
+                if len(object_contact_body_names) != 1:
+                    raise RuntimeError(
+                        "Object-contact diagnostics require exactly one object contact body; "
+                        f"resolved {object_contact_body_names}"
+                    )
+                robot_contact_body_names = [
+                    prim.GetPath().pathString.rsplit("/", 1)[-1]
+                    for prim in sim_utils.find_matching_prims("/World/envs/env_0/Robot/.*")
+                    if prim.HasAPI(PhysxSchema.PhysxContactReportAPI)
+                ]
+                if not robot_contact_body_names:
+                    raise RuntimeError("Object-contact diagnostics could not resolve any robot contact bodies")
+
+                common_object_contact_sensor_kwargs = {
+                    # The URDF importer creates the rigid body below the
+                    # container prim. ContactSensor must target the body that
+                    # owns the contact reporter API, not the /Object scope.
+                    "prim_path": f"/World/envs/env_.*/Object/{object_contact_body_names[0]}",
+                    "history_length": self.simulator_config.contact_sensor_history_length,
+                    "update_period": 0.005,
+                    "track_pose": True,
+                    "track_contact_points": True,
+                    "max_contact_data_count_per_prim": 32,
+                    "debug_vis": False,
+                }
+                self.object_robot_contact_sensor = ContactSensor(
+                    ContactSensorCfg(
+                        **common_object_contact_sensor_kwargs,
+                        # PhysX filtered contacts are reliable here when each
+                        # opposing rigid body is named explicitly. A single
+                        # broad Robot/.* filter produced an all-zero aggregate
+                        # even while the hand-specific filters reported force.
+                        filter_prim_paths_expr=[
+                            f"/World/envs/env_.*/Robot/{body_name}" for body_name in robot_contact_body_names
+                        ],
+                    )
+                )
+                self.scene.sensors["object_robot_contact_sensor"] = self.object_robot_contact_sensor
+
+                self.object_hand_contact_sensor = ContactSensor(
+                    ContactSensorCfg(
+                        **common_object_contact_sensor_kwargs,
+                        filter_prim_paths_expr=[
+                            "/World/envs/env_.*/Robot/left_rubber_hand_link",
+                            "/World/envs/env_.*/Robot/right_rubber_hand_link",
+                        ],
+                    )
+                )
+                self.scene.sensors["object_hand_contact_sensor"] = self.object_hand_contact_sensor
 
         # add lights
         # light_config = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.98, 0.95, 0.88))

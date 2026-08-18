@@ -511,6 +511,14 @@ class SimulatorInitConfig:
     contact_sensor_history_length: int = 3
     """Number of frames of contact data retained for sensors."""
 
+    enable_object_contact_diagnostics: bool = False
+    """Enable opt-in Isaac Sim object-vs-robot filtered contact sensors.
+
+    The additional sensors are intended for bounded physics audits. They are
+    disabled by default so ordinary training and evaluation retain the
+    original sensor graph and runtime cost.
+    """
+
     robot_mjcf_filter: MujocoXMLFilterCfg = field(default_factory=MujocoXMLFilterCfg)
     """MuJoCo-specific XML filtering configuration for robot MJCF files."""
 

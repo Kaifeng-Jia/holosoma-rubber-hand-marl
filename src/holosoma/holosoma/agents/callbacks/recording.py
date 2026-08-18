@@ -97,6 +97,46 @@ class EvalRecordingCallback(RLEvalCallback):
         asset_cfg = robot_cfg.asset
         self._metadata["urdf_path"] = str(Path(asset_cfg.asset_root) / asset_cfg.urdf_file)
 
+        object_asset = getattr(sim, "_object", None)
+        if object_asset is not None:
+            object_physx_view = object_asset.root_physx_view
+
+            def _selected_property(value: torch.Tensor) -> Any:
+                return value[self.env_id].detach().cpu().numpy().tolist()
+
+            self._metadata["object_physics"] = {
+                "object_urdf_path": robot_cfg.object.object_urdf_path,
+                "mass_kg": _selected_property(object_physx_view.get_masses()),
+                "inertia_kg_m2": _selected_property(object_physx_view.get_inertias()),
+                "com_pose_b": _selected_property(object_physx_view.get_coms()),
+                "material_properties": _selected_property(object_physx_view.get_material_properties()),
+                "material_property_order": [
+                    "static_friction",
+                    "dynamic_friction",
+                    "restitution",
+                ],
+            }
+
+        for sensor_name in ("object_robot_contact_sensor", "object_hand_contact_sensor"):
+            sensor = getattr(sim, sensor_name, None)
+            if sensor is None:
+                continue
+            channel_prefix = sensor_name.removesuffix("_sensor")
+            self._metadata[channel_prefix] = {
+                "sensor_body_names": list(sensor.body_names),
+                "filter_prim_paths_expr": list(sensor.cfg.filter_prim_paths_expr),
+                "force_semantics": (
+                    "World-frame contact force on the object sensor body from the filtered robot bodies."
+                ),
+                "contact_point_semantics": (
+                    "World-frame aggregate contact point for each configured filter; NaN means no contact."
+                ),
+            }
+            self._buffers[f"{channel_prefix}_force_matrix_w"] = []
+            self._buffers[f"{channel_prefix}_force_matrix_history_w"] = []
+            contact_position_channel = f"{channel_prefix.removesuffix('_contact')}_contact_pos_w"
+            self._buffers[contact_position_channel] = []
+
         channel_names = [
             "dof_pos_target",
             "dof_pos",
@@ -198,6 +238,7 @@ class EvalRecordingCallback(RLEvalCallback):
                         "object_pos_w",
                         "object_quat_xyzw",
                         "object_lin_vel_w",
+                        "object_ang_vel_w",
                     ]
                 )
             for name in pre_step_channels:
@@ -261,6 +302,23 @@ class EvalRecordingCallback(RLEvalCallback):
         if hasattr(sim, "contact_sensor"):
             _append("contact_sensor_forces_w", sim.contact_sensor.data.net_forces_w[eid])
             _append("contact_sensor_forces_history_w", sim.contact_sensor.data.net_forces_w_history[eid])
+        for sensor_name in ("object_robot_contact_sensor", "object_hand_contact_sensor"):
+            sensor = getattr(sim, sensor_name, None)
+            if sensor is None:
+                continue
+            channel_prefix = sensor_name.removesuffix("_sensor")
+            sensor_data = sensor.data
+            if sensor_data.force_matrix_w is None or sensor_data.force_matrix_w_history is None:
+                raise RuntimeError(f"{sensor_name} did not initialize filtered force matrices")
+            if sensor_data.contact_pos_w is None:
+                raise RuntimeError(f"{sensor_name} did not initialize filtered contact positions")
+            _append(f"{channel_prefix}_force_matrix_w", sensor_data.force_matrix_w[eid])
+            _append(
+                f"{channel_prefix}_force_matrix_history_w",
+                sensor_data.force_matrix_w_history[eid],
+            )
+            contact_position_channel = f"{channel_prefix.removesuffix('_contact')}_contact_pos_w"
+            _append(contact_position_channel, sensor_data.contact_pos_w[eid])
 
         if motion_command.motion.has_object:
             _append("ref_object_pos_w", motion_command.object_pos_w[eid])
@@ -269,6 +327,8 @@ class EvalRecordingCallback(RLEvalCallback):
             _append("object_pos_w", motion_command.simulator_object_pos_w[eid])
             _append("object_quat_xyzw", motion_command.simulator_object_quat_w[eid])
             _append("object_lin_vel_w", motion_command.simulator_object_lin_vel_w[eid])
+            object_states = sim.all_root_states[motion_command.object_indices_in_simulator]
+            _append("object_ang_vel_w", object_states[eid, 10:13])
 
         self._pre_step_count += 1
         return actor_state
