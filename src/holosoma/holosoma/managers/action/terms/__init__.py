@@ -5,5 +5,6 @@ such as joint position control, velocity control, etc.
 """
 
 from .joint_control import JointPositionActionTerm
+from .marl import DualJointPositionActionTerm
 
-__all__ = ["JointPositionActionTerm"]
+__all__ = ["DualJointPositionActionTerm", "JointPositionActionTerm"]
