@@ -4,17 +4,46 @@
 
 - Status: active execution guide
 - Confirmed: 2026-08-14
+- Scope realigned: 2026-08-17
 - Advisor guidance incorporated: 2026-08-12 meeting
 - Platform: Unitree G1 with fixed rubber hands and a physically simulated table
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
+- Active work item: post-Plan-2 side-reference dynamics feasibility audit
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
 evaluation, and documentation on this branch. `LongTermGoal.md` remains an
 unchanged historical record. Later changes to the research direction must edit
 this file instead of creating parallel roadmap documents.
+
+### 1.1 Execution and consultation contract
+
+The overall direction in this roadmap governs local implementation choices.
+Diagnostics may refine how an approved step is executed, but they must not
+silently redefine the research question, add a new training objective, skip a
+decision gate, or promote a diagnostic artifact into a baseline.
+
+Before execution continues, discuss with the user any uncertainty that would
+change one or more of the following:
+
+- the active plan or the order of plans;
+- the robot/reference/object trajectory contract;
+- table geometry, mass, inertia, friction, or contact semantics;
+- actor or critic observations and parameter-sharing structure;
+- reward, termination, reset, or success definitions;
+- checkpoint initialization or promotion;
+- whether a step is single-agent, a frozen two-entity diagnostic, or MARL;
+- the approved iteration budget or the transition to a long-running job;
+- the inclusion of task-oriented, target-conditioned, or other out-of-scope
+  research elements.
+
+Read-only diagnosis, tests, and short explicitly approved smoke checks may
+proceed within the active contract. Any material change must first be explained
+by file/module purpose, proposed modification, expected evidence, and rollback
+condition. If evidence contradicts the roadmap, stop at the next decision gate,
+record the result here, and consult the user instead of improvising a new path.
 
 ## 2. Research question
 
@@ -317,25 +346,64 @@ friction are frozen only after the Stage 4 capacity calibration.
 
 ### Current-stage option register -- five plans
 
-The five plans below are alternative ways to move from the frozen single-agent
-A1 prior to a physically valid wide-table baseline. They are not five stages
-that must all be completed. A plan may be rejected without invalidating the A1
-checkpoint or the shared wide-table geometry.
+These five plans preserve the original escalation order discussed before the
+Stage 1B experiments. They are alternative experiments, not five mandatory
+stages. The former proposal to train separate left and right checkpoints was
+explicitly rejected and is not an active plan.
 
-| Plan | Training unit | Reference contract | Status and decision |
-|---|---|---|---|
-| **1. Frozen side transfer** | one physical robot | shift the central A1 robot reference to each side; keep the original object reference | **Failed as a bilateral solution.** Right retained `17/20`, left retained `1/20`. No training was involved. |
-| **2. Single-agent side adaptation** | one physical robot | the same shifted left/right references and original object reference | **Failed the left gate.** Plan 2A conservatively updated the full actor; Plan 2B froze the A1 backbone and trained only appended teammate-input columns. Neither completed the left trajectory. Do not add more iterations to either tested recipe. |
-| **3. Reconstruct single-agent side references** | one physical robot | generate separate left/right references whose robot contact and object motion are dynamically validated for off-centre pushing | **Pending alternative.** This keeps a single-agent side stage, but requires new reference generation rather than another rigid translation. |
-| **4. Frozen two-entity mechanics diagnostic** | two physical robots, no joint learning | run documented frozen/prescribed policies synchronously to test whether opposite-side contact moments cancel | **Pending diagnostic only.** No artificial force is applied at the teammate location. This plan measures mechanics; it does not produce a jointly trained policy. |
-| **5. Paired-reference multi-agent WBT** | two physical robots with a shared actor and centralized critic | materialize the promising Viser layout as two synchronized robot references plus one shared object reference and one shared phase | **New candidate.** Skip the remaining single-agent side-adaptation gate, initialize both actor calls from the frozen A1 checkpoint, and train directly for the dual-robot pushing demonstration. |
+| Plan | Method | Status and decision |
+|---|---|---|
+| **1. Bounded left-side adaptation** | Initialize from `model_07999_actor158.pt`, preserve the shifted reference/object/WBT contract, run a 50-iteration left smoke, and continue to 500 only if the same checkpoint improves both left and right gates. | **Failed.** The 50-iteration run caused severe first-update drift and completed only `2/20` on each side. The 500-iteration continuation was not authorized. |
+| **2. Balanced left/right reference training** | Train one shared checkpoint with both shifted references and report per-side metrics rather than aggregate reward. | **Failed under the tested recipes.** The conservative full-actor variant preserved the right side but completed `0/20` left; the backbone-frozen teammate-input adapter also completed no left trajectory. Do not add iterations to either recipe. |
+| **3. Training-time symmetry augmentation** | Define strict left/right transforms for observation, reference, action, critic state, joints, bodies, and contact channels, then train one shared actor with symmetry-consistency supervision. | **Pending, blocked by the post-Plan-2 feasibility gate.** Symmetry training is justified only if the single-agent side-end reference is dynamically feasible. |
+| **4. Full symmetric A1 retraining** | Re-run the complete A1 WBT configuration with validated left/right references and symmetry support, potentially up to the full 8,000-iteration budget. | **Pending high-cost fallback.** Use only if Plan 3 is valid but insufficient; do not start directly. This was the original Plan 5 before removal of the rejected separate-checkpoint proposal. |
+| **5. Paired-reference multi-agent WBT** | Materialize the accepted Viser layout as two synchronized robot references, one shared table reference, and one shared phase; initialize a shared actor from A1 and train a centralized critic for the dual-robot pushing demonstration. | **New parallel candidate, not yet selected.** It bypasses the remaining single-agent side-adaptation stage but preserves the A1 prior. |
 
-Plan 2 contains two implementation variants, not two additional top-level
-plans:
+#### Rejected proposal
 
-- **2A:** balanced left/right PPO with conservative full-actor updates;
-- **2B:** a lossless A1 backbone with only the appended teammate-input columns
-  trainable.
+Training independent `A1-left` and `A1-right` checkpoints was the former Plan
+4. It remains rejected because it breaks the simplest homogeneous shared-policy
+baseline, introduces role specialization before it is required, and creates an
+unresolved checkpoint selection/merging problem for the multi-agent stage.
+
+#### Post-Plan-2 feasibility gate
+
+The failure of Plan 2 does not authorize Plan 3, Plan 4, or Plan 5
+automatically. First determine whether a single off-centre robot can reproduce
+the required table trajectory under a frozen physical contract. This is a
+diagnostic decision gate, not a sixth training plan.
+
+```text
+Plans 1 and 2 failed
+        |
+        v
+single-agent side-reference dynamics feasibility audit
+        |
+        +-- feasible within accepted margins
+        |       -> generate/validate corrected side references
+        |       -> discuss Plan 3
+        |       -> Plan 4 only if Plan 3 is valid but insufficient
+        |
+        +-- infeasible or only physically brittle
+                -> discuss a frozen two-entity mechanics preflight
+                -> measure opposite-side yaw-moment cancellation
+                -> only then decide whether to select Plan 5
+```
+
+The feasibility audit first freezes representative mass, inertia, friction,
+contact semantics, torque limits, acceptable table-position/yaw errors, and
+allowed body contacts. It then compares the force and yaw moment required by
+the object reference with the contact wrench that one rubber-hand G1 can
+produce from the side while remaining balanced. It must distinguish a clearly
+feasible solution, a near-limit/brittle solution, and no acceptable solution.
+It must not claim mathematical impossibility from one failed PPO run.
+
+A frozen two-entity mechanics preflight is not MARL and is not the rejected
+separate-checkpoint plan. It uses two physical robots with documented frozen
+policies, synchronized phase, no artificial teammate force, and no joint
+learning solely to test whether their physical yaw moments cancel. If that
+preflight supports Plan 5, selecting and implementing Plan 5 still requires a
+separate user decision.
 
 Plan 5 is reference-guided multi-agent reinforcement learning. Its current
 scope is deliberately narrow: reproduce the synchronized dual-robot pushing
@@ -348,11 +416,15 @@ belong to a separate research direction and are not active here.
 ### Stage 1B -- Validate A1 retention with a ghost teammate
 
 Status: **Plans 1 and 2 failed the bilateral single-agent gate on 2026-08-15.
-Do not continue either Plan 2 recipe to 500 iterations. Plan 5 may bypass the
-remaining single-agent side gate only by an explicit roadmap decision; this
-does not retroactively mark Stage 1B as passed.**
+Do not continue either Plan 2 recipe. The post-Plan-2 dynamics feasibility
+audit is the active next gate. No later plan is selected, and selecting Plan 5
+would not retroactively mark Stage 1B as passed.**
 
-#### Work
+#### Historical protocol (closed)
+
+The work items, comparisons, and exit gate below record the contract used for
+the completed Stage 1B experiments. They are retained for reproducibility and
+do not authorize another adaptation run.
 
 1. Evaluate each observer side separately on the 1.4 m table using the frozen
    0.8 m partner spacing.
@@ -432,12 +504,10 @@ to adapted `left=4, right=7`. The smoke therefore failed and exposed severe
 right-side forgetting; `model_08048.pt` is a diagnostic artifact, not a new
 baseline.
 
-Do not continue this run to 500 iterations. Restart any further adaptation
-from `model_07999_actor158.pt`, include both centered left and right training
-distributions (mixed references or explicit original-side replay), and freeze
-a much tighter first-update constraint before execution. The next gate is one
-update followed by left/right 650-step regression; only a passing micro-gate
-may increase the update budget. Do not add another deployment geometry patch.
+This run was not continued to 500 iterations. Its failure motivated the
+balanced left/right Plan 2 experiments recorded below; those experiments also
+failed the bilateral gate and are now closed. Do not revive this one-sided
+recipe or add another deployment-geometry patch.
 
 The balanced conservative adaptation audit is now complete. It restarted from
 `model_07999_actor158.pt`, sampled the centered left/right references at
@@ -498,13 +568,17 @@ randomization adds `1--4 kg`; the simulated run is approximately
 the URDF base mass alone.
 
 Stage 1B remains failed and `model_07999_actor158.pt` remains the frozen
-baseline. The current-stage option register now owns the next decision: Plan 3
-rebuilds single-agent side references, Plan 4 performs a frozen two-entity
-mechanics diagnostic, and Plan 5 directly trains against the synchronized
-dual-robot reference. Do not silently relax the WBT object gate and do not
-promote any checkpoint from the failed Plan 1/2 diagnostic runs.
+baseline. The post-Plan-2 feasibility gate now owns the next decision. Do not
+start symmetry augmentation, full retraining, the frozen two-entity preflight,
+or paired-reference MARL until the corresponding branch is supported by the
+audit and explicitly confirmed. Do not silently relax the WBT object gate and
+do not promote any checkpoint from the failed Plan 1/2 diagnostic runs.
 
 ### Stage 2 -- Build the two-agent environment
+
+Status: **Blocked until the post-Plan-2 feasibility audit is reviewed and a
+specific branch is explicitly selected. The existing geometry and reset
+smokes are preserved evidence, not authorization to begin Plan 5.**
 
 #### Work
 
@@ -648,10 +722,10 @@ multi-agent baseline.
   baseline v1; this is an accepted first-run geometry, not a claim of global
   optimality or a mathematically minimal width. Depth, height, push-side
   contact geometry, and reference origin are preserved.
-- A1 prior budget: reuse the frozen 8,000-iteration checkpoint; do not run a
-  new 8,000- or 30,000-iteration A1 job before MARL. Only a bounded 50/500
-  retention adaptation is allowed if the converted policy fails its measured
-  retention gate.
+- A1 prior budget: reuse the frozen 8,000-iteration checkpoint. The bounded
+  Plan 1/2 adaptations failed and are closed. Do not run a new 8,000- or
+  30,000-iteration A1 job unless the feasibility gate supports Plan 3 and an
+  explicit decision subsequently authorizes the Plan 4 fallback.
 - Ghost distribution: frozen only after the real two-agent geometry preflight.
 - Physics: easy smoke asset followed by a bounded capacity sweep and a frozen
   final mass/friction setting.
@@ -676,18 +750,34 @@ Completed at the current checkpoint:
 - the lossless Stage 1A checkpoint conversion, strict model/normalizer loads,
   zero deterministic output error, and a two-step Isaac Sim runtime smoke.
 
-The next gates are:
+The active next work is the post-Plan-2 single-agent side-reference dynamics
+feasibility audit. It proceeds in reviewable steps:
 
-1. Attribute left-side early terminations exactly at the post-physics failure
-   state and audit the off-center contact/yaw-moment mechanism.
-2. Compare the accepted midpoint-preserving layout with a table-centerline
-   symmetric placement and, only if justified, a mirrored-reference variant.
-3. Re-run the nominal left/right no-training gate after one geometry/reference
-   correction is explicitly approved.
-4. Decide the teammate position/velocity observation scale from the measured
-   envelope before any teammate-aware update.
-5. Do not freeze reset randomization, run a 50/500-iteration adaptation, or
-   begin the full two-agent environment until both nominal sides pass Stage 1B.
+1. **Freeze the audit contract with the user.** Propose representative table
+   mass/inertia/friction, contact semantics, allowed body contacts, torque
+   limits, and table position/yaw tolerances. Do not infer these silently from
+   randomized training settings.
+2. **Reuse existing recordings for a read-only wrench audit.** Compute the
+   object-reference linear/yaw acceleration requirements, extract actual
+   rubber-hand contact forces and moment arms, and compare required versus
+   realized table force and yaw moment at the approach, first-contact, sustained
+   push, and termination intervals.
+3. **Run a bounded contact-feasibility solve only if the recorded channels are
+   insufficient.** Test whether reachable hand contacts and admissible forces
+   can satisfy the reference wrench while respecting balance, friction, and
+   actuator limits. This is analysis, not PPO training.
+4. **Present one of three evidence-backed outcomes:** feasible with margin,
+   feasible only near physical limits, or no acceptable solution under the
+   frozen contract. Review uncertainties with the user before interpreting the
+   outcome.
+5. **Choose the branch only after review.** A robust feasible result permits a
+   corrected-reference proposal and later discussion of Plan 3. An infeasible
+   or brittle result permits discussion of the frozen two-entity mechanics
+   preflight. Neither outcome automatically authorizes Plan 4 or Plan 5.
+
+Until this gate is reviewed, do not edit reference trajectories, change table
+physics, add a second physical robot, modify reward/termination logic, or start
+another training run.
 
 The Isaac Gym runtime asset check remains pending because the local machine has
 no `hsgym` environment. It does not block the current Isaac Sim baseline, but
