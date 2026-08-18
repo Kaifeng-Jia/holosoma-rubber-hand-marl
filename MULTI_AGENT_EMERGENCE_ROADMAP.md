@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 2 实施中；最小双实体物理环境已通过 CUDA smoke
+- 当前阶段：Stage 2 实施中；shared reward、joint reset 与 CUDA 短 rollout 已通过，recorder 待完成
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -314,7 +314,7 @@ team reward
 3. 使用一份 paired reference 和共享 phase。
 4. 用真实相对位置/速度替换 ghost buffers。
 5. 建立全局 critic observation。
-6. 实现 shared reward、joint reset、collision filtering 和双机器人 recorder。
+6. 实现 shared reward、joint reset、碰撞语义和双机器人 recorder。
 7. 完成确定性 reset、channel、维度、reward-sign 和短 rollout 测试。
 
 退出条件：
@@ -414,12 +414,12 @@ Push baseline 稳定后：
 - [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
 - [x] 建立 paired command，共享环境级 phase，并联合 reset 两台机器人和一张桌子。
 - [x] 把 paired A1 reference 接入每台机器人的在线 observation。
-- [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
+- [x] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [x] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
-- [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
+- [x] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
   reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
-  在线 actor/critic 已通过；reward sign 和多步 rollout 待完成。
+  在线 actor/critic、11 项 reward sign/有限性和 20 步 CUDA rollout 已通过。
 - [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
@@ -651,3 +651,32 @@ Push baseline 稳定后：
 - gate：shared actor 和 centralized critic 在线路由通过；
 - 下一项：逐项映射原 WBT reward/termination 到 team 语义，先实现简单 shared reward 与
   joint termination，再进行多步无更新 rollout。
+
+#### 2026-08-18：Shared WBT reward、joint termination 与短 rollout
+
+- commit：`2c9efe2b`；
+- reward：逐项保留原 Push A1 的 11 个 term、sigma 和权重；9 个机器人项先按 agent
+  独立计算再取均值，2 个共享桌子项每个 environment 只计算一次；
+- tracking：paired command 增加与原 `MotionCommand` 同义的 heading-aligned 相对身体
+  position/orientation reference，没有改变 A1 reference、Actor 或 Critic；
+- termination：保留原 `BadTrackingZOnly` 阈值；任一机器人 tracking 失败，或共享桌子
+  position/orientation 越界，均对整个双机器人 environment joint reset；
+- 碰撞语义：保留原 `undesired_contacts` 的 `-0.1` 轻量惩罚并在两台机器人之间取均值；
+  偶发非手部接触不是 termination，也没有加入 hand-only、角色或合作 shaping；
+- 配置：原一步物理 smoke 继续使用空 reward；新增 `g1_29dof_plan5_push_baseline`
+  才启用正式 shared reward 和 joint termination，防止两个 gate 混淆；
+- 测试：reward 权重/公式、agent 平均、共享 object、接触语义、任一机器人失效 joint reset、
+  object reset 和无接触 termination 均纳入回归；Plan 5/MAPPO 相关测试 `73 passed`，
+  `compileall` 与 `git diff --check` 通过；
+- 真实 CUDA/Isaac：冻结 `model_07999_actor158.pt`，连续 20 个 control steps，无梯度、
+  无 optimizer/normalizer 更新；Actor `[1,2,158] -> [1,2,29]`、Critic `[1,527] -> [1,1]`，
+  所有状态和 reward term 有限，`reset_count=0`；
+- reward 观测：总 reward 范围 `[-0.0583, 0.0720]`；启动负值来自 reset 后 previous action
+  为零产生的原 A1 action-rate 瞬态；object position reward 为 `[0.7925, 0.9996]`，object
+  orientation reward 为 `[0.8795, 0.9997]`；
+- 资产：两台实体均为 `main_mesh_collision_rubberhand.urdf`，hemisphere token 为空；
+- gate：shared reward、joint termination、collision semantics 与确定性短 rollout 通过；
+- 边界：尚未扩展双机器人 recorder，也未实现 stochastic action、log-prob、team GAE 或
+  PPO update；因此此结果不是训练成功或合作成功证明；
+- 下一项：扩展 recorder，使其区分 robot 0、robot 1、共享桌子、双方接触与具体 termination
+  原因，并用短 rollout 验证记录内容。
