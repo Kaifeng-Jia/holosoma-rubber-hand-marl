@@ -23,6 +23,9 @@ SIMULATION_APP = init_sim_imports(CONFIG)
 import torch  # noqa: E402
 
 from holosoma.config_types.env import get_tyro_env_config  # noqa: E402
+from holosoma.agents.mappo.initialization import initialize_plan5_model_bundle  # noqa: E402
+from holosoma.agents.mappo.runner import Plan5PolicyRunner  # noqa: E402
+from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
 
@@ -87,8 +90,20 @@ def main() -> None:
         if forbidden_asset_tokens:
             raise RuntimeError(f"Hemisphere-hand tokens are present: {forbidden_asset_tokens}")
 
-        zero_actions = torch.zeros(1, 2, 29, device=env.device)
-        observations, reward, reset, _ = env.step({"actions": zero_actions})
+        observations = env.observation_manager.compute()
+        checkpoint = REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
+        models = initialize_plan5_model_bundle(
+            checkpoint,
+            g1_29dof_wbt_w_object.algo.config,
+            device=env.device,
+        )
+        runner = Plan5PolicyRunner(models)
+        transition = runner.step_environment(env, observations)
+        observations = transition.observations
+        reward = transition.rewards
+        reset = transition.dones
+        policy_actions = transition.decision.actions
+        critic_values = transition.decision.values
         simulator.refresh_sim_tensors()
         actor_obs = observations["actor_obs"]
         teammate_obs = observations["teammate_obs"]
@@ -102,12 +117,19 @@ def main() -> None:
             raise RuntimeError(f"Unexpected combined observation shape: {tuple(combined_actor_obs.shape)}")
         if critic_obs.shape != (1, 527):
             raise RuntimeError(f"Unexpected centralized critic observation shape: {tuple(critic_obs.shape)}")
+        if policy_actions.shape != (1, 2, 29) or critic_values.shape != (1, 1):
+            raise RuntimeError(
+                "Unexpected online policy output: "
+                f"actions={tuple(policy_actions.shape)}, values={tuple(critic_values.shape)}"
+            )
         finite_after_step = bool(
             torch.isfinite(simulator.agent_root_states).all()
             and torch.isfinite(simulator.agent_dof_pos).all()
             and torch.isfinite(command.simulator_object_pos_w).all()
             and torch.isfinite(combined_actor_obs).all()
             and torch.isfinite(critic_obs).all()
+            and torch.isfinite(policy_actions).all()
+            and torch.isfinite(critic_values).all()
         )
         if not finite_after_step:
             raise RuntimeError("Non-finite state after one control step")
@@ -122,6 +144,8 @@ def main() -> None:
             "teammate_observation_shape": list(teammate_obs.shape),
             "combined_actor_observation_shape": list(combined_actor_obs.shape),
             "centralized_critic_observation_shape": list(critic_obs.shape),
+            "online_policy_action_shape": list(policy_actions.shape),
+            "online_critic_value_shape": list(critic_values.shape),
             "lateral_spacing_m": lateral_spacing.detach().cpu().tolist(),
             "object_position_w": initial_object_pos.detach().cpu().tolist(),
             "robot_urdf": str(robot_urdf.relative_to(REPO_ROOT)),
