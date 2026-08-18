@@ -2,8 +2,10 @@
 
 ## Scope
 
-This document freezes the single-motion A1 and Plan B pilot that precedes the
-mixed-data Step 1 policy in `LongTermGoal.md`.
+This document freezes the single-motion A1 and Plan B pilot and the completed
+four-action WBT milestone. The active downstream direction is the per-action
+multi-agent pipeline in `MULTI_AGENT_EMERGENCE_ROADMAP.md`; the former
+mixed-data policy direction is closed.
 
 The pilot answers:
 

@@ -25,7 +25,9 @@ TRAINING_MOTION_DIR = (
 TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_largetable.urdf"
 TRAINING_TABLE_MESH = TRAINING_MOTION_DIR / "largetable.obj"
 WIDE_TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable.urdf"
-WIDE_A1_RETENTION_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable_a1_retention.urdf"
+WIDE_PLAN5_PREFLIGHT_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_widetable_plan5_preflight.urdf"
+)
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -315,13 +317,13 @@ def test_widetable_uses_matching_symmetric_box_primitives() -> None:
     assert len(link.findall("./collision")) == len(expected_geometry)
 
 
-def test_widetable_a1_retention_asset_preserves_geometry_and_a1_contact_contract() -> None:
+def test_widetable_plan5_preflight_asset_preserves_geometry_and_a1_contact_contract() -> None:
     preflight_root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
-    retention_root = ET.parse(WIDE_A1_RETENTION_TABLE_URDF).getroot()
+    retention_root = ET.parse(WIDE_PLAN5_PREFLIGHT_TABLE_URDF).getroot()
     preflight_link = _required_element(preflight_root, "./link[@name='widetable_link']")
     retention_link = _required_element(retention_root, "./link[@name='widetable_link']")
 
-    assert retention_root.attrib["name"] == "widetable_a1_retention"
+    assert retention_root.attrib["name"] == "widetable_plan5_preflight"
     assert [ET.tostring(node) for node in preflight_link.findall("./visual")] == [
         ET.tostring(node) for node in retention_link.findall("./visual")
     ]

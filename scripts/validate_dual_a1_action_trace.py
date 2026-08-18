@@ -3,7 +3,7 @@
 
 This is a no-training mechanics preflight, not an online policy evaluation and
 not MARL. It extracts one complete motion-phase-aligned episode from each of
-the existing frozen-A1 Stage-1B recordings, places two physical rubber-hand G1
+the preserved frozen-A1 wide-table recordings, places two physical rubber-hand G1
 robots around one shared table, and replays their recorded PD position targets.
 
 The diagnostic asks one narrow question: do the two frozen action traces show
@@ -26,7 +26,7 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
-RECORDING_DIR = REPO_ROOT / "logs" / "WholeBodyTracking" / "stage1b_a1_retention_v1"
+RECORDING_DIR = REPO_ROOT / "logs" / "WholeBodyTracking" / "plan5_preflight_v1"
 DEFAULT_LEFT_RECORDING = RECORDING_DIR / "formal_wide_left_trajectory.npz"
 DEFAULT_RIGHT_RECORDING = RECORDING_DIR / "formal_wide_right_trajectory.npz"
 DEFAULT_ROBOT_URDF = (
@@ -35,7 +35,7 @@ DEFAULT_ROBOT_URDF = (
 )
 DEFAULT_TABLE_URDF = (
     REPO_ROOT / "src" / "holosoma" / "holosoma" / "data" / "motions"
-    / "g1_29dof" / "whole_body_tracking" / "objects_widetable_a1_retention.urdf"
+    / "g1_29dof" / "whole_body_tracking" / "objects_widetable_plan5_preflight.urdf"
 )
 
 

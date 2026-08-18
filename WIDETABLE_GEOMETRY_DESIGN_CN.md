@@ -33,7 +33,7 @@
 - 与推动方向垂直的桌面横向宽度；
 - 左右桌腿的横向位置；
 - 两个机器人 reference 的对称横向平移；
-- 与最终布局对应的 ghost teammate 分布。
+- 与最终布局对应的 teammate/opponent observation 几何范围。
 
 ## 3. 当前桌子几何
 
@@ -228,19 +228,17 @@ quaternion 计算 local X 的世界方向，不把 local X 错写成固定 world
 页面的 `Agent center spacing (m)` 可在 `0.4–1.2 m` 范围内临时调整，
 但只有写回本文并通过 collision preflight 的数值才是冻结配置。
 
-## 9. Ghost teammate 分布
+## 9. Teammate/opponent observation 几何契约
 
-Ghost 分布只能在 `d` 冻结后确定。两台机器人朝向大致相同时，左右
-机器人在自己的 heading frame 中应看到符号相反的横向 teammate
-位置。
-
-单机器人兼容训练按 50% 概率采样左右两种情况：
+两台机器人朝向大致相同时，应在各自 heading frame 中观察到符号相反的
+横向 teammate 位置。单智能体兼容阶段只负责维持与真实多智能体环境相同的
+四维接口，并在 Plan 5 设计确认后施加有界随机化：
 
 ```text
-relative position mean ≈ [0, +d] or [0, -d]
-relative position noise = geometry preflight 后冻结
-relative velocity mean = [0, 0]
-relative velocity range = geometry preflight 后冻结
+relative planar position: 2 values
+relative planar velocity: 2 values
+nominal lateral separation: d = 0.8 m
+randomization range: Plan 5 Stage 2 设计时冻结
 ```
 
 实际坐标分量和符号以 heading-frame 审计为准。不得把假设的 world
@@ -289,16 +287,16 @@ axis 直接写入 Actor 观测。
 | rubber-hand runtime contract | passed | 四台对照/目标机器人及其 contact sensor 均包含左右 `rubber_hand_link` |
 | 首轮桌宽 | frozen | 1.4 m；作为 baseline v1，不声称是全局最优或数学意义的最小宽度 |
 | 首轮机器人中心间距 | frozen | 0.8 m，对称分布在原 A1 root 两侧 |
-| Ghost 位置/速度范围 | pending | - |
+| Teammate/opponent 随机化范围 | pending | Plan 5 Stage 2 设计时冻结 |
 | 正式固定质量、COM、惯量和摩擦 | deferred | Stage 4 capacity sweep |
 
 ## 12. 下一步
 
-1. 以 1.4 m 桌面和 `d = 0.8 m` 冻结首轮几何基线；不把它表述为已经
+1. 以 1.4 m 桌面和 `d = 0.8 m` 保持首轮几何基线；不把它表述为已经
    证明的“最小充分宽度”。
-2. 继续 Stage 1A 的 154→158 lossless actor interface。
+2. 在 Plan 5 Stage 2 中建立真实双机器人 reset 和在线 rollout。
 3. Isaac Gym 检查延后至 `hsgym` 环境可用，不阻塞当前 Isaac Sim 主线。
-4. 只有后续真实双机器人 reset 或 rollout 暴露几何失败时才调整 `d`；
+4. 只有真实双机器人 reset 或 rollout 暴露几何失败时才调整 `d`；
    只有桌宽本身失败时才比较 1.2 m 或 1.6 m。
 
 独立 reset 碰撞门禁命令：

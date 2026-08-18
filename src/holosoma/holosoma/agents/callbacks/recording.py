@@ -168,14 +168,6 @@ class EvalRecordingCallback(RLEvalCallback):
             self._buffers["teammate_relative_position_b"] = []
             self._buffers["teammate_relative_velocity_b"] = []
 
-        stage1b_diagnostics = getattr(env, "stage1b_termination_diagnostics", None)
-        if isinstance(stage1b_diagnostics, dict):
-            diagnostic_metadata = dict(getattr(env, "stage1b_termination_diagnostic_metadata", {}))
-            diagnostic_metadata["channels"] = list(stage1b_diagnostics)
-            self._metadata["stage1b_termination_diagnostics"] = diagnostic_metadata
-            for name in stage1b_diagnostics:
-                self._buffers[name] = []
-
         motion_command = self._get_motion_command(env)
         if motion_command is not None:
             tracked_body_names = list(motion_command.motion_cfg.body_names_to_track)
@@ -388,19 +380,6 @@ class EvalRecordingCallback(RLEvalCallback):
         self._buffers["done"].append(_to_np(done))
         self._buffers["timeout"].append(_to_np(timeout))
         self._buffers["terminated"].append(_to_np(done & ~timeout))
-
-        stage1b_diagnostics = getattr(env, "stage1b_termination_diagnostics", None)
-        if isinstance(stage1b_diagnostics, dict):
-            expected = set(self._metadata.get("stage1b_termination_diagnostics", {}).get("channels", []))
-            if not expected:
-                expected = {name for name in self._buffers if name.startswith("stage1b_")}
-            if set(stage1b_diagnostics) != expected:
-                raise RuntimeError(
-                    "Stage 1B termination diagnostic channels changed during evaluation: "
-                    f"expected {sorted(expected)}, got {sorted(stage1b_diagnostics)}"
-                )
-            for name, value in stage1b_diagnostics.items():
-                self._buffers[name].append(_to_np(value[eid]))
 
         self._step_count += 1
         return actor_state
