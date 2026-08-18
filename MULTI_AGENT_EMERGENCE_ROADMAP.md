@@ -408,7 +408,8 @@ Push baseline 稳定后：
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
-- [ ] 建立 paired A1 reference、共享 phase 和共享 object reference。
+- [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
+- [ ] 把 paired A1 reference 接入在线环境 reset、phase 和 observation。
 - [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
@@ -498,3 +499,15 @@ Push baseline 稳定后：
 - gate：静态 gate 通过，物理 gate 尚未执行；
 - 下一项：建立最小 Plan 5 environment，使 paired reset 与 action routing 可驱动
   双 articulation，然后运行真实 CUDA reset smoke。
+
+#### 2026-08-18：Paired A1 reference 张量契约
+
+- commit：待本次代码提交；
+- 文件：`envs/marl/paired_a1_reference.py` 及其单元测试；
+- 结果：直接从冻结 A1 `MotionLoader` 在内存中生成左右 robot reference；
+  每帧沿共享桌子 local X 平移 `-0.4/+0.4 m`，关节角与姿态不变，object
+  reference 只保留一份，不生成冗余 NPZ；
+- 测试：paired reference 与 MAPPO 基础层合计 `17 passed`，并通过
+  `py_compile` 与 `git diff --check`；
+- gate：纯张量 gate 通过，在线 reset/phase 尚未接入；
+- 下一项：实现最小 Plan 5 environment orchestration。
