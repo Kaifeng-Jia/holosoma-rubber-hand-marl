@@ -3,11 +3,11 @@
 from dataclasses import replace
 
 from holosoma.config_types.curriculum import CurriculumManagerCfg
-from holosoma.config_types.observation import ObservationManagerCfg
 from holosoma.config_types.randomization import RandomizationManagerCfg
 from holosoma.config_types.reward import RewardManagerCfg
 from holosoma.config_types.termination import TerminationManagerCfg, TerminationTermCfg
 from holosoma.config_values import action, command, robot, simulator
+from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_actor_observation
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object
 
 
@@ -53,7 +53,7 @@ g1_29dof_plan5_push_smoke = replace(
         ),
         init_state=replace(robot.g1_29dof_w_object.init_state, pos=[0.0, 0.0, 0.76]),
     ),
-    observation=ObservationManagerCfg(),
+    observation=g1_29dof_plan5_actor_observation,
     action=action.g1_29dof_dual_joint_pos,
     reward=RewardManagerCfg(),
     termination=plan5_smoke_termination,

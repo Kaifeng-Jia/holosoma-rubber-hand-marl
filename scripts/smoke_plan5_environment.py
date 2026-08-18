@@ -88,12 +88,22 @@ def main() -> None:
             raise RuntimeError(f"Hemisphere-hand tokens are present: {forbidden_asset_tokens}")
 
         zero_actions = torch.zeros(1, 2, 29, device=env.device)
-        _, reward, reset, _ = env.step({"actions": zero_actions})
+        observations, reward, reset, _ = env.step({"actions": zero_actions})
         simulator.refresh_sim_tensors()
+        actor_obs = observations["actor_obs"]
+        teammate_obs = observations["teammate_obs"]
+        combined_actor_obs = torch.cat((actor_obs, teammate_obs), dim=-1)
+        if actor_obs.shape != (1, 2, 154):
+            raise RuntimeError(f"Unexpected actor observation shape: {tuple(actor_obs.shape)}")
+        if teammate_obs.shape != (1, 2, 4):
+            raise RuntimeError(f"Unexpected teammate observation shape: {tuple(teammate_obs.shape)}")
+        if combined_actor_obs.shape != (1, 2, 158):
+            raise RuntimeError(f"Unexpected combined observation shape: {tuple(combined_actor_obs.shape)}")
         finite_after_step = bool(
             torch.isfinite(simulator.agent_root_states).all()
             and torch.isfinite(simulator.agent_dof_pos).all()
             and torch.isfinite(command.simulator_object_pos_w).all()
+            and torch.isfinite(combined_actor_obs).all()
         )
         if not finite_after_step:
             raise RuntimeError("Non-finite state after one control step")
@@ -104,6 +114,9 @@ def main() -> None:
             "num_agents": 2,
             "agent_root_shape": list(initial_root.shape),
             "agent_dof_shape": list(initial_dof_pos.shape),
+            "actor_observation_shape": list(actor_obs.shape),
+            "teammate_observation_shape": list(teammate_obs.shape),
+            "combined_actor_observation_shape": list(combined_actor_obs.shape),
             "lateral_spacing_m": lateral_spacing.detach().cpu().tolist(),
             "object_position_w": initial_object_pos.detach().cpu().tolist(),
             "robot_urdf": str(robot_urdf.relative_to(REPO_ROOT)),

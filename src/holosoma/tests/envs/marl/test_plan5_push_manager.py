@@ -61,6 +61,6 @@ def test_smoke_config_is_dual_rubber_hand_and_not_a_training_reward():
     assert "widetable_plan5_preflight.urdf" in cfg.robot.object.object_urdf_path
     assert cfg.action.terms["joint_control"].func.endswith(":DualJointPositionActionTerm")
     assert "paired_motion_command" in cfg.command.setup_terms
-    assert cfg.observation.groups == {}
+    assert list(cfg.observation.groups) == ["actor_obs", "teammate_obs"]
     assert cfg.reward.terms == {}
     assert cfg.randomization.setup_terms == {}
