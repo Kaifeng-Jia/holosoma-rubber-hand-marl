@@ -5,12 +5,12 @@
 - Status: active execution guide
 - Confirmed: 2026-08-14
 - Scope realigned: 2026-08-17
-- Advisor guidance incorporated: 2026-08-12 meeting
+- Advisor guidance incorporated: 2026-08-12 and 2026-08-18 reviews
 - Platform: Unitree G1 with fixed rubber hands and a physically simulated table
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
-- Active work item: review a frozen two-entity mechanics preflight after classifying the translated side reference as brittle
+- Active work item: review the supportive-but-unstable frozen two-entity mechanics preflight, then decide whether to select Plan 5
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
@@ -95,6 +95,34 @@ The following are paused and are not prerequisites for multi-agent training:
 These are valid independent research directions, but combining them with the
 first MARL baseline would obscure the main question and add unnecessary
 engineering dependencies.
+
+### 3.1 Instructor constraints confirmed on 2026-08-18
+
+The latest instructor review reinforces, rather than replaces, the mainline
+above:
+
+1. Stop mixed-action training and task-oriented single-agent modifications.
+   Preserve one independently trained network/checkpoint per action. Do not
+   merge push, pull, kick, and other action classes into one actor in the first
+   baseline.
+2. Standardize the actor input dimension by reserving local relative position
+   and velocity channels for teammates or opponents. Apply bounded
+   randomization to those channels during the compatibility/training stage;
+   do not expose a different actor schema at deployment.
+3. Retain the existing single-agent actor architecture and action dimension.
+   Build the multi-agent training environment around parameter sharing within
+   one homogeneous action class and a centralized global critic. A separate
+   network per action is compatible with parameter sharing among agents that
+   are executing that same action.
+4. Build two experiment families: cooperative pushing/pulling and competitive
+   object grabbing. The primary scientific output is measurable emergent
+   multi-agent behavior, not a new single-agent task curriculum.
+
+For the first implementation, Push A1 remains the only active action network.
+Pull is the next cooperative extension; competition follows only after the
+cooperative environment and evaluation instrumentation are stable. This order
+does not mix action networks and does not require target-oriented single-agent
+training.
 
 ## 4. Preserved milestone and invariants
 
@@ -357,7 +385,7 @@ explicitly rejected and is not an active plan.
 | **2. Balanced left/right reference training** | Train one shared checkpoint with both shifted references and report per-side metrics rather than aggregate reward. | **Failed under the tested recipes.** The conservative full-actor variant preserved the right side but completed `0/20` left; the backbone-frozen teammate-input adapter also completed no left trajectory. Do not add iterations to either recipe. |
 | **3. Training-time symmetry augmentation** | Define strict left/right transforms for observation, reference, action, critic state, joints, bodies, and contact channels, then train one shared actor with symmetry-consistency supervision. | **Not selected for the current simply translated references.** The feasibility gate classified that reference construction as physically brittle. Revisit only if dynamically corrected single-side references are generated and reviewed. |
 | **4. Full symmetric A1 retraining** | Re-run the complete A1 WBT configuration with validated left/right references and symmetry support, potentially up to the full 8,000-iteration budget. | **Pending high-cost fallback.** Use only if Plan 3 is valid but insufficient; do not start directly. This was the original Plan 5 before removal of the rejected separate-checkpoint proposal. |
-| **5. Paired-reference multi-agent WBT** | Materialize the accepted Viser layout as two synchronized robot references, one shared table reference, and one shared phase; initialize a shared actor from A1 and train a centralized critic for the dual-robot pushing demonstration. | **New parallel candidate, not yet selected.** It bypasses the remaining single-agent side-adaptation stage but preserves the A1 prior. |
+| **5. Paired-reference multi-agent WBT** | Materialize the accepted Viser layout as two synchronized robot references, one shared table reference, and one shared phase; initialize a shared actor from A1 and train a centralized critic for the dual-robot pushing demonstration. | **Mechanically supported candidate, not yet selected.** The no-training action-trace replay reduced endpoint yaw but was unstable; it supports building an online dual-agent environment rather than copying open-loop trajectories. |
 
 #### Rejected proposal
 
@@ -571,6 +599,48 @@ learning solely to test whether their physical yaw moments cancel. If that
 preflight supports Plan 5, selecting and implementing Plan 5 still requires a
 separate user decision.
 
+#### Frozen dual-action-trace preflight result -- 2026-08-18
+
+Commit `bb315ef1` adds `scripts/validate_dual_a1_action_trace.py`, which performs the
+smallest useful no-training check before an online two-agent environment is
+built. It selects one complete 308-step episode from each formal frozen-A1
+wide-table evaluation, aligns the two traces by motion phase, places two
+physical rubber-hand G1 robots around one shared 1.4 m table, and replays the
+recorded PD position targets at 50 Hz over 200 Hz physics. The representative
+audit settings are a 2.6 kg total table mass and friction coefficient 0.5.
+
+This is an open-loop action-trace replay, not two online actors, not a policy
+evaluation, and not MARL. The independently recorded traces cannot react to
+the shared table or recover from state drift. Its result is therefore a
+necessary mechanics signal only.
+
+| Quantity | Result |
+|---|---:|
+| Reference planar displacement | 1.506 m |
+| Shared-table planar displacement | 0.818 m |
+| Endpoint planar error | 0.688 m |
+| Motion-direction cosine | 0.9997 |
+| Maximum absolute shared-table yaw change | 10.37 degrees |
+| Final shared-table yaw change | -0.20 degrees |
+| Left/right minimum root height | 0.411 m / 0.088 m |
+
+The shared table moved in essentially the correct direction, and its final yaw
+was close to zero. Compared with the approximately 20--23 degree yaw deviations
+seen in the preceding single-side dynamics checks, this is evidence that the
+opposite-side moments can cancel. The preflight nevertheless fails as a usable
+controller: it undershoots the reference, both robots cross the fall-height
+threshold, and the left robot develops extensive elbow, pelvis, torso, and
+other non-hand table contact after open-loop drift. Peak filtered table contact
+force also becomes unphysically large, so this replay must not be promoted as
+a baseline policy or demonstration.
+
+The decision-relevant interpretation is narrow: the mechanics hypothesis
+behind Plan 5 is supported, while direct open-loop copying is rejected. The
+next technically meaningful implementation would run both actor calls online
+against one shared physical state and introduce the centralized critic for
+joint training. This result does not by itself select Plan 5; explicit review
+is still required before Stage 2 code changes.
+
 Plan 5 is reference-guided multi-agent reinforcement learning. Its current
 scope is deliberately narrow: reproduce the synchronized dual-robot pushing
 reference, maintain both robots' WBT behavior, track the one shared table
@@ -745,9 +815,10 @@ do not promote any checkpoint from the failed Plan 1/2 diagnostic runs.
 
 ### Stage 2 -- Build the two-agent environment
 
-Status: **Blocked until the post-Plan-2 feasibility audit is reviewed and a
-specific branch is explicitly selected. The existing geometry and reset
-smokes are preserved evidence, not authorization to begin Plan 5.**
+Status: **Blocked pending explicit Plan-5 selection after review of the
+supportive-but-unstable frozen dual-action-trace preflight. The existing
+geometry, reset, and mechanics smokes are evidence, not authorization to begin
+the online two-agent environment.**
 
 #### Work
 
