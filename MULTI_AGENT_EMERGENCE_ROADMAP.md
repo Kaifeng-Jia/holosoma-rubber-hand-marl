@@ -10,7 +10,7 @@
 - Active branch: `rubber_hand_marl_baseline`
 - Baseline commit: `8038c092` (`wbt-four-action-priors-v1`)
 - Primary research direction: multi-agent physical cooperation and competition
-- Active work item: reference-state collision replay and rubber-hand wrench-feasibility check
+- Active work item: rubber-hand contact-wrench feasibility check after completed reference-state collision replay
 - Supersedes as the active guide: `LongTermGoal.md`
 
 This is the single canonical roadmap for subsequent implementation, training,
@@ -458,14 +458,44 @@ evidence therefore indicates rollout drift into an easier body-contact solution,
 but does not prove that the shifted reference itself is collision-free or that
 a single-robot side reference is dynamically impossible.
 
-The next bounded step is consequently a no-training reference-state collision
-replay followed, if collision-free, by a rubber-hand contact-wrench feasibility
-check. It must determine whether the exact reference states introduce table
-interpenetration, whether reachable palm contacts can supply the required
-translation and bounded yaw wrench, and what balance/actuator margin remains.
-Only after that evidence is reviewed may the project discuss Plan 3 or a frozen
-two-entity mechanics preflight. This result does not authorize Plan 4, Plan 5,
-new PPO iterations, hand-only rewards, or hidden support forces.
+#### Exact-reference collision replay result -- 2026-08-17
+
+The no-training Isaac Sim replay placed the exact left and right shifted
+references against the shared table for all 309 frames, with gravity and
+control disabled. Identical copies of each pose were placed far from the table
+and used to subtract pose-internal/self-contact force. A body contact was
+reported when the desired-minus-control force exceeded `5 N`.
+
+| Side reference | Rubber-hand contact frames | Other-body contact frames | Bodies responsible for every other-body event |
+|---|---:|---:|---|
+| left | 223/309 | 211/309 | `left_wrist_yaw_link`, `right_wrist_yaw_link` |
+| right | 227/309 | 206/309 | `left_wrist_yaw_link`, `right_wrist_yaw_link` |
+
+No hip, knee, ankle, waist, torso, or other lower-body reference contact
+exceeded `5 N` on either side. The maximum other-body excess was `135.10 N`
+on the left reference and `145.86 N` on the right reference, both at a wrist-yaw
+link. The strict rubber-hand-only collision gate therefore reports failure, but
+the result isolates a distal wrist/rubber-hand assembly contact issue rather
+than a lower-body collision built into the shifted reference. In particular,
+the hip/knee propulsion seen in policy rollouts is a policy deviation toward an
+easier contact mode; it is not required by the exact reference geometry.
+
+This classification does not silently relabel a wrist-yaw link as a rubber
+hand. Under the confirmed contract, wrist contact is permitted only as reported
+incidental contact and does not count toward rubber-hand propulsive force. The
+replay is geometry evidence only: it does not prove that the reference is
+dynamically realizable or that its wrist/palm contact wrench can be generated
+within friction, balance, and actuator limits. The all-frame diagnostic was
+added in commit `59471d90`; its default single-frame behavior and the training
+sensor graph remain unchanged.
+
+The next bounded step is consequently a no-training rubber-hand contact-wrench
+feasibility check. It must determine whether reachable rubber-hand contacts can
+supply the required translation and bounded yaw wrench, and what
+friction/balance/actuator margin remains, while reporting the wrist contact
+separately. Only after that evidence is reviewed may the project discuss Plan 3
+or a frozen two-entity mechanics preflight. This result does not authorize Plan
+4, Plan 5, new PPO iterations, hand-only rewards, or hidden support forces.
 
 A frozen two-entity mechanics preflight is not MARL and is not the rejected
 separate-checkpoint plan. It uses two physical robots with documented frozen
@@ -837,8 +867,10 @@ it proceeds in reviewable steps:
    realized table force and yaw moment at the approach, first-contact, sustained
    push, and termination intervals.
 3. **Run a bounded reference-state collision and contact-feasibility check --
-   active.** Replay exact reference states against the frozen table collision
-   geometry, then test whether reachable rubber-hand contacts and admissible
+   collision replay complete; wrench check active.** The exact 309-frame replay
+   found no lower-body reference collision above `5 N`; every non-rubber-hand
+   event came from a wrist-yaw link and remains separately reported incidental
+   contact. Next test whether reachable rubber-hand contacts and admissible
    forces can satisfy the reference wrench while respecting balance, friction,
    and actuator limits. This is analysis, not PPO training. The current physical
    rollouts are not a valid hand-wrench proof because hip/knee propulsion
