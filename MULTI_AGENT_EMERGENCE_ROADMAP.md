@@ -408,16 +408,17 @@ Push baseline 稳定后：
 - [x] 建立 opt-in 双机器人 ActionManager 控制项，把两组 `29-D` action 独立转换为 torque。
 - [x] 建立最小 Plan 5 environment shell，接通 paired command、dual action 和双实体 simulator。
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
-- [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
+- [x] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
 - [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
 - [x] 建立 paired command，共享环境级 phase，并联合 reset 两台机器人和一张桌子。
-- [ ] 把 paired A1 reference 接入每台机器人的在线 observation。
+- [x] 把 paired A1 reference 接入每台机器人的在线 observation。
 - [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
 - [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
-  reset、基础 shape、间距和一步物理已通过；在线 actor、observation 与 reward sign 待完成。
+  reset、基础 shape、间距、一步物理、heading-frame 和 agent-swap 已通过；
+  在线 actor 与 reward sign 待完成。
 - [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
@@ -563,3 +564,27 @@ Push baseline 稳定后：
 - gate：最小双实体物理启动 gate 通过；
 - 下一项：实现每台机器人 `158-D` actor observation，以真实 teammate 相对平面位置和
   速度替换 ghost 字段，并验证 heading-frame 坐标和 agent-swap 一致性。
+
+#### 2026-08-18：每台机器人 `158-D` actor observation
+
+- commit：`557e331b`；
+- 文件：`managers/observation/terms/marl.py`、Plan 5 observation preset、smoke experiment
+  与 observation/环境测试；
+- 数据契约：每个 environment 输出 `actor_obs [E, 2, 154]` 和
+  `teammate_obs [E, 2, 4]`；shared actor 边界拼接为 `[E, 2, 158]`，未把两台机器人
+  合并成一个 316 维 actor 输入；
+- 154 维兼容性：term 名称、顺序、scale、noise、clip 与原 Push A1 完全一致，只把
+  单机器人数据 provider 替换为 per-agent provider；paired motion command 和 orientation
+  分别读取同一共享 phase 下的两份 robot reference；
+- teammate 语义：另一台真实机器人相对平面位置和相对平面速度，使用观察者自身 yaw
+  转换到 heading frame；不向 actor 提供队友关节、contact force、角色或桌子全局真值；
+- 测试：CPU 测试覆盖 90° yaw、agent-swap、154+4 维度和原配置继承，相关回归
+  `46 passed`；`py_compile` 与 `git diff --check` 通过；
+- 真实 CUDA：一步 smoke 输出 `[1, 2, 154] + [1, 2, 4] = [1, 2, 158]`，全部有限，
+  `passed: true`；
+- 边界：teammate term 当前继承兼容 checkpoint 的 `clip=(-1, 1)`，足以完成接口 gate，
+  但正式训练前仍须依据 rollout 分布确认是否保留；critic、shared reward 和在线 actor
+  checkpoint 尚未接入；
+- gate：per-agent actor observation 与真实 teammate 坐标 gate 通过；
+- 下一项：先确认最小 centralized critic 的字段集合，再实现全新 critic observation；
+  不默认加入上一时刻 action、contact force 或其他冗余 simulator truth。
