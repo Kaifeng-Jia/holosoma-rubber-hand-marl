@@ -172,3 +172,54 @@ def test_adaptive_policy_kl_changes_only_actor_learning_rate(
     )
     assert learner.critic_learning_rate == critic_lr_before
     assert learner.models.critic_optimizer.param_groups[0]["lr"] == critic_lr_before
+
+
+def test_teammate_input_only_update_changes_only_four_new_input_columns() -> None:
+    torch.manual_seed(721)
+    learner = _learner()
+    actor_before = {key: value.clone() for key, value in learner.models.actor.state_dict().items()}
+    critic_before = {key: value.clone() for key, value in learner.models.critic.state_dict().items()}
+
+    learner.collect_rollout(FakeTeamEnvironment(2), _observations(2))
+    learner.update(teammate_input_only=True)
+
+    first_weight = "actor_module.module.0.weight"
+    actor_after = learner.models.actor.state_dict()
+    torch.testing.assert_close(
+        actor_after[first_weight][:, :154],
+        actor_before[first_weight][:, :154],
+        rtol=0.0,
+        atol=0.0,
+    )
+    assert not torch.equal(
+        actor_after[first_weight][:, 154:158],
+        actor_before[first_weight][:, 154:158],
+    )
+    for key, value in actor_before.items():
+        if key != first_weight:
+            torch.testing.assert_close(actor_after[key], value, rtol=0.0, atol=0.0)
+    assert any(
+        not torch.equal(value, learner.models.critic.state_dict()[key])
+        for key, value in critic_before.items()
+    )
+
+    zero_teammate = _observations(2)
+    zero_teammate["teammate_obs"].zero_()
+    flat_observations = torch.cat(
+        (zero_teammate["actor_obs"], zero_teammate["teammate_obs"]),
+        dim=-1,
+    ).reshape(-1, 158)
+    flat_normalized = learner.models.actor_obs_normalizer(flat_observations, update=False)
+    with torch.no_grad():
+        learner.models.actor.act({"actor_obs": flat_normalized})
+        action_after = learner.models.actor.action_mean.clone()
+        learner.models.actor.load_state_dict(actor_before, strict=True)
+        learner.models.actor.act({"actor_obs": flat_normalized})
+        action_before = learner.models.actor.action_mean.clone()
+    torch.testing.assert_close(action_after, action_before, rtol=0.0, atol=0.0)
+
+
+def test_teammate_input_only_requires_actor_update() -> None:
+    learner = _learner()
+    with pytest.raises(ValueError, match="requires update_actor=True"):
+        learner.update(update_actor=False, teammate_input_only=True)

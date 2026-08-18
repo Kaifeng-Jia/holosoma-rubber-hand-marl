@@ -17,6 +17,8 @@ from holosoma.config_types.algo import PPOConfig
 
 
 PLAN5_MAPPO_CHECKPOINT_VERSION = "plan5_shared_actor_mappo_v1"
+PLAN5_ACTOR_FIRST_WEIGHT = "actor_module.module.0.weight"
+PLAN5_LEGACY_ACTOR_OBS_DIM = 154
 
 
 @dataclass(frozen=True)
@@ -202,8 +204,15 @@ class Plan5PPO:
         advantages = (advantages - advantages.mean()) / (advantages.std() + 1.0e-8)
         return returns, advantages
 
-    def update(self, *, update_actor: bool = True) -> Plan5PPOUpdateMetrics:
+    def update(
+        self,
+        *,
+        update_actor: bool = True,
+        teammate_input_only: bool = False,
+    ) -> Plan5PPOUpdateMetrics:
         """Apply PPO epochs to one full synchronized rollout."""
+        if teammate_input_only and not update_actor:
+            raise ValueError("teammate_input_only requires update_actor=True")
         totals = {
             "surrogate_loss": 0.0,
             "value_loss": 0.0,
@@ -217,7 +226,11 @@ class Plan5PPO:
             num_mini_batches=self.config.num_mini_batches,
             num_epochs=self.config.num_learning_epochs,
         ):
-            metrics = self._update_minibatch(minibatch, update_actor=update_actor)
+            metrics = self._update_minibatch(
+                minibatch,
+                update_actor=update_actor,
+                teammate_input_only=teammate_input_only,
+            )
             for key, value in metrics.items():
                 totals[key] += value
             updates += 1
@@ -231,10 +244,14 @@ class Plan5PPO:
         minibatch: dict[str, dict[str, torch.Tensor]],
         *,
         update_actor: bool,
+        teammate_input_only: bool,
     ) -> dict[str, float]:
         agent = minibatch["agent"]
         team = minibatch["team"]
         if update_actor:
+            frozen_actor_parameters = (
+                self._snapshot_frozen_actor_parameters() if teammate_input_only else None
+            )
             team_advantages = team["advantages"]
             actor_advantages = team_advantages.repeat_interleave(self.layout.num_agents, dim=0)
 
@@ -260,11 +277,15 @@ class Plan5PPO:
 
             self.models.actor_optimizer.zero_grad()
             actor_loss.backward()
+            if teammate_input_only:
+                self._mask_actor_gradients_to_teammate_inputs()
             actor_grad_norm = nn.utils.clip_grad_norm_(
                 self.models.actor.parameters(),
                 self.config.max_grad_norm,
             )
             self.models.actor_optimizer.step()
+            if frozen_actor_parameters is not None:
+                self._restore_frozen_actor_parameters(frozen_actor_parameters)
         else:
             self.models.actor_optimizer.zero_grad()
             zero = torch.zeros((), device=team["critic_obs"].device)
@@ -299,6 +320,42 @@ class Plan5PPO:
             "actor_grad_norm": float(actor_grad_norm),
             "critic_grad_norm": float(critic_grad_norm),
         }
+
+    def _snapshot_frozen_actor_parameters(self) -> dict[str, torch.Tensor]:
+        return {
+            name: parameter.detach().clone()
+            for name, parameter in self.models.actor.named_parameters()
+        }
+
+    def _mask_actor_gradients_to_teammate_inputs(self) -> None:
+        first_weight_found = False
+        for name, parameter in self.models.actor.named_parameters():
+            if name == PLAN5_ACTOR_FIRST_WEIGHT:
+                if parameter.shape[1] != self.layout.actor_obs_dim:
+                    raise RuntimeError(
+                        f"Unexpected Plan 5 actor first-layer shape: {tuple(parameter.shape)}"
+                    )
+                if parameter.grad is None:
+                    raise RuntimeError("Plan 5 actor first-layer gradient is missing")
+                parameter.grad[:, :PLAN5_LEGACY_ACTOR_OBS_DIM] = 0.0
+                first_weight_found = True
+            else:
+                parameter.grad = None
+        if not first_weight_found:
+            raise RuntimeError(f"Missing Plan 5 actor parameter {PLAN5_ACTOR_FIRST_WEIGHT!r}")
+
+    @torch.no_grad()
+    def _restore_frozen_actor_parameters(
+        self,
+        snapshot: dict[str, torch.Tensor],
+    ) -> None:
+        for name, parameter in self.models.actor.named_parameters():
+            if name == PLAN5_ACTOR_FIRST_WEIGHT:
+                parameter[:, :PLAN5_LEGACY_ACTOR_OBS_DIM].copy_(
+                    snapshot[name][:, :PLAN5_LEGACY_ACTOR_OBS_DIM]
+                )
+            else:
+                parameter.copy_(snapshot[name])
 
     def _update_actor_learning_rate(self, kl: torch.Tensor) -> None:
         """Adapt only the policy optimizer to policy KL.
