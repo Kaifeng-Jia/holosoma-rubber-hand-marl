@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 2 实施中；shared reward、joint reset 与 CUDA 短 rollout 已通过，recorder 待完成
+- 当前阶段：Stage 2 实施中；双实体数据流与 recorder 已通过，teammate 短程鲁棒性检查待完成
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -416,7 +416,7 @@ Push baseline 稳定后：
 - [x] 把 paired A1 reference 接入每台机器人的在线 observation。
 - [x] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [x] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
-- [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
+- [x] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
 - [x] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
   reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
   在线 actor/critic、11 项 reward sign/有限性和 20 步 CUDA rollout 已通过。
@@ -680,3 +680,31 @@ Push baseline 稳定后：
   PPO update；因此此结果不是训练成功或合作成功证明；
 - 下一项：扩展 recorder，使其区分 robot 0、robot 1、共享桌子、双方接触与具体 termination
   原因，并用短 rollout 验证记录内容。
+
+#### 2026-08-18：Paired recorder 与 termination 原因快照
+
+- commit：`5c1827f1`；
+- recorder：沿用并扩展现有 `EvalRecordingCallback`，检测 `paired_motion_command` 后记录
+  agent-major 通道，不建立第二套重复 recorder；
+- 双机器人通道：actor observation `[T,2,158]`，joint/action/torque `[T,2,29]`，root
+  `[T,2,*]`，body/contact `[T,2,...]`；substep 明确为 `[T,2,decimation,29]`；
+- 共享通道：桌子 reference/actual pose 与 velocity 只记录一次，shape 为 `[T,3/4]`，
+  不按 agent 复制；shared reward、done、timeout 同样每个 environment 一份；
+- termination：通用 `TerminationManager` 保存每个 term 本步结果，`BaseTask` 在 reset 前
+  clone 到 `extras["termination_terms"]`；NPZ 分别记录 `termination_term_timeout` 和
+  `termination_term_joint_bad_tracking`，避免 reset 后原因丢失；
+- contact：双方 body-level net force/history 保留显式 agent 维；recording smoke 临时开启
+  object-filter diagnostics，记录全身 table filter `[T,1,78,3]` 与 rubber-hand table filter
+  `[T,1,4,3]`，metadata 中保存每个 filter 的 prim path；
+- 传感器边界：额外 object-filter diagnostics 只在 `--record-output` smoke/eval 时启用，
+  正式 baseline 配置仍默认关闭，不改变训练物理、reward、observation 或吞吐；
+- 测试：paired NPZ shape、agent 顺序、共享 object 单份、termination pre-reset 快照和旧接口
+  回归均通过；worktree 全部 24 个测试文件共 `158 passed`，`compileall` 与
+  `git diff --check` 通过；
+- 真实 CUDA/Isaac：冻结 A1 Actor 连续 5 步，成功写入并重新读取
+  `/tmp/plan5_recorder_smoke.npz`；关键通道 shape 与双侧 `/Robot/`、`/Robot_1/` filter
+  覆盖均通过脚本 fail-closed 自检，`reset_count=0`；
+- gate：双机器人、共享桌子、双方接触与具体 termination 原因均可记录，recorder gate 通过；
+- 边界：该 5 步文件是接口 smoke，不是训练结果或合作行为证据；临时 NPZ 不作为正式数据集；
+- 下一项：完成单智能体随机 teammate observation 的短程鲁棒性检查；随后复核 Stage 2
+  全部退出条件，再进入 stochastic rollout、team GAE 与 PPO update 实现。
