@@ -85,6 +85,30 @@ def test_actor_normalizer_is_frozen_and_critic_normalizer_is_fresh() -> None:
     )
 
 
+def test_frozen_a1_actor_is_invariant_to_random_teammate_channels() -> None:
+    torch.manual_seed(721)
+    bundle = initialize_plan5_model_bundle(
+        CHECKPOINT,
+        g1_29dof_wbt_w_object.algo.config,
+        device="cpu",
+    )
+    base_observation = torch.randn(257, 154)
+    zero_teammate = torch.zeros(257, 4)
+    random_teammate = torch.empty(257, 4).uniform_(-1.0, 1.0)
+
+    def action(teammate: torch.Tensor) -> torch.Tensor:
+        observation = torch.cat((base_observation, teammate), dim=-1)
+        normalized = bundle.actor_obs_normalizer(observation, update=False)
+        return bundle.actor.act_inference({"actor_obs": normalized})
+
+    torch.testing.assert_close(
+        action(zero_teammate),
+        action(random_teammate),
+        rtol=0.0,
+        atol=0.0,
+    )
+
+
 def test_checkpoint_hash_mismatch_fails_closed() -> None:
     with pytest.raises(ValueError, match="SHA256 mismatch"):
         initialize_plan5_model_bundle(
