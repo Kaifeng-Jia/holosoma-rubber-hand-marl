@@ -65,6 +65,11 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--robot-urdf", type=Path, default=DEFAULT_ROBOT_URDF)
     parser.add_argument("--table-urdf", type=Path, default=DEFAULT_TABLE_URDF)
     parser.add_argument("--frame-index", type=int, default=0)
+    parser.add_argument(
+        "--all-frames",
+        action="store_true",
+        help="Replay every reference frame and report hand versus non-hand collisions.",
+    )
     parser.add_argument("--lateral-spacing", type=float, default=0.8)
     parser.add_argument("--steps", type=int, default=8)
     parser.add_argument("--force-threshold-n", type=float, default=5.0)
@@ -211,7 +216,7 @@ def _make_sensor(name: str) -> ContactSensor:
     )
 
 
-def _validate_inputs(frame_counts: list[int]) -> int:
+def _validate_inputs(frame_counts: list[int]) -> list[int]:
     explicit_motion_paths = [ARGS.left_motion_npz, ARGS.right_motion_npz]
     if (ARGS.left_motion_npz is None) != (ARGS.right_motion_npz is None):
         raise ValueError("--left-motion-npz and --right-motion-npz must be provided together")
@@ -219,13 +224,19 @@ def _validate_inputs(frame_counts: list[int]) -> int:
     for path in (*motion_paths, ARGS.robot_urdf, ARGS.table_urdf):
         if not path.is_file():
             raise FileNotFoundError(path)
-    if any(not 0 <= ARGS.frame_index < frame_count for frame_count in frame_counts):
-        raise ValueError(f"frame-index {ARGS.frame_index} outside one or more motion trajectories")
+    if ARGS.all_frames:
+        if len(set(frame_counts)) != 1:
+            raise ValueError(f"--all-frames requires equal trajectory lengths, got {frame_counts}")
+        frames = list(range(frame_counts[0]))
+    else:
+        if any(not 0 <= ARGS.frame_index < frame_count for frame_count in frame_counts):
+            raise ValueError(f"frame-index {ARGS.frame_index} outside one or more motion trajectories")
+        frames = [ARGS.frame_index]
     if ARGS.steps <= 0:
         raise ValueError("steps must be positive")
     if ARGS.control_offset_m <= ARGS.lateral_spacing:
         raise ValueError("control-offset-m must exceed lateral-spacing")
-    return ARGS.frame_index
+    return frames
 
 
 def _set_robot_state(robot: Articulation, root_pose: np.ndarray, joint_pose: np.ndarray) -> None:
@@ -246,6 +257,188 @@ def _max_force(sensor: ContactSensor) -> tuple[float, str]:
     return float(force_norm[index].item()), sensor.body_names[index]
 
 
+def _run_all_frames(
+    sim: sim_utils.SimulationContext,
+    robots: dict[str, Articulation],
+    table: RigidObject,
+    sensors: dict[str, ContactSensor],
+    frames: list[int],
+    left_joint_pos: np.ndarray,
+    right_joint_pos: np.ndarray,
+    object_pos: np.ndarray,
+    object_quat: np.ndarray,
+    rubber_hand_asset_passed: bool,
+    robot_body_contract: dict[str, list[str]],
+    sensor_body_contract: dict[str, list[str]],
+) -> tuple[dict[str, object], bool]:
+    side_reports: dict[str, dict[str, object]] = {
+        "desired_0": {
+            "nonhand_collision_frames": [],
+            "nonhand_collision_contacts": [],
+            "nonhand_contact_body_frame_counts": {},
+            "rubber_hand_contact_frames": [],
+            "rubber_hand_contacts": [],
+            "rubber_hand_body_frame_counts": {},
+            "max_nonhand_force_excess_n": 0.0,
+            "max_nonhand_force_body": "",
+            "max_nonhand_force_frame": None,
+            "max_rubber_hand_force_excess_n": 0.0,
+            "max_rubber_hand_force_body": "",
+            "max_rubber_hand_force_frame": None,
+        },
+        "desired_1": {
+            "nonhand_collision_frames": [],
+            "nonhand_collision_contacts": [],
+            "nonhand_contact_body_frame_counts": {},
+            "rubber_hand_contact_frames": [],
+            "rubber_hand_contacts": [],
+            "rubber_hand_body_frame_counts": {},
+            "max_nonhand_force_excess_n": 0.0,
+            "max_nonhand_force_body": "",
+            "max_nonhand_force_frame": None,
+            "max_rubber_hand_force_excess_n": 0.0,
+            "max_rubber_hand_force_body": "",
+            "max_rubber_hand_force_frame": None,
+        },
+    }
+    max_table_drift = 0.0
+
+    for frame in frames:
+        desired_qpos = {
+            "desired_0": left_joint_pos[frame],
+            "desired_1": right_joint_pos[frame],
+        }
+        roots = {
+            "desired_0": desired_qpos["desired_0"][:3],
+            "desired_1": desired_qpos["desired_1"][:3],
+            "control_0": desired_qpos["desired_0"][:3] + np.array([ARGS.control_offset_m, 0.0, 0.0]),
+            "control_1": desired_qpos["desired_1"][:3] + np.array([-ARGS.control_offset_m, 0.0, 0.0]),
+        }
+        for name, robot in robots.items():
+            source_name = "desired_0" if name.endswith("0") else "desired_1"
+            source_qpos = desired_qpos[source_name]
+            _set_robot_state(robot, np.concatenate((roots[name], source_qpos[3:7])), source_qpos[7:])
+
+        table_pose = torch.as_tensor(
+            np.concatenate((object_pos[frame], object_quat[frame])),
+            dtype=torch.float32,
+            device=table.device,
+        ).unsqueeze(0)
+        table.write_root_pose_to_sim(table_pose)
+        table.write_root_velocity_to_sim(torch.zeros((1, 6), device=table.device))
+
+        per_robot_max_force = {
+            name: torch.zeros(
+                len(sensor.body_names),
+                dtype=torch.float32,
+                device=robots[name].device,
+            )
+            for name, sensor in sensors.items()
+        }
+        for _ in range(ARGS.steps):
+            for robot in robots.values():
+                robot.write_data_to_sim()
+            table.write_data_to_sim()
+            sim.step(render=False)
+            for robot in robots.values():
+                robot.update(DT)
+            table.update(DT)
+            for name, sensor in sensors.items():
+                sensor.update(DT, force_recompute=True)
+                force_norm = torch.linalg.vector_norm(sensor.data.net_forces_w[0], dim=-1)
+                per_robot_max_force[name] = torch.maximum(per_robot_max_force[name], force_norm)
+
+        current_table = table.data.root_pos_w[0].detach().cpu().numpy()
+        max_table_drift = max(max_table_drift, float(np.linalg.norm(current_table - object_pos[frame])))
+
+        for index in range(2):
+            desired = f"desired_{index}"
+            control = f"control_{index}"
+            if sensors[desired].body_names != sensors[control].body_names:
+                raise RuntimeError(f"Sensor body order mismatch for {desired} and {control}")
+            excess = torch.clamp(per_robot_max_force[desired] - per_robot_max_force[control], min=0.0)
+            body_names = sensors[desired].body_names
+            hand_indices = [i for i, body_name in enumerate(body_names) if body_name in REQUIRED_RUBBER_HAND_BODIES]
+            nonhand_indices = [i for i, body_name in enumerate(body_names) if body_name not in REQUIRED_RUBBER_HAND_BODIES]
+
+            report = side_reports[desired]
+            for category, indices in (("rubber_hand", hand_indices), ("nonhand", nonhand_indices)):
+                category_excess = excess[indices]
+                category_max_index = int(torch.argmax(category_excess).item())
+                force = float(category_excess[category_max_index].item())
+                body_name = body_names[indices[category_max_index]]
+                if force > float(report[f"max_{category}_force_excess_n"]):
+                    report[f"max_{category}_force_excess_n"] = force
+                    report[f"max_{category}_force_body"] = body_name
+                    report[f"max_{category}_force_frame"] = frame
+                if force > ARGS.force_threshold_n:
+                    frame_key = (
+                        "rubber_hand_contact_frames" if category == "rubber_hand" else "nonhand_collision_frames"
+                    )
+                    report[frame_key].append(
+                        {
+                            "frame": frame,
+                            "body": body_name,
+                            "force_excess_n": force,
+                        }
+                    )
+                contacts_key = "rubber_hand_contacts" if category == "rubber_hand" else "nonhand_collision_contacts"
+                counts_key = (
+                    "rubber_hand_body_frame_counts"
+                    if category == "rubber_hand"
+                    else "nonhand_contact_body_frame_counts"
+                )
+                body_counts = report[counts_key]
+                assert isinstance(body_counts, dict)
+                for category_index in torch.nonzero(
+                    category_excess > ARGS.force_threshold_n,
+                    as_tuple=False,
+                ).flatten():
+                    index_in_body_names = indices[int(category_index.item())]
+                    contact_body_name = body_names[index_in_body_names]
+                    contact_force = float(excess[index_in_body_names].item())
+                    report[contacts_key].append(
+                        {
+                            "frame": frame,
+                            "body": contact_body_name,
+                            "force_excess_n": contact_force,
+                        }
+                    )
+                    body_counts[contact_body_name] = int(body_counts.get(contact_body_name, 0)) + 1
+
+    passed = rubber_hand_asset_passed and all(
+        not side_reports[name]["nonhand_collision_frames"] for name in ("desired_0", "desired_1")
+    )
+    for report in side_reports.values():
+        report["nonhand_collision_frame_count"] = len(report["nonhand_collision_frames"])
+        report["nonhand_collision_contact_count"] = len(report["nonhand_collision_contacts"])
+        report["rubber_hand_contact_frame_count"] = len(report["rubber_hand_contact_frames"])
+        report["rubber_hand_contact_count"] = len(report["rubber_hand_contacts"])
+
+    result: dict[str, object] = {
+        "purpose": "geometry-only all-frame reference collision replay; not dynamics-feasibility evidence",
+        "passed": passed,
+        "frames_evaluated": len(frames),
+        "first_frame": frames[0],
+        "last_frame": frames[-1],
+        "steps_per_frame": ARGS.steps,
+        "dt_s": DT,
+        "gravity_enabled": False,
+        "rubber_hand_contact_allowed": True,
+        "nonhand_force_excess_threshold_n": ARGS.force_threshold_n,
+        "rubber_hand_asset_passed": rubber_hand_asset_passed,
+        "robot_rubber_hand_bodies": robot_body_contract,
+        "sensor_rubber_hand_bodies": sensor_body_contract,
+        "left_motion_npz": str(ARGS.left_motion_npz.resolve()),
+        "right_motion_npz": str(ARGS.right_motion_npz.resolve()),
+        "robot_urdf": str(ARGS.robot_urdf.resolve()),
+        "table_urdf": str(ARGS.table_urdf.resolve()),
+        "max_table_drift_m": max_table_drift,
+        "sides": side_reports,
+    }
+    return result, passed
+
+
 def run_preflight() -> tuple[dict[str, object], bool]:
     if (ARGS.left_motion_npz is None) != (ARGS.right_motion_npz is None):
         raise ValueError("--left-motion-npz and --right-motion-npz must be provided together")
@@ -256,10 +449,10 @@ def run_preflight() -> tuple[dict[str, object], bool]:
         right_joint_pos, right_object_pos, right_object_quat, _ = load_a1_motion(ARGS.right_motion_npz)
         if not np.array_equal(object_pos, right_object_pos) or not np.array_equal(object_quat, right_object_quat):
             raise ValueError("Explicit left/right references must contain identical object trajectories")
-        frame = _validate_inputs([len(left_joint_pos), len(right_joint_pos)])
+        frames = _validate_inputs([len(left_joint_pos), len(right_joint_pos)])
     else:
         joint_pos, object_pos, object_quat, _ = load_a1_motion(ARGS.motion_npz)
-        frame = _validate_inputs([len(joint_pos)])
+        frames = _validate_inputs([len(joint_pos)])
 
     sim = sim_utils.SimulationContext(
         sim_utils.SimulationCfg(
@@ -302,6 +495,26 @@ def run_preflight() -> tuple[dict[str, object], bool]:
         and set(sensor_body_contract[name]) == REQUIRED_RUBBER_HAND_BODIES
         for name in ROBOT_NAMES
     )
+
+    if ARGS.all_frames:
+        if not explicit_pair:
+            raise ValueError("--all-frames requires explicit --left-motion-npz and --right-motion-npz")
+        return _run_all_frames(
+            sim,
+            robots,
+            table,
+            sensors,
+            frames,
+            left_joint_pos,
+            right_joint_pos,
+            object_pos,
+            object_quat,
+            rubber_hand_asset_passed,
+            robot_body_contract,
+            sensor_body_contract,
+        )
+
+    frame = frames[0]
 
     if explicit_pair:
         desired_qpos = {
