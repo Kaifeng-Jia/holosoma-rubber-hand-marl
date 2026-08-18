@@ -7,7 +7,11 @@ import argparse
 import json
 import sys
 import traceback
+from dataclasses import replace
 from pathlib import Path
+from types import SimpleNamespace
+
+import numpy as np
 
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
@@ -24,10 +28,22 @@ from holosoma.utils.eval_utils import init_sim_imports
 PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--baseline-reward", action="store_true")
 PARSER.add_argument("--steps", type=int, default=1)
+PARSER.add_argument("--record-output", type=str, default=None)
 ARGS = PARSER.parse_args()
 if ARGS.steps < 1:
     PARSER.error("--steps must be at least 1")
 CONFIG = g1_29dof_plan5_push_baseline if ARGS.baseline_reward else g1_29dof_plan5_push_smoke
+if ARGS.record_output is not None:
+    CONFIG = replace(
+        CONFIG,
+        simulator=replace(
+            CONFIG.simulator,
+            config=replace(
+                CONFIG.simulator.config,
+                enable_object_contact_diagnostics=True,
+            ),
+        ),
+    )
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -35,6 +51,8 @@ import torch  # noqa: E402
 from holosoma.config_types.env import get_tyro_env_config  # noqa: E402
 from holosoma.agents.mappo.initialization import initialize_plan5_model_bundle  # noqa: E402
 from holosoma.agents.mappo.runner import Plan5PolicyRunner  # noqa: E402
+from holosoma.agents.callbacks.recording import EvalRecordingCallback  # noqa: E402
+from holosoma.config_types.eval_callback import RecordingConfig  # noqa: E402
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
@@ -108,21 +126,51 @@ def main() -> None:
             device=env.device,
         )
         runner = Plan5PolicyRunner(models)
+        recorder = None
+        if ARGS.record_output is not None:
+            training_loop = SimpleNamespace(
+                device=env.device,
+                actor_obs_keys=["actor_obs", "teammate_obs"],
+                _unwrap_env=lambda: env,
+            )
+            recorder = EvalRecordingCallback(
+                RecordingConfig(
+                    enabled=True,
+                    output_path=ARGS.record_output,
+                    env_id=0,
+                ),
+                training_loop,
+            )
+            recorder.on_pre_evaluate_policy()
         rewards = []
         resets = []
         term_samples: dict[str, list[torch.Tensor]] = {
             name: [] for name in env.reward_manager.active_terms
         }
-        transition = None
-        for _ in range(ARGS.steps):
-            transition = runner.step_environment(
-                env,
+        decision = None
+        for step in range(ARGS.steps):
+            decision = runner.decide(
                 observations,
                 update_critic_normalizer=False,
             )
-            observations = transition.observations
-            rewards.append(transition.rewards.detach().clone())
-            resets.append(transition.dones.detach().clone())
+            actor_state = {
+                "step": step,
+                "obs": observations,
+                "actions": decision.actions,
+            }
+            if recorder is not None:
+                recorder.on_pre_eval_env_step(actor_state)
+            observations, reward, done, extras = env.step({"actions": decision.actions})
+            actor_state.update(
+                obs=observations,
+                rewards=reward,
+                dones=done,
+                extras=extras,
+            )
+            if recorder is not None:
+                recorder.on_post_eval_env_step(actor_state)
+            rewards.append(reward.detach().clone())
+            resets.append(done.detach().clone())
             for name, cfg in zip(
                 env.reward_manager._term_names,
                 env.reward_manager._term_cfgs,
@@ -134,11 +182,13 @@ def main() -> None:
                 if raw.shape != (env.num_envs,) or not torch.isfinite(raw).all():
                     raise RuntimeError(f"Invalid diagnostic reward term {name}: {raw}")
                 term_samples[name].append(raw.detach().clone())
-        assert transition is not None
+        assert decision is not None
+        if recorder is not None:
+            recorder.on_post_evaluate_policy()
         reward_history = torch.stack(rewards)
         reset_history = torch.stack(resets)
-        policy_actions = transition.decision.actions
-        critic_values = transition.decision.values
+        policy_actions = decision.actions
+        critic_values = decision.values
         simulator.refresh_sim_tensors()
         actor_obs = observations["actor_obs"]
         teammate_obs = observations["teammate_obs"]
@@ -168,6 +218,42 @@ def main() -> None:
         )
         if not finite_after_step:
             raise RuntimeError("Non-finite state after one control step")
+
+        recording_shapes = None
+        if recorder is not None:
+            with np.load(recorder.output_path) as recording:
+                required_shapes = {
+                    "policy_actor_obs": (ARGS.steps, 2, 158),
+                    "dof_pos": (ARGS.steps, 2, 29),
+                    "root_pos": (ARGS.steps, 2, 3),
+                    "ref_object_pos_w": (ARGS.steps, 3),
+                    "termination_term_joint_bad_tracking": (ARGS.steps,),
+                }
+                for name, expected_shape in required_shapes.items():
+                    actual_shape = recording[name].shape
+                    if actual_shape != expected_shape:
+                        raise RuntimeError(
+                            f"Unexpected recording channel {name}: {actual_shape}, expected {expected_shape}"
+                        )
+                recording_shapes = {
+                    name: list(recording[name].shape) for name in required_shapes
+                }
+                diagnostic_channels = [
+                    "object_robot_contact_force_matrix_w",
+                    "object_hand_contact_force_matrix_w",
+                    "object_robot_contact_pos_w",
+                    "object_hand_contact_pos_w",
+                ]
+                for name in diagnostic_channels:
+                    if name not in recording or recording[name].shape[0] != ARGS.steps:
+                        raise RuntimeError(f"Missing or invalid object contact diagnostic: {name}")
+                    recording_shapes[name] = list(recording[name].shape)
+                metadata = json.loads(recording["_metadata_json"].item())
+                hand_filters = metadata["object_hand_contact"]["filter_prim_paths_expr"]
+                if not any("/Robot/" in path for path in hand_filters) or not any(
+                    "/Robot_1/" in path for path in hand_filters
+                ):
+                    raise RuntimeError("Object-hand diagnostics do not cover both physical robots")
 
         report = {
             "passed": True,
@@ -199,6 +285,8 @@ def main() -> None:
                 }
                 for name, samples in term_samples.items()
             },
+            "recording_output": recorder.output_path if recorder is not None else None,
+            "recording_shapes": recording_shapes,
             "finite_after_rollout": finite_after_step,
         }
         print(json.dumps(report, indent=2, sort_keys=True), flush=True)

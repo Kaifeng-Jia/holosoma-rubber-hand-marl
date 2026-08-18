@@ -199,6 +199,15 @@ class PairedA1MotionCommand(CommandTermBase):
         return self._sample()["agent_body_quat_w"][:, :, self.ref_body_index]
 
     @property
+    def agent_root_pos_w(self) -> torch.Tensor:
+        values = self._sample()["agent_body_pos_w"][:, :, 0]
+        return values + self.env.simulator.scene.env_origins[:, None, :]
+
+    @property
+    def agent_root_quat_w(self) -> torch.Tensor:
+        return self._sample()["agent_body_quat_w"][:, :, 0]
+
+    @property
     def object_pos_w(self) -> torch.Tensor:
         return self._sample()["object_pos_w"] + self.env.simulator.scene.env_origins
 
@@ -233,6 +242,10 @@ class PairedA1MotionCommand(CommandTermBase):
     @property
     def simulator_object_quat_w(self) -> torch.Tensor:
         return self.env.simulator.all_root_states[self.object_indices_in_simulator][:, 3:7]
+
+    @property
+    def simulator_object_lin_vel_w(self) -> torch.Tensor:
+        return self.env.simulator.all_root_states[self.object_indices_in_simulator][:, 7:10]
 
     def update_metrics(self) -> None:
         agent_ref_error = torch.linalg.vector_norm(

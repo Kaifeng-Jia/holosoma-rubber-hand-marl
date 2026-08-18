@@ -526,6 +526,10 @@ class BaseTask:
             return
 
         reset_flags, timeout_flags = self.termination_manager.check()
+        self.extras["termination_terms"] = {
+            name: result.clone()
+            for name, result in self.termination_manager.term_results.items()
+        }
         self.reset_buf |= reset_flags.to(dtype=self.reset_buf.dtype)
         self.time_out_buf |= timeout_flags
         self.reset_buf |= self.time_out_buf
