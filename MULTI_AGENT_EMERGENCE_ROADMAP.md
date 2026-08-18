@@ -398,6 +398,22 @@ produce from the side while remaining balanced. It must distinguish a clearly
 feasible solution, a near-limit/brittle solution, and no acceptable solution.
 It must not claim mathematical impossibility from one failed PPO run.
 
+#### Confirmed feasibility-audit contract -- 2026-08-17
+
+- Evaluate the historical effective table-mass envelope of approximately
+  `1.1--4.1 kg`; do not treat the `0.1 kg` URDF base mass as the complete
+  simulated mass or silently replace the envelope with one favorable mass.
+- Permit a small, bounded amount of natural table yaw rather than requiring an
+  off-centre single robot to reproduce the central A1 table orientation
+  exactly. Recover the existing reference/termination yaw scales first and
+  review the numerical tolerance before using it to classify feasibility.
+- Permit incidental contact by legs or other robot bodies. Such contact must be
+  reported separately, and a rollout does not count as rubber-hand pushing if
+  non-hand contact supplies the dominant propulsive impulse.
+- Keep table geometry, friction/contact settings, actuator limits, reference
+  trajectories, reward, and termination logic unchanged during the initial
+  read-only audit. Any later change requires a separate review.
+
 A frozen two-entity mechanics preflight is not MARL and is not the rejected
 separate-checkpoint plan. It uses two physical robots with documented frozen
 policies, synchronized phase, no artificial teammate force, and no joint
@@ -753,10 +769,11 @@ Completed at the current checkpoint:
 The active next work is the post-Plan-2 single-agent side-reference dynamics
 feasibility audit. It proceeds in reviewable steps:
 
-1. **Freeze the audit contract with the user.** Propose representative table
-   mass/inertia/friction, contact semantics, allowed body contacts, torque
-   limits, and table position/yaw tolerances. Do not infer these silently from
-   randomized training settings.
+1. **Apply the confirmed audit contract.** Cover the `1.1--4.1 kg` effective
+   mass envelope, permit small natural yaw and incidental body contact, and
+   recover the exact existing friction, actuator, reference, and termination
+   values without changing them. Review the numerical yaw tolerance before it
+   is used as a feasibility boundary.
 2. **Reuse existing recordings for a read-only wrench audit.** Compute the
    object-reference linear/yaw acceleration requirements, extract actual
    rubber-hand contact forces and moment arms, and compare required versus
