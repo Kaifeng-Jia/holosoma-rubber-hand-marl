@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 3 训练入口已建立；原 `1e-3` warm-start preflight 因策略漂移未通过，50 iterations 尚未启动
+- 当前阶段：Stage 3 tuned warm-start preflight 已通过；准备启动 `50 iterations` 数值 smoke
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -426,6 +426,7 @@ Push baseline 稳定后：
 
 - [x] 打通 stochastic rollout、log-prob、team GAE、单次 PPO update 与 checkpoint round-trip。
 - [!] `1 iteration` 训练入口 preflight：管线通过，但原 WBT `1e-3` actor LR 的稳定性未通过。
+- [x] tuned preflight：`32 envs`、actor LR `1e-5`、fresh critic LR `1e-3` 通过 KL/drift gate。
 - [ ] `50 iterations`：环境与数值 smoke。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
@@ -783,3 +784,21 @@ Push baseline 稳定后：
 - 待确认的最小对照：优先保持 fresh critic LR `1e-3`，只把 pretrained actor LR 降为
   `1e-4` 并做同一 seed 的 1-iteration 对照；若 KL/漂移仍过大，再试 `1e-5`。另一条对照是
   增加并行环境数后复测原 `1e-3`，但 1e-3 已直接造成大幅 mean shift，当前优先级较低。
+
+#### 2026-08-18：Warm-start learning-rate 与 batch 对照
+
+- commit：`693e2a64`；训练入口增加独立的 actor/critic 初始 LR 参数，未改变 adaptive-KL
+  规则；fresh critic 可以从较高 LR 开始，但仍随 actor KL 一起自适应调整；
+- 所有对照使用同一 seed `721`、相同 paired A1 reference、reward、termination、24 steps/env、
+  rubber-hand 双机器人与 `0.1 kg` smoke 宽桌；
+- `8 envs, actor=1e-4, critic=1e-3`：KL `0.11737`，mean/max drift
+  `0.03038/0.19434`；比原 `1e-3` 明显改善，但 KL 仍约为目标的 11.7 倍；
+- `8 envs, actor=1e-5, critic=1e-3`：KL `0.02536`，mean/max drift
+  `0.01645/0.07943`；接近但仍高于 adaptive 上边界 `0.02`；
+- `32 envs, actor=1e-5, critic=1e-3`：每轮 768 个 team transitions、1536 个 actor samples；
+  KL `0.01536`，mean/max drift `0.01560/0.07762`；actor LR 保持 `1e-5`，critic LR 自适应到
+  `2.96e-4`，没有降到下限；约 `2.37 s/iteration`，8 GB GPU 可容纳；
+- tracking failure：32-env 更新前 rollout 为 `35/768=4.56%`；第一轮 rollout 发生在任何参数
+  更新前，因此这里只作为 frozen prior 的随机采样基线，不用于评价新 LR 的学习成效；
+- gate：冻结首个 50-iteration smoke 为 `seed=721, num_envs=32, steps_per_env=24,
+  actor_lr=1e-5, critic_lr=1e-3`；当前结论仅适用于数值 smoke，不冻结正式物理训练参数。
