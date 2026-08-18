@@ -29,10 +29,13 @@ PARSER = argparse.ArgumentParser()
 PARSER.add_argument("--baseline-reward", action="store_true")
 PARSER.add_argument("--steps", type=int, default=1)
 PARSER.add_argument("--record-output", type=str, default=None)
+PARSER.add_argument("--mappo-checkpoint", type=str, default=None)
+PARSER.add_argument("--seed", type=int, default=42)
 ARGS = PARSER.parse_args()
 if ARGS.steps < 1:
     PARSER.error("--steps must be at least 1")
 CONFIG = g1_29dof_plan5_push_baseline if ARGS.baseline_reward else g1_29dof_plan5_push_smoke
+CONFIG = replace(CONFIG, training=replace(CONFIG.training, seed=ARGS.seed))
 if ARGS.record_output is not None:
     CONFIG = replace(
         CONFIG,
@@ -50,6 +53,7 @@ import torch  # noqa: E402
 
 from holosoma.config_types.env import get_tyro_env_config  # noqa: E402
 from holosoma.agents.mappo.initialization import initialize_plan5_model_bundle  # noqa: E402
+from holosoma.agents.mappo.ppo import Plan5PPO  # noqa: E402
 from holosoma.agents.mappo.runner import Plan5PolicyRunner  # noqa: E402
 from holosoma.agents.callbacks.recording import EvalRecordingCallback  # noqa: E402
 from holosoma.config_types.eval_callback import RecordingConfig  # noqa: E402
@@ -125,6 +129,17 @@ def main() -> None:
             g1_29dof_wbt_w_object.algo.config,
             device=env.device,
         )
+        restored_iteration = None
+        if ARGS.mappo_checkpoint is not None:
+            mappo_checkpoint = Path(ARGS.mappo_checkpoint).expanduser().resolve()
+            learner = Plan5PPO(
+                models,
+                g1_29dof_wbt_w_object.algo.config,
+                num_envs=env.num_envs,
+                device=env.device,
+            )
+            state = torch.load(mappo_checkpoint, map_location=env.device, weights_only=False)
+            restored_iteration = learner.load_training_state_dict(state)
         runner = Plan5PolicyRunner(models)
         recorder = None
         if ARGS.record_output is not None:
@@ -146,6 +161,9 @@ def main() -> None:
         resets = []
         term_samples: dict[str, list[torch.Tensor]] = {
             name: [] for name in env.reward_manager.active_terms
+        }
+        termination_samples: dict[str, list[torch.Tensor]] = {
+            name: [] for name in env.termination_manager.active_terms
         }
         decision = None
         for step in range(ARGS.steps):
@@ -171,6 +189,8 @@ def main() -> None:
                 recorder.on_post_eval_env_step(actor_state)
             rewards.append(reward.detach().clone())
             resets.append(done.detach().clone())
+            for name, value in extras.get("termination_terms", {}).items():
+                termination_samples[name].append(value.detach().clone())
             for name, cfg in zip(
                 env.reward_manager._term_names,
                 env.reward_manager._term_cfgs,
@@ -273,14 +293,24 @@ def main() -> None:
             "rubber_hand_asset_tokens": sorted(required_asset_tokens),
             "hemisphere_asset_tokens": forbidden_asset_tokens,
             "baseline_reward_enabled": ARGS.baseline_reward,
+            "seed": ARGS.seed,
+            "mappo_checkpoint": ARGS.mappo_checkpoint,
+            "restored_iteration": restored_iteration,
             "rollout_steps": ARGS.steps,
             "reward_min": reward_history.min().item(),
             "reward_max": reward_history.max().item(),
+            "reward_mean": reward_history.mean().item(),
             "reset_count": int(reset_history.count_nonzero().item()),
+            "termination_counts": {
+                name: int(torch.stack(samples).count_nonzero().item())
+                for name, samples in termination_samples.items()
+                if samples
+            },
             "reward_terms": {
                 name: {
                     "raw_min": torch.stack(samples).min().item(),
                     "raw_max": torch.stack(samples).max().item(),
+                    "raw_mean": torch.stack(samples).mean().item(),
                     "weight": env.reward_manager.cfg.terms[name].weight,
                 }
                 for name, samples in term_samples.items()
