@@ -409,7 +409,8 @@ Push baseline 稳定后：
 - [x] 建立最小 Plan 5 environment shell，接通 paired command、dual action 和双实体 simulator。
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [x] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
-- [ ] 建立最小 centralized critic observation 和全新 critic。
+- [x] 建立最小 centralized critic observation。
+- [ ] 建立全新 centralized critic 网络、normalizer 和 optimizer。
 - [x] 建立 paired A1 reference 的内存张量契约和共享 object reference。
 - [x] 建立 paired command，共享环境级 phase，并联合 reset 两台机器人和一张桌子。
 - [x] 把 paired A1 reference 接入每台机器人的在线 observation。
@@ -417,8 +418,8 @@ Push baseline 稳定后：
 - [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
 - [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
-  reset、基础 shape、间距、一步物理、heading-frame 和 agent-swap 已通过；
-  在线 actor 与 reward sign 待完成。
+  reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
+  在线 actor、新 critic 网络与 reward sign 待完成。
 - [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
@@ -588,3 +589,24 @@ Push baseline 稳定后：
 - gate：per-agent actor observation 与真实 teammate 坐标 gate 通过；
 - 下一项：先确认最小 centralized critic 的字段集合，再实现全新 critic observation；
   不默认加入上一时刻 action、contact force 或其他冗余 simulator truth。
+
+#### 2026-08-18：`527-D` centralized critic observation
+
+- commit：`63a43b00`；
+- 文件：Plan 5 observation preset、`managers/observation/terms/marl.py`、CUDA smoke 与测试；
+- 数据契约：每个物理 environment 只输出一个 `critic_obs [E, 527]`，没有 agent 轴；
+- 组成：一份共享 joint reference `58-D`、一份 normalized phase `1-D`、两台机器人各自
+  physical/tracking state `2 × 228-D`，以及一份共享桌子 tracking state `12-D`；
+- 去重：没有把两份原 `298-D` object-WBT critic 直接拼接；共享 motion command、phase
+  和桌子只出现一次；桌子使用 actual-vs-reference position/orientation/velocity error；
+- 权限边界：critic 没有 raw contact force、角色 ID 或额外动作历史；actor observation
+  没有因此获得任何新的 privileged information；
+- 测试：逐 term 维度相加为 `527`，并检查不存在 contact/role term；相关回归
+  `47 passed`，`py_compile`、旧符号搜索和 `git diff --check` 通过；
+- 真实 CUDA：一步 smoke 同时输出 actor `[1, 2, 158]` 和 centralized critic
+  `[1, 527]`，全部有限，`passed: true`；
+- 边界：本项只建立 critic 输入，尚未实例化新 critic 网络、critic normalizer、optimizer
+  或 MAPPO 更新循环；
+- gate：centralized critic observation gate 通过；
+- 下一项：接通 shared actor batch、冻结 A1 actor normalizer、加载 `158-D` actor，
+  并为 `527-D` 输入创建全新的 critic/normalizer/optimizer。
