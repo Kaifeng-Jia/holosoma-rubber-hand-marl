@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：critic-only `50 iterations` warm-up 已通过；解耦 LR 后的 `10 iterations`
-  actor 解冻 gate 未通过，下一步先诊断 A1 prior 保护方式，不直接进入 50 或 500
+- 当前阶段：critic-only `50 iterations` warm-up 已通过；full actor 与 teammate-only adapter
+  两种 `10 iterations` gate 均未通过，后者已定位为 adaptive-KL 步长膨胀，不进入 50 或 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -438,6 +438,8 @@ Push baseline 稳定后：
   value loss 改善且数值稳定。
 - [!] 解耦 actor/critic LR 并完成 `10 iterations` actor 解冻 gate：优化器机制正确，
   但三 seed A1 行为方向仍退化。
+- [!] 仅训练 teammate 四列的 `10 iterations` gate：A1 基础参数严格不变，但 adaptive-KL
+  将 actor LR 放大至 `6.57e-3`，adapter 过强且三 seed 行为退化。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -891,3 +893,29 @@ Push baseline 稳定后：
 - gate：学习率解耦在机制上成功，但行为方向仍未通过。critic 得以继续学习，并没有自动阻止
   actor 改坏 A1 tracking；不得继续到 50 或 500 iterations。下一步需先讨论更直接的 A1 prior
   保护方式，而不是继续堆叠 PPO 更新量。
+
+#### 2026-08-18：Teammate-input-only adapter gate
+
+- 实现 commit：`b52e5463`；网络结构不变，仅允许第一层新增 teammate 输入列 `154:158`
+  接收 actor 梯度；旧 154 列、其余层、bias 与 action noise 在 optimizer step 后强制逐张量恢复；
+- 测试：四列发生更新、全部冻结参数严格不变、teammate 为零时 deterministic action 与原 A1
+  完全一致；训练入口记录 `actor_update_mode=teammate_input_only`；全套 `170 passed`；
+- 训练配置：从 critic-only `model_00050.pt` 恢复，seed `721`、`32 envs × 24 steps`、
+  初始 actor LR `1e-5`、critic LR `1e-3`，训练 10 iterations 至 iteration 60；
+- 产物：`logs/Plan5Push/a1_teammate_adapter10_from_critic50_seed721_env32/`；status
+  `passed: true`；iteration-60 checkpoint SHA256
+  `b648d895019cc002c7bb056bd8088c837c6088d2d6fc0353f518aec5267550ed`；
+- 硬不变量：iteration 50→60 的旧 154 列和其余 actor state 逐张量严格相同；唯一变化键为
+  `actor_module.module.0.weight`，四列最终 L2 `3.11210`、最大绝对值 `0.24611`；
+- 调度诊断：受限 adapter 在首轮产生低 KL，原 adaptive-KL 在每个 minibatch 连续把 LR 乘
+  `1.5`；actor LR 首轮已达到 `6.568e-3`，十轮范围 `[5.138e-5,6.568e-3]`，最终
+  `4.444e-3`；KL mean 仍为 `0.01123`。因此本轮没有实际维持名义上的 `1e-5` 小步更新；
+- 行为评测：复用完全相同的 frozen A1 seeds `721/722/723` 基准，adapter checkpoint 分别做
+  100-step 确定性 rollout；final−source 总 reward 为 `-0.00422/-0.01162/-0.00320`，三 seed
+  平均 `-0.00634`；reset 平均保持 `2.33`；
+- 三 seed raw-term 平均 final−source：global body orientation `-0.00880`、relative body
+  orientation `-0.02208`、relative body position `-0.03243`、object orientation `+0.01858`、
+  object position `+0.01135`、undesired contacts `+0.16000`；
+- gate：未通过。该结果否定的是“受限 adapter 继续沿用无上限 adaptive-KL”，尚未否定四列
+  adapter 本身；最小后续对照是把 actor LR 固定在 `1e-5` 后重跑相同 10 iterations，但此项
+  需先确认，不能把本次失败直接归因于 adapter 容量不足。
