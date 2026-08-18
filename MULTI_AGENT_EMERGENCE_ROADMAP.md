@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 2 实施中；双实体数据流与 recorder 已通过，teammate 短程鲁棒性检查待完成
+- 当前阶段：Stage 2 已通过；准备进入 Stage 3 的 stochastic rollout、team GAE 与 PPO update 闭环
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -305,7 +305,7 @@ team reward
 
 ### Stage 2——最小双机器人在线环境
 
-状态：实施中；按 9.1 清单逐项通过 gate。
+状态：完成；9.1 清单与退出条件均已通过。
 
 工作：
 
@@ -420,7 +420,7 @@ Push baseline 稳定后：
 - [x] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
   reset、基础 shape、间距、一步物理、heading-frame、agent-swap 和 critic shape 已通过；
   在线 actor/critic、11 项 reward sign/有限性和 20 步 CUDA rollout 已通过。
-- [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
+- [x] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
 
@@ -708,3 +708,24 @@ Push baseline 稳定后：
 - 边界：该 5 步文件是接口 smoke，不是训练结果或合作行为证据；临时 NPZ 不作为正式数据集；
 - 下一项：完成单智能体随机 teammate observation 的短程鲁棒性检查；随后复核 Stage 2
   全部退出条件，再进入 stochastic rollout、team GAE 与 PPO update 实现。
+
+#### 2026-08-18：单智能体随机 teammate 输入鲁棒性
+
+- commit：`d076a641`；
+- 验证对象：冻结的 `model_07999_actor158.pt`、原 Push A1 motion、`objects_largetable.urdf`
+  和 `main_mesh_collision_rubberhand.urdf`；未使用 generic largebox 或 hemisphere hand；
+- checkpoint 边界：154→158 转换后的四个 teammate 输入列保持严格零权重，actor normalizer
+  对新增四列保持 identity，因此这是旧 A1 行为的向后兼容检查；
+- CPU：对同一批 257 组 154-D A1 observation，分别拼接全零 teammate 和从
+  `[-1,1]` 均匀采样的 teammate；真实 checkpoint 的 29-D action 逐元素严格相同，
+  `rtol=0`、`atol=0`；
+- 真实 CUDA/Isaac：单机器人连续执行随机 teammate 路径 20 个 control steps，最大采样
+  绝对值 `0.9805`，相对全零路径的 `max_abs_action_difference=0.0`，`reset_count=0`，
+  reward 范围 `[0.0196, 0.1148]`，状态、动作和 reward 全部有限；
+- 测试：worktree 全套 `159 passed`，`compileall` 与 `git diff --check` 通过；
+- gate：随机 teammate 输入不会污染冻结 A1 先验，Stage 2 全部 checklist 与退出条件通过；
+- 边界：该结果不表示 actor 已学会使用 teammate 信息；MARL 更新后新增四列将变为非零，
+  届时必须通过消融与因果评测确认其用途；
+- 下一项：进入 Stage 3，先实现 stochastic action sampling、log-prob、team rollout storage、
+  team return/GAE 与单次 PPO update 的闭环；通过无 NaN、shape、参数更新和 checkpoint
+  round-trip gate 后，才启动 `50 iterations` 训练 smoke。
