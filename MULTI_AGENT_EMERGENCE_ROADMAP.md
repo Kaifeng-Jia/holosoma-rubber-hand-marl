@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 3 学习闭环已通过；下一项为 `50 iterations` 环境与数值 smoke
+- 当前阶段：Stage 3 训练入口已建立；原 `1e-3` warm-start preflight 因策略漂移未通过，50 iterations 尚未启动
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -425,6 +425,7 @@ Push baseline 稳定后：
 ### 9.2 Stage 3——Push A1 训练 gate
 
 - [x] 打通 stochastic rollout、log-prob、team GAE、单次 PPO update 与 checkpoint round-trip。
+- [!] `1 iteration` 训练入口 preflight：管线通过，但原 WBT `1e-3` actor LR 的稳定性未通过。
 - [ ] `50 iterations`：环境与数值 smoke。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
@@ -757,3 +758,28 @@ Push baseline 稳定后：
 - 下一项：建立有界的 `50 iterations` 训练入口、日志和 checkpoint 保存，使用当前已冻结的
   paired A1 reference、shared WBT reward、joint reset、rubber-hand 双机器人和宽桌；训练后按
   数值稳定性、reference tracking、桌面运动、双方稳定性与接触记录决定是否进入 500 iterations。
+
+#### 2026-08-18：有界训练入口与 1-iteration 稳定性诊断
+
+- commit：`ac6d68e6`；
+- 入口：`scripts/train_plan5_push.py` 支持 iterations、environment 数、rollout 长度、seed、
+  output directory 和 resume；目录非空时 fail-closed，不覆盖既有结果；
+- 产物：每轮写 `metrics.jsonl`，启动时写 `run_config.json`，关闭前写 `status.json`，保存
+  初始和最终 resumable checkpoint；status 文件用于规避 Isaac 关闭流程可能吞掉异常退出码；
+- 默认 smoke：seed `721`、`8 envs × 2 agents × 24 steps`；实际约 `2.0 s/iteration`，8 GB
+  RTX 5070 Laptop GPU 可以运行；当前宽桌仍为仅限 smoke 的 `0.1 kg` 资产；
+- 诊断增强：rollout 分开记录 timeout 与非-timeout reset；每轮在相同固定 observation 上
+  比较更新前后 deterministic action，报告 mean/max absolute policy drift；
+- 可重复结果：`reset_count=10`，其中 `timeout_count=0`、`tracking_failure_count=10`；reward
+  mean `-0.0431`，范围 `[-0.3975,0.0844]`；
+- 更新稳定性：平均 KL `12.3562`，远高于目标 `0.01`；adaptive schedule 在第一轮内把
+  actor/critic LR 从 `1e-3` 降到下限 `1e-5`；固定 observation 的 deterministic action
+  漂移 mean `0.3739`、max `2.5100`；
+- 排除项：source actor noise std mean `0.50816`，更新后 `0.50857`，因此失败不是探索噪声
+  突然坍缩；所有张量与 loss 有限，checkpoint 和日志完整，因此也不是 CUDA/数据流故障；
+- gate 结论：训练入口和持久化通过，但原单智能体 WBT 的 `1e-3` actor learning rate 不能
+  直接晋升到 50-iteration warm-start MARL；不得以增加 iterations 代替诊断；
+- 测试：全套 `165 passed`，`compileall` 与 `git diff --check` 通过；
+- 待确认的最小对照：优先保持 fresh critic LR `1e-3`，只把 pretrained actor LR 降为
+  `1e-4` 并做同一 seed 的 1-iteration 对照；若 KL/漂移仍过大，再试 `1e-5`。另一条对照是
+  增加并行环境数后复测原 `1e-3`，但 1e-3 已直接造成大幅 mean shift，当前优先级较低。
