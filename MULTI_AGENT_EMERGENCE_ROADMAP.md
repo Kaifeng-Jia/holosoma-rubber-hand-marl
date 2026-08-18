@@ -305,7 +305,7 @@ team reward
 
 ### Stage 2——最小双机器人在线环境
 
-状态：下一阶段，等待技术设计确认。
+状态：实施中；按 9.1 清单逐项通过 gate。
 
 工作：
 
@@ -405,6 +405,7 @@ Push baseline 稳定后：
 - [ ] 用真实 CUDA reset 验证两台 physical rubber-hand G1、共享宽桌和 collision graph。
 - [x] 定义 shared actor batch 与两组 `29-D` action 的纯张量 shape/routing 契约。
 - [x] 建立 per-agent actor 数据与 per-environment team 数据分离的 rollout storage。
+- [x] 建立 opt-in 双机器人 ActionManager 控制项，把两组 `29-D` action 独立转换为 torque。
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
@@ -445,14 +446,14 @@ Push baseline 稳定后：
 
 #### 2026-08-18：实施决策冻结
 
-- commit：待与 Stage 2 只读审计结果一并提交；
+- commit：`bd4f1af0`；
 - 结果：八项技术决策全部确认，Plan 5 从概念讨论进入执行；
 - gate：通过；
 - 下一项：只读代码审计。
 
 #### 2026-08-18：Stage 2 只读代码审计
 
-- commit：待本次清单提交；
+- commit：`bd4f1af0`；
 - 检查范围：`BaseTask`、`WholeBodyTrackingManager`、Isaac Sim、`MotionCommand`、
   action/observation/reward/termination managers、PPO、rollout storage、recorder 和训练入口；
 - 结果：现有框架以“每个环境一台 robot”为硬假设，不存在可直接启用的 MARL 路径；
@@ -468,7 +469,7 @@ Push baseline 稳定后：
 
 #### 2026-08-18：Shared actor batch/action shape 基础层
 
-- commit：待本次代码提交；
+- commit：`1c72ff25`；
 - 文件：`agents/mappo/batch_layout.py` 及其单元测试；
 - 结果：固定 `2 agents x 158-D observation x 29-D action` 契约；
   `[env, agent, feature]` 与 shared-actor batch 可逆转换，agent 顺序不串线；
@@ -478,7 +479,7 @@ Push baseline 稳定后：
 
 #### 2026-08-18：Multi-agent rollout storage
 
-- commit：待本次代码提交；
+- commit：`6d82d121`；
 - 文件：`agents/mappo/storage.py` 及其单元测试；
 - 结果：agent 字段使用 `[time, env, agent, ...]`，team/critic 字段使用
   `[time, env, ...]`；minibatch 先采样完整 environment transition，再展开 agent；
@@ -489,7 +490,7 @@ Push baseline 稳定后：
 
 #### 2026-08-18：双 articulation Isaac Sim 适配层（静态 gate）
 
-- commit：待本次代码提交；
+- commit：`ed9e4f17`；
 - 文件：`simulator/isaacsim/dual_robot_isaacsim.py`、Isaac Sim 扩展钩子、
   独立 simulator 配置和配置测试；
 - 结果：普通 `isaacsim` 行为保持 opt-out；Plan 5 配置增加第二 articulation，
@@ -502,7 +503,7 @@ Push baseline 稳定后：
 
 #### 2026-08-18：Paired A1 reference 张量契约
 
-- commit：待本次代码提交；
+- commit：`c95780c6`；
 - 文件：`envs/marl/paired_a1_reference.py` 及其单元测试；
 - 结果：直接从冻结 A1 `MotionLoader` 在内存中生成左右 robot reference；
   每帧沿共享桌子 local X 平移 `-0.4/+0.4 m`，关节角与姿态不变，object
@@ -511,3 +512,16 @@ Push baseline 稳定后：
   `py_compile` 与 `git diff --check`；
 - gate：纯张量 gate 通过，在线 reset/phase 尚未接入；
 - 下一项：实现最小 Plan 5 environment orchestration。
+
+#### 2026-08-18：双机器人 ActionManager 控制项
+
+- commit：`18f4fe4c`；
+- 文件：`managers/action/terms/marl.py`、独立 action preset 及单元测试；
+- 结果：ActionManager 显式接收 agent-major `58-D` action，并在控制器内部保持
+  `[env, 2 agents, 29 dofs]`；两台机器人分别使用自己的 DOF position/velocity
+  计算 PD torque，再经 `apply_agent_torques()` 写入对应 articulation；普通单机器人
+  action preset 未改变；
+- 测试：本项与 MAPPO、paired reference、双机器人配置及 rubber-hand 资产回归合计
+  `29 passed`；首次测试因遗漏项目 `PYTHONPATH` 未进入收集，补齐既定源码路径后全部通过；
+- gate：控制项及纯张量路由通过，shared actor 与在线 environment 尚未接入；
+- 下一项：实现 paired phase/reset 的在线 command，使两台机器人和共享桌子可联合 reset。
