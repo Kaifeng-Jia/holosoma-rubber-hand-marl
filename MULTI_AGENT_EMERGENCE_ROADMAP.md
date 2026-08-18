@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Stage 3 的 joint `50 iterations` 行为方向 gate 未通过；critic-only `50 iterations`
-  warm-up 已通过，下一步先冻结 actor 解冻与学习率调度设计，不直接进入 500
+- 当前阶段：critic-only `50 iterations` warm-up 已通过；解耦 LR 后的 `10 iterations`
+  actor 解冻 gate 未通过，下一步先诊断 A1 prior 保护方式，不直接进入 50 或 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -436,7 +436,8 @@ Push baseline 稳定后：
 - [!] `50 iterations` 后三 seed 行为方向 gate：数值稳定，但 A1 姿态/总 reward 平均退化。
 - [x] centralized critic-only `50 iterations` warm-up：actor/normalizer 逐张量不变，critic
   value loss 改善且数值稳定。
-- [ ] 冻结 actor 解冻策略，并完成短程联合更新 gate。
+- [!] 解耦 actor/critic LR 并完成 `10 iterations` actor 解冻 gate：优化器机制正确，
+  但三 seed A1 行为方向仍退化。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -863,3 +864,30 @@ Push baseline 稳定后：
 - gate：critic-only warm-up 通过。下一步不是直接训练 500 iterations，而是先确认短程 actor
   解冻方案，尤其要解决原 adaptive-KL 同时缩放 actor/critic LR、导致 critic LR 被 actor KL
   拖到 `1e-5` 的耦合问题；确认后再从 iteration-50 critic-warmed checkpoint 做小型对照。
+
+#### 2026-08-18：学习率解耦与 10-iteration actor 解冻 gate
+
+- 实现 commit：`424c64b4`；Plan 5 MAPPO 的 adaptive policy-KL 只调节 actor optimizer，
+  不再改变独立 centralized critic optimizer 的 LR；原单智能体 PPO 路径未修改；
+- 测试：高 KL 与低 KL 两个方向均验证 actor LR 按规则变化而 critic LR 逐值不变；worktree
+  全套 `168 passed`，并通过 `compileall` 与 `git diff --check`；
+- 训练配置：从 critic-only `model_00050.pt` 恢复，seed `721`、`32 envs × 24 steps`、
+  actor LR `1e-5`、critic LR `1e-3`，联合更新 10 iterations 至 iteration 60；
+- 产物：`logs/Plan5Push/a1_actor_unfreeze10_from_critic50_seed721_env32/`；status
+  `passed: true`；iteration-60 checkpoint SHA256
+  `859cc9e887460b665977a1d9116c8580ef42f0d261efc7c2f7cad2886c135e4f`；
+- 数值结果：所有指标有限；KL mean `0.01794`、范围 `[0.01624,0.02160]`；actor LR
+  全程 `1e-5`，critic LR 全程 `1e-3`；value loss 首次/末次 `0.08147→0.05543`；
+  每轮 deterministic policy drift mean 平均 `0.01575`；
+- 参数结果：iteration 50→60 actor delta L2 `0.21379`、最大绝对变化 `0.00211`；第一层旧
+  154 列 delta L2 `0.12250`，teammate 四列从零增长至 L2 `0.02264`；critic delta L2
+  `7.98588`；
+- 行为评测：冻结 A1 与 iteration 60 分别在 seeds `721/722/723` 做 100-step 确定性
+  rollout，六次均有限；final−source 总 reward 分别为 `-0.01743/-0.00542/+0.01242`，
+  三 seed 平均 `-0.00348`；reset 平均 `2.33→2.00`；
+- 三 seed raw-term 平均 final−source：global body orientation `-0.05257`、relative body
+  orientation `-0.02833`、relative body position `-0.02624`、object orientation `+0.03291`、
+  object position `-0.00010`、undesired contacts `+0.06667`；
+- gate：学习率解耦在机制上成功，但行为方向仍未通过。critic 得以继续学习，并没有自动阻止
+  actor 改坏 A1 tracking；不得继续到 50 或 500 iterations。下一步需先讨论更直接的 A1 prior
+  保护方式，而不是继续堆叠 PPO 更新量。
