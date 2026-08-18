@@ -7,7 +7,7 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Plan 5 技术设计讨论；尚未开始双机器人训练环境实现
+- 当前阶段：Stage 2 实施中；最小双实体物理环境已通过 CUDA smoke
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -402,10 +402,11 @@ Push baseline 稳定后：
 - [x] 只读审计 simulator、environment、PPO、rollout storage 和 recorder 的现有结构。
 - [x] 冻结精确的修改文件、模块边界和回退方案。
 - [x] 建立 opt-in 双 articulation Isaac Sim 状态、接触、reset 与 torque 适配层。
-- [ ] 用真实 CUDA reset 验证两台 physical rubber-hand G1、共享宽桌和 collision graph。
+- [x] 用真实 CUDA reset 验证两台 physical rubber-hand G1、共享宽桌和 collision graph。
 - [x] 定义 shared actor batch 与两组 `29-D` action 的纯张量 shape/routing 契约。
 - [x] 建立 per-agent actor 数据与 per-environment team 数据分离的 rollout storage。
 - [x] 建立 opt-in 双机器人 ActionManager 控制项，把两组 `29-D` action 独立转换为 torque。
+- [x] 建立最小 Plan 5 environment shell，接通 paired command、dual action 和双实体 simulator。
 - [ ] 把 shared actor batch 和 action routing 接入在线环境。
 - [ ] 实现每台机器人 `158-D` actor observation 和真实 teammate 相对状态。
 - [ ] 建立最小 centralized critic observation 和全新 critic。
@@ -415,7 +416,8 @@ Push baseline 稳定后：
 - [ ] 实现 shared reward、joint reset、termination 和碰撞语义。
 - [ ] 实现 actor checkpoint、冻结 normalizer、全新 critic/optimizer 的加载契约。
 - [ ] 扩展 recorder，区分两台机器人、共享桌子、接触和终止原因。
-- [ ] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试。
+- [~] 完成确定性 reset、维度、坐标、action routing、reward sign 和短 rollout 测试：
+  reset、基础 shape、间距和一步物理已通过；在线 actor、observation 与 reward sign 待完成。
 - [ ] 完成单智能体随机 teammate observation 的短程鲁棒性检查。
 
 ### 9.2 Stage 3——Push A1 训练 gate
@@ -539,3 +541,25 @@ Push baseline 稳定后：
 - gate：command 数据流通过；真实 Isaac Sim/CUDA joint reset 尚未执行，不计为 physical gate；
 - 下一项：建立最小 Plan 5 environment shell，把 `[env, 2, 29]` actor action、paired
   command 和 DualRobotIsaacSim 接在一起，然后运行单环境 CUDA reset smoke。
+
+#### 2026-08-18：最小双实体在线环境与真实 CUDA smoke
+
+- commit：`070a0f60`；
+- 文件：`envs/marl/plan5_push_manager.py`、Plan 5 smoke experiment、
+  `scripts/smoke_plan5_environment.py`、simulator 初始化时序修正及对应测试；
+- 环境：一个 Isaac Sim environment、两台 physical rubber-hand G1、一张共享 `0.1 kg`
+  宽桌；`0.1 kg` 仍只用于环境 smoke，不代表正式训练物理参数；
+- 结果：paired command 完成联合 reset；root shape 为 `[1, 2, 13]`，DOF shape 为
+  `[1, 2, 29]`，两机器人间距为 `0.80000001 m`；输入一组 `[1, 2, 29]` 零动作后
+  状态保持有限且未立即 reset；
+- 资产：实际配置加载 `main_mesh_collision_rubberhand.urdf`，左右 rubber-hand link、
+  STL 与 collision prim 存在，未发现 hemisphere/hemispherical 资产 token；
+- 修正：最初主 contact sensor 在第二 articulation 引起的 stage recomposition 后未初始化；
+  将主 contact sensor 延后到所有机器人 articulation 建立完成后创建，两套 sensor 均正常；
+- 测试：相关 MAPPO、environment、dual action、paired command 和 simulator config 回归
+  `34 passed`；`py_compile` 与 `git diff --check` 通过；真实 CUDA smoke `passed: true`；
+- 边界：当前 smoke reward 刻意为空，因此一步 reward 为 `0.0`；这只证明物理环境和
+  数据路由可运行，不表示 actor observation、centralized critic、shared reward 或 MAPPO 已完成；
+- gate：最小双实体物理启动 gate 通过；
+- 下一项：实现每台机器人 `158-D` actor observation，以真实 teammate 相对平面位置和
+  速度替换 ghost 字段，并验证 heading-frame 坐标和 agent-swap 一致性。
