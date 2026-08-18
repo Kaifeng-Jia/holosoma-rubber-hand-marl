@@ -10,6 +10,7 @@ from holosoma.config_types.command import MotionConfig
 from holosoma.envs.marl import PairedA1Reference
 from holosoma.managers.command.base import CommandTermBase
 from holosoma.managers.command.terms.wbt import FAKE_BODY_NAME_ALIASES, MotionLoader
+from holosoma.utils.rotations import quat_apply, quat_inverse, quat_mul, yaw_quat
 
 
 class PairedA1MotionCommand(CommandTermBase):
@@ -142,6 +143,43 @@ class PairedA1MotionCommand(CommandTermBase):
     @property
     def agent_body_quat_w(self) -> torch.Tensor:
         return self._sample()["agent_body_quat_w"][:, :, self.tracked_body_indexes]
+
+    @property
+    def agent_body_pos_relative_w(self) -> torch.Tensor:
+        """Reference bodies aligned to each simulated robot's planar heading.
+
+        This is the paired-agent equivalent of ``MotionCommand.body_pos_relative_w``.
+        It preserves the original WBT reward semantics independently for each robot.
+        """
+        ref_pos = self.agent_ref_pos_w[:, :, None, :]
+        ref_quat = self.agent_ref_quat_w[:, :, None, :]
+        robot_ref_pos = self.env.simulator.agent_rigid_body_pos[:, :, self.ref_body_index, None, :]
+        robot_ref_quat = self.env.simulator.agent_rigid_body_rot[:, :, self.ref_body_index, None, :]
+        delta_quat = yaw_quat(
+            quat_mul(robot_ref_quat, quat_inverse(ref_quat, w_last=True), w_last=True),
+            w_last=True,
+        )
+        delta_quat = delta_quat.expand(-1, -1, self.agent_body_pos_w.shape[2], -1)
+        height_delta = ref_pos - robot_ref_pos
+        height_delta = height_delta.clone()
+        height_delta[..., :2] = 0.0
+        return (
+            robot_ref_pos
+            + height_delta
+            + quat_apply(delta_quat, self.agent_body_pos_w - ref_pos, w_last=True)
+        )
+
+    @property
+    def agent_body_quat_relative_w(self) -> torch.Tensor:
+        """Reference body orientations aligned to each robot's planar heading."""
+        ref_quat = self.agent_ref_quat_w[:, :, None, :]
+        robot_ref_quat = self.env.simulator.agent_rigid_body_rot[:, :, self.ref_body_index, None, :]
+        delta_quat = yaw_quat(
+            quat_mul(robot_ref_quat, quat_inverse(ref_quat, w_last=True), w_last=True),
+            w_last=True,
+        )
+        delta_quat = delta_quat.expand(-1, -1, self.agent_body_quat_w.shape[2], -1)
+        return quat_mul(delta_quat, self.agent_body_quat_w, w_last=True)
 
     @property
     def agent_body_lin_vel_w(self) -> torch.Tensor:

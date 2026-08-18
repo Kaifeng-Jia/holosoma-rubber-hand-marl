@@ -64,3 +64,13 @@ def test_smoke_config_is_dual_rubber_hand_and_not_a_training_reward():
     assert list(cfg.observation.groups) == ["actor_obs", "teammate_obs", "critic_obs"]
     assert cfg.reward.terms == {}
     assert cfg.randomization.setup_terms == {}
+
+
+def test_baseline_config_enables_original_reward_and_joint_termination():
+    from holosoma.config_values.marl.g1.experiment import g1_29dof_plan5_push_baseline
+
+    cfg = g1_29dof_plan5_push_baseline
+    assert len(cfg.reward.terms) == 11
+    assert list(cfg.termination.terms) == ["timeout", "joint_bad_tracking"]
+    assert cfg.termination.terms["joint_bad_tracking"].func.endswith(":JointBadTrackingZOnly")
+    assert cfg.robot.asset.urdf_file.endswith("main_mesh_collision_rubberhand.urdf")

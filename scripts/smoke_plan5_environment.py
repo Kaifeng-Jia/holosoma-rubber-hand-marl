@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Run the first real-CUDA reset and one-step gate for the Plan 5 environment."""
+"""Run real-CUDA one-step or multi-step gates for the Plan 5 environment."""
 
 from __future__ import annotations
 
+import argparse
 import json
 import sys
 import traceback
@@ -13,11 +14,20 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
-from holosoma.config_values.marl.g1.experiment import g1_29dof_plan5_push_smoke
+from holosoma.config_values.marl.g1.experiment import (
+    g1_29dof_plan5_push_baseline,
+    g1_29dof_plan5_push_smoke,
+)
 from holosoma.utils.eval_utils import init_sim_imports
 
 
-CONFIG = g1_29dof_plan5_push_smoke
+PARSER = argparse.ArgumentParser()
+PARSER.add_argument("--baseline-reward", action="store_true")
+PARSER.add_argument("--steps", type=int, default=1)
+ARGS = PARSER.parse_args()
+if ARGS.steps < 1:
+    PARSER.error("--steps must be at least 1")
+CONFIG = g1_29dof_plan5_push_baseline if ARGS.baseline_reward else g1_29dof_plan5_push_smoke
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -98,10 +108,35 @@ def main() -> None:
             device=env.device,
         )
         runner = Plan5PolicyRunner(models)
-        transition = runner.step_environment(env, observations)
-        observations = transition.observations
-        reward = transition.rewards
-        reset = transition.dones
+        rewards = []
+        resets = []
+        term_samples: dict[str, list[torch.Tensor]] = {
+            name: [] for name in env.reward_manager.active_terms
+        }
+        transition = None
+        for _ in range(ARGS.steps):
+            transition = runner.step_environment(
+                env,
+                observations,
+                update_critic_normalizer=False,
+            )
+            observations = transition.observations
+            rewards.append(transition.rewards.detach().clone())
+            resets.append(transition.dones.detach().clone())
+            for name, cfg in zip(
+                env.reward_manager._term_names,
+                env.reward_manager._term_cfgs,
+            ):
+                if name in env.reward_manager._term_instances:
+                    raw = env.reward_manager._term_instances[name](env, **cfg.params)
+                else:
+                    raw = env.reward_manager._term_funcs[name](env, **cfg.params)
+                if raw.shape != (env.num_envs,) or not torch.isfinite(raw).all():
+                    raise RuntimeError(f"Invalid diagnostic reward term {name}: {raw}")
+                term_samples[name].append(raw.detach().clone())
+        assert transition is not None
+        reward_history = torch.stack(rewards)
+        reset_history = torch.stack(resets)
         policy_actions = transition.decision.actions
         critic_values = transition.decision.values
         simulator.refresh_sim_tensors()
@@ -151,9 +186,20 @@ def main() -> None:
             "robot_urdf": str(robot_urdf.relative_to(REPO_ROOT)),
             "rubber_hand_asset_tokens": sorted(required_asset_tokens),
             "hemisphere_asset_tokens": forbidden_asset_tokens,
-            "reward_after_one_step": reward.detach().cpu().tolist(),
-            "reset_after_one_step": reset.detach().cpu().tolist(),
-            "finite_after_one_step": finite_after_step,
+            "baseline_reward_enabled": ARGS.baseline_reward,
+            "rollout_steps": ARGS.steps,
+            "reward_min": reward_history.min().item(),
+            "reward_max": reward_history.max().item(),
+            "reset_count": int(reset_history.count_nonzero().item()),
+            "reward_terms": {
+                name: {
+                    "raw_min": torch.stack(samples).min().item(),
+                    "raw_max": torch.stack(samples).max().item(),
+                    "weight": env.reward_manager.cfg.terms[name].weight,
+                }
+                for name, samples in term_samples.items()
+            },
+            "finite_after_rollout": finite_after_step,
         }
         print(json.dumps(report, indent=2, sort_keys=True), flush=True)
     except BaseException as exc:
