@@ -8,8 +8,8 @@
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
-  `50 iterations` full-actor 实现预检均已完成；所有机器人高度项已改为纯诊断；下一步冻结
-  设计并运行 `1,000 iterations` full-actor 观测窗口，不以短程行为提前否决方法
+  `50 iterations` full-actor 实现预检和 `1,000 iterations` full-actor 观测窗口均已完成；
+  学习指标持续改善，固定回放呈现先退化后恢复但尚未收敛；当前不修改设计
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -1217,3 +1217,42 @@ Push baseline 稳定后：
   实现有效性问题。正常的低 reward、低完成率或非预期动作不构成中止理由；
 - 本 1,000-iteration 窗口结束后才评估趋势；若仍在改善，可继续扩大训练预算；若足量数据
   显示无学习趋势，再讨论 reward、网络或 reference，不在训练途中做临时设计改动。
+
+#### 2026-08-19：1,000-iteration 观测窗口结果
+
+- 完整性：训练从 iteration 50 连续运行到 1050，共 1,000 行指标，status `passed: true`；
+  训练用时约 `1880.9 s`（31.3 分钟）；每 50 iterations 的 checkpoint 均完整保存；
+- 最终产物：
+  `logs/Plan5Push/a1_formal20kg_heightdiag_fullactor1000_from_critic50_seed721_env32/model_01050.pt`；
+  SHA256 `5085511de1d82b720ab6365112066d6ff5d6386f679a6df6a0e7740222441489`；
+- 数值与物理：全程有限；actor LR 约 `1e-5`、critic LR 固定 `1e-3`；运行时桌子质量
+  `20 kg`、五个 collision shape 材料均为 `[0.5,0.5,0.0]`；
+- 每 100 updates 的训练趋势：reward mean 从首段 `-0.0791` 持续提高到末段 `+0.00791`；
+  value loss 从 `0.4308` 降到 `0.02286`；KL 从 `0.01896` 缓慢降到 `0.01640`；
+  policy drift mean 从 `0.01600` 降到 `0.01446`；
+- raw reward 末段相对首段：global ref position `+0.1091`、relative body position
+  `+0.1448`、relative body orientation `+0.1043`、global linear velocity `+0.0695`、
+  object position `+0.0237`、object orientation `+0.0344`；action-rate raw penalty
+  `65.74→27.52`，undesired contact `0.406→0.246`；
+- 需要结合回放解释的训练指标：reset count 从首段 `21.2` 增至末段 `34.5`。训练使用随机
+  motion phase，频繁 reset 可能让 batch 含有更多高相似初始状态，因此 reward 上升不能单独
+  证明完整轨迹改善；这也是固定 frame-0 评测不可省略的原因；
+- 固定评测协议：当前相同 termination（所有高度项仅诊断），deterministic actor mean，
+  seeds `721/722/723` 各 3 次、最多 309 帧；500 updates 对应 `model_00550.pt`，
+  1,000 updates 对应 `model_01050.pt`；
+
+| checkpoint | 完成 | 平均帧数（范围） | 平均沿轨迹进度 | 平均方向余弦 | planar RMSE | yaw 绝对误差 |
+|---|---:|---:|---:|---:|---:|---:|
+| Frozen A1 | 0/9 | **72.78（40–92）** | **0.0604 m** | 0.9269 | 0.0747 m | 11.905° |
+| 500 actor updates | 0/9 | 45.89（30–95） | 0.0594 m | 0.7997 | 0.0719 m | **7.418°** |
+| 1,000 actor updates | 0/9 | 58.78（29–92） | 0.0575 m | **0.9616** | **0.0696 m** | 9.235° |
+
+- 终止分层：Frozen 为 6 robot-orientation / 3 object-position；500 updates 为
+  7 robot-orientation / 2 object-position；1,000 updates 为 6 robot-orientation /
+  3 object-position；三者都没有完成整条 reference；高度诊断可超阈值但不触发 reset；
+- 解释：500 updates 相对 Frozen 明显退化，1,000 updates 又恢复平均帧数，并在方向一致性和
+  planar RMSE 上超过 Frozen，说明策略仍在学习且尚未收敛。推进量没有增加，完整率仍为零，
+  因此也不能把训练 reward 上升写成任务已经学会；
+- 当前结论：本结果支持继续给当前冻结设计更多训练预算，不支持因最初 50/500 updates 的表现
+  临时修改 reward、网络或 reference。下一次训练预算和 checkpoint 评测间隔需与用户确认；
+  方法判断应依据更长学习曲线，而不是重新引入短程淘汰 gate。
