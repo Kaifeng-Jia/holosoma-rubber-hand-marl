@@ -49,6 +49,31 @@ def test_failure_of_either_robot_jointly_resets_only_its_environment(tmp_path):
     )
     torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([True, False]))
     torch.testing.assert_close(
+        term.last_diagnostics["robot_ref_height_error_m_by_agent"],
+        torch.tensor([[0.0, 0.6], [0.0, 0.0]]),
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["robot_ref_height_reference_m_by_agent"],
+        command.agent_ref_pos_w[..., 2],
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["robot_ref_height_actual_m_by_agent"],
+        env.simulator.agent_rigid_body_pos[:, :, command.ref_body_index, 2],
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["robot_body_height_error_m_by_agent"],
+        torch.tensor(
+            [
+                [[0.0, 0.0], [0.0, 0.6]],
+                [[0.0, 0.0], [0.0, 0.0]],
+            ]
+        ),
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["robot_max_body_height_error_m_by_agent"],
+        torch.tensor([[0.0, 0.6], [0.0, 0.0]]),
+    )
+    torch.testing.assert_close(
         term.last_diagnostics["bad_object_position"],
         torch.tensor([False, False]),
     )
@@ -70,6 +95,14 @@ def test_shared_object_error_jointly_resets_the_environment(tmp_path):
     torch.testing.assert_close(
         term.last_diagnostics["actual_object_position"],
         command.simulator_object_pos_w,
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["object_position_error_m"],
+        torch.tensor([0.0, 0.3]),
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["object_orientation_error_rad"],
+        torch.zeros(2),
     )
 
 

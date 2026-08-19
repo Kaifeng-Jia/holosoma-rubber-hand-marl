@@ -229,8 +229,18 @@ def main() -> None:
                     "bad_robot_orientation_by_agent",
                     "bad_robot_body_height_by_agent",
                     "bad_robot",
+                    "robot_ref_height_error_m_by_agent",
+                    "robot_ref_height_reference_m_by_agent",
+                    "robot_ref_height_actual_m_by_agent",
+                    "robot_gravity_z_error_by_agent",
+                    "robot_reference_gravity_z_by_agent",
+                    "robot_actual_gravity_z_by_agent",
+                    "robot_body_height_error_m_by_agent",
+                    "robot_max_body_height_error_m_by_agent",
                     "bad_object_position",
                     "bad_object_orientation",
+                    "object_position_error_m",
+                    "object_orientation_error_rad",
                     "reference_object_position",
                     "actual_object_position",
                     "reference_object_quaternion",
@@ -277,12 +287,74 @@ def main() -> None:
                         .cpu()
                         .tolist(),
                         "bad_robot": bool(diagnostics["bad_robot"][0].item()),
+                        "robot_ref_height_error_m_by_agent": diagnostics[
+                            "robot_ref_height_error_m_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_ref_height_reference_m_by_agent": diagnostics[
+                            "robot_ref_height_reference_m_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_ref_height_actual_m_by_agent": diagnostics[
+                            "robot_ref_height_actual_m_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_gravity_z_error_by_agent": diagnostics[
+                            "robot_gravity_z_error_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_reference_gravity_z_by_agent": diagnostics[
+                            "robot_reference_gravity_z_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_actual_gravity_z_by_agent": diagnostics[
+                            "robot_actual_gravity_z_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_body_height_names": joint_tracking_term.body_pos_body_names,
+                        "robot_body_height_error_m_by_agent": diagnostics[
+                            "robot_body_height_error_m_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "robot_max_body_height_error_m_by_agent": diagnostics[
+                            "robot_max_body_height_error_m_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
                         "bad_object_position": bool(
                             diagnostics["bad_object_position"][0].item()
                         ),
                         "bad_object_orientation": bool(
                             diagnostics["bad_object_orientation"][0].item()
                         ),
+                        "object_position_error_m": float(
+                            diagnostics["object_position_error_m"][0].item()
+                        ),
+                        "object_orientation_error_rad": float(
+                            diagnostics["object_orientation_error_rad"][0].item()
+                        ),
+                        "thresholds": {
+                            "robot_ref_height_m": joint_tracking_term.ref_pos_threshold,
+                            "robot_gravity_z": joint_tracking_term.ref_ori_threshold,
+                            "robot_body_height_m": joint_tracking_term.body_pos_threshold,
+                            "object_position_m": joint_tracking_term.object_pos_threshold,
+                            "object_orientation_rad": joint_tracking_term.object_ori_threshold,
+                        },
                         "timeout": bool(extras["time_outs"][0].item()),
                     }
                     break

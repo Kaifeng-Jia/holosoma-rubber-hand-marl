@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：object-centric evaluator 已建立并重评现有 checkpoint；full actor 10 iterations
-  是当前任务指标领先者，但仅完成约 `6.7%` reference，尚未通过，不直接进入 500
+- 当前阶段：object-centric evaluator 已补充连续终止误差和逐 link 诊断；现有候选均未完成
+  reference，且 `0.1 kg` 桌子仍只属于 smoke，不直接进入 500 iterations
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -255,6 +255,10 @@ A1 robot reference 始终保留在 WBT reward 中，但它是动作先验和软�
 合理的双机器人动力学适应可以偏离 A1；但若偏离没有带来桌子任务收益，或导致机器人失稳，
 仍然不能晋升。不得只用总 WBT reward、单步 KL 或 ViSER 几何外观代替任务完成度。
 
+checkpoint 的正式晋升评测使用 deterministic actor mean，但 GPU 物理 rollout 不保证位级
+复现。因此单次 seed 只用于 smoke 和定位；正式比较必须使用多个 seed，并对每个 seed 做少量
+重复，报告完成率与误差分布，不能把单次终止帧当作稳定排序。
+
 ## 6. 已完成证据与关闭结论
 
 ### 6.1 已完成
@@ -360,6 +364,15 @@ A1 robot reference 始终保留在 WBT reward 中，但它是动作先验和软�
 
 任何阶段未通过 gate 时先诊断，不自动增加训练量。
 
+任何正式训练启动前，必须先向用户明确报告并确认：
+
+1. actor/critic 网络结构、输入输出维度和字段；
+2. 初始化 checkpoint、训练参数与冻结参数；
+3. environment 数、rollout 长度、seed、learning rate、schedule 和 iteration 预算；
+4. reward 各项权重、termination/reset 阈值和 checkpoint gate；
+5. 桌子质量、惯量、COM、table-ground friction、hand-table friction 和碰撞配置；
+6. reset/domain randomization 范围及正式多 seed 重复评测协议。
+
 当前恢复策略：先让全新的 centralized critic 在 actor 严格冻结时拟合 team return，避免
 actor 在 critic 尚未形成有效估计时偏离 A1。critic-only warm-up 通过后，只允许进行短程、
 有 gate 的 actor 解冻试验；它不是自动晋升到 `500 iterations` 的许可。
@@ -459,6 +472,9 @@ Push baseline 稳定后：
   不跨 reset，报告 completion、progress、planar/along/lateral error、yaw 与精确失败子原因。
 - [!] 用新标准重评现有 checkpoint：full actor 10 iterations 当前领先，但无一 checkpoint
   完成 reference，暂不晋升。
+- [x] 增加连续终止误差和脚踝/手腕逐 link Z 诊断；确认存在真实整体高度塌陷，也存在刚越过
+  tracking threshold 的案例；deterministic actor mean 下 GPU rollout 仍非位级复现，正式
+  gate 改用多 seed × 少量重复统计。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -994,3 +1010,24 @@ Push baseline 稳定后：
 - gate：四组均为 `0/3` 完成，距 309 帧目标很远，均不通过。下一步不是立即加 A1 anchor，
   而是先量化 robot-height failure 的物理严重程度，并审计 object-position termination 与当前
   reference/reward 是否给出了可学习的连续信号；之后再决定继续 full actor 还是调整 termination。
+
+#### 2026-08-18：连续终止误差与重复性诊断
+
+- 实现：`JointBadTrackingZOnly` 只增加 reset 前连续诊断，不改变任何 reward、termination 条件
+  或阈值；evaluator 现在报告 reference/actual root height、gravity-Z、四个受监控 link 的逐项
+  Z 误差、桌子位置/姿态误差及对应阈值；
+- 受监控 link：`left/right_ankle_roll_link` 与 `left/right_wrist_yaw_link`。因此原先笼统的
+  `tracked-body Z` 可能表示脚部失稳，也可能只是手腕偏离 A1，必须逐项解释；
+- 真实失稳证据：seed 721 中 Frozen A1 和 full actor 10 的 0 号机器人参考 root height 均约
+  `0.73 m`，实际分别约 `0.22/0.18 m`，误差 `0.513/0.546 m`，超过 `0.50 m` 阈值；这不是
+  轻微 A1 姿态差，而是整体高度塌陷；
+- 边界案例：首轮 seed 722/723 的 tracked-body 最大 Z 误差分别出现 `0.2504/0.2949 m`
+  （Frozen）和 `0.2674 m`（full actor 10），相对 `0.25 m` 阈值从仅超 `0.4 mm` 到超
+  `44.9 mm` 不等；是否允许这类偏离必须结合具体 link 和机器人稳定性判断，不能统一放宽；
+- 重复性：相同 checkpoint 与 seed 再次启动 Isaac/PhysX 后，若干案例的终止帧和主因发生变化；
+  runner 已确认使用 deterministic `act_inference` 均值动作，不是策略采样噪声。因此单次
+  GPU rollout 只作为诊断样本，不能独立决定 checkpoint 晋升；
+- 测试：termination 定向测试 `4 passed`；worktree 全套回归 `174 passed`，并通过
+  `compileall` 与 `git diff --check`；
+- gate：诊断工具通过。现阶段没有证据支持简单删除 robot tracking termination，也没有许可
+  继续 500 iterations；下一步先冻结正式桌子物理参数，再用多 seed × 少量重复协议比较候选。
