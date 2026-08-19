@@ -484,6 +484,7 @@ Push baseline 稳定后：
 ### 9.3 Stage 4——物理与合作真实性
 
 - [ ] 完成单机器人/双机器人 capacity calibration。
+- [x] 审计 preflight 宽桌的 PhysX 运行时质量、COM、惯量和材料参数。
 - [ ] 冻结正式桌子质量、惯量、COM 和摩擦。
 - [ ] 完成 frozen-copy、scratch、WBT-initialized 三组双机器人对照。
 - [ ] 完成多 seed 正式评测。
@@ -1031,3 +1032,18 @@ Push baseline 稳定后：
   `compileall` 与 `git diff --check`；
 - gate：诊断工具通过。现阶段没有证据支持简单删除 robot tracking termination，也没有许可
   继续 500 iterations；下一步先冻结正式桌子物理参数，再用多 seed × 少量重复协议比较候选。
+
+#### 2026-08-18：Preflight 宽桌运行时物理审计
+
+- evaluator 直接读取 PhysX view 的 mass、COM pose、3×3 inertia 和每个 collision shape 的
+  material，不再仅依赖 URDF 文本推断运行时参数；
+- 1-step CUDA preflight 通过；实际质量为 `0.1 kg`，COM 为
+  `[0, 0.015111745, 0] m`，惯量对角为
+  `[0.003138749, 0.021802075, 0.019752447] kg·m²`，均与 preflight URDF 一致；
+- 五个桌子 collision shape 的 PhysX material 均为 static friction `1.0`、dynamic friction
+  `1.0`、restitution `0.0`。URDF 中的 `0.9` contact 值没有成为运行时材料；此前不能把
+  Plan 5 smoke 的实际摩擦报告为 `0.9`；
+- 当前 Plan 5 的 randomization manager 为空，因此上述质量和材料没有被 domain randomization
+  改写；
+- gate：运行时审计工具通过，但正式物理参数仍未冻结。下一步与用户确认 nominal 总质量和
+  固定摩擦，再建立独立正式资产；`0.1 kg / 1.0 friction` 不进入正式训练。

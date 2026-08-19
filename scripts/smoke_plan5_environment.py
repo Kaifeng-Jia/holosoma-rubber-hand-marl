@@ -92,6 +92,22 @@ def main() -> None:
         initial_root = simulator.agent_root_states.clone()
         initial_dof_pos = simulator.agent_dof_pos.clone()
         initial_object_pos = command.simulator_object_pos_w.clone()
+        object_physx_view = simulator._object.root_physx_view
+        runtime_object_tensors = {
+            "mass_kg": object_physx_view.get_masses(),
+            "inertia_kg_m2_row_major": object_physx_view.get_inertias(),
+            "com_pose_body_xyzw": object_physx_view.get_coms(),
+            "material_static_dynamic_restitution": object_physx_view.get_material_properties(),
+        }
+        if not all(torch.isfinite(value).all() for value in runtime_object_tensors.values()):
+            raise RuntimeError("Non-finite runtime object physics properties")
+        runtime_object_physics = {
+            name: {
+                "shape": list(value.shape),
+                "values": value.detach().cpu().tolist(),
+            }
+            for name, value in runtime_object_tensors.items()
+        }
         lateral_spacing = torch.linalg.vector_norm(
             initial_root[:, 1, :3] - initial_root[:, 0, :3], dim=-1
         )
@@ -473,6 +489,7 @@ def main() -> None:
             "online_critic_value_shape": list(critic_values.shape),
             "lateral_spacing_m": lateral_spacing.detach().cpu().tolist(),
             "object_position_w": initial_object_pos.detach().cpu().tolist(),
+            "runtime_object_physics": runtime_object_physics,
             "robot_urdf": str(robot_urdf.relative_to(REPO_ROOT)),
             "rubber_hand_asset_tokens": sorted(required_asset_tokens),
             "hemisphere_asset_tokens": forbidden_asset_tokens,
