@@ -8,8 +8,8 @@
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
-  `50 iterations` full-actor gate 均已完成；A1 高度跟踪改为诊断后的短程 full-actor
-  复测仍未通过；下一步先讨论 team reward 的跨 agent 聚合，不直接扩训到 `500 iterations`
+  `50 iterations` full-actor 实现预检均已完成；所有机器人高度项已改为纯诊断；下一步冻结
+  设计并运行 `1,000 iterations` full-actor 观测窗口，不以短程行为提前否决方法
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -1194,6 +1194,26 @@ Push baseline 稳定后：
   两台机器人取平均，再形成一份 team reward；object term 也是共享 reward。这种 mean pooling
   允许“一台机器人退化、另一台维持表现”被平均值部分掩盖，是 0 号机器人持续被牺牲的一个
   可检验假设，不应直接当作已证实根因；
-- gate：**未通过**，不扩训至 500。下一步在改代码前讨论最小 reward 聚合对照，例如只把
-  与机器人可用性直接相关的 motion/stability 项从跨 agent mean 改为 worst-agent/min 聚合，
-  而不增加手部奖励、不限制接触部位、不改变桌子 reference 或引入预设角色。
+- 当时结论：该 50-iteration 候选没有显示短程行为改善。此结果仅保留为诊断记录，不再用作
+  否决 Plan 5 或阻止足量训练的 gate；下节给出取代该早期判定的正式执行规则。
+
+#### 2026-08-19：学习实验判定方式修正与 1,000-iteration 观测窗口
+
+- 方法论修正：此前把 50-iteration 行为结果用作方法晋升 gate 过于严格。短程运行只能验证
+  数据、资产、维度、checkpoint、梯度、数值和日志是否有效，不能判断 learning-based 方法
+  是否成立；Plan 5 尚未经过足量训练，因此不得写成方法失败；
+- 撤销未经充分验证的硬条件：`torso_link < 0.40 m`、reference-body 高度误差和手腕/脚踝
+  Z 误差全部只作诊断，不参与 reset，也不新增 torso reward；保留原有宽松 orientation、
+  object-position、object-orientation 和 timeout termination；
+- 冻结范围：共享 actor、centralized critic、A1 reference、现有 reward 及跨 agent mean、
+  20 kg 桌子、`0.5/0.5` 摩擦、reset、observation 和首轮无 physics randomization 均不改；
+- 训练计划：从 actor 未更新的正式 critic-only `model_00050.pt` 开始，训练 1,000 个
+  full-actor iterations；`32 envs × 24 steps`、seed `721`、actor LR `1e-5`、critic LR
+  `1e-3`；每 50 iterations 保存 checkpoint；
+- 观测指标：reward、reset/episode、KL、value loss、policy drift、各 raw reward term；训练完成后
+  再对代表性 checkpoint 做固定 frame-0 的 object-centric 回放，形成学习曲线；torso 高度、
+  A1 相似度和接触方式是诊断指标，不是提前停止条件；
+- 唯一提前停止理由：NaN/Inf、错误资产或物理常量、维度/数据错接、checkpoint/日志损坏等
+  实现有效性问题。正常的低 reward、低完成率或非预期动作不构成中止理由；
+- 本 1,000-iteration 窗口结束后才评估趋势；若仍在改善，可继续扩大训练预算；若足量数据
+  显示无学习趋势，再讨论 reward、网络或 reference，不在训练途中做临时设计改动。

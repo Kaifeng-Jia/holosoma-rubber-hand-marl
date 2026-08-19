@@ -15,9 +15,9 @@ from holosoma.utils.rotations import quat_error_magnitude, quat_rotate_inverse
 class JointBadTrackingZOnly(TerminationTermBase):
     """Reset on physical robot failure or shared-table tracking failure.
 
-    Robot-to-reference height errors remain available as diagnostics, but are not
-    hard termination conditions. This lets the policy depart from the A1 pose
-    while retaining a low-body-height safety gate.
+    Robot-to-reference and absolute low-height errors remain available as
+    diagnostics, but are not hard termination conditions. This lets the policy
+    depart from the A1 pose while learning alternative physically useful poses.
     """
 
     def __init__(self, cfg: TerminationTermCfg, env: Any):
@@ -72,7 +72,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
             - command.simulator_agent_body_pos_w[:, :, self.body_indexes, 2]
         )
         bad_body = torch.any(body_error_z > self.body_pos_threshold, dim=-1)
-        bad_robot = torch.any(bad_low_height | bad_ref_ori, dim=1)
+        bad_robot = torch.any(bad_ref_ori, dim=1)
 
         object_position_error = torch.linalg.vector_norm(
             command.object_pos_w - command.simulator_object_pos_w, dim=-1

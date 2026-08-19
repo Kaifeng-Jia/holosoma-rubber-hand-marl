@@ -80,16 +80,16 @@ def test_reference_height_deviation_is_diagnostic_only(tmp_path):
     )
 
 
-def test_low_reference_body_height_of_either_robot_resets_its_environment(tmp_path):
+def test_low_reference_body_height_is_diagnostic_only(tmp_path):
     command, env, term = make_termination(tmp_path)
     env.simulator.agent_rigid_body_pos[0, 1, command.ref_body_index, 2] = 0.39
 
-    torch.testing.assert_close(term(env), torch.tensor([True, False]))
+    torch.testing.assert_close(term(env), torch.tensor([False, False]))
     torch.testing.assert_close(
         term.last_diagnostics["bad_robot_low_height_by_agent"],
         torch.tensor([[False, True], [False, False]]),
     )
-    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([True, False]))
+    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([False, False]))
 
 
 def test_shared_object_error_jointly_resets_the_environment(tmp_path):
