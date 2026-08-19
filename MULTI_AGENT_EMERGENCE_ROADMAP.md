@@ -3,12 +3,12 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-18
+- 最近更新：2026-08-19
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：正式宽桌物理参数已经冻结并由 CUDA/PhysX 运行时读回验证；下一步是在正式
-  `20 kg` 桌子上重新建立 critic-only 与短程 actor 解冻 gate
+- 当前阶段：正式 `20 kg` Frozen A1 基准和 critic-only `50 iterations` warm-up 已完成；
+  下一步是从正式 critic-50 checkpoint 进行 `50 iterations` full-actor gate
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -487,6 +487,11 @@ Push baseline 稳定后：
 - [x] 增加连续终止误差和脚踝/手腕逐 link Z 诊断；确认存在真实整体高度塌陷，也存在刚越过
   tracking threshold 的案例；deterministic actor mean 下 GPU rollout 仍非位级复现，正式
   gate 改用多 seed × 少量重复统计。
+- [!] 正式 `20 kg` Frozen A1 基准：三 seed × 三次均未完成 reference，但 9/9 初始推动方向
+  正确且均由机器人失稳终止；作为 formal full-actor 的固定对照，不视为配置错误。
+- [x] 正式 `20 kg` centralized critic-only `50 iterations` warm-up：actor/normalizer 逐张量
+  不变，critic value-loss 趋势改善，数值、checkpoint 和实际物理记录均通过 gate。
+- [ ] 正式 `20 kg` full-actor `50 iterations`：短程学习方向 gate。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -1077,3 +1082,29 @@ Push baseline 稳定后：
   环境的完整 PhysX 物理读回值；
 - gate：正式物理配置通过。下一步先完成回归测试与提交，然后在启动任何正式训练前向用户
   报告并确认完整网络、PPO、reward、termination、物理、随机化及评测设置。
+
+#### 2026-08-19：正式 20 kg Frozen A1 基准
+
+- 协议：冻结 `model_07999_actor158.pt`，deterministic actor mean，seeds `721/722/723` 各
+  3 次，每次从 frame 0 连续运行至首次 termination 或完整 309 帧；
+- 结果：`0/9` 完成；平均执行 `27.78/309` 帧，范围 `22–41`；平均沿轨迹进度 `0.0403 m`，
+  平均方向余弦 `0.9504`，平均 planar RMSE `0.0347 m`，最终 yaw 误差均值 `1.873°`；
+- 失败分层：`9/9` 为 robot tracking failure，`0/9` 为 object-position，`0/9` 为
+  object-orientation；多数案例是 0 号机器人 root/reference 高度误差超过 `0.5 m`；
+- 解释：Frozen A1 在正式负载下能产生正确初始推动方向，reference 和桌面偏航没有首先失效，
+  但无法维持机器人稳定；该结果是后续 full-actor 学习的正式对照，而不是增加硬约束的依据。
+
+#### 2026-08-19：正式 20 kg critic-only 50-iteration warm-up
+
+- 配置：seed `721`、`32 envs × 24 steps`、actor LR `1e-5` 但关闭 actor update、fresh
+  centralized critic LR `1e-3`，共 50 iterations；
+- 产物：`logs/Plan5Push/a1_formal20kg_critic50_seed721_env32/model_00050.pt`；checkpoint
+  SHA256 `08ff9b3404b2bdf387f85f85fe1537757a7301f6d8c9961fefe415ffaab9302a`；
+- 不变量：Actor state 和 Actor normalizer 相对 frozen source 逐张量完全一致，50 轮 actor
+  grad、KL 和 deterministic policy drift 均严格为零；
+- 数值：全部有限；value loss 前/后 25 轮均值 `0.12405→0.11909`，下降约 `4.0%`，线性趋势
+  为负；reward 前/后 10 轮均值 `-0.05103→-0.05014`，符合 Actor 未更新的预期；
+- 物理：`run_config.json` 记录 32 个环境质量均为 `20.0 kg`，每个环境五个 collision shape
+  均为 `[0.5, 0.5, 0.0]`；
+- gate：通过。下一步从该 checkpoint 恢复，进行 50-iteration full-actor 短程 gate；完成后
+  必须进行三 seed × 三次 object-centric 评测，不自动进入 500 iterations。
