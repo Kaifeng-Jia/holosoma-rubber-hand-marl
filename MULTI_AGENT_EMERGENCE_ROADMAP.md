@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：critic-only `50 iterations` warm-up 已通过；full actor 与 teammate-only adapter
-  两种 `10 iterations` gate 均未通过，后者已定位为 adaptive-KL 步长膨胀，不进入 50 或 500
+- 当前阶段：critic-only `50 iterations` warm-up 已通过；fixed-LR teammate adapter 已保住
+  A1 参数，但 `10 iterations` 三 seed 行为 gate 仍未通过，不进入 50 或 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -440,6 +440,8 @@ Push baseline 稳定后：
   但三 seed A1 行为方向仍退化。
 - [!] 仅训练 teammate 四列的 `10 iterations` gate：A1 基础参数严格不变，但 adaptive-KL
   将 actor LR 放大至 `6.57e-3`，adapter 过强且三 seed 行为退化。
+- [!] 固定 actor LR `1e-5` 的 teammate 四列 gate：参数与步长安全，但三 seed reset 增加且
+  global body orientation 退化，尚无合作改善证据。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -919,3 +921,29 @@ Push baseline 稳定后：
 - gate：未通过。该结果否定的是“受限 adapter 继续沿用无上限 adaptive-KL”，尚未否定四列
   adapter 本身；最小后续对照是把 actor LR 固定在 `1e-5` 后重跑相同 10 iterations，但此项
   需先确认，不能把本次失败直接归因于 adapter 容量不足。
+
+#### 2026-08-18：Fixed-LR teammate adapter gate
+
+- 实现 commit：`7b8b36de`；`--teammate-input-only` 要求显式 actor LR，并把 Plan 5 PPO
+  schedule 固定为 `fixed`；run config 记录实际 update mode 与 schedule；普通 full-actor 和
+  critic-only 模式不变；
+- 测试：真实 teammate-only PPO update 验证 fixed schedule 下 actor/critic LR 均保持不变；
+  全套 `171 passed`，并通过 `compileall` 与 `git diff --check`；
+- 训练配置：从 critic-only `model_00050.pt` 恢复，seed `721`、`32 envs × 24 steps`、
+  actor LR 固定 `1e-5`、critic LR 固定 `1e-3`，训练 10 iterations 至 iteration 60；
+- 产物：`logs/Plan5Push/a1_teammate_adapter_fixed1e5_10_from_critic50_seed721_env32/`；
+  iteration-60 checkpoint SHA256
+  `08a777540fba427c98396485c26cc13ca54290fca13cd7d9bcaad7e072dbe0c5`；
+- 数值结果：所有指标有限；actor LR 和 critic LR 全程分别严格为 `1e-5/1e-3`；KL mean
+  `1.83e-7`；每轮 deterministic drift mean 平均 `9.10e-5`、max 平均 `8.69e-4`；value
+  loss 首次/末次 `0.08147→0.05589`；
+- 参数不变量：旧 154 列和其余 actor state 逐张量严格相同；四列最终 L2 `0.01342`、最大
+  绝对值 `9.46e-4`，相较 adaptive 版本的 L2 `3.11210` 已消除步长膨胀；
+- 行为评测：seeds `721/722/723` 的 100-step deterministic final−source reward 分别为
+  `-0.00259/+0.00419/-0.00329`，三 seed 平均 `-0.00056`；reset 平均 `2.33→3.00`；
+- 三 seed raw-term 平均 final−source：global body orientation `-0.04191`、relative body
+  orientation `-0.00020`、relative body position `-0.01095`、object orientation `+0.01750`、
+  object position `+0.00062`、undesired contacts `+0.03333`；
+- gate：参数安全 gate 通过，但行为方向 gate 未通过。结果比 full actor 和 adaptive adapter
+  更接近 frozen A1，却没有稳定提升 team reward，且 reset 与 global body orientation 变差；
+  不得据此进入 50 或 500 iterations，也不能把“几乎保住 A1”误写成“已学会合作”。
