@@ -8,8 +8,8 @@
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
-  `50 iterations` full-actor gate 均已完成；full-actor gate 未通过；已将 A1 高度跟踪
-  从硬终止改为诊断，下一步从正式 critic-50 checkpoint 重新做短程 full-actor gate
+  `50 iterations` full-actor gate 均已完成；A1 高度跟踪改为诊断后的短程 full-actor
+  复测仍未通过；下一步先讨论 team reward 的跨 agent 聚合，不直接扩训到 `500 iterations`
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -1164,3 +1164,36 @@ Push baseline 稳定后：
 - gate：实现与语义检查通过，但旧 iteration 100 不因 termination 改写而自动晋升。下一步从
   actor 未变的正式 critic-only iteration 50 checkpoint 重新训练一个短程 full-actor 候选；
   训练前再次确认完整设置，完成后仍按三 seed × 三次、309 帧协议评估，不直接扩到 500。
+
+#### 2026-08-19：软 termination 下的 full-actor 复测
+
+- 配置：从正式 critic-only `model_00050.pt` 恢复，seed `721`、`32 envs × 24 steps`，
+  actor LR `1e-5`、centralized critic LR `1e-3`，联合更新 50 iterations 至 iteration 100；
+  除上一节确认的 termination 语义外，网络、reward、reference、20 kg 桌子和随机化均不变；
+- 产物：
+  `logs/Plan5Push/a1_formal20kg_softtermination_fullactor50_from_critic50_seed721_env32/model_00100.pt`；
+  checkpoint SHA256
+  `7cf1a08a660fd3a32c4b46d51fb2a4c7b0004455bc0623b8dfb9b64b03f2c577`；
+- 数值审计：全部有限；actor/critic LR 全程保持 `1e-5/1e-3`；actor delta L2
+  `0.46754`、最大绝对变化 `0.00479`；KL 前/后 10 轮均值 `0.01895→0.01824`；
+  reward `-0.07356→-0.06853`，value loss `0.29644→0.27200`；reset
+  `22.3→22.7`，未形成稳定性改善趋势；运行时 32 张桌子均为 `20 kg`、五个碰撞形状均为
+  `[0.5,0.5,0.0]`；
+- 同口径评测：新 termination 下，Frozen A1 与候选均使用 deterministic actor mean，
+  seeds `721/722/723` 各 3 次、最多 309 帧；
+
+| checkpoint | 完成 | 平均帧数（范围） | 平均沿轨迹进度 | 平均方向余弦 | planar RMSE | yaw 绝对误差 |
+|---|---:|---:|---:|---:|---:|---:|
+| Frozen A1 | 0/9 | **30.67（21–50）** | 0.0424 m | 0.8887 | **0.0381 m** | **1.923°** |
+| Soft-termination iteration 100 | 0/9 | 24.89（21–32） | **0.0644 m** | **0.9533** | 0.0528 m | 3.325° |
+
+- 失败分层：两组均为 `9/9` 的 0 号机器人 `torso_link < 0.40 m`；没有 object-position、
+  object-orientation 或机器人姿态首先失败。候选推动更激进、方向更一致，但更早进入低高度，
+  且桌面位置与偏航误差变大；
+- reward 审计：六个机器人 motion term、action-rate、joint-limit 和 undesired-contact 当前都先对
+  两台机器人取平均，再形成一份 team reward；object term 也是共享 reward。这种 mean pooling
+  允许“一台机器人退化、另一台维持表现”被平均值部分掩盖，是 0 号机器人持续被牺牲的一个
+  可检验假设，不应直接当作已证实根因；
+- gate：**未通过**，不扩训至 500。下一步在改代码前讨论最小 reward 聚合对照，例如只把
+  与机器人可用性直接相关的 motion/stability 项从跨 agent mean 改为 worst-agent/min 聚合，
+  而不增加手部奖励、不限制接触部位、不改变桌子 reference 或引入预设角色。
