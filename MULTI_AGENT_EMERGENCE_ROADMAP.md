@@ -7,8 +7,9 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：正式 `20 kg` Frozen A1 基准和 critic-only `50 iterations` warm-up 已完成；
-  下一步是从正式 critic-50 checkpoint 进行 `50 iterations` full-actor gate
+- 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
+  `50 iterations` full-actor gate 均已完成；full-actor gate 未通过，下一步先诊断
+  0 号机器人高度跟踪失稳，不直接扩训到 `500 iterations`
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -1108,3 +1109,35 @@ Push baseline 稳定后：
   均为 `[0.5, 0.5, 0.0]`；
 - gate：通过。下一步从该 checkpoint 恢复，进行 50-iteration full-actor 短程 gate；完成后
   必须进行三 seed × 三次 object-centric 评测，不自动进入 500 iterations。
+
+#### 2026-08-19：正式 20 kg full-actor 50-iteration gate
+
+- 配置：从正式 critic-only `model_00050.pt` 恢复，seed `721`、`32 envs × 24 steps`，
+  actor LR `1e-5`、centralized critic LR `1e-3`；联合更新 50 iterations 至 iteration 100；
+  reward、termination、reference、20 kg 桌子物理和首轮无 physics randomization 契约均未修改；
+- 产物：
+  `logs/Plan5Push/a1_formal20kg_fullactor50_from_critic50_seed721_env32/model_00100.pt`；
+  checkpoint SHA256
+  `1021e007631203307a53a1ff5fc3f4d971852fb9bda39753c6bf728f6e1f73f9`；
+- 数值审计：全部有限；actor/critic LR 全程分别保持 `1e-5/1e-3`；actor 参数相对
+  iteration 50 的 delta L2 为 `0.48341`，最大绝对变化 `0.00495`；KL mean `0.01803`、
+  max `0.02269`；value loss 前/后 10 轮均值 `0.11061→0.09098`；训练 reward
+  `-0.05147→-0.04557`，但每轮 reset 前/后 10 轮均值 `32.4→34.6`，没有显示稳定性改善；
+- 正式行为协议：deterministic actor mean，seeds `721/722/723` 各 3 次，每次从 frame 0
+  运行至首次 termination 或完整 309 帧；与 Frozen A1 使用完全相同的正式物理和评测协议；
+
+| checkpoint | 完成 | 平均帧数（范围） | 平均沿轨迹进度 | 平均方向余弦 | planar RMSE | yaw 绝对误差 |
+|---|---:|---:|---:|---:|---:|---:|
+| Frozen A1 | 0/9 | 27.78（22–41） | **0.0403 m** | 0.9504 | 0.0347 m | 1.873° |
+| Full actor iteration 100 | 0/9 | 27.89（23–35） | 0.0267 m | **0.9561** | 0.0242 m | **0.793°** |
+
+- 失败分层：iteration 100 的 `9/9` 均由 robot tracking termination 触发，`0/9` 为
+  object-position，`0/9` 为 object-orientation；多数是 0 号机器人 root/reference 高度误差
+  超过 `0.5 m`，与 Frozen A1 的主要失败模式相同；
+- 解释：较低的 planar RMSE 和 yaw error 伴随更小的桌子位移，不能独立证明行为改善；平均
+  存活帧数几乎不变，而推进量下降约 `33.8%`。训练 reward 和 value loss 的改善没有转化为
+  完整物理 rollout 的稳定性或任务完成率；
+- gate：**未通过**。不得把本结果扩训到 `500 iterations`，也不因失败而偏离 Plan 5 主线。
+  下一步只做最小诊断：定位 0 号机器人高度失稳首先发生在哪个 root/body/link、对应 motion
+  phase、接触状态及左右差异；先判断是 reference/初始化的非对称问题，还是当前 reward 下的
+  可学习稳定性问题。任何 reward、termination、reference 或布局修改必须在证据形成后另行确认。
