@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：object-centric evaluator 已补充连续终止误差和逐 link 诊断；现有候选均未完成
-  reference，且 `0.1 kg` 桌子仍只属于 smoke，不直接进入 500 iterations
+- 当前阶段：正式宽桌物理参数已经冻结并由 CUDA/PhysX 运行时读回验证；下一步是在正式
+  `20 kg` 桌子上重新建立 critic-only 与短程 actor 解冻 gate
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -127,8 +127,19 @@ Hemisphere、half-sphere 和 sphere-hand 资产不得进入本分支的活动命
 接触边和 object origin。详细几何契约保留在
 `WIDETABLE_GEOMETRY_DESIGN_CN.md`。
 
-几何预检不负责冻结最终质量、惯量和摩擦。正式物理参数必须在 Plan 5
-capacity calibration 中单独确认。
+正式训练宽桌的物理参数冻结为：
+
+- 总质量：`20 kg`；
+- COM：object frame 中 `[0, 0.015111745244133, 0] m`；
+- 惯量对角：`[0.62774975216702, 4.36041519206568, 3.95048914424628] kg·m²`，
+  非对角项为零；
+- 所有五个碰撞形状的 static/dynamic friction：`0.5 / 0.5`；
+- restitution：`0.0`；
+- 首轮正式 baseline 不做质量、惯量、COM 或材料 domain randomization。
+
+`0.1 kg`、运行时 friction `1.0 / 1.0` 的 preflight 资产只用于一步环境 smoke，禁止进入
+正式训练。Stage 4 的 capacity calibration 用于测量上述固定物理设置下的能力与因果贡献，
+不得在未确认的情况下改写这组 baseline 常量。
 
 ### 4.4 158 维 actor 兼容接口
 
@@ -421,7 +432,8 @@ Push baseline 稳定后：
 - [x] 任一机器人失效时 joint reset；允许并记录偶发非手部接触。
 - [x] 冻结已有 actor normalizer，完整 actor 参与 MARL 更新。
 - [x] 训练采用 `50 -> 500 -> 2,000 -> 8,000 iterations` gate。
-- [x] `0.1 kg` 只用于环境 smoke；正式物理参数通过单/双机器人 capacity calibration 冻结。
+- [x] `0.1 kg` 只用于环境 smoke；正式宽桌冻结为 `20 kg`、friction `0.5 / 0.5`、
+  restitution `0.0`，首轮不做物理随机化。
 
 ## 9. 执行清单与结果记录
 
@@ -483,9 +495,9 @@ Push baseline 稳定后：
 
 ### 9.3 Stage 4——物理与合作真实性
 
-- [ ] 完成单机器人/双机器人 capacity calibration。
+- [ ] 在冻结的正式物理设置下完成单机器人/双机器人 capacity calibration。
 - [x] 审计 preflight 宽桌的 PhysX 运行时质量、COM、惯量和材料参数。
-- [ ] 冻结正式桌子质量、惯量、COM 和摩擦。
+- [x] 冻结正式桌子质量、惯量、COM 和摩擦，并完成 CUDA/PhysX 运行时校验。
 - [ ] 完成 frozen-copy、scratch、WBT-initialized 三组双机器人对照。
 - [ ] 完成多 seed 正式评测。
 - [ ] 完成单 agent removal、接触 impulse、桌子功率贡献和非手接触报告。
@@ -1047,3 +1059,21 @@ Push baseline 稳定后：
   改写；
 - gate：运行时审计工具通过，但正式物理参数仍未冻结。下一步与用户确认 nominal 总质量和
   固定摩擦，再建立独立正式资产；`0.1 kg / 1.0 friction` 不进入正式训练。
+
+#### 2026-08-18：正式宽桌物理参数冻结
+
+- 用户确认正式 nominal 总质量 `20 kg`、static/dynamic friction `0.5 / 0.5`、restitution
+  `0.0`；COM 和惯量按与宽桌五盒几何一致的均匀密度模型计算；
+- 新建独立正式资产 `objects_widetable_plan5_training.urdf`，不修改 `0.1 kg` preflight 资产；
+- 正式 Plan 5 baseline 使用固定 startup material 配置，首轮不进行质量、惯量、COM、材料或
+  其他 physics domain randomization；
+- 训练入口在创建环境后从 PhysX 读回质量、COM、惯量和全部 collision-shape material；任一项
+  不匹配即拒绝训练，并把完整读回值写入 `run_config.json`；
+- 真实 CUDA 一步检查通过：质量 `20.0 kg`，COM `[0, 0.015111745335, 0] m`，惯量对角
+  `[0.6277497411, 4.3604149818, 3.9504892826] kg·m²`，五个 collision shape 均为
+  `[0.5, 0.5, 0.0]`；
+- 正式训练入口最小合法门禁通过：`4 envs × 1 step × 1 critic-only iteration`，无 reset、
+  actor drift 严格为零，checkpoint/status/run config 均成功写出，且 `run_config.json` 包含四个
+  环境的完整 PhysX 物理读回值；
+- gate：正式物理配置通过。下一步先完成回归测试与提交，然后在启动任何正式训练前向用户
+  报告并确认完整网络、PPO、reward、termination、物理、随机化及评测设置。

@@ -30,7 +30,7 @@ UPDATE_MODE.add_argument("--teammate-input-only", action="store_true")
 PARSER.add_argument(
     "--output-dir",
     type=Path,
-    default=REPO_ROOT / "logs" / "Plan5Push" / "a1_mappo_smoke50_seed721",
+    default=REPO_ROOT / "logs" / "Plan5Push" / "a1_mappo_formal50_seed721",
 )
 PARSER.add_argument("--resume", type=Path, default=None)
 PARSER.add_argument("--save-interval", type=int, default=50)
@@ -57,7 +57,7 @@ CONFIG = replace(
         headless=True,
         seed=ARGS.seed,
         project="Plan5Push",
-        name="a1_mappo_smoke",
+        name="a1_mappo_formal",
     ),
 )
 SIMULATION_APP = init_sim_imports(CONFIG)
@@ -71,6 +71,22 @@ from holosoma.config_values.marl.g1.command import motion_config  # noqa: E402
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
+
+
+EXPECTED_OBJECT_MASS_KG = 20.0
+EXPECTED_OBJECT_COM_M = (0.0, 0.015111745244133, 0.0)
+EXPECTED_OBJECT_INERTIA_KG_M2 = (
+    0.62774975216702,
+    0.0,
+    0.0,
+    0.0,
+    4.36041519206568,
+    0.0,
+    0.0,
+    0.0,
+    3.95048914424628,
+)
+EXPECTED_OBJECT_MATERIAL = (0.5, 0.5, 0.0)
 
 
 def _git_commit() -> str:
@@ -104,6 +120,65 @@ def _reward_term_snapshot(env) -> dict[str, float]:
     return result
 
 
+def _runtime_object_physics(env) -> dict[str, dict[str, object]]:
+    """Read, validate, and serialize the formal table properties from PhysX."""
+    physx_view = env.simulator._object.root_physx_view
+    tensors = {
+        "mass_kg": physx_view.get_masses(),
+        "inertia_kg_m2_row_major": physx_view.get_inertias(),
+        "com_pose_body_xyzw": physx_view.get_coms(),
+        "material_static_dynamic_restitution": physx_view.get_material_properties(),
+    }
+    if not all(torch.isfinite(value).all() for value in tensors.values()):
+        raise RuntimeError("Non-finite runtime object physics properties")
+
+    checks = {
+        "mass": (
+            tensors["mass_kg"].reshape(-1),
+            torch.full_like(tensors["mass_kg"].reshape(-1), EXPECTED_OBJECT_MASS_KG),
+        ),
+        "center of mass": (
+            tensors["com_pose_body_xyzw"][..., :3],
+            torch.as_tensor(
+                EXPECTED_OBJECT_COM_M,
+                device=tensors["com_pose_body_xyzw"].device,
+                dtype=tensors["com_pose_body_xyzw"].dtype,
+            ).expand_as(tensors["com_pose_body_xyzw"][..., :3]),
+        ),
+        "inertia": (
+            tensors["inertia_kg_m2_row_major"],
+            torch.as_tensor(
+                EXPECTED_OBJECT_INERTIA_KG_M2,
+                device=tensors["inertia_kg_m2_row_major"].device,
+                dtype=tensors["inertia_kg_m2_row_major"].dtype,
+            ).expand_as(tensors["inertia_kg_m2_row_major"]),
+        ),
+        "collision material": (
+            tensors["material_static_dynamic_restitution"],
+            torch.as_tensor(
+                EXPECTED_OBJECT_MATERIAL,
+                device=tensors["material_static_dynamic_restitution"].device,
+                dtype=tensors["material_static_dynamic_restitution"].dtype,
+            ).expand_as(tensors["material_static_dynamic_restitution"]),
+        ),
+    }
+    for name, (actual, expected) in checks.items():
+        if not torch.allclose(actual, expected, rtol=1.0e-5, atol=1.0e-6):
+            raise RuntimeError(
+                f"Formal Plan 5 object {name} does not match the frozen setup: "
+                f"actual={actual.detach().cpu().tolist()}, "
+                f"expected={expected.detach().cpu().tolist()}"
+            )
+
+    return {
+        name: {
+            "shape": list(value.shape),
+            "values": value.detach().cpu().tolist(),
+        }
+        for name, value in tensors.items()
+    }
+
+
 def main() -> None:
     env = None
     failure: BaseException | None = None
@@ -122,6 +197,7 @@ def main() -> None:
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
         observations = env.reset_all()
+        runtime_object_physics = _runtime_object_physics(env)
         if g1_29dof_wbt_w_object.algo.config.init_at_random_ep_len:
             env.episode_length_buf = torch.randint_like(
                 env.episode_length_buf,
@@ -165,6 +241,7 @@ def main() -> None:
             "motion_file": motion_config.motion_file,
             "robot_urdf": CONFIG.robot.asset.urdf_file,
             "object_urdf": CONFIG.robot.object.object_urdf_path,
+            "runtime_object_physics": runtime_object_physics,
             "reward_terms": list(env.reward_manager.active_terms),
             "termination_terms": list(env.termination_manager.active_terms),
             "actor_obs_dim": 158,

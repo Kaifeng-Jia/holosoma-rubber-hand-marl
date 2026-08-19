@@ -74,3 +74,11 @@ def test_baseline_config_enables_original_reward_and_joint_termination():
     assert list(cfg.termination.terms) == ["timeout", "joint_bad_tracking"]
     assert cfg.termination.terms["joint_bad_tracking"].func.endswith(":JointBadTrackingZOnly")
     assert cfg.robot.asset.urdf_file.endswith("main_mesh_collision_rubberhand.urdf")
+    assert cfg.robot.object.object_urdf_path.endswith("objects_widetable_plan5_training.urdf")
+    assert list(cfg.randomization.setup_terms) == ["set_object_rigid_body_material_startup"]
+    material = cfg.randomization.setup_terms["set_object_rigid_body_material_startup"]
+    assert material.params == {
+        "static_friction": 0.5,
+        "dynamic_friction": 0.5,
+        "restitution": 0.0,
+    }

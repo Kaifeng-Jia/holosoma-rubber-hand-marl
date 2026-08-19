@@ -28,6 +28,9 @@ WIDE_TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable.urdf"
 WIDE_PLAN5_PREFLIGHT_TABLE_URDF = (
     TRAINING_MOTION_DIR / "objects_widetable_plan5_preflight.urdf"
 )
+WIDE_PLAN5_TRAINING_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_widetable_plan5_training.urdf"
+)
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -348,3 +351,29 @@ def test_widetable_plan5_preflight_asset_preserves_geometry_and_a1_contact_contr
     assert [(child.tag, child.attrib) for child in retention_contact] == [
         (child.tag, child.attrib) for child in source_contact
     ]
+
+
+def test_widetable_plan5_training_asset_has_frozen_20kg_physics() -> None:
+    geometry_root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    training_root = ET.parse(WIDE_PLAN5_TRAINING_TABLE_URDF).getroot()
+    geometry_link = _required_element(geometry_root, "./link[@name='widetable_link']")
+    training_link = _required_element(training_root, "./link[@name='widetable_link']")
+
+    assert training_root.attrib["name"] == "widetable_plan5_training"
+    assert [ET.tostring(node) for node in geometry_link.findall("./visual")] == [
+        ET.tostring(node) for node in training_link.findall("./visual")
+    ]
+    assert [ET.tostring(node) for node in geometry_link.findall("./collision")] == [
+        ET.tostring(node) for node in training_link.findall("./collision")
+    ]
+
+    inertial = _required_element(training_link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 20.0
+    _assert_float_sequence_equal(
+        _required_element(inertial, "./origin").attrib["xyz"],
+        "0 0.015111745244133 0",
+    )
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.62774975216702)
+    assert float(inertia["iyy"]) == pytest.approx(4.36041519206568)
+    assert float(inertia["izz"]) == pytest.approx(3.95048914424628)

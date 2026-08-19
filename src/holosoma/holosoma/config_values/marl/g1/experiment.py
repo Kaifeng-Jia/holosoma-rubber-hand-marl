@@ -8,6 +8,9 @@ from holosoma.config_types.reward import RewardManagerCfg
 from holosoma.config_types.termination import TerminationManagerCfg, TerminationTermCfg
 from holosoma.config_values import action, command, robot, simulator
 from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_observation
+from holosoma.config_values.marl.g1.randomization import (
+    g1_29dof_plan5_fixed_object_material,
+)
 from holosoma.config_values.marl.g1.reward import g1_29dof_plan5_push_reward
 from holosoma.config_values.marl.g1.termination import g1_29dof_plan5_push_termination
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object
@@ -69,10 +72,21 @@ g1_29dof_plan5_push_baseline = replace(
     g1_29dof_plan5_push_smoke,
     training=replace(
         g1_29dof_plan5_push_smoke.training,
-        name="dual_rubberhand_a1_shared_reward_preflight",
+        name="dual_rubberhand_a1_shared_reward_training",
+    ),
+    robot=replace(
+        g1_29dof_plan5_push_smoke.robot,
+        object=replace(
+            g1_29dof_plan5_push_smoke.robot.object,
+            object_urdf_path=(
+                "holosoma/data/motions/g1_29dof/whole_body_tracking/"
+                "objects_widetable_plan5_training.urdf"
+            ),
+        ),
     ),
     reward=g1_29dof_plan5_push_reward,
     termination=g1_29dof_plan5_push_termination,
+    randomization=g1_29dof_plan5_fixed_object_material,
 )
 
 __all__ = ["g1_29dof_plan5_push_baseline", "g1_29dof_plan5_push_smoke"]
