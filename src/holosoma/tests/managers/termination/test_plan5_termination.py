@@ -23,6 +23,7 @@ def make_termination(tmp_path):
             "bad_ref_pos_threshold": 0.5,
             "bad_ref_ori_threshold": 0.8,
             "bad_motion_body_pos_threshold": 0.25,
+            "minimum_ref_body_height": 0.4,
             "body_names_to_track": ["pelvis", "torso_link"],
             "bad_motion_body_pos_body_names": ["pelvis", "torso_link"],
             "bad_object_pos_threshold": 0.25,
@@ -38,16 +39,16 @@ def test_matching_joint_state_does_not_terminate(tmp_path):
     torch.testing.assert_close(term(env), torch.tensor([False, False]))
 
 
-def test_failure_of_either_robot_jointly_resets_only_its_environment(tmp_path):
+def test_reference_height_deviation_is_diagnostic_only(tmp_path):
     command, env, term = make_termination(tmp_path)
     env.simulator.agent_rigid_body_pos[0, 1, command.ref_body_index, 2] += 0.6
 
-    torch.testing.assert_close(term(env), torch.tensor([True, False]))
+    torch.testing.assert_close(term(env), torch.tensor([False, False]))
     torch.testing.assert_close(
         term.last_diagnostics["bad_robot_ref_height_by_agent"],
         torch.tensor([[False, True], [False, False]]),
     )
-    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([True, False]))
+    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([False, False]))
     torch.testing.assert_close(
         term.last_diagnostics["robot_ref_height_error_m_by_agent"],
         torch.tensor([[0.0, 0.6], [0.0, 0.0]]),
@@ -77,6 +78,18 @@ def test_failure_of_either_robot_jointly_resets_only_its_environment(tmp_path):
         term.last_diagnostics["bad_object_position"],
         torch.tensor([False, False]),
     )
+
+
+def test_low_reference_body_height_of_either_robot_resets_its_environment(tmp_path):
+    command, env, term = make_termination(tmp_path)
+    env.simulator.agent_rigid_body_pos[0, 1, command.ref_body_index, 2] = 0.39
+
+    torch.testing.assert_close(term(env), torch.tensor([True, False]))
+    torch.testing.assert_close(
+        term.last_diagnostics["bad_robot_low_height_by_agent"],
+        torch.tensor([[False, True], [False, False]]),
+    )
+    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([True, False]))
 
 
 def test_shared_object_error_jointly_resets_the_environment(tmp_path):

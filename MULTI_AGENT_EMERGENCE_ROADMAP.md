@@ -8,8 +8,8 @@
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
-  `50 iterations` full-actor gate 均已完成；full-actor gate 未通过，下一步先诊断
-  0 号机器人高度跟踪失稳，不直接扩训到 `500 iterations`
+  `50 iterations` full-actor gate 均已完成；full-actor gate 未通过；已将 A1 高度跟踪
+  从硬终止改为诊断，下一步从正式 critic-50 checkpoint 重新做短程 full-actor gate
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -1141,3 +1141,26 @@ Push baseline 稳定后：
   下一步只做最小诊断：定位 0 号机器人高度失稳首先发生在哪个 root/body/link、对应 motion
   phase、接触状态及左右差异；先判断是 reference/初始化的非对称问题，还是当前 reward 下的
   可学习稳定性问题。任何 reward、termination、reference 或布局修改必须在证据形成后另行确认。
+
+#### 2026-08-19：A1 软先验与物理安全 termination 对齐
+
+- 用户确认：手掌精确接触不是当前阶段目标；腿、髋或其他身体部位参与施力可以接受，不增加
+  手部专用 reward，也不惩罚 incidental contact；A1 是动作先验和软引导，而非必须逐帧复刻的
+  硬约束；核心仍是机器人保持可用状态并让桌子跟随共享 reference；
+- termination 语义：原 `0.5 m` reference-body 高度误差和 `0.25 m` 手腕/脚踝 Z 误差继续
+  完整记录，但不再触发 reset；保留宽松的 reference orientation 安全门槛 `0.8`、桌子位置
+  `0.25 m` 和姿态 `0.8 rad`；新增 tracked `torso_link` 绝对最低高度 `0.40 m` 作为物理
+  低高度安全门槛；
+- `0.40 m` 依据：A1 全轨迹 pelvis 为 `0.668–0.768 m`，tracked torso 为
+  `0.705–0.822 m`；门槛允许相对最低 A1 torso 约 `0.30 m` 的下蹲偏离，但不把 torso
+  落到桌面附近或以下的持续塌陷直接当作有效策略；
+- 测试：termination、paired command、recording、reward 和 Plan 5 manager 定向测试
+  `21 passed`；HoloSoma 核心套件 `143 passed`；仓库级自动发现的可选 inference/retargeting
+  测试因环境未安装 `sshkeyboard`、`netifaces` 和 `mujoco` 在收集期停止，与本次变更无关；
+- CUDA 预检：Frozen A1 在 frame 26、iteration 100 在 frame 19 首次触发新低高度门槛；
+  两者均为 0 号机器人 torso 约 `0.37/0.36 m`，旧 reference-height、手腕/脚踝、机器人姿态、
+  object-position 和 object-orientation 条件均未触发；证明新实现已把失败原因从“偏离 A1”
+  分离为“绝对低高度”；
+- gate：实现与语义检查通过，但旧 iteration 100 不因 termination 改写而自动晋升。下一步从
+  actor 未变的正式 critic-only iteration 50 checkpoint 重新训练一个短程 full-actor 候选；
+  训练前再次确认完整设置，完成后仍按三 seed × 三次、309 帧协议评估，不直接扩到 500。

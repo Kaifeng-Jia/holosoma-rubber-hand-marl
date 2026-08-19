@@ -15,6 +15,9 @@ g1_29dof_plan5_push_termination = TerminationManagerCfg(
                 "bad_ref_pos_threshold": 0.5,
                 "bad_ref_ori_threshold": 0.8,
                 "bad_motion_body_pos_threshold": 0.25,
+                # Hard safety gate on the tracked torso body. The reference-relative
+                # height thresholds below remain diagnostics rather than termination.
+                "minimum_ref_body_height": 0.4,
                 "body_names_to_track": [
                     "pelvis",
                     "left_hip_roll_link",

@@ -19,6 +19,8 @@ def write_motion(path, frames: int = 5) -> None:
     body_pos = np.zeros((frames, 2, 3), dtype=np.float32)
     body_pos[:, 0, 1] = 1.0
     body_pos[:, 1, 1] = 1.2
+    body_pos[:, 0, 2] = 0.70
+    body_pos[:, 1, 2] = 0.75
     body_quat = np.zeros((frames, 2, 4), dtype=np.float32)
     body_quat[..., 0] = 1.0
     body_lin_vel = np.zeros_like(body_pos)

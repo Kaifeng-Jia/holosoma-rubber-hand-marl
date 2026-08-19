@@ -242,6 +242,7 @@ def main() -> None:
                 diagnostics = joint_tracking_term.last_diagnostics
                 required_diagnostics = {
                     "bad_robot_ref_height_by_agent",
+                    "bad_robot_low_height_by_agent",
                     "bad_robot_orientation_by_agent",
                     "bad_robot_body_height_by_agent",
                     "bad_robot",
@@ -286,6 +287,12 @@ def main() -> None:
                         "reference_frame": int(diagnostics["reference_frame"][0].item()),
                         "bad_robot_ref_height_by_agent": diagnostics[
                             "bad_robot_ref_height_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "bad_robot_low_height_by_agent": diagnostics[
+                            "bad_robot_low_height_by_agent"
                         ][0]
                         .detach()
                         .cpu()
@@ -366,6 +373,9 @@ def main() -> None:
                         ),
                         "thresholds": {
                             "robot_ref_height_m": joint_tracking_term.ref_pos_threshold,
+                            "robot_minimum_ref_body_height_m": (
+                                joint_tracking_term.minimum_ref_body_height
+                            ),
                             "robot_gravity_z": joint_tracking_term.ref_ori_threshold,
                             "robot_body_height_m": joint_tracking_term.body_pos_threshold,
                             "object_position_m": joint_tracking_term.object_pos_threshold,

@@ -13,7 +13,12 @@ from holosoma.utils.rotations import quat_error_magnitude, quat_rotate_inverse
 
 
 class JointBadTrackingZOnly(TerminationTermBase):
-    """Reset the shared environment when either robot or the table loses tracking."""
+    """Reset on physical robot failure or shared-table tracking failure.
+
+    Robot-to-reference height errors remain available as diagnostics, but are not
+    hard termination conditions. This lets the policy depart from the A1 pose
+    while retaining a low-body-height safety gate.
+    """
 
     def __init__(self, cfg: TerminationTermCfg, env: Any):
         super().__init__(cfg, env)
@@ -21,6 +26,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
         self.ref_pos_threshold = float(params["bad_ref_pos_threshold"])
         self.ref_ori_threshold = float(params["bad_ref_ori_threshold"])
         self.body_pos_threshold = float(params["bad_motion_body_pos_threshold"])
+        self.minimum_ref_body_height = float(params["minimum_ref_body_height"])
         self.object_pos_threshold = float(params["bad_object_pos_threshold"])
         self.object_ori_threshold = float(params["bad_object_ori_threshold"])
         self.body_names_to_track = list(params["body_names_to_track"])
@@ -43,6 +49,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
         actual_ref_pos = env.simulator.agent_rigid_body_pos[:, :, command.ref_body_index]
         ref_height_error = torch.abs(command.agent_ref_pos_w[..., 2] - actual_ref_pos[..., 2])
         bad_ref_pos = ref_height_error > self.ref_pos_threshold
+        bad_low_height = actual_ref_pos[..., 2] < self.minimum_ref_body_height
 
         actual_ref_quat = env.simulator.agent_rigid_body_rot[:, :, command.ref_body_index]
         gravity = torch.zeros_like(command.agent_ref_pos_w)
@@ -65,7 +72,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
             - command.simulator_agent_body_pos_w[:, :, self.body_indexes, 2]
         )
         bad_body = torch.any(body_error_z > self.body_pos_threshold, dim=-1)
-        bad_robot = torch.any(bad_ref_pos | bad_ref_ori | bad_body, dim=1)
+        bad_robot = torch.any(bad_low_height | bad_ref_ori, dim=1)
 
         object_position_error = torch.linalg.vector_norm(
             command.object_pos_w - command.simulator_object_pos_w, dim=-1
@@ -77,6 +84,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
         bad_object_ori = object_orientation_error > self.object_ori_threshold
         self.last_diagnostics = {
             "bad_robot_ref_height_by_agent": bad_ref_pos.clone(),
+            "bad_robot_low_height_by_agent": bad_low_height.clone(),
             "bad_robot_orientation_by_agent": bad_ref_ori.clone(),
             "bad_robot_body_height_by_agent": bad_body.clone(),
             "bad_robot": bad_robot.clone(),
