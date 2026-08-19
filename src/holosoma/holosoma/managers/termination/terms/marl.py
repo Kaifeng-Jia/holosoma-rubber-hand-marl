@@ -30,6 +30,7 @@ class JointBadTrackingZOnly(TerminationTermBase):
             dtype=torch.long,
             device=env.device,
         )
+        self.last_diagnostics: dict[str, torch.Tensor] = {}
 
     def __call__(self, env: Any, **kwargs) -> torch.Tensor:
         command = env.command_manager.get_state("paired_motion_command")
@@ -71,6 +72,19 @@ class JointBadTrackingZOnly(TerminationTermBase):
             quat_error_magnitude(command.object_quat_w, command.simulator_object_quat_w)
             > self.object_ori_threshold
         )
+        self.last_diagnostics = {
+            "bad_robot_ref_height_by_agent": bad_ref_pos.clone(),
+            "bad_robot_orientation_by_agent": bad_ref_ori.clone(),
+            "bad_robot_body_height_by_agent": bad_body.clone(),
+            "bad_robot": bad_robot.clone(),
+            "bad_object_position": bad_object_pos.clone(),
+            "bad_object_orientation": bad_object_ori.clone(),
+            "reference_object_position": command.object_pos_w.clone(),
+            "actual_object_position": command.simulator_object_pos_w.clone(),
+            "reference_object_quaternion": command.object_quat_w.clone(),
+            "actual_object_quaternion": command.simulator_object_quat_w.clone(),
+            "reference_frame": command.time_steps.clone(),
+        }
         return bad_robot | bad_object_pos | bad_object_ori
 
     def reset(self, env_ids: torch.Tensor | None = None) -> None:

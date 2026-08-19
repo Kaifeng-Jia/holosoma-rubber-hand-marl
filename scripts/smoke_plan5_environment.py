@@ -31,10 +31,15 @@ PARSER.add_argument("--steps", type=int, default=1)
 PARSER.add_argument("--record-output", type=str, default=None)
 PARSER.add_argument("--mappo-checkpoint", type=str, default=None)
 PARSER.add_argument("--seed", type=int, default=42)
+PARSER.add_argument("--object-centric", action="store_true")
 ARGS = PARSER.parse_args()
 if ARGS.steps < 1:
     PARSER.error("--steps must be at least 1")
-CONFIG = g1_29dof_plan5_push_baseline if ARGS.baseline_reward else g1_29dof_plan5_push_smoke
+CONFIG = (
+    g1_29dof_plan5_push_baseline
+    if ARGS.baseline_reward or ARGS.object_centric
+    else g1_29dof_plan5_push_smoke
+)
 CONFIG = replace(CONFIG, training=replace(CONFIG.training, seed=ARGS.seed))
 if ARGS.record_output is not None:
     CONFIG = replace(
@@ -58,6 +63,7 @@ from holosoma.agents.mappo.runner import Plan5PolicyRunner  # noqa: E402
 from holosoma.agents.callbacks.recording import EvalRecordingCallback  # noqa: E402
 from holosoma.config_types.eval_callback import RecordingConfig  # noqa: E402
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object  # noqa: E402
+from holosoma.envs.marl import compute_object_reference_metrics  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
 
@@ -77,6 +83,11 @@ def main() -> None:
         command = env.command_manager.get_state("paired_motion_command")
         if command is None:
             raise RuntimeError("paired_motion_command was not created")
+        joint_tracking_term = env.termination_manager._term_instances.get("joint_bad_tracking")
+        if ARGS.object_centric and (
+            joint_tracking_term is None or not hasattr(joint_tracking_term, "last_diagnostics")
+        ):
+            raise RuntimeError("Object-centric evaluation requires joint tracking diagnostics")
 
         initial_root = simulator.agent_root_states.clone()
         initial_dof_pos = simulator.agent_dof_pos.clone()
@@ -165,8 +176,16 @@ def main() -> None:
         termination_samples: dict[str, list[torch.Tensor]] = {
             name: [] for name in env.termination_manager.active_terms
         }
+        reference_object_positions: list[torch.Tensor] = []
+        actual_object_positions: list[torch.Tensor] = []
+        reference_object_quaternions: list[torch.Tensor] = []
+        actual_object_quaternions: list[torch.Tensor] = []
+        evaluated_reference_frames: list[torch.Tensor] = []
+        first_termination_components = None
         decision = None
-        for step in range(ARGS.steps):
+        rollout_step_limit = command.reference.num_frames if ARGS.object_centric else ARGS.steps
+        executed_steps = 0
+        for step in range(rollout_step_limit):
             decision = runner.decide(
                 observations,
                 update_critic_normalizer=False,
@@ -179,6 +198,7 @@ def main() -> None:
             if recorder is not None:
                 recorder.on_pre_eval_env_step(actor_state)
             observations, reward, done, extras = env.step({"actions": decision.actions})
+            executed_steps = step + 1
             actor_state.update(
                 obs=observations,
                 rewards=reward,
@@ -202,6 +222,70 @@ def main() -> None:
                 if raw.shape != (env.num_envs,) or not torch.isfinite(raw).all():
                     raise RuntimeError(f"Invalid diagnostic reward term {name}: {raw}")
                 term_samples[name].append(raw.detach().clone())
+            if ARGS.object_centric:
+                diagnostics = joint_tracking_term.last_diagnostics
+                required_diagnostics = {
+                    "bad_robot_ref_height_by_agent",
+                    "bad_robot_orientation_by_agent",
+                    "bad_robot_body_height_by_agent",
+                    "bad_robot",
+                    "bad_object_position",
+                    "bad_object_orientation",
+                    "reference_object_position",
+                    "actual_object_position",
+                    "reference_object_quaternion",
+                    "actual_object_quaternion",
+                    "reference_frame",
+                }
+                if set(diagnostics) != required_diagnostics:
+                    raise RuntimeError(
+                        "Incomplete joint tracking diagnostics: "
+                        f"{sorted(set(diagnostics) ^ required_diagnostics)}"
+                    )
+                reference_object_positions.append(
+                    diagnostics["reference_object_position"][0].detach().clone()
+                )
+                actual_object_positions.append(
+                    diagnostics["actual_object_position"][0].detach().clone()
+                )
+                reference_object_quaternions.append(
+                    diagnostics["reference_object_quaternion"][0].detach().clone()
+                )
+                actual_object_quaternions.append(
+                    diagnostics["actual_object_quaternion"][0].detach().clone()
+                )
+                evaluated_reference_frames.append(diagnostics["reference_frame"][0].detach().clone())
+                if bool(done[0].item()):
+                    first_termination_components = {
+                        "reference_frame": int(diagnostics["reference_frame"][0].item()),
+                        "bad_robot_ref_height_by_agent": diagnostics[
+                            "bad_robot_ref_height_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "bad_robot_orientation_by_agent": diagnostics[
+                            "bad_robot_orientation_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "bad_robot_body_height_by_agent": diagnostics[
+                            "bad_robot_body_height_by_agent"
+                        ][0]
+                        .detach()
+                        .cpu()
+                        .tolist(),
+                        "bad_robot": bool(diagnostics["bad_robot"][0].item()),
+                        "bad_object_position": bool(
+                            diagnostics["bad_object_position"][0].item()
+                        ),
+                        "bad_object_orientation": bool(
+                            diagnostics["bad_object_orientation"][0].item()
+                        ),
+                        "timeout": bool(extras["time_outs"][0].item()),
+                    }
+                    break
         assert decision is not None
         if recorder is not None:
             recorder.on_post_evaluate_policy()
@@ -243,11 +327,11 @@ def main() -> None:
         if recorder is not None:
             with np.load(recorder.output_path) as recording:
                 required_shapes = {
-                    "policy_actor_obs": (ARGS.steps, 2, 158),
-                    "dof_pos": (ARGS.steps, 2, 29),
-                    "root_pos": (ARGS.steps, 2, 3),
-                    "ref_object_pos_w": (ARGS.steps, 3),
-                    "termination_term_joint_bad_tracking": (ARGS.steps,),
+                    "policy_actor_obs": (executed_steps, 2, 158),
+                    "dof_pos": (executed_steps, 2, 29),
+                    "root_pos": (executed_steps, 2, 3),
+                    "ref_object_pos_w": (executed_steps, 3),
+                    "termination_term_joint_bad_tracking": (executed_steps,),
                 }
                 for name, expected_shape in required_shapes.items():
                     actual_shape = recording[name].shape
@@ -265,7 +349,7 @@ def main() -> None:
                     "object_hand_contact_pos_w",
                 ]
                 for name in diagnostic_channels:
-                    if name not in recording or recording[name].shape[0] != ARGS.steps:
+                    if name not in recording or recording[name].shape[0] != executed_steps:
                         raise RuntimeError(f"Missing or invalid object contact diagnostic: {name}")
                     recording_shapes[name] = list(recording[name].shape)
                 metadata = json.loads(recording["_metadata_json"].item())
@@ -274,6 +358,34 @@ def main() -> None:
                     "/Robot_1/" in path for path in hand_filters
                 ):
                     raise RuntimeError("Object-hand diagnostics do not cover both physical robots")
+
+        object_reference_metrics = None
+        if ARGS.object_centric:
+            reference_frames = torch.stack(evaluated_reference_frames)
+            expected_frames = torch.arange(
+                reference_frames.shape[0],
+                device=reference_frames.device,
+                dtype=reference_frames.dtype,
+            )
+            if not torch.equal(reference_frames, expected_frames):
+                raise RuntimeError(
+                    "Object-centric evaluation crossed a reset or skipped reference frames: "
+                    f"{reference_frames.detach().cpu().tolist()}"
+                )
+            full_reference_positions = (
+                command.reference.object_pos_w + simulator.scene.env_origins[0]
+            )
+            object_reference_metrics = compute_object_reference_metrics(
+                reference_positions=torch.stack(reference_object_positions),
+                actual_positions=torch.stack(actual_object_positions),
+                reference_quaternions=torch.stack(reference_object_quaternions),
+                actual_quaternions=torch.stack(actual_object_quaternions),
+                full_reference_positions=full_reference_positions,
+                completed_reference=(
+                    first_termination_components is None
+                    and executed_steps == command.reference.num_frames
+                ),
+            )
 
         report = {
             "passed": True,
@@ -296,7 +408,9 @@ def main() -> None:
             "seed": ARGS.seed,
             "mappo_checkpoint": ARGS.mappo_checkpoint,
             "restored_iteration": restored_iteration,
-            "rollout_steps": ARGS.steps,
+            "object_centric": ARGS.object_centric,
+            "rollout_step_limit": rollout_step_limit,
+            "rollout_steps": executed_steps,
             "reward_min": reward_history.min().item(),
             "reward_max": reward_history.max().item(),
             "reward_mean": reward_history.mean().item(),
@@ -317,6 +431,8 @@ def main() -> None:
             },
             "recording_output": recorder.output_path if recorder is not None else None,
             "recording_shapes": recording_shapes,
+            "object_reference_metrics": object_reference_metrics,
+            "first_termination_components": first_termination_components,
             "finite_after_rollout": finite_after_step,
         }
         print(json.dumps(report, indent=2, sort_keys=True), flush=True)

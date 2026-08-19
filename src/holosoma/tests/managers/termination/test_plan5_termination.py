@@ -43,6 +43,15 @@ def test_failure_of_either_robot_jointly_resets_only_its_environment(tmp_path):
     env.simulator.agent_rigid_body_pos[0, 1, command.ref_body_index, 2] += 0.6
 
     torch.testing.assert_close(term(env), torch.tensor([True, False]))
+    torch.testing.assert_close(
+        term.last_diagnostics["bad_robot_ref_height_by_agent"],
+        torch.tensor([[False, True], [False, False]]),
+    )
+    torch.testing.assert_close(term.last_diagnostics["bad_robot"], torch.tensor([True, False]))
+    torch.testing.assert_close(
+        term.last_diagnostics["bad_object_position"],
+        torch.tensor([False, False]),
+    )
 
 
 def test_shared_object_error_jointly_resets_the_environment(tmp_path):
@@ -50,6 +59,18 @@ def test_shared_object_error_jointly_resets_the_environment(tmp_path):
     env.simulator.all_root_states[command.object_indices_in_simulator[1], 0] += 0.3
 
     torch.testing.assert_close(term(env), torch.tensor([False, True]))
+    torch.testing.assert_close(
+        term.last_diagnostics["bad_object_position"],
+        torch.tensor([False, True]),
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["reference_frame"],
+        command.time_steps,
+    )
+    torch.testing.assert_close(
+        term.last_diagnostics["actual_object_position"],
+        command.simulator_object_pos_w,
+    )
 
 
 def test_termination_has_no_contact_condition(tmp_path):
