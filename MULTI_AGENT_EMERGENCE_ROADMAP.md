@@ -7,8 +7,8 @@
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：critic-only `50 iterations` warm-up 已通过；fixed-LR teammate adapter 已保住
-  A1 参数，但 `10 iterations` 三 seed 行为 gate 仍未通过，不进入 50 或 500
+- 当前阶段：object-centric evaluator 已建立并重评现有 checkpoint；full actor 10 iterations
+  是当前任务指标领先者，但仅完成约 `6.7%` reference，尚未通过，不直接进入 500
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 第一动作：Push A1
 
@@ -242,6 +242,19 @@ team reward
 
 最终公式和权重必须从原 WBT reward 逐项审计后再确认。
 
+### 5.6 Checkpoint 晋升标准
+
+A1 robot reference 始终保留在 WBT reward 中，但它是动作先验和软约束，不是要求训练后
+逐关节完全复制的硬标准。首个 Push baseline 的 checkpoint 按以下优先级晋升：
+
+1. 共享桌子连续完成 reference 的比例、沿轨迹进度和位置误差；
+2. 两台机器人在整个连续 rollout 中保持物理有效，没有失稳或非法状态；
+3. 桌子运动来自真实接触，后续需证明双方具有因果贡献；
+4. paired A1 body/joint tracking、yaw 和非手部接触作为重要辅助诊断。
+
+合理的双机器人动力学适应可以偏离 A1；但若偏离没有带来桌子任务收益，或导致机器人失稳，
+仍然不能晋升。不得只用总 WBT reward、单步 KL 或 ViSER 几何外观代替任务完成度。
+
 ## 6. 已完成证据与关闭结论
 
 ### 6.1 已完成
@@ -442,6 +455,10 @@ Push baseline 稳定后：
   将 actor LR 放大至 `6.57e-3`，adapter 过强且三 seed 行为退化。
 - [!] 固定 actor LR `1e-5` 的 teammate 四列 gate：参数与步长安全，但三 seed reset 增加且
   global body orientation 退化，尚无合作改善证据。
+- [x] 建立连续 object-reference evaluator：从 frame 0 运行至首次 termination 或 309 帧结束，
+  不跨 reset，报告 completion、progress、planar/along/lateral error、yaw 与精确失败子原因。
+- [!] 用新标准重评现有 checkpoint：full actor 10 iterations 当前领先，但无一 checkpoint
+  完成 reference，暂不晋升。
 - [ ] `500 iterations`：学习方向与稳定性检查。
 - [ ] `2,000 iterations`：初步合作与搭便车诊断。
 - [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
@@ -947,3 +964,33 @@ Push baseline 稳定后：
 - gate：参数安全 gate 通过，但行为方向 gate 未通过。结果比 full actor 和 adaptive adapter
   更接近 frozen A1，却没有稳定提升 team reward，且 reset 与 global body orientation 变差；
   不得据此进入 50 或 500 iterations，也不能把“几乎保住 A1”误写成“已学会合作”。
+
+#### 2026-08-18：Object-centric evaluator 与现有 checkpoint 重评
+
+- 实现 commit：`7b86e3b2`；新增纯张量 object trajectory metrics，并扩展 CUDA evaluator：
+  每次从 frame 0 连续运行，首次 termination 立即停止，绝不把 reset 后的新 episode 混入；
+- 指标：309 帧 reference completion、平面/along/lateral error、实际路径和净位移、沿轨迹进度、
+  方向余弦与 yaw；termination 在 reset 前区分 robot ref height、robot orientation、tracked-body
+  height、object position 和 object orientation；
+- 正确性：reference frame 必须严格为 `0,1,2,...`；纯指标与 termination 测试、全套回归
+  `174 passed`；真实 CUDA frozen-A1 preflight 正确识别 seed 721 在 frame 16 因 object position
+  error 超过 `0.25 m` 终止，而不是机器人跌倒；
+- 评测协议：seeds `721/722/723`，完整 reference 上限 309 帧；critic-warmed actor 与 frozen
+  A1 逐张量相同，因此不重复；adaptive adapter 因 LR 膨胀属于无效配置，不参与候选比较；
+
+| checkpoint | 平均完成帧 | completion | 沿轨迹进度 | 方向余弦 | planar RMSE | 首次失败主因 |
+|---|---:|---:|---:|---:|---:|---|
+| Frozen A1 | 20.33 | 6.58% | 0.164 m | 0.862 | 0.115 m | 2 object-pos / 1 robot-height |
+| Full actor 10 | 20.67 | 6.69% | **0.217 m** | **0.947** | 0.145 m | 2 robot-height / 1 object-pos |
+| Full actor 50 | **32.67** | **10.57%** | 0.091 m | 0.446 | 0.112 m | 3 robot-height |
+| Fixed adapter 10 | 25.00 | 8.09% | 0.126 m | **0.947** | **0.082 m** | 3 robot-height |
+
+- 解释：full actor 10 的 A1 姿态退化并非全无任务收益；它把平均沿轨迹进度提高约 `32%`，
+  因而按新标准是当前最有希望的候选。full actor 50 虽存活更久，但 seed 721 出现负进度，
+  说明增加更新量没有形成一致的正确方向；adapter 的低 RMSE部分来自移动较少，不能单独判优；
+- termination 子因：所有 robot failure 均来自 reference-body height 或 tracked-body Z threshold；
+  没有 robot orientation、object orientation 或 timeout failure。它们可能包含真实下沉/失稳，
+  也可能包含仍然稳定但偏离 A1 的姿态，下一步需用连续物理高度和倾角数值区分；
+- gate：四组均为 `0/3` 完成，距 309 帧目标很远，均不通过。下一步不是立即加 A1 anchor，
+  而是先量化 robot-height failure 的物理严重程度，并审计 object-position termination 与当前
+  reference/reward 是否给出了可学习的连续信号；之后再决定继续 full actor 还是调整 termination。
