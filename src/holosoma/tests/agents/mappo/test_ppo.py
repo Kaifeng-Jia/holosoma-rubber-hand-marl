@@ -127,6 +127,30 @@ def test_mappo_checkpoint_round_trip_and_metadata_fail_closed() -> None:
         restored.load_training_state_dict(bad_state)
 
 
+def test_fine_tune_load_restores_models_but_keeps_fresh_optimizers() -> None:
+    learner = _learner()
+    learner.collect_rollout(FakeTeamEnvironment(2), _observations(2))
+    learner.update()
+    state = learner.training_state_dict(iteration=8050)
+
+    fine_tuned = _learner()
+    assert fine_tuned.models.actor_optimizer.state == {}
+    assert fine_tuned.models.critic_optimizer.state == {}
+    assert fine_tuned.load_fine_tune_state_dict(state) == 8050
+
+    for key, value in learner.models.actor.state_dict().items():
+        torch.testing.assert_close(value, fine_tuned.models.actor.state_dict()[key])
+    for key, value in learner.models.critic.state_dict().items():
+        torch.testing.assert_close(value, fine_tuned.models.critic.state_dict()[key])
+    for key, value in learner.models.actor_obs_normalizer.state_dict().items():
+        torch.testing.assert_close(value, fine_tuned.models.actor_obs_normalizer.state_dict()[key])
+    for key, value in learner.models.critic_obs_normalizer.state_dict().items():
+        torch.testing.assert_close(value, fine_tuned.models.critic_obs_normalizer.state_dict()[key])
+
+    assert fine_tuned.models.actor_optimizer.state == {}
+    assert fine_tuned.models.critic_optimizer.state == {}
+
+
 def test_critic_only_update_preserves_actor_and_updates_critic() -> None:
     torch.manual_seed(721)
     learner = _learner()

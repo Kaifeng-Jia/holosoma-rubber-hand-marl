@@ -400,8 +400,7 @@ class Plan5PPO:
             "iter": iteration,
         }
 
-    def load_training_state_dict(self, state: dict[str, Any]) -> int:
-        """Strictly restore a checkpoint created by :meth:`training_state_dict`."""
+    def _validate_training_state(self, state: dict[str, Any]) -> None:
         metadata = state.get("plan5_mappo", {})
         expected = {
             "version": PLAN5_MAPPO_CHECKPOINT_VERSION,
@@ -413,6 +412,10 @@ class Plan5PPO:
         }
         if metadata != expected:
             raise ValueError(f"Plan 5 MAPPO checkpoint metadata mismatch: {metadata!r}")
+
+    def load_training_state_dict(self, state: dict[str, Any]) -> int:
+        """Strictly restore a checkpoint created by :meth:`training_state_dict`."""
+        self._validate_training_state(state)
         self.models.actor.load_state_dict(state["actor_model_state_dict"], strict=True)
         self.models.critic.load_state_dict(state["critic_model_state_dict"], strict=True)
         self.models.actor_optimizer.load_state_dict(state["actor_optimizer_state_dict"])
@@ -427,4 +430,24 @@ class Plan5PPO:
         )
         self.actor_learning_rate = self.models.actor_optimizer.param_groups[0]["lr"]
         self.critic_learning_rate = self.models.critic_optimizer.param_groups[0]["lr"]
+        return int(state["iter"])
+
+    def load_fine_tune_state_dict(self, state: dict[str, Any]) -> int:
+        """Restore learned models and normalizers while keeping fresh optimizers.
+
+        Fine-tuning changes the reward objective.  Reusing the old Adam moments
+        would carry update momentum from the pre-smoothing objective, so this
+        path intentionally leaves both newly constructed optimizers untouched.
+        """
+        self._validate_training_state(state)
+        self.models.actor.load_state_dict(state["actor_model_state_dict"], strict=True)
+        self.models.critic.load_state_dict(state["critic_model_state_dict"], strict=True)
+        self.models.actor_obs_normalizer.load_state_dict(
+            state["actor_obs_normalizer_state_dict"],
+            strict=True,
+        )
+        self.models.critic_obs_normalizer.load_state_dict(
+            state["critic_obs_normalizer_state_dict"],
+            strict=True,
+        )
         return int(state["iter"])

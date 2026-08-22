@@ -132,15 +132,26 @@ class DualJointPositionActionTerm(ActionTermBase):
         ]
 
     def apply_actions(self) -> None:
-        self.torques[:] = self._compute_torques(self._actions_after_delay)
+        dof_pos, dof_vel = self.env.simulator.get_agent_dof_control_state()
+        self.torques[:] = self._compute_torques(
+            self._actions_after_delay,
+            dof_pos=dof_pos,
+            dof_vel=dof_vel,
+        )
         self.torques_substep[:, self._substep_idx] = self.torques
-        self.dof_pos_substep[:, self._substep_idx] = self.env.simulator.agent_dof_pos
-        self.dof_vel_substep[:, self._substep_idx] = self.env.simulator.agent_dof_vel
+        self.dof_pos_substep[:, self._substep_idx] = dof_pos
+        self.dof_vel_substep[:, self._substep_idx] = dof_vel
         self._substep_idx += 1
         self.env.simulator.apply_agent_torques(self.torques)
-        self._prev_dof_vel.copy_(self.env.simulator.agent_dof_vel)
+        self._prev_dof_vel.copy_(dof_vel)
 
-    def _compute_torques(self, actions: torch.Tensor) -> torch.Tensor:
+    def _compute_torques(
+        self,
+        actions: torch.Tensor,
+        *,
+        dof_pos: torch.Tensor,
+        dof_vel: torch.Tensor,
+    ) -> torch.Tensor:
         actions_scaled = actions * self.action_scales
         control_type = self.env.robot_config.control.control_type
 
@@ -151,17 +162,17 @@ class DualJointPositionActionTerm(ActionTermBase):
             torques = (
                 self._kp_scale
                 * self.p_gains
-                * (actions_scaled + default_dof_pos - self.env.simulator.agent_dof_pos)
-                - self._kd_scale * self.d_gains * self.env.simulator.agent_dof_vel
+                * (actions_scaled + default_dof_pos - dof_pos)
+                - self._kd_scale * self.d_gains * dof_vel
             )
         elif control_type == "V":
             torques = (
                 self._kp_scale
                 * self.p_gains
-                * (actions_scaled - self.env.simulator.agent_dof_vel)
+                * (actions_scaled - dof_vel)
                 - self._kd_scale
                 * self.d_gains
-                * (self.env.simulator.agent_dof_vel - self._prev_dof_vel)
+                * (dof_vel - self._prev_dof_vel)
                 / self.env.sim_dt
             )
         elif control_type == "T":

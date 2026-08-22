@@ -1,4 +1,4 @@
-"""Experiment presets for Plan 5 cooperative Push A1."""
+"""Experiment presets for Plan 5 cooperative Push and Pull."""
 
 from dataclasses import replace
 
@@ -11,7 +11,10 @@ from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_observatio
 from holosoma.config_values.marl.g1.randomization import (
     g1_29dof_plan5_fixed_object_material,
 )
-from holosoma.config_values.marl.g1.reward import g1_29dof_plan5_push_reward
+from holosoma.config_values.marl.g1.reward import (
+    g1_29dof_plan5_push_reward,
+    g1_29dof_plan5_push_smooth_reward,
+)
 from holosoma.config_values.marl.g1.termination import g1_29dof_plan5_push_termination
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object
 
@@ -89,4 +92,49 @@ g1_29dof_plan5_push_baseline = replace(
     randomization=g1_29dof_plan5_fixed_object_material,
 )
 
-__all__ = ["g1_29dof_plan5_push_baseline", "g1_29dof_plan5_push_smoke"]
+g1_29dof_plan5_push_smooth = replace(
+    g1_29dof_plan5_push_baseline,
+    training=replace(
+        g1_29dof_plan5_push_baseline.training,
+        name="dual_rubberhand_a1_joint_acceleration_finetune",
+    ),
+    reward=g1_29dof_plan5_push_smooth_reward,
+)
+
+g1_29dof_plan5_pull_smoke = replace(
+    g1_29dof_plan5_push_smoke,
+    training=replace(
+        g1_29dof_plan5_push_smoke.training,
+        name="dual_rubberhand_pull_reset_smoke",
+    ),
+    robot=replace(
+        g1_29dof_plan5_push_smoke.robot,
+        object=replace(
+            g1_29dof_plan5_push_smoke.robot.object,
+            object_urdf_path=(
+                "holosoma/data/motions/g1_29dof/whole_body_tracking/"
+                "objects_widetable_plan5_pull_training.urdf"
+            ),
+        ),
+    ),
+    command=command.g1_29dof_paired_pull_command,
+    randomization=g1_29dof_plan5_fixed_object_material,
+)
+
+g1_29dof_plan5_pull_baseline = replace(
+    g1_29dof_plan5_pull_smoke,
+    training=replace(
+        g1_29dof_plan5_pull_smoke.training,
+        name="dual_rubberhand_pull_shared_reward_training",
+    ),
+    reward=g1_29dof_plan5_push_reward,
+    termination=g1_29dof_plan5_push_termination,
+)
+
+__all__ = [
+    "g1_29dof_plan5_pull_baseline",
+    "g1_29dof_plan5_pull_smoke",
+    "g1_29dof_plan5_push_baseline",
+    "g1_29dof_plan5_push_smoke",
+    "g1_29dof_plan5_push_smooth",
+]

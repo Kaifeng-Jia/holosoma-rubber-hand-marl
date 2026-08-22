@@ -72,4 +72,14 @@ g1_29dof_plan5_push_reward = RewardManagerCfg(
     }
 )
 
-__all__ = ["g1_29dof_plan5_push_reward"]
+g1_29dof_plan5_push_smooth_reward = RewardManagerCfg(
+    terms={
+        **g1_29dof_plan5_push_reward.terms,
+        "joint_acceleration_l2": RewardTermCfg(
+            func=f"{_TERMS}:JointAccelerationPenalty",
+            weight=-5.0e-9,
+        ),
+    }
+)
+
+__all__ = ["g1_29dof_plan5_push_reward", "g1_29dof_plan5_push_smooth_reward"]

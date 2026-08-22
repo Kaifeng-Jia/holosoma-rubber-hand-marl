@@ -19,6 +19,8 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 from holosoma.config_values.marl.g1.experiment import (
+    g1_29dof_plan5_pull_baseline,
+    g1_29dof_plan5_pull_smoke,
     g1_29dof_plan5_push_baseline,
     g1_29dof_plan5_push_smoke,
 )
@@ -26,6 +28,7 @@ from holosoma.utils.eval_utils import init_sim_imports
 
 
 PARSER = argparse.ArgumentParser()
+PARSER.add_argument("--skill", choices=("push", "pull"), default="push")
 PARSER.add_argument("--baseline-reward", action="store_true")
 PARSER.add_argument("--steps", type=int, default=1)
 PARSER.add_argument("--record-output", type=str, default=None)
@@ -35,11 +38,31 @@ PARSER.add_argument("--object-centric", action="store_true")
 ARGS = PARSER.parse_args()
 if ARGS.steps < 1:
     PARSER.error("--steps must be at least 1")
-CONFIG = (
-    g1_29dof_plan5_push_baseline
-    if ARGS.baseline_reward or ARGS.object_centric
-    else g1_29dof_plan5_push_smoke
-)
+USE_BASELINE_CONFIG = ARGS.baseline_reward or ARGS.object_centric
+if ARGS.skill == "pull":
+    CONFIG = g1_29dof_plan5_pull_baseline if USE_BASELINE_CONFIG else g1_29dof_plan5_pull_smoke
+    CONFIG_LABEL = (
+        "g1_29dof_plan5_pull_baseline"
+        if USE_BASELINE_CONFIG
+        else "g1_29dof_plan5_pull_smoke"
+    )
+    ACTOR_CHECKPOINT = (
+        REPO_ROOT / "logs/WholeBodyTracking/marl_compat_pull_v1/model_07999_actor158.pt"
+    )
+    EXPECTED_ACTOR_SHA256 = (
+        "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364"
+    )
+else:
+    CONFIG = g1_29dof_plan5_push_baseline if USE_BASELINE_CONFIG else g1_29dof_plan5_push_smoke
+    CONFIG_LABEL = (
+        "g1_29dof_plan5_push_baseline"
+        if USE_BASELINE_CONFIG
+        else "g1_29dof_plan5_push_smoke"
+    )
+    ACTOR_CHECKPOINT = (
+        REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
+    )
+    EXPECTED_ACTOR_SHA256 = None
 CONFIG = replace(CONFIG, training=replace(CONFIG.training, seed=ARGS.seed))
 if ARGS.record_output is not None:
     CONFIG = replace(
@@ -111,6 +134,7 @@ def main() -> None:
         lateral_spacing = torch.linalg.vector_norm(
             initial_root[:, 1, :3] - initial_root[:, 0, :3], dim=-1
         )
+        reference_initial_root_pos = command.agent_root_pos_w.clone()
         robot_urdf = (
             REPO_ROOT
             / "src"
@@ -142,19 +166,34 @@ def main() -> None:
             raise RuntimeError("Non-finite robot state after paired reset")
         if not torch.isfinite(initial_object_pos).all():
             raise RuntimeError("Non-finite object state after paired reset")
-        if not torch.allclose(lateral_spacing, torch.full_like(lateral_spacing, 0.8), atol=1.0e-4):
-            raise RuntimeError(f"Unexpected robot spacing: {lateral_spacing.tolist()}")
+        if ARGS.skill == "push":
+            if not torch.allclose(
+                lateral_spacing, torch.full_like(lateral_spacing, 0.8), atol=1.0e-4
+            ):
+                raise RuntimeError(f"Unexpected robot spacing: {lateral_spacing.tolist()}")
+        else:
+            if command.paired_reference_file is None:
+                raise RuntimeError("Pull smoke requires an explicit paired reference file")
+            if not torch.allclose(
+                initial_root[..., :3], reference_initial_root_pos, atol=1.0e-4
+            ):
+                raise RuntimeError(
+                    "Pull reset positions do not match the explicit paired reference"
+                )
         if missing_asset_tokens:
             raise RuntimeError(f"Rubber-hand URDF is incomplete: {missing_asset_tokens}")
         if forbidden_asset_tokens:
             raise RuntimeError(f"Hemisphere-hand tokens are present: {forbidden_asset_tokens}")
 
         observations = env.observation_manager.compute()
-        checkpoint = REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
+        initialization_kwargs = {}
+        if EXPECTED_ACTOR_SHA256 is not None:
+            initialization_kwargs["expected_sha256"] = EXPECTED_ACTOR_SHA256
         models = initialize_plan5_model_bundle(
-            checkpoint,
+            ACTOR_CHECKPOINT,
             g1_29dof_wbt_w_object.algo.config,
             device=env.device,
+            **initialization_kwargs,
         )
         restored_iteration = None
         if ARGS.mappo_checkpoint is not None:
@@ -487,6 +526,11 @@ def main() -> None:
 
         report = {
             "passed": True,
+            "skill": ARGS.skill,
+            "config": CONFIG_LABEL,
+            "actor_checkpoint": str(ACTOR_CHECKPOINT.relative_to(REPO_ROOT)),
+            "actor_checkpoint_sha256": models.source_sha256,
+            "expected_actor_checkpoint_sha256": EXPECTED_ACTOR_SHA256,
             "num_envs": env.num_envs,
             "num_agents": 2,
             "agent_root_shape": list(initial_root.shape),
@@ -542,6 +586,10 @@ def main() -> None:
             json.dumps(
                 {
                     "passed": False,
+                    "skill": ARGS.skill,
+                    "config": CONFIG_LABEL,
+                    "actor_checkpoint": str(ACTOR_CHECKPOINT.relative_to(REPO_ROOT)),
+                    "expected_actor_checkpoint_sha256": EXPECTED_ACTOR_SHA256,
                     "error_type": type(exc).__name__,
                     "error": str(exc),
                 },

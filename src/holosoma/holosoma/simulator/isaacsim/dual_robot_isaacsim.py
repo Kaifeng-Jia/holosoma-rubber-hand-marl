@@ -125,6 +125,24 @@ class DualRobotIsaacSim(IsaacSim):
             dim=1,
         )
 
+    def get_agent_dof_control_state(self) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return the latest per-agent joint state for low-level control.
+
+        ``agent_dof_pos`` and ``agent_dof_vel`` are control-step snapshots used
+        by observations, rewards, and the critic.  A PD controller instead
+        needs the state refreshed by Isaac Lab after every physics substep.
+        Reading the articulation buffers here keeps those two timing contracts
+        separate while preserving the public ``[env, agent, dof]`` layout.
+        """
+        primary_dof_pos = self._robot.data.joint_pos[:, self.dof_ids]
+        primary_dof_vel = self._robot.data.joint_vel[:, self.dof_ids]
+        secondary_dof_pos = self._robot_1.data.joint_pos[:, self._robot_1_dof_ids]
+        secondary_dof_vel = self._robot_1.data.joint_vel[:, self._robot_1_dof_ids]
+        return (
+            torch.stack((primary_dof_pos, secondary_dof_pos), dim=1),
+            torch.stack((primary_dof_vel, secondary_dof_vel), dim=1),
+        )
+
     def apply_agent_torques(self, torques: torch.Tensor) -> None:
         expected = (self.num_envs, self.num_agents, self.num_dof)
         if torques.shape != expected:

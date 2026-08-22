@@ -73,6 +73,58 @@ def penalty_action_rate(env: Any) -> torch.Tensor:
     return torch.sum(torch.square(previous - actions), dim=-1).mean(dim=1)
 
 
+class JointAccelerationPenalty(RewardTermBase):
+    """Penalize control-step joint acceleration, averaged over both agents.
+
+    The simulator exposes the latest physical joint velocities after the full
+    control decimation.  Keeping the previous 50 Hz sample here therefore
+    measures the acceleration seen by the policy, rather than a single 200 Hz
+    physics substep.  The first sample after every reset is deliberately zero
+    because no valid predecessor exists in the new episode.
+    """
+
+    def __init__(self, cfg: RewardTermCfg, env: Any):
+        super().__init__(cfg, env)
+        shape = (env.num_envs, env.num_agents, env.num_dof)
+        self._previous_velocity = torch.zeros(shape, device=env.device)
+        self._valid_previous = torch.zeros(env.num_envs, dtype=torch.bool, device=env.device)
+        self._last_value = torch.zeros(env.num_envs, device=env.device)
+
+    def __call__(self, env: Any, **kwargs) -> torch.Tensor:
+        velocity = env.simulator.agent_dof_vel
+        if velocity.shape != self._previous_velocity.shape:
+            raise ValueError(
+                "Plan 5 joint velocity shape changed: "
+                f"expected {tuple(self._previous_velocity.shape)}, got {tuple(velocity.shape)}"
+            )
+        control_dt = float(env.dt)
+        if control_dt <= 0.0:
+            raise ValueError(f"Control dt must be positive, got {control_dt}")
+
+        acceleration = (velocity - self._previous_velocity) / control_dt
+        value = torch.sum(torch.square(acceleration), dim=-1).mean(dim=1)
+        value = torch.where(self._valid_previous, value, torch.zeros_like(value))
+
+        self._previous_velocity.copy_(velocity)
+        self._valid_previous.fill_(True)
+        self._last_value.copy_(value)
+        return value
+
+    def snapshot(self) -> torch.Tensor:
+        """Return the last computed value without advancing reward state."""
+        return self._last_value.clone()
+
+    def reset(self, env_ids: torch.Tensor | None = None) -> None:
+        if env_ids is None:
+            self._previous_velocity.zero_()
+            self._valid_previous.zero_()
+            self._last_value.zero_()
+            return
+        self._previous_velocity[env_ids] = 0.0
+        self._valid_previous[env_ids] = False
+        self._last_value[env_ids] = 0.0
+
+
 def limits_dof_pos(env: Any, soft_dof_pos_limit: float = 0.95) -> torch.Tensor:
     limits = env.simulator.hard_dof_pos_limits
     midpoint = (limits[:, 0] + limits[:, 1]) / 2

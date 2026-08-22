@@ -18,6 +18,8 @@ from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object
 
 REPO_ROOT = Path(__file__).resolve().parents[5]
 CHECKPOINT = REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
+PULL_CHECKPOINT = REPO_ROOT / "logs/WholeBodyTracking/marl_compat_pull_v1/model_07999_actor158.pt"
+PULL_CHECKPOINT_SHA256 = "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364"
 
 
 def _first_linear_weight(module: torch.nn.Module) -> torch.Tensor:
@@ -117,3 +119,21 @@ def test_checkpoint_hash_mismatch_fails_closed() -> None:
             device="cpu",
             expected_sha256="0" * 64,
         )
+
+
+def test_pull_actor_checkpoint_loads_with_its_explicit_hash() -> None:
+    bundle = initialize_plan5_model_bundle(
+        PULL_CHECKPOINT,
+        g1_29dof_wbt_w_object.algo.config,
+        device="cpu",
+        expected_sha256=PULL_CHECKPOINT_SHA256,
+    )
+
+    assert bundle.source_sha256 == PULL_CHECKPOINT_SHA256
+    assert bundle.source_iteration == 7999
+    actor_input = bundle.actor_obs_normalizer(
+        torch.zeros(2, PLAN5_ACTOR_OBS_DIM), update=False
+    )
+    action = bundle.actor.act_inference({"actor_obs": actor_input})
+    assert action.shape == (2, 29)
+    assert torch.isfinite(action).all()

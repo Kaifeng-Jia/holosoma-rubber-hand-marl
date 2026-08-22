@@ -4,7 +4,10 @@ from types import SimpleNamespace
 
 import torch
 
-from holosoma.config_values.marl.g1.reward import g1_29dof_plan5_push_reward
+from holosoma.config_values.marl.g1.reward import (
+    g1_29dof_plan5_push_reward,
+    g1_29dof_plan5_push_smooth_reward,
+)
 from holosoma.config_values.wbt.g1.reward import g1_29dof_wbt_reward_w_object
 from holosoma.managers.reward.terms import marl
 from tests.managers.command.test_paired_a1_command import make_command
@@ -28,7 +31,9 @@ def make_reward_env(tmp_path):
     env.simulator.agent_rigid_body_rot.copy_(command.agent_body_quat_w)
     env.simulator.agent_rigid_body_vel = command.agent_body_lin_vel_w.clone()
     env.simulator.agent_rigid_body_ang_vel = command.agent_body_ang_vel_w.clone()
+    env.simulator.agent_dof_vel = torch.zeros(env.num_envs, env.num_agents, env.num_dof)
     env.simulator.agent_contact_forces_history = torch.zeros(2, 2, 3, 2, 3)
+    env.dt = 0.02
     return command, env
 
 
@@ -98,3 +103,36 @@ def test_regularizers_average_the_two_agent_costs(tmp_path):
 
     torch.testing.assert_close(action_rate, torch.tensor([1.0, 0.0]))
     torch.testing.assert_close(marl.limits_dof_pos(env, soft_dof_pos_limit=0.9), torch.zeros(2))
+
+
+def test_smooth_reward_adds_only_joint_acceleration_penalty():
+    baseline = g1_29dof_plan5_push_reward.terms
+    smooth = g1_29dof_plan5_push_smooth_reward.terms
+
+    assert list(smooth) == [*baseline, "joint_acceleration_l2"]
+    for name in baseline:
+        assert smooth[name] == baseline[name]
+    assert smooth["joint_acceleration_l2"].weight == -5.0e-9
+
+
+def test_joint_acceleration_uses_control_step_and_is_reset_safe(tmp_path):
+    _, env = make_reward_env(tmp_path)
+    cfg = g1_29dof_plan5_push_smooth_reward.terms["joint_acceleration_l2"]
+    term = marl.JointAccelerationPenalty(cfg, env)
+
+    # The first sample has no predecessor and must not create a reset spike.
+    torch.testing.assert_close(term(env), torch.zeros(env.num_envs))
+
+    # Agent 0 in environment 0 has two joints at 1 rad/s^2.  The per-agent
+    # sums are [2, 0], so the homogeneous team mean is exactly 1.
+    env.simulator.agent_dof_vel[0, 0] = 0.02
+    value = term(env)
+    torch.testing.assert_close(value, torch.tensor([1.0, 0.0]))
+    torch.testing.assert_close(term.snapshot(), value)
+
+    # Reading the snapshot must not advance the previous-velocity sample.
+    torch.testing.assert_close(term(env), torch.zeros(env.num_envs))
+
+    term.reset(torch.tensor([0]))
+    env.simulator.agent_dof_vel[0, 0] = 0.04
+    torch.testing.assert_close(term(env), torch.zeros(env.num_envs))

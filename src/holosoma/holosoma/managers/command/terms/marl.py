@@ -7,7 +7,7 @@ from typing import Any
 import torch
 
 from holosoma.config_types.command import MotionConfig
-from holosoma.envs.marl import PairedA1Reference
+from holosoma.envs.marl import PairedA1Reference, PairedMotionReference
 from holosoma.managers.command.base import CommandTermBase
 from holosoma.managers.command.terms.wbt import FAKE_BODY_NAME_ALIASES, MotionLoader
 from holosoma.utils.rotations import quat_apply, quat_inverse, quat_mul, yaw_quat
@@ -28,6 +28,9 @@ class PairedA1MotionCommand(CommandTermBase):
         motion_cfg = cfg.params["motion_config"]
         self.motion_cfg = motion_cfg if isinstance(motion_cfg, MotionConfig) else MotionConfig(**motion_cfg)
         self.lateral_spacing_m = float(cfg.params.get("lateral_spacing_m", 0.8))
+        self.paired_reference_file = cfg.params.get("paired_reference_file")
+        if self.paired_reference_file is not None and not str(self.paired_reference_file).strip():
+            raise ValueError("paired_reference_file must be a non-empty path when provided")
         if self.motion_cfg.motion_dir or self.motion_cfg.motion_files:
             raise ValueError("Paired A1 command accepts exactly one frozen motion_file")
         if self.motion_cfg.noise_to_initial_pose.overall_noise_scale != 0.0:
@@ -40,18 +43,29 @@ class PairedA1MotionCommand(CommandTermBase):
         robot_body_names = simulator._body_list
         robot_body_aliases = [FAKE_BODY_NAME_ALIASES.get(name, name) for name in robot_body_names]
 
-        self.motion = MotionLoader(
-            self.motion_cfg.motion_file,
-            robot_body_aliases,
-            simulator.dof_names,
-            device=self.device,
-        )
-        if not self.motion.has_object:
-            raise ValueError("Paired A1 command requires a motion with one object reference")
-        self.reference = PairedA1Reference.from_motion_loader(
-            self.motion,
-            lateral_spacing_m=self.lateral_spacing_m,
-        )
+        if self.paired_reference_file is not None:
+            self.motion = PairedMotionReference(
+                str(self.paired_reference_file),
+                robot_body_aliases,
+                simulator.dof_names,
+                device=self.device,
+            )
+            # Explicit paired files already contain both robot placements.  In
+            # particular, do not apply the legacy A1 lateral offset a second time.
+            self.reference = self.motion
+        else:
+            self.motion = MotionLoader(
+                self.motion_cfg.motion_file,
+                robot_body_aliases,
+                simulator.dof_names,
+                device=self.device,
+            )
+            if not self.motion.has_object:
+                raise ValueError("Paired A1 command requires a motion with one object reference")
+            self.reference = PairedA1Reference.from_motion_loader(
+                self.motion,
+                lateral_spacing_m=self.lateral_spacing_m,
+            )
         self.ref_body_index = robot_body_names.index(self.motion_cfg.body_name_ref[0])
         self.tracked_body_indexes = torch.tensor(
             [robot_body_names.index(name) for name in self.motion_cfg.body_names_to_track],

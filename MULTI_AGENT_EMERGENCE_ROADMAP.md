@@ -3,15 +3,16 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-19
+- 最近更新：2026-08-22
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：正式 `20 kg` Frozen A1、critic-only `50 iterations` warm-up 和随后
-  `50 iterations` full-actor 实现预检和 `1,000 iterations` full-actor 观测窗口均已完成；
-  学习指标持续改善，固定回放呈现先退化后恢复但尚未收敛；当前不修改设计
+- 当前阶段：Push A1 已建立独立 PPO 主线；Pull 的镜像 paired reference、完整 runtime
+  reference、`158-D` checkpoint、z-wide `20 kg` 资产、ViSER 人工验收和 CUDA smoke
+  均已完成。用户已确认在本地单张 RTX 5070 上按 Pull、Push 的顺序运行；每项使用
+  `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
-- 第一动作：Push A1
+- 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
 
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
@@ -59,9 +60,11 @@ Push 网络：多个 push agent 共享一套 Push actor 参数
 Pull 网络：多个 pull agent 共享另一套 Pull actor 参数
 ```
 
-首个 baseline 只使用 Push A1。Pull 是下一项合作扩展；竞争性物体争抢在
-合作环境和评测工具稳定后加入。Plan B 与 Kick 保留为后续动作实验，不是
-首个 baseline 的依赖。
+Push A1 是第一个已建立的合作 baseline。Pull 现在作为第二个独立合作动作推进，
+可以在独立配置、独立日志和独立 GPU 上与 Push 并行训练，但两者不得混为一个
+actor、一个 rollout buffer 或一个 checkpoint。竞争性物体争抢在合作环境和评测
+工具稳定后加入。Plan B 与 Kick 保留为后续动作实验，不是当前 Push/Pull baseline
+的依赖。
 
 ### 3.2 停止的方向
 
@@ -84,13 +87,16 @@ Plan 5 包含两类实验：
 1. **合作场景**：两台或多台同质机器人共同推动或拉动物体。
 2. **竞争场景**：多个机器人围绕同一物体进行争抢、占位或控制权竞争。
 
-首个实现顺序：
+主线顺序与并行边界：
 
 ```text
-双机器人 Push A1 合作
-    -> Pull 合作扩展
-    -> 竞争性物体争抢
+双机器人 Push A1 合作 baseline ─┐
+                                 ├─ 各自动作内训练与评测成熟后 -> 竞争性物体争抢
+双机器人 Pull 合作 baseline ─────┘
 ```
+
+Push 与 Pull 可以同时占用两张 GPU，但它们仍是两个独立实验，不是 mixed-action
+training，也不是 task-oriented 单智能体目标点搬运。
 
 ## 4. 已冻结资产与不变量
 
@@ -114,7 +120,7 @@ Plan 5 包含两类实验：
 所有活动配置、reference、训练、评估和可视化只允许使用 fixed rubber hand。
 Hemisphere、half-sphere 和 sphere-hand 资产不得进入本分支的活动命令或配置。
 
-### 4.3 宽桌与站位
+### 4.3 Push 宽桌与站位
 
 首个双机器人布局冻结为：
 
@@ -142,7 +148,63 @@ Hemisphere、half-sphere 和 sphere-hand 资产不得进入本分支的活动命
 正式训练。Stage 4 的 capacity calibration 用于测量上述固定物理设置下的能力与因果贡献，
 不得在未确认的情况下改写这组 baseline 常量。
 
-### 4.4 158 维 actor 兼容接口
+### 4.4 Pull paired reference、z-wide 桌与物理契约
+
+Pull 不沿用 Push 的 local-X 横向平移规则，也不使用 Push 固定的 `0.8 m`
+agent spacing。冻结的单机器人 Pull 在桌子 local-X 方向拉动；其双机器人合作
+横向轴是 **table-local-Z**，镜像面是 **table-local-XY**。
+
+冻结的 Pull paired reference 由已接受的单机器人物理 rollout attempt 8 离线生成：
+
+1. 在初始桌坐标系中，把实测桌轨迹与其 table-local-Z 镜像轨迹取对称平均；
+   平移使用算术平均，姿态使用两条相对旋转的 SO(3) 测地线中点。因此运行时只有
+   一条共享桌轨迹，不为两台机器人维护两条冲突的 object reference。
+2. 把原机器人姿态运输到该共享桌轨迹，并在 table-local-XY 平面上做完整 G1
+   左右镜像，包含 root、左右关节交换和符号变换。
+3. 两台机器人分别沿 table-local-Z 向外偏移 `0.4390236 m`。该值严格来自
+   `0.6742736 - 0.23525`，用于把原小桌腿位置对齐到 z-wide 桌腿位置；不再叠加
+   Push 的 `lateral_spacing_m`。
+
+reference 契约冻结为：
+
+- `316` 帧、`50 Hz`；两台机器人共享同一个 phase；
+- robot joint/body/velocity 通道均为 `[frame, 2 agents, ...]`，桌子通道只保留一份；
+- 共享桌完整 reference 的平面净位移为 `0.584278 m`；对称化后的初始桌坐标系
+  local-Z 漂移数值上为零（最大绝对值约 `1.23e-16 m`）；
+- agent 的 table-local-Z 间距不是固定常量，参考内 min/mean/max 为
+  `1.0520 / 1.4215 / 1.6259 m`；
+- 活动机器人资产只能是 `main_mesh_collision_rubberhand.urdf`，不得出现
+  hemisphere、half-sphere 或 sphere hand。
+
+Pull 专用正式桌资产为
+`objects_widetable_plan5_pull_training.urdf`：
+
+- tabletop 尺寸：`0.5219528 × 0.04745 × 1.4 m`；
+- 桌腿坐标：local-X `±0.23525 m`，local-Z `±0.6742736 m`；
+- 总质量：`20 kg`；COM：`[0, 0.015111745244133, 0] m`；
+- 惯量对角：`[3.95048914424628, 4.36041519206568, 0.62774975216702] kg·m²`；
+- 五个碰撞形状的 static/dynamic friction：`0.5 / 0.5`；restitution：`0.0`；
+- 首轮不进行质量、惯量、COM 或材料 domain randomization。
+
+冻结产物及完整 SHA256：
+
+| 产物 | 路径 | SHA256 |
+|---|---|---|
+| 单机物理来源 attempt 8 | `.../pull_7999_seed42_attempt08_success_viser_qpos.npz` | `d5c0705cfc3e643e75c9a9b1b28a21473b8b042134bd37ae935c7192c179bcdc` |
+| ViSER paired reference | `logs/Plan5Pull/reference_preview/pull_attempt08_mirrored_pair_widetable_viser.npz` | `adf41371577bf32c606f3ab6caa07b2ac1826bf8e6dce8f524467aa6674812d6` |
+| 显式 A/B/shared-table qpos | `logs/Plan5Pull/reference_preview/plan5_attempt08_mirrored_pair_qpos.npz` | `fab0d3ab51ab83495abfce39acf9c6bbc15caebd32f4b0db12acd66e538c9c65` |
+| 完整 runtime reference | `holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz` | `571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4` |
+| Pull z-wide URDF | `holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf` | `c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2` |
+| 原 Pull WBT checkpoint | `.../20260807_071217-rubberhand_pull_sub3_010_8000_seed42-locomotion/model_07999.pt` | `fc5a5d3b66bc076598b28f6c1e8ad822798ce6ce44c9f0370056dc8ad44495dd` |
+| Pull `158-D` checkpoint | `logs/WholeBodyTracking/marl_compat_pull_v1/model_07999_actor158.pt` | `f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364` |
+| `158-D` 转换 manifest | `logs/WholeBodyTracking/marl_compat_pull_v1/conversion_manifest.json` | `ab30286729948e3c102479dab2199e5fbc99674fe5757bd6add14ea2c3fa2f3e` |
+
+可复现生成链固定为：用 `synthesize_plan5_pull_reference.py` 的 `--output` 与
+`--qpos-output` 从同一 attempt 8 同时写出 ViSER 和显式 qpos，再把该 qpos 交给
+`synthesize_plan5_pull_runtime_reference.py` 扩展为正式 runtime reference。正式 NPZ 的
+provenance 只记录仓库相对路径与源/模型 SHA，不写入本机绝对路径。
+
+### 4.5 158 维 actor 兼容接口
 
 Stage 1A 已把冻结 A1 actor 从 154 维无损扩为 158 维：
 
@@ -159,6 +221,11 @@ Stage 1A 已把冻结 A1 actor 从 154 维无损扩为 158 维：
 
 转换保持原 154 列、原 normalizer 和原 deterministic actor 输出不变；新增
 四列初始权重为零。实现与验证提交：`eec8fa19`。
+
+Pull 使用同一接口规则。其 `154→158` 转换相对原 Pull `model_07999.pt` 的
+deterministic actor 输出最大绝对误差为 `0.0`；原 154 列与 normalizer 保持不变，
+新增 teammate 四列首层权重严格为零，旧 optimizer state 被移除。该转换只保证
+初始化策略等价，不表示 frozen Pull actor 已适应双机器人 z-wide `20 kg` 物理环境。
 
 ## 5. Plan 5 架构契约
 
@@ -217,7 +284,7 @@ Plan 5 设计讨论中冻结，不能沿用旧左右适应实验的范围而不�
 
 ### 5.4 Paired reference
 
-首个任务使用一份同步的双机器人 reference：
+每个动作任务各自使用一份同步的双机器人 reference：
 
 ```text
 agent_0 reference
@@ -231,6 +298,10 @@ object reference。
 
 reference 的作用是提供 WBT 先验和姿态约束，不是硬编码实际物理轨迹。真实桌子
 只由两台机器人接触产生的物理力推动。
+
+Push A1 继续使用原中央 A1 在 table-local-X 上左右平移得到的 paired reference；
+Pull 使用 4.4 节冻结的显式 table-local-Z 镜像 runtime reference。二者只共享
+Plan 5 的接口和算法结构，不共享 motion 数据、phase、rollout buffer 或 checkpoint。
 
 ### 5.5 Reward 与 termination
 
@@ -256,13 +327,14 @@ team reward
 
 ### 5.6 Checkpoint 晋升标准
 
-A1 robot reference 始终保留在 WBT reward 中，但它是动作先验和软约束，不是要求训练后
-逐关节完全复制的硬标准。首个 Push baseline 的 checkpoint 按以下优先级晋升：
+对应动作的 robot reference 始终保留在 WBT reward 中，但它是动作先验和软约束，
+不是要求训练后逐关节完全复制的硬标准。Push 与 Pull 各自的 checkpoint 按以下
+优先级独立晋升：
 
 1. 共享桌子连续完成 reference 的比例、沿轨迹进度和位置误差；
 2. 两台机器人在整个连续 rollout 中保持物理有效，没有失稳或非法状态；
 3. 桌子运动来自真实接触，后续需证明双方具有因果贡献；
-4. paired A1 body/joint tracking、yaw 和非手部接触作为重要辅助诊断。
+4. paired body/joint tracking、yaw 和非手部接触作为重要辅助诊断。
 
 合理的双机器人动力学适应可以偏离 A1；但若偏离没有带来桌子任务收益，或导致机器人失稳，
 仍然不能晋升。不得只用总 WBT reward、单步 KL 或 ViSER 几何外观代替任务完成度。
@@ -276,8 +348,10 @@ checkpoint 的正式晋升评测使用 deterministic actor mean，但 GPU 物理
 ### 6.1 已完成
 
 - 四个独立动作 WBT 先验已冻结。
-- A1 154→158 维 actor 转换已通过无损等价验证。
+- A1 与 Pull 的 154→158 维 actor 转换均已通过严格等价验证。
 - 1.4 m 宽桌和 0.8 m 双机器人布局已通过 Viser 与 Isaac reset 几何检查。
+- Pull table-local-Z 镜像 paired reference、完整 runtime reference 和 z-wide 20 kg
+  桌资产已冻结，并通过 ViSER 人工验收和一步 CUDA 环境 smoke。
 - Rubber-hand 碰撞资产已验证。
 - 双实体无训练 action-trace mechanics preflight 已完成。
 
@@ -374,7 +448,9 @@ checkpoint 的正式晋升评测使用 deterministic actor mean，但 GPU 物理
 8,000 iterations   第一版完整 baseline
 ```
 
-任何阶段未通过 gate 时先诊断，不自动增加训练量。
+上述节点是观测与记录里程碑，不是用少量 iterations 提前否决学习方法的硬 gate。
+短程阶段只检查数据、资产、维度、梯度、数值和日志是否有效；只要这些实现有效性
+条件成立，就按已确认预算收集足量学习曲线，再用固定物理回放判断策略质量。
 
 任何正式训练启动前，必须先向用户明确报告并确认：
 
@@ -385,9 +461,12 @@ checkpoint 的正式晋升评测使用 deterministic actor mean，但 GPU 物理
 5. 桌子质量、惯量、COM、table-ground friction、hand-table friction 和碰撞配置；
 6. reset/domain randomization 范围及正式多 seed 重复评测协议。
 
-当前恢复策略：先让全新的 centralized critic 在 actor 严格冻结时拟合 team return，避免
-actor 在 critic 尚未形成有效估计时偏离 A1。critic-only warm-up 通过后，只允许进行短程、
-有 gate 的 actor 解冻试验；它不是自动晋升到 `500 iterations` 的许可。
+Push 和 Pull 分别从各自严格等价的 `158-D` WBT actor 初始化，并分别建立全新的
+centralized critic、optimizer、rollout storage、日志目录和 checkpoint 序列。用户于
+2026-08-22 确认本地单 GPU 正式设置：每项 `2,048` environments、每 iteration 每环境
+`24` steps、先 `50` iterations critic-only bootstrap，再 `8,000` iterations full-actor，
+每 `1,000` iterations 保存。先训练 Pull，再干净重训 Push；Push 不加载旧 MARL
+`model_13050.pt`。两项不得交叉加载 checkpoint 或混合数据。
 
 ### Stage 4——合作真实性与物理校准
 
@@ -412,12 +491,14 @@ actor 在 critic 尚未形成有效估计时偏离 A1。critic-only warm-up 通�
 
 ### Stage 5——Pull 与竞争场景
 
-Push baseline 稳定后：
+状态：Pull 训练前准备完成；正式 PPO 尚未启动。
 
-1. 为 Pull 独立建立相同的多智能体接口和训练组；
-2. 保留 Pull 独立 actor/checkpoint，不与 Push 混合；
-3. 建立 competitive object-grabbing 环境；
-4. 比较 WBT 初始化与从零训练；
+1. Pull 的独立 paired reference、runtime loader、z-wide 物理资产、`158-D` actor、
+   配置和 CUDA smoke 已完成；
+2. 正式设置已经确认：先在本地单 GPU 上完成 Pull，再干净重训 Push；两个动作必须使用
+   独立 actor/critic、optimizer、rollout storage、日志和 checkpoint；
+3. Push/Pull 各自形成稳定合作 baseline 后，再建立 competitive object-grabbing 环境；
+4. 分动作比较 WBT 初始化与从零训练；
 5. 量化角色分化、阻挡、争抢、让位和接触点切换等涌现行为。
 
 创新模块只在 baseline 暴露明确限制后选择。
@@ -429,10 +510,13 @@ Push baseline 稳定后：
 - [x] 单智能体随机 teammate 输入只做短程接口与鲁棒性检查，不做长期适应训练。
 - [x] 同一动作内使用 shared actor 和 decentralized execution；centralized critic 从零训练。
 - [x] 首版使用左右平移的 paired A1 robot reference 和一条共享桌子 reference。
+- [x] Pull 使用 table-local-Z 镜像的显式 paired runtime reference 和一条对称平均的共享桌轨迹；
+  不套用 Push 的固定横向间距。
 - [x] 使用简单 shared WBT reward，不加入显式分工、hand-only 或合作塑形奖励。
 - [x] 任一机器人失效时 joint reset；允许并记录偶发非手部接触。
 - [x] 冻结已有 actor normalizer，完整 actor 参与 MARL 更新。
-- [x] 训练采用 `50 -> 500 -> 2,000 -> 8,000 iterations` gate。
+- [x] 训练采用 `50 -> 500 -> 2,000 -> 8,000 iterations` 观测里程碑；短程结果不作为
+  学习方法的提前否决 gate，只有实现有效性错误可中止运行。
 - [x] `0.1 kg` 只用于环境 smoke；正式宽桌冻结为 `20 kg`、friction `0.5 / 0.5`、
   restitution `0.0`，首轮不做物理随机化。
 
@@ -492,12 +576,19 @@ Push baseline 稳定后：
   正确且均由机器人失稳终止；作为 formal full-actor 的固定对照，不视为配置错误。
 - [x] 正式 `20 kg` centralized critic-only `50 iterations` warm-up：actor/normalizer 逐张量
   不变，critic value-loss 趋势改善，数值、checkpoint 和实际物理记录均通过 gate。
-- [ ] 正式 `20 kg` full-actor `50 iterations`：短程学习方向 gate。
-- [ ] `500 iterations`：学习方向与稳定性检查。
-- [ ] `2,000 iterations`：初步合作与搭便车诊断。
-- [ ] `8,000 iterations`：第一版完整 Push A1 baseline。
+- [x] 正式 `20 kg` full-actor `50 iterations`：完成实现有效性和短程诊断；不再用作
+  方法淘汰 gate。
+- [x] `500/1,000 iterations`：完成第一段足量观测窗口，确认学习仍在变化且未收敛。
+- [x] 下一轮独立 Push/Pull PPO 设置已确认：本地单 GPU 顺序运行、`2,048` environments、
+  `50 critic-only + 8,000 full-actor`、每 `1,000` iterations 保存；Push 不加载旧 `13050`。
+- [ ] Pull `2,048 env × 1 iteration` 容量验证；只检查 OOM、NaN、资产、维度和日志。
+- [ ] Pull `50 iterations` critic-only bootstrap。
+- [ ] Pull `8,000 iterations` full-actor 正式训练。
+- [ ] Push 按相同规模从 A1 `158-D` WBT actor 干净重训。
 
-每一级未通过时先记录失败层级和证据，不自动进入下一级或增加训练量。
+训练中只有 NaN/Inf、错误资产或物理常量、维度/数据错接、checkpoint/日志损坏等
+实现有效性问题可以提前停止；正常的低 reward、低完成率或动作偏差应记录为学习曲线，
+不能在训练量不足时改写主线。
 
 ### 9.3 Stage 4——物理与合作真实性
 
@@ -511,7 +602,17 @@ Push baseline 稳定后：
 
 ### 9.4 Stage 5——动作与场景扩展
 
-- [ ] 使用独立 Pull checkpoint 建立 Pull 合作 baseline。
+- [x] 冻结 Pull attempt 8 来源、table-local-Z 镜像规则和 `0.4390236 m` outward offset。
+- [x] 生成 316 帧、50 Hz 的 ViSER paired reference，并于 2026-08-22 完成人工批准。
+- [x] 生成完整 Pull runtime reference，并通过 channel、name reorder、finite 和 quaternion 检查。
+- [x] 建立 Pull z-wide 20 kg 桌资产，冻结 rubber-hand、`0.5/0.5` friction 和 `0` restitution。
+- [x] 完成 Pull actor `154→158` 严格等价转换；新增 teammate 四列权重为零。
+- [x] 完成 Pull 独立 command/smoke/baseline 配置与一步 CUDA smoke。
+- [!] Frozen Pull actor 连续回放在 316 帧 reference 的 frame 156 触发
+  `joint_bad_tracking`；该结果证明需要训练，不否决 reference 或 Plan 5。
+- [x] 已向用户报告并确认独立 Push/Pull PPO 的网络、优化器、环境数、预算、reward、
+  termination、物理和保存/评测协议。
+- [ ] 使用独立 Pull checkpoint 建立 Pull 合作 baseline；不与 Push 混合数据或 checkpoint。
 - [ ] 建立 competitive object-grabbing 环境。
 - [ ] 比较 WBT 初始化与从零训练。
 - [ ] 量化争抢、阻挡、让位、接触点切换和控制权变化。
@@ -891,8 +992,9 @@ Push baseline 稳定后：
 - 权重证据：teammate 四列从 L2 `0` 增至 `0.05505`，说明策略开始使用新输入；旧 154 列
   的累计 delta L2 为 `0.27081`，整个 actor delta L2 为 `0.48854`，说明 A1 先验也发生了
   不可忽略的累计漂移；
-- gate 结论：50-iteration “环境与数值 smoke”通过，但“行为学习方向”未通过；不得直接进入
-  500 iterations，也不能用更长训练量解释当前退化；
+- 当时 gate 结论：50-iteration “环境与数值 smoke”通过，但“行为学习方向”未通过，并曾据此
+  暂停进入 500 iterations。该短程淘汰规则已被 2026-08-19 的“学习实验判定方式修正”取代，
+  当前只把本结果保留为早期诊断证据；
 - 待讨论：下一步必须优先限制 actor 对旧 A1 prior 的累计漂移，同时让 fresh central critic
   获得足够学习速率；任何 actor/critic 分离调度、critic warm-up 或 KL early-stop 改动都需先确认。
 
@@ -944,8 +1046,9 @@ Push baseline 稳定后：
 - 三 seed raw-term 平均 final−source：global body orientation `-0.05257`、relative body
   orientation `-0.02833`、relative body position `-0.02624`、object orientation `+0.03291`、
   object position `-0.00010`、undesired contacts `+0.06667`；
-- gate：学习率解耦在机制上成功，但行为方向仍未通过。critic 得以继续学习，并没有自动阻止
-  actor 改坏 A1 tracking；不得继续到 50 或 500 iterations。下一步需先讨论更直接的 A1 prior
+- 当时 gate：学习率解耦在机制上成功，但行为方向仍未通过。critic 得以继续学习，并没有自动阻止
+  actor 改坏 A1 tracking；当时暂停到 50 或 500 iterations。该暂停规则后来已被足量训练原则
+  取代；本项仍用于说明 fresh critic 初期可能造成的 actor drift。下一步曾讨论更直接的 A1 prior
   保护方式，而不是继续堆叠 PPO 更新量。
 
 #### 2026-08-18：Teammate-input-only adapter gate
@@ -996,9 +1099,10 @@ Push baseline 稳定后：
 - 三 seed raw-term 平均 final−source：global body orientation `-0.04191`、relative body
   orientation `-0.00020`、relative body position `-0.01095`、object orientation `+0.01750`、
   object position `+0.00062`、undesired contacts `+0.03333`；
-- gate：参数安全 gate 通过，但行为方向 gate 未通过。结果比 full actor 和 adaptive adapter
+- 当时 gate：参数安全 gate 通过，但行为方向 gate 未通过。结果比 full actor 和 adaptive adapter
   更接近 frozen A1，却没有稳定提升 team reward，且 reset 与 global body orientation 变差；
-  不得据此进入 50 或 500 iterations，也不能把“几乎保住 A1”误写成“已学会合作”。
+  当时暂停进入 50 或 500 iterations。该短程暂停规则现已废止，但仍不能把“几乎保住 A1”
+  误写成“已学会合作”。
 
 #### 2026-08-18：Object-centric evaluator 与现有 checkpoint 重评
 
@@ -1107,8 +1211,9 @@ Push baseline 稳定后：
   为负；reward 前/后 10 轮均值 `-0.05103→-0.05014`，符合 Actor 未更新的预期；
 - 物理：`run_config.json` 记录 32 个环境质量均为 `20.0 kg`，每个环境五个 collision shape
   均为 `[0.5, 0.5, 0.0]`；
-- gate：通过。下一步从该 checkpoint 恢复，进行 50-iteration full-actor 短程 gate；完成后
-  必须进行三 seed × 三次 object-centric 评测，不自动进入 500 iterations。
+- gate：通过。当时下一步是从该 checkpoint 恢复进行 50-iteration full-actor 短程检查，
+  并做三 seed × 三次 object-centric 评测；“短程不通过即阻止 500 iterations”的规则后来
+  已被足量训练原则取代。
 
 #### 2026-08-19：正式 20 kg full-actor 50-iteration gate
 
@@ -1137,8 +1242,9 @@ Push baseline 稳定后：
 - 解释：较低的 planar RMSE 和 yaw error 伴随更小的桌子位移，不能独立证明行为改善；平均
   存活帧数几乎不变，而推进量下降约 `33.8%`。训练 reward 和 value loss 的改善没有转化为
   完整物理 rollout 的稳定性或任务完成率；
-- gate：**未通过**。不得把本结果扩训到 `500 iterations`，也不因失败而偏离 Plan 5 主线。
-  下一步只做最小诊断：定位 0 号机器人高度失稳首先发生在哪个 root/body/link、对应 motion
+- 当时 gate：**未通过**，曾暂停扩训到 `500 iterations`，但不因失败而偏离 Plan 5 主线；
+  该短程暂停规则后来已被足量训练原则取代。当时下一步只做最小诊断：定位 0 号机器人高度
+  失稳首先发生在哪个 root/body/link、对应 motion
   phase、接触状态及左右差异；先判断是 reference/初始化的非对称问题，还是当前 reward 下的
   可学习稳定性问题。任何 reward、termination、reference 或布局修改必须在证据形成后另行确认。
 
@@ -1256,3 +1362,41 @@ Push baseline 稳定后：
 - 当前结论：本结果支持继续给当前冻结设计更多训练预算，不支持因最初 50/500 updates 的表现
   临时修改 reward、网络或 reference。下一次训练预算和 checkpoint 评测间隔需与用户确认；
   方法判断应依据更长学习曲线，而不是重新引入短程淘汰 gate。
+
+#### 2026-08-22：Pull paired reference、正式物理资产与 CUDA 训练前验证
+
+- 来源：冻结 Pull WBT `model_07999.pt` 的成功物理 rollout attempt 8。双机器人 reference
+  以 table-local-Z 为横向轴、table-local-XY 为镜像面；共享桌轨迹是原实测相对轨迹与其
+  local-Z 镜像的对称平均，机器人再分别向外偏移 `0.4390236 m` 对齐 z-wide 桌腿；
+- reference：`316` 帧、`50 Hz`，一条共享 object trajectory 和一个共享 phase；完整 runtime
+  文件 SHA256 为 `571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4`；
+- 人工验收：用户于 2026-08-22 在 ViSER 中批准该双机器人 Pull 布局与动作语义；两台
+  rubber-hand G1 位于同一拉动侧、沿 table-local-Z 对称并对应两侧桌腿区域，未引入
+  hemisphere/sphere hand。该批准只覆盖几何与运动学 reference，不是动力学可行性或训练
+  成功证明；ViSER 文件 SHA256 为
+  `adf41371577bf32c606f3ab6caa07b2ac1826bf8e6dce8f524467aa6674812d6`；
+- actor 兼容：Pull `154→158` checkpoint SHA256 为
+  `f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364`；原 154 维
+  deterministic 输出最大绝对误差 `0.0`，新增 teammate 四列首层权重严格为零；
+- 物理：Pull z-wide URDF SHA256 为
+  `c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2`。一步真实 CUDA
+  smoke 通过，实际加载两台 rubber-hand G1、单张 `20 kg` 桌；PhysX 读回 COM/惯量与
+  资产一致，五个碰撞形状材料均为 `[0.5, 0.5, 0.0]`；
+- frozen 连续回放：使用未经 Pull MARL 适应的 `158-D` actor，从 reference frame 0 开始，
+  在总长 316 帧中的 frame 156 触发 `joint_bad_tracking` 联合 reset（recorder 保存
+  frame index `0..155` 共 156 条）。记录文件
+  `logs/Plan5Pull/frozen_smoke_20260822/pull_frozen_316_object_centric.npz`，SHA256
+  `e27710ad400ea35f7cf47918fe1f0a2b22b96c032e0638a39e8d0a0d4cb14b6a`；
+- object 结果：smoke 内置 object-reference metric 报告 actual net displacement
+  `0.001603 m`、actual path `0.001913 m`、along progress `-0.001417 m`、终止时 final
+  position error `0.25177 m`，而完整 reference 平面净位移为 `0.584278 m`。recorder 的
+  world-XY 首末样本直接相减约为 `0.00404 m`，两者测量时序/口径不同；正式比较固定使用
+  命名的 object-reference metric，不把未限定的首末差混作同一指标；
+- 结论：loader、维度、reference、rubber-hand、z-wide 资产和真实物理环境已接通；frozen
+  单机先验不能直接完成新的双机器人 Pull 动力学任务是预期训练前结果，说明需要独立 Pull
+  PPO 适应，不构成对 paired reference、Plan 5 或 Pull 路线的否决；
+- 后续决定：用户确认改为本地单张 RTX 5070 顺序训练，每项 `2,048` environments；先 Pull、
+  后 Push，均从各自 WBT `158-D` actor 建立全新 MARL critic/optimizer。每项先做
+  `50 critic-only` bootstrap，再做 `8,000 full-actor`，每 `1,000` iterations 保存；Push
+  不加载旧 `model_13050.pt`。禁止 mixed-action 数据、跨动作 checkpoint 或 task-oriented
+  单智能体目标点奖励进入当前主线。
