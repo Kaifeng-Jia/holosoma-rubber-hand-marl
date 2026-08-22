@@ -11,8 +11,9 @@
   reference、`158-D` checkpoint、z-wide `20 kg` 资产、ViSER 人工验收和 CUDA smoke
   均已完成。用户已确认在本地单张 RTX 5070 上按 Pull、Push 的顺序运行；每项使用
   `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化。
-  Pull 的 `2,048 env × 1 iteration` 完整更新容量测试已通过；正式训练等待 actor
-  adaptive learning-rate 语义的最终确认
+  Pull 的 `2,048 env × 1 iteration` 完整更新容量测试和 `50 critic-only` bootstrap
+  已通过；用户确认 full-actor 沿用 adaptive-KL、初始 actor LR `1e-5`，下一步运行
+  `8,000 iterations` 并每 `1,000` iterations 保存
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
 
@@ -585,7 +586,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `50 critic-only + 8,000 full-actor`、每 `1,000` iterations 保存；Push 不加载旧 `13050`。
 - [x] Pull `2,048 env × 1 iteration` 完整 actor+critic 容量验证通过；无 OOM/NaN，资产、
   维度、运行时物理与日志有效；该独立 checkpoint 禁止用于正式训练。
-- [ ] Pull `50 iterations` critic-only bootstrap。
+- [x] Pull `50 iterations` critic-only bootstrap 完成；actor 与 actor normalizer 逐张量不变，
+  50 轮 policy drift、actor gradient 与 KL 均为零。
 - [ ] Pull `8,000 iterations` full-actor 正式训练。
 - [ ] Push 按相同规模从 A1 `158-D` WBT actor 干净重训。
 
@@ -1411,6 +1413,11 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `[0.5, 0.5, 0.0]`，网络维度为 actor `158→512→256→128→29`、critic
   `527→512→256→128→1`；
 - 容量测试显式设置 actor 初始 LR `1e-5`，adaptive-KL schedule 在第 1 iteration 后将其
-  调整为 `3.375e-5`。因此 `1e-5` 不能描述为固定 LR。正式 `50+8,000` 尚未启动；需由用户
-  最终确认沿用既有 Push 基线的 adaptive schedule，或把上限锁为 `1e-5`。容量 checkpoint
-  只用于验证显存峰值，不参与任一正式阶段的 resume。
+  调整为 `3.375e-5`。因此 `1e-5` 不能描述为固定 LR。用户确认正式训练沿用该既有 Push
+  adaptive schedule，并要求每 `1,000` iterations 保存；容量 checkpoint 只用于验证显存
+  峰值，不参与任一正式阶段的 resume；
+- 正式 critic-only 输出目录为 `logs/Plan5Pull/pull_20kg_critic50_seed721_env2048`，50/50
+  metrics 完整且 `status.passed=true`。最终 `model_00050.pt` SHA256 为
+  `f211fd0b6603c5f28e52d62443fd03ccec138765dbc190e6b02e01187e2b8ab7`；相对
+  `model_00000.pt`，actor 与 actor normalizer 最大绝对差均为 `0.0`，critic 最大参数变化
+  为 `0.43130`。正式 full-actor 必须从该 checkpoint resume，不得从容量测试 resume。
