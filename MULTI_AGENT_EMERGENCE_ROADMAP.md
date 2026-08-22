@@ -12,8 +12,8 @@
   均已完成。用户已确认在本地单张 RTX 5070 上按 Pull、Push 的顺序运行；每项使用
   `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化。
   Pull 的 `2,048 env × 1 iteration` 完整更新容量测试和 `50 critic-only` bootstrap
-  已通过；用户确认 full-actor 沿用 adaptive-KL、初始 actor LR `1e-5`，下一步运行
-  `8,000 iterations` 并每 `1,000` iterations 保存
+  已通过；`8,000 full-actor iterations` 已完成，最终 `model_08050.pt` 在 seed 721
+  确定性物理回放中完成 316/316 帧。当前等待人工动作质量验收，再做多 seed 固定评测
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
 
@@ -494,7 +494,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 
 ### Stage 5——Pull 与竞争场景
 
-状态：Pull 训练前准备完成；正式 PPO 尚未启动。
+状态：Pull 首个完整 PPO baseline 已训练完成，seed 721 连续物理回放通过；等待人工动作
+质量验收与固定多 seed 统计。
 
 1. Pull 的独立 paired reference、runtime loader、z-wide 物理资产、`158-D` actor、
    配置和 CUDA smoke 已完成；
@@ -588,7 +589,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   维度、运行时物理与日志有效；该独立 checkpoint 禁止用于正式训练。
 - [x] Pull `50 iterations` critic-only bootstrap 完成；actor 与 actor normalizer 逐张量不变，
   50 轮 policy drift、actor gradient 与 KL 均为零。
-- [ ] Pull `8,000 iterations` full-actor 正式训练。
+- [x] Pull `8,000 iterations` full-actor 正式训练完成；8 个千轮 checkpoint 齐全，最终
+  `model_08050.pt` 完成 seed 721 的 316/316 帧连续物理回放。
 - [ ] Push 按相同规模从 A1 `158-D` WBT actor 干净重训。
 
 训练中只有 NaN/Inf、错误资产或物理常量、维度/数据错接、checkpoint/日志损坏等
@@ -1421,3 +1423,25 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `f211fd0b6603c5f28e52d62443fd03ccec138765dbc190e6b02e01187e2b8ab7`；相对
   `model_00000.pt`，actor 与 actor normalizer 最大绝对差均为 `0.0`，critic 最大参数变化
   为 `0.43130`。正式 full-actor 必须从该 checkpoint resume，不得从容量测试 resume。
+
+#### 2026-08-22：Pull 2,048-env 完整训练与首轮物理验收
+
+- 正式目录：`logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048`；训练从
+  iteration 50 连续运行至 8050，共 8,000 行有限 metrics，`status.passed=true`，耗时约
+  `10.33 h`。每千轮保存一次，`model_01050.pt` 至 `model_08050.pt` 共 8 个 checkpoint；
+- 最终 `model_08050.pt` SHA256 为
+  `727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43`。最后 100 轮相较
+  最初 100 轮，平均 reward 从 `0.07109` 升至 `0.15086`，tracking failure 从
+  `419.28/iteration` 降至 `0.56/iteration`，value loss 从 `0.10996` 降至 `0.00423`；
+- seed 721、frame-0、actor mean-action、单环境连续 PhysX 回放中，`model_08050.pt` 完成
+  316/316 帧，无 reset 或 tracking failure。桌子实际/参考净位移为
+  `0.58082/0.58428 m`，沿轨进度比 `99.40%`，最终平面误差 `0.00799 m`，最终 yaw
+  误差 `0.262°`，平面 RMSE `0.01467 m`。录制文件
+  `logs/Plan5Pull/eval_full8000_seed721/model_08050_object_centric.npz` SHA256 为
+  `b6c6c056a609849b3c19cb80516bd687a7d5ddacd5f1d5ebe5d06ed82e6d3e0f`；
+- `model_07050.pt` 在相同协议下也完成 316/316 帧，但沿轨进度比 `89.88%`、最终平面
+  误差 `0.06377 m`、最终 yaw 误差 `4.05°`，因此数值主候选为 `08050`。保留 `07050`
+  仅用于比较动作自然度、抖动与角色分工；
+- 当前结论只覆盖一个 seed 的确定性固定初始化回放。下一步先由用户在 ViSER 中人工检查
+  两台机器人是否真正参与、动作是否自然及是否存在明显抖动；通过后再以固定多 seed 协议
+  评估 `08050`，然后进入独立 Push 干净重训。不得把单次成功提前解释为统计稳健性证明。
