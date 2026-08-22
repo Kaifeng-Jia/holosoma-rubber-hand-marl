@@ -10,7 +10,9 @@
 - 当前阶段：Push A1 已建立独立 PPO 主线；Pull 的镜像 paired reference、完整 runtime
   reference、`158-D` checkpoint、z-wide `20 kg` 资产、ViSER 人工验收和 CUDA smoke
   均已完成。用户已确认在本地单张 RTX 5070 上按 Pull、Push 的顺序运行；每项使用
-  `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化
+  `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化。
+  Pull 的 `2,048 env × 1 iteration` 完整更新容量测试已通过；正式训练等待 actor
+  adaptive learning-rate 语义的最终确认
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
 
@@ -581,7 +583,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - [x] `500/1,000 iterations`：完成第一段足量观测窗口，确认学习仍在变化且未收敛。
 - [x] 下一轮独立 Push/Pull PPO 设置已确认：本地单 GPU 顺序运行、`2,048` environments、
   `50 critic-only + 8,000 full-actor`、每 `1,000` iterations 保存；Push 不加载旧 `13050`。
-- [ ] Pull `2,048 env × 1 iteration` 容量验证；只检查 OOM、NaN、资产、维度和日志。
+- [x] Pull `2,048 env × 1 iteration` 完整 actor+critic 容量验证通过；无 OOM/NaN，资产、
+  维度、运行时物理与日志有效；该独立 checkpoint 禁止用于正式训练。
 - [ ] Pull `50 iterations` critic-only bootstrap。
 - [ ] Pull `8,000 iterations` full-actor 正式训练。
 - [ ] Push 按相同规模从 A1 `158-D` WBT actor 干净重训。
@@ -1399,4 +1402,15 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   后 Push，均从各自 WBT `158-D` actor 建立全新 MARL critic/optimizer。每项先做
   `50 critic-only` bootstrap，再做 `8,000 full-actor`，每 `1,000` iterations 保存；Push
   不加载旧 `model_13050.pt`。禁止 mixed-action 数据、跨动作 checkpoint 或 task-oriented
-  单智能体目标点奖励进入当前主线。
+  单智能体目标点奖励进入当前主线；
+- 训练前里程碑提交为 `3cedc74e`。独立容量目录
+  `logs/Plan5Pull/pull_capacity_full1_seed721_env2048` 完成一次 `2,048 env × 24 steps` 的
+  完整 actor+critic PPO 更新，最终 `status.passed=true`，iteration 用时 `5.655 s`；运行时
+  读回为 `20 kg`、COM `[0, 0.0151117453, 0] m`、Pull 惯量对角
+  `[3.9504893, 4.3604150, 0.6277497] kg·m²`、五个碰撞形状材料均
+  `[0.5, 0.5, 0.0]`，网络维度为 actor `158→512→256→128→29`、critic
+  `527→512→256→128→1`；
+- 容量测试显式设置 actor 初始 LR `1e-5`，adaptive-KL schedule 在第 1 iteration 后将其
+  调整为 `3.375e-5`。因此 `1e-5` 不能描述为固定 LR。正式 `50+8,000` 尚未启动；需由用户
+  最终确认沿用既有 Push 基线的 adaptive schedule，或把上限锁为 `1e-5`。容量 checkpoint
+  只用于验证显存峰值，不参与任一正式阶段的 resume。
