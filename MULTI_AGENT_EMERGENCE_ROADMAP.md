@@ -3,17 +3,17 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-22
+- 最近更新：2026-08-27
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Push A1 已建立独立 PPO 主线；Pull 的镜像 paired reference、完整 runtime
-  reference、`158-D` checkpoint、z-wide `20 kg` 资产、ViSER 人工验收和 CUDA smoke
-  均已完成。用户已确认在本地单张 RTX 5070 上按 Pull、Push 的顺序运行；每项使用
-  `2,048` environments，并从各自冻结 WBT `158-D` actor 做干净的 MARL 初始化。
-  Pull 的 `2,048 env × 1 iteration` 完整更新容量测试和 `50 critic-only` bootstrap
-  已通过；`8,000 full-actor iterations` 已完成，最终 `model_08050.pt` 在 seed 721
-  确定性物理回放中完成 316/316 帧。当前等待人工动作质量验收，再做多 seed 固定评测
+- 当前阶段：Pull 的独立 `8,000 full-actor iterations` baseline 已完成并通过用户人工动作
+  质量验收。Push A1 已从冻结 WBT `158-D` actor 干净完成 `50 critic-only + 8,000
+  full-actor iterations`，并在修正双机器人实时关节状态读取后，从 `model_08050.pt`
+  继续训练至 `model_15050.pt`。当前固定 frame-0 重复评测中，`model_13050.pt` 是
+  三个后期 checkpoint 里的最佳候选，但只有 `1/9` 完整成功，尚不能称为稳健 baseline。
+  **决定：Push 仍需继续足量训练，但现在暂停；恢复 checkpoint、预算和启动时间须另行确认，
+  当前没有训练任务在运行。**
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
 
@@ -494,8 +494,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 
 ### Stage 5——Pull 与竞争场景
 
-状态：Pull 首个完整 PPO baseline 已训练完成，seed 721 连续物理回放通过；等待人工动作
-质量验收与固定多 seed 统计。
+状态：Pull 首个完整 PPO baseline 已训练完成，seed 721 连续物理回放和用户人工动作质量
+验收均通过；固定多 seed 统计仍待完成。
 
 1. Pull 的独立 paired reference、runtime loader、z-wide 物理资产、`158-D` actor、
    配置和 CUDA smoke 已完成；
@@ -591,7 +591,13 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   50 轮 policy drift、actor gradient 与 KL 均为零。
 - [x] Pull `8,000 iterations` full-actor 正式训练完成；8 个千轮 checkpoint 齐全，最终
   `model_08050.pt` 完成 seed 721 的 316/316 帧连续物理回放。
-- [ ] Push 按相同规模从 A1 `158-D` WBT actor 干净重训。
+- [x] Push 按相同规模从 A1 `158-D` WBT actor 干净重训：完成 `50 critic-only + 8,000
+  full-actor iterations`，随后从 `model_08050.pt` 连续训练 7,000 iterations 至
+  `model_15050.pt`；训练日志、checkpoint 和状态账本完整。
+- [!] Push 后期 checkpoint 固定重复评测：`13050/14050/15050` 各做
+  `3 seeds × 3 independent launches`。`13050` 为当前最佳但仅 `1/9` 完整成功，后两者
+  均为 `0/9`；这说明策略仍需继续训练或后续受控诊断，不等于 Plan 5 路线失败。用户决定
+  **需要续训，但当前暂停**，不得在未再次确认设置前自动启动。
 
 训练中只有 NaN/Inf、错误资产或物理常量、维度/数据错接、checkpoint/日志损坏等
 实现有效性问题可以提前停止；正常的低 reward、低完成率或动作偏差应记录为学习曲线，
@@ -603,7 +609,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - [x] 审计 preflight 宽桌的 PhysX 运行时质量、COM、惯量和材料参数。
 - [x] 冻结正式桌子质量、惯量、COM 和摩擦，并完成 CUDA/PhysX 运行时校验。
 - [ ] 完成 frozen-copy、scratch、WBT-initialized 三组双机器人对照。
-- [ ] 完成多 seed 正式评测。
+- [~] 完成多 seed 正式评测：Push `13050/14050/15050` 已完成固定 frame-0 的
+  `3 seeds × 3 repeats` 首轮重复性检查；稳健 Push 候选和 Pull 多 seed 统计仍待完成。
 - [ ] 完成单 agent removal、接触 impulse、桌子功率贡献和非手接触报告。
 - [ ] 证明第二台机器人具有可量化的因果贡献。
 
@@ -619,7 +626,7 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `joint_bad_tracking`；该结果证明需要训练，不否决 reference 或 Plan 5。
 - [x] 已向用户报告并确认独立 Push/Pull PPO 的网络、优化器、环境数、预算、reward、
   termination、物理和保存/评测协议。
-- [ ] 使用独立 Pull checkpoint 建立 Pull 合作 baseline；不与 Push 混合数据或 checkpoint。
+- [x] 使用独立 Pull checkpoint 建立 Pull 合作 baseline；不与 Push 混合数据或 checkpoint。
 - [ ] 建立 competitive object-grabbing 环境。
 - [ ] 比较 WBT 初始化与从零训练。
 - [ ] 量化争抢、阻挡、让位、接触点切换和控制权变化。
@@ -1442,6 +1449,52 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - `model_07050.pt` 在相同协议下也完成 316/316 帧，但沿轨进度比 `89.88%`、最终平面
   误差 `0.06377 m`、最终 yaw 误差 `4.05°`，因此数值主候选为 `08050`。保留 `07050`
   仅用于比较动作自然度、抖动与角色分工；
-- 当前结论只覆盖一个 seed 的确定性固定初始化回放。下一步先由用户在 ViSER 中人工检查
-  两台机器人是否真正参与、动作是否自然及是否存在明显抖动；通过后再以固定多 seed 协议
-  评估 `08050`，然后进入独立 Push 干净重训。不得把单次成功提前解释为统计稳健性证明。
+- 本结果只覆盖一个 seed 的确定性固定初始化回放，不能解释为统计稳健性证明；用户随后已在
+  ViSER 中确认 Pull 动作质量良好。Pull 固定多 seed 统计仍待完成，但它不再阻塞独立 Push
+  的干净训练。
+
+#### 2026-08-27：Push live-state 完整训练、重复评测与暂停决定
+
+- 实时状态修正：双机器人执行时，每台 actor 在每个控制步读取对应实体机器人的实时关节位置
+  和速度；这些量属于本机 proprioception，不是 centralized critic 的特权信息。修正后用户确认
+  `model_08050.pt` 的手臂高频振荡明显消失；网络仍为 shared actor
+  `158→512→256→128→29`、team critic `527→512→256→128→1`，没有把桌子状态加入 actor；
+- 干净训练链：critic-only 目录
+  `logs/Plan5Push/a1_livepd_20kg_critic50_seed721_env2048/`，完整 8,000 轮目录
+  `logs/Plan5Push/a1_livepd_20kg_full8000_from_critic50_seed721_env2048/`，续训目录
+  `logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/`。续训从 iteration
+  `8050` 连续到 `15050`，共 7,000 条有限 metrics，`status.passed=true`；环境数 `2,048`、
+  每环境每轮 `24` steps、seed `721`、20 kg 宽桌、材料 `[0.5, 0.5, 0.0]`、原 11 项
+  WBT/object reward、adaptive actor LR 和 critic LR `1e-3` 均保持不变；
+- 保留的当前关键 checkpoint SHA256：`08050` 为
+  `58265a7d200695793b85b0821aea927fa90129f916eb30b438b1f621354e8266`；`13050` 为
+  `0ba8ae21239c7b6c0198f07086abbb0cfc3875dc908626df9e9fc0891692aede`；`14050` 为
+  `8fb2e29cd2af7b9cd05655b13ddfdd0b9d00de9d93028139890f11e8d99f3333`；`15050` 为
+  `b6be5f9b385122e8398ecc0494bc8fad9fdd13e72cd8766130f501f84f4b75e9`；
+- 固定评测协议：`13050/14050/15050` 分别使用 seeds `721/722/723`，每个 seed 独立启动
+  3 次，共 27 次；均从 frame 0、deterministic actor mean、相同 reference、初态和 PhysX
+  常量开始，最多 309 帧。这里的 seed 不随机化 reference、初态、摩擦或质量，因此该实验
+  衡量的是相同固定场景下跨 Isaac/PhysX 启动的重复稳定性，不是环境泛化；
+
+| checkpoint | 完整成功 | 平均帧数 | 中位帧数 | 平均沿轨进度 | 首个终止原因 |
+|---|---:|---:|---:|---:|---|
+| `13050` | **1/9** | **182.00** | **172** | **76.31%** | 8 次 object-position，1 次完成 |
+| `14050` | 0/9 | 83.78 | 90 | 2.86% | 3 次 robot、6 次 object-position |
+| `15050` | 0/9 | 87.78 | 91 | 2.94% | 3 次 robot、6 次 object-position |
+
+- 解释：PPO 优化的是 2,048 个随机 phase 环境中的期望回报，不保证固定 frame-0 物理回放随
+  iteration 单调改善。`14050/15050` 的训练平均 reward 与 object reward 没有显示实现错误，
+  但策略在接触闭环中的修正更激进；代表性 seed 721 回放中，0 号机器人相邻 action 的平均
+  变化由 `13050` 的 `1.031` 增至 `14050/15050` 的 `3.363/3.592`。接触、平衡和共享桌子的
+  耦合会放大小的策略参数变化，所以后两个 checkpoint 比 `13050` 差并不矛盾，也不能仅凭
+  iteration 编号选择最终模型；
+- 当前判定：`13050` 是保留的当前最佳 Push 候选，但 `1/9` 不足以宣称稳健。用户明确判断
+  **该方向仍需继续训练，但不是现在**。本轮不启动新训练；未来恢复前只需重新确认 resume
+  checkpoint、训练预算和相同评测间隔，不因当前回归偏离 Plan 5 主线；
+- 存储清理：按
+  `logs/Plan5Push/CLEANUP_20260827_MANIFEST.tsv` 永久删除 203 个已批准文件，共
+  `740,530,526` bytes（`706.225 MiB`），包括旧平滑目录
+  `a1_8050_jointacc_smooth2000_seed721_env2048/model_08050.pt`。manifest SHA256 为
+  `5701468c10019182bd0813a44cc65d5e582e10c45e828d7ead1628e0cd5c61c5`；删除后清单内
+  路径剩余 `0` 项，`logs/Plan5Push` 约为 `169 MiB`。当前恢复链、上述后期 checkpoint、
+  27 份重复评测、run config/metrics/status 账本和最小历史对照链均已保留。
