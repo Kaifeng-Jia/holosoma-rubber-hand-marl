@@ -3,19 +3,17 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-27
+- 最近更新：2026-08-28
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
-- 当前阶段：Pull 的独立 `8,000 full-actor iterations` baseline 已完成并通过用户人工动作
-  质量验收。Push A1 已从冻结 WBT `158-D` actor 干净完成 `50 critic-only + 8,000
-  full-actor iterations`，并在修正双机器人实时关节状态读取后，从 `model_08050.pt`
-  继续训练至 `model_15050.pt`。当前固定 frame-0 重复评测中，`model_13050.pt` 是
-  三个后期 checkpoint 里的最佳候选，但只有 `1/9` 完整成功，尚不能称为稳健 baseline。
-  **决定：Push 仍需继续足量训练，但现在暂停；恢复 checkpoint、预算和启动时间须另行确认，
-  当前没有训练任务在运行。**
+- 当前阶段：Push 与 Pull 两个独立协作 baseline 已完成；Push 后续训练暂缓，Pull 已通过用户
+  人工动作质量验收。Demo 3 对角桌腿竞争式拉拽已完成独立环境和训练接口，但尚未正式训练。
+  当前正推进 Demo 4：两台机器人从斜对角跟踪各自 Pull reference，以实际长桌 `+90°` yaw
+  progress 为共享任务；静态 reference、MAPPO、训练/评估入口和真实 Isaac/CUDA smoke 已完成，
+  **桌子没有逐帧运动 reference，正式训练尚未启动，下一步是用户视觉与训练参数最终确认。**
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
-- 活动动作：Push A1 与 Pull 使用相互独立的网络、reference、checkpoint 和训练任务
+- 活动实验：Push、Pull、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
 
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
@@ -1532,3 +1530,47 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - 当前状态：实现和 smoke 已完成，**尚未开始正式训练**。`signed_table_progress_velocity` 的首版
   权重暂写为 `10.0`，只用于符号/接线验证；正式训练前必须与用户确认 reward 数值、
   critic-only 时长、环境数、总 iterations、学习率、checkpoint 间隔和对手更新方式。
+
+#### 2026-08-28：Demo 4 协作旋转长桌——静态桌子与团队 yaw 任务管线就绪
+
+- 任务定义：两台实体 rubber-hand G1 位于长方桌斜对角，各自跟踪独立的 Pull 动作先验，依靠
+  真实接触共同把桌子沿世界 Z 轴正向旋转 `+90°`。训练不指定逐帧桌子轨迹，不要求桌子在机器人
+  动作开始前旋转，也不限定必须由手完成接触；桌子只在 reset 时采用静态初始位姿，随后完全由
+  PhysX 动力学决定；
+- 隔离边界：Demo 4 使用独立的 command、observation、reward、termination、environment、MAPPO、
+  train/evaluate/smoke 入口和 `logs/Demo4Rotate/` 输出目录；不覆盖、不续训 Push、Pull 或 Demo 3
+  的环境、optimizer 和日志；
+- reference：A 使用 Pull `model_08050.pt` 的物理回放，B 是绕世界 Z 轴严格旋转 `180°` 的副本；
+  两者均保留完整机器人姿态、29 关节和速度信息。reference 为 `316` 帧、`50 Hz`；桌子每一帧
+  的位置/姿态恒定、线速度/角速度严格为零，桌子通道仅负责 reset/schema。ViSER 文件 SHA256
+  为 `706143a04c8f04c5165470b8d661ba5a9fb41b80ab7103913d4a5e968606369b`，runtime 文件
+  SHA256 为 `3eb482e1bdb9072b50054c5501cda1d4646bef39ef754df55c03c281626199f3`；
+- Actor/critic：两台机器人共享同一个 Actor，分别执行 `164→512→256→128→29`；每台输入为
+  原 Pull ego/reference `154` 维、teammate 相对平面位置/速度 `4` 维、实际桌子相对 XY、平面
+  线速度和相对 yaw 的 sin/cos `6` 维，明确不含桌子 yaw rate。Actor 从 Pull
+  `model_08050.pt` 的 actor 与 normalizer 初始化，`158→164` 的新增列置零；critic 与两个
+  optimizer 从新状态开始。共享 team critic 为 `527→512→256→128→1`，每个环境只有一套
+  team reward/value/return/advantage；
+- reward：六项机器人 Pull/WBT 动作先验权重为 `[0.5,0.5,1,1,1,1]`，action-rate 为 `-0.1`，
+  joint-limit 为 `-10`；团队任务采用相邻物理步累计的无缠绕 yaw progress，整段 `+90°` 的归一化
+  progress 总贡献为 `10`，首次安全达到目标再奖励 `5`。错误方向跨越 `±π` 不会被误判为成功；
+  机器人摔倒或桌子安全终止的同一步不发放 yaw task reward；
+- episode/安全：首次达到 `+90°` 即成功，不额外要求保持；reference horizon 为 `316` 帧
+  （`6.32 s`）。机器人明确摔倒、桌子倾斜超过 `60°`、平面漂移超过 `3 m`，或桌高离开
+  `[0.05,1.5] m` 时终止；这些是物理失控边界，不是动作形态约束；
+- 正式训练预设：单 GPU、`2,048` environments、每轮每环境 `24` control steps、seed `721`、
+  `8,000` iterations、每 `1,000` iterations 保存一次；物理频率 `200 Hz`、控制频率 `50 Hz`；
+  长方桌质量 `20 kg`，静/动摩擦 `0.5/0.5`，restitution `0`。PPO 沿用 WBT baseline：
+  `5` epochs、`4` mini-batches、clip `0.2`、gamma `0.99`、GAE lambda `0.95`、entropy `0.005`，
+  actor/critic 初始学习率均为 `1e-3`、adaptive KL `0.01`；
+- 可观测性：训练日志直接从真实 rollout 记录四类终止数量、完成 episode、成功率、连续 yaw
+  progress 与 terminal yaw 的 mean/min/max；不通过再次调用有状态 reward 函数来伪造统计。
+  独立 deterministic actor-only 评估入口会保留 reset 前的 terminal state，并输出代表性五通道
+  ViSER NPZ；checkpoint 同时锁定 reference SHA、网络维度、桌子常量、reward 和无 yaw-rate 契约；
+- 验证：Demo 4 定向 CPU 测试 `58 passed`；包含 Demo 3、Plan 5 与 MAPPO 隔离回归
+  `129 passed`。真实 Isaac/CUDA PPO smoke 以 `1 env × 4 steps` 完成 rollout、Actor/Critic 更新和
+  checkpoint round-trip；Actor/Critic 最大参数变化均约 `0.001`，所有张量与指标有限，Actor
+  normalizer 保持冻结。静态物理 smoke 另已确认 reset 后桌子不会自行旋转；
+- 当前状态：静态布局、训练管线、恢复契约、评估入口和 smoke 均已完成，**尚未启动正式训练**。
+  下一 gate 只包含用户对静态 ViSER 的最终视觉确认，以及正式训练参数的确认；不再人为设计桌子
+  逐帧 reference。
