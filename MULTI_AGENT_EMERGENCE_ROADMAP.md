@@ -10,8 +10,9 @@
 - 当前阶段：Push 与 Pull 两个独立协作 baseline 已完成；Push 后续训练暂缓，Pull 已通过用户
   人工动作质量验收。Demo 3 对角桌腿竞争式拉拽与 Demo 4 协作旋转长桌均已完成相互隔离的
   reference、环境、MAPPO、正式 train/resume、actor-only evaluate/record 和真实 Isaac/CUDA
-  验证，**两者都尚未开始正式训练**。下一步是冻结并提交本轮 Demo 3 管线、同步云端代码与外部
-  checkpoint，然后在独立 GPU/process 上按各自配置启动训练；不把两个 Demo 混成一个 policy。
+  验证，**两者都尚未开始正式训练**。Demo 3 正式管线已提交并推送为 `ca893dba`。用户确认租用
+  一张 RTX 4090，Demo 3 与 Demo 4 均使用 `4096 env × 24 steps`，先做容量验证，再在同一张 GPU
+  上顺序训练；不把两个 Demo 混成一个 policy。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动实验：Push、Pull、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
 
@@ -1524,12 +1525,12 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   也不因桌子偏离 reference 终止。episode 只在 317 帧 horizon 或机器人明确摔倒时结束；
 - 正式训练契约：冻结 Pull07999 的 164-D lossless 扩展作为 Actor/normalizer warm-start；Critic
   和 optimizer 新建；两名竞争者始终调用同一个同步更新的共享 Actor。正式 baseline 为
-  `50 critic-only + 8000 full-actor`、`2048 env × 24 steps`、seed `721`、每 `1000` 个
+  `50 critic-only + 8000 full-actor`、`4096 env × 24 steps`、seed `721`、每 `1000` 个
   full-actor iterations 保存；对应 `model_00050.pt`、`model_01050.pt` … `model_08050.pt`。
   `signed_table_progress_velocity` 权重正式冻结为 `10.0`；首版保持 fixed frame-0、固定质量/材料、
   无对手初态随机化。完整非 LR PPO 更新契约写入 run config 和 checkpoint；resume 只允许显式
-  覆盖 Actor/Critic learning rate。云端若想用 `4096` environments，必须先单独做容量测试，不能
-  默认替换；
+  覆盖 Actor/Critic learning rate。4096 是本轮用户确认的正式规模，但必须先在目标 RTX 4090
+  单独做容量测试；若 OOM，不自动降档，先回报并讨论；
 - 评估协议：部署时只调用共享 Actor，不调用 Critic。episode 末桌子沿 Agent A 初始 Pull 轴净位移
   `>+0.05 m` 判 A 胜、`<-0.05 m` 判 B 胜，其余为平局；该阈值只用于 evaluation，不属于 reward
   或 termination。每回合显式走相同 reset/settling 路径并从同一 reference phase 开始；reset 后
@@ -1577,7 +1578,7 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - episode/安全：首次达到 `+90°` 即成功，不额外要求保持；reference horizon 为 `316` 帧
   （`6.32 s`）。机器人明确摔倒、桌子倾斜超过 `60°`、平面漂移超过 `3 m`，或桌高离开
   `[0.05,1.5] m` 时终止；这些是物理失控边界，不是动作形态约束；
-- 正式训练预设：单 GPU、`2,048` environments、每轮每环境 `24` control steps、seed `721`、
+- 正式训练预设：单 GPU、`4,096` environments、每轮每环境 `24` control steps、seed `721`、
   `8,000` iterations、每 `1,000` iterations 保存一次；物理频率 `200 Hz`、控制频率 `50 Hz`；
   长方桌质量 `20 kg`，静/动摩擦 `0.5/0.5`，restitution `0`。PPO 沿用 WBT baseline：
   `5` epochs、`4` mini-batches、clip `0.2`、gamma `0.99`、GAE lambda `0.95`、entropy `0.005`，

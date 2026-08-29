@@ -14,13 +14,14 @@
 - 本轮 Demo 3/4 里程碑当前首先是本地提交；在云端 clone 前，必须把里程碑和本清单后续提交显式推送到
   `private` remote。没有推送成功前不得假定云端能取得这些文件。
 
-## 2. 并行方式
+## 2. 运行方式
 
-Demo 3 与 Demo 4 是两个完全独立的单 GPU 任务，不使用 DDP 或 `torchrun`：
+Demo 3 与 Demo 4 是两个完全独立的单 GPU 任务，不使用 DDP 或 `torchrun`。2026-08-28 用户确认
+租用一张 RTX 4090，并以 `4096` environments 顺序训练：
 
 ```text
-GPU 0：Demo 3，CUDA_VISIBLE_DEVICES=0，WORLD_SIZE=1
-GPU 1：Demo 4，CUDA_VISIBLE_DEVICES=1，WORLD_SIZE=1
+阶段 A：GPU 0 训练 Demo 3，CUDA_VISIBLE_DEVICES=0，WORLD_SIZE=1
+阶段 B：Demo 3 完成并回收后，GPU 0 训练 Demo 4，CUDA_VISIBLE_DEVICES=0，WORLD_SIZE=1
 ```
 
 建议在云端使用两个独立 clone，而不是让两个 Isaac Sim 进程共用一个 checkout。这样不仅隔离
@@ -110,13 +111,13 @@ Demo 3 的 `actor164` 文件是环境 smoke、正式训练和 actor-only 评估�
 训练入口会拒绝复用一个预先非空的输出目录。
 
 ```bash
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/smoke_demo4_rotate_environment.py \
   --steps 8 \
   --seed 721 \
   --output /tmp/demo4_environment_smoke.json
 
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/smoke_demo4_rotate_ppo_update.py
 ```
 
@@ -125,14 +126,11 @@ checkpoint round-trip，不属于正式训练。
 
 ### 4.2 环境数选择
 
-`2048` 是当前代码 preset，也是既有 Plan5 双机器人正式训练采用的规模；Demo 4 本地真实
-environment/PPO smoke 使用的是 `1 env`，并未做 2048-env 容量测试。`2048` 与 `4096` 都必须在
-目标云端 GPU 验证容量；`4096` 在接口上受支持，但相同 8000 iterations 会把总样本量翻倍。
-
-若希望使用 4096，先运行一次独立容量测试：
+代码 preset 仍为 `2048`，但本轮正式云端实验已由用户明确改为 `4096`。相同 8000 iterations 下，
+它相对 2048 会把总采样量翻倍，因此必须先在目标 RTX 4090 上运行一次独立容量测试：
 
 ```bash
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo4_rotate.py \
   --iterations 1 \
   --num-envs 4096 \
@@ -143,16 +141,16 @@ python scripts/train_demo4_rotate.py \
 
 通过后从 iteration 0 启动正式 run，不把 capacity checkpoint 当作正式初始化。
 
-### 4.3 当前已确认的正式 2048-env 命令
+### 4.3 当前已确认的正式 4096-env 命令
 
 ```bash
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo4_rotate.py \
   --iterations 8000 \
-  --num-envs 2048 \
+  --num-envs 4096 \
   --steps-per-env 24 \
   --seed 721 \
-  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env2048
+  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096
 ```
 
 固定设置：
@@ -198,14 +196,14 @@ actor_grad_norm / critic_grad_norm
 以下示例从 iteration 4000 再训练 4000 轮：
 
 ```bash
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo4_rotate.py \
-  --resume logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env2048/model_04000.pt \
+  --resume logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096/model_04000.pt \
   --iterations 4000 \
-  --num-envs 2048 \
+  --num-envs 4096 \
   --steps-per-env 24 \
   --seed 721 \
-  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env2048
+  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096
 ```
 
 `--iterations` 表示额外轮数。Resume 恢复 Actor、Critic、两个 optimizer、两个 normalizer、iteration
@@ -215,9 +213,9 @@ python scripts/train_demo4_rotate.py \
 ### 4.6 Actor-only 评估与 ViSER
 
 ```bash
-env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=1 \
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/evaluate_demo4_rotate.py \
-  --checkpoint logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env2048/model_08000.pt \
+  --checkpoint logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096/model_08000.pt \
   --episodes 5 \
   --seed 721 \
   --output-dir logs/Demo4Rotate/eval_model08000_seed721
@@ -258,9 +256,8 @@ python scripts/smoke_demo3_tug_ppo_update.py
 
 ### 5.2 环境数选择
 
-正式 baseline 使用 `2048` environments，与既有本地双机器人训练规模一致。`4096` 在接口上受
-支持，但必须先在目标云端 GPU 做独立容量测试；相同 iterations 下它也会把总样本数翻倍，不能把
-它当成与 2048 完全相同的实验。
+代码 preset 仍为 `2048`，但本轮正式云端实验已由用户明确改为 `4096`。相同 iterations 下总采样量
+是 2048 配置的两倍，因此先在目标 RTX 4090 上做独立容量测试；若 OOM，只报告并讨论，不自动降档。
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
@@ -276,18 +273,18 @@ python scripts/train_demo3_tug.py \
 
 容量测试通过后，正式 run 仍从冻结 warm-start 重新开始，不继承 capacity checkpoint。
 
-### 5.3 已确认的正式 2048-env 命令
+### 5.3 已确认的正式 4096-env 命令
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo3_tug.py \
   --critic-only-iterations 50 \
   --full-actor-iterations 8000 \
-  --num-envs 2048 \
+  --num-envs 4096 \
   --steps-per-env 24 \
   --checkpoint-interval 1000 \
   --seed 721 \
-  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096
 ```
 
 固定设置：
@@ -348,14 +345,14 @@ actor_learning_rate / critic_learning_rate
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo3_tug.py \
-  --resume logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048/model_04050.pt \
+  --resume logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096/model_04050.pt \
   --critic-only-iterations 50 \
   --full-actor-iterations 8000 \
-  --num-envs 2048 \
+  --num-envs 4096 \
   --steps-per-env 24 \
   --checkpoint-interval 1000 \
   --seed 721 \
-  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096
 ```
 
 Demo 3 的两个 iteration 参数描述**完整固定 schedule**，不是 resume 后额外增加的轮数。Resume
@@ -384,7 +381,7 @@ resume 的 run-config、metrics 或 status 任一分段已经存在，也会要�
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/evaluate_demo3_tug.py \
-  --checkpoint logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048/model_08050.pt \
+  --checkpoint logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096/model_08050.pt \
   --episodes 5 \
   --seed 721 \
   --output-dir logs/Demo3Tug/eval_model08050_seed721
