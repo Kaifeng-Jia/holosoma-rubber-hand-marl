@@ -1498,3 +1498,37 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `5701468c10019182bd0813a44cc65d5e582e10c45e828d7ead1628e0cd5c61c5`；删除后清单内
   路径剩余 `0` 项，`logs/Plan5Push` 约为 `169 MiB`。当前恢复链、上述后期 checkpoint、
   27 份重复评测、run config/metrics/status 账本和最小历史对照链均已保留。
+
+#### 2026-08-28：Demo 3 对角桌腿竞争式拉拽——独立环境与训练接口就绪
+
+- 范围：Demo 3 是 Push/Pull 两个协作 Demo 之后的独立竞争实验；两台实体 rubber-hand G1
+  位于方桌对角桌腿处，各自尝试把桌子拉向自己。它不读取、覆盖或续训 `Plan5Push`、
+  `Plan5Pull` 的环境配置、critic、optimizer、checkpoint 或日志；所有运行产物限定在
+  `logs/Demo3Tug/`；
+- reference：以原始单机器人 Pull 为动作先验，只移除桌子的平面 XY/heading 运动，并把第二台
+  机器人绕世界 Z 轴旋转 180°。保留机器人 Z、roll/pitch、29 关节轨迹，以及桌子的 Z/tilt；
+  runtime reference 为 `317` 帧、`50 Hz`、每台 `29` joints/`51` bodies，SHA256
+  `5baedb3f109402c521590701263facfa6b42649f4f18bdcefb5933d9b4a7caf5`。文件中的桌子通道只用于
+  reset 与 schema，不是训练跟踪目标；command 到末帧后 clamp，绝不循环回写机器人或桌子；
+- 资产：沿用原方桌尺寸，质量固定 `20 kg`，COM `[0,-0.0124134734,0] m`，惯量对角
+  `[0.8219720,1.2061834,0.8219720] kg·m²`；静/动摩擦 `0.5/0.5`，restitution `0`；URDF
+  SHA256 `386da8a4201a9365f7d4eef9e6ae2fb326c2777fac4998b72c4af6de693f9d1b`；
+- Actor：共享参数，输入为原 Pull `154` + 对手相对位置/速度 `4` + 实际桌子相对 XY、平面
+  线速度、相对 yaw sin/cos `6`，合计 `164`；不含 yaw rate。原 Pull `158-D` actor 的新增
+  六列首层权重为零，转换前后 deterministic 输出误差 `0.0`；转换 checkpoint SHA256
+  `048f952cad01d5fda42851502347ee626751dccab923905af303eb44807ef01b`；
+- MAPPO：同一个 Actor 与同一个 Critic 分别作用于 A/B。Critic 输入保持 `527` 维，但为每个
+  agent 构造 `[ego, opponent, ego Pull reference, actual table, phase]` 的 ego-first 全局状态；
+  reward/value/return/advantage 均为 `[T,E,2,1]`，共享物理 done/timeout 扩展到两条 GAE；
+  不再复制一份 team advantage 给双方；
+- reward/termination：每台机器人分别获得 Pull 动作、稳定和平滑先验；只有实际桌子沿两条相反
+  拉拽轴的速度项符号相反。不限制必须用手，不惩罚 incidental contact，不跟踪演示桌子位姿，
+  也不因桌子偏离 reference 终止。episode 只在 317 帧 horizon 或机器人明确摔倒时结束；
+- 验证：Demo 3、全 MAPPO 与 rubber-hand/方桌资产定向 CPU 回归共 `71 passed`。真实 Isaac/PhysX smoke 使用
+  `1 env × 2 steps`，干净退出并确认 actor groups `[1,2,154]/[1,2,4]/[1,2,6]`、critic
+  `[1,2,527]`、reward `[1,2]`、value `[1,2,1]`、物理 `200 Hz`、控制 `50 Hz` 及上述资产
+  常量；报告 SHA256
+  `f688b125d4b986afed215573f82e704ecc5d36a48b77fc64b167fc5d3e004ed8`；
+- 当前状态：实现和 smoke 已完成，**尚未开始正式训练**。`signed_table_progress_velocity` 的首版
+  权重暂写为 `10.0`，只用于符号/接线验证；正式训练前必须与用户确认 reward 数值、
+  critic-only 时长、环境数、总 iterations、学习率、checkpoint 间隔和对手更新方式。

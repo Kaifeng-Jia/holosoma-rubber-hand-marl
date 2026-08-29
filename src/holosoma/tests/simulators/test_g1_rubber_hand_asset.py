@@ -34,6 +34,9 @@ WIDE_PLAN5_TRAINING_TABLE_URDF = (
 WIDE_PLAN5_PULL_TRAINING_TABLE_URDF = (
     TRAINING_MOTION_DIR / "objects_widetable_plan5_pull_training.urdf"
 )
+SQUARE_DEMO3_TRAINING_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_squaretable_demo3_training.urdf"
+)
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -447,6 +450,70 @@ def test_widetable_plan5_pull_training_asset_swaps_local_x_and_z() -> None:
         )
         assert _required_element(visual, "./material").attrib["name"] == (
             "widetable_pull_material"
+        )
+
+    assert len(link.findall("./visual")) == len(expected_geometry)
+    assert len(link.findall("./collision")) == len(expected_geometry)
+
+
+def test_squaretable_demo3_training_asset_has_recomputed_20kg_physics() -> None:
+    root = ET.parse(SQUARE_DEMO3_TRAINING_TABLE_URDF).getroot()
+    link = _required_element(root, "./link[@name='squaretable_demo3_link']")
+
+    assert root.attrib["name"] == "squaretable_demo3_training"
+    assert not link.findall(".//mesh")
+    inertial = _required_element(link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 20.0
+    _assert_float_sequence_equal(
+        _required_element(inertial, "./origin").attrib["xyz"],
+        "0 -0.012413473401914 0",
+    )
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.821972006993735)
+    assert float(inertia["iyy"]) == pytest.approx(1.206183371508506)
+    assert float(inertia["izz"]) == pytest.approx(0.821972006993735)
+    assert all(float(inertia[name]) == 0.0 for name in ("ixy", "ixz", "iyz"))
+
+    expected_geometry = {
+        "squaretable_demo3_tabletop": (
+            "0 0.036275 0",
+            "0.5219528 0.04745 0.5219528",
+        ),
+        "squaretable_demo3_leg_neg_x_neg_z": (
+            "-0.23525 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_neg_x_pos_z": (
+            "-0.23525 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_pos_x_neg_z": (
+            "0.23525 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_pos_x_pos_z": (
+            "0.23525 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+    }
+    for name, (expected_xyz, expected_size) in expected_geometry.items():
+        visual = _required_element(link, f"./visual[@name='{name}']")
+        collision = _required_element(link, f"./collision[@name='{name}']")
+        _assert_float_sequence_equal(
+            _required_element(visual, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(visual, "./geometry/box").attrib["size"],
+            expected_size,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./geometry/box").attrib["size"],
+            expected_size,
         )
 
     assert len(link.findall("./visual")) == len(expected_geometry)
