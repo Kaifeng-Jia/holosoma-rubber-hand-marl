@@ -29,6 +29,15 @@ PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--checkpoint-interval", type=int, default=150)
 PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
+PARSER.add_argument(
+    "--stop-iteration",
+    type=int,
+    default=None,
+    help=(
+        "End this invocation at an inclusive global iteration without changing "
+        "the frozen training schedule stored in the checkpoint."
+    ),
+)
 PARSER.add_argument("--actor-learning-rate", type=float, default=None)
 PARSER.add_argument("--critic-learning-rate", type=float, default=None)
 ARGS = PARSER.parse_args()
@@ -46,6 +55,8 @@ for name in ("actor_learning_rate", "critic_learning_rate"):
     value = getattr(ARGS, name)
     if value is not None and (not math.isfinite(value) or value <= 0.0):
         PARSER.error(f"--{name.replace('_', '-')} must be finite and positive")
+if ARGS.stop_iteration is not None and ARGS.stop_iteration < 1:
+    PARSER.error("--stop-iteration must be positive")
 try:
     RUNTIME_WORLD_SIZE = int(os.environ.get("WORLD_SIZE", "1"))
 except ValueError:
@@ -447,10 +458,20 @@ def main() -> int:
         final_iteration = (
             ARGS.critic_only_iterations + ARGS.full_actor_iterations
         )
-        if start_iteration < 0 or start_iteration >= final_iteration:
+        run_end_iteration = (
+            final_iteration
+            if ARGS.stop_iteration is None
+            else ARGS.stop_iteration
+        )
+        if run_end_iteration > final_iteration:
             raise ValueError(
-                "Resume iteration must be within the requested unfinished schedule: "
-                f"start={start_iteration}, final={final_iteration}"
+                "Stop iteration cannot exceed the frozen training schedule: "
+                f"stop={run_end_iteration}, final={final_iteration}"
+            )
+        if start_iteration < 0 or start_iteration >= run_end_iteration:
+            raise ValueError(
+                "Resume iteration must be before this invocation's end: "
+                f"start={start_iteration}, end={run_end_iteration}"
             )
 
         command_term = CONFIG.command.setup_terms["paired_motion_command"]
@@ -463,6 +484,8 @@ def main() -> int:
             "seed": ARGS.seed,
             "start_iteration": start_iteration,
             "final_iteration": final_iteration,
+            "run_end_iteration": run_end_iteration,
+            "requested_stop_iteration": ARGS.stop_iteration,
             "critic_only_iterations": ARGS.critic_only_iterations,
             "full_actor_iterations": ARGS.full_actor_iterations,
             "num_envs": env.num_envs,
@@ -571,7 +594,7 @@ def main() -> int:
                 output_dir / "model_00000.pt",
             )
 
-        for iteration in range(start_iteration + 1, final_iteration + 1):
+        for iteration in range(start_iteration + 1, run_end_iteration + 1):
             iteration_started = time.perf_counter()
             update_actor = iteration > ARGS.critic_only_iterations
             full_actor_iteration = max(
@@ -646,7 +669,7 @@ def main() -> int:
                     critic_only_iterations=ARGS.critic_only_iterations,
                     checkpoint_interval=ARGS.checkpoint_interval,
                 )
-                or iteration == final_iteration
+                or iteration == run_end_iteration
             ):
                 torch.save(
                     learner.training_state_dict(iteration=iteration),
@@ -656,11 +679,15 @@ def main() -> int:
         status = {
             "passed": True,
             "output_dir": str(output_dir),
-            "final_iteration": final_iteration,
+            "final_iteration": run_end_iteration,
+            "training_schedule_final_iteration": final_iteration,
+            "stopped_at_requested_iteration": run_end_iteration < final_iteration,
             "critic_only_boundary_checkpoint": str(
                 output_dir / f"model_{ARGS.critic_only_iterations:05d}.pt"
             ),
-            "final_checkpoint": str(output_dir / f"model_{final_iteration:05d}.pt"),
+            "final_checkpoint": str(
+                output_dir / f"model_{run_end_iteration:05d}.pt"
+            ),
             "checkpoint_interval_full_actor_iterations": ARGS.checkpoint_interval,
             "run_config": str(run_config_path),
             "metrics": str(metrics_path),
