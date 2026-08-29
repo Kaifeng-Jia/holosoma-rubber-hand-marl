@@ -3,7 +3,7 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-28
+- 最近更新：2026-08-29
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
@@ -11,8 +11,8 @@
   人工动作质量验收。Demo 3 对角桌腿竞争式拉拽与 Demo 4 协作旋转长桌均已完成相互隔离的
   reference、环境、MAPPO、正式 train/resume、actor-only evaluate/record 和真实 Isaac/CUDA
   验证，**两者都尚未开始正式训练**。Demo 3 正式管线已提交并推送为 `ca893dba`。用户确认租用
-  一张 RTX 4090，Demo 3 与 Demo 4 均使用 `4096 env × 24 steps`，先做容量验证，再在同一张 GPU
-  上顺序训练；不把两个 Demo 混成一个 policy。
+  一张 RTX 4090，Demo 3 与 Demo 4 均使用 `4096 env × 24 steps`、训练 `15,000` iterations、
+  每 `150` iterations 保存；先做容量验证，再在同一张 GPU 上顺序训练，不把两个 Demo 混成一个 policy。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动实验：Push、Pull、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
 
@@ -1525,8 +1525,8 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   也不因桌子偏离 reference 终止。episode 只在 317 帧 horizon 或机器人明确摔倒时结束；
 - 正式训练契约：冻结 Pull07999 的 164-D lossless 扩展作为 Actor/normalizer warm-start；Critic
   和 optimizer 新建；两名竞争者始终调用同一个同步更新的共享 Actor。正式 baseline 为
-  `50 critic-only + 8000 full-actor`、`4096 env × 24 steps`、seed `721`、每 `1000` 个
-  full-actor iterations 保存；对应 `model_00050.pt`、`model_01050.pt` … `model_08050.pt`。
+  `50 critic-only + 15000 full-actor`、`4096 env × 24 steps`、seed `721`、每 `150` 个
+  full-actor iterations 保存；对应 `model_00050.pt`、`model_00200.pt` … `model_15050.pt`。
   `signed_table_progress_velocity` 权重正式冻结为 `10.0`；首版保持 fixed frame-0、固定质量/材料、
   无对手初态随机化。完整非 LR PPO 更新契约写入 run config 和 checkpoint；resume 只允许显式
   覆盖 Actor/Critic learning rate。4096 是本轮用户确认的正式规模，但必须先在目标 RTX 4090
@@ -1548,7 +1548,7 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   能同时记录；确定性 Actor 不被误写成 GPU 接触动力学逐 bit 确定。Resume smoke 确认原始
   `run_config.json` SHA 保持不变，恢复段使用独立且不可覆盖的 run-config/metrics/status，且拒绝
   倒退覆盖更新模型；完整账本目录允许跨机器迁移，但会显式记录原路径和 relocation lineage；
-- 当前状态：正式管线已就绪，**尚未开始正式 50+8000 训练**。临时 1-iteration 结果只证明程序
+- 当前状态：正式管线已就绪，**尚未开始正式 50+15000 训练**。临时 1-iteration 结果只证明程序
   闭环，不作为竞争效果或 checkpoint 质量证据。
 
 #### 2026-08-28：Demo 4 协作旋转长桌——静态桌子与团队 yaw 任务管线就绪
@@ -1579,7 +1579,7 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   （`6.32 s`）。机器人明确摔倒、桌子倾斜超过 `60°`、平面漂移超过 `3 m`，或桌高离开
   `[0.05,1.5] m` 时终止；这些是物理失控边界，不是动作形态约束；
 - 正式训练预设：单 GPU、`4,096` environments、每轮每环境 `24` control steps、seed `721`、
-  `8,000` iterations、每 `1,000` iterations 保存一次；物理频率 `200 Hz`、控制频率 `50 Hz`；
+  `15,000` iterations、每 `150` iterations 保存一次；物理频率 `200 Hz`、控制频率 `50 Hz`；
   长方桌质量 `20 kg`，静/动摩擦 `0.5/0.5`，restitution `0`。PPO 沿用 WBT baseline：
   `5` epochs、`4` mini-batches、clip `0.2`、gamma `0.99`、GAE lambda `0.95`、entropy `0.005`，
   actor/critic 初始学习率均为 `1e-3`、adaptive KL `0.01`；

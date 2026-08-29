@@ -324,7 +324,7 @@ def test_update_uses_agent_batches_and_checkpoint_is_demo3_only() -> None:
         DEMO3_RUNTIME_REFERENCE_SHA256
     )
     assert state["demo3_mappo"]["critic_only_iterations"] == 50
-    assert state["demo3_mappo"]["full_actor_iterations"] == 8000
+    assert state["demo3_mappo"]["full_actor_iterations"] == 15000
     assert state["demo3_mappo"]["ppo_contract"]["gamma"] == 0.9
     assert algorithm.load_training_state_dict(state) == 17
     contaminated = dict(state)

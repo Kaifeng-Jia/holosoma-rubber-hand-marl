@@ -19,10 +19,11 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
-PARSER.add_argument("--iterations", type=int, default=8000)
-PARSER.add_argument("--num-envs", type=int, default=2048)
+PARSER.add_argument("--iterations", type=int, default=15000)
+PARSER.add_argument("--num-envs", type=int, default=4096)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
 PARSER.add_argument("--seed", type=int, default=721)
+PARSER.add_argument("--checkpoint-interval", type=int, default=150)
 PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
 PARSER.add_argument("--actor-learning-rate", type=float, default=None)
@@ -37,7 +38,7 @@ if ARGS.output_dir is None:
             f"seed{ARGS.seed}_env{ARGS.num_envs}"
         )
     )
-for name in ("iterations", "num_envs", "steps_per_env"):
+for name in ("iterations", "num_envs", "steps_per_env", "checkpoint_interval"):
     if getattr(ARGS, name) < 1:
         PARSER.error(f"--{name.replace('_', '-')} must be positive")
 for name in ("actor_learning_rate", "critic_learning_rate"):
@@ -57,7 +58,6 @@ from holosoma.config_values.marl.g1.demo4_experiment import (  # noqa: E402
     g1_29dof_demo4_rotate_baseline,
 )
 from holosoma.agents.mappo.demo4_checkpoint import (  # noqa: E402
-    DEMO4_CHECKPOINT_INTERVAL,
     DEMO4_OBJECT_MASS_KG,
     DEMO4_OBJECT_MATERIAL,
     DEMO4_STATIC_RUNTIME_SHA256,
@@ -231,7 +231,7 @@ def main() -> int:
             "num_envs": env.num_envs,
             "num_agents": 2,
             "steps_per_env": ARGS.steps_per_env,
-            "checkpoint_interval": DEMO4_CHECKPOINT_INTERVAL,
+            "checkpoint_interval": ARGS.checkpoint_interval,
             "source_checkpoint": str(SOURCE_CHECKPOINT.relative_to(REPO_ROOT)),
             "source_checkpoint_sha256": models.source_sha256,
             "expected_source_checkpoint_sha256": DEMO4_SOURCE_PULL_CHECKPOINT_SHA256,
@@ -377,7 +377,13 @@ def main() -> int:
             _append_jsonl(metrics_path, metrics)
             print(json.dumps(metrics, sort_keys=True), flush=True)
 
-            if is_demo4_periodic_checkpoint(iteration) or iteration == final_iteration:
+            if (
+                is_demo4_periodic_checkpoint(
+                    iteration,
+                    interval=ARGS.checkpoint_interval,
+                )
+                or iteration == final_iteration
+            ):
                 torch.save(
                     learner.training_state_dict(iteration=iteration),
                     output_dir / f"model_{iteration:05d}.pt",
@@ -388,7 +394,7 @@ def main() -> int:
             "output_dir": str(output_dir),
             "final_iteration": final_iteration,
             "final_checkpoint": str(output_dir / f"model_{final_iteration:05d}.pt"),
-            "periodic_checkpoint_interval": DEMO4_CHECKPOINT_INTERVAL,
+            "periodic_checkpoint_interval": ARGS.checkpoint_interval,
         }
         _write_json(output_dir / "status.json", status)
         print(json.dumps(status, indent=2, sort_keys=True), flush=True)
@@ -400,6 +406,7 @@ def main() -> int:
             "passed": False,
             "error_type": type(exc).__name__,
             "error": str(exc),
+            "periodic_checkpoint_interval": ARGS.checkpoint_interval,
         }
         if owns_output_dir:
             _write_json(output_dir / "status.json", status)

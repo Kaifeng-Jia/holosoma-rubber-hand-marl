@@ -21,7 +21,7 @@ from holosoma.agents.ppo.checkpoint_compat import (
 
 DEMO4_ACTOR_COMPATIBILITY_VERSION = "demo4_pull_actor_158_to_164_table_v1"
 DEMO4_MAPPO_CHECKPOINT_VERSION = "demo4_cooperative_rotate_team_mappo_v1"
-DEMO4_CHECKPOINT_INTERVAL = 1000
+DEMO4_CHECKPOINT_INTERVAL = 150
 DEMO4_STATIC_RUNTIME_SHA256 = (
     "3eb482e1bdb9072b50054c5501cda1d4646bef39ef754df55c03c281626199f3"
 )
@@ -280,10 +280,15 @@ def validate_demo4_lossless_expansion(
         raise ValueError("Demo 4 Actor input must not contain table yaw rate")
 
 
-def is_demo4_periodic_checkpoint(iteration: int) -> bool:
-    """Return whether a positive iteration is on the frozen 1000-step cadence."""
+def is_demo4_periodic_checkpoint(
+    iteration: int,
+    interval: int = DEMO4_CHECKPOINT_INTERVAL,
+) -> bool:
+    """Return whether a positive iteration is on the requested cadence."""
 
-    return iteration > 0 and iteration % DEMO4_CHECKPOINT_INTERVAL == 0
+    if interval < 1:
+        raise ValueError("Demo 4 checkpoint interval must be positive")
+    return iteration > 0 and iteration % interval == 0
 
 
 __all__ = [

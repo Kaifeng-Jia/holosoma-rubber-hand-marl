@@ -54,23 +54,23 @@ def test_demo3_formal_training_contract_and_checkpoint_cadence() -> None:
     assert contract["signed_progress_reward_weight"] == 10.0
     assert contract["table_obs_contains_yaw_rate"] is False
     assert contract["critic_only_iterations"] == 50
-    assert contract["full_actor_iterations"] == 8000
-    assert contract["checkpoint_interval"] == 1000
+    assert contract["full_actor_iterations"] == 15000
+    assert contract["checkpoint_interval"] == 150
     assert contract["randomization"].startswith("fixed_frame0")
     assert is_demo3_periodic_checkpoint(
         50,
         critic_only_iterations=50,
-        checkpoint_interval=1000,
+        checkpoint_interval=150,
     )
     assert is_demo3_periodic_checkpoint(
-        1050,
+        200,
         critic_only_iterations=50,
-        checkpoint_interval=1000,
+        checkpoint_interval=150,
     )
     assert not is_demo3_periodic_checkpoint(
-        1000,
+        150,
         critic_only_iterations=50,
-        checkpoint_interval=1000,
+        checkpoint_interval=150,
     )
 
 

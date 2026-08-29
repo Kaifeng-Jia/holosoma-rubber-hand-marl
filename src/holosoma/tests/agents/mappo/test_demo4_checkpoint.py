@@ -94,14 +94,33 @@ def test_demo4_expansion_rejects_incompatible_plan5_metadata() -> None:
 
 @pytest.mark.parametrize(
     ("iteration", "expected"),
-    [(-1, False), (0, False), (999, False), (1000, True), (2000, True), (2001, False)],
+    [(-1, False), (0, False), (149, False), (150, True), (300, True), (301, False)],
 )
-def test_demo4_checkpoint_cadence_is_frozen_at_1000(
+def test_demo4_checkpoint_cadence_defaults_to_150(
     iteration: int,
     expected: bool,
 ) -> None:
-    assert DEMO4_CHECKPOINT_INTERVAL == 1000
+    assert DEMO4_CHECKPOINT_INTERVAL == 150
     assert is_demo4_periodic_checkpoint(iteration) is expected
+
+
+@pytest.mark.parametrize(
+    ("iteration", "expected"),
+    [(0, False), (999, False), (1000, True), (2000, True), (2001, False)],
+)
+def test_demo4_checkpoint_cadence_accepts_explicit_interval(
+    iteration: int,
+    expected: bool,
+) -> None:
+    assert is_demo4_periodic_checkpoint(iteration, interval=1000) is expected
+
+
+@pytest.mark.parametrize("interval", [0, -1])
+def test_demo4_checkpoint_cadence_rejects_non_positive_interval(
+    interval: int,
+) -> None:
+    with pytest.raises(ValueError, match="interval must be positive"):
+        is_demo4_periodic_checkpoint(150, interval=interval)
 
 
 def test_demo4_training_contract_uses_unwrapped_safe_yaw() -> None:

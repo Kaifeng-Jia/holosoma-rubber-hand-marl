@@ -16,7 +16,7 @@
 
 ## 2. 运行方式
 
-Demo 3 与 Demo 4 是两个完全独立的单 GPU 任务，不使用 DDP 或 `torchrun`。2026-08-28 用户确认
+Demo 3 与 Demo 4 是两个完全独立的单 GPU 任务，不使用 DDP 或 `torchrun`。2026-08-29 用户确认
 租用一张 RTX 4090，并以 `4096` environments 顺序训练：
 
 ```text
@@ -52,8 +52,8 @@ bash scripts/setup_isaacsim.sh
 source scripts/source_isaacsim_setup.sh
 ```
 
-若两个 clone 共用同一套全局 conda/Isaac 安装，首次安装必须串行执行；只有资产转换和 smoke
-分别通过后，才并行启动两个训练进程。
+若两个 clone 共用同一套全局 conda/Isaac 安装，首次安装必须串行执行；资产转换和 smoke
+也依次完成。正式训练先启动 Demo 3，完成并回收后再启动 Demo 4，不同时运行两个训练进程。
 
 不要上传或共享以下运行时缓存：
 
@@ -126,8 +126,8 @@ checkpoint round-trip，不属于正式训练。
 
 ### 4.2 环境数选择
 
-代码 preset 仍为 `2048`，但本轮正式云端实验已由用户明确改为 `4096`。相同 8000 iterations 下，
-它相对 2048 会把总采样量翻倍，因此必须先在目标 RTX 4090 上运行一次独立容量测试：
+代码 preset 与本轮正式云端实验均已冻结为 `4096`。相同 15000 iterations 下，它相对 2048
+会把总采样量翻倍，因此必须先在目标 RTX 4090 上运行一次独立容量测试：
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
@@ -146,11 +146,12 @@ python scripts/train_demo4_rotate.py \
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo4_rotate.py \
-  --iterations 8000 \
+  --iterations 15000 \
   --num-envs 4096 \
   --steps-per-env 24 \
+  --checkpoint-interval 150 \
   --seed 721 \
-  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096
+  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_full15000_seed721_env4096
 ```
 
 固定设置：
@@ -165,11 +166,12 @@ physics/control   200 Hz / 50 Hz
 table             20 kg，friction 0.5/0.5，restitution 0
 episode           316 frames，6.32 s
 target            actual table +90° unwrapped yaw progress
-checkpoint        每 1000 iterations，且总会保存最终 iteration
+checkpoint        每 150 iterations，且总会保存最终 iteration
 ```
 
-新 run 的编号从 `model_00000.pt` 到 `model_08000.pt`；Pull 的 `08050` 只是 Actor warm-start 来源，
-不会让 Demo 4 从 iteration 8050 编号。
+新 run 的编号从 `model_00000.pt` 到 `model_15000.pt`；Pull 的 `08050` 只是 Actor warm-start 来源，
+不会让 Demo 4 从 iteration 8050 编号。正式 run 共保存 100 个周期 checkpoint，加上初始
+`model_00000.pt`，合计 101 个模型文件。
 
 ### 4.4 监控
 
@@ -193,17 +195,18 @@ actor_grad_norm / critic_grad_norm
 
 ### 4.5 Resume
 
-以下示例从 iteration 4000 再训练 4000 轮：
+以下示例从 iteration 7500 再训练 7500 轮：
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo4_rotate.py \
-  --resume logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096/model_04000.pt \
-  --iterations 4000 \
+  --resume logs/Demo4Rotate/rectangular_pull_pull_rotate90_full15000_seed721_env4096/model_07500.pt \
+  --iterations 7500 \
   --num-envs 4096 \
   --steps-per-env 24 \
+  --checkpoint-interval 150 \
   --seed 721 \
-  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096
+  --output-dir logs/Demo4Rotate/rectangular_pull_pull_rotate90_full15000_seed721_env4096
 ```
 
 `--iterations` 表示额外轮数。Resume 恢复 Actor、Critic、两个 optimizer、两个 normalizer、iteration
@@ -215,10 +218,10 @@ python scripts/train_demo4_rotate.py \
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/evaluate_demo4_rotate.py \
-  --checkpoint logs/Demo4Rotate/rectangular_pull_pull_rotate90_seed721_env4096/model_08000.pt \
+  --checkpoint logs/Demo4Rotate/rectangular_pull_pull_rotate90_full15000_seed721_env4096/model_15000.pt \
   --episodes 5 \
   --seed 721 \
-  --output-dir logs/Demo4Rotate/eval_model08000_seed721
+  --output-dir logs/Demo4Rotate/eval_model15000_seed721
 ```
 
 评估输出 `evaluation.json` 和 `representative_episode.npz`。多 seed 应使用独立目录，例如
@@ -227,7 +230,7 @@ python scripts/evaluate_demo4_rotate.py \
 ```bash
 PYTHONPATH=src/holosoma_retargeting \
 python -m holosoma_retargeting.viser_dual_a1_player \
-  --rollout-npz logs/Demo4Rotate/eval_model08000_seed721/representative_episode.npz \
+  --rollout-npz logs/Demo4Rotate/eval_model15000_seed721/representative_episode.npz \
   --robot-urdf src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf \
   --object-urdf src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf \
   --port 8098
@@ -256,8 +259,8 @@ python scripts/smoke_demo3_tug_ppo_update.py
 
 ### 5.2 环境数选择
 
-代码 preset 仍为 `2048`，但本轮正式云端实验已由用户明确改为 `4096`。相同 iterations 下总采样量
-是 2048 配置的两倍，因此先在目标 RTX 4090 上做独立容量测试；若 OOM，只报告并讨论，不自动降档。
+代码 preset 与本轮正式云端实验均已冻结为 `4096`。相同 iterations 下总采样量是 2048
+配置的两倍，因此先在目标 RTX 4090 上做独立容量测试；若 OOM，只报告并讨论，不自动降档。
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
@@ -279,12 +282,12 @@ python scripts/train_demo3_tug.py \
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo3_tug.py \
   --critic-only-iterations 50 \
-  --full-actor-iterations 8000 \
+  --full-actor-iterations 15000 \
   --num-envs 4096 \
   --steps-per-env 24 \
-  --checkpoint-interval 1000 \
+  --checkpoint-interval 150 \
   --seed 721 \
-  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env4096
 ```
 
 固定设置：
@@ -304,20 +307,23 @@ episode           317-frame reference horizon；机器人明确摔倒也会终�
 initialization    fixed frame-0；固定质量/材料；首版不做对手初态随机化
 task reward       A/B 各自相反 Pull 轴上的 signed table progress velocity，权重 10
 motion prior      六项 Pull/WBT 权重 0.5/0.5/1/1/1/1；action-rate -0.1；joint-limit -10
-checkpoint        critic 边界和此后每 1000 个 full-actor iterations；始终保存最终模型
+checkpoint        critic 边界和此后每 150 个 full-actor iterations；始终保存最终模型
 ```
 
 方桌的 reference 通道只用于 reset/schema，不进行逐帧桌子 pose tracking；不限制必须用手，不惩罚
 incidental contact，也不把桌子偏离演示轨迹作为 termination。首个 `50` iterations 只训练新 Critic，
-之后 `8000` iterations 同步更新一个共享 Actor 和 Critic。编号为：
+之后 `15000` iterations 同步更新一个共享 Actor 和 Critic。编号为：
 
 ```text
 model_00000.pt  初始 Actor + 新 Critic
 model_00050.pt  critic-only 边界
-model_01050.pt  1000 full-actor iterations
+model_00200.pt  150 full-actor iterations
 ...
-model_08050.pt  8000 full-actor iterations（最终）
+model_15050.pt  15000 full-actor iterations（最终）
 ```
+
+正式 run 保存 100 个 full-actor 周期 checkpoint，另有 `model_00000.pt` 和 critic 边界
+`model_00050.pt`，合计 102 个模型文件。
 
 ### 5.4 监控
 
@@ -340,19 +346,19 @@ actor_learning_rate / critic_learning_rate
 
 ### 5.5 Resume
 
-以下示例从 `model_04050.pt` 继续完成原定 `50 + 8000` schedule：
+以下示例从 `model_07550.pt` 继续完成原定 `50 + 15000` schedule：
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/train_demo3_tug.py \
-  --resume logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096/model_04050.pt \
+  --resume logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env4096/model_07550.pt \
   --critic-only-iterations 50 \
-  --full-actor-iterations 8000 \
+  --full-actor-iterations 15000 \
   --num-envs 4096 \
   --steps-per-env 24 \
-  --checkpoint-interval 1000 \
+  --checkpoint-interval 150 \
   --seed 721 \
-  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env4096
 ```
 
 Demo 3 的两个 iteration 参数描述**完整固定 schedule**，不是 resume 后额外增加的轮数。Resume
@@ -367,9 +373,9 @@ Demo 3 的两个 iteration 参数描述**完整固定 schedule**，不是 resume
 Resume 不覆盖原 `run_config.json` 或 `metrics.jsonl`，而是生成例如：
 
 ```text
-run_config_resume_from_04050.json
-metrics_resume_from_04050.jsonl
-status_resume_from_model_04050.json
+run_config_resume_from_07550.json
+metrics_resume_from_07550.jsonl
+status_resume_from_model_07550.json
 ```
 
 若目录中已经存在比所选 resume checkpoint 更新的 `model_*.pt`，入口会拒绝倒退覆盖；若同名
@@ -381,10 +387,10 @@ resume 的 run-config、metrics 或 status 任一分段已经存在，也会要�
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
 python scripts/evaluate_demo3_tug.py \
-  --checkpoint logs/Demo3Tug/square_table_diagonal_tug_seed721_env4096/model_08050.pt \
+  --checkpoint logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env4096/model_15050.pt \
   --episodes 5 \
   --seed 721 \
-  --output-dir logs/Demo3Tug/eval_model08050_seed721
+  --output-dir logs/Demo3Tug/eval_model15050_seed721
 ```
 
 评估只调用共享 Actor，不调用 Critic。每个 episode 都显式执行相同的 `reset_all + zero-action
@@ -426,7 +432,7 @@ metrics.jsonl
 status.json
 如发生 resume：run_config_resume_from_*.json / metrics_resume_from_*.jsonl / status_resume_from_*.json
 model_00000.pt
-按各 Demo 已确认间隔保存的 model_*.pt（Demo 3/4 均为每 1000 full iterations；Demo 3 另存 00050）
+按各 Demo 已确认间隔保存的 model_*.pt（Demo 3/4 均为每 150 iterations；Demo 3 另存 00050）
 最终 model_*.pt
 所有 evaluation.json
 每个候选 checkpoint 的 representative_episode.npz
