@@ -6,11 +6,17 @@ import copy
 import hashlib
 from pathlib import Path
 
+import pytest
 import torch
 
 from holosoma.agents.mappo.demo3_checkpoint import (
+    DEMO3_RUNTIME_REFERENCE_SHA256,
     Demo3TableObservationExpansion,
+    demo3_ppo_contract,
+    demo3_training_contract,
     expand_actor_checkpoint_for_demo3_table_obs,
+    is_demo3_periodic_checkpoint,
+    validate_demo3_asset,
     validate_demo3_lossless_expansion,
 )
 from holosoma.agents.mappo.demo3_initialization import initialize_demo3_model_bundle
@@ -22,6 +28,10 @@ from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object
 REPO_ROOT = Path(__file__).resolve().parents[5]
 PULL_CHECKPOINT = REPO_ROOT / "logs/WholeBodyTracking/marl_compat_pull_v1/model_07999_actor158.pt"
 PULL_CHECKPOINT_SHA256 = "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364"
+DEMO3_RUNTIME_REFERENCE = REPO_ROOT / (
+    "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/"
+    "demo3_tug/sub3_010_diagonal_tug_runtime.npz"
+)
 
 
 def _sha256(path: Path) -> str:
@@ -30,6 +40,87 @@ def _sha256(path: Path) -> str:
         for chunk in iter(lambda: stream.read(1024 * 1024), b""):
             digest.update(chunk)
     return digest.hexdigest()
+
+
+def test_demo3_formal_training_contract_and_checkpoint_cadence() -> None:
+    contract = demo3_training_contract()
+
+    assert contract["runtime_reference_sha256"] == DEMO3_RUNTIME_REFERENCE_SHA256
+    assert contract["warm_start_iteration"] == 7999
+    assert contract["reference_frames"] == 317
+    assert contract["reference_fps"] == 50
+    assert contract["object_mass_kg"] == 20.0
+    assert contract["object_material_static_dynamic_restitution"] == [0.5, 0.5, 0.0]
+    assert contract["signed_progress_reward_weight"] == 10.0
+    assert contract["table_obs_contains_yaw_rate"] is False
+    assert contract["critic_only_iterations"] == 50
+    assert contract["full_actor_iterations"] == 8000
+    assert contract["checkpoint_interval"] == 1000
+    assert contract["randomization"].startswith("fixed_frame0")
+    assert is_demo3_periodic_checkpoint(
+        50,
+        critic_only_iterations=50,
+        checkpoint_interval=1000,
+    )
+    assert is_demo3_periodic_checkpoint(
+        1050,
+        critic_only_iterations=50,
+        checkpoint_interval=1000,
+    )
+    assert not is_demo3_periodic_checkpoint(
+        1000,
+        critic_only_iterations=50,
+        checkpoint_interval=1000,
+    )
+
+
+def test_demo3_ppo_contract_captures_update_semantics() -> None:
+    config = g1_29dof_wbt_w_object.algo.config
+    contract = demo3_ppo_contract(config, num_steps_per_env=24)
+
+    assert contract["num_steps_per_env"] == 24
+    assert contract["module_dict"]["actor"]["layer_config"]["activation"] == "ELU"
+    assert contract["module_dict"]["actor"]["layer_config"]["hidden_dims"] == [
+        512,
+        256,
+        128,
+    ]
+    assert contract["module_dict"]["critic"]["layer_config"]["activation"] == "ELU"
+    assert contract["num_learning_epochs"] == 5
+    assert contract["num_mini_batches"] == 4
+    assert contract["gamma"] == 0.99
+    assert contract["gae_lambda"] == 0.95
+    assert contract["clip_param"] == 0.2
+    assert contract["entropy_coef"] == 0.005
+    assert contract["value_loss_coef"] == 1.0
+    assert contract["max_grad_norm"] == 1.0
+    assert contract["schedule"] == "adaptive"
+    assert contract["desired_kl"] == 0.01
+    assert contract["actor_optimizer"] == {
+        "target": "torch.optim.AdamW",
+        "weight_decay": 0.0,
+    }
+    assert contract["critic_optimizer"] == {
+        "target": "torch.optim.AdamW",
+        "weight_decay": 0.0,
+    }
+
+
+def test_demo3_runtime_hash_validation_fails_closed_on_tamper(tmp_path) -> None:
+    assert validate_demo3_asset(
+        DEMO3_RUNTIME_REFERENCE,
+        expected_sha256=DEMO3_RUNTIME_REFERENCE_SHA256,
+        label="runtime reference",
+    ) == DEMO3_RUNTIME_REFERENCE_SHA256
+
+    tampered = tmp_path / "runtime.npz"
+    tampered.write_bytes(DEMO3_RUNTIME_REFERENCE.read_bytes() + b"tampered")
+    with pytest.raises(ValueError, match="SHA-256 mismatch"):
+        validate_demo3_asset(
+            tampered,
+            expected_sha256=DEMO3_RUNTIME_REFERENCE_SHA256,
+            label="runtime reference",
+        )
 
 
 def test_real_pull_actor_expands_without_mutating_source() -> None:

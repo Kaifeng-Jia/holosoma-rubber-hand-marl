@@ -8,10 +8,10 @@
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：Push 与 Pull 两个独立协作 baseline 已完成；Push 后续训练暂缓，Pull 已通过用户
-  人工动作质量验收。Demo 3 对角桌腿竞争式拉拽已完成独立环境和训练接口，但尚未正式训练。
-  当前正推进 Demo 4：两台机器人从斜对角跟踪各自 Pull reference，以实际长桌 `+90°` yaw
-  progress 为共享任务；静态 reference、MAPPO、训练/评估入口和真实 Isaac/CUDA smoke 已完成，
-  **桌子没有逐帧运动 reference，正式训练尚未启动，下一步是用户视觉与训练参数最终确认。**
+  人工动作质量验收。Demo 3 对角桌腿竞争式拉拽与 Demo 4 协作旋转长桌均已完成相互隔离的
+  reference、环境、MAPPO、正式 train/resume、actor-only evaluate/record 和真实 Isaac/CUDA
+  验证，**两者都尚未开始正式训练**。下一步是冻结并提交本轮 Demo 3 管线、同步云端代码与外部
+  checkpoint，然后在独立 GPU/process 上按各自配置启动训练；不把两个 Demo 混成一个 policy。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动实验：Push、Pull、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
 
@@ -1522,14 +1522,33 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - reward/termination：每台机器人分别获得 Pull 动作、稳定和平滑先验；只有实际桌子沿两条相反
   拉拽轴的速度项符号相反。不限制必须用手，不惩罚 incidental contact，不跟踪演示桌子位姿，
   也不因桌子偏离 reference 终止。episode 只在 317 帧 horizon 或机器人明确摔倒时结束；
-- 验证：Demo 3、全 MAPPO 与 rubber-hand/方桌资产定向 CPU 回归共 `71 passed`。真实 Isaac/PhysX smoke 使用
-  `1 env × 2 steps`，干净退出并确认 actor groups `[1,2,154]/[1,2,4]/[1,2,6]`、critic
-  `[1,2,527]`、reward `[1,2]`、value `[1,2,1]`、物理 `200 Hz`、控制 `50 Hz` 及上述资产
-  常量；报告 SHA256
-  `f688b125d4b986afed215573f82e704ecc5d36a48b77fc64b167fc5d3e004ed8`；
-- 当前状态：实现和 smoke 已完成，**尚未开始正式训练**。`signed_table_progress_velocity` 的首版
-  权重暂写为 `10.0`，只用于符号/接线验证；正式训练前必须与用户确认 reward 数值、
-  critic-only 时长、环境数、总 iterations、学习率、checkpoint 间隔和对手更新方式。
+- 正式训练契约：冻结 Pull07999 的 164-D lossless 扩展作为 Actor/normalizer warm-start；Critic
+  和 optimizer 新建；两名竞争者始终调用同一个同步更新的共享 Actor。正式 baseline 为
+  `50 critic-only + 8000 full-actor`、`2048 env × 24 steps`、seed `721`、每 `1000` 个
+  full-actor iterations 保存；对应 `model_00050.pt`、`model_01050.pt` … `model_08050.pt`。
+  `signed_table_progress_velocity` 权重正式冻结为 `10.0`；首版保持 fixed frame-0、固定质量/材料、
+  无对手初态随机化。完整非 LR PPO 更新契约写入 run config 和 checkpoint；resume 只允许显式
+  覆盖 Actor/Critic learning rate。云端若想用 `4096` environments，必须先单独做容量测试，不能
+  默认替换；
+- 评估协议：部署时只调用共享 Actor，不调用 Critic。episode 末桌子沿 Agent A 初始 Pull 轴净位移
+  `>+0.05 m` 判 A 胜、`<-0.05 m` 判 B 胜，其余为平局；该阈值只用于 evaluation，不属于 reward
+  或 termination。每回合显式走相同 reset/settling 路径并从同一 reference phase 开始；reset 后
+  的微小 PhysX 数值差以物理量级 sanity check 和实际误差记录处理，不要求 bitwise 相同。horizon
+  episode 的 Actor 步数必须精确，真实摔倒允许提前终止并单独计数。评估在 auto-reset 前捕获真实
+  terminal state，输出 `evaluation.json` 与去重的五通道 ViSER NPZ；
+- 验证：当前最终 CPU 回归分为共享 MAPPO/Demo 3/4 的 `90 passed`，以及环境、Plan 5、
+  rubber-hand 与跨 Demo 隔离边界的 `104 passed`。真实 Isaac/PhysX 环境 smoke 使用 `1 env × 8 steps`，
+  确认 actor groups `[1,2,154]/[1,2,4]/[1,2,6]`、critic `[1,2,527]`、reward `[1,2]`、
+  value `[1,2,1]`、物理 `200 Hz`、控制 `50 Hz` 及上述资产常量。真实 CUDA PPO smoke 使用
+  `1 env × 4 steps × 1 epoch × 1 minibatch`，Actor/Critic 都发生参数更新、Actor normalizer
+  冻结、v2 checkpoint 往返恢复通过；正式 train 入口另以隔离的 1-iteration `/tmp` run 验证完整
+  run ledger/checkpoint/退出流程，并用其 checkpoint 跑完 316-step actor-only 评估，终态捕获与
+  ViSER NPZ 输出闭环通过。两回合复核进一步确认相同 start phase、horizon 精确步数和合法提前摔倒
+  能同时记录；确定性 Actor 不被误写成 GPU 接触动力学逐 bit 确定。Resume smoke 确认原始
+  `run_config.json` SHA 保持不变，恢复段使用独立且不可覆盖的 run-config/metrics/status，且拒绝
+  倒退覆盖更新模型；完整账本目录允许跨机器迁移，但会显式记录原路径和 relocation lineage；
+- 当前状态：正式管线已就绪，**尚未开始正式 50+8000 训练**。临时 1-iteration 结果只证明程序
+  闭环，不作为竞争效果或 checkpoint 质量证据。
 
 #### 2026-08-28：Demo 4 协作旋转长桌——静态桌子与团队 yaw 任务管线就绪
 

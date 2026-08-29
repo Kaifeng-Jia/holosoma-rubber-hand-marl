@@ -5,12 +5,13 @@
 - 分支：`rubber_hand_marl_baseline`
 - Demo 3 里程碑：`0d864f713156f07eb72253483c2d0553e3072978`
 - Demo 4 里程碑：`e8c9db4a4d7ba744ffb121c078a6d1b5f1dd3c12`
-- Demo 4 已具备正式 train、真实 PPO-update smoke、actor-only evaluate/record 和 resume 入口。
-- Demo 3 已具备 reference、环境、共享 Actor、ego-first Critic 和底层 PPO，但还缺正式 train、
-  真实 PPO-update smoke、evaluate/record 三个入口。因此 **Demo 3 暂时不能启动正式云端训练**。
+- 本清单基础里程碑：`2266fbcc5284768577488db1c0b42d83644ed275`；Demo 3 正式管线位于
+  **包含本清单最新版本的部署 HEAD**，部署时必须记录该 HEAD，不能只停在前三个历史里程碑。
+- Demo 3 与 Demo 4 均已具备正式 train、真实 PPO-update smoke、actor-only evaluate/record 和
+  resume 入口；两者都**尚未开始正式训练**。
 - 本文件只负责云端执行和资产交付，不替代
   `MULTI_AGENT_EMERGENCE_ROADMAP.md` 的研究决策地位。
-- Demo 4 里程碑当前首先是本地提交；在云端 clone 前，必须把里程碑和本清单后续提交显式推送到
+- 本轮 Demo 3/4 里程碑当前首先是本地提交；在云端 clone 前，必须把里程碑和本清单后续提交显式推送到
   `private` remote。没有推送成功前不得假定云端能取得这些文件。
 
 ## 2. 并行方式
@@ -30,15 +31,18 @@ git clone <private-repository-url> holosoma-demo3
 git clone <private-repository-url> holosoma-demo4
 git -C holosoma-demo3 checkout rubber_hand_marl_baseline
 git -C holosoma-demo4 checkout rubber_hand_marl_baseline
-git -C holosoma-demo3 merge-base --is-ancestor e8c9db4a HEAD
-git -C holosoma-demo4 merge-base --is-ancestor e8c9db4a HEAD
+git -C holosoma-demo3 merge-base --is-ancestor 2266fbcc HEAD
+git -C holosoma-demo4 merge-base --is-ancestor 2266fbcc HEAD
 test "$(git -C holosoma-demo3 rev-parse HEAD)" = \
   "$(git -C holosoma-demo4 rev-parse HEAD)"
+test -f holosoma-demo3/scripts/train_demo3_tug.py
+test -f holosoma-demo3/scripts/evaluate_demo3_tug.py
+test -f holosoma-demo4/scripts/train_demo4_rotate.py
 git -C holosoma-demo3 rev-parse HEAD
 ```
 
-最后一条输出就是本次部署 commit，必须抄入两个 run 的记录中。祖先检查只保证 Demo 4 代码存在；
-两个 clone 的 HEAD 相等检查才保证它们使用同一个部署版本。
+最后一条输出就是本次部署 commit，必须抄入两个 run 的记录中。祖先检查只保证云端清单基础存在；
+入口文件检查和两个 clone 的 HEAD 相等检查共同保证它们使用同一个完整部署版本。
 
 在两个 clone 中分别安装/激活相同的项目环境：
 
@@ -92,8 +96,8 @@ awk -F '\t' 'NR>1 && ($1=="shared" || $1=="demo4") && $3!~/optional/ \
 这两个命令同时校验各自 clone 的 robot URDF、table URDF、runtime reference 和外部 checkpoint；
 Demo 3 JSON manifest 与 Demo 4 ViSER reference 属于可选 provenance/preview，不参与强制校验。
 
-Demo 3 的 `actor164` 文件是当前环境 smoke 的强制依赖，也是当前正式 warm-start 候选；如果
-第 5.3 节最终决定改用 Plan5 Pull08050，必须同步更新 checkpoint、初始化代码和资产清单。
+Demo 3 的 `actor164` 文件是环境 smoke、正式训练和 actor-only 评估的冻结 warm-start。当前契约
+明确使用 WBT Pull07999 的 164-D lossless 扩展，不再把 Plan5 Pull08050 视为本轮候选。
 
 只有重新合成 Demo 4 reference 时才需要
 `logs/Plan5Pull/eval_full8000_seed721/model_08050_object_centric.npz`；正式训练和评估不需要它。
@@ -231,11 +235,11 @@ python -m holosoma_retargeting.viser_dual_a1_player \
   --port 8098
 ```
 
-## 5. Demo 3：当前可执行部分与正式训练缺口
+## 5. Demo 3：正式云端启动流程
 
-### 5.1 已可执行的环境 smoke
+### 5.1 资产、环境与 PPO smoke
 
-以下命令在 `holosoma-demo3` 中运行：
+以下命令均在 `holosoma-demo3` 中运行：
 
 ```bash
 env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
@@ -243,37 +247,177 @@ python scripts/smoke_demo3_tug_environment.py \
   --steps 8 \
   --seed 721 \
   --output /tmp/demo3_environment_smoke.json
+
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
+python scripts/smoke_demo3_tug_ppo_update.py
 ```
 
-当前代码应确认：两台 rubber-hand G1、方桌 20 kg、材料 `0.5/0.5/0`、Actor groups
-`154+4+6=164`、critic `[E,2,527]`、per-agent reward/value 与 shared physical done。
+第一条确认两台 rubber-hand G1、方桌物理常量、相反 Pull 轴和真实观测/奖励/value shape；第二条只
+运行 `1 env × 4 steps × 1 epoch × 1 minibatch`，确认 Actor/Critic 确实更新、Actor normalizer
+保持冻结、per-agent GAE 和 v2 checkpoint round-trip。两条都不是正式训练。
 
-### 5.2 为什么目前不能直接正式训练
+### 5.2 环境数选择
 
-仓库中尚不存在：
+正式 baseline 使用 `2048` environments，与既有本地双机器人训练规模一致。`4096` 在接口上受
+支持，但必须先在目标云端 GPU 做独立容量测试；相同 iterations 下它也会把总样本数翻倍，不能把
+它当成与 2048 完全相同的实验。
+
+```bash
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
+python scripts/train_demo3_tug.py \
+  --critic-only-iterations 0 \
+  --full-actor-iterations 1 \
+  --num-envs 4096 \
+  --steps-per-env 24 \
+  --checkpoint-interval 1 \
+  --seed 721 \
+  --output-dir logs/Demo3Tug/capacity_only_seed721_env4096
+```
+
+容量测试通过后，正式 run 仍从冻结 warm-start 重新开始，不继承 capacity checkpoint。
+
+### 5.3 已确认的正式 2048-env 命令
+
+```bash
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
+python scripts/train_demo3_tug.py \
+  --critic-only-iterations 50 \
+  --full-actor-iterations 8000 \
+  --num-envs 2048 \
+  --steps-per-env 24 \
+  --checkpoint-interval 1000 \
+  --seed 721 \
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048
+```
+
+固定设置：
 
 ```text
-scripts/train_demo3_tug.py
-scripts/smoke_demo3_tug_ppo_update.py
-scripts/evaluate_demo3_tug.py
+warm-start        WBT Pull07999 的冻结 164-D lossless 扩展，只加载 Actor/normalizer
+shared Actor      164 → 512 → 256 → 128 → 29；同一组实时参数分别控制 A/B
+ego-first Critic  527 → 512 → 256 → 128 → 1；每个 agent 各有 value/return/GAE
+PPO               5 epochs，4 mini-batches，clip 0.2
+gamma/lambda      0.99 / 0.95
+entropy/LR        0.005 / actor 1e-3 / critic 1e-3，adaptive KL 0.01
+value/grad         value-loss coef 1.0 / max grad norm 1.0
+optimizer          Actor/Critic 均为 AdamW，weight decay 0
+physics/control   200 Hz / 50 Hz
+table             20 kg，friction 0.5/0.5，restitution 0
+episode           317-frame reference horizon；机器人明确摔倒也会终止
+initialization    fixed frame-0；固定质量/材料；首版不做对手初态随机化
+task reward       A/B 各自相反 Pull 轴上的 signed table progress velocity，权重 10
+motion prior      六项 Pull/WBT 权重 0.5/0.5/1/1/1/1；action-rate -0.1；joint-limit -10
+checkpoint        critic 边界和此后每 1000 个 full-actor iterations；始终保存最终模型
 ```
 
-底层 `Demo3PPO` 虽已实现，但直接临时拼接 Python 命令会绕过 output-directory 防覆盖、配置记录、
-checkpoint 恢复契约、真实 rollout 指标和 terminal-state 录制，因此禁止把这种临时方式用于云端
-正式 run。
+方桌的 reference 通道只用于 reset/schema，不进行逐帧桌子 pose tracking；不限制必须用手，不惩罚
+incidental contact，也不把桌子偏离演示轨迹作为 termination。首个 `50` iterations 只训练新 Critic，
+之后 `8000` iterations 同步更新一个共享 Actor 和 Critic。编号为：
 
-### 5.3 补入口前需确认的 Demo 3 契约
+```text
+model_00000.pt  初始 Actor + 新 Critic
+model_00050.pt  critic-only 边界
+model_01050.pt  1000 full-actor iterations
+...
+model_08050.pt  8000 full-actor iterations（最终）
+```
 
-1. Warm-start：保持当前 WBT Pull07999 的 164-D lossless 扩展，还是改为 Plan5 Pull08050。
-2. 对手更新：首版是否采用当前设计，即双方共享同一个、同步更新的 Actor，而不是 frozen opponent
-   或 opponent pool。
-3. 任务奖励：当前 `signed_table_progress_velocity` 权重 `10.0` 是否转为正式值。
-4. 训练节奏：是否采用 `50 critic-only + 8000 full-actor`、环境数 2048，以及每 1000 轮保存。
-5. 胜负协议：以 episode 末桌子沿两条相反 pull axis 的净位移判定胜负时，平局阈值是多少。
-6. 随机化：首版是否保持固定 frame-0、固定质量/摩擦和无对手初态随机化，先建立最小 baseline。
+### 5.4 监控
 
-在上述六项确认前，继承配置中的 `30000 iterations` 以及 provisional reward `10.0` 都不能视为
-正式训练决定。
+每轮至少查看：
+
+```text
+reward_agent_a_mean / reward_agent_b_mean
+progress_agent_a_sample_mean_m / progress_agent_b_sample_mean_m
+table_displacement_sample_mean_m
+completed_episodes / clear_robot_fall_count / reference_horizon_count
+advantage_agent_a_mean/std / advantage_agent_b_mean/std
+policy_drift_mean_abs / policy_drift_max_abs
+surrogate_loss / value_loss / entropy / kl
+actor_grad_norm / critic_grad_norm
+actor_learning_rate / critic_learning_rate
+```
+
+竞争任务中 A/B reward 不需要同时单调上升，也不能用单一总 reward 选模型。训练 checkpoint 的
+最终判断必须来自独立 actor-only 物理回放。
+
+### 5.5 Resume
+
+以下示例从 `model_04050.pt` 继续完成原定 `50 + 8000` schedule：
+
+```bash
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
+python scripts/train_demo3_tug.py \
+  --resume logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048/model_04050.pt \
+  --critic-only-iterations 50 \
+  --full-actor-iterations 8000 \
+  --num-envs 2048 \
+  --steps-per-env 24 \
+  --checkpoint-interval 1000 \
+  --seed 721 \
+  --output-dir logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048
+```
+
+Demo 3 的两个 iteration 参数描述**完整固定 schedule**，不是 resume 后额外增加的轮数。Resume
+严格恢复 Actor、Critic、两个 optimizer、两个 normalizer、iteration 和 checkpoint 内实际学习率；
+只有显式传入 `--actor-learning-rate` 或 `--critic-learning-rate` 才覆盖恢复值。它不恢复物理瞬时
+状态、rollout buffer 或完整 RNG 连续状态。恢复 checkpoint 必须位于本次 `--output-dir` 内，且其 metadata、
+原始 seed/env/steps/schedule、完整非 LR PPO 更新契约和全部冻结资产契约必须完全一致。这里的
+“同一目录”是指 checkpoint、原 `run_config.json` 和原账本必须作为一个完整目录共同存在；如果把
+这个完整目录原样迁移到另一台机器或另一个绝对路径，允许继续训练，但 resume config 会明确记录
+`ledger_origin_output_dir` 和 `ledger_relocated=true`，不会把迁移伪装成原路径续训。
+
+Resume 不覆盖原 `run_config.json` 或 `metrics.jsonl`，而是生成例如：
+
+```text
+run_config_resume_from_04050.json
+metrics_resume_from_04050.jsonl
+status_resume_from_model_04050.json
+```
+
+若目录中已经存在比所选 resume checkpoint 更新的 `model_*.pt`，入口会拒绝倒退覆盖；若同名
+resume 的 run-config、metrics 或 status 任一分段已经存在，也会要求先人工核对，不自动删除、
+截断或覆盖任何历史数据。
+
+### 5.6 Actor-only 评估与 ViSER
+
+```bash
+env WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=0 \
+python scripts/evaluate_demo3_tug.py \
+  --checkpoint logs/Demo3Tug/square_table_diagonal_tug_seed721_env2048/model_08050.pt \
+  --episodes 5 \
+  --seed 721 \
+  --output-dir logs/Demo3Tug/eval_model08050_seed721
+```
+
+评估只调用共享 Actor，不调用 Critic。每个 episode 都显式执行相同的 `reset_all + zero-action
+settling`，断言从相同 reference phase 开始；reset 后的实际状态差异按物理量级做 sanity check 并
+完整写入 JSON。horizon episode 必须精确执行剩余 reference 步数，真实摔倒则允许提前终止并单独计数。
+胜负按 episode 末桌子沿 Agent A 初始 Pull 轴的净位移：
+
+```text
+> +0.05 m  Agent A 胜
+< -0.05 m  Agent B 胜
+其余        平局
+```
+
+该 `0.05 m` 只属于 evaluation protocol，不进入 reward 或 termination。输出包括
+`evaluation.json`，以及实际存在的 A 胜/B 胜/最大绝对位移代表 episode（重复选择只保存一个）对应的
+`representative_episode_XXX.npz`。从 `evaluation.json` 选定一个路径后回放：
+
+```bash
+PYTHONPATH=src/holosoma_retargeting \
+python -m holosoma_retargeting.viser_dual_a1_player \
+  --rollout-npz <representative_episode_XXX.npz> \
+  --robot-urdf src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf \
+  --object-urdf src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_squaretable_demo3_training.urdf \
+  --port 8097
+```
+
+首版 fixed frame-0 且无初态随机化。`deterministic_inference` 只表示 Actor 输出使用 mean action，
+不承诺 GPU 接触求解逐 bit 相同；相同 seed 的重复 episode 可能因接触动力学出现不同胜负或提前
+摔倒，它们可用于重复性/敏感性检查，但不应包装成经过初态随机化的鲁棒性证据。正式结果仍应使用
+独立目录记录 seed 721/722/723，并如实说明当前随机化边界。
 
 ## 6. 云端训练结束后必须回收
 
@@ -283,8 +427,9 @@ checkpoint 恢复契约、真实 rollout 指标和 terminal-state 录制，因�
 run_config.json
 metrics.jsonl
 status.json
+如发生 resume：run_config_resume_from_*.json / metrics_resume_from_*.jsonl / status_resume_from_*.json
 model_00000.pt
-按该 Demo 最终确认间隔保存的 model_*.pt（Demo 4 为每 1000；Demo 3 待确认）
+按各 Demo 已确认间隔保存的 model_*.pt（Demo 3/4 均为每 1000 full iterations；Demo 3 另存 00050）
 最终 model_*.pt
 所有 evaluation.json
 每个候选 checkpoint 的 representative_episode.npz

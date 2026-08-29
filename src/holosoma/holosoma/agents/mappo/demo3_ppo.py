@@ -3,12 +3,19 @@
 from __future__ import annotations
 
 from dataclasses import dataclass
+import math
 from typing import Any
 
 import torch
 from torch import nn
 from torch.distributions import Normal, kl_divergence
 
+from holosoma.agents.mappo.demo3_checkpoint import (
+    DEMO3_MAPPO_CHECKPOINT_VERSION,
+    DEMO3_WARM_START_SHA256,
+    demo3_ppo_contract,
+    demo3_training_contract,
+)
 from holosoma.agents.mappo.demo3_initialization import (
     DEMO3_ACTION_DIM,
     DEMO3_ACTOR_OBS_DIM,
@@ -20,7 +27,213 @@ from holosoma.agents.mappo.initialization import Plan5ModelBundle
 from holosoma.config_types.algo import PPOConfig
 
 
-DEMO3_MAPPO_CHECKPOINT_VERSION = "demo3_ego_first_per_agent_mappo_v1"
+_DEMO3_TERMINATION_KEYS = ("clear_robot_fall", "reference_horizon")
+_DEMO3_LOG_SERIES = {
+    "progress_agent_a": "tug/progress_agent_a_m",
+    "progress_agent_b": "tug/progress_agent_b_m",
+    "table_displacement": "tug/table_displacement_m",
+}
+
+
+def _empty_rollout_diagnostics() -> dict[str, Any]:
+    result: dict[str, Any] = {
+        "termination_counts": {name: 0 for name in _DEMO3_TERMINATION_KEYS},
+        "completed_episodes": 0,
+    }
+    for prefix in _DEMO3_LOG_SERIES:
+        result.update(
+            {
+                f"{prefix}_sample_count": 0,
+                f"{prefix}_sample_mean_m": 0.0,
+                f"{prefix}_sample_min_m": 0.0,
+                f"{prefix}_sample_max_m": 0.0,
+                f"{prefix}_terminal_count": 0,
+                f"{prefix}_terminal_mean_m": 0.0,
+                f"{prefix}_terminal_min_m": 0.0,
+                f"{prefix}_terminal_max_m": 0.0,
+            }
+        )
+    return result
+
+
+class _ScalarSeriesAccumulator:
+    def __init__(self) -> None:
+        self.count: torch.Tensor | None = None
+        self.total: torch.Tensor | None = None
+        self.minimum: torch.Tensor | None = None
+        self.maximum: torch.Tensor | None = None
+        self.terminal_count: torch.Tensor | None = None
+        self.terminal_total: torch.Tensor | None = None
+        self.terminal_minimum: torch.Tensor | None = None
+        self.terminal_maximum: torch.Tensor | None = None
+
+    @staticmethod
+    def _add(current: torch.Tensor | None, value: torch.Tensor) -> torch.Tensor:
+        return value if current is None else current + value
+
+    def observe(self, values: torch.Tensor, done: torch.Tensor) -> None:
+        self.count = self._add(
+            self.count,
+            torch.as_tensor(values.numel(), device=values.device),
+        )
+        self.total = self._add(self.total, values.sum())
+        step_minimum = values.min()
+        self.minimum = (
+            step_minimum
+            if self.minimum is None
+            else torch.minimum(self.minimum, step_minimum)
+        )
+        step_maximum = values.max()
+        self.maximum = (
+            step_maximum
+            if self.maximum is None
+            else torch.maximum(self.maximum, step_maximum)
+        )
+
+        terminal = values[done]
+        if terminal.numel() == 0:
+            return
+        self.terminal_count = self._add(
+            self.terminal_count,
+            torch.as_tensor(terminal.numel(), device=values.device),
+        )
+        self.terminal_total = self._add(self.terminal_total, terminal.sum())
+        step_terminal_minimum = terminal.min()
+        self.terminal_minimum = (
+            step_terminal_minimum
+            if self.terminal_minimum is None
+            else torch.minimum(self.terminal_minimum, step_terminal_minimum)
+        )
+        step_terminal_maximum = terminal.max()
+        self.terminal_maximum = (
+            step_terminal_maximum
+            if self.terminal_maximum is None
+            else torch.maximum(self.terminal_maximum, step_terminal_maximum)
+        )
+
+    @staticmethod
+    def _integer(value: torch.Tensor | None) -> int:
+        return 0 if value is None else int(value.item())
+
+    @staticmethod
+    def _floating(value: torch.Tensor | None) -> float:
+        return 0.0 if value is None else float(value.item())
+
+    def finalize(self, prefix: str) -> dict[str, int | float]:
+        count = self._integer(self.count)
+        terminal_count = self._integer(self.terminal_count)
+        return {
+            f"{prefix}_sample_count": count,
+            f"{prefix}_sample_mean_m": (
+                self._floating(self.total) / count if count > 0 else 0.0
+            ),
+            f"{prefix}_sample_min_m": self._floating(self.minimum),
+            f"{prefix}_sample_max_m": self._floating(self.maximum),
+            f"{prefix}_terminal_count": terminal_count,
+            f"{prefix}_terminal_mean_m": (
+                self._floating(self.terminal_total) / terminal_count
+                if terminal_count > 0
+                else 0.0
+            ),
+            f"{prefix}_terminal_min_m": self._floating(self.terminal_minimum),
+            f"{prefix}_terminal_max_m": self._floating(self.terminal_maximum),
+        }
+
+
+class _RolloutDiagnosticsAccumulator:
+    """Read reset-safe competition metrics from each actual environment step."""
+
+    def __init__(self) -> None:
+        self.termination_counts: dict[str, torch.Tensor] = {}
+        self.completed_episodes: torch.Tensor | None = None
+        self.series = {
+            prefix: _ScalarSeriesAccumulator() for prefix in _DEMO3_LOG_SERIES
+        }
+
+    @staticmethod
+    def _vector(
+        values: Any,
+        *,
+        device: torch.device,
+        dtype: torch.dtype,
+        label: str,
+        expected_numel: int,
+    ) -> torch.Tensor:
+        vector = torch.as_tensor(values, device=device, dtype=dtype).reshape(-1)
+        if vector.numel() != expected_numel:
+            raise ValueError(
+                f"Demo 3 {label} must contain one value per environment; "
+                f"expected {expected_numel}, got {vector.numel()}"
+            )
+        return vector.detach()
+
+    @staticmethod
+    def _add(current: torch.Tensor | None, value: torch.Tensor) -> torch.Tensor:
+        return value if current is None else current + value
+
+    def observe(self, dones: torch.Tensor, extras: dict[str, Any]) -> None:
+        done = torch.as_tensor(dones).reshape(-1).to(dtype=torch.bool)
+        device = done.device
+        num_envs = done.numel()
+        self.completed_episodes = self._add(
+            self.completed_episodes,
+            done.count_nonzero(),
+        )
+
+        termination_terms = extras.get("termination_terms", {})
+        if not isinstance(termination_terms, dict):
+            raise TypeError("extras['termination_terms'] must be a dictionary")
+        for name, values in termination_terms.items():
+            mask = self._vector(
+                values,
+                device=device,
+                dtype=torch.bool,
+                label=f"termination term {name!r}",
+                expected_numel=num_envs,
+            )
+            self.termination_counts[name] = self._add(
+                self.termination_counts.get(name),
+                mask.count_nonzero(),
+            )
+
+        to_log = extras.get("to_log", {})
+        if not isinstance(to_log, dict):
+            raise TypeError("extras['to_log'] must be a dictionary")
+        for prefix, log_key in _DEMO3_LOG_SERIES.items():
+            if log_key not in to_log:
+                continue
+            values = self._vector(
+                to_log[log_key],
+                device=device,
+                dtype=torch.float32,
+                label=log_key,
+                expected_numel=num_envs,
+            )
+            self.series[prefix].observe(values, done)
+
+    @staticmethod
+    def _integer(value: torch.Tensor | None) -> int:
+        return 0 if value is None else int(value.item())
+
+    def finalize(self) -> dict[str, Any]:
+        termination_counts = {
+            name: self._integer(self.termination_counts.get(name))
+            for name in _DEMO3_TERMINATION_KEYS
+        }
+        termination_counts.update(
+            {
+                name: self._integer(value)
+                for name, value in self.termination_counts.items()
+                if name not in termination_counts
+            }
+        )
+        result: dict[str, Any] = {
+            "termination_counts": termination_counts,
+            "completed_episodes": self._integer(self.completed_episodes),
+        }
+        for prefix, accumulator in self.series.items():
+            result.update(accumulator.finalize(prefix))
+        return result
 
 
 @dataclass(frozen=True)
@@ -49,6 +262,7 @@ class Demo3PPO:
         num_envs: int,
         num_steps_per_env: int | None = None,
         device: str = "cpu",
+        training_contract: dict[str, Any] | None = None,
     ) -> None:
         self.models = models
         self.config = config
@@ -61,6 +275,41 @@ class Demo3PPO:
             raise ValueError("num_envs must be positive")
         if self.num_steps_per_env <= 0:
             raise ValueError("num_steps_per_env must be positive")
+        self.training_contract = dict(
+            demo3_training_contract()
+            if training_contract is None
+            else training_contract
+        )
+        expected_contract = demo3_training_contract(
+            critic_only_iterations=int(
+                self.training_contract.get("critic_only_iterations", -1)
+            ),
+            full_actor_iterations=int(
+                self.training_contract.get("full_actor_iterations", -1)
+            ),
+            checkpoint_interval=int(
+                self.training_contract.get("checkpoint_interval", -1)
+            ),
+        )
+        if self.training_contract != expected_contract:
+            raise ValueError("Demo 3 training contract is incomplete or incompatible")
+        self.ppo_contract = demo3_ppo_contract(
+            config,
+            num_steps_per_env=self.num_steps_per_env,
+        )
+        if models.source_sha256 != DEMO3_WARM_START_SHA256:
+            raise ValueError(
+                "Demo 3 must initialize from the frozen Pull07999 Actor artifact: "
+                f"expected {DEMO3_WARM_START_SHA256}, got {models.source_sha256}"
+            )
+        if int(models.source_iteration) != int(
+            self.training_contract["warm_start_iteration"]
+        ):
+            raise ValueError(
+                "Demo 3 warm-start iteration mismatch: "
+                f"expected {self.training_contract['warm_start_iteration']}, "
+                f"got {models.source_iteration}"
+            )
 
         self.runner = Demo3PolicyRunner(models)
         self.storage = Demo3RolloutStorage(
@@ -78,6 +327,7 @@ class Demo3PPO:
             self.actor_learning_rate,
             1.0e-2,
         )
+        self.last_rollout_diagnostics = _empty_rollout_diagnostics()
 
     @staticmethod
     def _agent_column(values: torch.Tensor, *, num_envs: int) -> torch.Tensor:
@@ -116,6 +366,8 @@ class Demo3PPO:
     ) -> dict[str, torch.Tensor]:
         """Collect a synchronized rollout and compute one GAE stream per agent."""
         self.storage.clear()
+        diagnostics = _RolloutDiagnosticsAccumulator()
+        self.last_rollout_diagnostics = _empty_rollout_diagnostics()
         for _ in range(self.num_steps_per_env):
             decision = self.runner.sample(
                 observations,
@@ -131,6 +383,7 @@ class Demo3PPO:
             next_observations, rewards, dones, extras = env.step(
                 {"actions": decision.actions}
             )
+            diagnostics.observe(dones, extras)
             rewards = self._agent_column(
                 torch.as_tensor(rewards, device=self.device),
                 num_envs=self.num_envs,
@@ -210,6 +463,7 @@ class Demo3PPO:
         )
         self.storage.set_agent("returns", returns)
         self.storage.set_agent("advantages", advantages)
+        self.last_rollout_diagnostics = diagnostics.finalize()
         return observations
 
     def compute_returns_and_advantages(
@@ -388,20 +642,27 @@ class Demo3PPO:
         for group in self.models.actor_optimizer.param_groups:
             group["lr"] = self.actor_learning_rate
 
-    def training_state_dict(self, *, iteration: int) -> dict[str, Any]:
-        """Return a Demo 3-only checkpoint with an explicit layout contract."""
+    def _checkpoint_metadata(self) -> dict[str, Any]:
         return {
-            "demo3_mappo": {
-                "version": DEMO3_MAPPO_CHECKPOINT_VERSION,
-                "num_agents": DEMO3_NUM_AGENTS,
-                "actor_obs_dim": DEMO3_ACTOR_OBS_DIM,
-                "critic_obs_dim": DEMO3_CRITIC_OBS_DIM,
-                "action_dim": DEMO3_ACTION_DIM,
-                "critic_layout": "ego_first_per_agent",
-                "reward_layout": "per_agent",
-                "done_layout": "shared_environment",
-                "source_sha256": self.models.source_sha256,
-            },
+            "version": DEMO3_MAPPO_CHECKPOINT_VERSION,
+            "num_agents": DEMO3_NUM_AGENTS,
+            "actor_obs_dim": DEMO3_ACTOR_OBS_DIM,
+            "actor_obs_groups": ["actor_obs", "teammate_obs", "table_obs"],
+            "critic_obs_dim": DEMO3_CRITIC_OBS_DIM,
+            "action_dim": DEMO3_ACTION_DIM,
+            "critic_layout": "ego_first_per_agent",
+            "reward_layout": "per_agent",
+            "done_layout": "shared_environment",
+            "source_iteration": self.models.source_iteration,
+            "source_sha256": self.models.source_sha256,
+            "ppo_contract": self.ppo_contract,
+            **self.training_contract,
+        }
+
+    def training_state_dict(self, *, iteration: int) -> dict[str, Any]:
+        """Return a resumable Demo 3-only checkpoint with the full contract."""
+        return {
+            "demo3_mappo": self._checkpoint_metadata(),
             "actor_model_state_dict": self.models.actor.state_dict(),
             "critic_model_state_dict": self.models.critic.state_dict(),
             "actor_optimizer_state_dict": self.models.actor_optimizer.state_dict(),
@@ -411,22 +672,28 @@ class Demo3PPO:
             "iter": iteration,
         }
 
-    def _expected_checkpoint_metadata(self) -> dict[str, Any]:
-        return {
-            "version": DEMO3_MAPPO_CHECKPOINT_VERSION,
-            "num_agents": DEMO3_NUM_AGENTS,
-            "actor_obs_dim": DEMO3_ACTOR_OBS_DIM,
-            "critic_obs_dim": DEMO3_CRITIC_OBS_DIM,
-            "action_dim": DEMO3_ACTION_DIM,
-            "critic_layout": "ego_first_per_agent",
-            "reward_layout": "per_agent",
-            "done_layout": "shared_environment",
-            "source_sha256": self.models.source_sha256,
-        }
+    def load_training_state_dict(
+        self,
+        state: dict[str, Any],
+        *,
+        actor_learning_rate: float | None = None,
+        critic_learning_rate: float | None = None,
+    ) -> int:
+        """Restore exactly, then apply only explicitly requested LR overrides."""
 
-    def load_training_state_dict(self, state: dict[str, Any]) -> int:
+        for name, value in {
+            "actor_learning_rate": actor_learning_rate,
+            "critic_learning_rate": critic_learning_rate,
+        }.items():
+            if value is not None and (not math.isfinite(value) or value <= 0.0):
+                raise ValueError(f"{name} override must be finite and positive")
+        contaminants = sorted({"plan5_mappo", "demo4_mappo"}.intersection(state))
+        if contaminants:
+            raise ValueError(
+                f"Demo 3 checkpoint contains cross-demo metadata: {contaminants}"
+            )
         metadata = state.get("demo3_mappo", {})
-        expected = self._expected_checkpoint_metadata()
+        expected = self._checkpoint_metadata()
         if metadata != expected:
             raise ValueError(f"Demo 3 MAPPO checkpoint metadata mismatch: {metadata!r}")
         self.models.actor.load_state_dict(state["actor_model_state_dict"], strict=True)
@@ -443,6 +710,14 @@ class Demo3PPO:
         )
         self.actor_learning_rate = self.models.actor_optimizer.param_groups[0]["lr"]
         self.critic_learning_rate = self.models.critic_optimizer.param_groups[0]["lr"]
+        if actor_learning_rate is not None:
+            self.actor_learning_rate = float(actor_learning_rate)
+            for group in self.models.actor_optimizer.param_groups:
+                group["lr"] = self.actor_learning_rate
+        if critic_learning_rate is not None:
+            self.critic_learning_rate = float(critic_learning_rate)
+            for group in self.models.critic_optimizer.param_groups:
+                group["lr"] = self.critic_learning_rate
         return int(state["iter"])
 
 
