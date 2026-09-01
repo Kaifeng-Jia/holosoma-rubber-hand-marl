@@ -7,7 +7,7 @@
 本阶段固定链路如下：
 
 ```text
-CORE4D-Real V2
+CORE4D-Real V1（官方完整 scene bundle）
   person1_poses.npz
   person2_poses.npz
   smooth_objposes.npy
@@ -38,7 +38,7 @@ CORE4D-Real V2
 
 本节仅记录官方论文、官方数据定义和官方代码能够确认的事实。
 
-### 2.1 一段 CORE4D-Real 序列
+### 2.1 一段 CORE4D-Real V1 序列
 
 每段交互包含两个人和一个刚体物体。与本项目有关的文件是：
 
@@ -53,7 +53,7 @@ CORE4D-Real V2
 
 物体网格位于 `object_models/<category>/<object_name>_m.obj`。官方说明网格位于物体类别的 canonical space，单位为米。
 
-### 2.2 每个人的 SMPL-X 字段
+### 2.2 V1 中每个人的 SMPL-X 字段
 
 官方加载方式为：
 
@@ -94,6 +94,12 @@ Motion NPZ 本身没有逐帧时间戳。视觉数据目录另有 `timestamp.txt
 官方说明人体与物体轨迹均位于同一个 world coordinate system；物体网格单位为米。世界原点由三枚固定标记定义，外部相机通过世界坐标下的 3D 标记和图像 2D 点执行 PnP 标定。
 
 官方文档没有明确写出 handedness、forward axis 和每根轴的正方向。官方 benchmark 代码把坐标第 1 维用于脚部高度，并在 X–Z 平面做朝向 canonicalization，因此 **Y-up 是有代码依据的判断**；它仍须在一个真实样本上用脚底、重力方向和物体落地姿态进行验证。不能只根据数组形状硬编码轴交换。
+
+### 2.6 V2 与完整 V1 scene 的关系
+
+远端真实包核查表明，`CORE4D_Real_human_object_motions_v2/batch*.zip` 不是上述完整五文件布局。V2 每段只包含更新后的人体 `person_1/result.npz`、`person_2/result.npz` 和少量抽帧 mesh/joints；物体轨迹、metadata 和对齐表仍须来自 V1。
+
+V2 的 `result.npz` 也不是 V1 的 `arr_0` NumPy 字典：顶层键为 `results`，内部包含 Torch Tensor/Parameter。当前 adapter 因此先支持官方文档和可视化程序直接使用的 V1 完整序列。若以后采用 V2，应新增单独的可信 loader，并用同一序列逐项验证帧数、person identity、世界坐标、人体—物体相对位置和接触时序；provenance 必须明确记录 `human_version=V2`、`scene_version=V1`，不能将 hybrid 产物标成纯 V2。
 
 ## 3. Adapter 必须锁定的四项规范
 
@@ -168,8 +174,8 @@ CORE4D 官方 person NPZ 把字典放在 `arr_0` object array 中，读取它必
 
 ### Stage A：最小官方样本与 raw audit
 
-- 使用 CORE4D-Real V2，而不是先下载全部 255 GB 数据或直接接入未充分文档化的 Synthetic 分支。
-- 先取得 action label、object model 和一个候选 motion sequence。
+- 使用 CORE4D-Real V1 的完整五文件序列，而不是先下载全部 255 GB 数据、拼接尚未校验的 V1/V2 hybrid，或直接接入未充分文档化的 Synthetic 分支。
+- 首个样本固定为 `20231003_2/000`：官方标签 `move2_obs0`、物体 `desk001`、197 帧。通过 HTTP Range 只提取该序列及其 object model，不下载约 34 GB 的完整 motion ZIP。
 - 打印并保存字段、shape、dtype、帧数、数值范围和 SHA-256；验证 15 FPS、Y-up、两人—物体长度一致和 mesh/metadata 解析。
 
 输出：raw audit 报告。此阶段不运行 OmniRetarget。
@@ -216,6 +222,7 @@ CORE4D 官方 person NPZ 把字典放在 `arr_0` object array 中，读取它必
 ## 8. 下载与许可注意事项
 
 - 官方 Hugging Face 数据仓库总计约 255 GB；CORE4D-Real human-object motion V2 单独约 39.6 GB，分为四个压缩包。Base adapter 首轮不需要 RGB/RGB-D 和 segmentation。
+- V1 完整 motion ZIP 约 34.16 GB，但官方 Hugging Face endpoint 支持 HTTP Range；首个样本实际只需提取约 44.4 MB 的 motion/metadata 和一个约 0.17 MB 的 desk mesh。
 - 官方 GitHub README 将该 work 标为 CC BY 4.0；Hugging Face dataset metadata 当前显示 MIT，部分 benchmark code 也单独使用 MIT。三处标记并不完全一致。内部研究阶段保留来源和引用即可；若要重新分发数据或转换产物，应先向作者确认 dataset 本体适用的许可。
 - SMPL-X 模型需要从 SMPL-X 官方渠道单独取得并遵守其许可；它不是 CORE4D 文件许可的自动组成部分。
 
