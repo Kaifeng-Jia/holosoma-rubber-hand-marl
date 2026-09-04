@@ -30,6 +30,11 @@ PERSON_COLORS = ((66, 135, 245), (245, 145, 66))
 def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--input", type=Path, required=True, help="Canonical CORE4D NPZ.")
+    parser.add_argument(
+        "--host",
+        default="127.0.0.1",
+        help="Viser bind address (default: local machine only).",
+    )
     parser.add_argument("--port", type=int, default=8080, help="Viser TCP port.")
     parser.add_argument(
         "--validate-only",
@@ -81,10 +86,10 @@ def validation_summary(sequence, mesh: trimesh.Trimesh) -> dict[str, object]:
     }
 
 
-def run_viewer(sequence, mesh: trimesh.Trimesh, port: int) -> None:
+def run_viewer(sequence, mesh: trimesh.Trimesh, host: str, port: int) -> None:
     if not 1 <= port <= 65535:
         raise ValueError(f"port must be in [1, 65535], got {port}")
-    server = viser.ViserServer(port=port)
+    server = viser.ViserServer(host=host, port=port)
     server.scene.add_grid(
         "/ground",
         width=8.0,
@@ -275,7 +280,7 @@ def main() -> None:
         print(json.dumps(summary, indent=2, sort_keys=True))
         return
     print(json.dumps(summary, indent=2, sort_keys=True))
-    run_viewer(sequence, mesh, args.port)
+    run_viewer(sequence, mesh, args.host, args.port)
 
 
 if __name__ == "__main__":

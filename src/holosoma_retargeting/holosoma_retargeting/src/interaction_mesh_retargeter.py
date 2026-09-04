@@ -18,9 +18,12 @@ from tqdm import tqdm
 from viser.extras import ViserUrdf  # type: ignore[import-not-found]
 
 from holosoma_retargeting.config_types.retargeter import (
+    ElasticConstraintConfig,
     FootLockConfig,
     HandOrientationConfig,
     PlanBPalmContactConfig,
+    PTFullArmOrientationConfig,
+    PTWristDominantSurfaceConfig,
     PTWristOrientationConfig,
     SelfCollisionConfig,
 )
@@ -66,6 +69,7 @@ class InteractionMeshRetargeter:
         activate_foot_sticking: bool = True,
         activate_obj_non_penetration: bool = True,
         activate_joint_limits: bool = True,
+        apply_manual_joint_limit_overrides: bool = True,
         step_size: float = 0.2,
         collision_detection_threshold: float = 0.1,
         penetration_tolerance: float = 1e-3,
@@ -82,6 +86,9 @@ class InteractionMeshRetargeter:
         hand_orientation: HandOrientationConfig | None = None,
         plan_b_palm_contact: PlanBPalmContactConfig | None = None,
         pt_wrist_orientation: PTWristOrientationConfig | None = None,
+        pt_full_arm_orientation: PTFullArmOrientationConfig | None = None,
+        pt_wrist_dominant_surface: PTWristDominantSurfaceConfig | None = None,
+        elastic_constraints: ElasticConstraintConfig | None = None,
     ):
         """This kinematic retargeter solves the diffIK problem with hard constraints in SQP style.
         During each SQP iteration, the problem is solved with the following constraints and costs:
@@ -96,12 +103,17 @@ class InteractionMeshRetargeter:
             q_a_init_idx: the index in robot's configuration where the optimization variables start. -7: starts from the
             floating base, -3: starts from the translation of the floating base, 0: starts from the actuated DOF,
             12: starts from waist, 15: starts from left shoulder
+            apply_manual_joint_limit_overrides: whether task-specific manual
+                bounds should further tighten the robot URDF joint limits.
             step_size: trust region for each SQP iteration.
             collision_detection_threshold: only start to detect collision
             when the distance is smaller than this threshold.
             penetration_tolerance: tolerance for penetration when enforcing non-penetration constraints.
             foot_sticking_tolerance: tolerance for foot sticking constraints in x, y.
             foot_lock: configuration for explicit frame-range based foot locking constraints.
+            elastic_constraints: optional exact-penalty relaxation for
+                robot-object and foot kinematic constraints. Ground, joint
+                limits, and the SQP trust region remain hard constraints.
             nominal_tracking_tau: the time constant for the nominal tracking cost.
         """
 
@@ -112,6 +124,9 @@ class InteractionMeshRetargeter:
         self.activate_foot_sticking = activate_foot_sticking
         self.activate_obj_non_penetration = activate_obj_non_penetration
         self.activate_joint_limits = activate_joint_limits
+        self.apply_manual_joint_limit_overrides = (
+            apply_manual_joint_limit_overrides
+        )
         self.foot_links = dict(zip(task_constants.FOOT_STICKING_LINKS, task_constants.FOOT_STICKING_LINKS))
         self.penetration_tolerance = penetration_tolerance
         self.step_size = step_size
@@ -135,6 +150,29 @@ class InteractionMeshRetargeter:
         self.hand_orientation = hand_orientation or HandOrientationConfig()
         self.plan_b_palm_contact = plan_b_palm_contact or PlanBPalmContactConfig()
         self.pt_wrist_orientation = pt_wrist_orientation or PTWristOrientationConfig()
+        self.pt_full_arm_orientation = (
+            pt_full_arm_orientation or PTFullArmOrientationConfig()
+        )
+        self._validate_pt_full_arm_orientation_config()
+        self.pt_wrist_dominant_surface = (
+            pt_wrist_dominant_surface or PTWristDominantSurfaceConfig()
+        )
+        self._validate_pt_wrist_dominant_surface_config()
+        self.elastic_constraints = elastic_constraints or ElasticConstraintConfig()
+        if (
+            not np.isfinite(self.elastic_constraints.object_collision_weight)
+            or self.elastic_constraints.object_collision_weight <= 0.0
+        ):
+            raise ValueError("Elastic object collision weight must be positive")
+        if (
+            not np.isfinite(self.elastic_constraints.foot_kinematics_weight)
+            or self.elastic_constraints.foot_kinematics_weight <= 0.0
+        ):
+            raise ValueError("Elastic foot kinematics weight must be positive")
+        self._last_elastic_slack_diagnostics = {
+            "object_collision_slack_max_m": 0.0,
+            "foot_constraint_slack_max_m": 0.0,
+        }
         if self.plan_b_palm_contact.enable:
             self.penetration_tolerance = (
                 self.plan_b_palm_contact.penetration_tolerance
@@ -147,12 +185,15 @@ class InteractionMeshRetargeter:
                 self.hand_orientation.enable,
                 self.plan_b_palm_contact.enable,
                 self.pt_wrist_orientation.enable,
+                self.pt_full_arm_orientation.enable,
+                self.pt_wrist_dominant_surface.enable,
             )
         )
         if enabled_hand_modes > 1:
             raise ValueError(
-                "Legacy hand orientation, Plan B palm contact, and A.1 PT wrist "
-                "orientation are mutually exclusive"
+                "Legacy hand orientation, Plan B palm contact, A.1 PT wrist "
+                "orientation, PT full-arm orientation, and PT wrist-dominant "
+                "surface refinement are mutually exclusive"
             )
 
         # Setup visualization if requested
@@ -171,6 +212,7 @@ class InteractionMeshRetargeter:
 
         self.robot_model = mujoco.MjModel.from_xml_path(robot_xml_path)
         print("Loading robot model from: ", robot_xml_path)
+        self._object_geom_ids = self._resolve_object_geom_ids()
 
         self.robot_data = mujoco.MjData(self.robot_model)
         self._init_self_collision(self._self_collision_config)
@@ -203,12 +245,21 @@ class InteractionMeshRetargeter:
         self.q_a_lb = complete_lower_limits[self.q_a_indices]
         self.q_a_ub = complete_upper_limits[self.q_a_indices]
 
-        self.q_a_lb[np.array(list(self.task_constants.MANUAL_LB.keys())).astype(int)] = list(
-            self.task_constants.MANUAL_LB.values()
-        )
-        self.q_a_ub[np.array(list(self.task_constants.MANUAL_UB.keys())).astype(int)] = list(
-            self.task_constants.MANUAL_UB.values()
-        )
+        if self.apply_manual_joint_limit_overrides:
+            manual_lb_indices = np.asarray(
+                list(self.task_constants.MANUAL_LB.keys()),
+                dtype=int,
+            )
+            manual_ub_indices = np.asarray(
+                list(self.task_constants.MANUAL_UB.keys()),
+                dtype=int,
+            )
+            self.q_a_lb[manual_lb_indices] = list(
+                self.task_constants.MANUAL_LB.values()
+            )
+            self.q_a_ub[manual_ub_indices] = list(
+                self.task_constants.MANUAL_UB.values()
+            )
 
         self._init_hand_orientation()
         self._init_plan_b_tabletop()
@@ -223,6 +274,67 @@ class InteractionMeshRetargeter:
         self.nominal_tracking_tau = nominal_tracking_tau
         self.track_nominal_indices = task_constants.NOMINAL_TRACKING_INDICES
 
+    def _validate_pt_full_arm_orientation_config(self) -> None:
+        """Validate the opt-in full-arm refinement before loading its targets."""
+        config = self.pt_full_arm_orientation
+        positive_weights = {
+            "orientation_weight": config.orientation_weight,
+            "hand_position_weight": config.hand_position_weight,
+        }
+        nonnegative_weights = {
+            "arm_prior_weight": config.arm_prior_weight,
+            "correction_temporal_weight": config.correction_temporal_weight,
+        }
+        for name, value in positive_weights.items():
+            if not np.isfinite(value) or value <= 0.0:
+                raise ValueError(f"PT full-arm {name} must be finite and positive")
+        for name, value in nonnegative_weights.items():
+            if not np.isfinite(value) or value < 0.0:
+                raise ValueError(f"PT full-arm {name} must be finite and non-negative")
+        if (
+            isinstance(config.max_nfev, bool)
+            or not isinstance(config.max_nfev, (int, np.integer))
+            or config.max_nfev <= 0
+        ):
+            raise ValueError("PT full-arm max_nfev must be a positive integer")
+
+    def _validate_pt_wrist_dominant_surface_config(self) -> None:
+        """Validate wrist-dominant surface-point refinement weights."""
+        config = self.pt_wrist_dominant_surface
+        positive_weights = {
+            "normal_weight": config.normal_weight,
+            "surface_position_weight": config.surface_position_weight,
+        }
+        nonnegative_weights = {
+            "finger_weight": config.finger_weight,
+            "proximal_prior_weight": config.proximal_prior_weight,
+            "wrist_prior_weight": config.wrist_prior_weight,
+            "proximal_correction_temporal_weight": (
+                config.proximal_correction_temporal_weight
+            ),
+            "wrist_correction_temporal_weight": (
+                config.wrist_correction_temporal_weight
+            ),
+        }
+        for name, value in positive_weights.items():
+            if not np.isfinite(value) or value <= 0.0:
+                raise ValueError(
+                    f"PT wrist-dominant surface {name} must be finite and positive"
+                )
+        for name, value in nonnegative_weights.items():
+            if not np.isfinite(value) or value < 0.0:
+                raise ValueError(
+                    f"PT wrist-dominant surface {name} must be finite and non-negative"
+                )
+        if (
+            isinstance(config.max_nfev, bool)
+            or not isinstance(config.max_nfev, (int, np.integer))
+            or config.max_nfev <= 0
+        ):
+            raise ValueError(
+                "PT wrist-dominant surface max_nfev must be a positive integer"
+            )
+
     def _init_hand_orientation(self) -> None:
         """Resolve hand links, palm frames, and upper-limb optimization joints."""
         self._hand_orientation_specs: list[dict[str, object]] = []
@@ -230,6 +342,8 @@ class InteractionMeshRetargeter:
             self.hand_orientation.enable
             or self.plan_b_palm_contact.enable
             or self.pt_wrist_orientation.enable
+            or self.pt_full_arm_orientation.enable
+            or self.pt_wrist_dominant_surface.enable
         ):
             return
         if not self.has_dynamic_object:
@@ -275,11 +389,15 @@ class InteractionMeshRetargeter:
             spec["palm_basis"] = np.column_stack(
                 [finger_direction, across_direction, palm_normal]
             )
-            if self.plan_b_palm_contact.enable:
+            if (
+                self.plan_b_palm_contact.enable
+                or self.pt_wrist_dominant_surface.enable
+            ):
                 spec["palm_contact_point"] = self._derive_palm_contact_point(
                     str(spec["side"]),
                     palm_normal,
                 )
+            if self.plan_b_palm_contact.enable:
                 spec["palm_geom_id"] = mujoco.mj_name2id(
                     self.robot_model,
                     mujoco.mjtObj.mjOBJ_GEOM,
@@ -318,6 +436,18 @@ class InteractionMeshRetargeter:
                 arm_lower_limits.append(float(self.robot_model.jnt_range[joint_id, 0]))
                 arm_upper_limits.append(float(self.robot_model.jnt_range[joint_id, 1]))
             spec["arm_orientation_indices"] = np.asarray(arm_indices, dtype=int)
+            spec["pt_full_arm_qpos_indices"] = np.asarray(
+                arm_qpos_indices,
+                dtype=int,
+            )
+            spec["pt_full_arm_lower_limits"] = np.asarray(
+                arm_lower_limits,
+                dtype=float,
+            )
+            spec["pt_full_arm_upper_limits"] = np.asarray(
+                arm_upper_limits,
+                dtype=float,
+            )
             spec["pt_wrist_qpos_indices"] = _select_pt_wrist_orientation_indices(
                 np.asarray(arm_qpos_indices, dtype=int)
             )
@@ -729,6 +859,7 @@ class InteractionMeshRetargeter:
         q_locked_list[:, -7:] = object_poses_augmented
         q = np.copy(q_locked_list[0])
         retargeted_motions = [q]
+        elastic_diagnostics: list[dict[str, float]] = []
 
         hand_orientation_weights = self._compute_hand_orientation_weights(
             human_joint_motions,
@@ -859,6 +990,19 @@ class InteractionMeshRetargeter:
                     )
 
                 retargeted_motions.append(q)
+                if self.elastic_constraints.enable:
+                    elastic_diagnostics.append(
+                        self._measure_elastic_constraint_diagnostics(
+                            q=q,
+                            q_t_last=retargeted_motions[-2],
+                            q_a_nominal=(
+                                q_nominal_list[i, self.q_a_indices]
+                                if q_nominal_list is not None
+                                else None
+                            ),
+                            foot_sticking=foot_sticking_sequences[i],
+                        )
+                    )
                 if self.visualize and self.debug:
                     self.draw_q(q)
 
@@ -883,13 +1027,19 @@ class InteractionMeshRetargeter:
             robot_kpts_handle_list.clear()
 
         # Save results
-        np.savez(
-            dest_res_path,
-            qpos=np.array(retargeted_motions)[1:],
-            human_joints=human_joint_motions,
-            fps=30,
-            cost=cost,
-        )
+        result_arrays: dict[str, object] = {
+            "qpos": np.array(retargeted_motions)[1:],
+            "human_joints": human_joint_motions,
+            "fps": 30,
+            "cost": cost,
+        }
+        if self.elastic_constraints.enable:
+            for key in elastic_diagnostics[0] if elastic_diagnostics else ():
+                result_arrays[key] = np.asarray(
+                    [frame[key] for frame in elastic_diagnostics],
+                    dtype=np.float64,
+                )
+        np.savez(dest_res_path, **result_arrays)
         print("Saving results to path:", dest_res_path)
 
         if self.visualize:
@@ -1088,7 +1238,19 @@ class InteractionMeshRetargeter:
         """Convert anatomical PT palm frames to robot hand-link rotations."""
         num_hands = len(self._hand_orientation_specs)
         targets = np.zeros((num_frames, num_hands, 3, 3), dtype=float)
-        if not self.pt_wrist_orientation.enable:
+        if not (
+            self.pt_wrist_orientation.enable
+            or getattr(
+                self,
+                "pt_full_arm_orientation",
+                PTFullArmOrientationConfig(),
+            ).enable
+            or getattr(
+                self,
+                "pt_wrist_dominant_surface",
+                PTWristDominantSurfaceConfig(),
+            ).enable
+        ):
             return targets
         if palm_orientations is None:
             raise ValueError("PT wrist orientation tracking requires palm orientation targets")
@@ -1192,6 +1354,539 @@ class InteractionMeshRetargeter:
                 f"{self.pt_wrist_orientation.max_solver_error_deg:.6f} deg"
             )
         return result, errors_deg
+
+    def apply_pt_full_arm_orientation_postprocess(
+        self,
+        qpos_sequence: np.ndarray,
+        palm_orientations: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, np.ndarray | float]]:
+        """Refine demonstrated palms with each seven-DoF arm independently.
+
+        The floating base, waist, legs, opposite arm, and interaction object are
+        copied exactly from ``qpos_sequence``.  Each hand solve trades off the
+        raw demonstrated palm orientation against the baseline hand-link
+        position, a baseline arm-pose prior, and temporal continuity of the
+        *correction*.  Smoothing the correction rather than the output motion
+        preserves intentional fast motion already present in the baseline.
+
+        Returns:
+            ``(qpos, metrics)``.  Per-frame metrics use left/right hand order
+            and retain the complete seven-joint corrections for auditing.
+        """
+        config = self.pt_full_arm_orientation
+        if not config.enable:
+            raise ValueError("PT full-arm orientation post-processing is disabled")
+
+        baseline = np.asarray(qpos_sequence, dtype=float)
+        if baseline.ndim != 2 or baseline.shape[1] != self.nq:
+            raise ValueError(
+                f"Expected qpos with shape (T, {self.nq}), got {baseline.shape}"
+            )
+        if baseline.shape[0] == 0:
+            raise ValueError("PT full-arm orientation requires at least one frame")
+        if not np.isfinite(baseline).all():
+            raise ValueError("PT full-arm qpos input contains non-finite values")
+
+        targets = self._map_pt_palm_orientations_to_robot_links(
+            palm_orientations,
+            baseline.shape[0],
+        )
+        if not np.isfinite(targets).all():
+            raise ValueError("PT full-arm palm targets contain non-finite values")
+
+        num_frames = baseline.shape[0]
+        num_hands = len(self._hand_orientation_specs)
+        if num_hands != 2:
+            raise ValueError(
+                f"PT full-arm orientation requires two hand specifications, got {num_hands}"
+            )
+
+        result = baseline.copy()
+        orientation_errors_deg = np.zeros((num_frames, num_hands), dtype=float)
+        hand_position_errors_m = np.zeros((num_frames, num_hands), dtype=float)
+        arm_corrections_rad = np.zeros((num_frames, num_hands, 7), dtype=float)
+        solver_success = np.zeros((num_frames, num_hands), dtype=bool)
+        solver_nfev = np.zeros((num_frames, num_hands), dtype=np.int64)
+        solver_cost = np.zeros((num_frames, num_hands), dtype=float)
+        arm_qpos_indices = np.empty((num_hands, 7), dtype=np.int64)
+
+        previous_corrections = [np.zeros(7, dtype=float) for _ in range(num_hands)]
+        sqrt_orientation_weight = np.sqrt(config.orientation_weight)
+        sqrt_position_weight = np.sqrt(config.hand_position_weight)
+        sqrt_prior_weight = np.sqrt(config.arm_prior_weight)
+        sqrt_temporal_weight = np.sqrt(config.correction_temporal_weight)
+
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            indices = np.asarray(spec["pt_full_arm_qpos_indices"], dtype=int)
+            if indices.shape != (7,):
+                raise ValueError(
+                    "PT full-arm hand specification must contain seven qpos indices"
+                )
+            arm_qpos_indices[hand_idx] = indices
+
+        for frame_idx in range(num_frames):
+            baseline_q = baseline[frame_idx].copy()
+            self.robot_data.qpos[:] = baseline_q
+            mujoco.mj_forward(self.robot_model, self.robot_data)
+            baseline_positions = np.stack(
+                [
+                    self.robot_data.xpos[int(spec["body_id"])].copy()
+                    for spec in self._hand_orientation_specs
+                ]
+            )
+
+            frame_q = baseline_q.copy()
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                qpos_indices = arm_qpos_indices[hand_idx]
+                lower = np.asarray(spec["pt_full_arm_lower_limits"], dtype=float)
+                upper = np.asarray(spec["pt_full_arm_upper_limits"], dtype=float)
+                if lower.shape != (7,) or upper.shape != (7,):
+                    raise ValueError(
+                        "PT full-arm hand specification must contain seven joint bounds"
+                    )
+                body_id = int(spec["body_id"])
+                baseline_arm = baseline_q[qpos_indices].copy()
+                previous_correction = previous_corrections[hand_idx]
+                target_rotation = targets[frame_idx, hand_idx]
+                target_position = baseline_positions[hand_idx]
+
+                def full_arm_residual(arm_qpos: np.ndarray) -> np.ndarray:
+                    candidate_q = baseline_q.copy()
+                    candidate_q[qpos_indices] = arm_qpos
+                    self.robot_data.qpos[:] = candidate_q
+                    mujoco.mj_forward(self.robot_model, self.robot_data)
+                    current_rotation = self.robot_data.xmat[body_id].reshape(3, 3)
+                    current_position = self.robot_data.xpos[body_id]
+                    correction = arm_qpos - baseline_arm
+                    residuals = [
+                        sqrt_orientation_weight
+                        * Rotation.from_matrix(
+                            target_rotation @ current_rotation.T
+                        ).as_rotvec(),
+                        sqrt_position_weight
+                        * (current_position - target_position),
+                    ]
+                    if sqrt_prior_weight > 0.0:
+                        residuals.append(sqrt_prior_weight * correction)
+                    if sqrt_temporal_weight > 0.0:
+                        residuals.append(
+                            sqrt_temporal_weight
+                            * (correction - previous_correction)
+                        )
+                    return np.concatenate(residuals)
+
+                initial = np.clip(
+                    baseline_arm + previous_correction,
+                    lower + 1.0e-9,
+                    upper - 1.0e-9,
+                )
+                solution = least_squares(
+                    full_arm_residual,
+                    initial,
+                    bounds=(lower, upper),
+                    xtol=1.0e-11,
+                    ftol=1.0e-11,
+                    gtol=1.0e-11,
+                    max_nfev=int(config.max_nfev),
+                )
+                if not np.isfinite(solution.x).all():
+                    raise RuntimeError(
+                        "PT full-arm solver produced non-finite joint values at "
+                        f"frame {frame_idx}, hand {spec['side']}"
+                    )
+
+                frame_q[qpos_indices] = solution.x
+                correction = solution.x - baseline_arm
+                previous_corrections[hand_idx] = correction.copy()
+                arm_corrections_rad[frame_idx, hand_idx] = correction
+                solver_success[frame_idx, hand_idx] = bool(solution.success)
+                solver_nfev[frame_idx, hand_idx] = int(solution.nfev)
+                solver_cost[frame_idx, hand_idx] = float(solution.cost)
+
+                self.robot_data.qpos[:] = frame_q
+                mujoco.mj_forward(self.robot_model, self.robot_data)
+                current_rotation = self.robot_data.xmat[body_id].reshape(3, 3)
+                current_position = self.robot_data.xpos[body_id]
+                orientation_errors_deg[frame_idx, hand_idx] = np.degrees(
+                    np.linalg.norm(
+                        Rotation.from_matrix(
+                            target_rotation @ current_rotation.T
+                        ).as_rotvec()
+                    )
+                )
+                hand_position_errors_m[frame_idx, hand_idx] = np.linalg.norm(
+                    current_position - target_position
+                )
+
+            result[frame_idx] = frame_q
+
+        if not np.isfinite(result).all():
+            raise RuntimeError("PT full-arm result contains non-finite qpos values")
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            indices = arm_qpos_indices[hand_idx]
+            lower = np.asarray(spec["pt_full_arm_lower_limits"], dtype=float)
+            upper = np.asarray(spec["pt_full_arm_upper_limits"], dtype=float)
+            if np.any(result[:, indices] < lower - 1.0e-8) or np.any(
+                result[:, indices] > upper + 1.0e-8
+            ):
+                raise RuntimeError(
+                    f"PT full-arm result violates {spec['side']} arm joint limits"
+                )
+
+        arm_steps_rad = np.zeros_like(arm_corrections_rad)
+        correction_steps_rad = np.zeros_like(arm_corrections_rad)
+        if num_frames > 1:
+            for hand_idx in range(num_hands):
+                indices = arm_qpos_indices[hand_idx]
+                arm_steps_rad[1:, hand_idx] = np.diff(
+                    result[:, indices],
+                    axis=0,
+                )
+            correction_steps_rad[1:] = np.diff(arm_corrections_rad, axis=0)
+
+        metrics: dict[str, np.ndarray | float] = {
+            "orientation_errors_deg": orientation_errors_deg,
+            "hand_position_errors_m": hand_position_errors_m,
+            "arm_corrections_rad": arm_corrections_rad,
+            "arm_steps_rad": arm_steps_rad,
+            "correction_steps_rad": correction_steps_rad,
+            "arm_qpos_indices": arm_qpos_indices,
+            "solver_success": solver_success,
+            "solver_nfev": solver_nfev,
+            "solver_cost": solver_cost,
+            "orientation_error_p95_deg": np.percentile(
+                orientation_errors_deg,
+                95,
+                axis=0,
+            ),
+            "orientation_error_max_deg": orientation_errors_deg.max(axis=0),
+            "hand_position_error_p95_m": np.percentile(
+                hand_position_errors_m,
+                95,
+                axis=0,
+            ),
+            "hand_position_error_max_m": hand_position_errors_m.max(axis=0),
+            "arm_correction_abs_max_rad": np.max(
+                np.abs(arm_corrections_rad),
+                axis=(0, 2),
+            ),
+            "correction_step_abs_max_rad": np.max(
+                np.abs(correction_steps_rad),
+                axis=(0, 2),
+            ),
+            "solver_success_rate": solver_success.mean(axis=0),
+        }
+        return result, metrics
+
+    def apply_pt_wrist_dominant_surface_postprocess(
+        self,
+        qpos_sequence: np.ndarray,
+        palm_orientations: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, np.ndarray | float]]:
+        """Refine palm surfaces while keeping shoulder/elbow motion conservative.
+
+        Both arms are solved independently.  The rubber-hand support point is
+        held near its baseline world position, palm-normal alignment is the
+        primary orientation task, and the demonstrated finger direction is a
+        weaker twist cue.  Priors and temporal correction weights are larger
+        for the proximal four joints than for the three wrist joints.
+        """
+        config = self.pt_wrist_dominant_surface
+        if not config.enable:
+            raise ValueError(
+                "PT wrist-dominant surface post-processing is disabled"
+            )
+
+        baseline = np.asarray(qpos_sequence, dtype=float)
+        if baseline.ndim != 2 or baseline.shape[1] != self.nq:
+            raise ValueError(
+                f"Expected qpos with shape (T, {self.nq}), got {baseline.shape}"
+            )
+        if baseline.shape[0] == 0:
+            raise ValueError(
+                "PT wrist-dominant surface refinement requires at least one frame"
+            )
+        if not np.isfinite(baseline).all():
+            raise ValueError(
+                "PT wrist-dominant surface qpos input contains non-finite values"
+            )
+
+        targets = self._map_pt_palm_orientations_to_robot_links(
+            palm_orientations,
+            baseline.shape[0],
+        )
+        if not np.isfinite(targets).all():
+            raise ValueError(
+                "PT wrist-dominant surface palm targets contain non-finite values"
+            )
+
+        num_frames = baseline.shape[0]
+        num_hands = len(self._hand_orientation_specs)
+        if num_hands != 2:
+            raise ValueError(
+                "PT wrist-dominant surface refinement requires two hand "
+                f"specifications, got {num_hands}"
+            )
+
+        result = baseline.copy()
+        orientation_errors_deg = np.zeros((num_frames, num_hands), dtype=float)
+        palm_normal_errors_deg = np.zeros((num_frames, num_hands), dtype=float)
+        finger_direction_errors_deg = np.zeros(
+            (num_frames, num_hands),
+            dtype=float,
+        )
+        surface_position_errors_m = np.zeros(
+            (num_frames, num_hands),
+            dtype=float,
+        )
+        link_origin_errors_m = np.zeros((num_frames, num_hands), dtype=float)
+        arm_corrections_rad = np.zeros((num_frames, num_hands, 7), dtype=float)
+        solver_success = np.zeros((num_frames, num_hands), dtype=bool)
+        solver_nfev = np.zeros((num_frames, num_hands), dtype=np.int64)
+        solver_cost = np.zeros((num_frames, num_hands), dtype=float)
+        arm_qpos_indices = np.empty((num_hands, 7), dtype=np.int64)
+
+        previous_corrections = [np.zeros(7, dtype=float) for _ in range(num_hands)]
+        sqrt_normal_weight = np.sqrt(config.normal_weight)
+        sqrt_finger_weight = np.sqrt(config.finger_weight)
+        sqrt_surface_position_weight = np.sqrt(config.surface_position_weight)
+        sqrt_proximal_prior_weight = np.sqrt(config.proximal_prior_weight)
+        sqrt_wrist_prior_weight = np.sqrt(config.wrist_prior_weight)
+        sqrt_proximal_temporal_weight = np.sqrt(
+            config.proximal_correction_temporal_weight
+        )
+        sqrt_wrist_temporal_weight = np.sqrt(
+            config.wrist_correction_temporal_weight
+        )
+
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            indices = np.asarray(spec["pt_full_arm_qpos_indices"], dtype=int)
+            if indices.shape != (7,):
+                raise ValueError(
+                    "PT wrist-dominant surface hand specification must contain "
+                    "seven qpos indices"
+                )
+            if "palm_contact_point" not in spec:
+                raise ValueError(
+                    "PT wrist-dominant surface hand specification is missing "
+                    "the rubber-palm support point"
+                )
+            arm_qpos_indices[hand_idx] = indices
+
+        def unit_vector_angle_deg(first: np.ndarray, second: np.ndarray) -> float:
+            cosine = float(np.clip(np.dot(first, second), -1.0, 1.0))
+            return float(np.degrees(np.arccos(cosine)))
+
+        for frame_idx in range(num_frames):
+            baseline_q = baseline[frame_idx].copy()
+            self.robot_data.qpos[:] = baseline_q
+            mujoco.mj_forward(self.robot_model, self.robot_data)
+            baseline_link_origins = np.stack(
+                [
+                    self.robot_data.xpos[int(spec["body_id"])].copy()
+                    for spec in self._hand_orientation_specs
+                ]
+            )
+            baseline_surface_points = np.stack(
+                [
+                    self.robot_data.xpos[int(spec["body_id"])]
+                    + self.robot_data.xmat[int(spec["body_id"])].reshape(3, 3)
+                    @ np.asarray(spec["palm_contact_point"], dtype=float)
+                    for spec in self._hand_orientation_specs
+                ]
+            )
+
+            frame_q = baseline_q.copy()
+            for hand_idx, spec in enumerate(self._hand_orientation_specs):
+                qpos_indices = arm_qpos_indices[hand_idx]
+                lower = np.asarray(spec["pt_full_arm_lower_limits"], dtype=float)
+                upper = np.asarray(spec["pt_full_arm_upper_limits"], dtype=float)
+                if lower.shape != (7,) or upper.shape != (7,):
+                    raise ValueError(
+                        "PT wrist-dominant surface hand specification must "
+                        "contain seven joint bounds"
+                    )
+                body_id = int(spec["body_id"])
+                baseline_arm = baseline_q[qpos_indices].copy()
+                previous_correction = previous_corrections[hand_idx]
+                palm_normal_local = np.asarray(spec["palm_normal"], dtype=float)
+                palm_normal_local /= np.linalg.norm(palm_normal_local)
+                finger_local = np.asarray(spec["palm_basis"], dtype=float)[:, 0]
+                finger_local /= np.linalg.norm(finger_local)
+                palm_support_local = np.asarray(
+                    spec["palm_contact_point"],
+                    dtype=float,
+                )
+                target_rotation = targets[frame_idx, hand_idx]
+                target_normal = target_rotation @ palm_normal_local
+                target_finger = target_rotation @ finger_local
+                target_surface_point = baseline_surface_points[hand_idx]
+
+                def surface_residual(arm_qpos: np.ndarray) -> np.ndarray:
+                    candidate_q = baseline_q.copy()
+                    candidate_q[qpos_indices] = arm_qpos
+                    self.robot_data.qpos[:] = candidate_q
+                    mujoco.mj_forward(self.robot_model, self.robot_data)
+                    current_rotation = self.robot_data.xmat[body_id].reshape(3, 3)
+                    current_surface_point = (
+                        self.robot_data.xpos[body_id]
+                        + current_rotation @ palm_support_local
+                    )
+                    current_normal = current_rotation @ palm_normal_local
+                    current_finger = current_rotation @ finger_local
+                    correction = arm_qpos - baseline_arm
+                    residuals = [
+                        sqrt_normal_weight * (current_normal - target_normal),
+                        sqrt_surface_position_weight
+                        * (current_surface_point - target_surface_point),
+                    ]
+                    if sqrt_finger_weight > 0.0:
+                        residuals.append(
+                            sqrt_finger_weight * (current_finger - target_finger)
+                        )
+                    if sqrt_proximal_prior_weight > 0.0:
+                        residuals.append(
+                            sqrt_proximal_prior_weight * correction[:4]
+                        )
+                    if sqrt_wrist_prior_weight > 0.0:
+                        residuals.append(
+                            sqrt_wrist_prior_weight * correction[4:]
+                        )
+                    temporal_correction = correction - previous_correction
+                    if sqrt_proximal_temporal_weight > 0.0:
+                        residuals.append(
+                            sqrt_proximal_temporal_weight
+                            * temporal_correction[:4]
+                        )
+                    if sqrt_wrist_temporal_weight > 0.0:
+                        residuals.append(
+                            sqrt_wrist_temporal_weight
+                            * temporal_correction[4:]
+                        )
+                    return np.concatenate(residuals)
+
+                initial = np.clip(
+                    baseline_arm + previous_correction,
+                    lower + 1.0e-9,
+                    upper - 1.0e-9,
+                )
+                solution = least_squares(
+                    surface_residual,
+                    initial,
+                    bounds=(lower, upper),
+                    xtol=1.0e-11,
+                    ftol=1.0e-11,
+                    gtol=1.0e-11,
+                    max_nfev=int(config.max_nfev),
+                )
+                if not np.isfinite(solution.x).all():
+                    raise RuntimeError(
+                        "PT wrist-dominant surface solver produced non-finite "
+                        f"joint values at frame {frame_idx}, hand {spec['side']}"
+                    )
+
+                frame_q[qpos_indices] = solution.x
+                correction = solution.x - baseline_arm
+                previous_corrections[hand_idx] = correction.copy()
+                arm_corrections_rad[frame_idx, hand_idx] = correction
+                solver_success[frame_idx, hand_idx] = bool(solution.success)
+                solver_nfev[frame_idx, hand_idx] = int(solution.nfev)
+                solver_cost[frame_idx, hand_idx] = float(solution.cost)
+
+                self.robot_data.qpos[:] = frame_q
+                mujoco.mj_forward(self.robot_model, self.robot_data)
+                current_rotation = self.robot_data.xmat[body_id].reshape(3, 3)
+                current_origin = self.robot_data.xpos[body_id]
+                current_surface_point = (
+                    current_origin + current_rotation @ palm_support_local
+                )
+                current_normal = current_rotation @ palm_normal_local
+                current_finger = current_rotation @ finger_local
+                orientation_errors_deg[frame_idx, hand_idx] = np.degrees(
+                    Rotation.from_matrix(
+                        target_rotation @ current_rotation.T
+                    ).magnitude()
+                )
+                palm_normal_errors_deg[frame_idx, hand_idx] = (
+                    unit_vector_angle_deg(current_normal, target_normal)
+                )
+                finger_direction_errors_deg[frame_idx, hand_idx] = (
+                    unit_vector_angle_deg(current_finger, target_finger)
+                )
+                surface_position_errors_m[frame_idx, hand_idx] = np.linalg.norm(
+                    current_surface_point - target_surface_point
+                )
+                link_origin_errors_m[frame_idx, hand_idx] = np.linalg.norm(
+                    current_origin - baseline_link_origins[hand_idx]
+                )
+
+            result[frame_idx] = frame_q
+
+        if not np.isfinite(result).all():
+            raise RuntimeError(
+                "PT wrist-dominant surface result contains non-finite qpos values"
+            )
+        for hand_idx, spec in enumerate(self._hand_orientation_specs):
+            indices = arm_qpos_indices[hand_idx]
+            lower = np.asarray(spec["pt_full_arm_lower_limits"], dtype=float)
+            upper = np.asarray(spec["pt_full_arm_upper_limits"], dtype=float)
+            if np.any(result[:, indices] < lower - 1.0e-8) or np.any(
+                result[:, indices] > upper + 1.0e-8
+            ):
+                raise RuntimeError(
+                    "PT wrist-dominant surface result violates "
+                    f"{spec['side']} arm joint limits"
+                )
+
+        arm_steps_rad = np.zeros_like(arm_corrections_rad)
+        correction_steps_rad = np.zeros_like(arm_corrections_rad)
+        if num_frames > 1:
+            for hand_idx in range(num_hands):
+                indices = arm_qpos_indices[hand_idx]
+                arm_steps_rad[1:, hand_idx] = np.diff(
+                    result[:, indices],
+                    axis=0,
+                )
+            correction_steps_rad[1:] = np.diff(arm_corrections_rad, axis=0)
+
+        metrics: dict[str, np.ndarray | float] = {
+            "orientation_errors_deg": orientation_errors_deg,
+            "palm_normal_errors_deg": palm_normal_errors_deg,
+            "finger_direction_errors_deg": finger_direction_errors_deg,
+            "surface_position_errors_m": surface_position_errors_m,
+            "link_origin_errors_m": link_origin_errors_m,
+            "arm_corrections_rad": arm_corrections_rad,
+            "arm_steps_rad": arm_steps_rad,
+            "correction_steps_rad": correction_steps_rad,
+            "arm_qpos_indices": arm_qpos_indices,
+            "solver_success": solver_success,
+            "solver_nfev": solver_nfev,
+            "solver_cost": solver_cost,
+            "palm_normal_error_p95_deg": np.percentile(
+                palm_normal_errors_deg,
+                95,
+                axis=0,
+            ),
+            "palm_normal_error_max_deg": palm_normal_errors_deg.max(axis=0),
+            "finger_direction_error_p95_deg": np.percentile(
+                finger_direction_errors_deg,
+                95,
+                axis=0,
+            ),
+            "finger_direction_error_max_deg": finger_direction_errors_deg.max(
+                axis=0
+            ),
+            "surface_position_error_p95_m": np.percentile(
+                surface_position_errors_m,
+                95,
+                axis=0,
+            ),
+            "surface_position_error_max_m": surface_position_errors_m.max(
+                axis=0
+            ),
+            "solver_success_rate": solver_success.mean(axis=0),
+        }
+        return result, metrics
 
     def _compute_fixed_push_hand_orientation_targets(
         self,
@@ -1404,6 +2099,8 @@ class InteractionMeshRetargeter:
 
         # Constraints list
         constraints = []
+        object_collision_slacks: list[cp.Variable] = []
+        foot_constraint_slacks: list[cp.Variable] = []
 
         # Linear equality
         constraints += [cp.Constant(J_L[:, self.q_a_indices]) @ dqa - lap_var == -lap0_vec]
@@ -1429,10 +2126,21 @@ class InteractionMeshRetargeter:
                 for key, J_WF in J_WF_dict.items():
                     z_delta = p_WF_nominal_dict[key][2] - p_WF_dict[key][2]
                     Jz = J_WF[2, self.q_a_indices]
-                    constraints += [
-                        Jz @ dqa >= z_delta - tolerance,
-                        Jz @ dqa <= z_delta + tolerance,
-                    ]
+                    if self.elastic_constraints.enable:
+                        slack = cp.Variable(
+                            nonneg=True,
+                            name=f"foot_height_slack_{frame_idx}_{key}",
+                        )
+                        foot_constraint_slacks.append(slack)
+                        constraints += [
+                            Jz @ dqa >= z_delta - tolerance - slack,
+                            Jz @ dqa <= z_delta + tolerance + slack,
+                        ]
+                    else:
+                        constraints += [
+                            Jz @ dqa >= z_delta - tolerance,
+                            Jz @ dqa <= z_delta + tolerance,
+                        ]
 
             # Foot sticking: constrain XY to stay near previous frame position
             if apply_foot_sticking:
@@ -1456,10 +2164,22 @@ class InteractionMeshRetargeter:
                         p_ub = p_lb + 2 * self.foot_sticking_tolerance  # symmetric window
 
                         Jxy = J_WF[:2, self.q_a_indices]  # (2 x nq_act)
-                        constraints += [
-                            Jxy @ dqa >= p_lb[:2],
-                            Jxy @ dqa <= p_ub[:2],
-                        ]
+                        if self.elastic_constraints.enable:
+                            slack = cp.Variable(
+                                2,
+                                nonneg=True,
+                                name=f"foot_xy_slack_{frame_idx}_{key}",
+                            )
+                            foot_constraint_slacks.append(slack)
+                            constraints += [
+                                Jxy @ dqa >= p_lb[:2] - slack,
+                                Jxy @ dqa <= p_ub[:2] + slack,
+                            ]
+                        else:
+                            constraints += [
+                                Jxy @ dqa >= p_lb[:2],
+                                Jxy @ dqa <= p_ub[:2],
+                            ]
 
             # Foot lock windows: pin Z to floor within configured frame ranges
             if apply_foot_lock:
@@ -1478,10 +2198,23 @@ class InteractionMeshRetargeter:
         # Non-penetration constraints
         Js, phis = self._update_jacobians_and_phis_from_q(q)
         for key, phi in phis.items():
+            is_object_pair = self._is_object_collision_pair(key)
+            if is_object_pair and not self.activate_obj_non_penetration:
+                continue
             Ja_n_full = Js[key]
             Ja_n = Ja_n_full[self.q_a_indices]
             rhs = -phi - self.penetration_tolerance
-            constraints += [Ja_n @ dqa >= rhs]
+            if self.elastic_constraints.enable and is_object_pair:
+                slack = cp.Variable(
+                    nonneg=True,
+                    name=(
+                        f"object_collision_slack_{frame_idx}_{key[0]}_{key[1]}"
+                    ),
+                )
+                object_collision_slacks.append(slack)
+                constraints += [Ja_n @ dqa + slack >= rhs]
+            else:
+                constraints += [Ja_n @ dqa >= rhs]
 
         # Self-collision constraints
         Js_sc, phis_sc = self._compute_self_collision_constraints(frame_idx)
@@ -1504,6 +2237,17 @@ class InteractionMeshRetargeter:
 
         # Objective
         obj_terms = []
+
+        if object_collision_slacks:
+            obj_terms.append(
+                self.elastic_constraints.object_collision_weight
+                * cp.sum(cp.hstack(object_collision_slacks))
+            )
+        if foot_constraint_slacks:
+            obj_terms.append(
+                self.elastic_constraints.foot_kinematics_weight
+                * cp.sum(cp.hstack(foot_constraint_slacks))
+            )
 
         obj_terms.append(cp.sum_squares(cp.multiply(sqrt_w3, lap_var - target_lap_vec)))
 
@@ -1711,6 +2455,7 @@ class InteractionMeshRetargeter:
         if (
             problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE)
             and (init_t or self.plan_b_palm_contact.enable)
+            and not self.elastic_constraints.enable
         ):
             constraints = [c for c in constraints if not isinstance(c, cp.constraints.second_order.SOC)]
             problem = cp.Problem(cp.Minimize(cp.sum(obj_terms)), constraints)
@@ -1718,6 +2463,23 @@ class InteractionMeshRetargeter:
 
         if problem.status not in (cp.OPTIMAL, cp.OPTIMAL_INACCURATE):
             raise RuntimeError(f"CVXPY solve failed: {problem.status}")
+
+        def _slack_max(slacks: list[cp.Variable]) -> float:
+            values = [
+                np.asarray(slack.value, dtype=float).reshape(-1)
+                for slack in slacks
+                if slack.value is not None
+            ]
+            return float(np.max(np.concatenate(values))) if values else 0.0
+
+        self._last_elastic_slack_diagnostics = {
+            "object_collision_slack_max_m": _slack_max(
+                object_collision_slacks
+            ),
+            "foot_constraint_slack_max_m": _slack_max(
+                foot_constraint_slacks
+            ),
+        }
 
         dqa_star = dqa.value
         cost = problem.value
@@ -1727,6 +2489,125 @@ class InteractionMeshRetargeter:
         q_star[3:7] /= np.linalg.norm(q_star[3:7]) + 1e-12
 
         return q_star, cost
+
+    def _is_object_collision_pair(self, pair: tuple[int, int]) -> bool:
+        """Return whether a collision pair contains the interaction object."""
+        return pair[0] in self._object_geom_ids or pair[1] in self._object_geom_ids
+
+    def _resolve_object_geom_ids(self) -> frozenset[int]:
+        """Resolve interaction-object geoms by MuJoCo body ownership."""
+        model = self.robot_model
+        object_body_id = -1
+        for body_name in (self.object_name, f"{self.object_name}_link"):
+            object_body_id = mujoco.mj_name2id(
+                model,
+                mujoco.mjtObj.mjOBJ_BODY,
+                body_name,
+            )
+            if object_body_id >= 0:
+                break
+
+        if object_body_id < 0:
+            free_joint_ids = np.flatnonzero(
+                model.jnt_type == int(mujoco.mjtJoint.mjJNT_FREE)
+            )
+            if free_joint_ids.size >= 2:
+                object_body_id = int(model.jnt_bodyid[int(free_joint_ids[-1])])
+        if object_body_id < 0:
+            return frozenset()
+
+        object_body_ids: set[int] = set()
+        for body_id in range(model.nbody):
+            ancestor = body_id
+            while ancestor > 0:
+                if ancestor == object_body_id:
+                    object_body_ids.add(body_id)
+                    break
+                ancestor = int(model.body_parentid[ancestor])
+        return frozenset(
+            geom_id
+            for geom_id in range(model.ngeom)
+            if int(model.geom_bodyid[geom_id]) in object_body_ids
+        )
+
+    def _measure_elastic_constraint_diagnostics(
+        self,
+        *,
+        q: np.ndarray,
+        q_t_last: np.ndarray,
+        q_a_nominal: np.ndarray | None,
+        foot_sticking: dict[str, bool],
+    ) -> dict[str, float]:
+        """Measure nonlinear constraint violations after an accepted SQP frame."""
+        diagnostics = dict(self._last_elastic_slack_diagnostics)
+        _, collision_distances = self._update_jacobians_and_phis_from_q(q)
+        object_distances = [
+            distance
+            for pair, distance in collision_distances.items()
+            if self._is_object_collision_pair(pair)
+        ]
+        diagnostics["object_penetration_max_m"] = (
+            max(0.0, -float(min(object_distances)))
+            if object_distances
+            else 0.0
+        )
+
+        diagnostics["foot_xy_deviation_max_m"] = 0.0
+        diagnostics["foot_height_deviation_max_m"] = 0.0
+        if self.q_a_init_idx >= 12:
+            return diagnostics
+
+        _, current_positions, _ = self._calc_manipulator_jacobians(
+            q,
+            links=self.foot_links,
+            obj_frame=False,
+        )
+        if self.activate_foot_sticking:
+            _, previous_positions, _ = self._calc_manipulator_jacobians(
+                q_t_last,
+                links=self.foot_links,
+                obj_frame=False,
+            )
+            active_sides = {
+                "left": any(
+                    bool(active) and str(key).lower().startswith("l")
+                    for key, active in foot_sticking.items()
+                ),
+                "right": any(
+                    bool(active) and str(key).lower().startswith("r")
+                    for key, active in foot_sticking.items()
+                ),
+            }
+            xy_deviations = [
+                float(
+                    np.linalg.norm(
+                        current_positions[key][:2]
+                        - previous_positions[key][:2]
+                    )
+                )
+                for key in current_positions
+                for side in ("left", "right")
+                if side in key.lower() and active_sides[side]
+            ]
+            if xy_deviations:
+                diagnostics["foot_xy_deviation_max_m"] = max(xy_deviations)
+
+        if self.anchor_nominal_foot_height and q_a_nominal is not None:
+            q_nominal = np.copy(q)
+            q_nominal[self.q_a_indices] = q_a_nominal
+            _, nominal_positions, _ = self._calc_manipulator_jacobians(
+                q_nominal,
+                links=self.foot_links,
+                obj_frame=False,
+            )
+            diagnostics["foot_height_deviation_max_m"] = max(
+                abs(
+                    float(current_positions[key][2])
+                    - float(nominal_positions[key][2])
+                )
+                for key in current_positions
+            )
+        return diagnostics
 
     def _is_foot_locked_in_window(self, foot_link_key: str, frame_idx: int) -> bool:
         """Check whether a foot link is locked by configured frame windows."""
@@ -1824,6 +2705,7 @@ class InteractionMeshRetargeter:
         object_collision_feasible = True
         minimum_object_collision: tuple[tuple[int, int], float] | None = None
         for _ in range(n_iter):
+            q_before_iteration = np.copy(q_n)
             q_a_n_last = q_n[self.q_a_indices]
             q_n, cost = self.solve_single_iteration(
                 q_locked=q_locked,
@@ -1877,7 +2759,18 @@ class InteractionMeshRetargeter:
                         >= -self.penetration_tolerance
                         - self.plan_b_palm_contact.collision_validation_tolerance
                     )
-            if np.isclose(cost, last_cost) and object_collision_feasible:
+            cost_converged = np.isclose(cost, last_cost)
+            if self.elastic_constraints.enable:
+                step_converged = (
+                    np.linalg.norm(
+                        q_n[self.q_a_indices]
+                        - q_before_iteration[self.q_a_indices]
+                    )
+                    <= 1.0e-6
+                )
+            else:
+                step_converged = True
+            if cost_converged and step_converged and object_collision_feasible:
                 break
             last_cost = cost
         if self.plan_b_palm_contact.enable and not object_collision_feasible:
@@ -2335,16 +3228,15 @@ class InteractionMeshRetargeter:
                 return False
             if contype[g2] == 0 and conaff[g2] == 0:
                 return False
-            if self.object_name in self._geom_names[g1] and "ground" in self._geom_names[g2]:
+            object_g1 = g1 in self._object_geom_ids
+            object_g2 = g2 in self._object_geom_ids
+            ground_g1 = "ground" in self._geom_names[g1]
+            ground_g2 = "ground" in self._geom_names[g2]
+            if object_g1 and ground_g2:
                 return False
-            if "ground" in self._geom_names[g1] and self.object_name in self._geom_names[g2]:
+            if ground_g1 and object_g2:
                 return False
-            return (
-                self.object_name in self._geom_names[g1]
-                or self.object_name in self._geom_names[g2]
-                or "ground" in self._geom_names[g1]
-                or "ground" in self._geom_names[g2]
-            )
+            return object_g1 or object_g2 or ground_g1 or ground_g2
 
         for g1, g2 in candidates:
             # Optional: keep your own filters here (e.g., skip object-ground, only keep interaction with object/ground)

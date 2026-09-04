@@ -512,6 +512,9 @@ def build_retargeter_kwargs_from_config(
         "object_urdf_path": object_urdf_path,
         "q_a_init_idx": retargeter_config.q_a_init_idx,
         "activate_joint_limits": retargeter_config.activate_joint_limits,
+        "apply_manual_joint_limit_overrides": (
+            retargeter_config.apply_manual_joint_limit_overrides
+        ),
         "activate_obj_non_penetration": retargeter_config.activate_obj_non_penetration,
         "activate_foot_sticking": retargeter_config.activate_foot_sticking,
         "foot_lock": retargeter_config.foot_lock,
@@ -521,6 +524,7 @@ def build_retargeter_kwargs_from_config(
         "hand_orientation": retargeter_config.hand_orientation,
         "plan_b_palm_contact": retargeter_config.plan_b_palm_contact,
         "pt_wrist_orientation": retargeter_config.pt_wrist_orientation,
+        "elastic_constraints": retargeter_config.elastic_constraints,
         "step_size": retargeter_config.step_size,
         "visualize": retargeter_config.visualize,
         "debug": retargeter_config.debug,
@@ -644,6 +648,267 @@ def determine_output_path(
     raise ValueError(f"Unknown task type: {task_type}")
 
 
+def run_fixed_object_size_adaptation(
+    *,
+    cfg: RetargetingConfig,
+    constants: SimpleNamespace,
+    data_format: str,
+    task_name: str,
+    save_dir: Path,
+    smpl_scale: float,
+    human_joints: np.ndarray,
+    nominal_object_poses: np.ndarray,
+    physical_object_poses: np.ndarray,
+    object_local_pts: np.ndarray,
+    object_local_pts_demo: np.ndarray,
+    object_urdf_path: str | None,
+    toe_names: list[str],
+    retargeter: InteractionMeshRetargeter,
+    pt_wrist_palm_orientations: np.ndarray | None = None,
+) -> tuple[np.ndarray, Path]:
+    """Run the validated fixed-object pipeline with an explicit physical target.
+
+    ``nominal_object_poses`` belongs only to the person-specific scaled Stage 1
+    scene.  ``physical_object_poses`` is copied into the locked object qpos in
+    Stages 2 and 3.  Keeping the two arrays explicit lets a paired CORE4D run
+    use independent human scales while sharing one final physical object track.
+    """
+    human_joints = np.asarray(human_joints, dtype=float)
+    nominal_object_poses = np.asarray(nominal_object_poses, dtype=float)
+    physical_object_poses = np.asarray(physical_object_poses, dtype=float)
+    object_local_pts = np.asarray(object_local_pts, dtype=float)
+    object_local_pts_demo = np.asarray(object_local_pts_demo, dtype=float)
+    num_frames = len(human_joints)
+    if human_joints.ndim != 3 or human_joints.shape[-1] != 3:
+        raise ValueError(f"human_joints must have shape (T, J, 3), got {human_joints.shape}")
+    for name, poses in (
+        ("nominal_object_poses", nominal_object_poses),
+        ("physical_object_poses", physical_object_poses),
+    ):
+        if poses.shape != (num_frames, 7):
+            raise ValueError(f"{name} must have shape ({num_frames}, 7), got {poses.shape}")
+        if not np.isfinite(poses).all():
+            raise ValueError(f"{name} contains non-finite values")
+        if not np.allclose(np.linalg.norm(poses[:, :4], axis=-1), 1.0, atol=1.0e-6):
+            raise ValueError(f"{name} contains a non-unit quaternion")
+    if not np.isfinite(human_joints).all():
+        raise ValueError("human_joints contains non-finite values")
+    if object_local_pts.ndim != 2 or object_local_pts.shape[1] != 3:
+        raise ValueError(f"object_local_pts must have shape (N, 3), got {object_local_pts.shape}")
+    if object_local_pts_demo.shape != object_local_pts.shape:
+        raise ValueError(
+            "object_local_pts_demo must have the same shape as object_local_pts, "
+            f"got {object_local_pts_demo.shape} and {object_local_pts.shape}"
+        )
+
+    q_init_nominal = _compute_q_init_base(
+        "object_interaction",
+        data_format,
+        human_joints,
+        nominal_object_poses,
+        constants,
+    )
+    nominal_object_poses_mj = convert_object_poses_to_mujoco_order(
+        nominal_object_poses
+    )
+    physical_object_poses_mj = convert_object_poses_to_mujoco_order(
+        physical_object_poses
+    )
+
+    foot_sticking_sequences = extract_foot_sticking_sequence_velocity(
+        human_joints, retargeter.demo_joints, toe_names
+    )
+    foot_sticking_sequences[0][toe_names[0]] = False
+    foot_sticking_sequences[0][toe_names[1]] = False
+
+    nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
+    refine_plan_b = cfg.retargeter.plan_b_palm_contact.enable
+    final_result_path = save_dir / (
+        f"{task_name}_fixed_object_plan_b.npz"
+        if refine_plan_b
+        else f"{task_name}_fixed_object.npz"
+    )
+    refine_hand_orientation = cfg.retargeter.hand_orientation.enable
+    refine_pt_wrist_orientation = cfg.retargeter.pt_wrist_orientation.enable
+    refine_orientation = (
+        refine_hand_orientation
+        or refine_plan_b
+        or refine_pt_wrist_orientation
+    )
+    fixed_base_result_path = (
+        save_dir / f"{task_name}_fixed_object_base.npz"
+        if refine_orientation
+        else final_result_path
+    )
+    scene_xml_path = getattr(constants, "SCENE_XML_FILE", None)
+    if not scene_xml_path:
+        scene_xml_path = constants.ROBOT_URDF_FILE.replace(
+            ".urdf", f"_w_{constants.OBJECT_NAME}.xml"
+        )
+    scene_xml_path = str(scene_xml_path)
+
+    with tempfile.TemporaryDirectory(prefix="holosoma_scaled_object_") as temp_dir:
+        scaled_scene_path = create_uniformly_scaled_object_scene_xml(
+            scene_xml_path,
+            constants.OBJECT_NAME,
+            smpl_scale,
+            Path(temp_dir) / Path(scene_xml_path).name,
+        )
+        nominal_config = replace(
+            cfg.retargeter,
+            visualize=False,
+            debug=False,
+            hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+            plan_b_palm_contact=replace(
+                cfg.retargeter.plan_b_palm_contact,
+                enable=False,
+            ),
+            pt_wrist_orientation=replace(
+                cfg.retargeter.pt_wrist_orientation,
+                enable=False,
+            ),
+        )
+        nominal_kwargs = build_retargeter_kwargs_from_config(
+            nominal_config, constants, object_urdf_path, "object_interaction"
+        )
+        nominal_kwargs["nominal_tracking_tau"] = nominal_config.nominal_tracking_tau
+        nominal_kwargs["scene_xml_path"] = scaled_scene_path
+        nominal_retargeter = InteractionMeshRetargeter(**nominal_kwargs)
+
+        stage_count = 3 if refine_orientation else 2
+        logger.info("Stage 1/%d: retargeting in the scaled nominal scene", stage_count)
+        q_nominal, _, _, _ = nominal_retargeter.retarget_motion(
+            human_joint_motions=human_joints,
+            object_poses=nominal_object_poses_mj,
+            object_poses_augmented=nominal_object_poses_mj,
+            object_points_local_demo=object_local_pts_demo,
+            object_points_local=object_local_pts_demo,
+            foot_sticking_sequences=foot_sticking_sequences,
+            q_a_init=q_init_nominal,
+            q_nominal_list=None,
+            original=True,
+            dest_res_path=str(nominal_result_path),
+        )
+
+    if refine_orientation:
+        fixed_base_config = replace(
+            cfg.retargeter,
+            visualize=False,
+            debug=False,
+            hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
+            plan_b_palm_contact=replace(
+                cfg.retargeter.plan_b_palm_contact,
+                enable=False,
+            ),
+            pt_wrist_orientation=replace(
+                cfg.retargeter.pt_wrist_orientation,
+                enable=False,
+            ),
+        )
+        fixed_base_kwargs = build_retargeter_kwargs_from_config(
+            fixed_base_config, constants, object_urdf_path, "object_interaction"
+        )
+        fixed_base_kwargs["nominal_tracking_tau"] = fixed_base_config.nominal_tracking_tau
+        fixed_base_kwargs["anchor_nominal_foot_height"] = True
+        fixed_base_kwargs["scene_xml_path"] = scene_xml_path
+        fixed_base_retargeter = InteractionMeshRetargeter(**fixed_base_kwargs)
+    else:
+        fixed_base_retargeter = retargeter
+
+    logger.info(
+        "Stage 2/%d: adapting the nominal motion to the real-size object",
+        stage_count,
+    )
+    q_fixed_base, _, _, _ = fixed_base_retargeter.retarget_motion(
+        human_joint_motions=human_joints,
+        object_poses=nominal_object_poses_mj,
+        object_poses_augmented=physical_object_poses_mj,
+        object_points_local_demo=object_local_pts_demo,
+        object_points_local=object_local_pts,
+        foot_sticking_sequences=foot_sticking_sequences,
+        q_a_init=q_nominal[0],
+        q_nominal_list=q_nominal,
+        original=False,
+        dest_res_path=str(fixed_base_result_path),
+    )
+    q_final = q_fixed_base
+
+    if refine_plan_b:
+        logger.info("Stage 3/3: optimizing independent Plan B full-body palm contact")
+        q_final, _, _, _ = retargeter.retarget_motion(
+            human_joint_motions=human_joints,
+            object_poses=nominal_object_poses_mj,
+            object_poses_augmented=physical_object_poses_mj,
+            object_points_local_demo=object_local_pts_demo,
+            object_points_local=object_local_pts,
+            foot_sticking_sequences=foot_sticking_sequences,
+            q_a_init=q_fixed_base[0],
+            q_nominal_list=q_fixed_base,
+            original=False,
+            dest_res_path=str(final_result_path),
+        )
+        logger.info(
+            "Three-stage Plan B retargeting complete. Baseline: %s; Plan B: %s",
+            fixed_base_result_path,
+            final_result_path,
+        )
+    elif refine_hand_orientation:
+        logger.info(
+            "Stage 3/3: adapting the nominal motion with the standardized pushing-hand pose"
+        )
+        q_final, _, _, _ = retargeter.retarget_motion(
+            human_joint_motions=human_joints,
+            object_poses=nominal_object_poses_mj,
+            object_poses_augmented=physical_object_poses_mj,
+            object_points_local_demo=object_local_pts_demo,
+            object_points_local=object_local_pts,
+            foot_sticking_sequences=foot_sticking_sequences,
+            q_a_init=q_nominal[0],
+            q_nominal_list=q_nominal,
+            original=False,
+            dest_res_path=str(final_result_path),
+        )
+        logger.info(
+            "Three-stage retargeting complete. Base: %s; refined: %s",
+            fixed_base_result_path,
+            final_result_path,
+        )
+    elif refine_pt_wrist_orientation:
+        if pt_wrist_palm_orientations is None:
+            raise RuntimeError("A.1 requires wrist palm orientation targets")
+
+        logger.info("Stage 3/3: applying A.1 wrist-only orientation post-processing")
+        q_final, solver_errors_deg = retargeter.apply_pt_wrist_orientation_postprocess(
+            q_fixed_base,
+            pt_wrist_palm_orientations,
+        )
+        with np.load(fixed_base_result_path, allow_pickle=True) as fixed_base_result:
+            np.savez(
+                final_result_path,
+                qpos=q_final,
+                human_joints=fixed_base_result["human_joints"],
+                fps=fixed_base_result["fps"],
+                cost=fixed_base_result["cost"],
+            )
+        logger.info(
+            "Wrist orientation error: left p90/max=%.9f/%.9f deg; "
+            "right p90/max=%.9f/%.9f deg",
+            np.percentile(solver_errors_deg[:, 0], 90),
+            solver_errors_deg[:, 0].max(),
+            np.percentile(solver_errors_deg[:, 1], 90),
+            solver_errors_deg[:, 1].max(),
+        )
+        logger.info(
+            "Three-stage wrist retargeting complete. Base: %s; final: %s",
+            fixed_base_result_path,
+            final_result_path,
+        )
+    else:
+        logger.info("Two-stage retargeting complete. Final result: %s", final_result_path)
+
+    return q_final, final_result_path
+
+
 # ----------------------------- Main -----------------------------
 
 
@@ -753,205 +1018,23 @@ def main(cfg: RetargetingConfig) -> None:
             raise ValueError("Fixed object size adaptation requires object points")
 
         nominal_object_poses = create_grounded_nominal_object_poses(object_poses, smpl_scale)
-        q_init_nominal = _compute_q_init_base(
-            task_type,
-            data_format,
-            human_joints,
-            nominal_object_poses,
-            constants,
+        run_fixed_object_size_adaptation(
+            cfg=cfg,
+            constants=constants,
+            data_format=data_format,
+            task_name=task_name,
+            save_dir=save_dir,
+            smpl_scale=smpl_scale,
+            human_joints=human_joints,
+            nominal_object_poses=nominal_object_poses,
+            physical_object_poses=object_poses,
+            object_local_pts=object_local_pts,
+            object_local_pts_demo=object_local_pts_demo,
+            object_urdf_path=object_urdf_path,
+            toe_names=toe_names,
+            retargeter=retargeter,
+            pt_wrist_palm_orientations=pt_wrist_palm_orientations,
         )
-        nominal_object_poses_mj = convert_object_poses_to_mujoco_order(nominal_object_poses)
-        physical_object_poses_mj = convert_object_poses_to_mujoco_order(object_poses)
-
-        foot_sticking_sequences = extract_foot_sticking_sequence_velocity(
-            human_joints, retargeter.demo_joints, toe_names
-        )
-        foot_sticking_sequences[0][toe_names[0]] = False
-        foot_sticking_sequences[0][toe_names[1]] = False
-
-        nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
-        refine_plan_b = cfg.retargeter.plan_b_palm_contact.enable
-        final_result_path = save_dir / (
-            f"{task_name}_fixed_object_plan_b.npz"
-            if refine_plan_b
-            else f"{task_name}_fixed_object.npz"
-        )
-        refine_hand_orientation = cfg.retargeter.hand_orientation.enable
-        refine_pt_wrist_orientation = cfg.retargeter.pt_wrist_orientation.enable
-        refine_orientation = (
-            refine_hand_orientation
-            or refine_plan_b
-            or refine_pt_wrist_orientation
-        )
-        fixed_base_result_path = (
-            save_dir / f"{task_name}_fixed_object_base.npz"
-            if refine_orientation
-            else final_result_path
-        )
-        scene_xml_path = constants.ROBOT_URDF_FILE.replace(
-            ".urdf", f"_w_{constants.OBJECT_NAME}.xml"
-        )
-
-        with tempfile.TemporaryDirectory(prefix="holosoma_scaled_object_") as temp_dir:
-            scaled_scene_path = create_uniformly_scaled_object_scene_xml(
-                scene_xml_path,
-                constants.OBJECT_NAME,
-                smpl_scale,
-                Path(temp_dir) / Path(scene_xml_path).name,
-            )
-            nominal_config = replace(
-                cfg.retargeter,
-                visualize=False,
-                debug=False,
-                hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
-                plan_b_palm_contact=replace(
-                    cfg.retargeter.plan_b_palm_contact,
-                    enable=False,
-                ),
-                pt_wrist_orientation=replace(
-                    cfg.retargeter.pt_wrist_orientation,
-                    enable=False,
-                ),
-            )
-            nominal_kwargs = build_retargeter_kwargs_from_config(
-                nominal_config, constants, object_urdf_path, task_type
-            )
-            nominal_kwargs["nominal_tracking_tau"] = nominal_config.nominal_tracking_tau
-            nominal_kwargs["scene_xml_path"] = scaled_scene_path
-            nominal_retargeter = InteractionMeshRetargeter(**nominal_kwargs)
-
-            stage_count = 3 if refine_orientation else 2
-            logger.info("Stage 1/%d: retargeting in the scaled nominal scene", stage_count)
-            q_nominal, _, _, _ = nominal_retargeter.retarget_motion(
-                human_joint_motions=human_joints,
-                object_poses=nominal_object_poses_mj,
-                object_poses_augmented=nominal_object_poses_mj,
-                object_points_local_demo=object_local_pts_demo,
-                object_points_local=object_local_pts_demo,
-                foot_sticking_sequences=foot_sticking_sequences,
-                q_a_init=q_init_nominal,
-                q_nominal_list=None,
-                original=True,
-                dest_res_path=str(nominal_result_path),
-            )
-
-        if refine_orientation:
-            fixed_base_config = replace(
-                cfg.retargeter,
-                visualize=False,
-                debug=False,
-                hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
-                plan_b_palm_contact=replace(
-                    cfg.retargeter.plan_b_palm_contact,
-                    enable=False,
-                ),
-                pt_wrist_orientation=replace(
-                    cfg.retargeter.pt_wrist_orientation,
-                    enable=False,
-                ),
-            )
-            fixed_base_kwargs = build_retargeter_kwargs_from_config(
-                fixed_base_config, constants, object_urdf_path, task_type
-            )
-            fixed_base_kwargs["nominal_tracking_tau"] = fixed_base_config.nominal_tracking_tau
-            fixed_base_kwargs["anchor_nominal_foot_height"] = True
-            fixed_base_retargeter = InteractionMeshRetargeter(**fixed_base_kwargs)
-        else:
-            fixed_base_retargeter = retargeter
-
-        logger.info(
-            "Stage 2/%d: adapting the nominal motion to the real-size object",
-            stage_count,
-        )
-        q_fixed_base, _, _, _ = fixed_base_retargeter.retarget_motion(
-            human_joint_motions=human_joints,
-            object_poses=nominal_object_poses_mj,
-            object_poses_augmented=physical_object_poses_mj,
-            object_points_local_demo=object_local_pts_demo,
-            object_points_local=object_local_pts,
-            foot_sticking_sequences=foot_sticking_sequences,
-            q_a_init=q_nominal[0],
-            q_nominal_list=q_nominal,
-            original=False,
-            dest_res_path=str(fixed_base_result_path),
-        )
-
-        if refine_plan_b:
-            logger.info(
-                "Stage 3/3: optimizing independent Plan B full-body palm contact"
-            )
-            retargeter.retarget_motion(
-                human_joint_motions=human_joints,
-                object_poses=nominal_object_poses_mj,
-                object_poses_augmented=physical_object_poses_mj,
-                object_points_local_demo=object_local_pts_demo,
-                object_points_local=object_local_pts,
-                foot_sticking_sequences=foot_sticking_sequences,
-                q_a_init=q_fixed_base[0],
-                q_nominal_list=q_fixed_base,
-                original=False,
-                dest_res_path=str(final_result_path),
-            )
-            logger.info(
-                "Three-stage Plan B retargeting complete. Baseline: %s; Plan B: %s",
-                fixed_base_result_path,
-                final_result_path,
-            )
-        elif refine_hand_orientation:
-            logger.info(
-                "Stage 3/3: adapting the nominal motion with the standardized pushing-hand pose"
-            )
-            retargeter.retarget_motion(
-                human_joint_motions=human_joints,
-                object_poses=nominal_object_poses_mj,
-                object_poses_augmented=physical_object_poses_mj,
-                object_points_local_demo=object_local_pts_demo,
-                object_points_local=object_local_pts,
-                foot_sticking_sequences=foot_sticking_sequences,
-                q_a_init=q_nominal[0],
-                q_nominal_list=q_nominal,
-                original=False,
-                dest_res_path=str(final_result_path),
-            )
-            logger.info(
-                "Three-stage retargeting complete. Base: %s; refined: %s",
-                fixed_base_result_path,
-                final_result_path,
-            )
-        elif refine_pt_wrist_orientation:
-            if pt_wrist_palm_orientations is None:
-                raise RuntimeError("A.1 requires PT wrist palm orientation targets")
-
-            logger.info(
-                "Stage 3/3: applying A.1 wrist-only PT orientation post-processing"
-            )
-            q_final, solver_errors_deg = retargeter.apply_pt_wrist_orientation_postprocess(
-                q_fixed_base,
-                pt_wrist_palm_orientations,
-            )
-            with np.load(fixed_base_result_path, allow_pickle=True) as fixed_base_result:
-                np.savez(
-                    final_result_path,
-                    qpos=q_final,
-                    human_joints=fixed_base_result["human_joints"],
-                    fps=fixed_base_result["fps"],
-                    cost=fixed_base_result["cost"],
-                )
-            logger.info(
-                "A.1 wrist orientation error: left p90/max=%.9f/%.9f deg; "
-                "right p90/max=%.9f/%.9f deg",
-                np.percentile(solver_errors_deg[:, 0], 90),
-                solver_errors_deg[:, 0].max(),
-                np.percentile(solver_errors_deg[:, 1], 90),
-                solver_errors_deg[:, 1].max(),
-            )
-            logger.info(
-                "Three-stage A.1 retargeting complete. Base: %s; A.1: %s",
-                fixed_base_result_path,
-                final_result_path,
-            )
-        else:
-            logger.info("Two-stage retargeting complete. Final result: %s", final_result_path)
 
         if cfg.retargeter.debug:
             input("Press Enter to exit ...")

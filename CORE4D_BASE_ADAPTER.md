@@ -32,7 +32,7 @@ CORE4D-Real V1（官方完整 scene bundle）
           Isaac 单环境物理可行性检查
 ```
 
-“分别运行两次”指同一段双人数据中的两个人分别进入现有单机器人 OmniRetarget 求解器；两次求解共享同一条物体轨迹、同一物体网格和同一时间轴。它不表示复制数据，也不表示当前就开始 MARL。
+“分别运行两次”指同一段双人数据中的两个人分别进入现有单机器人 OmniRetarget 求解器。两次求解共享同一条最终 physical object trajectory、同一真实尺寸物体网格和同一时间轴；每个人在 fixed-object pipeline 的 Stage 1 可以拥有按自身身高比例生成的内部 nominal scene。内部 nominal object 不是第二个物体，也不会写入最终共享 reference。它不表示复制数据，也不表示当前就开始 MARL。
 
 ## 2. 官方数据事实
 
@@ -109,13 +109,13 @@ V2 的 `result.npz` 也不是 V1 的 `arr_0` NumPy 字典：顶层键为 `result
 - OmniRetarget 使用的身体关键点固定为 22 个 SMPL-X body joints，顺序必须与本仓库的 `SMPLX_DEMO_JOINTS` 一致。
 - 前 22 个关节按官方 SMPL-X body 顺序映射到本仓库的 `SMPLX_DEMO_JOINTS`；首次真实样本仍须通过可视化核验左右侧和腕部位置。
 - 腕部世界 quaternion 不是 CORE4D 的原始字段，应由 `global_orient + body_pose` 沿 SMPL-X 运动链计算。为了直接复用现有 A1 校准接口，腕部输出使用 `xyzw`，归一化并执行时间符号连续化。
-- Adapter 保存两个人各自的 10 维 beta；进入 Omni 前再用 neutral/rest SMPL-X 计算身高并确定**共享场景尺度**，不能让两次独立求解各自缩放同一条物体轨迹。
+- Adapter 保存两个人各自的 10 维 beta；进入 Omni 前再用 neutral/rest SMPL-X 分别计算身高，并分别得到 `s_i = G1_HEIGHT / human_height_i`。两个人不共享人体尺度。
 
 ### 3.2 坐标与单位规范
 
 - adapter 输出统一为 OmniRetarget 使用的 Z-up 世界坐标，长度单位为米。
 - 同一个经过样本验证的刚体坐标变换必须同时作用于两个人、腕部朝向和物体世界轨迹。物体 canonical mesh 的局部坐标保持不变，world pose 左乘坐标变换；这与把 mesh 实例变换到新的世界系等价。
-- adapter 阶段不偷偷缩放数据。人体到 G1 的比例缩放继续由 OmniRetarget 基线负责，并且人体、物体和接触关系必须采用一致的缩放策略。
+- adapter 阶段不偷偷缩放数据。人体到 G1 的比例缩放继续由 OmniRetarget 基线负责；同一个人物的 Stage 1 可以使用与其 `s_i` 一致的临时 nominal 人体和物体，但 Stage 2 必须恢复到所有人物共享的真实尺寸物体和唯一物体轨迹。
 - 输出前检查物体旋转正交性、`det(R)≈1`、齐次矩阵最后一行、四元数范数和所有数值的有限性。
 
 ### 3.3 时间规范
@@ -129,7 +129,7 @@ V2 的 `result.npz` 也不是 V1 的 `arr_0` NumPy 字典：顶层键为 `result
 
 - 保留 `object pose = canonical object model → world` 的变换方向。
 - 标准输出四元数顺序固定为 `[qw, qx, qy, qz]`，物体 pose 固定为 `[qw, qx, qy, qz, x, y, z]`。
-- mesh、pose、人体必须共享同一单位、坐标变换和尺度策略。
+- mesh、pose、人体必须共享同一单位和刚体坐标变换。人物尺度分别计算；最终物体 mesh 和物体轨迹不得按任一人物的身高尺度分叉。
 - `obj_name`、源 mesh 路径、文件哈希和 sequence ID 放入 provenance；训练资产的质量、摩擦、惯量和 collision approximation 在进入 Isaac 前单独定义并记录，不能冒充 CORE4D 原始标注。
 
 ## 4. 规范纯数值 NPZ
@@ -143,7 +143,7 @@ Adapter 的下游产物不得包含 Python dict、object dtype 或 pickle。当�
 | `human_joints_full` | `(T, 2, 127, 3)` | 保留手部/接触几何用途 |
 | `betas` | `(2, 10)` | 两个人的固定 SMPL-X shape 参数 |
 | `wrist_quat_xyzw` | `(T, 2, 2, 4)` | person × left/right × xyzw |
-| `object_poses` | `(T, 7)` | wxyz + xyz |
+| `object_poses` | `(T, 7)` | shared physical target；wxyz + xyz；不得按 person scale 改写 |
 | `joint_names` | `(22,)` | `SMPLX_DEMO_JOINTS` |
 | `aligned_frame_ids` | `(T, K)` | 若官方文件存在则原样保留；否则为顺序帧号，不解释列语义 |
 
@@ -153,10 +153,13 @@ Sequence ID、mesh 路径、转换约定等 provenance 以普通 Unicode/JSON �
 
 ```text
 human_joints: (T, 22, 3)
-object_poses: (T, 7)
-human_height: scalar
+object_poses: (T, 7)  # 两个人共享的 physical target
+human_height: scalar  # 当前 person 的 neutral/rest 身高
+person_scale: scalar  # G1_HEIGHT / human_height
 optional wrist quaternions: (T, 2, 4)
 ```
+
+person view 可以生成该人物内部 Stage 1 所需的 nominal 输入，但必须独立保留 shared physical `object_poses`，不能原地覆盖它。`human_height` 和 `person_scale` 写入各自的 retarget provenance，不提前冒充 Stage B 已经完成了 SMPL-X 身高标定。
 
 不要把 CORE4D 重新伪装成 InterMimic `.pt`，也不要修改优化器来理解 CORE4D 的原始 pickle 结构。
 
@@ -189,18 +192,40 @@ CORE4D 官方 person NPZ 把字典放在 `arr_0` object array 中，读取它必
 
 ### Stage C：分别 OmniRetarget 两次
 
-- Person 1 和 Person 2 使用同一个基线配置分别求解。
-- 共享物体轨迹和时间轴；腕部处理沿用已经验证过的 rubber-hand 思路。
+- Person 1 和 Person 2 使用同一个基线配置分别求解，但各自使用由自身身高得到的 `s_1`、`s_2`。
+- 每个人的 Stage 1 都可以拥有一份只供内部求解使用的 nominal 小桌：人体、demo object points 和临时 object scene 按该人的 `s_i` 同比缩放。这延续既有 fixed-object pipeline，不代表最终生成两张不同尺寸的桌子。
+- 两次 Stage 2 都切换到同一份真实尺寸 desk mesh，并锁定到同一条 shared physical object trajectory。该轨迹来自 CORE4D 米制物体轨迹，只允许统一坐标系变换和时间重采样，不乘 `s_1` 或 `s_2`。
+- 现有单人 `preprocess_motion_data()` 会按人物尺度改写物体 XY 和相对初始 Z 位移，因此 CORE4D paired 路径不能把它原样独立调用两次；接入时必须拆开 per-person human/nominal preprocessing 与 shared physical object target。
+- nominal 缩放使用的共同场景锚点必须显式定义并记录，不能隐式依赖任意世界原点；具体锚点在代码实现前单独确认。
+- 若启用 A1，必须在各自的 fixed-object baseline 之后执行 wrist-only post-process；不得改变机器人其他 qpos 或物体 qpos。
 - 每次求解单独保存结果和 provenance，不让一个人的优化状态影响另一个人。
+- 验收时要求两份最终输出的 `qpos[:, -7:]` 与 shared physical object trajectory 逐元素一致，也彼此逐元素一致。
 
 输出：两个 robot-object kinematic references。此阶段不训练。
 
 ### Stage D：paired reference 与 ViSER
 
-- 将两条机器人 reference 按原时间轴合并，只保留一条共享 object reference。
+- 先断言两份 object reference 完全一致，再按原时间轴合并两条机器人 reference，并且只保存一条共享 object reference；不允许求平均、择优或静默覆盖。
 - 检查机器人互穿、机器人—物体接触、脚底高度、双方相位和物体运动是否与 CORE4D 源动作一致。
 
 输出：人工确认的 paired reference。
+
+#### 共享小桌诊断预览（非训练资产）
+
+若需要复现 2026-09-03 验收过的“小桌更符合 Stage 1 动作语义”对照，可在完整
+`--method two-stage` 结果上运行：
+
+```bash
+python scripts/export_core4d_small_table_pair.py \
+  --source-run-dir <completed-two-stage-run> \
+  --output-dir <new-small-table-preview-dir>
+```
+
+该导出器直接保留两个人各自的 Stage 1 robot qpos，并用两个人尺度的算术平均值
+生成一张共享小桌；共享物体平移取两条 nominal 平移的算术平均，旋转必须一致。
+输出 manifest 固定写入 `training_ready=false`。它只用于 ViSER 几何/动作语义对照，
+不会修改 OmniRetarget 或 two-stage 求解器，也不能在尚未确认质量、惯量与摩擦前
+直接作为 Isaac 训练资产。
 
 ### Stage E：Isaac 单环境物理可行性
 

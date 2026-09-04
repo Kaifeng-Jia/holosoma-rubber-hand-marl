@@ -15,13 +15,14 @@ from pathlib import Path
 from typing import Mapping
 
 import numpy as np
-from scipy.spatial.transform import Rotation
+from scipy.spatial.transform import Rotation, Slerp
 
 from holosoma_retargeting.config_types.data_type import SMPLX_DEMO_JOINTS
 
 
 CORE4D_FPS = 15
 CORE4D_FULL_JOINT_COUNT = 127
+CORE4D_HEIGHT_METHOD = "raw_vertex_max_vertical_extent"
 
 # CORE4D uses a right-handed Y-up world.  OmniRetarget's contact and foot
 # utilities use a right-handed Z-up world.  Rx(+90 degrees) maps +Y to +Z.
@@ -61,6 +62,34 @@ def _validate_fps(fps: int) -> int:
     return int(fps)
 
 
+def _raw_vertex_max_vertical_extent(vertices: np.ndarray) -> float:
+    """Estimate a fallback height from the official raw Y-up vertices.
+
+    This is deliberately not described as neutral/rest body height.  It is the
+    maximum, over all frames, of the posed mesh's source-Y extent.
+    """
+    source_vertices = np.asarray(vertices, dtype=np.float64)
+    if (
+        source_vertices.ndim != 3
+        or source_vertices.shape[1:] != (10475, 3)
+        or len(source_vertices) < 1
+    ):
+        raise ValueError(
+            "CORE4D vertices must have shape [T, 10475, 3], "
+            f"got {source_vertices.shape}"
+        )
+    if not np.isfinite(source_vertices).all():
+        raise ValueError("CORE4D vertices contain non-finite values")
+    per_frame_vertical_extent = np.ptp(source_vertices[:, :, 1], axis=1)
+    height = float(np.max(per_frame_vertical_extent))
+    if not np.isfinite(height) or height <= 0.0:
+        raise ValueError(
+            "CORE4D raw-vertex vertical extent must be positive; "
+            f"got {height}"
+        )
+    return height
+
+
 def _load_official_person_npz(path: Path) -> dict[str, np.ndarray]:
     """Load one trusted official CORE4D pickled-NPZ person dictionary."""
     if not path.is_file():
@@ -78,6 +107,7 @@ def _load_official_person_npz(path: Path) -> dict[str, np.ndarray]:
     required_shapes = {
         "betas": (10,),
         "joints": (CORE4D_FULL_JOINT_COUNT, 3),
+        "vertices": (10475, 3),
         "global_orient": (3,),
         "body_pose": (21, 3),
     }
@@ -206,8 +236,11 @@ def _load_aligned_frame_ids(path: Path, expected_frames: int) -> np.ndarray:
 def _resolve_object_mesh(object_model_root: Path, object_name: str) -> Path:
     if len(object_name) <= 3:
         raise ValueError(f"CORE4D obj_name is too short to contain a category: {object_name!r}")
-    category = object_name[:-3]
-    mesh_path = (object_model_root / category / f"{object_name}_m.obj").resolve()
+    local_object_name = object_name.lower()
+    category = local_object_name[:-3]
+    mesh_path = (
+        object_model_root / category / f"{local_object_name}_m.obj"
+    ).resolve()
     if not mesh_path.is_file():
         raise FileNotFoundError(f"CORE4D object mesh does not exist: {mesh_path}")
     return mesh_path
@@ -220,6 +253,8 @@ class Core4DPairSequence:
     human_joints: np.ndarray
     human_joints_full: np.ndarray
     betas: np.ndarray
+    human_heights: np.ndarray
+    height_method: str
     wrist_quat_xyzw: np.ndarray
     object_poses: np.ndarray
     fps: int
@@ -230,6 +265,7 @@ class Core4DPairSequence:
     provenance: Mapping[str, object]
 
     def save(self, path: str | Path) -> Path:
+        _validate_canonical(self)
         output = Path(path).expanduser().resolve()
         output.parent.mkdir(parents=True, exist_ok=True)
         np.savez_compressed(
@@ -237,6 +273,8 @@ class Core4DPairSequence:
             human_joints=self.human_joints,
             human_joints_full=self.human_joints_full,
             betas=self.betas,
+            human_heights=self.human_heights,
+            height_method=np.asarray(self.height_method),
             wrist_quat_xyzw=self.wrist_quat_xyzw,
             object_poses=self.object_poses,
             fps=np.asarray(self.fps, dtype=np.int64),
@@ -258,6 +296,7 @@ def _validate_canonical(sequence: Core4DPairSequence) -> None:
         "human_joints": (frames, 2, len(SMPLX_DEMO_JOINTS), 3),
         "human_joints_full": (frames, 2, CORE4D_FULL_JOINT_COUNT, 3),
         "betas": (2, 10),
+        "human_heights": (2,),
         "wrist_quat_xyzw": (frames, 2, 2, 4),
         "object_poses": (frames, 7),
     }
@@ -273,6 +312,10 @@ def _validate_canonical(sequence: Core4DPairSequence) -> None:
         raise ValueError("aligned_frame_ids must be a two-dimensional table with one row per frame")
     if not np.array_equal(sequence.joint_names, np.asarray(SMPLX_DEMO_JOINTS)):
         raise ValueError("joint_names do not match OmniRetarget's SMPL-X body order")
+    if not isinstance(sequence.height_method, str) or not sequence.height_method:
+        raise ValueError("height_method must be a non-empty string")
+    if np.any(sequence.human_heights <= 0.0):
+        raise ValueError("human_heights must contain two positive heights in meters")
     _validate_fps(sequence.fps)
     if not np.allclose(
         np.linalg.norm(sequence.wrist_quat_xyzw, axis=-1),
@@ -338,6 +381,11 @@ def load_core4d_sequence(
         human_joints=np.stack([values[0] for values in converted_people], axis=1),
         human_joints_full=np.stack([values[1] for values in converted_people], axis=1),
         betas=np.stack([person["betas"][0] for person in people], axis=0),
+        human_heights=np.asarray(
+            [_raw_vertex_max_vertical_extent(person["vertices"]) for person in people],
+            dtype=np.float64,
+        ),
+        height_method=CORE4D_HEIGHT_METHOD,
         wrist_quat_xyzw=np.stack([values[2] for values in converted_people], axis=1),
         object_poses=object_poses,
         fps=fps,
@@ -355,12 +403,142 @@ def load_core4d_sequence(
             "coordinate_validation": "pending_first_real_sequence_visual_check",
             "object_mesh_local_frame": "preserved_from_CORE4D",
             "person_order": ["person1", "person2"],
+            "human_height_method": CORE4D_HEIGHT_METHOD,
+            "human_height_source_axis": "Y",
             "aligned_frame_ids_present": alignment_path.is_file(),
             "aligned_frame_ids_semantics": "preserved_only; not interpreted by adapter",
         },
     )
     _validate_canonical(sequence)
     return sequence
+
+
+def _resample_positions_linear(
+    values: np.ndarray,
+    source_times: np.ndarray,
+    target_times: np.ndarray,
+) -> np.ndarray:
+    source = np.asarray(values, dtype=np.float64)
+    flattened = source.reshape(len(source), -1)
+    result = np.empty((len(target_times), flattened.shape[1]), dtype=np.float64)
+    for component in range(flattened.shape[1]):
+        result[:, component] = np.interp(
+            target_times,
+            source_times,
+            flattened[:, component],
+        )
+    return result.reshape((len(target_times),) + source.shape[1:])
+
+
+def _resample_quaternions_xyzw(
+    quaternions: np.ndarray,
+    source_times: np.ndarray,
+    target_times: np.ndarray,
+) -> np.ndarray:
+    source = _continuous_quaternion_xyzw(quaternions)
+    trailing_shape = source.shape[1:-1]
+    if len(source) == 1:
+        return np.broadcast_to(
+            source[0],
+            (len(target_times),) + trailing_shape + (4,),
+        ).copy()
+    flattened = source.reshape(len(source), -1, 4)
+    result = np.empty((len(target_times), flattened.shape[1], 4), dtype=np.float64)
+    for sequence_index in range(flattened.shape[1]):
+        rotations = Rotation.from_quat(flattened[:, sequence_index])
+        result[:, sequence_index] = Slerp(source_times, rotations)(target_times).as_quat()
+    return _continuous_quaternion_xyzw(
+        result.reshape((len(target_times),) + trailing_shape + (4,))
+    )
+
+
+def resample_core4d_pair_sequence(
+    sequence: Core4DPairSequence,
+    target_fps: int,
+) -> Core4DPairSequence:
+    """Resample a complete paired sequence without modifying the input.
+
+    Joint positions and object translation use linear interpolation.  Wrist
+    and object rotations use SLERP.  The first and last samples are retained,
+    so the source duration is preserved; for 197 frames at 15 Hz this produces
+    393 frames at 30 Hz.
+    """
+    _validate_canonical(sequence)
+    target_fps = _validate_fps(target_fps)
+    source_frames = len(sequence.human_joints)
+    source_times = np.arange(source_frames, dtype=np.float64) / sequence.fps
+    duration = source_times[-1]
+    target_intervals_exact = duration * target_fps
+    target_intervals = int(round(target_intervals_exact))
+    if not np.isclose(target_intervals_exact, target_intervals, atol=1.0e-10):
+        raise ValueError(
+            "target_fps cannot preserve both the source duration and uniform target timing: "
+            f"{source_frames} frames at {sequence.fps} FPS -> {target_fps} FPS"
+        )
+    target_frames = target_intervals + 1
+    target_times = (
+        np.linspace(0.0, duration, target_frames, dtype=np.float64)
+        if target_frames > 1
+        else np.asarray([0.0], dtype=np.float64)
+    )
+
+    object_quat_xyzw = sequence.object_poses[:, [1, 2, 3, 0]]
+    resampled_object_quat_xyzw = _resample_quaternions_xyzw(
+        object_quat_xyzw,
+        source_times,
+        target_times,
+    )
+    resampled_object_positions = _resample_positions_linear(
+        sequence.object_poses[:, 4:],
+        source_times,
+        target_times,
+    )
+    resampled_object_poses = np.concatenate(
+        (
+            resampled_object_quat_xyzw[:, [3, 0, 1, 2]],
+            resampled_object_positions,
+        ),
+        axis=1,
+    )
+
+    if source_frames == 1:
+        nearest_source_frames = np.zeros(target_frames, dtype=np.int64)
+    else:
+        nearest_source_frames = np.floor(target_times * sequence.fps + 0.5).astype(np.int64)
+        nearest_source_frames = np.clip(nearest_source_frames, 0, source_frames - 1)
+
+    result = Core4DPairSequence(
+        human_joints=_resample_positions_linear(
+            sequence.human_joints,
+            source_times,
+            target_times,
+        ),
+        human_joints_full=_resample_positions_linear(
+            sequence.human_joints_full,
+            source_times,
+            target_times,
+        ),
+        betas=np.asarray(sequence.betas, dtype=np.float64).copy(),
+        human_heights=np.asarray(sequence.human_heights, dtype=np.float64).copy(),
+        height_method=str(sequence.height_method),
+        wrist_quat_xyzw=_resample_quaternions_xyzw(
+            sequence.wrist_quat_xyzw,
+            source_times,
+            target_times,
+        ),
+        object_poses=resampled_object_poses,
+        fps=target_fps,
+        joint_names=np.asarray(sequence.joint_names, dtype=str).copy(),
+        aligned_frame_ids=np.asarray(
+            sequence.aligned_frame_ids[nearest_source_frames],
+            dtype=np.int64,
+        ).copy(),
+        object_name=str(sequence.object_name),
+        object_mesh_path=str(sequence.object_mesh_path),
+        provenance=json.loads(json.dumps(dict(sequence.provenance))),
+    )
+    _validate_canonical(result)
+    return result
 
 
 def load_canonical_core4d_sequence(path: str | Path) -> Core4DPairSequence:
@@ -370,6 +548,8 @@ def load_canonical_core4d_sequence(path: str | Path) -> Core4DPairSequence:
         "human_joints",
         "human_joints_full",
         "betas",
+        "human_heights",
+        "height_method",
         "wrist_quat_xyzw",
         "object_poses",
         "fps",
@@ -390,6 +570,8 @@ def load_canonical_core4d_sequence(path: str | Path) -> Core4DPairSequence:
             human_joints=np.asarray(archive["human_joints"], dtype=np.float64),
             human_joints_full=np.asarray(archive["human_joints_full"], dtype=np.float64),
             betas=np.asarray(archive["betas"], dtype=np.float64),
+            human_heights=np.asarray(archive["human_heights"], dtype=np.float64),
+            height_method=str(np.asarray(archive["height_method"]).reshape(())),
             wrist_quat_xyzw=np.asarray(archive["wrist_quat_xyzw"], dtype=np.float64),
             object_poses=np.asarray(archive["object_poses"], dtype=np.float64),
             fps=int(np.asarray(archive["fps"]).reshape(())),
@@ -406,8 +588,10 @@ def load_canonical_core4d_sequence(path: str | Path) -> Core4DPairSequence:
 __all__ = [
     "CORE4D_FPS",
     "CORE4D_FULL_JOINT_COUNT",
+    "CORE4D_HEIGHT_METHOD",
     "CORE4D_TO_OMNI_ROTATION",
     "Core4DPairSequence",
     "load_canonical_core4d_sequence",
     "load_core4d_sequence",
+    "resample_core4d_pair_sequence",
 ]

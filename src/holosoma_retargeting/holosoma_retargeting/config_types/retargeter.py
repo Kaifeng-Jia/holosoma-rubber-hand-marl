@@ -155,6 +155,75 @@ class PTWristOrientationConfig:
 
 
 @dataclass(frozen=True)
+class PTFullArmOrientationConfig:
+    """Optional demonstrated-palm refinement using each complete G1 arm."""
+
+    enable: bool = False
+    """Whether shoulder, elbow, and wrist jointly track the demonstrated palm."""
+
+    orientation_weight: float = 100.0
+    """Quadratic weight for hand-link orientation error in radians."""
+
+    hand_position_weight: float = 1.0e4
+    """Quadratic weight for drift from the baseline hand-link position in metres."""
+
+    arm_prior_weight: float = 1.0
+    """Quadratic weight for changes from the baseline seven-joint arm pose."""
+
+    correction_temporal_weight: float = 5.0
+    """Quadratic weight for frame-to-frame changes in the refinement correction."""
+
+    max_nfev: int = 200
+    """Maximum nonlinear least-squares evaluations for each hand and frame."""
+
+
+@dataclass(frozen=True)
+class PTWristDominantSurfaceConfig:
+    """Demonstrated palm refinement that keeps proximal arm motion conservative."""
+
+    enable: bool = False
+    """Whether wrist-led palm-normal and support-point tracking is enabled."""
+
+    normal_weight: float = 100.0
+    """Quadratic weight for aligning the rubber-palm surface normal."""
+
+    finger_weight: float = 10.0
+    """Weaker quadratic weight for aligning the rubber-hand long axis."""
+
+    surface_position_weight: float = 1.0e4
+    """Quadratic weight for preserving the baseline palm support point in metres."""
+
+    proximal_prior_weight: float = 100.0
+    """Quadratic prior on shoulder and elbow corrections."""
+
+    wrist_prior_weight: float = 1.0
+    """Quadratic prior on wrist corrections."""
+
+    proximal_correction_temporal_weight: float = 100.0
+    """Temporal weight on shoulder/elbow correction changes."""
+
+    wrist_correction_temporal_weight: float = 20.0
+    """Temporal weight on wrist correction changes."""
+
+    max_nfev: int = 200
+    """Maximum nonlinear least-squares evaluations for each hand and frame."""
+
+
+@dataclass(frozen=True)
+class ElasticConstraintConfig:
+    """Optional exact-penalty relaxation for selected SQP constraints."""
+
+    enable: bool = False
+    """Whether object and foot constraints may use penalized slack variables."""
+
+    object_collision_weight: float = 1.0e5
+    """L1 penalty per metre of robot-object non-penetration slack."""
+
+    foot_kinematics_weight: float = 1.0e4
+    """L1 penalty per metre of foot XY or nominal-height slack."""
+
+
+@dataclass(frozen=True)
 class RetargeterConfig:
     """Configuration for retargeter parameters.
 
@@ -168,6 +237,9 @@ class RetargeterConfig:
 
     activate_joint_limits: bool = True
     """Whether to enforce joint limits during retargeting."""
+
+    apply_manual_joint_limit_overrides: bool = True
+    """Whether to tighten URDF joint limits with task-specific manual bounds."""
 
     activate_obj_non_penetration: bool = True
     """Whether to enforce object non-penetration constraints."""
@@ -204,6 +276,19 @@ class RetargeterConfig:
 
     pt_wrist_orientation: PTWristOrientationConfig = field(default_factory=PTWristOrientationConfig)
     """A.1 raw-PT wrist-only orientation post-processing for rigid robot hands."""
+
+    pt_full_arm_orientation: PTFullArmOrientationConfig = field(
+        default_factory=PTFullArmOrientationConfig
+    )
+    """Raw-PT palm-orientation refinement using shoulder, elbow, and wrist."""
+
+    pt_wrist_dominant_surface: PTWristDominantSurfaceConfig = field(
+        default_factory=PTWristDominantSurfaceConfig
+    )
+    """Wrist-led demonstrated-palm refinement with a fixed support point."""
+
+    elastic_constraints: ElasticConstraintConfig = field(default_factory=ElasticConstraintConfig)
+    """Optional slack variables for otherwise infeasible object/foot constraints."""
 
     w_nominal_tracking_init: float = 5.0
     """Initial weight for nominal tracking cost."""

@@ -326,6 +326,73 @@ def weighted_surface_sampling_by_face_normal(mesh, sample_count, weight_func, se
     return np.array(sampled_points)
 
 
+def _validate_positive_scale(scale: float) -> float:
+    scale_value = float(scale)
+    if not np.isfinite(scale_value) or scale_value <= 0.0:
+        raise ValueError(f"scale must be a finite positive value, got {scale!r}")
+    return scale_value
+
+
+def ground_and_scale_human_joints(
+    human_joints,
+    demo_joints,
+    foot_names,
+    scale=0.714,
+    mat_height=0.1,
+):
+    """Return a grounded and uniformly scaled copy of human joint positions."""
+    scale_value = _validate_positive_scale(scale)
+    mat_height_value = float(mat_height)
+    if not np.isfinite(mat_height_value) or mat_height_value < 0.0:
+        raise ValueError(f"mat_height must be a finite non-negative value, got {mat_height!r}")
+
+    joints = np.array(human_joints, copy=True)
+    if joints.ndim != 3 or joints.shape[-1] != 3 or joints.shape[0] < 1:
+        raise ValueError(f"human_joints must have shape (T, J, 3) with T >= 1, got {joints.shape}")
+    if not np.issubdtype(joints.dtype, np.number) or not np.isfinite(joints).all():
+        raise ValueError("human_joints must contain finite numeric values")
+    if len(foot_names) < 2:
+        raise ValueError("foot_names must contain left and right foot joint names")
+
+    try:
+        toe_indices = [demo_joints.index(foot_names[0]), demo_joints.index(foot_names[1])]
+    except ValueError as exc:
+        raise ValueError("foot_names must be present in demo_joints") from exc
+    if any(index >= joints.shape[1] for index in toe_indices):
+        raise ValueError(
+            f"demo_joints foot indices {toe_indices} exceed the human joint dimension {joints.shape[1]}"
+        )
+
+    z_min = joints[:, toe_indices, 2].min()
+    if z_min >= mat_height_value:
+        # Preserve the legacy convention: demonstrations recorded on a mat
+        # retain ``mat_height`` above the world ground after normalization.
+        z_min -= mat_height_value
+    joints[:, :, 2] -= z_min
+    return joints * scale_value
+
+
+def scale_object_pose_trajectory(object_poses, scale=0.714):
+    """Return a scaled copy of a ``wxyz + xyz`` object-pose trajectory.
+
+    Rotation and the initial object height remain unchanged.  Horizontal
+    translation and vertical displacement relative to the first frame are
+    scaled uniformly, matching the legacy object-interaction preprocessing.
+    """
+    scale_value = _validate_positive_scale(scale)
+    poses = np.array(object_poses, copy=True)
+    if poses.ndim != 2 or poses.shape[1] != 7 or poses.shape[0] < 1:
+        raise ValueError(f"object_poses must have shape (T, 7) with T >= 1, got {poses.shape}")
+    if not np.issubdtype(poses.dtype, np.number) or not np.isfinite(poses).all():
+        raise ValueError("object_poses must contain finite numeric values")
+
+    poses[:, -3:-1] = poses[:, -3:-1] * scale_value
+    object_z0 = poses[0, -1]
+    dz_scale = (poses[:, -1] - object_z0) * scale_value
+    poses[:, -1] = object_z0 + dz_scale
+    return poses
+
+
 def preprocess_motion_data(
     human_joints,
     retargeter,
@@ -347,26 +414,16 @@ def preprocess_motion_data(
     Returns:
         tuple: (human_joints_scaled, object_poses_scaled, object_moving_frame_idx).
     """
-    # Normalize human joint heights
-    toe_indices = [
-        retargeter.demo_joints.index(foot_names[0]),
-        retargeter.demo_joints.index(foot_names[1]),
-    ]
-    z_min = human_joints[:, toe_indices, 2].min()
-    if z_min >= mat_height:
-        # On a mat.
-        z_min -= mat_height
-    human_joints[:, :, 2] -= z_min
-
-    # Scale human joints
-    human_joints = human_joints * scale
+    human_joints = ground_and_scale_human_joints(
+        human_joints,
+        retargeter.demo_joints,
+        foot_names,
+        scale=scale,
+        mat_height=mat_height,
+    )
 
     if object_poses is not None:
-        object_poses[:, -3:-1] = object_poses[:, -3:-1] * scale
-        object_z0 = object_poses[0, -1]
-        dz_scale = (object_poses[:, -1] - object_z0) * scale
-        object_poses[:, -1] = object_z0 + dz_scale
-
+        object_poses = scale_object_pose_trajectory(object_poses, scale=scale)
         object_moving_frame_idx = extract_object_first_moving_frame(object_poses)
 
         return human_joints, object_poses, object_moving_frame_idx
@@ -453,7 +510,7 @@ def augment_object_poses(
         rotation_list[object_moving_frame_idx:] = rotation_initial * np.exp(
             (object_moving_frame_idx - np.arange(object_moving_frame_idx, N)) / rotation_tau
         )
-        rotation = R.from_euler("z", rotation_list)
+        rotation = R.from_euler("z", rotation_list[:, None])
         object_quat = R.from_quat(object_poses[:, :4], scalar_first=True)
         object_quat_rotated = (rotation * object_quat).as_quat(scalar_first=True)
         object_poses_augmented[:, :4] = object_quat_rotated

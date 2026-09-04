@@ -16,6 +16,7 @@ from holosoma_retargeting.data_utils.core4d_adapter import (  # noqa: E402
     CORE4D_FPS,
     load_canonical_core4d_sequence,
     load_core4d_sequence,
+    resample_core4d_pair_sequence,
 )
 
 
@@ -53,6 +54,15 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         help=f"Input motion rate (official processing default: {CORE4D_FPS} FPS).",
     )
     parser.add_argument(
+        "--output-fps",
+        type=_positive_int,
+        default=None,
+        help=(
+            "Optionally resample the complete paired sequence before saving. "
+            "For example, 197 frames at 15 FPS become 393 frames at 30 FPS."
+        ),
+    )
+    parser.add_argument(
         "--force",
         action="store_true",
         help="Explicitly permit replacement of an existing output artifact.",
@@ -68,10 +78,15 @@ def main(argv: list[str] | None = None) -> int:
     if output.exists() and not args.force:
         raise FileExistsError(f"Refusing to overwrite existing CORE4D artifact: {output}")
 
-    sequence = load_core4d_sequence(
+    source_sequence = load_core4d_sequence(
         sequence_dir,
         object_model_root,
         fps=args.fps,
+    )
+    sequence = (
+        resample_core4d_pair_sequence(source_sequence, args.output_fps)
+        if args.output_fps is not None
+        else source_sequence
     )
     sequence.save(output)
     verified = load_canonical_core4d_sequence(output)
@@ -79,11 +94,21 @@ def main(argv: list[str] | None = None) -> int:
         json.dumps(
             {
                 "output": str(output),
+                "source_frames": int(len(source_sequence.human_joints)),
+                "source_fps": source_sequence.fps,
                 "frames": int(len(verified.human_joints)),
                 "fps": verified.fps,
+                "duration_seconds": (
+                    (len(verified.human_joints) - 1) / verified.fps
+                    if len(verified.human_joints) > 1
+                    else 0.0
+                ),
+                "resampled": args.output_fps is not None,
                 "human_joints_shape": list(verified.human_joints.shape),
                 "human_joints_full_shape": list(verified.human_joints_full.shape),
                 "betas_shape": list(verified.betas.shape),
+                "human_heights": verified.human_heights.tolist(),
+                "height_method": verified.height_method,
                 "wrist_quat_xyzw_shape": list(verified.wrist_quat_xyzw.shape),
                 "object_poses_shape": list(verified.object_poses.shape),
                 "object_name": verified.object_name,
