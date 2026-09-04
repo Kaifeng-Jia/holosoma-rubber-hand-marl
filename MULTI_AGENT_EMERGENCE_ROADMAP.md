@@ -3,21 +3,38 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-08-29
+- 最近更新：2026-09-04
 - 分支：`rubber_hand_marl_baseline`
 - 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：Push 与 Pull 两个独立协作 baseline 已完成；Push 后续训练暂缓，Pull 已通过用户
-  人工动作质量验收。Demo 3 对角桌腿竞争式拉拽与 Demo 4 协作旋转长桌均已完成相互隔离的
-  reference、环境、MAPPO、正式 train/resume、actor-only evaluate/record 和真实 Isaac/CUDA
-  验证，**两者都尚未开始正式训练**。Demo 3 正式管线已提交并推送为 `ca893dba`。用户确认租用
-  一张 RTX 4090，Demo 3 与 Demo 4 均使用 `4096 env × 24 steps`、训练 `15,000` iterations、
-  每 `150` iterations 保存；先做容量验证，再在同一张 GPU 上顺序训练，不把两个 Demo 混成一个 policy。
+  人工动作质量验收。Demo 3 已训练至 iteration `10,100`，但竞争策略在早期出现 collapse，结果
+  作为诊断材料保留。Demo 4 已完成一轮本地 `2,048 env × 24 steps × 10,000 iterations` 正式
+  训练；最终 Actor 能快速完成 `+90°`，但通过猛烈旋转和提前终止绕开了大部分 Pull 先验，当前
+  只作为 reward-hacking 对照，不视为动作质量合格的最终 Demo。独立 Kick Demo 已完成
+  `2,048 env × 24 steps × 8,000 iterations` 训练并通过用户视觉验收。CORE4D 接入工作已隔离在
+  `core4d-base` 分支，不把数据适配代码混入本 MARL 分支。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
-- 活动实验：Push、Pull、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
+- 活动实验：Push、Pull、Kick、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
 
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
+
+### 1.1 三项并行方向与当前状态（2026-09-04）
+
+以下三项是后续需要分别推进的工作方向，彼此不得混成一个 policy 或一个实验目录。这里的编号
+表示用户梳理时的顺序，不表示必须同时开始训练。
+
+1. **继续探索 Demo 4 协作旋转**：保留当前快速暴力旋转模型作为失败设计对照；未来若恢复，
+   优先采用“Pull 先验模式约束 + 平滑 yaw 目标 + 非即时成功终止”的重设计。该重设计目前只
+   记录，不立即实现。
+2. **CORE4D-Base 数据接入**：确定性 CORE4D adapter、双人 OmniRetarget/two-stage 管线、ViSER
+   与可复现小桌诊断导出已经在独立 `core4d-base` 分支实现并推送。该分支继续独立评审，不修改
+   本分支的 Actor、Critic、reward 或正式训练逻辑。
+3. **Kick 独立 Demo**：已经沿用 Demo 1/2 的 reference-guided MARL 思路，以冻结的 Kick WBT
+   checkpoint 构造镜像双机器人 reference，并完成一轮 `8,000` iterations 正式训练。Kick 与
+   Push、Pull、Demo 3、Demo 4 保持独立网络、配置、reference、checkpoint 和日志；本轮结果与
+   复现边界记录在第 9.5 节。
 
 执行过程中，如下事项存在不确定性时必须先与用户讨论：
 
@@ -1591,6 +1608,59 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `129 passed`。真实 Isaac/CUDA PPO smoke 以 `1 env × 4 steps` 完成 rollout、Actor/Critic 更新和
   checkpoint round-trip；Actor/Critic 最大参数变化均约 `0.001`，所有张量与指标有限，Actor
   normalizer 保持冻结。静态物理 smoke 另已确认 reset 后桌子不会自行旋转；
-- 当前状态：静态布局、训练管线、恢复契约、评估入口和 smoke 均已完成，**尚未启动正式训练**。
-  下一 gate 只包含用户对静态 ViSER 的最终视觉确认，以及正式训练参数的确认；不再人为设计桌子
-  逐帧 reference。
+- 截至 2026-08-28：静态布局、训练管线、恢复契约、评估入口和 smoke 均已完成，当时尚未
+  启动正式训练。其后的实际训练结果与设计结论记录在下一节。
+
+#### 2026-08-31：Demo 4 首轮正式训练结果与保留重设计
+
+- 正式训练实际改为本地 RTX 5070 Laptop GPU 上的
+  `2,048 env × 24 steps × 10,000 iterations`，seed `721`，每 `1,000` iterations 保存；
+  输出目录为
+  `logs/Demo4Rotate/rectangular_pull_pull_rotate90_full10000_save1000_seed721_env2048/`，
+  metrics 从 `1` 到 `10,000` 连续且全部有限，`status.passed=true`；
+- `model_10000.pt` 的单环境 deterministic actor-only 评估为 `5/5` 成功、`0` 跌倒、`0`
+  table-safety、`0` timeout，终止 yaw 为 `97.01°–100.60°`。但只需 `14–15` 个 50 Hz 控制步，
+  即约 `0.28–0.30 s`；ViSER 显示两台机器人以猛烈方式把桌子甩转，甚至出现机器人被桌子带飞；
+- checkpoint 对比证明这种加速随训练形成：iteration `1,000` 需 `38–39` 步，`3,000` 需
+  `21–22` 步，`6,000` 需 `16` 步，`9,000/10,000` 需 `14–15` 步。当前 yaw potential 在
+  `90°` 截断，因此并不直接奖励超过 `90°`；真正漏洞是折扣回报偏好更早拿到 progress/bonus、
+  首次达到目标立即终止、没有超调/桌面角速度/成功后稳定保持要求。最终策略只执行约
+  `14/316=4.4%` 的 Pull reference，现有 WBT 奖励不足以阻止该捷径；
+- 当前结论：这轮训练证明环境、共享 Actor 和任务接触链能够产生桌面旋转，但不能证明策略
+  保留了 Pull 动作模式。它是任务成功、动作先验失败的 reward-hacking baseline；不能因为
+  `5/5` success 将其晋升为动作质量合格的 Demo 4；
+- 存储保留：用户确认只需最终 checkpoint。已永久删除 `model_00000.pt` 及
+  `model_01000.pt` 至 `model_09000.pt`，释放 `77,284,819 bytes`（约 `73.7 MiB`）；保留完整
+  `model_10000.pt`、metrics/run-config/status、console log 和各阶段 ViSER 评估轨迹；
+- 保留但暂不执行的重设计：重新从验收过的 Pull checkpoint 启动；保持共享 Actor 与全局
+  Critic；用冻结 Pull Actor 的软 KL 约束保留动作模式；不再以达到 `90°` 立即终止，而让动作
+  完成主要 reference 时段；用随 motion phase 平滑到 `90°` 的标量 yaw 目标同时惩罚过快、
+  过慢和超调；成功要求目标附近、桌面低角速度且两台机器人稳定保持。是否给前馈 Actor 恢复
+  一个可物理估计的桌面 yaw-rate 标量，必须在正式实现前再次由用户确认。
+
+#### 2026-09-01：独立双机器人 Kick Demo 完整训练与验收
+
+- reference 来源：冻结 Kick WBT 的物理评估 attempt `9`，将第二台 G1 在桌子局部 XY 平面做
+  完整镜像，包括 root、左右关节置换和关节符号；共享桌轨迹由原轨迹及其镜像在初始桌坐标系
+  中对称化得到。用户否决的 `same_action` 预览不进入活动资产；
+- accepted canonical ViSER reference 为 `298` 帧、`50 Hz`，SHA256
+  `4daada28ae9d530969e7249d8fee4025c303eba65bb516ac787e23e797bc5d85`；完整 WBT runtime
+  reference SHA256 为
+  `8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d`；两者均随代码提交，
+  不依赖本地 `logs/` 才能加载；
+- 训练保持 Plan 5 契约：共享 `158→512→256→128→29` Actor、`527→512→256→128→1`
+  centralized critic、原 Push/Pull reference-guided reward 与 joint tracking termination。两台实体
+  robot 使用 `main_mesh_collision_rubberhand.urdf`；桌子质量 `20 kg`，静/动摩擦
+  `0.5/0.5`，restitution `0`；物理 `200 Hz`、控制 `50 Hz`；
+- 正式 run 为 `logs/Plan5Kick/mirrored_kick_full8000_seed721_env2048/`：seed `721`、
+  `2,048 env × 24 steps × 8,000 iterations`，每 `2,000` iterations 保存一次，完整保存
+  `model_00000/02000/04000/06000/08000.pt`，训练账本 `status.passed=true`；
+- 最终 `model_08000.pt` SHA256 为
+  `9c6a31809ba69eaf3fd510391ce5b5f56069d4378c514ce09c3b4f28e407b3a3`。其单环境
+  deterministic actor-only rollout 完整执行 motion step `0..297`，无提前 done、timeout 或
+  joint-bad-tracking；rollout SHA256 为
+  `0531239d1cafe0490dae00c56d83bbc8899b71be59be03cb5739d8dfa7c4cb46`，并已通过用户视觉验收；
+- Git 复现边界：checkpoint、训练 metrics 和评估 rollout 仍位于被忽略的 `logs/`，不上传
+  GitHub；训练入口要求用户另行恢复 Kick `158-D` source checkpoint，固定 SHA256 为
+  `1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491`。本节的“成功”表示本轮
+  完整训练与单条确定性物理回放已通过，不替代后续多 seed 统计评估。
