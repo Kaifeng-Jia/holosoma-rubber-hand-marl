@@ -54,6 +54,7 @@ class DualA1ViserConfig:
     robot_urdf: Path = DEFAULT_ROBOT_URDF
     object_urdf: Path = DEFAULT_OBJECT_URDF
     lateral_spacing: float = 0.8
+    host: str = "127.0.0.1"
     port: int = 8080
     loop: bool = False
     grid_size: float = 8.0
@@ -130,7 +131,7 @@ def make_player(config: DualA1ViserConfig) -> viser.ViserServer:
         joint_pos = None
         source_label = f"rollout={config.rollout_npz}"
 
-    server = viser.ViserServer(port=config.port)
+    server = viser.ViserServer(host=config.host, port=config.port)
     agent_frames = (
         server.scene.add_frame("/agent_0", show_axes=False),
         server.scene.add_frame("/agent_1", show_axes=False),
