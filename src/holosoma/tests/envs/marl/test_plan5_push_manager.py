@@ -147,33 +147,46 @@ def test_cuda_smoke_cli_has_skill_specific_checkpoint_and_spacing_contracts():
     repo_root = Path(__file__).resolve().parents[5]
     script = (repo_root / "scripts/smoke_plan5_environment.py").read_text()
 
-    assert 'PARSER.add_argument("--skill", choices=("push", "pull"), default="push")' in script
+    assert (
+        'PARSER.add_argument("--skill", choices=("push", "pull", "kick"), default="push")'
+        in script
+    )
     assert "g1_29dof_plan5_push_smoke" in script
     assert "g1_29dof_plan5_push_baseline" in script
     assert "g1_29dof_plan5_pull_smoke" in script
     assert "g1_29dof_plan5_pull_baseline" in script
+    assert "g1_29dof_plan5_kick_smoke" in script
+    assert "g1_29dof_plan5_kick_baseline" in script
     assert "marl_compat_a1_v1/model_07999_actor158.pt" in script
     assert "marl_compat_pull_v1/model_07999_actor158.pt" in script
+    assert "marl_compat_kick_v1/model_07999_actor158.pt" in script
     assert "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364" in script
+    assert "1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491" in script
     assert 'if ARGS.skill == "push":' in script
     assert "torch.full_like(lateral_spacing, 0.8)" in script
-    assert "Pull reset positions do not match the explicit paired reference" in script
+    assert "reset positions do not match the explicit paired reference" in script
     assert '"skill": ARGS.skill' in script
     assert '"config": CONFIG_LABEL' in script
     assert '"actor_checkpoint_sha256": models.source_sha256' in script
 
 
-def test_training_cli_selects_independent_push_and_pull_inputs_without_ddp():
+def test_training_cli_selects_independent_push_pull_and_kick_inputs_without_ddp():
     repo_root = Path(__file__).resolve().parents[5]
     script_path = repo_root / "scripts/train_plan5_push.py"
     script = script_path.read_text()
 
-    assert 'PARSER.add_argument("--skill", choices=("push", "pull"), default="push")' in script
+    assert (
+        'PARSER.add_argument("--skill", choices=("push", "pull", "kick"), default="push")'
+        in script
+    )
     assert "g1_29dof_plan5_push_baseline" in script
     assert "g1_29dof_plan5_pull_baseline" in script
+    assert "g1_29dof_plan5_kick_baseline" in script
     assert "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt" in script
     assert "logs/WholeBodyTracking/marl_compat_pull_v1/model_07999_actor158.pt" in script
+    assert "logs/WholeBodyTracking/marl_compat_kick_v1/model_07999_actor158.pt" in script
     assert "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364" in script
+    assert "1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491" in script
     assert 'command_term = CONFIG.command.setup_terms["paired_motion_command"]' in script
     assert '"motion_file": selected_motion_config.motion_file' in script
     assert '"paired_reference_file": command_params.get("paired_reference_file")' in script
@@ -194,7 +207,7 @@ def test_training_cli_selects_independent_push_and_pull_inputs_without_ddp():
         text=True,
     )
     assert result.returncode == 0, result.stderr
-    assert "--skill {push,pull}" in result.stdout
+    assert "--skill {push,pull,kick}" in result.stdout
 
 
 def test_pull_training_cli_rejects_push_only_smooth_mode_before_sim_start():

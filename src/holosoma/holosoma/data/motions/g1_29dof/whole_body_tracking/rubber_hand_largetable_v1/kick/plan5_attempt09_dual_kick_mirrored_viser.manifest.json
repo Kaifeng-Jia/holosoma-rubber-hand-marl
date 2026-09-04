@@ -1,0 +1,82 @@
+{
+  "agent_joint_mirroring": true,
+  "artifacts": {
+    "canonical_rollout": {
+      "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_viser.npz",
+      "sha256": "4daada28ae9d530969e7249d8fee4025c303eba65bb516ac787e23e797bc5d85"
+    }
+  },
+  "attempt": {
+    "completed": true,
+    "end_exclusive": 2716,
+    "end_inclusive": 2715,
+    "index": 9,
+    "indexing": "zero_based",
+    "length_steps": 298,
+    "start": 2418,
+    "terminated": false
+  },
+  "fps": 50,
+  "frames": 298,
+  "generator": "scripts/synthesize_plan5_kick_reference.py",
+  "geometry": {
+    "layout": "mirrored",
+    "robot_a_lateral_offset_m": -0.43902360000000007,
+    "robot_a_table_local_z_m": {
+      "max": -0.5859671088266366,
+      "min": -1.1519785518775978
+    },
+    "robot_b_lateral_offset_m": 0.43902360000000007,
+    "robot_b_table_local_z_m": {
+      "max": 1.1519785518775985,
+      "min": 0.5859671088266366
+    },
+    "robot_spacing_table_local_z_m": {
+      "max": 2.303957103755196,
+      "mean": 1.6959400169083179,
+      "min": 1.1719342176532732,
+      "signed_first": 2.3038769499507863
+    },
+    "shared_table_lateral_drift_initial_local_z_m": {
+      "final": -2.644098048149024e-17,
+      "max": 6.132179724942233e-17,
+      "max_abs": 6.370365389710142e-17,
+      "min": -6.370365389710142e-17
+    },
+    "shared_table_net_displacement_initial_local_m": [
+      0.26878814780673044,
+      0.002296745787300944,
+      -2.644098048149024e-17
+    ],
+    "source_contact_local_z_m": -0.23525,
+    "target_contact_half_span_m": 0.6742736,
+    "target_robot_spacing_m": 1.3485472
+  },
+  "layout": "mirrored",
+  "mirror_plane": "table_local_xy",
+  "provenance": {
+    "agent_joint_mirroring": true,
+    "generator": "scripts/synthesize_plan5_kick_reference.py",
+    "layout": "mirrored",
+    "mirror_plane": "table_local_xy",
+    "robot_a_lateral_offset_m": -0.43902360000000007,
+    "robot_b_lateral_offset_m": 0.43902360000000007,
+    "source": "kick_7999_seed42_physics_eval_v1.npz",
+    "source_attempt": 9,
+    "source_attempt_indexing": "zero_based",
+    "source_contact_local_z_m": -0.23525,
+    "source_sha256": "fffed485ca6d25c33fb54477c121701b2416916cc4e22825494bd8550c1e103e",
+    "target_contact_half_span_m": 0.6742736
+  },
+  "quaternion_convention": {
+    "canonical_rollout": "xyzw",
+    "qpos_contract": "wxyz"
+  },
+  "schema_version": 1,
+  "source": {
+    "path": "kick_7999_seed42_physics_eval_v1.npz",
+    "sha256": "fffed485ca6d25c33fb54477c121701b2416916cc4e22825494bd8550c1e103e"
+  },
+  "source_contact_local_z_m": -0.23525,
+  "target_contact_half_span_m": 0.6742736
+}

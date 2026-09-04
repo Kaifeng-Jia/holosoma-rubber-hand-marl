@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Train one bounded Plan 5 cooperative Push or Pull MAPPO baseline."""
+"""Train one bounded Plan 5 cooperative Push, Pull, or Kick MAPPO baseline."""
 
 from __future__ import annotations
 
@@ -19,7 +19,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("--skill", choices=("push", "pull"), default="push")
+PARSER.add_argument("--skill", choices=("push", "pull", "kick"), default="push")
 PARSER.add_argument("--iterations", type=int, default=50)
 PARSER.add_argument("--num-envs", type=int, default=8)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
@@ -51,15 +51,21 @@ if RUNTIME_WORLD_SIZE != 1:
         "This entry point runs one independent single-GPU process; WORLD_SIZE must be 1"
     )
 if ARGS.output_dir is None:
+    project_dir = {
+        "push": "Plan5Push",
+        "pull": "Plan5Pull",
+        "kick": "Plan5Kick",
+    }[ARGS.skill]
+    default_run_name = {
+        "push": "a1_mappo_formal50_seed721",
+        "pull": "pull_mappo_formal50_seed721",
+        "kick": "mirrored_kick_mappo_formal50_seed721",
+    }[ARGS.skill]
     ARGS.output_dir = (
         REPO_ROOT
         / "logs"
-        / ("Plan5Push" if ARGS.skill == "push" else "Plan5Pull")
-        / (
-            "a1_mappo_formal50_seed721"
-            if ARGS.skill == "push"
-            else "pull_mappo_formal50_seed721"
-        )
+        / project_dir
+        / default_run_name
     )
 for name in ("iterations", "num_envs", "steps_per_env", "save_interval"):
     if getattr(ARGS, name) < 1:
@@ -74,11 +80,12 @@ if ARGS.joint_acceleration_weight is not None and ARGS.joint_acceleration_weight
     PARSER.error("--joint-acceleration-weight must be negative")
 if ARGS.fine_tune_from is not None and ARGS.joint_acceleration_weight is None:
     PARSER.error("--fine-tune-from requires --joint-acceleration-weight")
-if ARGS.skill == "pull" and (
+if ARGS.skill != "push" and (
     ARGS.joint_acceleration_weight is not None or ARGS.fine_tune_from is not None
 ):
     PARSER.error(
-        "Pull currently supports baseline training only; smooth fine-tuning is Push-only"
+        f"{ARGS.skill.title()} currently supports baseline training only; "
+        "smooth fine-tuning is Push-only"
     )
 if (
     ARGS.actor_learning_rate is not None
@@ -94,11 +101,25 @@ from holosoma.config_values.marl.g1.experiment import (
     g1_29dof_plan5_push_baseline,
     g1_29dof_plan5_push_smooth,
 )
+from holosoma.config_values.marl.g1.kick_experiment import (
+    g1_29dof_plan5_kick_baseline,
+)
 from holosoma.utils.eval_utils import init_sim_imports
 
 
 SMOOTH_FINETUNE = ARGS.joint_acceleration_weight is not None
-if ARGS.skill == "pull":
+if ARGS.skill == "kick":
+    EXPERIMENT = g1_29dof_plan5_kick_baseline
+    CONFIG_LABEL = "g1_29dof_plan5_kick_baseline"
+    TRAINING_PROJECT = "Plan5Kick"
+    TRAINING_NAME = "mirrored_kick_mappo_formal"
+    SOURCE_CHECKPOINT = (
+        REPO_ROOT / "logs/WholeBodyTracking/marl_compat_kick_v1/model_07999_actor158.pt"
+    )
+    EXPECTED_SOURCE_CHECKPOINT_SHA256 = (
+        "1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491"
+    )
+elif ARGS.skill == "pull":
     EXPERIMENT = g1_29dof_plan5_pull_baseline
     CONFIG_LABEL = "g1_29dof_plan5_pull_baseline"
     TRAINING_PROJECT = "Plan5Pull"
@@ -160,6 +181,17 @@ EXPECTED_OBJECT_INERTIA_KG_M2 = {
         3.95048914424628,
     ),
     "pull": (
+        3.95048914424628,
+        0.0,
+        0.0,
+        0.0,
+        4.36041519206568,
+        0.0,
+        0.0,
+        0.0,
+        0.62774975216702,
+    ),
+    "kick": (
         3.95048914424628,
         0.0,
         0.0,

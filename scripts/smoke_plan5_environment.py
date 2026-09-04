@@ -24,11 +24,15 @@ from holosoma.config_values.marl.g1.experiment import (
     g1_29dof_plan5_push_baseline,
     g1_29dof_plan5_push_smoke,
 )
+from holosoma.config_values.marl.g1.kick_experiment import (
+    g1_29dof_plan5_kick_baseline,
+    g1_29dof_plan5_kick_smoke,
+)
 from holosoma.utils.eval_utils import init_sim_imports
 
 
 PARSER = argparse.ArgumentParser()
-PARSER.add_argument("--skill", choices=("push", "pull"), default="push")
+PARSER.add_argument("--skill", choices=("push", "pull", "kick"), default="push")
 PARSER.add_argument("--baseline-reward", action="store_true")
 PARSER.add_argument("--steps", type=int, default=1)
 PARSER.add_argument("--record-output", type=str, default=None)
@@ -39,7 +43,20 @@ ARGS = PARSER.parse_args()
 if ARGS.steps < 1:
     PARSER.error("--steps must be at least 1")
 USE_BASELINE_CONFIG = ARGS.baseline_reward or ARGS.object_centric
-if ARGS.skill == "pull":
+if ARGS.skill == "kick":
+    CONFIG = g1_29dof_plan5_kick_baseline if USE_BASELINE_CONFIG else g1_29dof_plan5_kick_smoke
+    CONFIG_LABEL = (
+        "g1_29dof_plan5_kick_baseline"
+        if USE_BASELINE_CONFIG
+        else "g1_29dof_plan5_kick_smoke"
+    )
+    ACTOR_CHECKPOINT = (
+        REPO_ROOT / "logs/WholeBodyTracking/marl_compat_kick_v1/model_07999_actor158.pt"
+    )
+    EXPECTED_ACTOR_SHA256 = (
+        "1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491"
+    )
+elif ARGS.skill == "pull":
     CONFIG = g1_29dof_plan5_pull_baseline if USE_BASELINE_CONFIG else g1_29dof_plan5_pull_smoke
     CONFIG_LABEL = (
         "g1_29dof_plan5_pull_baseline"
@@ -63,7 +80,10 @@ else:
         REPO_ROOT / "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt"
     )
     EXPECTED_ACTOR_SHA256 = None
-CONFIG = replace(CONFIG, training=replace(CONFIG.training, seed=ARGS.seed))
+CONFIG = replace(
+    CONFIG,
+    training=replace(CONFIG.training, seed=ARGS.seed, num_envs=1),
+)
 if ARGS.record_output is not None:
     CONFIG = replace(
         CONFIG,
@@ -173,12 +193,14 @@ def main() -> None:
                 raise RuntimeError(f"Unexpected robot spacing: {lateral_spacing.tolist()}")
         else:
             if command.paired_reference_file is None:
-                raise RuntimeError("Pull smoke requires an explicit paired reference file")
+                raise RuntimeError(
+                    f"{ARGS.skill.title()} smoke requires an explicit paired reference file"
+                )
             if not torch.allclose(
                 initial_root[..., :3], reference_initial_root_pos, atol=1.0e-4
             ):
                 raise RuntimeError(
-                    "Pull reset positions do not match the explicit paired reference"
+                    f"{ARGS.skill.title()} reset positions do not match the explicit paired reference"
                 )
         if missing_asset_tokens:
             raise RuntimeError(f"Rubber-hand URDF is incomplete: {missing_asset_tokens}")
