@@ -5,6 +5,8 @@ import xml.etree.ElementTree as ET
 from math import isclose
 from pathlib import Path
 
+import pytest
+
 from holosoma.config_values.wbt.g1.reward import g1_29dof_wbt_reward
 
 
@@ -22,6 +24,19 @@ TRAINING_MOTION_DIR = (
 )
 TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_largetable.urdf"
 TRAINING_TABLE_MESH = TRAINING_MOTION_DIR / "largetable.obj"
+WIDE_TRAINING_TABLE_URDF = TRAINING_MOTION_DIR / "objects_widetable.urdf"
+WIDE_PLAN5_PREFLIGHT_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_widetable_plan5_preflight.urdf"
+)
+WIDE_PLAN5_TRAINING_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_widetable_plan5_training.urdf"
+)
+WIDE_PLAN5_PULL_TRAINING_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_widetable_plan5_pull_training.urdf"
+)
+SQUARE_DEMO3_TRAINING_TABLE_URDF = (
+    TRAINING_MOTION_DIR / "objects_squaretable_demo3_training.urdf"
+)
 RETARGETING_MODEL_DIR = (
     PACKAGE_ROOT.parent
     / "holosoma_retargeting"
@@ -262,3 +277,244 @@ def test_retargeting_and_training_rubber_hand_kinematics_match() -> None:
 def test_training_and_retargeting_largetable_assets_are_identical() -> None:
     assert TRAINING_TABLE_URDF.read_bytes() == RETARGETING_TABLE_URDF.read_bytes()
     assert TRAINING_TABLE_MESH.read_bytes() == RETARGETING_TABLE_MESH.read_bytes()
+
+
+def test_widetable_uses_matching_symmetric_box_primitives() -> None:
+    root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    link = _required_element(root, "./link[@name='widetable_link']")
+
+    assert root.attrib["name"] == "widetable_geometry_preflight"
+    assert not link.findall(".//mesh")
+
+    expected_geometry = {
+        "widetable_tabletop": (
+            "0 0.036275 0",
+            "1.4 0.04745 0.5219528",
+        ),
+        "widetable_leg_neg_x_neg_z": (
+            "-0.6742736 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_neg_x_pos_z": (
+            "-0.6742736 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_pos_x_neg_z": (
+            "0.6742736 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_leg_pos_x_pos_z": (
+            "0.6742736 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+    }
+
+    for name, (expected_xyz, expected_size) in expected_geometry.items():
+        visual = _required_element(link, f"./visual[@name='{name}']")
+        collision = _required_element(link, f"./collision[@name='{name}']")
+        visual_origin = _required_element(visual, "./origin")
+        collision_origin = _required_element(collision, "./origin")
+        visual_box = _required_element(visual, "./geometry/box")
+        collision_box = _required_element(collision, "./geometry/box")
+
+        _assert_float_sequence_equal(visual_origin.attrib["xyz"], expected_xyz)
+        _assert_float_sequence_equal(collision_origin.attrib["xyz"], expected_xyz)
+        _assert_float_sequence_equal(visual_box.attrib["size"], expected_size)
+        _assert_float_sequence_equal(collision_box.attrib["size"], expected_size)
+
+    assert len(link.findall("./visual")) == len(expected_geometry)
+    assert len(link.findall("./collision")) == len(expected_geometry)
+
+
+def test_widetable_plan5_preflight_asset_preserves_geometry_and_a1_contact_contract() -> None:
+    preflight_root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    retention_root = ET.parse(WIDE_PLAN5_PREFLIGHT_TABLE_URDF).getroot()
+    preflight_link = _required_element(preflight_root, "./link[@name='widetable_link']")
+    retention_link = _required_element(retention_root, "./link[@name='widetable_link']")
+
+    assert retention_root.attrib["name"] == "widetable_plan5_preflight"
+    assert [ET.tostring(node) for node in preflight_link.findall("./visual")] == [
+        ET.tostring(node) for node in retention_link.findall("./visual")
+    ]
+    assert [ET.tostring(node) for node in preflight_link.findall("./collision")] == [
+        ET.tostring(node) for node in retention_link.findall("./collision")
+    ]
+
+    inertial = _required_element(retention_link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 0.1
+    _assert_float_sequence_equal(_required_element(inertial, "./origin").attrib["xyz"], "0 0.015111745244133 0")
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.0031387487608351)
+    assert float(inertia["iyy"]) == pytest.approx(0.0218020759603284)
+    assert float(inertia["izz"]) == pytest.approx(0.0197524457212314)
+
+    source_root = ET.parse(TRAINING_TABLE_URDF).getroot()
+    assert ET.tostring(_required_element(retention_root, "./dynamics")) == ET.tostring(
+        _required_element(source_root, "./dynamics")
+    )
+    source_contact = _required_element(_required_element(source_root, "./link"), "./contact")
+    retention_contact = _required_element(retention_link, "./contact")
+    assert [(child.tag, child.attrib) for child in retention_contact] == [
+        (child.tag, child.attrib) for child in source_contact
+    ]
+
+
+def test_widetable_plan5_training_asset_has_frozen_20kg_physics() -> None:
+    geometry_root = ET.parse(WIDE_TRAINING_TABLE_URDF).getroot()
+    training_root = ET.parse(WIDE_PLAN5_TRAINING_TABLE_URDF).getroot()
+    geometry_link = _required_element(geometry_root, "./link[@name='widetable_link']")
+    training_link = _required_element(training_root, "./link[@name='widetable_link']")
+
+    assert training_root.attrib["name"] == "widetable_plan5_training"
+    assert [ET.tostring(node) for node in geometry_link.findall("./visual")] == [
+        ET.tostring(node) for node in training_link.findall("./visual")
+    ]
+    assert [ET.tostring(node) for node in geometry_link.findall("./collision")] == [
+        ET.tostring(node) for node in training_link.findall("./collision")
+    ]
+
+    inertial = _required_element(training_link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 20.0
+    _assert_float_sequence_equal(
+        _required_element(inertial, "./origin").attrib["xyz"],
+        "0 0.015111745244133 0",
+    )
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.62774975216702)
+    assert float(inertia["iyy"]) == pytest.approx(4.36041519206568)
+    assert float(inertia["izz"]) == pytest.approx(3.95048914424628)
+
+
+def test_widetable_plan5_pull_training_asset_swaps_local_x_and_z() -> None:
+    root = ET.parse(WIDE_PLAN5_PULL_TRAINING_TABLE_URDF).getroot()
+    link = _required_element(root, "./link[@name='widetable_pull_link']")
+
+    assert root.attrib["name"] == "widetable_plan5_pull_training"
+    assert not link.findall(".//mesh")
+
+    inertial = _required_element(link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 20.0
+    _assert_float_sequence_equal(
+        _required_element(inertial, "./origin").attrib["xyz"],
+        "0 0.015111745244133 0",
+    )
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(3.95048914424628)
+    assert float(inertia["iyy"]) == pytest.approx(4.36041519206568)
+    assert float(inertia["izz"]) == pytest.approx(0.62774975216702)
+    assert all(float(inertia[name]) == 0.0 for name in ("ixy", "ixz", "iyz"))
+
+    material = _required_element(root, "./material[@name='widetable_pull_material']/color")
+    _assert_float_sequence_equal(material.attrib["rgba"], "0.7 0.8 0.9 0.7")
+
+    expected_geometry = {
+        "widetable_pull_tabletop": (
+            "0 0.036275 0",
+            "0.5219528 0.04745 1.4",
+        ),
+        "widetable_pull_leg_neg_x_neg_z": (
+            "-0.23525 -0.17835 -0.6742736",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_pull_leg_neg_x_pos_z": (
+            "-0.23525 -0.17835 0.6742736",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_pull_leg_pos_x_neg_z": (
+            "0.23525 -0.17835 -0.6742736",
+            "0.05 0.3793 0.05",
+        ),
+        "widetable_pull_leg_pos_x_pos_z": (
+            "0.23525 -0.17835 0.6742736",
+            "0.05 0.3793 0.05",
+        ),
+    }
+    for name, (expected_xyz, expected_size) in expected_geometry.items():
+        visual = _required_element(link, f"./visual[@name='{name}']")
+        collision = _required_element(link, f"./collision[@name='{name}']")
+        _assert_float_sequence_equal(
+            _required_element(visual, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(visual, "./geometry/box").attrib["size"],
+            expected_size,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./geometry/box").attrib["size"],
+            expected_size,
+        )
+        assert _required_element(visual, "./material").attrib["name"] == (
+            "widetable_pull_material"
+        )
+
+    assert len(link.findall("./visual")) == len(expected_geometry)
+    assert len(link.findall("./collision")) == len(expected_geometry)
+
+
+def test_squaretable_demo3_training_asset_has_recomputed_20kg_physics() -> None:
+    root = ET.parse(SQUARE_DEMO3_TRAINING_TABLE_URDF).getroot()
+    link = _required_element(root, "./link[@name='squaretable_demo3_link']")
+
+    assert root.attrib["name"] == "squaretable_demo3_training"
+    assert not link.findall(".//mesh")
+    inertial = _required_element(link, "./inertial")
+    assert float(_required_element(inertial, "./mass").attrib["value"]) == 20.0
+    _assert_float_sequence_equal(
+        _required_element(inertial, "./origin").attrib["xyz"],
+        "0 -0.012413473401914 0",
+    )
+    inertia = _required_element(inertial, "./inertia").attrib
+    assert float(inertia["ixx"]) == pytest.approx(0.821972006993735)
+    assert float(inertia["iyy"]) == pytest.approx(1.206183371508506)
+    assert float(inertia["izz"]) == pytest.approx(0.821972006993735)
+    assert all(float(inertia[name]) == 0.0 for name in ("ixy", "ixz", "iyz"))
+
+    expected_geometry = {
+        "squaretable_demo3_tabletop": (
+            "0 0.036275 0",
+            "0.5219528 0.04745 0.5219528",
+        ),
+        "squaretable_demo3_leg_neg_x_neg_z": (
+            "-0.23525 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_neg_x_pos_z": (
+            "-0.23525 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_pos_x_neg_z": (
+            "0.23525 -0.17835 -0.23525",
+            "0.05 0.3793 0.05",
+        ),
+        "squaretable_demo3_leg_pos_x_pos_z": (
+            "0.23525 -0.17835 0.23525",
+            "0.05 0.3793 0.05",
+        ),
+    }
+    for name, (expected_xyz, expected_size) in expected_geometry.items():
+        visual = _required_element(link, f"./visual[@name='{name}']")
+        collision = _required_element(link, f"./collision[@name='{name}']")
+        _assert_float_sequence_equal(
+            _required_element(visual, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./origin").attrib["xyz"],
+            expected_xyz,
+        )
+        _assert_float_sequence_equal(
+            _required_element(visual, "./geometry/box").attrib["size"],
+            expected_size,
+        )
+        _assert_float_sequence_equal(
+            _required_element(collision, "./geometry/box").attrib["size"],
+            expected_size,
+        )
+
+    assert len(link.findall("./visual")) == len(expected_geometry)
+    assert len(link.findall("./collision")) == len(expected_geometry)

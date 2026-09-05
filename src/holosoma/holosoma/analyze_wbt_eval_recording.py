@@ -411,6 +411,21 @@ def summarize_recording(
             "minimum_displacement_m": min_table_displacement_m,
         }
 
+    teammate_channels = ("teammate_relative_position_b", "teammate_relative_velocity_b")
+    if all(name in recording for name in teammate_channels):
+        teammate_position = recording["teammate_relative_position_b"][evaluated_slice]
+        teammate_velocity = recording["teammate_relative_velocity_b"][evaluated_slice]
+        summary["teammate_observation"] = {
+            "frame": metadata.get("teammate_observation_frame"),
+            "semantics": metadata.get("teammate_observation_semantics"),
+            "position_min_m": np.min(teammate_position, axis=0).tolist(),
+            "position_max_m": np.max(teammate_position, axis=0).tolist(),
+            "position_abs_max_m": np.max(np.abs(teammate_position), axis=0).tolist(),
+            "velocity_min_m_s": np.min(teammate_velocity, axis=0).tolist(),
+            "velocity_max_m_s": np.max(teammate_velocity, axis=0).tolist(),
+            "velocity_abs_max_m_s": np.max(np.abs(teammate_velocity), axis=0).tolist(),
+        }
+
     return summary
 
 

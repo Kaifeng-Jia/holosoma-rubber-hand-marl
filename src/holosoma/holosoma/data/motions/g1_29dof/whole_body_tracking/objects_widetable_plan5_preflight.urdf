@@ -1,0 +1,104 @@
+<?xml version="1.0" ?>
+<robot name="widetable_plan5_preflight">
+  <dynamics damping="0.5" friction="0.9"/>
+  <material name="widetable_material">
+    <color rgba="0.7 0.8 0.9 0.7"/>
+  </material>
+  <link name="widetable_link">
+    <!--
+      Plan 5 mechanics-preflight asset only. It keeps the frozen A1 table's
+      0.1 kg total mass while using the wide-table five-box geometry. COM and
+      inertia are the uniformly dense 1 kg preflight values scaled by 0.1.
+      This asset reproduces the frozen dual-A1 action-trace audit; it is not the
+      final MARL training table.
+    -->
+    <inertial>
+      <mass value="0.1"/>
+      <origin rpy="0 0 0" xyz="0 0.015111745244133 0"/>
+      <inertia
+        ixx="0.0031387487608351"
+        ixy="0"
+        ixz="0"
+        iyy="0.0218020759603284"
+        iyz="0"
+        izz="0.0197524457212314"
+      />
+    </inertial>
+    <contact>
+      <lateral_friction value="0.9"/>
+      <rolling_friction value="0.5"/>
+      <stiffness value="30000"/>
+      <damping value="1000"/>
+    </contact>
+
+    <visual name="widetable_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="1.4 0.04745 0.5219528"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="1.4 0.04745 0.5219528"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

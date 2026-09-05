@@ -52,6 +52,9 @@ class TerminationManager:
         self.time_outs = torch.zeros_like(self.terminated)
 
         self._initialize_terms()
+        self._term_results = {
+            name: torch.zeros_like(self.terminated) for name in self._term_names
+        }
 
     def _initialize_terms(self) -> None:
         for term_name, term_cfg in self.cfg.terms.items():
@@ -100,6 +103,12 @@ class TerminationManager:
                 raise TypeError(
                     f"Termination term '{term_name}' returned dtype {result.dtype}, expected torch.bool tensor."
                 )
+            if result.shape != (self.env.num_envs,):
+                raise ValueError(
+                    f"Termination term '{term_name}' returned shape {tuple(result.shape)}, "
+                    f"expected ({self.env.num_envs},)"
+                )
+            self._term_results[term_name] = result.clone()
 
             if term_cfg.is_timeout:
                 timeout_flags |= result
@@ -109,6 +118,15 @@ class TerminationManager:
         self.terminated = reset_flags.clone()
         self.time_outs = timeout_flags.clone()
         return reset_flags, timeout_flags
+
+    @property
+    def active_terms(self) -> list[str]:
+        return list(self._term_names)
+
+    @property
+    def term_results(self) -> dict[str, torch.Tensor]:
+        """Per-term results from the latest pre-reset termination check."""
+        return self._term_results
 
     def reset(self, env_ids: torch.Tensor | None = None) -> None:
         """Reset stateful terms.
@@ -124,6 +142,10 @@ class TerminationManager:
         if env_ids is None:
             self.terminated.zero_()
             self.time_outs.zero_()
+            for result in self._term_results.values():
+                result.zero_()
         else:
             self.terminated[env_ids] = False
             self.time_outs[env_ids] = False
+            for result in self._term_results.values():
+                result[env_ids] = False

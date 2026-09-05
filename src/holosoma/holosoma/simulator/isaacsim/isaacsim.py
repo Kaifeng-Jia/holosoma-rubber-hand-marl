@@ -29,6 +29,7 @@ from isaaclab.terrains.utils import create_prim_from_mesh
 from isaaclab.utils.timer import Timer
 from loguru import logger
 from omegaconf import DictConfig
+from pxr import PhysxSchema
 
 from holosoma.utils.module_utils import get_holosoma_root
 from holosoma.utils.path import resolve_data_file_path
@@ -192,6 +193,17 @@ class IsaacSim(BaseSimulator):
         # print the environment information
 
         logger.info("Completed setting up the environment...")
+
+    def _setup_additional_robot_articulations(
+        self,
+        robot_articulation_config: ArticulationCfg,
+        contact_sensor_config: ContactSensorCfg,
+    ) -> None:
+        """Hook for simulator subclasses that place more robots in each scene."""
+
+    def _robot_prim_path_expressions(self) -> list[str]:
+        """Return robot articulation roots used by filtered contact sensors."""
+        return ["/World/envs/env_.*/Robot"]
 
     def _setup_scene(self) -> None:
         self._load_scene_config()
@@ -379,6 +391,14 @@ class IsaacSim(BaseSimulator):
 
         self.scene.articulations["robot"] = self._robot
 
+        self._setup_additional_robot_articulations(
+            robot_articulation_config,
+            contact_sensor_config,
+        )
+
+        # Create the primary contact sensor only after every robot articulation
+        # has been added. Adding another articulation recomposes the stage and
+        # can invalidate a sensor registered earlier in the construction pass.
         self.contact_sensor = ContactSensor(contact_sensor_config)
         self.scene.sensors["contact_sensor"] = self.contact_sensor
 
@@ -394,6 +414,12 @@ class IsaacSim(BaseSimulator):
             global_collision_prims.append("/World/scene")
 
         self.scene.filter_collisions(global_prim_paths=global_collision_prims)
+
+        # The filtered object-contact sensors are opt-in diagnostics. Keep
+        # explicit attributes so recorders can feature-detect them without
+        # changing the default simulator path.
+        self.object_robot_contact_sensor = None
+        self.object_hand_contact_sensor = None
 
         # add objects if object is provided
         if self.robot_config.object.object_urdf_path:
@@ -431,6 +457,68 @@ class IsaacSim(BaseSimulator):
             )
             self._object = RigidObject(object_cfg)
             self.scene.rigid_objects[object_name] = self._object
+
+            if self.simulator_config.enable_object_contact_diagnostics:
+                object_contact_body_names = [
+                    prim.GetPath().pathString.rsplit("/", 1)[-1]
+                    for prim in sim_utils.find_matching_prims("/World/envs/env_0/Object/.*")
+                    if prim.HasAPI(PhysxSchema.PhysxContactReportAPI)
+                ]
+                if len(object_contact_body_names) != 1:
+                    raise RuntimeError(
+                        "Object-contact diagnostics require exactly one object contact body; "
+                        f"resolved {object_contact_body_names}"
+                    )
+                robot_contact_body_names = [
+                    prim.GetPath().pathString.rsplit("/", 1)[-1]
+                    for prim in sim_utils.find_matching_prims("/World/envs/env_0/Robot/.*")
+                    if prim.HasAPI(PhysxSchema.PhysxContactReportAPI)
+                ]
+                if not robot_contact_body_names:
+                    raise RuntimeError("Object-contact diagnostics could not resolve any robot contact bodies")
+
+                common_object_contact_sensor_kwargs = {
+                    # The URDF importer creates the rigid body below the
+                    # container prim. ContactSensor must target the body that
+                    # owns the contact reporter API, not the /Object scope.
+                    "prim_path": f"/World/envs/env_.*/Object/{object_contact_body_names[0]}",
+                    "history_length": self.simulator_config.contact_sensor_history_length,
+                    "update_period": 0.005,
+                    "track_pose": True,
+                    "track_contact_points": True,
+                    "max_contact_data_count_per_prim": 32,
+                    "debug_vis": False,
+                }
+                self.object_robot_contact_sensor = ContactSensor(
+                    ContactSensorCfg(
+                        **common_object_contact_sensor_kwargs,
+                        # PhysX filtered contacts are reliable here when each
+                        # opposing rigid body is named explicitly. A single
+                        # broad Robot/.* filter produced an all-zero aggregate
+                        # even while the hand-specific filters reported force.
+                        filter_prim_paths_expr=[
+                            f"{robot_prim_path}/{body_name}"
+                            for robot_prim_path in self._robot_prim_path_expressions()
+                            for body_name in robot_contact_body_names
+                        ],
+                    )
+                )
+                self.scene.sensors["object_robot_contact_sensor"] = self.object_robot_contact_sensor
+
+                self.object_hand_contact_sensor = ContactSensor(
+                    ContactSensorCfg(
+                        **common_object_contact_sensor_kwargs,
+                        filter_prim_paths_expr=[
+                            f"{robot_prim_path}/{body_name}"
+                            for robot_prim_path in self._robot_prim_path_expressions()
+                            for body_name in (
+                                "left_rubber_hand_link",
+                                "right_rubber_hand_link",
+                            )
+                        ],
+                    )
+                )
+                self.scene.sensors["object_hand_contact_sensor"] = self.object_hand_contact_sensor
 
         # add lights
         # light_config = sim_utils.DomeLightCfg(intensity=2000.0, color=(0.98, 0.95, 0.88))
@@ -655,10 +743,10 @@ class IsaacSim(BaseSimulator):
         assert self.dof_names == self.robot_config.dof_names, "DOF names must match the config"
         assert self.body_names == self.robot_config.body_names, "Body names must match the config"
 
-        self._contact_to_robot_body_ids = torch.tensor(
-            [self.contact_sensor.body_names.index(body_name) for body_name in self.body_names],
-            device=self.sim_device,
-        )
+        # ContactSensor physics views may still be uninitialized while assets
+        # are being enumerated. Build this mapping in prepare_sim(), immediately
+        # before the first tensor refresh.
+        self._contact_to_robot_body_ids = None
 
         # return self.num_dof, self.num_bodies, self.dof_names, self.body_names
 
@@ -734,6 +822,7 @@ class IsaacSim(BaseSimulator):
         self.contact_forces_history = torch.zeros(
             self.num_envs, self.simulator_config.contact_sensor_history_length, self.num_bodies, 3, device=self.device
         )
+        self._initialize_contact_body_mapping()
 
         # Initialize virtual gantry system after object registry setup
         # Initialize virtual gantry using config
@@ -765,12 +854,40 @@ class IsaacSim(BaseSimulator):
         else:
             logger.debug("Bridge disabled: skipping acceleration computation tensors")
 
+    def _initialize_contact_body_mapping(self) -> None:
+        """Map configured robot body order to an initialized contact sensor."""
+        if not self.contact_sensor.is_initialized or self.contact_sensor.body_physx_view is None:
+            callback_exception = getattr(builtins, "ISAACLAB_CALLBACK_EXCEPTION", None)
+            if callback_exception is not None:
+                builtins.ISAACLAB_CALLBACK_EXCEPTION = None
+                raise RuntimeError("IsaacLab contact sensor initialization callback failed") from callback_exception
+            sensor_states = {
+                name: {
+                    "initialized": sensor.is_initialized,
+                    "has_physx_view": sensor.body_physx_view is not None,
+                }
+                for name, sensor in self.scene.sensors.items()
+                if hasattr(sensor, "body_physx_view")
+            }
+            raise RuntimeError(
+                "IsaacLab contact sensor did not initialize after simulation play: "
+                f"is_playing={self.sim.is_playing()}, is_stopped={self.sim.is_stopped()}, "
+                f"sensors={sensor_states}"
+            )
+        sensor_body_names = self.contact_sensor.body_names
+        self._contact_to_robot_body_ids = torch.tensor(
+            [sensor_body_names.index(body_name) for body_name in self.body_names],
+            device=self.sim_device,
+        )
+
     @property
     def dof_state(self):
         # This will always use the latest dof_pos and dof_vel
         return torch.cat([self.dof_pos[..., None], self.dof_vel[..., None]], dim=-1)
 
     def refresh_sim_tensors(self):
+        if self._contact_to_robot_body_ids is None:
+            raise RuntimeError("Contact body mapping must be initialized before refreshing simulator tensors")
         # Apply reset to recache new wyxz -> xyzw tensor
         self.robot_root_states.reset(self._robot.data.root_state_w)  # (num_envs, 13)
 

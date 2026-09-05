@@ -170,6 +170,26 @@ g1_29dof_wbt_w_object = replace(
     ),
 )
 
+g1_29dof_wbt_w_object_marl_compat = replace(
+    g1_29dof_wbt_w_object,
+    env_class="holosoma.envs.wbt.wbt_marl_compat_manager.GhostTeammateWholeBodyTrackingManager",
+    algo=replace(
+        g1_29dof_wbt_w_object.algo,
+        config=replace(
+            g1_29dof_wbt_w_object.algo.config,
+            load_optimizer=False,
+            module_dict=replace(
+                g1_29dof_wbt_w_object.algo.config.module_dict,
+                actor=replace(
+                    g1_29dof_wbt_w_object.algo.config.module_dict.actor,
+                    input_dim=["actor_obs", "teammate_obs"],
+                ),
+            ),
+        ),
+    ),
+    observation=observation.g1_29dof_wbt_observation_w_object_marl_compat,
+)
+
 g1_29dof_wbt_fast_sac_w_object = replace(
     g1_29dof_wbt_fast_sac,
     command=command.g1_29dof_wbt_command_w_object,
@@ -196,6 +216,7 @@ __all__ = [
     "g1_29dof_wbt_fast_sac",
     "g1_29dof_wbt_fast_sac_w_object",
     "g1_29dof_wbt_w_object",
+    "g1_29dof_wbt_w_object_marl_compat",
 ]
 
 """
