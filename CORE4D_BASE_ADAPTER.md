@@ -243,7 +243,7 @@ python scripts/export_core4d_small_table_pair.py \
 输出：物理可行性报告。是否进入 WBT/MARL 原本是之后的独立决策；本次已由用户另行确认
 进入下述小桌 reference-guided MAPPO 训练准备，不反向改变 adapter 数据契约。
 
-#### 当前晋升与验证状态（2026-09-04）
+#### 当前晋升与验证状态（2026-09-05）
 
 - 已将用户确认的小桌诊断 qpos 晋升为一个**独立的 CORE4D 小桌实验资产**，而不是改写
   CORE4D adapter 的原始数据契约。训练场景使用新建的显式 URDF；质量固定为 `20 kg`，
@@ -273,8 +273,15 @@ python scripts/export_core4d_small_table_pair.py \
   双次前向及参数更新的最短闭环。
 - 训练日志记录 reward、reference completion、物理失败，以及机器人 reference/桌子位置误差，
   可用于后续 `500/1000 iterations` 的趋势观察；这些指标不是提前否定方法的硬 gate。
-- 正式 `8000 iterations` 训练尚未开始；smoke 通过只表示工程链路可运行，不代表学习效果
-  已被验证。
+- 已确认首轮从零训练：本地 RTX 5070 Laptop、`2048 env × 24 steps × 12000 iterations`，
+  seed `721`，每 `2000` iterations 保存 checkpoint；另保存 iteration `0` 的随机初始模型。
+  Actor 与 Critic、归一化器和优化器均重新初始化。与旧 Push/Pull/Kick 相同的是接口与架构，
+  旧 Demo 继承对应 WBT Actor，本轮不继承其权重。
+- 本轮目录为
+  `logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/`。
+  checkpoint 为 `model_00000/02000/04000/06000/08000/10000/12000.pt`；每轮写入
+  `metrics.jsonl`，完成或异常写入 `status.json`。正式训练启动后以该目录账本为准；smoke
+  通过只表示工程链路可运行，不代表学习效果已被验证。
 
 ## 7. 当前明确不做的事项
 

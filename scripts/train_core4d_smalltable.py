@@ -20,11 +20,11 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
-PARSER.add_argument("--iterations", type=int, default=8000)
+PARSER.add_argument("--iterations", type=int, default=12000)
 PARSER.add_argument("--num-envs", type=int, default=2048)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
 PARSER.add_argument("--seed", type=int, default=721)
-PARSER.add_argument("--save-interval", type=int, default=1000)
+PARSER.add_argument("--save-interval", type=int, default=2000)
 PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
 ARGS = PARSER.parse_args()
@@ -212,7 +212,9 @@ def main() -> int:
         physics_hz, control_hz = _simulation_rates(env)
         ppo_config = replace(
             CONFIG.algo.config,
+            num_learning_iterations=ARGS.iterations,
             num_steps_per_env=ARGS.steps_per_env,
+            save_interval=ARGS.save_interval,
         )
         models = initialize_core4d_smalltable_model_bundle(
             ppo_config,

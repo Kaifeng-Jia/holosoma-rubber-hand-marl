@@ -26,7 +26,7 @@ def test_core4d_smalltable_uses_plan5_compatible_158d_shared_actor_contract() ->
     assert cfg.env_class.endswith("Core4DSmallTableManager")
     assert cfg.training.num_envs == 2048
     assert cfg.training.seed == 721
-    assert cfg.algo.config.save_interval == 1000
+    assert cfg.algo.config.save_interval == 2000
     assert cfg.algo.config.module_dict.actor.input_dim == [
         "actor_obs",
         "teammate_obs",

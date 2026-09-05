@@ -37,7 +37,8 @@ _core4d_smalltable_algo = replace(
     config=replace(
         g1_29dof_wbt_w_object.algo.config,
         load_optimizer=False,
-        save_interval=1000,
+        num_learning_iterations=12000,
+        save_interval=2000,
         module_dict=replace(
             g1_29dof_wbt_w_object.algo.config.module_dict,
             actor=replace(

@@ -38,7 +38,9 @@
    Push/Pull/Kick 一致的 `158-D = 自身 154 + 队友 4`，centralized critic 为 `527-D`，沿用
    Plan 5 reference rewards；桌子质量固定 `20 kg`、静/动摩擦为 `0.5/0.5`；runtime reference
    为 `687` 帧、`50 Hz`。桌子状态仍进入 centralized critic、reward 与 termination，但不直接
-   进入 Actor。Isaac smoke 已通过，正式训练尚未开始。
+   进入 Actor。Isaac smoke 已通过；首轮已确认本地从零训练 `12000 iterations`，
+   `2048 env × 24 steps`，seed `721`，每 `2000` iterations 保存，实际进度以第 9.5 节
+   所列运行目录的账本为准。
 3. **Kick 独立 Demo**：已经沿用 Demo 1/2 的 reference-guided MARL 思路，以冻结的 Kick WBT
    checkpoint 构造镜像双机器人 reference，并完成一轮 `8,000` iterations 正式训练。Kick 与
    Push、Pull、Demo 3、Demo 4 保持独立网络、配置、reference、checkpoint 和日志；本轮结果与
@@ -1678,11 +1680,16 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
 - 当前工作分支为 `core4d-base`；`8aa50374` 已合入 `rubber_hand_marl_baseline` 的源码，未合入
   `logs/` 或 checkpoints。
 - accepted small-table paired runtime reference 为 `687` 个采样点、`50 Hz`，首末采样跨度
-  `13.72 s`；训练采用与成功 Push/Pull/Kick 基线一致的 fresh shared `158-D` Actor
-  （自身/参考 `154` + 队友 `4`）、`527-D` centralized critic 与 Plan 5 reference rewards。
+  `13.72 s`；训练采用 shared `158-D` Actor（自身/参考 `154` + 队友 `4`）、
+  `527-D` centralized critic 与 Plan 5 reference rewards。接口与架构沿用成功 Push/Pull/Kick
+  基线；初始化方式不同：旧 Demo 继承对应 WBT Actor，本轮所有网络、归一化器与优化器从零初始化。
   桌子状态只进入 centralized critic、reward 与 termination，不直接进入 Actor。原诊断 source
   的 `training_ready=false` 历史保持不变，另由独立 promotion manifest 将固定 runtime 与训练
   URDF 晋升到这一实验。
 - 小桌质量固定为 `20 kg`，静/动摩擦为 `0.5/0.5`，restitution 为 `0`；物理/控制频率为
   `200/50 Hz`。最终 Isaac smoke 已验证桌子建模原点与质心速度换算、双机器人张量接口和一次
-  PPO update。checkpoint 锁定资产与实验契约，actor-only 评估关闭观测噪声；正式训练尚未开始。
+  PPO update。checkpoint 锁定资产与实验契约，actor-only 评估关闭观测噪声。
+- 首轮正式训练已确认：本地 RTX 5070 Laptop、`2048 env × 24 steps × 12000 iterations`，
+  seed `721`，每 `2000` iterations 保存 checkpoint，另保留 iteration `0` 的随机初始模型。
+  输出目录：`logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/`；
+  实际进度以 `metrics.jsonl` 为准，结束状态以 `status.json` 为准。
