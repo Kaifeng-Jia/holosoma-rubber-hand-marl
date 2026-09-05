@@ -4,18 +4,21 @@
 
 - 状态：唯一有效执行指南
 - 最近更新：2026-09-04
-- 分支：`rubber_hand_marl_baseline`
-- 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
+- 当前分支：`core4d-base`
+- WBT 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
+- MARL 代码合入提交：`8aa50374`（从 `rubber_hand_marl_baseline` 合入源码；不包含
+  `logs/` 与 checkpoints）
 - 当前唯一方案：**Plan 5——按动作分网的 reference-guided 多智能体强化学习**
 - 当前阶段：Push 与 Pull 两个独立协作 baseline 已完成；Push 后续训练暂缓，Pull 已通过用户
   人工动作质量验收。Demo 3 已训练至 iteration `10,100`，但竞争策略在早期出现 collapse，结果
   作为诊断材料保留。Demo 4 已完成一轮本地 `2,048 env × 24 steps × 10,000 iterations` 正式
   训练；最终 Actor 能快速完成 `+90°`，但通过猛烈旋转和提前终止绕开了大部分 Pull 先验，当前
   只作为 reward-hacking 对照，不视为动作质量合格的最终 Demo。独立 Kick Demo 已完成
-  `2,048 env × 24 steps × 8,000 iterations` 训练并通过用户视觉验收。CORE4D 接入工作已隔离在
-  `core4d-base` 分支，不把数据适配代码混入本 MARL 分支。
+  `2,048 env × 24 steps × 8,000 iterations` 训练并通过用户视觉验收。当前在 `core4d-base`
+  上继续 CORE4D 小桌双人 Demo：已完成正式训练前准备与 Isaac smoke，尚未开始正式训练。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
-- 活动实验：Push、Pull、Kick、Demo 3 与 Demo 4 使用相互隔离的网络、reference、checkpoint 和日志
+- 活动实验：Push、Pull、Kick、Demo 3、Demo 4 与 CORE4D 小桌使用相互隔离的网络、reference、
+  checkpoint 和日志；合入源码不代表混用任何实验产物
 
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
@@ -28,9 +31,13 @@
 1. **继续探索 Demo 4 协作旋转**：保留当前快速暴力旋转模型作为失败设计对照；未来若恢复，
    优先采用“Pull 先验模式约束 + 平滑 yaw 目标 + 非即时成功终止”的重设计。该重设计目前只
    记录，不立即实现。
-2. **CORE4D-Base 数据接入**：确定性 CORE4D adapter、双人 OmniRetarget/two-stage 管线、ViSER
-   与可复现小桌诊断导出已经在独立 `core4d-base` 分支实现并推送。该分支继续独立评审，不修改
-   本分支的 Actor、Critic、reward 或正式训练逻辑。
+2. **CORE4D-Base 数据接入与小桌双人 Demo**：当前工作位于 `core4d-base`。确定性 CORE4D
+   adapter、双人 OmniRetarget/two-stage 管线、ViSER 与可复现小桌诊断导出已经完成；提交
+   `8aa50374` 已把 `rubber_hand_marl_baseline` 的源码合入当前分支，但没有带入 `logs/` 或
+   checkpoints。accepted small-table paired demo 已完成训练准备：fresh shared Actor 为 `164-D`，
+   centralized critic 为 `527-D`，沿用 Plan 5 reference rewards；桌子质量固定 `20 kg`、静/动
+   摩擦为 `0.5/0.5`；runtime reference 为 `687` 帧、`50 Hz`。Isaac smoke 已通过，正式训练
+   尚未开始。
 3. **Kick 独立 Demo**：已经沿用 Demo 1/2 的 reference-guided MARL 思路，以冻结的 Kick WBT
    checkpoint 构造镜像双机器人 reference，并完成一轮 `8,000` iterations 正式训练。Kick 与
    Push、Pull、Demo 3、Demo 4 保持独立网络、配置、reference、checkpoint 和日志；本轮结果与
@@ -1664,3 +1671,15 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   GitHub；训练入口要求用户另行恢复 Kick `158-D` source checkpoint，固定 SHA256 为
   `1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491`。本节的“成功”表示本轮
   完整训练与单条确定性物理回放已通过，不替代后续多 seed 统计评估。
+
+#### 2026-09-04：CORE4D 小桌双人 Demo 训练准备完成
+
+- 当前工作分支为 `core4d-base`；`8aa50374` 已合入 `rubber_hand_marl_baseline` 的源码，未合入
+  `logs/` 或 checkpoints。
+- accepted small-table paired runtime reference 为 `687` 个采样点、`50 Hz`，首末采样跨度
+  `13.72 s`；训练采用 fresh shared `164-D` Actor、`527-D` centralized critic 与 Plan 5
+  reference rewards。原诊断 source 的 `training_ready=false` 历史保持不变，另由独立 promotion
+  manifest 将固定 runtime 与训练 URDF 晋升到这一实验。
+- 小桌质量固定为 `20 kg`，静/动摩擦为 `0.5/0.5`，restitution 为 `0`；物理/控制频率为
+  `200/50 Hz`。最终 Isaac smoke 已验证桌子建模原点与质心速度换算、双机器人张量接口和一次
+  PPO update。checkpoint 锁定资产与实验契约，actor-only 评估关闭观测噪声；正式训练尚未开始。

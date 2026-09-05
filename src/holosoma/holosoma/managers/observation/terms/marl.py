@@ -175,7 +175,7 @@ def centralized_shared_object_tracking(env: Any) -> torch.Tensor:
         actual_quat,
     )
     relative_orientation = quaternion_to_matrix(relative_quat, w_last=True)[..., :2].reshape(env.num_envs, 6)
-    actual_velocity = env.simulator.all_root_states[command.object_indices_in_simulator][:, 7:10]
+    actual_velocity = command.simulator_object_lin_vel_w
     relative_velocity = quat_rotate_inverse(
         reference_quat,
         actual_velocity - command.object_lin_vel_w,

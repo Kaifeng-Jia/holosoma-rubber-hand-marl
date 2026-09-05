@@ -227,13 +227,54 @@ python scripts/export_core4d_small_table_pair.py \
 不会修改 OmniRetarget 或 two-stage 求解器，也不能在尚未确认质量、惯量与摩擦前
 直接作为 Isaac 训练资产。
 
+用户已确认该小桌诊断结果中的 paired robot/object qpos 可作为后续独立实验的动作来源。
+这项确认不改变上述 source manifest 的性质：source 文件 SHA-256 为
+`d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05`，其
+`training_ready` 仍为 `false`，其中的 retarget placeholder 质量与惯量仍只属于诊断场景，
+不得冒充 CORE4D 原始数据提供的物理标注。真正面向训练的 URDF、物理常量和 runtime
+在 Stage E 作为独立实验资产显式定义。
+
 ### Stage E：Isaac 单环境物理可行性
 
 - 只建立一个双机器人、单物体环境。
 - 明确写出质量、惯量、摩擦、碰撞几何、PD 参数和控制频率。
 - 先做 reset/FK/contact/短 rollout 检查，不直接启动大规模 PPO 或 MARL。
 
-输出：物理可行性报告。是否进入 WBT/MARL 是之后的独立决策。
+输出：物理可行性报告。是否进入 WBT/MARL 原本是之后的独立决策；本次已由用户另行确认
+进入下述小桌 reference-guided MAPPO 训练准备，不反向改变 adapter 数据契约。
+
+#### 当前晋升与验证状态（2026-09-04）
+
+- 已将用户确认的小桌诊断 qpos 晋升为一个**独立的 CORE4D 小桌实验资产**，而不是改写
+  CORE4D adapter 的原始数据契约。训练场景使用新建的显式 URDF；质量固定为 `20 kg`，
+  静摩擦/动摩擦为 `0.5/0.5`，恢复系数为 `0`。这些数值属于本项目的 Isaac 实验配置，
+  不是 CORE4D 原始物理标注。
+- 原始 `source_manifest.json` 继续保留 `training_ready=false` 的诊断历史；独立的
+  `training_asset_manifest.json` 才记录本次人工审阅后的训练晋升，并绑定 source、runtime、
+  最终 URDF 与 `20 kg / 0.5 / 0.5 / 0` 物理契约。其 SHA-256 为
+  `6d55d7235c49456dd2793cf5ecafe6abd2420800504eb664e7ac0027efcba584`。
+- 诊断 source 已被重采样为 `687` 个采样点、`50 Hz` 的非循环 runtime reference，首末采样
+  时间跨度为 `13.72 s`；runtime
+  SHA-256 为
+  `582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153`。
+- 每个机器人继续使用共享 Actor，输入为 `164 = 自身 154 + 队友 4 + 桌子 6` 维；桌子
+  6 维仅包含机器人 heading frame 下的相对三维位置与相对三维线速度，不包含桌子 yaw
+  或 yaw rate。集中式 critic 输入为 `527` 维。
+- Actor、critic 和 observation normalizer 均采用 fresh initialization，不加载 Push、Pull、
+  Kick、Demo 4 或其他旧 checkpoint。
+- reference 的物体速度定义在桌子建模原点；Isaac 写入的是质心速度。训练 command 在 reset
+  时执行 `v_com = v_origin + omega × r`，Critic 比较 reference 时再还原为建模原点速度；Actor
+  的桌子线速度继续使用 COM 速度，因此仍不输入 yaw 或 yaw rate。
+- checkpoint 元数据绑定 runtime、URDF、晋升清单及物理/reward/termination 契约；fresh 与 resume
+  都必须写入全新的输出目录，避免覆盖旧 checkpoint。评估使用共享 Actor 的均值动作并关闭
+  Actor observation noise，不调用 Critic。
+- 最终 Isaac `1 env × 8 steps` 环境 smoke 和一次 PPO update smoke 已通过，已覆盖 reset、
+  建模原点/质心速度换算、`200/50 Hz`、`20 kg`、`0.5/0.5/0`、164/527 维接口、共享 Actor
+  双次前向及参数更新的最短闭环。
+- 训练日志记录 reward、reference completion、物理失败，以及机器人 reference/桌子位置误差，
+  可用于后续 `500/1000 iterations` 的趋势观察；这些指标不是提前否定方法的硬 gate。
+- 正式 `8000 iterations` 训练尚未开始；smoke 通过只表示工程链路可运行，不代表学习效果
+  已被验证。
 
 ## 7. 当前明确不做的事项
 

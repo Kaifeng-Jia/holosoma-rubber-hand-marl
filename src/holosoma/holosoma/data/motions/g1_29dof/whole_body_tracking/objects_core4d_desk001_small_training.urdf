@@ -1,0 +1,79 @@
+<?xml version="1.0"?>
+<robot name="core4d_desk001_small_training">
+  <material name="core4d_smalltable_material">
+    <color rgba="0.76 0.80 0.86 1.0"/>
+  </material>
+
+  <link name="desk001_link">
+    <!--
+      Portable training proxy for CORE4D desk001 at scale 0.741228385619.
+
+      The five boxes and local origins are frozen from the reviewed retarget
+      preview. CORE4D supplies no trusted mass/contact material: 20 kg is the
+      explicit experiment baseline. PhysX material is fixed in the isolated
+      experiment configuration.
+    -->
+    <inertial>
+      <origin xyz="0 0.126415000089 0" rpy="0 0 0"/>
+      <mass value="20.0"/>
+      <inertia
+        ixx="1.508353334770"
+        ixy="0"
+        ixz="0"
+        iyy="0.964473631150"
+        iyz="0"
+        izz="1.070457149412"
+      />
+    </inertial>
+
+    <visual name="desk001_tabletop_visual">
+      <origin xyz="0 0.253129493689 0" rpy="0 0 0"/>
+      <geometry><box size="0.443699311632 0.0348377341241 0.592241480110"/></geometry>
+      <material name="core4d_smalltable_material"/>
+    </visual>
+    <collision name="desk001_tabletop">
+      <origin xyz="0 0.253129493689 0" rpy="0 0 0"/>
+      <geometry><box size="0.443699311632 0.0348377341241 0.592241480110"/></geometry>
+    </collision>
+
+    <visual name="desk001_vertical_support_negative_z_visual">
+      <origin xyz="0 -0.0037061419281 -0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.0444737031371 0.485504592580 0.0555921289214"/></geometry>
+      <material name="core4d_smalltable_material"/>
+    </visual>
+    <collision name="desk001_vertical_support_negative_z">
+      <origin xyz="0 -0.0037061419281 -0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.0444737031371 0.485504592580 0.0555921289214"/></geometry>
+    </collision>
+
+    <visual name="desk001_vertical_support_positive_z_visual">
+      <origin xyz="0 -0.0037061419281 0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.0444737031371 0.485504592580 0.0555921289214"/></geometry>
+      <material name="core4d_smalltable_material"/>
+    </visual>
+    <collision name="desk001_vertical_support_positive_z">
+      <origin xyz="0 -0.0037061419281 0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.0444737031371 0.485504592580 0.0555921289214"/></geometry>
+    </collision>
+
+    <visual name="desk001_bottom_foot_negative_z_visual">
+      <origin xyz="0 -0.252017651110 -0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.407675612090 0.037061419281 0.0741228385619"/></geometry>
+      <material name="core4d_smalltable_material"/>
+    </visual>
+    <collision name="desk001_bottom_foot_negative_z">
+      <origin xyz="0 -0.252017651110 -0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.407675612090 0.037061419281 0.0741228385619"/></geometry>
+    </collision>
+
+    <visual name="desk001_bottom_foot_positive_z_visual">
+      <origin xyz="0 -0.252017651110 0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.407675612090 0.037061419281 0.0741228385619"/></geometry>
+      <material name="core4d_smalltable_material"/>
+    </visual>
+    <collision name="desk001_bottom_foot_positive_z">
+      <origin xyz="0 -0.252017651110 0.214956231830" rpy="0 0 0"/>
+      <geometry><box size="0.407675612090 0.037061419281 0.0741228385619"/></geometry>
+    </collision>
+  </link>
+</robot>
