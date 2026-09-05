@@ -42,7 +42,7 @@ _core4d_smalltable_algo = replace(
             g1_29dof_wbt_w_object.algo.config.module_dict,
             actor=replace(
                 g1_29dof_wbt_w_object.algo.config.module_dict.actor,
-                input_dim=["actor_obs", "teammate_obs", "table_obs"],
+                input_dim=["actor_obs", "teammate_obs"],
             ),
             critic=replace(
                 g1_29dof_wbt_w_object.algo.config.module_dict.critic,

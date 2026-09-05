@@ -257,19 +257,19 @@ python scripts/export_core4d_small_table_pair.py \
   时间跨度为 `13.72 s`；runtime
   SHA-256 为
   `582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153`。
-- 每个机器人继续使用共享 Actor，输入为 `164 = 自身 154 + 队友 4 + 桌子 6` 维；桌子
-  6 维仅包含机器人 heading frame 下的相对三维位置与相对三维线速度，不包含桌子 yaw
-  或 yaw rate。集中式 critic 输入为 `527` 维。
+- 每个机器人继续使用共享 Actor，输入为与 Push/Pull/Kick 一致的
+  `158 = 自身/参考 154 + 队友 4` 维。桌子状态不直接进入 Actor，但仍进入集中式 critic、
+  reward 与 termination；集中式 critic 输入为 `527` 维。
 - Actor、critic 和 observation normalizer 均采用 fresh initialization，不加载 Push、Pull、
   Kick、Demo 4 或其他旧 checkpoint。
 - reference 的物体速度定义在桌子建模原点；Isaac 写入的是质心速度。训练 command 在 reset
-  时执行 `v_com = v_origin + omega × r`，Critic 比较 reference 时再还原为建模原点速度；Actor
-  的桌子线速度继续使用 COM 速度，因此仍不输入 yaw 或 yaw rate。
+  时执行 `v_com = v_origin + omega × r`，Critic 比较 reference 时再还原为建模原点速度；
+  Actor 不读取桌子速度、yaw 或 yaw rate。
 - checkpoint 元数据绑定 runtime、URDF、晋升清单及物理/reward/termination 契约；fresh 与 resume
   都必须写入全新的输出目录，避免覆盖旧 checkpoint。评估使用共享 Actor 的均值动作并关闭
   Actor observation noise，不调用 Critic。
 - 最终 Isaac `1 env × 8 steps` 环境 smoke 和一次 PPO update smoke 已通过，已覆盖 reset、
-  建模原点/质心速度换算、`200/50 Hz`、`20 kg`、`0.5/0.5/0`、164/527 维接口、共享 Actor
+  建模原点/质心速度换算、`200/50 Hz`、`20 kg`、`0.5/0.5/0`、158/527 维接口、共享 Actor
   双次前向及参数更新的最短闭环。
 - 训练日志记录 reward、reference completion、物理失败，以及机器人 reference/桌子位置误差，
   可用于后续 `500/1000 iterations` 的趋势观察；这些指标不是提前否定方法的硬 gate。

@@ -19,7 +19,6 @@ from holosoma.agents.mappo.initialization import Plan5ModelBundle
 CORE4D_SMALLTABLE_ACTOR_GROUPS = (
     ("actor_obs", 154),
     ("teammate_obs", 4),
-    ("table_obs", 6),
 )
 
 
@@ -37,7 +36,7 @@ class Core4DSmallTablePolicyDecision:
 
 
 class Core4DSmallTablePolicyRunner:
-    """Call one 164-D Actor once per robot and one 527-D Critic per team."""
+    """Call one 158-D Actor once per robot and one 527-D Critic per team."""
 
     def __init__(self, models: Plan5ModelBundle) -> None:
         self.models = models

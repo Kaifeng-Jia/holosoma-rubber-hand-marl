@@ -16,7 +16,7 @@ from holosoma.utils.helpers import instantiate
 
 
 CORE4D_SMALLTABLE_NUM_AGENTS = 2
-CORE4D_SMALLTABLE_ACTOR_OBS_DIM = 164
+CORE4D_SMALLTABLE_ACTOR_OBS_DIM = 158
 CORE4D_SMALLTABLE_CRITIC_OBS_DIM = 527
 CORE4D_SMALLTABLE_ACTION_DIM = 29
 CORE4D_SMALLTABLE_INITIALIZATION = "fresh_random_initialization_v1"
@@ -31,13 +31,12 @@ def initialize_core4d_smalltable_model_bundle(
     obs_dim_dict = {
         "actor_obs": 154,
         "teammate_obs": 4,
-        "table_obs": 6,
         "critic_obs": CORE4D_SMALLTABLE_CRITIC_OBS_DIM,
     }
     history_length = {name: 1 for name in obs_dim_dict}
     actor_config = replace(
         copy.deepcopy(config.module_dict.actor),
-        input_dim=["actor_obs", "teammate_obs", "table_obs"],
+        input_dim=["actor_obs", "teammate_obs"],
     )
     critic_config = replace(
         copy.deepcopy(config.module_dict.critic),

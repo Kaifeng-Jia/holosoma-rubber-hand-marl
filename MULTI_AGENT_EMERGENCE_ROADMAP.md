@@ -23,7 +23,7 @@
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
 
-### 1.1 三项并行方向与当前状态（2026-09-04）
+### 1.1 三项并行方向与当前状态（2026-09-05）
 
 以下三项是后续需要分别推进的工作方向，彼此不得混成一个 policy 或一个实验目录。这里的编号
 表示用户梳理时的顺序，不表示必须同时开始训练。
@@ -34,10 +34,11 @@
 2. **CORE4D-Base 数据接入与小桌双人 Demo**：当前工作位于 `core4d-base`。确定性 CORE4D
    adapter、双人 OmniRetarget/two-stage 管线、ViSER 与可复现小桌诊断导出已经完成；提交
    `8aa50374` 已把 `rubber_hand_marl_baseline` 的源码合入当前分支，但没有带入 `logs/` 或
-   checkpoints。accepted small-table paired demo 已完成训练准备：fresh shared Actor 为 `164-D`，
-   centralized critic 为 `527-D`，沿用 Plan 5 reference rewards；桌子质量固定 `20 kg`、静/动
-   摩擦为 `0.5/0.5`；runtime reference 为 `687` 帧、`50 Hz`。Isaac smoke 已通过，正式训练
-   尚未开始。
+   checkpoints。accepted small-table paired demo 已完成训练准备：fresh shared Actor 为与
+   Push/Pull/Kick 一致的 `158-D = 自身 154 + 队友 4`，centralized critic 为 `527-D`，沿用
+   Plan 5 reference rewards；桌子质量固定 `20 kg`、静/动摩擦为 `0.5/0.5`；runtime reference
+   为 `687` 帧、`50 Hz`。桌子状态仍进入 centralized critic、reward 与 termination，但不直接
+   进入 Actor。Isaac smoke 已通过，正式训练尚未开始。
 3. **Kick 独立 Demo**：已经沿用 Demo 1/2 的 reference-guided MARL 思路，以冻结的 Kick WBT
    checkpoint 构造镜像双机器人 reference，并完成一轮 `8,000` iterations 正式训练。Kick 与
    Push、Pull、Demo 3、Demo 4 保持独立网络、配置、reference、checkpoint 和日志；本轮结果与
@@ -1672,14 +1673,16 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   `1555968f678c2b69fcd6f09c64d0a6252683eab902edd773a84acc205d0f5491`。本节的“成功”表示本轮
   完整训练与单条确定性物理回放已通过，不替代后续多 seed 统计评估。
 
-#### 2026-09-04：CORE4D 小桌双人 Demo 训练准备完成
+#### 2026-09-05：CORE4D 小桌双人 Demo 训练准备完成
 
 - 当前工作分支为 `core4d-base`；`8aa50374` 已合入 `rubber_hand_marl_baseline` 的源码，未合入
   `logs/` 或 checkpoints。
 - accepted small-table paired runtime reference 为 `687` 个采样点、`50 Hz`，首末采样跨度
-  `13.72 s`；训练采用 fresh shared `164-D` Actor、`527-D` centralized critic 与 Plan 5
-  reference rewards。原诊断 source 的 `training_ready=false` 历史保持不变，另由独立 promotion
-  manifest 将固定 runtime 与训练 URDF 晋升到这一实验。
+  `13.72 s`；训练采用与成功 Push/Pull/Kick 基线一致的 fresh shared `158-D` Actor
+  （自身/参考 `154` + 队友 `4`）、`527-D` centralized critic 与 Plan 5 reference rewards。
+  桌子状态只进入 centralized critic、reward 与 termination，不直接进入 Actor。原诊断 source
+  的 `training_ready=false` 历史保持不变，另由独立 promotion manifest 将固定 runtime 与训练
+  URDF 晋升到这一实验。
 - 小桌质量固定为 `20 kg`，静/动摩擦为 `0.5/0.5`，restitution 为 `0`；物理/控制频率为
   `200/50 Hz`。最终 Isaac smoke 已验证桌子建模原点与质心速度换算、双机器人张量接口和一次
   PPO update。checkpoint 锁定资产与实验契约，actor-only 评估关闭观测噪声；正式训练尚未开始。

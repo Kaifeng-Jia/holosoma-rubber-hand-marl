@@ -20,7 +20,7 @@ from holosoma.agents.mappo.ppo import Plan5PPO
 from holosoma.config_types.algo import PPOConfig
 
 
-CORE4D_SMALLTABLE_MAPPO_VERSION = "core4d_smalltable_shared_actor_mappo_v2"
+CORE4D_SMALLTABLE_MAPPO_VERSION = "core4d_smalltable_shared_actor_mappo_158_v1"
 CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256 = (
     "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153"
 )
@@ -87,7 +87,7 @@ def validate_core4d_smalltable_checkpoint(state: Mapping[str, Any]) -> int:
 
 
 class Core4DSmallTablePPO(Plan5PPO):
-    """Reuse the proven team GAE/PPO objective with the 164-D Actor layout."""
+    """Reuse the proven team GAE/PPO objective with the 158-D Actor layout."""
 
     def __init__(
         self,

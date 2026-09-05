@@ -254,9 +254,8 @@ def main() -> int:
             "actor_observation_groups": {
                 "actor_obs": 154,
                 "teammate_obs": 4,
-                "table_obs": 6,
             },
-            "actor_input_dim": 164,
+            "actor_input_dim": 158,
             "action_dim_per_agent": 29,
             "critic_input_dim": 527,
             "shared_actor": True,

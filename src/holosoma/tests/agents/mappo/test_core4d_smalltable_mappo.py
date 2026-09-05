@@ -33,7 +33,6 @@ def _observations(num_envs: int = 3) -> dict[str, torch.Tensor]:
     return {
         "actor_obs": torch.randn(num_envs, 2, 154, generator=generator),
         "teammate_obs": torch.randn(num_envs, 2, 4, generator=generator),
-        "table_obs": torch.randn(num_envs, 2, 6, generator=generator),
         "critic_obs": torch.randn(num_envs, 527, generator=generator),
     }
 
@@ -49,7 +48,7 @@ def test_core4d_initialization_is_fully_fresh_and_has_reviewed_dimensions() -> N
         device="cpu",
     )
 
-    assert _first_linear_width(bundle.actor) == 164
+    assert _first_linear_width(bundle.actor) == 158
     assert _first_linear_width(bundle.critic) == 527
     assert bundle.source_iteration == 0
     assert bundle.source_sha256 == CORE4D_SMALLTABLE_INITIALIZATION
@@ -67,7 +66,7 @@ def test_core4d_runner_routes_two_actor_rows_and_one_team_critic_row() -> None:
     runner = Core4DSmallTablePolicyRunner(bundle)
     decision = runner.sample(_observations())
 
-    assert decision.actor_observations.shape == (3, 2, 164)
+    assert decision.actor_observations.shape == (3, 2, 158)
     assert decision.actions.shape == (3, 2, 29)
     assert decision.values.shape == (3, 1)
     assert decision.action_log_probs.shape == (3, 2, 1)
@@ -105,7 +104,7 @@ def test_core4d_checkpoint_is_isolated_and_strictly_resumable() -> None:
 
     assert validate_core4d_smalltable_checkpoint(state) == 1000
     assert set(state).isdisjoint({"plan5_mappo", "demo3_mappo", "demo4_mappo"})
-    assert state["core4d_smalltable_mappo"]["actor_obs_dim"] == 164
+    assert state["core4d_smalltable_mappo"]["actor_obs_dim"] == 158
     assert state["core4d_smalltable_mappo"]["critic_obs_dim"] == 527
     assert (
         state["core4d_smalltable_mappo"]["runtime_reference_sha256"]

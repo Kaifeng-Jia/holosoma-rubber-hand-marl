@@ -21,7 +21,7 @@ from holosoma.envs.marl.core4d_smalltable_manager import Core4DSmallTableManager
 from holosoma.envs.marl.plan5_push_manager import Plan5PushManager
 
 
-def test_core4d_smalltable_uses_frozen_164d_shared_actor_contract() -> None:
+def test_core4d_smalltable_uses_plan5_compatible_158d_shared_actor_contract() -> None:
     cfg = g1_29dof_core4d_smalltable_baseline
     assert cfg.env_class.endswith("Core4DSmallTableManager")
     assert cfg.training.num_envs == 2048
@@ -30,7 +30,6 @@ def test_core4d_smalltable_uses_frozen_164d_shared_actor_contract() -> None:
     assert cfg.algo.config.module_dict.actor.input_dim == [
         "actor_obs",
         "teammate_obs",
-        "table_obs",
     ]
     assert cfg.algo.config.module_dict.critic.input_dim == ["critic_obs"]
     assert cfg.robot.asset.urdf_file.endswith("main_mesh_collision_rubberhand.urdf")

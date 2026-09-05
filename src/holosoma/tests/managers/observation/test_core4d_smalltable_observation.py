@@ -2,24 +2,20 @@
 
 from __future__ import annotations
 
-import math
 from types import SimpleNamespace
 
 import torch
 
-from holosoma.config_values.marl.g1.core4d_smalltable_observation import (
+from holosoma.agents.mappo.core4d_smalltable_initialization import (
     CORE4D_SMALLTABLE_ACTOR_OBS_DIM,
+)
+from holosoma.config_values.marl.g1.core4d_smalltable_observation import (
     CORE4D_SMALLTABLE_CRITIC_OBS_DIM,
-    CORE4D_SMALLTABLE_TABLE_OBS_DIM,
     g1_29dof_core4d_smalltable_evaluation_observation,
     g1_29dof_core4d_smalltable_observation,
 )
 from holosoma.config_values.marl.g1.observation import g1_29dof_plan5_observation
 from holosoma.managers.observation.manager import ObservationManager
-from holosoma.managers.observation.terms.core4d_smalltable import (
-    table_relative_linear_velocity_b,
-    table_relative_position_b,
-)
 from holosoma.managers.observation.terms.marl import (
     centralized_shared_object_tracking,
 )
@@ -31,10 +27,6 @@ class _CommandManager:
 
     def get_state(self, name):
         return self.command if name == "paired_motion_command" else None
-
-
-def _yaw_quaternion(angle: float) -> torch.Tensor:
-    return torch.tensor([0.0, 0.0, math.sin(angle / 2.0), math.cos(angle / 2.0)])
 
 
 def _make_env(num_envs: int = 1):
@@ -87,17 +79,8 @@ def _make_env(num_envs: int = 1):
     )
 
 
-def _table_obs(env) -> torch.Tensor:
-    return torch.cat(
-        (table_relative_position_b(env), table_relative_linear_velocity_b(env)),
-        dim=-1,
-    )
-
-
-def test_smalltable_actor_contract_is_plan5_154_plus_teammate_4_plus_table_6() -> None:
+def test_smalltable_actor_contract_matches_plan5_154_plus_teammate_4() -> None:
     env = _make_env(num_envs=3)
-    env.simulator.all_root_states[:, :3] = torch.tensor([1.0, 2.0, 3.0])
-    env.simulator.all_root_states[:, 7:10] = torch.tensor([4.0, 5.0, 6.0])
     observations = ObservationManager(
         g1_29dof_core4d_smalltable_observation, env, "cpu"
     ).compute()
@@ -105,7 +88,6 @@ def test_smalltable_actor_contract_is_plan5_154_plus_teammate_4_plus_table_6() -
         (
             observations["actor_obs"],
             observations["teammate_obs"],
-            observations["table_obs"],
         ),
         dim=-1,
     )
@@ -113,7 +95,6 @@ def test_smalltable_actor_contract_is_plan5_154_plus_teammate_4_plus_table_6() -
     assert list(g1_29dof_core4d_smalltable_observation.groups) == [
         "actor_obs",
         "teammate_obs",
-        "table_obs",
         "critic_obs",
     ]
     assert list(g1_29dof_plan5_observation.groups) == [
@@ -123,60 +104,9 @@ def test_smalltable_actor_contract_is_plan5_154_plus_teammate_4_plus_table_6() -
     ]
     assert observations["actor_obs"].shape == (3, 2, 154)
     assert observations["teammate_obs"].shape == (3, 2, 4)
-    assert observations["table_obs"].shape == (
-        3,
-        2,
-        CORE4D_SMALLTABLE_TABLE_OBS_DIM,
-    )
-    torch.testing.assert_close(observations["table_obs"], _table_obs(env))
     assert observations["critic_obs"].shape == (3, CORE4D_SMALLTABLE_CRITIC_OBS_DIM)
     assert actor_input.shape == (3, 2, CORE4D_SMALLTABLE_ACTOR_OBS_DIM)
     assert torch.isfinite(actor_input).all()
-    assert set(g1_29dof_core4d_smalltable_observation.groups["table_obs"].terms) == {
-        "position_b",
-        "velocity_b",
-    }
-
-
-def test_smalltable_state_is_relative_xyz_in_each_robot_heading_frame() -> None:
-    env = _make_env()
-    roots = env.simulator.agent_root_states[0]
-    roots[0, 3:7] = _yaw_quaternion(math.pi / 2.0)
-    roots[0, 7:10] = torch.tensor([1.0, 1.0, 1.0])
-    roots[1, 7:10] = torch.tensor([0.5, -1.0, 2.0])
-    env.simulator.all_root_states[0, :3] = torch.tensor([1.0, 2.0, 0.5])
-    env.simulator.all_root_states[0, 7:10] = torch.tensor([2.0, 3.0, 4.0])
-
-    position = table_relative_position_b(env)
-    velocity = table_relative_linear_velocity_b(env)
-
-    torch.testing.assert_close(
-        position[0, 0], torch.tensor([2.0, -1.0, 0.5]), atol=1e-6, rtol=0.0
-    )
-    torch.testing.assert_close(
-        position[0, 1], torch.tensor([0.2, 2.0, 0.5]), atol=1e-6, rtol=0.0
-    )
-    torch.testing.assert_close(
-        velocity[0, 0], torch.tensor([2.0, -1.0, 3.0]), atol=1e-6, rtol=0.0
-    )
-    torch.testing.assert_close(
-        velocity[0, 1], torch.tensor([1.5, 4.0, 2.0]), atol=1e-6, rtol=0.0
-    )
-
-
-def test_smalltable_observation_excludes_yaw_yaw_rate_and_reference_state() -> None:
-    env = _make_env()
-    env.simulator.all_root_states[0, :3] = torch.tensor([0.4, -0.2, 0.7])
-    env.simulator.all_root_states[0, 7:10] = torch.tensor([0.3, -0.1, 0.2])
-    before = _table_obs(env)
-
-    env.simulator.all_root_states[0, 3:7] = _yaw_quaternion(1.7)
-    env.simulator.all_root_states[0, 10:13] = torch.tensor([7.0, -8.0, 9.0])
-    env.command_manager.command.object_pos_w[:] = 100.0
-    env.command_manager.command.object_quat_w[:] = _yaw_quaternion(-1.2)
-    env.command_manager.command.object_lin_vel_w[:] = -50.0
-
-    torch.testing.assert_close(_table_obs(env), before, atol=0.0, rtol=0.0)
 
 
 def test_evaluation_disables_only_actor_training_noise() -> None:
@@ -187,7 +117,6 @@ def test_evaluation_disables_only_actor_training_noise() -> None:
     assert evaluation["actor_obs"].enable_noise is False
     assert evaluation["actor_obs"].terms == training["actor_obs"].terms
     assert evaluation["teammate_obs"] == training["teammate_obs"]
-    assert evaluation["table_obs"] == training["table_obs"]
     assert evaluation["critic_obs"] == training["critic_obs"]
 
 

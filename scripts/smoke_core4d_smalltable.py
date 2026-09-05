@@ -80,7 +80,6 @@ def main() -> int:
         expected_shapes = {
             "actor_obs": (env.num_envs, 2, 154),
             "teammate_obs": (env.num_envs, 2, 4),
-            "table_obs": (env.num_envs, 2, 6),
             "critic_obs": (env.num_envs, 527),
         }
         for name, expected in expected_shapes.items():
@@ -177,7 +176,7 @@ def main() -> int:
             "reference_frames": command.reference.num_frames,
             "reference_fps": command.reference.fps,
             "reference_non_looping": True,
-            "actor_input_shape": [env.num_envs, 2, 164],
+            "actor_input_shape": [env.num_envs, 2, 158],
             "critic_input_shape": [env.num_envs, 527],
             "action_shape": [env.num_envs, 2, 29],
             "object_angular_velocity_reset_verified": True,
