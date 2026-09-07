@@ -14,6 +14,7 @@ from holosoma.config_values.marl.g1.core4d_smalltable_observation import (
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_reward import (
     g1_29dof_core4d_smalltable_reward,
+    with_interaction_reward_term,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_termination import (
     g1_29dof_core4d_smalltable_termination,
@@ -113,9 +114,15 @@ g1_29dof_core4d_smalltable_baseline = replace(
     ),
 )
 
+def with_interaction_mesh_reward(config, reference_file: str):
+    """Opt in to the approved relation term; keep all other settings intact."""
+    return replace(config, reward=with_interaction_reward_term(config.reward, reference_file))
+
+
 __all__ = [
     "CORE4D_SMALLTABLE_EPISODE_SECONDS",
     "CORE4D_SMALLTABLE_OBJECT_URDF",
     "g1_29dof_core4d_smalltable_baseline",
     "g1_29dof_core4d_smalltable_smoke",
+    "with_interaction_mesh_reward",
 ]

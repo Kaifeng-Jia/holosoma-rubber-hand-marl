@@ -1,5 +1,9 @@
 #!/usr/bin/env python3
-"""Actor-only deterministic evaluation for a CORE4D small-table checkpoint."""
+"""Actor-only evaluation with a fixed baseline scoring regime for both reward variants.
+
+For interaction-mesh checkpoints, reward_sum intentionally excludes the new training
+reward. Reports explicitly name both regimes; completion/tracking metrics are unchanged.
+"""
 
 from __future__ import annotations
 
@@ -28,6 +32,7 @@ if ARGS.episodes < 1:
     PARSER.error("--episodes must be positive")
 
 from holosoma.agents.mappo.core4d_smalltable_evaluation import (  # noqa: E402
+    core4d_smalltable_evaluation_reward_metadata,
     deterministic_core4d_smalltable_actions,
     save_core4d_smalltable_viser,
     validate_core4d_smalltable_checkpoint,
@@ -147,6 +152,8 @@ def main() -> int:
         torch.manual_seed(ARGS.seed)
         state = torch.load(checkpoint, map_location="cuda:0", weights_only=False)
         iteration = validate_core4d_smalltable_checkpoint(state)
+        reward_metadata = core4d_smalltable_evaluation_reward_metadata(state)
+        print(json.dumps({"reward_regime": reward_metadata}, sort_keys=True), flush=True)
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
         env.set_is_evaluating()
@@ -207,6 +214,7 @@ def main() -> int:
                 "episode": episode,
                 "steps": step,
                 "reward_sum": reward_sum,
+                "reward_sum_contract": reward_metadata["evaluation_reward_contract"],
                 "completed_reference": bool(terminal_terms.get("reference_horizon", False)),
                 "bad_tracking": bool(terminal_terms.get("joint_bad_tracking", False)),
                 "object_position_rmse_m": float(
@@ -235,6 +243,7 @@ def main() -> int:
             output_dir / "representative_episode.npz",
             trajectory,
             metadata={
+                **reward_metadata,
                 "scenario": "core4d_paired_small_table_reference_tracking",
                 "checkpoint": str(checkpoint),
                 "checkpoint_iteration": iteration,
@@ -247,6 +256,7 @@ def main() -> int:
             },
         )
         summary = {
+            **reward_metadata,
             "checkpoint": str(checkpoint),
             "checkpoint_iteration": iteration,
             "seed": ARGS.seed,

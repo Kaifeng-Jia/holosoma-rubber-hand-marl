@@ -27,12 +27,19 @@ PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--save-interval", type=int, default=2000)
 PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
+PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh"), default="baseline")
+PARSER.add_argument("--interaction-reference", type=Path, default=None)
 ARGS = PARSER.parse_args()
+if ARGS.reward_variant == "interaction_mesh" and ARGS.interaction_reference is None:
+    PARSER.error("--reward-variant interaction_mesh requires --interaction-reference")
+if ARGS.reward_variant == "baseline" and ARGS.interaction_reference is not None:
+    PARSER.error("--interaction-reference requires the explicit interaction_mesh reward variant")
 if ARGS.output_dir is None:
+    variant_suffix = "" if ARGS.reward_variant == "baseline" else "_interaction_mesh"
     ARGS.output_dir = (
         REPO_ROOT
         / "logs/Core4DSmallTable"
-        / f"paired_reference_fresh_seed{ARGS.seed}_env{ARGS.num_envs}"
+        / f"paired_reference_fresh{variant_suffix}_seed{ARGS.seed}_env{ARGS.num_envs}"
     )
 for name in ("iterations", "num_envs", "steps_per_env", "save_interval"):
     if getattr(ARGS, name) < 1:
@@ -49,6 +56,7 @@ from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
     CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256,
     CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
     Core4DSmallTablePPO,
+    build_core4d_interaction_contract,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_command import (  # noqa: E402
     CORE4D_SMALLTABLE_RUNTIME_REFERENCE_FILE,
@@ -56,14 +64,26 @@ from holosoma.config_values.marl.g1.core4d_smalltable_command import (  # noqa: 
 from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noqa: E402
     CORE4D_SMALLTABLE_OBJECT_URDF,
     g1_29dof_core4d_smalltable_baseline,
+    with_interaction_mesh_reward,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
 
 
+INTERACTION_REFERENCE = (
+    None if ARGS.interaction_reference is None else ARGS.interaction_reference.expanduser().resolve()
+)
+INTERACTION_CONTRACT = (
+    None if INTERACTION_REFERENCE is None else build_core4d_interaction_contract(INTERACTION_REFERENCE)
+)
+BASE_CONFIG = (
+    g1_29dof_core4d_smalltable_baseline
+    if INTERACTION_REFERENCE is None
+    else with_interaction_mesh_reward(g1_29dof_core4d_smalltable_baseline, str(INTERACTION_REFERENCE))
+)
 CONFIG = replace(
-    g1_29dof_core4d_smalltable_baseline,
+    BASE_CONFIG,
     training=replace(
-        g1_29dof_core4d_smalltable_baseline.training,
+        BASE_CONFIG.training,
         num_envs=ARGS.num_envs,
         headless=True,
         seed=ARGS.seed,
@@ -84,6 +104,7 @@ import torch  # noqa: E402
 
 from holosoma.config_types.env import get_tyro_env_config  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
+from holosoma.utils.module_utils import get_holosoma_root  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
 
 
@@ -191,6 +212,15 @@ def main() -> int:
             CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
             "training-asset promotion",
         )
+        training_robot_urdf_sha256 = None
+        if INTERACTION_CONTRACT is not None:
+            asset_root = CONFIG.robot.asset.asset_root
+            if asset_root.startswith("@holosoma/"):
+                asset_root = asset_root.replace("@holosoma", get_holosoma_root())
+            robot_path = (Path(asset_root) / CONFIG.robot.asset.urdf_file).resolve()
+            training_robot_urdf_sha256 = _require_sha256(
+                robot_path, INTERACTION_CONTRACT["training_robot_urdf_sha256"], "interaction robot URDF"
+            )
         if output_dir.exists() and any(output_dir.iterdir()):
             raise FileExistsError(
                 "Output directory is not empty: "
@@ -226,7 +256,14 @@ def main() -> int:
             num_envs=env.num_envs,
             num_steps_per_env=ARGS.steps_per_env,
             device=env.device,
+            interaction_contract=INTERACTION_CONTRACT,
         )
+        interaction_term = (
+            env.reward_manager.get_term("interaction_mesh")
+            if "interaction_mesh" in env.reward_manager.active_terms else None
+        )
+        if (interaction_term is not None) != (INTERACTION_CONTRACT is not None):
+            raise RuntimeError("Interaction reward and checkpoint contract disagree")
 
         start_iteration = 0
         resume_checkpoint_sha256 = None
@@ -272,6 +309,10 @@ def main() -> int:
             "physics_hz": physics_hz,
             "control_hz": control_hz,
             "reward_terms": list(env.reward_manager.active_terms),
+            "reward_variant": ARGS.reward_variant,
+            "interaction_reference": None if INTERACTION_REFERENCE is None else str(INTERACTION_REFERENCE),
+            "interaction_contract": INTERACTION_CONTRACT,
+            "training_robot_urdf_sha256": training_robot_urdf_sha256,
             "termination_terms": list(env.termination_manager.active_terms),
             "gamma": ppo_config.gamma,
             "lambda": ppo_config.lam,
@@ -287,6 +328,8 @@ def main() -> int:
         )
 
         metrics_path = output_dir / "metrics.jsonl"
+        if interaction_term is not None:
+            interaction_term.get_iteration_diagnostics(reset=True)
         final_iteration = start_iteration + ARGS.iterations
         for iteration in range(start_iteration + 1, final_iteration + 1):
             started = time.perf_counter()
@@ -325,6 +368,11 @@ def main() -> int:
                 "critic_learning_rate": learner.critic_learning_rate,
                 **metrics.__dict__,
             }
+            if interaction_term is not None:
+                record.update({
+                    name: float(value.item())
+                    for name, value in interaction_term.get_iteration_diagnostics(reset=True).items()
+                })
             numeric = [value for value in record.values() if isinstance(value, (int, float))]
             if not all(torch.isfinite(torch.tensor(value)) for value in numeric):
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")

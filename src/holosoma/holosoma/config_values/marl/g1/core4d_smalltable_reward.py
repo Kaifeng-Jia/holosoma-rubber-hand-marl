@@ -1,4 +1,6 @@
-"""Frozen Plan-5-style tracking reward for the CORE4D small-table demo."""
+"""Original tracking reward and an explicit additive interaction variant."""
+
+from dataclasses import replace
 
 from holosoma.config_types.reward import RewardManagerCfg, RewardTermCfg
 
@@ -72,4 +74,32 @@ g1_29dof_core4d_smalltable_reward = RewardManagerCfg(
     }
 )
 
-__all__ = ["g1_29dof_core4d_smalltable_reward"]
+CORE4D_INTERACTION_WEIGHT = 1.0
+CORE4D_INTERACTION_SIGMA = 0.06
+
+
+def with_interaction_reward_term(base_reward: RewardManagerCfg, reference_file: str) -> RewardManagerCfg:
+    """Copy a reward preset without mutating any of its existing terms."""
+    if not str(reference_file).strip():
+        raise ValueError("An explicit precomputed interaction reference is required")
+    if "interaction_mesh" in base_reward.terms:
+        raise ValueError("The interaction reward is already enabled")
+    return replace(
+        base_reward,
+        terms={
+            **base_reward.terms,
+            "interaction_mesh": RewardTermCfg(
+                func="holosoma.managers.reward.terms.interaction_mesh:InteractionMeshReward",
+                params={"reference_file": str(reference_file), "sigma": CORE4D_INTERACTION_SIGMA},
+                weight=CORE4D_INTERACTION_WEIGHT,
+            ),
+        },
+    )
+
+
+__all__ = [
+    "g1_29dof_core4d_smalltable_reward",
+    "CORE4D_INTERACTION_WEIGHT",
+    "CORE4D_INTERACTION_SIGMA",
+    "with_interaction_reward_term",
+]

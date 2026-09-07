@@ -3,7 +3,7 @@
 ## 1. 文档地位与当前状态
 
 - 状态：唯一有效执行指南
-- 最近更新：2026-09-04
+- 最近更新：2026-09-07
 - 当前分支：`core4d-base`
 - WBT 基线提交：`8038c092`（`wbt-four-action-priors-v1`）
 - MARL 代码合入提交：`8aa50374`（从 `rubber_hand_marl_baseline` 合入源码；不包含
@@ -15,7 +15,9 @@
   训练；最终 Actor 能快速完成 `+90°`，但通过猛烈旋转和提前终止绕开了大部分 Pull 先验，当前
   只作为 reward-hacking 对照，不视为动作质量合格的最终 Demo。独立 Kick Demo 已完成
   `2,048 env × 24 steps × 8,000 iterations` 训练并通过用户视觉验收。当前在 `core4d-base`
-  上继续 CORE4D 小桌双人 Demo：已完成正式训练前准备与 Isaac smoke，尚未开始正式训练。
+  上继续 CORE4D 小桌双人 Demo：原 baseline 已完成 12000 iterations，用户接受总体结果，但希望
+  更接近数据中的双人搬运模式。独立 interaction-mesh 奖励版本已接入并完成短 smoke；该版本
+  尚未开始正式长训练，必须再次确认开跑。
 - 机器人：Unitree G1 29-DoF，固定 rubber hand
 - 活动实验：Push、Pull、Kick、Demo 3、Demo 4 与 CORE4D 小桌使用相互隔离的网络、reference、
   checkpoint 和日志；合入源码不代表混用任何实验产物
@@ -23,7 +25,7 @@
 本文件取代此前所有总路线文档。技术细节可以保留在专项文档中，但不得
 建立与本文件并行的“另一份总路线图”。
 
-### 1.1 三项并行方向与当前状态（2026-09-05）
+### 1.1 三项并行方向与当前状态（2026-09-07）
 
 以下三项是后续需要分别推进的工作方向，彼此不得混成一个 policy 或一个实验目录。这里的编号
 表示用户梳理时的顺序，不表示必须同时开始训练。
@@ -38,9 +40,11 @@
    Push/Pull/Kick 一致的 `158-D = 自身 154 + 队友 4`，centralized critic 为 `527-D`，沿用
    Plan 5 reference rewards；桌子质量固定 `20 kg`、静/动摩擦为 `0.5/0.5`；runtime reference
    为 `687` 帧、`50 Hz`。桌子状态仍进入 centralized critic、reward 与 termination，但不直接
-   进入 Actor。Isaac smoke 已通过；首轮已确认本地从零训练 `12000 iterations`，
-   `2048 env × 24 steps`，seed `721`，每 `2000` iterations 保存，实际进度以第 9.5 节
-   所列运行目录的账本为准。
+   进入 Actor。首轮从零训练 `12000 iterations` 已完成，使用 `2048 env × 24 steps`、seed
+   `721`、每 `2000` iterations 保存。当前沿同一条数据增加相对交互形状奖励作独立对照：
+   Omni 原15点加4个固定橡胶手表面点；物体采样请求100、实际85点（seed42），权重1.0，
+   指数尺度0.06 m，不退火，不增加手工接触标签。代码和短 smoke 已完成，正式训练未启动。
+   原 baseline 不覆盖；具体实现、验证结果和下一步见第9.5节2026-09-07条目。
 3. **Kick 独立 Demo**：已经沿用 Demo 1/2 的 reference-guided MARL 思路，以冻结的 Kick WBT
    checkpoint 构造镜像双机器人 reference，并完成一轮 `8,000` iterations 正式训练。Kick 与
    Push、Pull、Demo 3、Demo 4 保持独立网络、配置、reference、checkpoint 和日志；本轮结果与
@@ -1693,3 +1697,60 @@ centralized critic、optimizer、rollout storage、日志目录和 checkpoint �
   seed `721`，每 `2000` iterations 保存 checkpoint，另保留 iteration `0` 的随机初始模型。
   输出目录：`logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/`；
   实际进度以 `metrics.jsonl` 为准，结束状态以 `status.json` 为准。
+
+#### 2026-09-07：CORE4D 小桌交互关系奖励首版接入与检查
+
+目标是鼓励数据中的双人—物体交互形状，而不是只完成桌子轨迹；不要求动作完全相同，
+不强制只用手，不把图邻接解释为接触力。原12000 baseline保留，原reward、termination、
+reset、参考轨迹、Actor158／Critic527与物理参数不变。
+
+- [x] 用户确认选点：每人19点（原Omni15点不动，增加4个橡胶手表面点），无头部点；
+  物体使用同一外表面均匀采样算法，100预算返回85点，seed42，不人为补齐。
+- [x] 用户确认奖励：每人的分组Laplacian误差为E；身体组和与身体相邻的物体行各占一半，
+  每只手三个点仍共用一个身体组。团队raw reward为 `exp(-mean(E_agent)/0.06²)`，
+  配置weight为1.0，由RewardManager统一乘dt=0.02。原11项奖励全部保留、不退火。
+  0.06 m是关系形状误差的敏感尺度，不是手桌间隙上限或终止门槛。
+- [x] 离线编译参考：每帧每人沿用Omni联合图，压缩为 `Q=L_body.T @ W @ L_body`；
+  在线 `E=sum_xyz(delta.T @ Q @ delta)`，物体行贡献仍保留。Q共687×2×19×19，
+  float32约1.89 MiB；在线不重新采样或构图。
+- [x] 在线真实点位：从仿真主刚体位置/XYZW旋转，加固定链偏移生成19点；相对真实桌子的
+  建模原点（不是COM）计算。未使用离线可视化模型FK替代实际仿真，也未改变参考来消除
+  约4 mm的参考／训练模型差异。参考点固定链复现误差最大4.04e-16 m。
+- [x] 回归检查：48项训练侧测试、4项离线编译测试通过；完整图与Q人工扰动评分差最大
+  1.04e-10 m²，历史回放评分差约3.06e-10 m²。旧model_12000.pt仍可正常校验。
+- [x] Isaac短smoke：8 env×24 steps，一次PPO update通过，权重/dt只计入一次；初始raw关系
+  奖励均值约0.999737。另用正式入口运行独立两次更新小段，逐次记录每人误差、团队误差、
+  raw reward分布，model_00002.pt已保存。两段仅证明数值与接口，不用于判定动作学习效果。
+- [x] 新旧版本隔离：训练默认仍为baseline；显式 `--reward-variant interaction_mesh` 才启用。
+  checkpoint增加独立reward contract和图资产/采样点哈希，新旧训练恢复不得混用。
+  Actor-only评估自动识别训练版本，仍用原baseline评估奖励作统一对照，报告明确标注
+  `reward_sum`不含新关系项；推理、物理和成功定义不因训练reward版本改变。
+- [ ] 正式对照训练：建议从零、2048 env×24 steps×12000 iterations，seed721，每2000保存；
+  需用户再次确认开跑。不能把这次smoke checkpoint当作正式训练的起点。
+
+关键文件：
+
+- `scripts/prepare_core4d_interaction_reference.py` 与
+  `src/holosoma_retargeting/holosoma_retargeting/interaction_mesh_training_reference.py`：离线编译。
+- `src/holosoma/holosoma/managers/reward/terms/interaction_mesh.py`：真实状态在线评分与分人日志。
+- `src/holosoma/holosoma/config_values/marl/g1/core4d_smalltable_reward.py`、
+  `core4d_smalltable_experiment.py`：只增加显式配置，不覆盖原reward。
+- `scripts/train_core4d_smalltable.py`、`smoke_core4d_smalltable.py`、`evaluate_core4d_smalltable.py`
+  和小桌PPO/评估模块：版本选择、验证、保存与评估口径标注。
+
+评分资产：`src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/interaction_mesh_100_v1.npz`，
+SHA256 `caa1f9bb47425254253b588112800a5a32000435027352ceb496d66d55decf3e`。
+同路径 `.diagnostics.json` 保存数值核对记录；原参考没有改写。
+
+本次检查产物：`logs/Core4DSmallTable/interaction_mesh_validation_20260907/physics_smoke.json`、
+`train_smoke/metrics.jsonl`、`train_smoke/status.json`与独立小段checkpoint。正式训练尚未启动。
+
+批准正式训练后，在本工作树使用hssim环境运行（以下仅记录命令，本次未执行）：
+
+```bash
+python scripts/train_core4d_smalltable.py \
+  --reward-variant interaction_mesh \
+  --interaction-reference src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/interaction_mesh_100_v1.npz \
+  --num-envs 2048 --steps-per-env 24 --iterations 12000 --save-interval 2000 --seed 721 \
+  --output-dir logs/Core4DSmallTable/interaction_mesh_fresh12000_save2000_actor158_seed721_env2048
+```

@@ -21,29 +21,48 @@ PARSER.add_argument("--steps", type=int, default=8)
 PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--ppo-update", action="store_true")
 PARSER.add_argument("--output", type=Path, default=None)
+PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh"), default="baseline")
+PARSER.add_argument("--interaction-reference", type=Path, default=None)
 ARGS = PARSER.parse_args()
 if ARGS.num_envs < 1 or ARGS.steps < 1:
     PARSER.error("--num-envs and --steps must be positive")
+if ARGS.reward_variant == "interaction_mesh" and ARGS.interaction_reference is None:
+    PARSER.error("--reward-variant interaction_mesh requires --interaction-reference")
+if ARGS.reward_variant == "baseline" and ARGS.interaction_reference is not None:
+    PARSER.error("--interaction-reference requires the explicit interaction_mesh reward variant")
 
 from holosoma.agents.mappo.core4d_smalltable_initialization import (  # noqa: E402
     initialize_core4d_smalltable_model_bundle,
 )
 from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
     Core4DSmallTablePPO,
+    build_core4d_interaction_contract,
 )
 from holosoma.agents.mappo.core4d_smalltable_runner import (  # noqa: E402
     Core4DSmallTablePolicyRunner,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noqa: E402
     g1_29dof_core4d_smalltable_smoke,
+    with_interaction_mesh_reward,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
 
 
+INTERACTION_REFERENCE = (
+    None if ARGS.interaction_reference is None else ARGS.interaction_reference.expanduser().resolve()
+)
+INTERACTION_CONTRACT = (
+    None if INTERACTION_REFERENCE is None else build_core4d_interaction_contract(INTERACTION_REFERENCE)
+)
+BASE_CONFIG = (
+    g1_29dof_core4d_smalltable_smoke
+    if INTERACTION_REFERENCE is None
+    else with_interaction_mesh_reward(g1_29dof_core4d_smalltable_smoke, str(INTERACTION_REFERENCE))
+)
 CONFIG = replace(
-    g1_29dof_core4d_smalltable_smoke,
+    BASE_CONFIG,
     training=replace(
-        g1_29dof_core4d_smalltable_smoke.training,
+        BASE_CONFIG.training,
         num_envs=ARGS.num_envs,
         seed=ARGS.seed,
     ),
@@ -118,6 +137,34 @@ def main() -> int:
         env._compute_observations()
         observations = env.obs_buf_dict
 
+        interaction_term = (
+            env.reward_manager.get_term("interaction_mesh")
+            if "interaction_mesh" in env.reward_manager.active_terms else None
+        )
+        interaction_check = None
+        if interaction_term is not None:
+            params = CONFIG.reward.terms["interaction_mesh"].params
+            raw = interaction_term(env, **params)
+            if raw.shape != (env.num_envs,) or not torch.isfinite(raw).all():
+                raise RuntimeError("Invalid interaction reward shape/value")
+            # A weight-zero counterpart must differ by precisely dt * this raw
+            # term. The switch is temporary and restored before PPO rollout.
+            weighted = env.reward_manager.compute(env.dt).clone()
+            term_cfg = env.reward_manager.get_term_cfg("interaction_mesh")
+            env.reward_manager.set_term_cfg("interaction_mesh", replace(term_cfg, weight=0.0))
+            try:
+                without = env.reward_manager.compute(env.dt).clone()
+            finally:
+                env.reward_manager.set_term_cfg("interaction_mesh", term_cfg)
+            torch.testing.assert_close(weighted - without, raw * term_cfg.weight * env.dt, atol=1.0e-6, rtol=1.0e-5)
+            interaction_check = {
+                "raw_reward_shape": list(raw.shape),
+                "initial_raw_reward_mean": raw.mean().item(),
+                "initial_error_m2_per_agent": interaction_term.last_error_m2.mean(dim=0).cpu().tolist(),
+                "additive_dt_weight_verified": True,
+            }
+            interaction_term.get_iteration_diagnostics(reset=True)
+
         view = env.simulator._object.root_physx_view
         mass = view.get_masses().reshape(-1)
         material = view.get_material_properties()
@@ -156,6 +203,7 @@ def main() -> int:
                 num_envs=env.num_envs,
                 num_steps_per_env=ARGS.steps,
                 device=env.device,
+                interaction_contract=INTERACTION_CONTRACT,
             )
             observations = learner.collect_rollout(env, observations)
             update_metrics = learner.update().__dict__
@@ -188,6 +236,15 @@ def main() -> int:
             "material_static_dynamic_restitution": material.cpu().tolist(),
             "robot_urdf": CONFIG.robot.asset.urdf_file,
             "object_urdf": CONFIG.robot.object.object_urdf_path,
+            "reward_variant": ARGS.reward_variant,
+            "interaction_contract": INTERACTION_CONTRACT,
+            "interaction_initial_check": interaction_check,
+            "interaction_rollout_diagnostics": (
+                None if interaction_term is None else {
+                    name: value.item()
+                    for name, value in interaction_term.get_iteration_diagnostics(reset=True).items()
+                }
+            ),
         }
         text = json.dumps(report, indent=2, sort_keys=True)
         print(text, flush=True)

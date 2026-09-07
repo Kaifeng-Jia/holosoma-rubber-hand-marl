@@ -15,11 +15,44 @@ from holosoma.agents.mappo.core4d_smalltable_initialization import (
     CORE4D_SMALLTABLE_NUM_AGENTS,
 )
 from holosoma.agents.mappo.core4d_smalltable_ppo import (
+    CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION,
+    CORE4D_SMALLTABLE_REWARD_CONTRACT_VERSION,
     validate_core4d_smalltable_checkpoint,
 )
 from holosoma.agents.mappo.core4d_smalltable_runner import (
     CORE4D_SMALLTABLE_ACTOR_GROUPS,
 )
+
+
+def core4d_smalltable_evaluation_reward_metadata(
+    state: Mapping[str, Any],
+) -> dict[str, Any]:
+    """Label the fixed baseline evaluation score separately from the training reward.
+
+    Evaluation runs the same Actor, physics, observations and termination regardless
+    of the training reward. It deliberately does not instantiate a training-only graph
+    reward or need its precomputed asset merely to replay a checkpoint.
+    """
+    validate_core4d_smalltable_checkpoint(state)
+    training_contract = state["core4d_smalltable_mappo"]["reward_contract"]
+    is_interaction = (
+        training_contract == CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
+    )
+    metadata = {
+        "training_reward_variant": "interaction_mesh" if is_interaction else "baseline",
+        "training_reward_contract": training_contract,
+        "evaluation_reward_contract": CORE4D_SMALLTABLE_REWARD_CONTRACT_VERSION,
+        "evaluation_reward_matches_training": not is_interaction,
+        "evaluation_reward_note": (
+            "reward_sum uses the unchanged baseline reward and excludes interaction_mesh; "
+            "shared Actor-only inference, physics and termination are unchanged"
+        ),
+    }
+    if is_interaction:
+        metadata["interaction_mesh_training_contract"] = dict(
+            state["core4d_smalltable_mappo"]["interaction_mesh"]
+        )
+    return metadata
 
 
 @torch.no_grad()
@@ -92,6 +125,7 @@ def save_core4d_smalltable_viser(
 
 
 __all__ = [
+    "core4d_smalltable_evaluation_reward_metadata",
     "deterministic_core4d_smalltable_actions",
     "save_core4d_smalltable_viser",
     "validate_core4d_smalltable_checkpoint",
