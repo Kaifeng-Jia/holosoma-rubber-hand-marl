@@ -119,10 +119,70 @@ def with_interaction_mesh_reward(config, reference_file: str):
     return replace(config, reward=with_interaction_reward_term(config.reward, reference_file))
 
 
+def with_pair_experiment(config, experiment):
+    """Reuse the environment/learning method, selecting only reviewed data and physics."""
+    if experiment.experiment_id == "smalltable":
+        return config
+    if "interaction_mesh" in config.reward.terms and not experiment.allow_interaction_mesh:
+        raise ValueError("This CORE4D pair experiment does not allow an interaction graph reward")
+    if experiment.reference_fps != experiment.control_hz:
+        raise ValueError("Reference FPS must equal the policy control frequency")
+    if experiment.physics_hz % experiment.control_hz:
+        raise ValueError("Physics frequency must be an integer multiple of control frequency")
+
+    def remap_terms(terms):
+        updated = dict(terms)
+        term = updated["paired_motion_command"]
+        params = dict(term.params)
+        params["motion_config"] = replace(
+            params["motion_config"], motion_file=experiment.runtime_reference_file,
+        )
+        params["paired_reference_file"] = experiment.runtime_reference_file
+        updated["paired_motion_command"] = replace(term, params=params)
+        return updated
+
+    command = replace(
+        config.command,
+        setup_terms=remap_terms(config.command.setup_terms),
+        reset_terms=remap_terms(config.command.reset_terms),
+        step_terms=remap_terms(config.command.step_terms),
+    )
+    material_terms = dict(config.randomization.setup_terms)
+    key = "set_object_rigid_body_material_startup"
+    material_terms[key] = replace(
+        material_terms[key],
+        params=dict(zip(
+            ("static_friction", "dynamic_friction", "restitution"),
+            experiment.material_static_dynamic_restitution,
+        )),
+    )
+    return replace(
+        config,
+        training=replace(config.training, project=experiment.project),
+        command=command,
+        robot=replace(config.robot, object=replace(
+            config.robot.object,
+            object_urdf_path=experiment.object_urdf_file,
+            collider_type=experiment.object_collider_type,
+        )),
+        simulator=replace(config.simulator, config=replace(
+            config.simulator.config,
+            sim=replace(
+                config.simulator.config.sim,
+                fps=experiment.physics_hz,
+                control_decimation=experiment.physics_hz // experiment.control_hz,
+                max_episode_length_s=experiment.reference_frames / experiment.reference_fps,
+            ),
+        )),
+        randomization=replace(config.randomization, setup_terms=material_terms),
+    )
+
+
 __all__ = [
     "CORE4D_SMALLTABLE_EPISODE_SECONDS",
     "CORE4D_SMALLTABLE_OBJECT_URDF",
     "g1_29dof_core4d_smalltable_baseline",
     "g1_29dof_core4d_smalltable_smoke",
     "with_interaction_mesh_reward",
+    "with_pair_experiment",
 ]

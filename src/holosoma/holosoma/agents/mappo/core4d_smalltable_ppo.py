@@ -2,8 +2,10 @@
 
 from __future__ import annotations
 
+import copy
 import hashlib
 import json
+import math
 import re
 from pathlib import Path
 from typing import Any, Mapping
@@ -22,9 +24,11 @@ from holosoma.agents.mappo.core4d_smalltable_runner import (
 from holosoma.agents.mappo.initialization import Plan5ModelBundle
 from holosoma.agents.mappo.ppo import Plan5PPO
 from holosoma.config_types.algo import PPOConfig
+from holosoma.config_values.marl.g1.core4d_smalltable_reward import validate_object_z_error_weight
 
 
 CORE4D_SMALLTABLE_MAPPO_VERSION = "core4d_smalltable_shared_actor_mappo_158_v1"
+CORE4D_PAIR_MAPPO_VERSION = "core4d_pair_shared_actor_mappo_158_v1"
 CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256 = (
     "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153"
 )
@@ -49,6 +53,7 @@ CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION = (
     "plan5_tracking_with_object_plus_interaction_mesh_v1"
 )
 CORE4D_SMALLTABLE_INTERACTION_CONTRACT_VERSION = "core4d_smalltable_interaction_mesh_v1"
+CORE4D_OBJECT_POSITION_TRACKING_CONTRACT_VERSION = "world_xyz_squared_error_weighting_v1"
 _INTERACTION_FIELDS = {
     "version",
     "reference_file_sha256",
@@ -62,6 +67,68 @@ _INTERACTION_FIELDS = {
     "sigma",
     "weight",
 }
+
+_EXPERIMENT_HASH_FIELDS = (
+    "source_pair_sha256",
+    "runtime_reference_sha256",
+    "object_urdf_sha256",
+    "training_promotion_sha256",
+)
+_EXPERIMENT_FIELDS = {
+    "experiment_id", "object_name", "reference_frames", "reference_fps",
+    "physics_contract", *_EXPERIMENT_HASH_FIELDS,
+}
+_EXPERIMENT_PHYSICS_FIELDS = {
+    "object_mass_kg", "material_static_dynamic_restitution", "physics_hz",
+    "control_hz", "object_collider_type",
+}
+
+
+def _validated_experiment_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
+    """Copy a descriptor-selected contract, never infer one from a checkpoint.
+
+    Asset identity and reviewed values belong to the calling descriptor. Here we
+    validate their schema and consistency, then require exact equality on resume.
+    This avoids duplicating each new object's constants inside the PPO learner.
+    """
+    if not isinstance(contract, Mapping) or set(contract) != _EXPERIMENT_FIELDS:
+        raise ValueError("CORE4D experiment contract has missing or unexpected fields")
+    result = copy.deepcopy(dict(contract))
+    for key in ("experiment_id", "object_name"):
+        if not isinstance(result[key], str) or not result[key].strip():
+            raise ValueError(f"CORE4D experiment {key} must be a non-empty string")
+    for key in _EXPERIMENT_HASH_FIELDS:
+        if not isinstance(result[key], str) or re.fullmatch(r"[0-9a-f]{64}", result[key]) is None:
+            raise ValueError(f"CORE4D experiment {key} must be a lowercase SHA-256 digest")
+    for key, minimum in (("reference_frames", 3), ("reference_fps", 1)):
+        if type(result[key]) is not int or result[key] < minimum:
+            raise ValueError(f"CORE4D experiment {key} must be an integer >= {minimum}")
+    physics = result["physics_contract"]
+    if not isinstance(physics, Mapping) or set(physics) != _EXPERIMENT_PHYSICS_FIELDS:
+        raise ValueError("CORE4D experiment physics contract has missing or unexpected fields")
+    physics = dict(physics)
+    mass = physics["object_mass_kg"]
+    if type(mass) not in (int, float) or not math.isfinite(mass) or mass <= 0:
+        raise ValueError("CORE4D experiment object_mass_kg must be positive and finite")
+    physics["object_mass_kg"] = float(mass)
+    material = physics["material_static_dynamic_restitution"]
+    if (
+        not isinstance(material, (tuple, list))
+        or len(material) != 3
+        or any(type(value) not in (int, float) or not math.isfinite(value) or value < 0 for value in material)
+        or material[2] > 1
+    ):
+        raise ValueError("CORE4D experiment material must be finite non-negative friction and restitution in [0, 1]")
+    physics["material_static_dynamic_restitution"] = tuple(float(value) for value in material)
+    for key in ("physics_hz", "control_hz"):
+        if type(physics[key]) is not int or physics[key] < 1:
+            raise ValueError(f"CORE4D experiment {key} must be a positive integer")
+    if physics["control_hz"] != result["reference_fps"] or physics["physics_hz"] % physics["control_hz"]:
+        raise ValueError("CORE4D experiment reference/control FPS and physics decimation must agree")
+    if physics["object_collider_type"] not in ("convex_hull", "convex_decomposition"):
+        raise ValueError("CORE4D experiment object_collider_type must be convex_hull or convex_decomposition")
+    result["physics_contract"] = physics
+    return result
 
 
 def _validated_interaction_contract(contract: Mapping[str, Any]) -> dict[str, Any]:
@@ -140,10 +207,51 @@ def build_core4d_interaction_contract(reference_file: str | Path) -> dict[str, A
     return _validated_interaction_contract(contract)
 
 
+def core4d_object_position_tracking_contract(object_z_error_weight: float) -> dict[str, Any] | None:
+    """Keep legacy metadata absent at z=1; explicitly bind all new position semantics."""
+    value = validate_object_z_error_weight(object_z_error_weight)
+    if value == 1.0:
+        return None
+    return {
+        "version": CORE4D_OBJECT_POSITION_TRACKING_CONTRACT_VERSION,
+        "frame": "world",
+        "squared_error_weights_xyz": (1.0, 1.0, value),
+        "sigma_m": 0.3,
+        "reward_weight": 1.0,
+    }
+
+
+def _checkpoint_object_z_error_weight(metadata: Mapping[str, Any]) -> float:
+    if "object_position_tracking" not in metadata:
+        return 1.0
+    contract = metadata["object_position_tracking"]
+    if not isinstance(contract, Mapping):
+        raise ValueError("CORE4D object_position_tracking must be a position contract")
+    weights = contract.get("squared_error_weights_xyz")
+    if not isinstance(weights, tuple) or len(weights) != 3:
+        raise ValueError("CORE4D object_position_tracking requires three squared-error weights")
+    for weight in weights:
+        validate_object_z_error_weight(weight)
+    for key in ("sigma_m", "reward_weight"):
+        validate_object_z_error_weight(contract.get(key))
+    value = validate_object_z_error_weight(weights[2])
+    expected = core4d_object_position_tracking_contract(value)
+    if expected is None or contract != expected:
+        raise ValueError("CORE4D object_position_tracking contract mismatch")
+    return value
+
+
 def expected_core4d_smalltable_checkpoint_metadata(
-    *, interaction_contract: Mapping[str, Any] | None = None
+    *, interaction_contract: Mapping[str, Any] | None = None,
+    experiment_contract: Mapping[str, Any] | None = None,
+    object_z_error_weight: float = 1.0,
 ) -> dict[str, Any]:
     """Preserve the baseline dictionary exactly unless a reviewed variant is supplied."""
+    if experiment_contract is not None and interaction_contract is not None:
+        raise ValueError("CORE4D custom experiments do not support interaction_mesh")
+    position_contract = core4d_object_position_tracking_contract(object_z_error_weight)
+    if experiment_contract is not None and position_contract is not None:
+        raise ValueError("Non-default object_z_error_weight is restricted to smalltable")
     metadata = {
         "version": CORE4D_SMALLTABLE_MAPPO_VERSION,
         "num_agents": CORE4D_SMALLTABLE_NUM_AGENTS,
@@ -161,18 +269,41 @@ def expected_core4d_smalltable_checkpoint_metadata(
     if interaction_contract is not None:
         metadata["reward_contract"] = CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
         metadata["interaction_mesh"] = _validated_interaction_contract(interaction_contract)
+    if experiment_contract is not None:
+        contract = _validated_experiment_contract(experiment_contract)
+        metadata["version"] = CORE4D_PAIR_MAPPO_VERSION
+        for key in ("runtime_reference_sha256", "object_urdf_sha256", "training_promotion_sha256"):
+            metadata[key] = contract[key]
+        metadata["physics_contract"] = copy.deepcopy(contract["physics_contract"])
+        metadata["experiment_contract"] = contract
+    if position_contract is not None:
+        metadata["object_position_tracking"] = position_contract
     return metadata
 
 
-def validate_core4d_smalltable_checkpoint(state: Mapping[str, Any]) -> int:
+def validate_core4d_smalltable_checkpoint(
+    state: Mapping[str, Any], *, experiment_contract: Mapping[str, Any] | None = None,
+) -> int:
     metadata = state.get("core4d_smalltable_mappo")
+    if isinstance(metadata, Mapping):
+        if "experiment_contract" in metadata and experiment_contract is None:
+            raise ValueError("CORE4D custom checkpoint requires an explicit experiment_contract")
+        if experiment_contract is not None and (
+            "interaction_mesh" in metadata
+            or metadata.get("reward_contract") == CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
+        ):
+            raise ValueError("CORE4D custom experiments do not support interaction_mesh")
     interaction_contract = None
     if isinstance(metadata, Mapping) and (
         metadata.get("reward_contract") == CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
     ):
         interaction_contract = _validated_interaction_contract(metadata.get("interaction_mesh"))
     expected = expected_core4d_smalltable_checkpoint_metadata(
-        interaction_contract=interaction_contract
+        interaction_contract=interaction_contract,
+        experiment_contract=experiment_contract,
+        object_z_error_weight=(
+            _checkpoint_object_z_error_weight(metadata) if isinstance(metadata, Mapping) else 1.0
+        ),
     )
     if metadata != expected:
         raise ValueError(
@@ -212,10 +343,14 @@ class Core4DSmallTablePPO(Plan5PPO):
         num_steps_per_env: int | None = None,
         device: str = "cpu",
         interaction_contract: Mapping[str, Any] | None = None,
+        experiment_contract: Mapping[str, Any] | None = None,
+        object_z_error_weight: float = 1.0,
     ) -> None:
         # Freeze a value copy before constructing models/storage. Resume must match it.
         self._checkpoint_metadata = expected_core4d_smalltable_checkpoint_metadata(
-            interaction_contract=interaction_contract
+            interaction_contract=interaction_contract,
+            experiment_contract=experiment_contract,
+            object_z_error_weight=object_z_error_weight,
         )
         super().__init__(
             models,
@@ -234,23 +369,23 @@ class Core4DSmallTablePPO(Plan5PPO):
     def training_state_dict(self, *, iteration: int) -> dict[str, Any]:
         state = super().training_state_dict(iteration=iteration)
         state.pop("plan5_mappo", None)
-        state["core4d_smalltable_mappo"] = (
-            expected_core4d_smalltable_checkpoint_metadata(
-                interaction_contract=self._checkpoint_metadata.get("interaction_mesh")
-            )
-        )
+        state["core4d_smalltable_mappo"] = copy.deepcopy(self._checkpoint_metadata)
         return state
 
     def _validate_training_state(self, state: dict[str, Any]) -> None:
-        validate_core4d_smalltable_checkpoint(state)
+        validate_core4d_smalltable_checkpoint(
+            state, experiment_contract=self._checkpoint_metadata.get("experiment_contract"),
+        )
         if state["core4d_smalltable_mappo"] != self._checkpoint_metadata:
             raise ValueError(
                 "CORE4D small-table resume reward contract mismatch: "
-                "baseline, interaction variant, and reference hashes must match the learner"
+                "baseline, interaction variant, position tracking and reference hashes must match the learner"
             )
 
 
 __all__ = [
+    "CORE4D_PAIR_MAPPO_VERSION",
+    "CORE4D_OBJECT_POSITION_TRACKING_CONTRACT_VERSION",
     "CORE4D_SMALLTABLE_MAPPO_VERSION",
     "CORE4D_SMALLTABLE_INTERACTION_CONTRACT_VERSION",
     "CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION",
@@ -263,6 +398,7 @@ __all__ = [
     "CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256",
     "Core4DSmallTablePPO",
     "build_core4d_interaction_contract",
+    "core4d_object_position_tracking_contract",
     "expected_core4d_smalltable_checkpoint_metadata",
     "validate_core4d_smalltable_checkpoint",
 ]

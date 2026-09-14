@@ -432,6 +432,7 @@ class IsaacSim(BaseSimulator):
                     fix_base=False,
                     replace_cylinders_with_capsules=True,
                     asset_path=object_asset_urdf_path,
+                    collider_type=self.robot_config.object.collider_type,
                     activate_contact_sensors=True,
                     rigid_props=sim_utils.RigidBodyPropertiesCfg(
                         disable_gravity=False,

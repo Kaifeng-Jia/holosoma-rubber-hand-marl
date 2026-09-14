@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import math
 import re
 from typing import Any
 
@@ -137,9 +138,26 @@ def limits_dof_pos(env: Any, soft_dof_pos_limit: float = 0.95) -> torch.Tensor:
     return torch.sum(excess, dim=-1).mean(dim=1)
 
 
-def object_global_ref_position_error_exp(env: Any, sigma: float) -> torch.Tensor:
+def object_global_ref_position_error_exp(
+    env: Any, sigma: float, object_z_error_weight: float = 1.0,
+) -> torch.Tensor:
+    """Track world position with optional weighting of squared vertical error.
+
+    The default follows the original arithmetic exactly for existing demos.
+    This is not a height bonus: overshooting reference height is penalized too.
+    """
+    if (
+        type(object_z_error_weight) not in (int, float)
+        or not math.isfinite(object_z_error_weight)
+        or object_z_error_weight <= 0.0
+    ):
+        raise ValueError("object_z_error_weight must be positive and finite")
     command = _command(env)
-    error = torch.sum(torch.square(command.object_pos_w - command.simulator_object_pos_w), dim=-1)
+    squared_error = torch.square(command.object_pos_w - command.simulator_object_pos_w)
+    if object_z_error_weight != 1.0:
+        error = torch.sum(squared_error[..., :2], dim=-1) + object_z_error_weight * squared_error[..., 2]
+    else:
+        error = torch.sum(squared_error, dim=-1)
     return torch.exp(-error / sigma**2)
 
 

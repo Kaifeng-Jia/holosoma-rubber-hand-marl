@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from dataclasses import field
+from typing import Literal
 
 from pydantic.dataclasses import dataclass
 
@@ -74,6 +75,8 @@ class RobotForceControlConfig:
 @dataclass(frozen=True)
 class ObjectConfig:
     object_urdf_path: str | None = None
+    collider_type: Literal["convex_hull", "convex_decomposition"] = "convex_hull"
+    """Isaac Sim mesh collision approximation; preserve the legacy default."""
 
 
 @dataclass(frozen=True)

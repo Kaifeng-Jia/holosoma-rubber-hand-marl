@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import copy
 import json
 from pathlib import Path
 from typing import Any, Mapping
@@ -26,6 +27,7 @@ from holosoma.agents.mappo.core4d_smalltable_runner import (
 
 def core4d_smalltable_evaluation_reward_metadata(
     state: Mapping[str, Any],
+    *, experiment_contract: Mapping[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Label the fixed baseline evaluation score separately from the training reward.
 
@@ -33,7 +35,7 @@ def core4d_smalltable_evaluation_reward_metadata(
     of the training reward. It deliberately does not instantiate a training-only graph
     reward or need its precomputed asset merely to replay a checkpoint.
     """
-    validate_core4d_smalltable_checkpoint(state)
+    validate_core4d_smalltable_checkpoint(state, experiment_contract=experiment_contract)
     training_contract = state["core4d_smalltable_mappo"]["reward_contract"]
     is_interaction = (
         training_contract == CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
@@ -51,6 +53,25 @@ def core4d_smalltable_evaluation_reward_metadata(
     if is_interaction:
         metadata["interaction_mesh_training_contract"] = dict(
             state["core4d_smalltable_mappo"]["interaction_mesh"]
+        )
+    position_contract = state["core4d_smalltable_mappo"].get("object_position_tracking")
+    if position_contract is not None:
+        metadata.update(
+            object_position_tracking_training_contract=copy.deepcopy(position_contract),
+            evaluation_object_z_error_weight=1.0,
+            evaluation_reward_matches_training=False,
+            evaluation_reward_note=(
+                "reward_sum uses the unchanged isotropic baseline position reward (z weight=1) "
+                "and excludes interaction_mesh; the anisotropic training position contract is "
+                "reported separately; shared Actor-only inference, physics and termination are unchanged"
+            ),
+        )
+    if experiment_contract is not None:
+        contract = copy.deepcopy(state["core4d_smalltable_mappo"]["experiment_contract"])
+        metadata.update(
+            experiment_id=contract["experiment_id"],
+            object_name=contract["object_name"],
+            experiment_contract=contract,
         )
     return metadata
 

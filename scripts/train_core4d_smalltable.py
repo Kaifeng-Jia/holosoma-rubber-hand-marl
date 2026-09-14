@@ -1,14 +1,16 @@
 #!/usr/bin/env python3
-"""Train the isolated CORE4D small-table shared-Actor MAPPO baseline."""
+"""Train a selected CORE4D paired-reference shared-Actor MAPPO baseline."""
 
 from __future__ import annotations
 
 import argparse
 import hashlib
 import json
+import math
 import os
 import subprocess
 import sys
+import tempfile
 import time
 import traceback
 from dataclasses import replace
@@ -20,6 +22,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
 PARSER.add_argument("--iterations", type=int, default=12000)
 PARSER.add_argument("--num-envs", type=int, default=2048)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
@@ -29,57 +32,78 @@ PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
 PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh"), default="baseline")
 PARSER.add_argument("--interaction-reference", type=Path, default=None)
+PARSER.add_argument(
+    "--object-z-error-weight", type=float, default=1.0,
+    help="Coefficient of squared world-z position error; x/y stay 1, smalltable only if non-default",
+)
 ARGS = PARSER.parse_args()
+if not math.isfinite(ARGS.object_z_error_weight) or ARGS.object_z_error_weight <= 0.0:
+    PARSER.error("--object-z-error-weight must be positive and finite")
+if ARGS.experiment != "smalltable" and ARGS.object_z_error_weight != 1.0:
+    PARSER.error("Non-default --object-z-error-weight is restricted to --experiment smalltable")
 if ARGS.reward_variant == "interaction_mesh" and ARGS.interaction_reference is None:
     PARSER.error("--reward-variant interaction_mesh requires --interaction-reference")
 if ARGS.reward_variant == "baseline" and ARGS.interaction_reference is not None:
     PARSER.error("--interaction-reference requires the explicit interaction_mesh reward variant")
-if ARGS.output_dir is None:
-    variant_suffix = "" if ARGS.reward_variant == "baseline" else "_interaction_mesh"
-    ARGS.output_dir = (
-        REPO_ROOT
-        / "logs/Core4DSmallTable"
-        / f"paired_reference_fresh{variant_suffix}_seed{ARGS.seed}_env{ARGS.num_envs}"
-    )
 for name in ("iterations", "num_envs", "steps_per_env", "save_interval"):
     if getattr(ARGS, name) < 1:
         PARSER.error(f"--{name.replace('_', '-')} must be positive")
 if int(os.environ.get("WORLD_SIZE", "1")) != 1:
-    PARSER.error("CORE4D small-table training is one independent single-GPU process")
+    PARSER.error("CORE4D paired training is one independent single-GPU process")
 
 from holosoma.agents.mappo.core4d_smalltable_initialization import (  # noqa: E402
     initialize_core4d_smalltable_model_bundle,
 )
 from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
-    CORE4D_SMALLTABLE_OBJECT_URDF_SHA256,
-    CORE4D_SMALLTABLE_PHYSICS_CONTRACT,
-    CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256,
-    CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
     Core4DSmallTablePPO,
     build_core4d_interaction_contract,
+    core4d_object_position_tracking_contract,
 )
-from holosoma.config_values.marl.g1.core4d_smalltable_command import (  # noqa: E402
-    CORE4D_SMALLTABLE_RUNTIME_REFERENCE_FILE,
+from holosoma.config_values.marl.g1.core4d_pair_experiments import (  # noqa: E402
+    get_core4d_pair_experiment,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noqa: E402
-    CORE4D_SMALLTABLE_OBJECT_URDF,
     g1_29dof_core4d_smalltable_baseline,
     with_interaction_mesh_reward,
+    with_pair_experiment,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
+from holosoma.config_values.marl.g1.core4d_smalltable_reward import (  # noqa: E402
+    with_object_z_error_weight,
+)
 
 
+EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
+    PARSER.error(f"--experiment {ARGS.experiment} does not allow interaction_mesh")
+if not EXPERIMENT.training_ready:
+    PARSER.error(f"--experiment {ARGS.experiment} is not training_ready; complete asset/physics preparation first")
+if ARGS.output_dir is None:
+    variant_suffix = "" if ARGS.reward_variant == "baseline" else "_interaction_mesh"
+    if ARGS.object_z_error_weight != 1.0:
+        variant_suffix += f"_zweight{ARGS.object_z_error_weight:g}"
+    ARGS.output_dir = (
+        REPO_ROOT
+        / "logs" / EXPERIMENT.project
+        / f"paired_reference_fresh{variant_suffix}_seed{ARGS.seed}_env{ARGS.num_envs}"
+    )
 INTERACTION_REFERENCE = (
     None if ARGS.interaction_reference is None else ARGS.interaction_reference.expanduser().resolve()
 )
 INTERACTION_CONTRACT = (
     None if INTERACTION_REFERENCE is None else build_core4d_interaction_contract(INTERACTION_REFERENCE)
 )
+PAIR_CONFIG = with_pair_experiment(g1_29dof_core4d_smalltable_baseline, EXPERIMENT)
 BASE_CONFIG = (
-    g1_29dof_core4d_smalltable_baseline
+    PAIR_CONFIG
     if INTERACTION_REFERENCE is None
-    else with_interaction_mesh_reward(g1_29dof_core4d_smalltable_baseline, str(INTERACTION_REFERENCE))
+    else with_interaction_mesh_reward(PAIR_CONFIG, str(INTERACTION_REFERENCE))
 )
+if ARGS.object_z_error_weight != 1.0:
+    BASE_CONFIG = replace(
+        BASE_CONFIG,
+        reward=with_object_z_error_weight(BASE_CONFIG.reward, ARGS.object_z_error_weight),
+    )
 CONFIG = replace(
     BASE_CONFIG,
     training=replace(
@@ -90,14 +114,14 @@ CONFIG = replace(
     ),
 )
 RUNTIME_REFERENCE_PATH = (
-    REPO_ROOT / "src" / "holosoma" / CORE4D_SMALLTABLE_RUNTIME_REFERENCE_FILE
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.runtime_reference_file
 ).resolve()
 OBJECT_URDF_PATH = (
-    REPO_ROOT / "src" / "holosoma" / CORE4D_SMALLTABLE_OBJECT_URDF
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.object_urdf_file
 ).resolve()
-TRAINING_PROMOTION_PATH = RUNTIME_REFERENCE_PATH.with_name(
-    "training_asset_manifest.json"
-)
+TRAINING_PROMOTION_PATH = (
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.training_promotion_file
+).resolve()
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -108,10 +132,8 @@ from holosoma.utils.module_utils import get_holosoma_root  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
 
 
-EXPECTED_OBJECT_MASS_KG = CORE4D_SMALLTABLE_PHYSICS_CONTRACT["object_mass_kg"]
-EXPECTED_OBJECT_MATERIAL = CORE4D_SMALLTABLE_PHYSICS_CONTRACT[
-    "material_static_dynamic_restitution"
-]
+EXPECTED_OBJECT_MASS_KG = EXPERIMENT.object_mass_kg
+EXPECTED_OBJECT_MATERIAL = EXPERIMENT.material_static_dynamic_restitution
 
 
 def _sha256(path: Path) -> str:
@@ -152,6 +174,23 @@ def _append_jsonl(path: Path, payload: dict) -> None:
         stream.write(json.dumps(payload, sort_keys=True) + "\n")
 
 
+def _save_checkpoint_atomic(path: Path, state: dict) -> None:
+    """Expose a .pt file to cloud sync only after serialization has completed."""
+    temporary_path = None
+    try:
+        with tempfile.NamedTemporaryFile(
+            mode="wb", dir=path.parent, prefix=f".{path.name}.", suffix=".tmp", delete=False,
+        ) as stream:
+            temporary_path = Path(stream.name)
+            torch.save(state, stream)
+            stream.flush()
+            os.fsync(stream.fileno())
+        os.replace(temporary_path, path)
+    finally:
+        if temporary_path is not None:
+            temporary_path.unlink(missing_ok=True)
+
+
 def _object_physics(env) -> dict[str, object]:
     view = env.simulator._object.root_physx_view
     mass = view.get_masses().reshape(-1)
@@ -181,8 +220,8 @@ def _simulation_rates(env) -> tuple[float, float]:
     physics_hz = 1.0 / float(env.sim_dt)
     control_hz = 1.0 / float(env.dt)
     expected = (
-        float(CORE4D_SMALLTABLE_PHYSICS_CONTRACT["physics_hz"]),
-        float(CORE4D_SMALLTABLE_PHYSICS_CONTRACT["control_hz"]),
+        float(EXPERIMENT.physics_hz),
+        float(EXPERIMENT.control_hz),
     )
     if abs(physics_hz - expected[0]) > 1.0e-6 or abs(control_hz - expected[1]) > 1.0e-6:
         raise RuntimeError(
@@ -199,17 +238,17 @@ def main() -> int:
     try:
         runtime_reference_sha256 = _require_sha256(
             RUNTIME_REFERENCE_PATH,
-            CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256,
+            EXPERIMENT.runtime_reference_sha256,
             "runtime reference",
         )
         object_urdf_sha256 = _require_sha256(
             OBJECT_URDF_PATH,
-            CORE4D_SMALLTABLE_OBJECT_URDF_SHA256,
+            EXPERIMENT.object_urdf_sha256,
             "object URDF",
         )
         training_promotion_sha256 = _require_sha256(
             TRAINING_PROMOTION_PATH,
-            CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
+            EXPERIMENT.training_promotion_sha256,
             "training-asset promotion",
         )
         training_robot_urdf_sha256 = None
@@ -257,6 +296,8 @@ def main() -> int:
             num_steps_per_env=ARGS.steps_per_env,
             device=env.device,
             interaction_contract=INTERACTION_CONTRACT,
+            experiment_contract=EXPERIMENT.checkpoint_contract,
+            object_z_error_weight=ARGS.object_z_error_weight,
         )
         interaction_term = (
             env.reward_manager.get_term("interaction_mesh")
@@ -279,7 +320,13 @@ def main() -> int:
         run_config = {
             "git_commit": _git_commit(),
             "started_unix_time": time.time(),
-            "scenario": "core4d_paired_small_table_reference_tracking",
+            "experiment": EXPERIMENT.experiment_id,
+            "project": EXPERIMENT.project,
+            "scenario": EXPERIMENT.scenario,
+            "experiment_contract": EXPERIMENT.checkpoint_contract,
+            "reference_frames": EXPERIMENT.reference_frames,
+            "reference_fps": EXPERIMENT.reference_fps,
+            "object_collider_type": EXPERIMENT.object_collider_type,
             "initialization": "fresh" if resume_path is None else "resumed",
             "resume_checkpoint": None if resume_path is None else str(resume_path),
             "resume_checkpoint_sha256": resume_checkpoint_sha256,
@@ -310,6 +357,10 @@ def main() -> int:
             "control_hz": control_hz,
             "reward_terms": list(env.reward_manager.active_terms),
             "reward_variant": ARGS.reward_variant,
+            "object_z_error_weight": ARGS.object_z_error_weight,
+            "object_position_tracking_contract": core4d_object_position_tracking_contract(
+                ARGS.object_z_error_weight
+            ),
             "interaction_reference": None if INTERACTION_REFERENCE is None else str(INTERACTION_REFERENCE),
             "interaction_contract": INTERACTION_CONTRACT,
             "training_robot_urdf_sha256": training_robot_urdf_sha256,
@@ -322,9 +373,9 @@ def main() -> int:
             "critic_learning_rate": learner.critic_learning_rate,
         }
         _write_json(output_dir / "run_config.json", run_config)
-        torch.save(
-            learner.training_state_dict(iteration=start_iteration),
+        _save_checkpoint_atomic(
             output_dir / f"model_{start_iteration:05d}.pt",
+            learner.training_state_dict(iteration=start_iteration),
         )
 
         metrics_path = output_dir / "metrics.jsonl"
@@ -380,9 +431,9 @@ def main() -> int:
             print(json.dumps(record, sort_keys=True), flush=True)
 
             if iteration % ARGS.save_interval == 0 or iteration == final_iteration:
-                torch.save(
-                    learner.training_state_dict(iteration=iteration),
+                _save_checkpoint_atomic(
                     output_dir / f"model_{iteration:05d}.pt",
+                    learner.training_state_dict(iteration=iteration),
                 )
 
         status = {

@@ -1,9 +1,10 @@
 #!/usr/bin/env python3
-"""Run bounded physics and optional one-update checks for CORE4D small-table MAPPO."""
+"""Run bounded physics and optional one-update checks for selected CORE4D paired MAPPO."""
 
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 import sys
 import traceback
@@ -16,6 +17,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
 PARSER.add_argument("--num-envs", type=int, default=1)
 PARSER.add_argument("--steps", type=int, default=8)
 PARSER.add_argument("--seed", type=int, default=721)
@@ -41,23 +43,33 @@ from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
 from holosoma.agents.mappo.core4d_smalltable_runner import (  # noqa: E402
     Core4DSmallTablePolicyRunner,
 )
+from holosoma.config_values.marl.g1.core4d_pair_experiments import (  # noqa: E402
+    get_core4d_pair_experiment,
+)
 from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noqa: E402
     g1_29dof_core4d_smalltable_smoke,
     with_interaction_mesh_reward,
+    with_pair_experiment,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
 
 
+EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
+    PARSER.error(f"--experiment {ARGS.experiment} does not allow interaction_mesh")
+if ARGS.ppo_update and not EXPERIMENT.training_ready:
+    PARSER.error(f"--experiment {ARGS.experiment} is not training_ready; run physics smoke without --ppo-update first")
 INTERACTION_REFERENCE = (
     None if ARGS.interaction_reference is None else ARGS.interaction_reference.expanduser().resolve()
 )
 INTERACTION_CONTRACT = (
     None if INTERACTION_REFERENCE is None else build_core4d_interaction_contract(INTERACTION_REFERENCE)
 )
+PAIR_CONFIG = with_pair_experiment(g1_29dof_core4d_smalltable_smoke, EXPERIMENT)
 BASE_CONFIG = (
-    g1_29dof_core4d_smalltable_smoke
+    PAIR_CONFIG
     if INTERACTION_REFERENCE is None
-    else with_interaction_mesh_reward(g1_29dof_core4d_smalltable_smoke, str(INTERACTION_REFERENCE))
+    else with_interaction_mesh_reward(PAIR_CONFIG, str(INTERACTION_REFERENCE))
 )
 CONFIG = replace(
     BASE_CONFIG,
@@ -80,13 +92,21 @@ from holosoma.utils.helpers import get_class  # noqa: E402
 from holosoma.utils.sim_utils import close_simulation_app  # noqa: E402
 
 
-EXPECTED_MASS_KG = 20.0
-EXPECTED_MATERIAL = (0.5, 0.5, 0.0)
+EXPECTED_MASS_KG = EXPERIMENT.object_mass_kg
+EXPECTED_MATERIAL = EXPERIMENT.material_static_dynamic_restitution
 
 
 def main() -> int:
     env = None
     try:
+        for relative_path, expected in (
+            (EXPERIMENT.runtime_reference_file, EXPERIMENT.runtime_reference_sha256),
+            (EXPERIMENT.object_urdf_file, EXPERIMENT.object_urdf_sha256),
+            (EXPERIMENT.training_promotion_file, EXPERIMENT.training_promotion_sha256),
+        ):
+            path = REPO_ROOT / "src" / "holosoma" / relative_path
+            if hashlib.sha256(path.read_bytes()).hexdigest() != expected:
+                raise RuntimeError(f"CORE4D experiment asset SHA-256 mismatch: {path}")
         torch.manual_seed(ARGS.seed)
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
@@ -106,8 +126,14 @@ def main() -> int:
                 raise RuntimeError(
                     f"{name} shape mismatch: {tuple(observations[name].shape)} vs {expected}"
                 )
-        if command.reference.fps != 50:
-            raise RuntimeError(f"Runtime FPS must be 50, got {command.reference.fps}")
+        if command.reference.fps != EXPERIMENT.reference_fps:
+            raise RuntimeError(f"Runtime FPS must be {EXPERIMENT.reference_fps}, got {command.reference.fps}")
+        if command.reference.num_frames != EXPERIMENT.reference_frames:
+            raise RuntimeError(f"Runtime frames must be {EXPERIMENT.reference_frames}, got {command.reference.num_frames}")
+        actual_rates = (1.0 / float(env.sim_dt), 1.0 / float(env.dt))
+        expected_rates = (EXPERIMENT.physics_hz, EXPERIMENT.control_hz)
+        if any(abs(actual - expected) > 1.0e-6 for actual, expected in zip(actual_rates, expected_rates)):
+            raise RuntimeError(f"Simulation rates must be {expected_rates}, got {actual_rates}")
 
         # Verify the exact reset write before taking another physics step.
         env_ids = torch.arange(env.num_envs, device=env.device)
@@ -204,6 +230,7 @@ def main() -> int:
                 num_steps_per_env=ARGS.steps,
                 device=env.device,
                 interaction_contract=INTERACTION_CONTRACT,
+                experiment_contract=EXPERIMENT.checkpoint_contract,
             )
             observations = learner.collect_rollout(env, observations)
             update_metrics = learner.update().__dict__
@@ -215,8 +242,29 @@ def main() -> int:
         robot_urdf = CONFIG.robot.asset.urdf_file.lower()
         if "rubberhand" not in robot_urdf or "hemisphere" in robot_urdf:
             raise RuntimeError(f"Unexpected robot asset: {CONFIG.robot.asset.urdf_file}")
+        # Record the cooked USD configuration; this is diagnostic evidence, not
+        # a new success condition or a claim that every mesh opening is retained.
+        from pxr import Usd, UsdPhysics
+        import omni.usd
+
+        object_root = omni.usd.get_context().get_stage().GetPrimAtPath("/World/envs/env_0/Object")
+        object_mesh_collision_approximations = []
+        if object_root.IsValid():
+            for prim in Usd.PrimRange(object_root, Usd.TraverseInstanceProxies()):
+                if prim.HasAPI(UsdPhysics.MeshCollisionAPI):
+                    object_mesh_collision_approximations.append({
+                        "prim_path": str(prim.GetPath()),
+                        "approximation": UsdPhysics.MeshCollisionAPI(prim).GetApproximationAttr().Get(),
+                    })
         report = {
             "passed": True,
+            "experiment": EXPERIMENT.experiment_id,
+            "scenario": EXPERIMENT.scenario,
+            "experiment_contract": EXPERIMENT.checkpoint_contract,
+            "training_ready": EXPERIMENT.training_ready,
+            "runtime_reference_file": EXPERIMENT.runtime_reference_file,
+            "object_collider_type": EXPERIMENT.object_collider_type,
+            "object_mesh_collision_approximations": object_mesh_collision_approximations,
             "num_envs": env.num_envs,
             "steps": ARGS.steps,
             "ppo_update": ARGS.ppo_update,

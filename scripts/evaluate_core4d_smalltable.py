@@ -23,6 +23,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
 PARSER.add_argument("--checkpoint", type=Path, required=True)
 PARSER.add_argument("--episodes", type=int, default=5)
 PARSER.add_argument("--seed", type=int, default=721)
@@ -40,17 +41,12 @@ from holosoma.agents.mappo.core4d_smalltable_evaluation import (  # noqa: E402
 from holosoma.agents.mappo.core4d_smalltable_initialization import (  # noqa: E402
     initialize_core4d_smalltable_model_bundle,
 )
-from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
-    CORE4D_SMALLTABLE_OBJECT_URDF_SHA256,
-    CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256,
-    CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
-)
-from holosoma.config_values.marl.g1.core4d_smalltable_command import (  # noqa: E402
-    CORE4D_SMALLTABLE_RUNTIME_REFERENCE_FILE,
+from holosoma.config_values.marl.g1.core4d_pair_experiments import (  # noqa: E402
+    get_core4d_pair_experiment,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noqa: E402
-    CORE4D_SMALLTABLE_OBJECT_URDF,
     g1_29dof_core4d_smalltable_smoke,
+    with_pair_experiment,
 )
 from holosoma.config_values.marl.g1.core4d_smalltable_observation import (  # noqa: E402
     g1_29dof_core4d_smalltable_evaluation_observation,
@@ -58,29 +54,32 @@ from holosoma.config_values.marl.g1.core4d_smalltable_observation import (  # no
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
 
 
+EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+if not EXPERIMENT.training_ready:
+    PARSER.error(f"--experiment {ARGS.experiment} is not training_ready; complete asset/physics preparation first")
+BASE_CONFIG = with_pair_experiment(g1_29dof_core4d_smalltable_smoke, EXPERIMENT)
 CONFIG = replace(
-    g1_29dof_core4d_smalltable_smoke,
+    BASE_CONFIG,
     observation=g1_29dof_core4d_smalltable_evaluation_observation,
     training=replace(
-        g1_29dof_core4d_smalltable_smoke.training,
+        BASE_CONFIG.training,
         num_envs=1,
         headless=True,
         seed=ARGS.seed,
-        project="Core4DSmallTableEval",
+        project=f"{EXPERIMENT.project}Eval",
         name="actor_only",
     ),
 )
-SIMULATION_APP = init_sim_imports(CONFIG)
-
 RUNTIME_REFERENCE_PATH = (
-    REPO_ROOT / "src" / "holosoma" / CORE4D_SMALLTABLE_RUNTIME_REFERENCE_FILE
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.runtime_reference_file
 ).resolve()
 OBJECT_URDF_PATH = (
-    REPO_ROOT / "src" / "holosoma" / CORE4D_SMALLTABLE_OBJECT_URDF
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.object_urdf_file
 ).resolve()
-TRAINING_PROMOTION_PATH = RUNTIME_REFERENCE_PATH.with_name(
-    "training_asset_manifest.json"
-)
+TRAINING_PROMOTION_PATH = (
+    REPO_ROOT / "src" / "holosoma" / EXPERIMENT.training_promotion_file
+).resolve()
+SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
 
@@ -133,17 +132,17 @@ def main() -> int:
             raise FileNotFoundError(f"Checkpoint does not exist: {checkpoint}")
         _require_sha256(
             RUNTIME_REFERENCE_PATH,
-            CORE4D_SMALLTABLE_RUNTIME_REFERENCE_SHA256,
+            EXPERIMENT.runtime_reference_sha256,
             "runtime reference",
         )
         _require_sha256(
             OBJECT_URDF_PATH,
-            CORE4D_SMALLTABLE_OBJECT_URDF_SHA256,
+            EXPERIMENT.object_urdf_sha256,
             "object URDF",
         )
         _require_sha256(
             TRAINING_PROMOTION_PATH,
-            CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256,
+            EXPERIMENT.training_promotion_sha256,
             "training-asset promotion",
         )
         output_dir = ARGS.output_dir.expanduser().resolve()
@@ -151,8 +150,12 @@ def main() -> int:
 
         torch.manual_seed(ARGS.seed)
         state = torch.load(checkpoint, map_location="cuda:0", weights_only=False)
-        iteration = validate_core4d_smalltable_checkpoint(state)
-        reward_metadata = core4d_smalltable_evaluation_reward_metadata(state)
+        iteration = validate_core4d_smalltable_checkpoint(
+            state, experiment_contract=EXPERIMENT.checkpoint_contract,
+        )
+        reward_metadata = core4d_smalltable_evaluation_reward_metadata(
+            state, experiment_contract=EXPERIMENT.checkpoint_contract,
+        )
         print(json.dumps({"reward_regime": reward_metadata}, sort_keys=True), flush=True)
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
@@ -244,19 +247,26 @@ def main() -> int:
             trajectory,
             metadata={
                 **reward_metadata,
-                "scenario": "core4d_paired_small_table_reference_tracking",
+                "experiment": EXPERIMENT.experiment_id,
+                "scenario": EXPERIMENT.scenario,
+                "runtime_reference_file": EXPERIMENT.runtime_reference_file,
+                "object_urdf_file": EXPERIMENT.object_urdf_file,
                 "checkpoint": str(checkpoint),
                 "checkpoint_iteration": iteration,
                 "seed": ARGS.seed,
                 "actor_only": True,
                 "observation_noise": False,
                 "episode": representative,
-                "fps": 50,
+                "fps": EXPERIMENT.reference_fps,
                 "result": episode_results[representative],
             },
         )
         summary = {
             **reward_metadata,
+            "experiment": EXPERIMENT.experiment_id,
+            "scenario": EXPERIMENT.scenario,
+            "runtime_reference_file": EXPERIMENT.runtime_reference_file,
+            "object_urdf_file": EXPERIMENT.object_urdf_file,
             "checkpoint": str(checkpoint),
             "checkpoint_iteration": iteration,
             "seed": ARGS.seed,

@@ -1,5 +1,7 @@
 """Original tracking reward and an explicit additive interaction variant."""
 
+import copy
+import math
 from dataclasses import replace
 
 from holosoma.config_types.reward import RewardManagerCfg, RewardTermCfg
@@ -78,6 +80,29 @@ CORE4D_INTERACTION_WEIGHT = 1.0
 CORE4D_INTERACTION_SIGMA = 0.06
 
 
+def validate_object_z_error_weight(value: float) -> float:
+    """Reject invalid experiment coefficients before constructing a simulator."""
+    if type(value) not in (int, float) or not math.isfinite(value) or value <= 0.0:
+        raise ValueError("object_z_error_weight must be positive and finite")
+    return float(value)
+
+
+def with_object_z_error_weight(base_reward: RewardManagerCfg, value: float) -> RewardManagerCfg:
+    """Copy the preset and change only the coefficient of squared world-z error."""
+    value = validate_object_z_error_weight(value)
+    reward = copy.deepcopy(base_reward)
+    name = "object_global_ref_position_error_exp"
+    term = reward.terms[name]
+    if term.func != f"{_TERMS}:{name}" or term.params.get("sigma") != 0.3 or term.weight != 1.0:
+        raise ValueError("Vertical tracking requires the unchanged sigma=0.3, weight=1 position term")
+    params = dict(term.params)
+    params.pop("object_z_error_weight", None)
+    if value != 1.0:
+        params["object_z_error_weight"] = value
+    reward.terms[name] = replace(term, params=params)
+    return reward
+
+
 def with_interaction_reward_term(base_reward: RewardManagerCfg, reference_file: str) -> RewardManagerCfg:
     """Copy a reward preset without mutating any of its existing terms."""
     if not str(reference_file).strip():
@@ -102,4 +127,6 @@ __all__ = [
     "CORE4D_INTERACTION_WEIGHT",
     "CORE4D_INTERACTION_SIGMA",
     "with_interaction_reward_term",
+    "validate_object_z_error_weight",
+    "with_object_z_error_weight",
 ]
