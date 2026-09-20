@@ -23,7 +23,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
-PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021", "bucket003", "smalltable5kg_A"), default="smalltable")
 PARSER.add_argument("--checkpoint", type=Path, required=True)
 PARSER.add_argument("--episodes", type=int, default=5)
 PARSER.add_argument("--seed", type=int, default=721)
@@ -58,6 +58,14 @@ EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
 if not EXPERIMENT.training_ready:
     PARSER.error(f"--experiment {ARGS.experiment} is not training_ready; complete asset/physics preparation first")
 BASE_CONFIG = with_pair_experiment(g1_29dof_core4d_smalltable_smoke, EXPERIMENT)
+if ARGS.experiment in ("bucket003", "smalltable5kg_A"):
+    BASE_CONFIG = replace(
+        BASE_CONFIG,
+        env_class="holosoma.envs.marl.core4d_bucket_manager.Core4DBucketManager",
+        simulator=replace(BASE_CONFIG.simulator, config=replace(
+            BASE_CONFIG.simulator.config, enable_object_hand_contact=True,
+        )),
+    )
 CONFIG = replace(
     BASE_CONFIG,
     observation=g1_29dof_core4d_smalltable_evaluation_observation,
@@ -102,7 +110,7 @@ def _snapshot(env, command) -> dict[str, np.ndarray]:
     def array(value):
         return value[0].detach().cpu().numpy().copy()
 
-    return {
+    result = {
         "root_pos": array(env.simulator.agent_root_states[..., :3]),
         "root_quat_xyzw": array(env.simulator.agent_root_states[..., 3:7]),
         "dof_pos": array(env.simulator.agent_dof_pos),
@@ -114,13 +122,35 @@ def _snapshot(env, command) -> dict[str, np.ndarray]:
                 dim=-1,
             )[0].item()
         ),
+        "object_height_error_m": np.asarray(
+            (command.simulator_object_pos_w[0, 2] - command.object_pos_w[0, 2]).item()
+        ),
     }
+    if ARGS.experiment in ("bucket003", "smalltable5kg_A"):
+        sensor = env.simulator.object_hand_contact_sensor
+        result["hand_object_normal_force_w"] = array(sensor.data.force_matrix_w[:, 0].reshape(-1, 2, 2, 3))
+        result["contact_valid_after_physics"] = np.asarray(env.episode_length_buf[0].item() > 0)
+        result["reference_frame"] = np.asarray(command.time_steps[0].item())
+        result["episode_step"] = np.asarray(env.episode_length_buf[0].item())
+    return result
 
 
 def _stack(frames: list[dict[str, np.ndarray]]) -> dict[str, np.ndarray]:
     return {
         name: np.stack([frame[name] for frame in frames], axis=0)
         for name in frames[0]
+    }
+
+
+def _episode_height_metrics(trajectory: dict[str, np.ndarray]) -> dict[str, float]:
+    """Same-state/reference-frame height errors, including the pre-reset terminal state."""
+    error = np.asarray(trajectory["object_height_error_m"])
+    if error.ndim != 1 or not error.size or not np.isfinite(error).all():
+        raise ValueError("Episode height errors must be a nonempty finite vector")
+    return {
+        "object_height_rmse_m": float(np.sqrt(np.mean(np.square(error)))),
+        "object_height_bias_m": float(np.mean(error)),
+        "object_height_abs_error_max_m": float(np.max(np.abs(error))),
     }
 
 
@@ -146,6 +176,8 @@ def main() -> int:
             "training-asset promotion",
         )
         output_dir = ARGS.output_dir.expanduser().resolve()
+        if output_dir.exists() and any(output_dir.iterdir()):
+            raise FileExistsError(f"Refusing to overwrite nonempty evaluation directory: {output_dir}")
         output_dir.mkdir(parents=True, exist_ok=True)
 
         torch.manual_seed(ARGS.seed)
@@ -156,6 +188,14 @@ def main() -> int:
         reward_metadata = core4d_smalltable_evaluation_reward_metadata(
             state, experiment_contract=EXPERIMENT.checkpoint_contract,
         )
+        if ARGS.experiment in ("bucket003", "smalltable5kg_A"):
+            from holosoma.utils.module_utils import get_holosoma_root
+            asset_root = CONFIG.robot.asset.asset_root.replace("@holosoma", get_holosoma_root())
+            _require_sha256(
+                Path(asset_root) / CONFIG.robot.asset.urdf_file,
+                state["core4d_smalltable_mappo"]["bucket_reward"]["training_robot_urdf_sha256"],
+                "bucket training robot URDF",
+            )
         print(json.dumps({"reward_regime": reward_metadata}, sort_keys=True), flush=True)
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
@@ -228,7 +268,25 @@ def main() -> int:
                         trajectory["object_pos_w"][-1] - trajectory["object_pos_w"][0]
                     )
                 ),
+                **_episode_height_metrics(trajectory),
             }
+            episode_path = save_core4d_smalltable_viser(
+                output_dir / f"episode_{episode:03d}.npz",
+                trajectory,
+                metadata={
+                    **reward_metadata,
+                    "experiment": EXPERIMENT.experiment_id,
+                    "checkpoint": str(checkpoint),
+                    "checkpoint_iteration": iteration,
+                    "seed": ARGS.seed,
+                    "actor_only": True,
+                    "observation_noise": False,
+                    "episode": episode,
+                    "fps": EXPERIMENT.reference_fps,
+                    "result": dict(result),
+                },
+            )
+            result["episode_viser"] = str(episode_path)
             episode_results.append(result)
             trajectories.append(trajectory)
             print(json.dumps(result, sort_keys=True), flush=True)
@@ -276,7 +334,14 @@ def main() -> int:
             )
             / len(episode_results),
             "representative_episode": representative,
+            "representative_selection": "completed_first_then_minimum_object_position_rmse_not_random",
             "representative_viser": str(viser_path),
+            "all_episode_replays_saved": True,
+            "height_metric_note": (
+                "Each episode reports same-state/reference-frame object-root z errors; "
+                "not whole-geometry clearance or hand load-bearing. Compare completion and episode "
+                "lengths alongside errors; failed prefixes are not full-trajectory statistics."
+            ),
             "inference": "shared_actor_only_critic_not_called",
             "observation_noise": False,
         }

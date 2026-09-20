@@ -1,0 +1,296 @@
+{
+  "agent_aggregation": "minimum distance over that person's two hands",
+  "caveat": "Source joints and scanned mesh are not measured hand-surface contact, force, load sharing, or proof of a physically open bucket.",
+  "distance_definition": "unsigned exact nearest triangle-surface distance; not hull distance",
+  "distance_percentiles_m": {
+    "agent1_left": {
+      "max": 2.3866151523312236,
+      "min": 0.030585568466738936,
+      "p10": 0.0374859062681651,
+      "p25": 0.12791028936973955,
+      "p50": 0.6846082968159628,
+      "p75": 1.820025493574959,
+      "p90": 2.0891819956348514,
+      "p95": 2.242609263759921
+    },
+    "agent1_right": {
+      "max": 2.0252739931849244,
+      "min": 1.2232312043027626e-05,
+      "p10": 0.001968292649335522,
+      "p25": 0.0570416215200393,
+      "p50": 0.15540911103011285,
+      "p75": 1.6522414507266288,
+      "p90": 1.941105796245548,
+      "p95": 1.9739532640170558
+    },
+    "agent2_left": {
+      "max": 0.3903778619520968,
+      "min": 1.151120261532482e-05,
+      "p10": 0.0019496070069616141,
+      "p25": 0.0036414351240392283,
+      "p50": 0.04821803778176867,
+      "p75": 0.08226195664555265,
+      "p90": 0.10604826989588828,
+      "p95": 0.1958376372803597
+    },
+    "agent2_right": {
+      "max": 0.2223920821097435,
+      "min": 0.00028439925018941233,
+      "p10": 0.003175896545583066,
+      "p25": 0.007161520402331769,
+      "p50": 0.09774152898308183,
+      "p75": 0.18230999390252606,
+      "p90": 0.20509203112408345,
+      "p95": 0.2118100574222822
+    }
+  },
+  "mesh_volume_m3": 0.09978793355769898,
+  "mesh_watertight": true,
+  "object_mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+  "object_pose_layout": "source canonical [wxyz,xyz]; inverse rigid transform into object link frame",
+  "palm_joint_indices_left_right": [
+    [
+      20,
+      25,
+      28,
+      31
+    ],
+    [
+      21,
+      40,
+      43,
+      46
+    ]
+  ],
+  "palm_point_definition": "mean(wrist,index1,middle1,pinky1) of original unscaled SMPL-X joints",
+  "selected_candidate_soft_band": {
+    "dataset_contact_ground_truth": false,
+    "formula": "clip((outer-min(left_distance,right_distance))/(outer-inner),0,1)",
+    "inner_m": 0.02,
+    "kind": "source_human_geometric_proximity_proxy_not_contact_ground_truth",
+    "not_from_retargeted_robot_penetration": true,
+    "outer_m": 0.04,
+    "runtime_positive_intervals": {
+      "agent1": [
+        {
+          "first_frame": 165,
+          "first_time_s": 3.3,
+          "last_frame": 278,
+          "last_time_s": 5.56
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 222,
+          "first_time_s": 4.44,
+          "last_frame": 466,
+          "last_time_s": 9.32
+        }
+      ]
+    },
+    "runtime_unit_intervals": {
+      "agent1": [
+        {
+          "first_frame": 181,
+          "first_time_s": 3.62,
+          "last_frame": 275,
+          "last_time_s": 5.5
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 225,
+          "first_time_s": 4.5,
+          "last_frame": 464,
+          "last_time_s": 9.28
+        }
+      ]
+    },
+    "source_canonical_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+    "source_palm_definition": "mean(wrist,index1,middle1,pinky1) of original unscaled SMPL-X joints",
+    "source_palm_joint_indices": [
+      [
+        20,
+        25,
+        28,
+        31
+      ],
+      [
+        21,
+        40,
+        43,
+        46
+      ]
+    ],
+    "threshold_status": "explicit_candidate_pending_user_review_before_formal_training",
+    "time_mapping": "linear interpolate original 15Hz hand distances to uniform runtime 50Hz, then apply soft band"
+  },
+  "semantic_kind": "source_human_geometric_proximity_proxy_not_contact_ground_truth",
+  "source_canonical_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+  "source_fps": 15,
+  "source_frames": 150,
+  "threshold_sensitivity": {
+    "0.02": {
+      "agent1": [
+        {
+          "first_frame": 55,
+          "first_time_s": 3.6666666666666665,
+          "last_frame": 82,
+          "last_time_s": 5.466666666666667
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 68,
+          "first_time_s": 4.533333333333333,
+          "last_frame": 139,
+          "last_time_s": 9.266666666666667
+        }
+      ]
+    },
+    "0.03": {
+      "agent1": [
+        {
+          "first_frame": 51,
+          "first_time_s": 3.4,
+          "last_frame": 83,
+          "last_time_s": 5.533333333333333
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 67,
+          "first_time_s": 4.466666666666667,
+          "last_frame": 139,
+          "last_time_s": 9.266666666666667
+        }
+      ]
+    },
+    "0.04": {
+      "agent1": [
+        {
+          "first_frame": 50,
+          "first_time_s": 3.3333333333333335,
+          "last_frame": 83,
+          "last_time_s": 5.533333333333333
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 67,
+          "first_time_s": 4.466666666666667,
+          "last_frame": 139,
+          "last_time_s": 9.266666666666667
+        }
+      ]
+    },
+    "0.05": {
+      "agent1": [
+        {
+          "first_frame": 48,
+          "first_time_s": 3.2,
+          "last_frame": 83,
+          "last_time_s": 5.533333333333333
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 1,
+          "first_time_s": 0.06666666666666667,
+          "last_frame": 1,
+          "last_time_s": 0.06666666666666667
+        },
+        {
+          "first_frame": 7,
+          "first_time_s": 0.4666666666666667,
+          "last_frame": 13,
+          "last_time_s": 0.8666666666666667
+        },
+        {
+          "first_frame": 67,
+          "first_time_s": 4.466666666666667,
+          "last_frame": 140,
+          "last_time_s": 9.333333333333334
+        }
+      ]
+    },
+    "0.06": {
+      "agent1": [
+        {
+          "first_frame": 47,
+          "first_time_s": 3.1333333333333333,
+          "last_frame": 84,
+          "last_time_s": 5.6
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 0,
+          "first_time_s": 0.0,
+          "last_frame": 17,
+          "last_time_s": 1.1333333333333333
+        },
+        {
+          "first_frame": 20,
+          "first_time_s": 1.3333333333333333,
+          "last_frame": 20,
+          "last_time_s": 1.3333333333333333
+        },
+        {
+          "first_frame": 65,
+          "first_time_s": 4.333333333333333,
+          "last_frame": 140,
+          "last_time_s": 9.333333333333334
+        }
+      ]
+    },
+    "0.08": {
+      "agent1": [
+        {
+          "first_frame": 45,
+          "first_time_s": 3.0,
+          "last_frame": 84,
+          "last_time_s": 5.6
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 0,
+          "first_time_s": 0.0,
+          "last_frame": 35,
+          "last_time_s": 2.3333333333333335
+        },
+        {
+          "first_frame": 65,
+          "first_time_s": 4.333333333333333,
+          "last_frame": 141,
+          "last_time_s": 9.4
+        }
+      ]
+    },
+    "0.1": {
+      "agent1": [
+        {
+          "first_frame": 44,
+          "first_time_s": 2.933333333333333,
+          "last_frame": 84,
+          "last_time_s": 5.6
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 0,
+          "first_time_s": 0.0,
+          "last_frame": 54,
+          "last_time_s": 3.6
+        },
+        {
+          "first_frame": 64,
+          "first_time_s": 4.266666666666667,
+          "last_frame": 142,
+          "last_time_s": 9.466666666666667
+        }
+      ]
+    }
+  }
+}

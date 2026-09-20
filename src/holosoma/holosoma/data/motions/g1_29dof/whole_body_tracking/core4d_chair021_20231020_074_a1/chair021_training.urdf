@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="chair021">
+  <link name="chair021_link">
+    <inertial>
+      <origin xyz="-0.0153408561273 0.0748650554502 -0.00380911442266" rpy="0 0 0" />
+      <mass value="5" />
+      <inertia ixx="0.1253102255440" ixy="0.03154671411575" ixz="-0.0006530358770" iyy="0.126795453685" iyz="-0.00186917395970" izz="0.1222128082535" />
+    </inertial>
+    <visual name="chair021_visual">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="chair021_m.obj" scale="0.744193062691 0.744193062691 0.744193062691" />
+      </geometry>
+    </visual>
+    <collision name="chair021_mesh_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="chair021_m.obj" scale="0.744193062691 0.744193062691 0.744193062691" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

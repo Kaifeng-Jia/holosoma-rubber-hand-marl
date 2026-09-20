@@ -289,3 +289,62 @@ src/holosoma_retargeting/holosoma_retargeting/config_types/retargeter.py
 - 不恢复人手手指自由度或接触压力分布；
 - 不在 retarget 阶段估计训练中的实际接触力；
 - A.1e 等接触投影实验不属于本 pipeline。
+
+## 12. 可选的 PT 掌面 + 手臂避碰修正（2026-09-11）
+
+本节是新对照方法，**不改变上述旧 A.1 的定义或默认输出**。它用于先改善 OMOMO 单人
+Push 的训练参考，再比较原WBT与新增交互图奖励，避免奖励要求机器人复现明显穿透的几何关系。
+
+前两阶段与A.1相同。第三阶段仍使用第3–5节的原始PT腕四元数、解剖掌面标定和橡胶手映射，
+但优化变量扩为两条手臂的14个肩/肘/腕关节。基座、腿、腰和物体的每帧数值严格保留。
+姿态是软目标：碰撞冲突时可以改变手的位置并保留一定朝向残差，而不是硬复制人手朝向。
+没有手工规定手指朝下/向上、接触桌子的某个侧面或特定接触时段。
+
+每帧目标为以下项之和（角度用弧度、位置用米）：
+
+```text
+100 × sum_hand ||Log(R_target R_current^T)||²
++ 10000 × sum_hand ||hand_link_position - baseline_hand_link_position||²
++ 1 × ||q_arm - q_arm_baseline||²
++ 5 × ||current_correction - previous_frame_correction||²
+```
+
+首帧不加时序修正项。约束为物理关节限位、肩肘的既有限位、手臂—物体及手臂—地面的
+非穿透；腕部沿用A.1的URDF物理限位，不沿用旧baseline为保持腕姿态而收紧的手工范围。
+通过现有MuJoCo碰撞几何/距离Jacobian构建局部SQP；零间隙允许接触，不引入接触辅助力。
+同一对手掌/桌子几何可能有多个接触点：新末段保留这些点各自的距离与法向约束，避免
+只让一个接触点退出桌面，却通过旋转把另一个点压入桌面；此改动不修改旧求解器助手。
+每个候选步都重新检查实际非线性距离，回溯只缩小优化器的步长，不是修改机器人控制动作。
+默认每帧最多60次，最终距离验证容差0.1 mm；输出中记录未达到数值收敛的帧，不隐瞒残差。
+若后续局部QP不能再改善一个已经实测可行的姿态，则保留它并标记未收敛，不以局部优化
+失败冒充当前姿态不可行；若实测几何仍超出既定容差，则不作为完整参考导出。
+
+实现：
+
+- `config_types/retargeter.py`：新增默认关闭的 `PTPalmCollisionConfig`。
+- `src/pt_palm_collision.py`：可复用的14关节修正，不依赖动作文件名；输入是qpos与掌面旋转数组。
+- `src/interaction_mesh_retargeter.py`：沿用掌面映射和几何函数，提供新修正入口。
+- `examples/robot_retarget.py`：接入第三阶段、关闭前两阶段的新模式、另存结果和诊断。
+- `tests/retargeting/test_pt_palm_collision.py`：真实G1运动学、输入校验、冻结变量、实际手—桌碰撞回归。
+
+从当前工作树的 retargeting package 目录运行：
+
+```bash
+cd /home/kevin/holosoma-core4d-base/src/holosoma_retargeting/holosoma_retargeting
+PYTHONPATH=/home/kevin/holosoma-core4d-base/src/holosoma_retargeting \
+/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting/bin/python -B examples/robot_retarget.py \
+  --data-path /home/kevin/holosoma/OMOMO_new \
+  --save-dir /home/kevin/holosoma-core4d-base/logs/OMOMOPush/retarget_pt_collision_new_run \
+  --task-type object_interaction --task-name sub6_largetable_033 \
+  --data-format smplh --task-config.object-name largetable \
+  --fixed-object-size-adaptation --retargeter.pt-palm-collision.enable \
+  --retargeter.foot-sticking-tolerance 0.05
+```
+
+请使用新的输出目录。新末段输出尾缀为 `_fixed_object_pt_palm_collision.npz`，诊断为
+同名 `.diagnostics.npz`；其中`cost`沿用Stage 2，不能当成新阶段的目标值或碰撞指标。
+输入来源不决定重定向方法的名称：本模块是既有Omni求解后的可选修正，不冒称官方新增算法。
+
+本节所检查的非穿透不等于全身自碰撞、连续时间碰撞或接触动力学全部可行。冻结的脚—地
+约1 mm以及原桌子—地面约6.7 mm误差未被腕部修正解决；不改变原桌子参考，也不称场景
+整体“零穿透”。新参考需要用户预览确认，之后才生成训练资产及启动匹配对照训练。

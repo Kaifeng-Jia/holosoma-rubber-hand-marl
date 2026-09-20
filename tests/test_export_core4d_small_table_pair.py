@@ -149,3 +149,49 @@ def test_export_requires_two_stage_source_and_empty_output(tmp_path: Path) -> No
     (output / "keep.txt").write_text("do not overwrite", encoding="utf-8")
     with pytest.raises(FileExistsError, match="not empty"):
         module.export_small_table_pair(source, output)
+
+
+def test_export_accepts_explicit_legacy_two_stage_without_rewriting_source(tmp_path: Path) -> None:
+    module = _load_script()
+    source = tmp_path / "legacy"
+    qpos1, qpos2 = _write_source_run(source)
+    manifest_path = source / "manifest.json"
+    manifest_path.write_text(
+        json.dumps({"solver": "existing_fixed_object_size_adaptation_two_independent_runs"}),
+        encoding="utf-8",
+    )
+    original_manifest = manifest_path.read_bytes()
+
+    output = tmp_path / "small_object"
+    result = module.export_small_table_pair(source, output)
+
+    assert manifest_path.read_bytes() == original_manifest
+    with np.load(result, allow_pickle=False) as archive:
+        np.testing.assert_array_equal(archive["robot_qpos"][:, 0], qpos1[:, :36])
+        np.testing.assert_array_equal(archive["robot_qpos"][:, 1], qpos2[:, :36])
+        assert float(archive["shared_object_scale"]) == pytest.approx(0.74)
+    metadata = json.loads((output / "manifest.json").read_text(encoding="utf-8"))
+    assert metadata["source_manifest_format"] == "legacy_explicit_two_stage_solver"
+    assert metadata["source_manifest_sha256"] == module._sha256(manifest_path)
+    assert metadata["training_ready"] is False
+
+
+@pytest.mark.parametrize(
+    "metadata",
+    [
+        {},
+        {"solver": "unknown"},
+        {"solver": {"pipeline": "official_omniretarget_single_stage"}},
+        {"method": "omni", "solver": "existing_fixed_object_size_adaptation_two_independent_runs"},
+    ],
+)
+def test_export_does_not_guess_legacy_method(tmp_path: Path, metadata: dict) -> None:
+    module = _load_script()
+    source = tmp_path / "source"
+    _write_source_run(source)
+    (source / "manifest.json").write_text(json.dumps(metadata), encoding="utf-8")
+    output = tmp_path / "unused"
+
+    with pytest.raises(ValueError, match="--method two-stage"):
+        module.export_small_table_pair(source, output)
+    assert not output.exists()

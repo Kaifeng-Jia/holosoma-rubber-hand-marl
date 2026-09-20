@@ -1,0 +1,217 @@
+{
+  "a1": {
+    "allowed_qpos_indices": [
+      26,
+      27,
+      28,
+      33,
+      34,
+      35
+    ],
+    "calibration_errors_deg": {
+      "person1": {
+        "left": 0.12856103677850186,
+        "right": 0.01706763776635654
+      },
+      "person2": {
+        "left": 0.03054597083619221,
+        "right": 0.05078492250671658
+      }
+    },
+    "collision_reoptimized": false,
+    "max_calibration_error_deg": 1.0,
+    "max_solver_error_deg": 6.0,
+    "non_allowed_qpos_exact": true,
+    "non_wrist_qpos_exact": true,
+    "palm_landmarks": [
+      {
+        "name": "L_Wrist",
+        "smplx_index": 20
+      },
+      {
+        "name": "L_Index1",
+        "smplx_index": 25
+      },
+      {
+        "name": "L_Middle1",
+        "smplx_index": 28
+      },
+      {
+        "name": "L_Pinky1",
+        "smplx_index": 31
+      },
+      {
+        "name": "R_Wrist",
+        "smplx_index": 21
+      },
+      {
+        "name": "R_Index1",
+        "smplx_index": 40
+      },
+      {
+        "name": "R_Middle1",
+        "smplx_index": 43
+      },
+      {
+        "name": "R_Pinky1",
+        "smplx_index": 46
+      }
+    ],
+    "quaternion_convention": "canonical wrist xyzw",
+    "root_waist_legs_object_qpos_exact": true,
+    "shared_object_qpos_exact": true,
+    "solver_configuration": {
+      "enable": true,
+      "max_calibration_error_deg": 1.0,
+      "max_solver_error_deg": 6.0
+    },
+    "solver_diagnostics": {
+      "person1": {
+        "orientation_errors_deg": {
+          "left": {
+            "max": 8.827136511670657e-12,
+            "p90": 1.133295515760981e-12,
+            "p95": 2.2381791901042105e-12
+          },
+          "right": {
+            "max": 1.131868501938292e-11,
+            "p90": 1.341732911147617e-12,
+            "p95": 3.586145955897815e-12
+          }
+        }
+      },
+      "person2": {
+        "orientation_errors_deg": {
+          "left": {
+            "max": 4.718469040925905e-12,
+            "p90": 3.3747763205508204e-13,
+            "p95": 1.3306972913208398e-12
+          },
+          "right": {
+            "max": 5.007798930160543,
+            "p90": 5.4073410009616456e-12,
+            "p95": 2.3307946792182035
+          }
+        }
+      }
+    },
+    "solver_errors_deg": {
+      "person1": {
+        "left": {
+          "max": 8.827136511670657e-12,
+          "p90": 1.133295515760981e-12,
+          "p95": 2.2381791901042105e-12
+        },
+        "right": {
+          "max": 1.131868501938292e-11,
+          "p90": 1.341732911147617e-12,
+          "p95": 3.586145955897815e-12
+        }
+      },
+      "person2": {
+        "left": {
+          "max": 4.718469040925905e-12,
+          "p90": 3.3747763205508204e-13,
+          "p95": 1.3306972913208398e-12
+        },
+        "right": {
+          "max": 5.007798930160543,
+          "p90": 5.4073410009616456e-12,
+          "p95": 2.3307946792182035
+        }
+      }
+    },
+    "solver_mode": "wrist-only",
+    "wrist_motion": {
+      "person1": {
+        "absolute_delta_rad_max": 2.135866284977869,
+        "absolute_delta_rad_p90": 1.430725013454155,
+        "absolute_velocity_rad_s_max": 4.0669892378327805,
+        "absolute_velocity_rad_s_p90": 1.162998309382074,
+        "actually_changed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ],
+        "allowed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ]
+      },
+      "person2": {
+        "absolute_delta_rad_max": 1.6642186449581802,
+        "absolute_delta_rad_p90": 1.049169498366476,
+        "absolute_velocity_rad_s_max": 6.113980152866216,
+        "absolute_velocity_rad_s_p90": 1.1551693787923452,
+        "actually_changed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ],
+        "allowed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ]
+      }
+    }
+  },
+  "baseline_kind": "shared-scaled-preview",
+  "fps": 30,
+  "frames": 235,
+  "inertia_contract": "fixed-mass geometric preview: inertia multiplied by scale^2",
+  "input": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/source_canonical.npz",
+  "input_sha256": "e496e71901d50808b1d29d533b358117c64a1301b5244dfa134850fb8d729acc",
+  "kind": "diagnostic_preview_not_training_asset",
+  "mass_contract": "unchanged retarget placeholder mass; preview only, not approved for training",
+  "maximum_nominal_object_translation_disagreement_m": 0.024604494064080024,
+  "maximum_scale_mismatch_fraction": 0.02349826851593398,
+  "object_name": "chair021",
+  "object_urdf": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/assets/chair021.urdf",
+  "object_urdf_sha256": "1409a2c1577ed49ecd0ec4724ad6ea6117f3fb960338651cbeaff332ea6b7a12",
+  "pair_reference": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/core4d_pair_reference.npz",
+  "pair_sha256": "1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b",
+  "parent_baseline_dir": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_preview",
+  "parent_manifest_sha256": "d4293af1a46f09fba00318cbc6cb0217ed1883f4366254dfebc22bead436615e",
+  "parent_pair_sha256": "d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586",
+  "person_result_paths": [
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/person1/person1_shared_scaled_a1.npz",
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/person2/person2_shared_scaled_a1.npz"
+  ],
+  "robot": "g1_29dof_rubber_hands",
+  "robot_reference": "Stage1 nominal plus existing A1 wrist-only postprocess",
+  "scale_choice": "arithmetic_mean_balancing_two_person_scales",
+  "scene_xml": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/assets/g1_29dof_w_chair021.xml",
+  "shared_object_pose": "arithmetic mean of the two person-specific nominal translations; common rotation",
+  "shared_object_scale": 0.744193062691336,
+  "solver": "shared_scaled_Stage1_baseline_plus_existing_A1_wrist-only_postprocess",
+  "solver_mode": "wrist-only",
+  "source_human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+  ],
+  "source_manifest": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/manifest.json",
+  "source_manifest_format": "explicit_method_two_stage",
+  "source_manifest_sha256": "64098c707930fc6ece556964542caac0d2dbe3ebf3d271f83274a361db6e7e4f",
+  "source_object_urdf": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/assets/chair021.urdf",
+  "source_pair": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/core4d_pair_reference.npz",
+  "source_person_nominal": [
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/person1/person1_nominal_scaled.npz",
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/person2/person2_nominal_scaled.npz"
+  ],
+  "training_ready": false,
+  "wrist_mode": "A1_demonstrated_palm_orientation_wrist_only"
+}

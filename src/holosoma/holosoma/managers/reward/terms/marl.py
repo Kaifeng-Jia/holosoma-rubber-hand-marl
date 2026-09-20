@@ -167,6 +167,84 @@ def object_global_ref_orientation_error_exp(env: Any, sigma: float) -> torch.Ten
     return torch.exp(-error / sigma**2)
 
 
+class ObjectHeightErrorPenalty(RewardTermBase):
+    """Unbounded squared world-height error for the shared object's origin.
+
+    Return one positive raw cost per environment, (z_actual - z_ref)^2 / scale^2.
+    RewardManager supplies the negative weight and control dt exactly once.
+    Both positions use the existing command's world-frame actor origins, not
+    the object's COM or a contact-conditioned height. Command lookup is lazy
+    because the reward manager is constructed before the command manager.
+    """
+
+    def __init__(self, cfg: RewardTermCfg, env: Any):
+        super().__init__(cfg, env)
+        scale_m = cfg.params.get("scale_m", 0.05)
+        if type(scale_m) not in (int, float) or not math.isfinite(scale_m) or scale_m <= 0.0:
+            raise ValueError("object_height_penalty_scale must be positive and finite")
+        self.scale_m = float(scale_m)
+        self.last_error_z_m = torch.zeros(env.num_envs, device=env.device)
+        self.last_raw_penalty = torch.zeros(env.num_envs, device=env.device)
+        self._signed_error_sum = torch.zeros((), device=env.device)
+        self._absolute_error_sum = torch.zeros((), device=env.device)
+        self._squared_error_sum = torch.zeros((), device=env.device)
+        self._penalty_sum = torch.zeros((), device=env.device)
+        self._penalty_max = torch.zeros((), device=env.device)
+        self._sample_count = 0
+
+    @torch.no_grad()
+    def __call__(self, env: Any, **kwargs: Any) -> torch.Tensor:
+        command = _command(env)
+        error_z = command.simulator_object_pos_w[..., 2] - command.object_pos_w[..., 2]
+        if error_z.shape != (env.num_envs,):
+            raise ValueError("Object height penalty requires one shared object per environment")
+        penalty = torch.square(error_z / self.scale_m)
+        self.last_error_z_m.copy_(error_z)
+        self.last_raw_penalty.copy_(penalty)
+        self._signed_error_sum.add_(error_z.sum())
+        self._absolute_error_sum.add_(error_z.abs().sum())
+        self._squared_error_sum.add_(error_z.square().sum())
+        self._penalty_sum.add_(penalty.sum())
+        self._penalty_max.copy_(torch.maximum(self._penalty_max, penalty.max()))
+        self._sample_count += env.num_envs
+        return penalty
+
+    def get_iteration_diagnostics(self, reset: bool = True) -> dict[str, torch.Tensor]:
+        """Read all reward-evaluated samples, independently of episode resets.
+
+        Signed error is actual minus reference; RMSE is sqrt(mean(error^2)),
+        not mean(abs(error)). Scalars stay on device until the logger reads
+        them. Reading diagnostics never recomputes or advances reward state.
+        """
+        if self._sample_count == 0:
+            return {}
+        result = {
+            "Height/error_z_signed_mean_m": self._signed_error_sum / self._sample_count,
+            "Height/error_z_abs_mean_m": self._absolute_error_sum / self._sample_count,
+            "Height/error_z_rmse_m": (self._squared_error_sum / self._sample_count).sqrt(),
+            "Height/raw_penalty_mean": self._penalty_sum / self._sample_count,
+            "Height/raw_penalty_max": self._penalty_max.clone(),
+            "Height/sample_count": self._penalty_sum.new_tensor(self._sample_count),
+        }
+        if reset:
+            self._signed_error_sum.zero_()
+            self._absolute_error_sum.zero_()
+            self._squared_error_sum.zero_()
+            self._penalty_sum.zero_()
+            self._penalty_max.zero_()
+            self._sample_count = 0
+        return result
+
+    def reset(self, env_ids: torch.Tensor | None = None) -> None:
+        # Episode resets clear snapshots, never the iteration-wide statistics.
+        if env_ids is None:
+            self.last_error_z_m.zero_()
+            self.last_raw_penalty.zero_()
+        else:
+            self.last_error_z_m[env_ids] = 0.0
+            self.last_raw_penalty[env_ids] = 0.0
+
+
 class UndesiredContacts(RewardTermBase):
     """Average the original per-robot incidental-contact penalty over agents."""
 

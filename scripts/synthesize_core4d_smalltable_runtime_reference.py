@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
-"""Build the accepted CORE4D small-table pair's 50 Hz WBT runtime artifact."""
+"""Build a reviewed CORE4D pair's runtime artifact; preserve the small-table defaults."""
 
 from __future__ import annotations
 
 import argparse
 import json
+import re
 import sys
 from pathlib import Path
 
@@ -40,9 +41,21 @@ DEFAULT_OUTPUT = DEFAULT_DATA_DIR / "core4d_pair_runtime_fps50.npz"
 DEFAULT_OUTPUT_MANIFEST = DEFAULT_DATA_DIR / "core4d_pair_runtime_fps50.manifest.json"
 
 
+def _sha256_argument(value: str) -> str:
+    if re.fullmatch(r"[0-9a-f]{64}", value) is None:
+        raise argparse.ArgumentTypeError("must be a lowercase 64-character SHA256 digest")
+    return value
+
+
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--source", type=Path, default=DEFAULT_SOURCE)
+    parser.add_argument(
+        "--expected-source-sha256",
+        type=_sha256_argument,
+        default=ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256,
+        help="Reviewed compact reference hash; defaults to the accepted small-table source.",
+    )
     parser.add_argument(
         "--source-manifest",
         type=Path,
@@ -129,6 +142,12 @@ def main(argv: list[str] | None = None) -> int:
         if args.manifest is not None
         else _default_output_manifest(output)
     )
+    custom_reference = args.expected_source_sha256 != ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256
+    if custom_reference:
+        if source_manifest is None:
+            raise ValueError("A custom reference requires its source manifest")
+        if output.parent == DEFAULT_DATA_DIR.resolve() or output_manifest.parent == DEFAULT_DATA_DIR.resolve():
+            raise ValueError("A custom reference requires an output directory separate from the small-table assets")
 
     if source == output:
         raise ValueError("Runtime output must not overwrite the compact CORE4D source")
@@ -140,7 +159,7 @@ def main(argv: list[str] | None = None) -> int:
         source,
         output,
         target_fps=args.target_fps,
-        expected_source_sha256=ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256,
+        expected_source_sha256=args.expected_source_sha256,
         source_manifest_path=source_manifest,
     )
     provenance = dict(runtime.provenance)
@@ -157,12 +176,16 @@ def main(argv: list[str] | None = None) -> int:
             source_manifest_sha256=source_manifest_sha256,
         )
     report = {
-        "artifact_kind": "core4d_smalltable_pair_runtime_reference",
+        "artifact_kind": (
+            "core4d_pair_runtime_reference"
+            if custom_reference
+            else "core4d_smalltable_pair_runtime_reference"
+        ),
         "training_ready": training_promotion is not None,
         "schema_version": CORE4D_PAIR_RUNTIME_SCHEMA_VERSION,
         "source": _portable_path(source),
         "source_sha256": source_sha256,
-        "expected_source_sha256": ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256,
+        "expected_source_sha256": args.expected_source_sha256,
         "source_manifest": _portable_path(source_manifest) if source_manifest is not None else None,
         "source_manifest_sha256": source_manifest_sha256,
         "training_promotion": (

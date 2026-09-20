@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Export a shared small-table preview from a completed two-stage CORE4D run."""
+"""Export a shared scaled-object preview from a completed two-stage CORE4D run."""
 
 from __future__ import annotations
 
@@ -15,6 +15,7 @@ import numpy as np
 ROBOT_QPOS_WIDTH = 36
 OBJECT_QPOS_WIDTH = 7
 NOMINAL_QPOS_WIDTH = ROBOT_QPOS_WIDTH + OBJECT_QPOS_WIDTH
+LEGACY_TWO_STAGE_SOLVER = "existing_fixed_object_size_adaptation_two_independent_runs"
 
 
 def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
@@ -156,7 +157,14 @@ def export_small_table_pair(source_run_dir: Path, output_dir: Path) -> Path:
     if not source_manifest_path.is_file():
         raise FileNotFoundError(f"Source manifest does not exist: {source_manifest_path}")
     source_manifest = json.loads(source_manifest_path.read_text(encoding="utf-8"))
-    if source_manifest.get("method") != "two-stage":
+    # Early two-stage exports recorded only this explicit solver identifier.
+    # Never infer a two-stage run merely from the presence of nominal files,
+    # and never override a conflicting, explicit method in a newer manifest.
+    legacy_two_stage = (
+        "method" not in source_manifest
+        and source_manifest.get("solver") == LEGACY_TWO_STAGE_SOLVER
+    )
+    if source_manifest.get("method") != "two-stage" and not legacy_two_stage:
         raise ValueError("Small-table export requires a completed --method two-stage run")
 
     pair_path = source_run_dir / "core4d_pair_reference.npz"
@@ -219,6 +227,11 @@ def export_small_table_pair(source_run_dir: Path, output_dir: Path) -> Path:
         "source_pair": str(pair_path),
         "source_person_nominal": [str(path) for path in nominal_paths],
         "source_object_urdf": str(source_urdf),
+        "source_manifest": str(source_manifest_path),
+        "source_manifest_sha256": _sha256(source_manifest_path),
+        "source_manifest_format": (
+            "legacy_explicit_two_stage_solver" if legacy_two_stage else "explicit_method_two_stage"
+        ),
         "training_ready": False,
     }
 

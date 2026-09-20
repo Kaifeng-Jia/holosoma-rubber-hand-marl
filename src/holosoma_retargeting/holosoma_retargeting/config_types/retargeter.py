@@ -210,6 +210,29 @@ class PTWristDominantSurfaceConfig:
 
 
 @dataclass(frozen=True)
+class PTPalmCollisionConfig:
+    """Demonstrated palm orientation with collision-constrained arm refinement."""
+
+    enable: bool = False
+    """Opt-in final stage; does not change existing A.1 or Plan B."""
+
+    orientation_weight: float = 100.0
+    hand_position_weight: float = 1.0e4
+    arm_prior_weight: float = 1.0
+    correction_temporal_weight: float = 5.0
+    """Soft costs, not exact-pose requirements; positions are in metres."""
+
+    clearance: float = 0.0
+    """Minimum distance for movable-arm/object and ground pairs; zero allows touch."""
+
+    validation_tolerance: float = 1.0e-4
+    """Tolerance on final nonlinear distance, NOT an optimization slack."""
+
+    max_iterations: int = 60
+    """SQP iterations per frame, with the existing trust-region radius."""
+
+
+@dataclass(frozen=True)
 class ElasticConstraintConfig:
     """Optional exact-penalty relaxation for selected SQP constraints."""
 
@@ -286,6 +309,9 @@ class RetargeterConfig:
         default_factory=PTWristDominantSurfaceConfig
     )
     """Wrist-led demonstrated-palm refinement with a fixed support point."""
+
+    pt_palm_collision: PTPalmCollisionConfig = field(default_factory=PTPalmCollisionConfig)
+    """PT palm targets with hard arm/object non-penetration in the final stage."""
 
     elastic_constraints: ElasticConstraintConfig = field(default_factory=ElasticConstraintConfig)
     """Optional slack variables for otherwise infeasible object/foot constraints."""

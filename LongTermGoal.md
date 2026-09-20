@@ -1,5 +1,7 @@
 # Long-Term Goal
 
+> 历史方案（2026-07-27），保留溯源，不再作为当前执行指南。后续已取消的混合动作与目标驱动单人路线不因本文件而恢复。当前论文主线见 [story.md](story.md)，唯一执行路线见 [MULTI_AGENT_EMERGENCE_ROADMAP.md](MULTI_AGENT_EMERGENCE_ROADMAP.md)。状态标注于2026-09-19。
+
 ## Status
 
 - Confirmed: 2026-07-27

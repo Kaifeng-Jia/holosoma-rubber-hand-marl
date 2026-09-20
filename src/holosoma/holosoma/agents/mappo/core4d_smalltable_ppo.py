@@ -24,7 +24,13 @@ from holosoma.agents.mappo.core4d_smalltable_runner import (
 from holosoma.agents.mappo.initialization import Plan5ModelBundle
 from holosoma.agents.mappo.ppo import Plan5PPO
 from holosoma.config_types.algo import PPOConfig
-from holosoma.config_values.marl.g1.core4d_smalltable_reward import validate_object_z_error_weight
+from holosoma.config_values.marl.g1.core4d_bucket_contract import (
+    BUCKET_REWARD_VERSION, validate_bucket_reward_contract,
+)
+from holosoma.config_values.marl.g1.core4d_smalltable_reward import (
+    validate_object_height_penalty,
+    validate_object_z_error_weight,
+)
 
 
 CORE4D_SMALLTABLE_MAPPO_VERSION = "core4d_smalltable_shared_actor_mappo_158_v1"
@@ -54,6 +60,7 @@ CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION = (
 )
 CORE4D_SMALLTABLE_INTERACTION_CONTRACT_VERSION = "core4d_smalltable_interaction_mesh_v1"
 CORE4D_OBJECT_POSITION_TRACKING_CONTRACT_VERSION = "world_xyz_squared_error_weighting_v1"
+CORE4D_OBJECT_HEIGHT_PENALTY_CONTRACT_VERSION = "world_object_root_height_quadratic_penalty_v1"
 _INTERACTION_FIELDS = {
     "version",
     "reference_file_sha256",
@@ -241,17 +248,63 @@ def _checkpoint_object_z_error_weight(metadata: Mapping[str, Any]) -> float:
     return value
 
 
+def core4d_object_height_penalty_contract(
+    weight: float = 0.0, scale_m: float = 0.05,
+) -> dict[str, Any] | None:
+    """Bind the optional additive height objective without changing legacy metadata."""
+    weight, scale_m = validate_object_height_penalty(weight, scale_m)
+    if weight == 0.0:
+        return None
+    return {
+        "version": CORE4D_OBJECT_HEIGHT_PENALTY_CONTRACT_VERSION,
+        "frame": "world",
+        "position_source": "object_root",
+        "reward_term": "object_height_error_penalty",
+        "scale_m": scale_m,
+        "weight": weight,
+        "reward_weight": -weight,
+        "formula": "-weight * ((z - z_ref) / scale_m) ** 2",
+    }
+
+
+def _checkpoint_object_height_penalty(metadata: Mapping[str, Any]) -> tuple[float, float]:
+    if "object_height_penalty" not in metadata:
+        return 0.0, 0.05
+    contract = metadata["object_height_penalty"]
+    if not isinstance(contract, Mapping):
+        raise ValueError("CORE4D object_height_penalty must be a height penalty contract")
+    weight, scale_m = validate_object_height_penalty(contract.get("weight"), contract.get("scale_m"))
+    reward_weight = contract.get("reward_weight")
+    if type(reward_weight) not in (int, float) or not math.isfinite(reward_weight):
+        raise ValueError("CORE4D object_height_penalty reward_weight must be negative and finite")
+    expected = core4d_object_height_penalty_contract(weight, scale_m)
+    if expected is None or contract != expected:
+        raise ValueError("CORE4D object_height_penalty contract mismatch")
+    return weight, scale_m
+
+
 def expected_core4d_smalltable_checkpoint_metadata(
     *, interaction_contract: Mapping[str, Any] | None = None,
     experiment_contract: Mapping[str, Any] | None = None,
+    bucket_contract: Mapping[str, Any] | None = None,
     object_z_error_weight: float = 1.0,
+    object_height_penalty_weight: float = 0.0,
+    object_height_penalty_scale: float = 0.05,
 ) -> dict[str, Any]:
     """Preserve the baseline dictionary exactly unless a reviewed variant is supplied."""
+    if (experiment_contract is not None and experiment_contract.get("experiment_id") in ("bucket003", "smalltable5kg_A")
+            and bucket_contract is None):
+        raise ValueError("Bucket checkpoint requires an explicit A/B reward contract")
     if experiment_contract is not None and interaction_contract is not None:
         raise ValueError("CORE4D custom experiments do not support interaction_mesh")
     position_contract = core4d_object_position_tracking_contract(object_z_error_weight)
     if experiment_contract is not None and position_contract is not None:
         raise ValueError("Non-default object_z_error_weight is restricted to smalltable")
+    height_contract = core4d_object_height_penalty_contract(
+        object_height_penalty_weight, object_height_penalty_scale,
+    )
+    if experiment_contract is not None and height_contract is not None:
+        raise ValueError("Object height penalty is restricted to smalltable")
     metadata = {
         "version": CORE4D_SMALLTABLE_MAPPO_VERSION,
         "num_agents": CORE4D_SMALLTABLE_NUM_AGENTS,
@@ -278,6 +331,23 @@ def expected_core4d_smalltable_checkpoint_metadata(
         metadata["experiment_contract"] = contract
     if position_contract is not None:
         metadata["object_position_tracking"] = position_contract
+    if height_contract is not None:
+        # Keep the base reward version: this independently versioned additive
+        # contract composes with either baseline or interaction + world-z tracking.
+        metadata["object_height_penalty"] = height_contract
+    if bucket_contract is not None:
+        if (experiment_contract is None or experiment_contract.get("experiment_id") not in ("bucket003", "smalltable5kg_A")
+                or interaction_contract is not None or position_contract is not None or height_contract is not None):
+            raise ValueError("Bucket A/B reward requires bucket003 without legacy reward overrides")
+        bucket = validate_bucket_reward_contract(bucket_contract)
+        target = ("not_used_for_smalltable_A" if experiment_contract["experiment_id"] == "smalltable5kg_A"
+                  else "source_human_geometry_confidence_not_force_ground_truth")
+        if bucket["contact_target"] != target:
+            raise ValueError("Contact target contract differs from the selected experiment")
+        if bucket["runtime_reference_sha256"] != metadata["runtime_reference_sha256"]:
+            raise ValueError("Bucket reward reference differs from the experiment")
+        metadata["reward_contract"] = BUCKET_REWARD_VERSION
+        metadata["bucket_reward"] = bucket
     return metadata
 
 
@@ -298,12 +368,18 @@ def validate_core4d_smalltable_checkpoint(
         metadata.get("reward_contract") == CORE4D_SMALLTABLE_INTERACTION_REWARD_CONTRACT_VERSION
     ):
         interaction_contract = _validated_interaction_contract(metadata.get("interaction_mesh"))
+    height_weight, height_scale = (
+        _checkpoint_object_height_penalty(metadata) if isinstance(metadata, Mapping) else (0.0, 0.05)
+    )
     expected = expected_core4d_smalltable_checkpoint_metadata(
         interaction_contract=interaction_contract,
         experiment_contract=experiment_contract,
+        bucket_contract=metadata.get("bucket_reward") if isinstance(metadata, Mapping) else None,
         object_z_error_weight=(
             _checkpoint_object_z_error_weight(metadata) if isinstance(metadata, Mapping) else 1.0
         ),
+        object_height_penalty_weight=height_weight,
+        object_height_penalty_scale=height_scale,
     )
     if metadata != expected:
         raise ValueError(
@@ -344,13 +420,19 @@ class Core4DSmallTablePPO(Plan5PPO):
         device: str = "cpu",
         interaction_contract: Mapping[str, Any] | None = None,
         experiment_contract: Mapping[str, Any] | None = None,
+        bucket_contract: Mapping[str, Any] | None = None,
         object_z_error_weight: float = 1.0,
+        object_height_penalty_weight: float = 0.0,
+        object_height_penalty_scale: float = 0.05,
     ) -> None:
         # Freeze a value copy before constructing models/storage. Resume must match it.
         self._checkpoint_metadata = expected_core4d_smalltable_checkpoint_metadata(
             interaction_contract=interaction_contract,
             experiment_contract=experiment_contract,
+            bucket_contract=bucket_contract,
             object_z_error_weight=object_z_error_weight,
+            object_height_penalty_weight=object_height_penalty_weight,
+            object_height_penalty_scale=object_height_penalty_scale,
         )
         super().__init__(
             models,
@@ -379,12 +461,14 @@ class Core4DSmallTablePPO(Plan5PPO):
         if state["core4d_smalltable_mappo"] != self._checkpoint_metadata:
             raise ValueError(
                 "CORE4D small-table resume reward contract mismatch: "
-                "baseline, interaction variant, position tracking and reference hashes must match the learner"
+                "baseline, interaction variant, position tracking, height penalty and reference hashes "
+                "must match the learner"
             )
 
 
 __all__ = [
     "CORE4D_PAIR_MAPPO_VERSION",
+    "CORE4D_OBJECT_HEIGHT_PENALTY_CONTRACT_VERSION",
     "CORE4D_OBJECT_POSITION_TRACKING_CONTRACT_VERSION",
     "CORE4D_SMALLTABLE_MAPPO_VERSION",
     "CORE4D_SMALLTABLE_INTERACTION_CONTRACT_VERSION",
@@ -398,6 +482,7 @@ __all__ = [
     "CORE4D_SMALLTABLE_TRAINING_PROMOTION_SHA256",
     "Core4DSmallTablePPO",
     "build_core4d_interaction_contract",
+    "core4d_object_height_penalty_contract",
     "core4d_object_position_tracking_contract",
     "expected_core4d_smalltable_checkpoint_metadata",
     "validate_core4d_smalltable_checkpoint",

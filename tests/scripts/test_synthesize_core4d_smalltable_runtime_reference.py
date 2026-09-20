@@ -91,4 +91,64 @@ def test_cli_writes_manifest_with_hashes_and_non_loop_contract(
     assert report["output_sha256"] == "hash"
     assert report["training_ready"] is False
     assert report["training_promotion"] is None
+    assert report["artifact_kind"] == "core4d_smalltable_pair_runtime_reference"
+    assert report["expected_source_sha256"] == module.ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256
+
+
+def test_custom_source_keeps_existing_default_and_rejects_bad_hash() -> None:
+    module = _load_script()
+    assert module.parse_args([]).expected_source_sha256 == module.ACCEPTED_CORE4D_SMALLTABLE_COMPACT_SHA256
+    assert module.parse_args(["--expected-source-sha256", "a" * 64]).expected_source_sha256 == "a" * 64
+    with pytest.raises(SystemExit):
+        module.parse_args(["--expected-source-sha256", "unreviewed"])
+
+
+def test_custom_source_requires_manifest_and_isolated_output(tmp_path: Path) -> None:
+    module = _load_script()
+    arguments = ["--source", str(tmp_path / "source.npz"), "--expected-source-sha256", "a" * 64]
+    with pytest.raises(ValueError, match="requires its source manifest"):
+        module.main(arguments)
+    arguments.extend(["--source-manifest", str(tmp_path / "manifest.json")])
+    with pytest.raises(ValueError, match="separate from the small-table assets"):
+        module.main(arguments)
+
+
+def test_custom_source_passes_explicit_hash_and_stays_unpromoted(monkeypatch, tmp_path: Path, capsys) -> None:
+    module = _load_script()
+    source = tmp_path / "source.npz"
+    output = tmp_path / "new" / "runtime.npz"
+    source_manifest = tmp_path / "manifest.json"
+    source.write_bytes(b"source")
+    source_manifest.write_text("{}")
+    called = {}
+
+    def fake_build(actual_source, actual_output, **kwargs):
+        called.update(kwargs)
+        assert actual_source == source
+        actual_output.parent.mkdir()
+        actual_output.write_bytes(b"runtime")
+        return SimpleNamespace(
+            agent_joint_pos=SimpleNamespace(shape=(391, 2, 29)),
+            agent_body_pos_w=SimpleNamespace(shape=(391, 2, 51, 3)),
+            fps=50,
+            provenance={
+                "source_frames": 235, "source_fps": 30,
+                "source_duration_seconds": 7.8, "sampled_duration_seconds": 7.8,
+                "omitted_source_tail_seconds": 0.0, "uniform_runtime_timestep_seconds": 0.02,
+                "terminal_behavior": "stop_at_last_reference_frame_then_environment_reset",
+            },
+        )
+
+    monkeypatch.setattr(module, "build_core4d_pair_runtime_reference_file", fake_build)
+    monkeypatch.setattr(module, "sha256_file", lambda _path: "a" * 64)
+    assert module.main([
+        "--source", str(source), "--source-manifest", str(source_manifest),
+        "--expected-source-sha256", "a" * 64, "--output", str(output),
+    ]) == 0
+    assert called["expected_source_sha256"] == "a" * 64
+    assert called["source_manifest_path"] == source_manifest
+    report = json.loads(module._default_output_manifest(output).read_text())
+    assert report["artifact_kind"] == "core4d_pair_runtime_reference"
+    assert report["frames"] == 391
+    assert report["training_ready"] is False
     assert '"episode_loop": false' in capsys.readouterr().out

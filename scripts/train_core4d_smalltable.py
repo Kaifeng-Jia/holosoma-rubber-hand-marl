@@ -22,7 +22,7 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
-PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021", "bucket003", "smalltable5kg_A"), default="smalltable")
 PARSER.add_argument("--iterations", type=int, default=12000)
 PARSER.add_argument("--num-envs", type=int, default=2048)
 PARSER.add_argument("--steps-per-env", type=int, default=24)
@@ -30,13 +30,34 @@ PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--save-interval", type=int, default=2000)
 PARSER.add_argument("--output-dir", type=Path, default=None)
 PARSER.add_argument("--resume", type=Path, default=None)
-PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh"), default="baseline")
+BUCKET_REWARD_CHOICES = ("bucket_A", "bucket_B", "bucket_A_no_rel", "bucket_A_no_height", "bucket_A_no_rel_no_height")
+PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh", *BUCKET_REWARD_CHOICES), default="baseline")
+PARSER.add_argument("--bucket-reference", type=Path, default=None)
 PARSER.add_argument("--interaction-reference", type=Path, default=None)
 PARSER.add_argument(
     "--object-z-error-weight", type=float, default=1.0,
     help="Coefficient of squared world-z position error; x/y stay 1, smalltable only if non-default",
 )
+PARSER.add_argument("--object-height-penalty-weight", type=float, default=0.0,
+                    help="Nonnegative independent height penalty strength; zero preserves existing runs")
+PARSER.add_argument("--object-height-penalty-scale", type=float, default=0.05,
+                    help="World-z error in metres corresponding to unit squared cost")
 ARGS = PARSER.parse_args()
+IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
+if ARGS.experiment == "smalltable5kg_A" and ARGS.reward_variant not in ("bucket_A", "bucket_A_no_rel_no_height"):
+    PARSER.error("smalltable5kg_A requires bucket_A or bucket_A_no_rel_no_height")
+if IS_BUCKET != (ARGS.experiment in ("bucket003", "smalltable5kg_A")):
+    PARSER.error(f"bucket003 requires an explicit reward variant from {BUCKET_REWARD_CHOICES}")
+if ARGS.bucket_reference is not None and not IS_BUCKET:
+    PARSER.error("--bucket-reference is only for bucket reward variants")
+if IS_BUCKET and ARGS.interaction_reference is not None:
+    PARSER.error("Bucket vectors use --bucket-reference, not the legacy Laplacian artifact")
+if not math.isfinite(ARGS.object_height_penalty_weight) or ARGS.object_height_penalty_weight < 0.0:
+    PARSER.error("--object-height-penalty-weight must be nonnegative and finite")
+if not math.isfinite(ARGS.object_height_penalty_scale) or ARGS.object_height_penalty_scale <= 0.0:
+    PARSER.error("--object-height-penalty-scale must be positive and finite")
+if ARGS.experiment != "smalltable" and ARGS.object_height_penalty_weight != 0.0:
+    PARSER.error("Independent height penalty is restricted to --experiment smalltable")
 if not math.isfinite(ARGS.object_z_error_weight) or ARGS.object_z_error_weight <= 0.0:
     PARSER.error("--object-z-error-weight must be positive and finite")
 if ARGS.experiment != "smalltable" and ARGS.object_z_error_weight != 1.0:
@@ -57,6 +78,7 @@ from holosoma.agents.mappo.core4d_smalltable_initialization import (  # noqa: E4
 from holosoma.agents.mappo.core4d_smalltable_ppo import (  # noqa: E402
     Core4DSmallTablePPO,
     build_core4d_interaction_contract,
+    core4d_object_height_penalty_contract,
     core4d_object_position_tracking_contract,
 )
 from holosoma.config_values.marl.g1.core4d_pair_experiments import (  # noqa: E402
@@ -68,8 +90,12 @@ from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noq
     with_pair_experiment,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
+from holosoma.config_values.marl.g1.core4d_bucket_contract import (  # noqa: E402
+    BUCKET_DATA_DIR, build_bucket_reward_contract,
+)
 from holosoma.config_values.marl.g1.core4d_smalltable_reward import (  # noqa: E402
     with_object_z_error_weight,
+    with_object_height_penalty,
 )
 
 
@@ -79,9 +105,13 @@ if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interactio
 if not EXPERIMENT.training_ready:
     PARSER.error(f"--experiment {ARGS.experiment} is not training_ready; complete asset/physics preparation first")
 if ARGS.output_dir is None:
-    variant_suffix = "" if ARGS.reward_variant == "baseline" else "_interaction_mesh"
+    variant_suffix = "" if ARGS.reward_variant == "baseline" else f"_{ARGS.reward_variant}"
     if ARGS.object_z_error_weight != 1.0:
         variant_suffix += f"_zweight{ARGS.object_z_error_weight:g}"
+    if ARGS.object_height_penalty_weight != 0.0:
+        variant_suffix += (
+            f"_height{ARGS.object_height_penalty_weight:g}_scale{ARGS.object_height_penalty_scale:g}"
+        )
     ARGS.output_dir = (
         REPO_ROOT
         / "logs" / EXPERIMENT.project
@@ -99,10 +129,28 @@ BASE_CONFIG = (
     if INTERACTION_REFERENCE is None
     else with_interaction_mesh_reward(PAIR_CONFIG, str(INTERACTION_REFERENCE))
 )
+BUCKET_REFERENCE = None
+BUCKET_CONTRACT = None
+if IS_BUCKET:
+    from holosoma.config_values.marl.g1.core4d_bucket_reward import with_bucket_reward
+    BUCKET_REFERENCE = (
+        ARGS.bucket_reference.expanduser().resolve() if ARGS.bucket_reference is not None
+        else REPO_ROOT / "src/holosoma" / Path(EXPERIMENT.training_promotion_file).parent / "interaction_vectors_v1.npz"
+    )
+    bucket_variant = ARGS.reward_variant.removeprefix("bucket_")
+    BUCKET_CONTRACT = build_bucket_reward_contract(BUCKET_REFERENCE, bucket_variant, experiment=EXPERIMENT)
+    BASE_CONFIG = with_bucket_reward(BASE_CONFIG, str(BUCKET_REFERENCE), bucket_variant)
 if ARGS.object_z_error_weight != 1.0:
     BASE_CONFIG = replace(
         BASE_CONFIG,
         reward=with_object_z_error_weight(BASE_CONFIG.reward, ARGS.object_z_error_weight),
+    )
+if ARGS.object_height_penalty_weight != 0.0:
+    BASE_CONFIG = replace(
+        BASE_CONFIG,
+        reward=with_object_height_penalty(
+            BASE_CONFIG.reward, ARGS.object_height_penalty_weight, ARGS.object_height_penalty_scale,
+        ),
     )
 CONFIG = replace(
     BASE_CONFIG,
@@ -231,6 +279,64 @@ def _simulation_rates(env) -> tuple[float, float]:
     return physics_hz, control_hz
 
 
+def _collect_with_raw_reward_diagnostics(learner, env, observations):
+    """Observe environment rewards before PPO's timeout bootstrap, without altering them.
+
+    Only the opt-in height experiment uses this wrapper. Restore the original step
+    even on failure; keep shared PPO/GAE and simulation/reset order unchanged.
+    """
+    total = torch.zeros((), device=env.device)
+    minimum = torch.full((), float("inf"), device=env.device)
+    maximum = torch.full((), -float("inf"), device=env.device)
+    reset_lengths = torch.zeros((), device=env.device)
+    failure_lengths = torch.zeros((), device=env.device)
+    reset_count = torch.zeros((), device=env.device)
+    failure_count = torch.zeros((), device=env.device)
+    sample_count = 0
+    original_step = env.step
+
+    def observed_step(actions):
+        nonlocal total, minimum, maximum, sample_count
+        nonlocal reset_lengths, failure_lengths, reset_count, failure_count
+        lengths = env.episode_length_buf.clone() + 1
+        result = original_step(actions)
+        raw = result[1].detach()
+        done = result[2].reshape(-1).bool()
+        timeout = result[3].get("time_outs", torch.zeros_like(done)).reshape(-1).bool()
+        failure = done & ~timeout
+        total += raw.sum()
+        minimum = torch.minimum(minimum, raw.min())
+        maximum = torch.maximum(maximum, raw.max())
+        sample_count += raw.numel()
+        reset_lengths += torch.where(done, lengths, 0).sum()
+        failure_lengths += torch.where(failure, lengths, 0).sum()
+        reset_count += done.sum()
+        failure_count += failure.sum()
+        return result
+
+    env.step = observed_step
+    try:
+        next_observations = learner.collect_rollout(env, observations)
+    finally:
+        env.step = original_step
+    if sample_count == 0:
+        raise RuntimeError("No raw rewards were observed during collection")
+    stored_rewards = learner.storage.team("rewards")
+    if stored_rewards.numel() != sample_count:
+        raise RuntimeError("Raw environment reward and PPO storage sample counts differ")
+    return next_observations, {
+        "Reward/env_raw_mean": total / sample_count,
+        "Reward/env_raw_min": minimum,
+        "Reward/env_raw_max": maximum,
+        "Reward/timeout_bootstrap_mean": (stored_rewards.sum() - total) / sample_count,
+        "Reward/raw_sample_count": total.new_tensor(sample_count),
+        "Episode/reset_count": reset_count,
+        "Episode/failure_count": failure_count,
+        "Episode/reset_length_mean_steps": reset_lengths / reset_count.clamp(min=1),
+        "Episode/failure_length_mean_steps": failure_lengths / failure_count.clamp(min=1),
+    }
+
+
 def main() -> int:
     env = None
     output_dir = ARGS.output_dir.expanduser().resolve()
@@ -252,13 +358,14 @@ def main() -> int:
             "training-asset promotion",
         )
         training_robot_urdf_sha256 = None
-        if INTERACTION_CONTRACT is not None:
+        geometry_contract = INTERACTION_CONTRACT or BUCKET_CONTRACT
+        if geometry_contract is not None:
             asset_root = CONFIG.robot.asset.asset_root
             if asset_root.startswith("@holosoma/"):
                 asset_root = asset_root.replace("@holosoma", get_holosoma_root())
             robot_path = (Path(asset_root) / CONFIG.robot.asset.urdf_file).resolve()
             training_robot_urdf_sha256 = _require_sha256(
-                robot_path, INTERACTION_CONTRACT["training_robot_urdf_sha256"], "interaction robot URDF"
+                robot_path, geometry_contract["training_robot_urdf_sha256"], "interaction robot URDF"
             )
         if output_dir.exists() and any(output_dir.iterdir()):
             raise FileExistsError(
@@ -297,7 +404,10 @@ def main() -> int:
             device=env.device,
             interaction_contract=INTERACTION_CONTRACT,
             experiment_contract=EXPERIMENT.checkpoint_contract,
+            bucket_contract=BUCKET_CONTRACT,
             object_z_error_weight=ARGS.object_z_error_weight,
+            object_height_penalty_weight=ARGS.object_height_penalty_weight,
+            object_height_penalty_scale=ARGS.object_height_penalty_scale,
         )
         interaction_term = (
             env.reward_manager.get_term("interaction_mesh")
@@ -305,6 +415,13 @@ def main() -> int:
         )
         if (interaction_term is not None) != (INTERACTION_CONTRACT is not None):
             raise RuntimeError("Interaction reward and checkpoint contract disagree")
+        bucket_term = env.reward_manager.get_term("bucket_interaction") if IS_BUCKET else None
+        height_term = (
+            env.reward_manager.get_term("object_height_error_penalty")
+            if "object_height_error_penalty" in env.reward_manager.active_terms else None
+        )
+        if (height_term is not None) != (ARGS.object_height_penalty_weight > 0):
+            raise RuntimeError("Height penalty and checkpoint contract disagree")
 
         start_iteration = 0
         resume_checkpoint_sha256 = None
@@ -363,6 +480,8 @@ def main() -> int:
             ),
             "interaction_reference": None if INTERACTION_REFERENCE is None else str(INTERACTION_REFERENCE),
             "interaction_contract": INTERACTION_CONTRACT,
+            "bucket_reference": None if BUCKET_REFERENCE is None else str(BUCKET_REFERENCE),
+            "bucket_reward_contract": BUCKET_CONTRACT,
             "training_robot_urdf_sha256": training_robot_urdf_sha256,
             "termination_terms": list(env.termination_manager.active_terms),
             "gamma": ppo_config.gamma,
@@ -372,6 +491,18 @@ def main() -> int:
             "actor_learning_rate": learner.actor_learning_rate,
             "critic_learning_rate": learner.critic_learning_rate,
         }
+        if height_term is not None:
+            run_config.update(
+                object_height_penalty_weight=ARGS.object_height_penalty_weight,
+                object_height_penalty_scale=ARGS.object_height_penalty_scale,
+                object_height_penalty_contract=core4d_object_height_penalty_contract(
+                    ARGS.object_height_penalty_weight, ARGS.object_height_penalty_scale,
+                ),
+                reward_log_note=(
+                    "reward_mean/min/max include PPO timeout value bootstrap; "
+                    "Reward/env_raw_* exclude it; Height/scaled_penalty_mean includes weight and dt once"
+                ),
+            )
         _write_json(output_dir / "run_config.json", run_config)
         _save_checkpoint_atomic(
             output_dir / f"model_{start_iteration:05d}.pt",
@@ -381,10 +512,20 @@ def main() -> int:
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:
             interaction_term.get_iteration_diagnostics(reset=True)
+        if height_term is not None:
+            height_term.get_iteration_diagnostics(reset=True)
+        if bucket_term is not None:
+            bucket_term.get_iteration_diagnostics(reset=True)
         final_iteration = start_iteration + ARGS.iterations
         for iteration in range(start_iteration + 1, final_iteration + 1):
             started = time.perf_counter()
-            observations = learner.collect_rollout(env, observations)
+            raw_reward_diagnostics = {}
+            if height_term is not None or bucket_term is not None:
+                observations, raw_reward_diagnostics = _collect_with_raw_reward_diagnostics(
+                    learner, env, observations,
+                )
+            else:
+                observations = learner.collect_rollout(env, observations)
             rewards = learner.storage.team("rewards").clone()
             dones = learner.storage.team("dones").clone()
             timeouts = learner.storage.team("timeouts").clone()
@@ -424,6 +565,18 @@ def main() -> int:
                     name: float(value.item())
                     for name, value in interaction_term.get_iteration_diagnostics(reset=True).items()
                 })
+            if height_term is not None:
+                height_diagnostics = height_term.get_iteration_diagnostics(reset=True)
+                height_diagnostics["Height/scaled_penalty_mean"] = (
+                    -ARGS.object_height_penalty_weight * float(env.dt)
+                    * height_diagnostics["Height/raw_penalty_mean"]
+                )
+                record.update({name: float(value.item()) for name, value in height_diagnostics.items()})
+                record.update({name: float(value.item()) for name, value in raw_reward_diagnostics.items()})
+            if bucket_term is not None:
+                record.update({name: float(value.item()) for name, value in
+                               bucket_term.get_iteration_diagnostics(reset=True).items()})
+                record.update({name: float(value.item()) for name, value in raw_reward_diagnostics.items()})
             numeric = [value for value in record.values() if isinstance(value, (int, float))]
             if not all(torch.isfinite(torch.tensor(value)) for value in numeric):
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")

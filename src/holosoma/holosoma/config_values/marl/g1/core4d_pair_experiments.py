@@ -72,6 +72,43 @@ class Core4DPairExperiment:
 
 
 def get_core4d_pair_experiment(name: str = "smalltable") -> Core4DPairExperiment:
+    if name == "smalltable5kg_A":
+        data_dir = f"{MOTION_ROOT}/core4d_smalltable5kg_A"
+        promotion_file = f"{data_dir}/training_asset_manifest.json"
+        promotion_path = PACKAGE_ROOT / promotion_file
+        promotion = json.loads(promotion_path.read_text())
+        old = get_core4d_pair_experiment("smalltable")
+        runtime_file = f"{data_dir}/core4d_pair_runtime_fps50.npz"
+        object_file = f"{data_dir}/desk001_5kg_training.urdf"
+        expected = {
+            "experiment_id": name, "source_pair_sha256": old.source_pair_sha256,
+            "runtime_reference_sha256": old.runtime_reference_sha256,
+            "training_object_urdf_sha256": _sha256(PACKAGE_ROOT / object_file),
+            "interaction_artifact_sha256": _sha256(PACKAGE_ROOT / data_dir / "interaction_vectors_v1.npz"),
+            "training_robot_urdf_sha256": _sha256(PACKAGE_ROOT / "holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf"),
+            "object_mass_kg": 5.0, "inertia_scale_from_20kg": .25,
+            "object_material_static_dynamic_restitution": [.5, .5, 0.],
+            "object_collider_type": "convex_hull", "reference_frames": 687, "reference_fps": 50,
+            "contact_target": "not_used_for_smalltable_A", "allowed_reward_variant": "A",
+        }
+        if any(promotion.get(k) != v for k, v in expected.items()):
+            raise ValueError("5kg table manifest differs from selected reference/physics/reward")
+        if _sha256(PACKAGE_ROOT / runtime_file) != old.runtime_reference_sha256:
+            raise ValueError("5kg table must preserve the original runtime reference exactly")
+        if type(promotion.get("training_ready")) is not bool:
+            raise ValueError("5kg table requires explicit training_ready")
+        return Core4DPairExperiment(
+            experiment_id=name, object_name="desk001", project="Core4DSmallTableA",
+            scenario="core4d_smalltable5kg_bucket_A_transfer",
+            source_pair_sha256=old.source_pair_sha256,
+            runtime_reference_file=runtime_file, runtime_reference_sha256=old.runtime_reference_sha256,
+            object_urdf_file=object_file, object_urdf_sha256=expected["training_object_urdf_sha256"],
+            training_promotion_file=promotion_file, training_promotion_sha256=_sha256(promotion_path),
+            reference_frames=687, reference_fps=50, object_mass_kg=5.0,
+            material_static_dynamic_restitution=(.5, .5, 0.), object_collider_type="convex_hull",
+            physics_hz=200, control_hz=50, allow_interaction_mesh=False,
+            training_ready=promotion["training_ready"],
+        )
     if name == "smalltable":
         from holosoma.agents.mappo.core4d_smalltable_ppo import (
             CORE4D_SMALLTABLE_OBJECT_URDF_SHA256,
@@ -93,6 +130,43 @@ def get_core4d_pair_experiment(name: str = "smalltable") -> Core4DPairExperiment
             material_static_dynamic_restitution=(0.5, 0.5, 0.0),
             object_collider_type="convex_hull", physics_hz=200, control_hz=50,
             allow_interaction_mesh=True, training_ready=True,
+        )
+    if name == "bucket003":
+        from holosoma.config_values.marl.g1.core4d_bucket_contract import (
+            BUCKET_DATA_DIR, BUCKET_SOURCE_SHA256,
+        )
+        promotion_file = f"{BUCKET_DATA_DIR}/training_asset_manifest.json"
+        promotion_path = PACKAGE_ROOT / promotion_file
+        promotion = json.loads(promotion_path.read_text(encoding="utf-8"))
+        object_file = f"{BUCKET_DATA_DIR}/bucket003_training.urdf"
+        runtime_file = f"{BUCKET_DATA_DIR}/core4d_pair_runtime_fps50.npz"
+        expected = {
+            "source_pair_sha256": BUCKET_SOURCE_SHA256,
+            "runtime_reference_sha256": _sha256(PACKAGE_ROOT / runtime_file),
+            "training_object_urdf_sha256": _sha256(PACKAGE_ROOT / object_file),
+            "object_mesh_sha256": _sha256(PACKAGE_ROOT / BUCKET_DATA_DIR / "bucket003_m.obj"),
+            "object_mass_kg": 1.0,
+            "object_material_static_dynamic_restitution": [0.5, 0.5, 0.0],
+            "object_collider_type": "convex_decomposition",
+        }
+        if any(promotion.get(key) != value for key, value in expected.items()):
+            raise ValueError("Bucket asset manifest differs from the selected reference/physics")
+        if type(promotion.get("training_ready")) is not bool:
+            raise ValueError("Bucket manifest requires an explicit training_ready boolean")
+        return Core4DPairExperiment(
+            experiment_id=name, object_name="bucket003", project="Core4DBucket",
+            scenario="core4d_paired_bucket003_handover_reference_tracking",
+            source_pair_sha256=BUCKET_SOURCE_SHA256,
+            runtime_reference_file=runtime_file,
+            runtime_reference_sha256=expected["runtime_reference_sha256"],
+            object_urdf_file=object_file,
+            object_urdf_sha256=expected["training_object_urdf_sha256"],
+            training_promotion_file=promotion_file,
+            training_promotion_sha256=_sha256(promotion_path),
+            reference_frames=497, reference_fps=50, object_mass_kg=1.0,
+            material_static_dynamic_restitution=(0.5, 0.5, 0.0),
+            object_collider_type="convex_decomposition", physics_hz=200, control_hz=50,
+            allow_interaction_mesh=False, training_ready=promotion["training_ready"],
         )
     if name != "chair021":
         raise ValueError(f"Unknown CORE4D pair experiment: {name!r}")

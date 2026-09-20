@@ -103,6 +103,37 @@ def with_object_z_error_weight(base_reward: RewardManagerCfg, value: float) -> R
     return reward
 
 
+def validate_object_height_penalty(weight: float, scale_m: float) -> tuple[float, float]:
+    """Validate the positive penalty coefficient and metric normalization."""
+    if type(weight) not in (int, float) or not math.isfinite(weight) or weight < 0.0:
+        raise ValueError("object_height_penalty_weight must be nonnegative and finite")
+    if type(scale_m) not in (int, float) or not math.isfinite(scale_m) or scale_m <= 0.0:
+        raise ValueError("object_height_penalty_scale must be positive and finite")
+    return float(weight), float(scale_m)
+
+
+def with_object_height_penalty(
+    base_reward: RewardManagerCfg, weight: float = 0.0, scale_m: float = 0.05,
+) -> RewardManagerCfg:
+    """Deep-copy a preset and optionally add -weight * (height_error/scale)^2.
+
+    ``weight`` is the nonnegative lambda, not the signed manager weight. Zero
+    leaves the term absent, preserving all existing preset reward behavior.
+    """
+    weight, scale_m = validate_object_height_penalty(weight, scale_m)
+    name = "object_height_error_penalty"
+    if name in base_reward.terms:
+        raise ValueError("The object height penalty is already enabled")
+    reward = copy.deepcopy(base_reward)
+    if weight != 0.0:
+        reward.terms[name] = RewardTermCfg(
+            func=f"{_TERMS}:ObjectHeightErrorPenalty",
+            params={"scale_m": scale_m},
+            weight=-weight,
+        )
+    return reward
+
+
 def with_interaction_reward_term(base_reward: RewardManagerCfg, reference_file: str) -> RewardManagerCfg:
     """Copy a reward preset without mutating any of its existing terms."""
     if not str(reference_file).strip():
@@ -129,4 +160,6 @@ __all__ = [
     "with_interaction_reward_term",
     "validate_object_z_error_weight",
     "with_object_z_error_weight",
+    "validate_object_height_penalty",
+    "with_object_height_penalty",
 ]

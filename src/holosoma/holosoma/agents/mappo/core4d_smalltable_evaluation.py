@@ -33,7 +33,8 @@ def core4d_smalltable_evaluation_reward_metadata(
 
     Evaluation runs the same Actor, physics, observations and termination regardless
     of the training reward. It deliberately does not instantiate a training-only graph
-    reward or need its precomputed asset merely to replay a checkpoint.
+    reward or need its precomputed asset merely to replay a checkpoint. Optional
+    training-only height penalties are likewise excluded from evaluation scores.
     """
     validate_core4d_smalltable_checkpoint(state, experiment_contract=experiment_contract)
     training_contract = state["core4d_smalltable_mappo"]["reward_contract"]
@@ -66,12 +67,35 @@ def core4d_smalltable_evaluation_reward_metadata(
                 "reported separately; shared Actor-only inference, physics and termination are unchanged"
             ),
         )
+    height_contract = state["core4d_smalltable_mappo"].get("object_height_penalty")
+    if height_contract is not None:
+        metadata.update(
+            object_height_penalty_training_contract=copy.deepcopy(height_contract),
+            evaluation_object_height_penalty_weight=0.0,
+            evaluation_reward_matches_training=False,
+            evaluation_reward_note=(
+                metadata["evaluation_reward_note"]
+                + "; training includes the separate world object-root height penalty "
+                "object_height_error_penalty, which evaluation reward_sum excludes"
+            ),
+        )
     if experiment_contract is not None:
         contract = copy.deepcopy(state["core4d_smalltable_mappo"]["experiment_contract"])
         metadata.update(
             experiment_id=contract["experiment_id"],
             object_name=contract["object_name"],
             experiment_contract=contract,
+        )
+    bucket_contract = state["core4d_smalltable_mappo"].get("bucket_reward")
+    if bucket_contract is not None:
+        metadata.update(
+            training_reward_variant=f"bucket_{bucket_contract['variant']}",
+            bucket_training_contract=copy.deepcopy(bucket_contract),
+            evaluation_reward_matches_training=False,
+            evaluation_reward_note=(
+                "reward_sum uses the common original tracking score, excluding bucket vector, "
+                "independent height and contact gate; A/B share actor-only evaluation physics"
+            ),
         )
     return metadata
 
@@ -138,6 +162,20 @@ def save_core4d_smalltable_viser(
         if values.shape != expected or not np.isfinite(values).all():
             raise ValueError(f"{name} must be finite with shape {expected}, got {values.shape}")
         payload[name] = values
+    # Optional physical diagnostics do not alter the five-channel ViSER contract.
+    for name, trailing in {
+        "hand_object_normal_force_w": (2, 2, 3),
+        "contact_valid_after_physics": (),
+        "reference_frame": (),
+        "episode_step": (),
+        "object_height_error_m": (),
+        "object_position_error_m": (),
+    }.items():
+        if name in channels:
+            values = np.asarray(channels[name])
+            if values.shape != (frame_count, *trailing) or not np.isfinite(values).all():
+                raise ValueError(f"Invalid optional evaluation diagnostic: {name}")
+            payload[name] = values
     payload["_metadata_json"] = np.asarray(json.dumps(dict(metadata), sort_keys=True))
     output = Path(path).expanduser().resolve()
     output.parent.mkdir(parents=True, exist_ok=True)

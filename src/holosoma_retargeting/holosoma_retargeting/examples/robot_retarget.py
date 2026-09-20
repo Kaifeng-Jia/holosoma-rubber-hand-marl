@@ -177,15 +177,23 @@ def validate_config(cfg: RetargetingConfig) -> None:
         raise ValueError("A.1 PT wrist orientation requires fixed object size adaptation")
     if cfg.retargeter.pt_wrist_orientation.enable and cfg.robot != "g1":
         raise ValueError("A.1 PT wrist orientation currently supports the G1 rubber hands only")
+    if cfg.retargeter.pt_palm_collision.enable:
+        if not cfg.fixed_object_size_adaptation or cfg.robot != "g1":
+            raise ValueError("PT palm collision refinement requires fixed-object G1 retargeting")
+        if not cfg.retargeter.activate_obj_non_penetration or not cfg.retargeter.activate_joint_limits:
+            raise ValueError("PT palm collision refinement requires collisions and joint limits")
+        if cfg.retargeter.elastic_constraints.enable:
+            raise ValueError("PT palm collision refinement does not use elastic collision slack")
     if (
         int(cfg.retargeter.hand_orientation.enable)
         + int(cfg.retargeter.plan_b_palm_contact.enable)
         + int(cfg.retargeter.pt_wrist_orientation.enable)
+        + int(cfg.retargeter.pt_palm_collision.enable)
         > 1
     ):
         raise ValueError(
             "Legacy hand orientation, Plan B palm contact, and A.1 PT wrist "
-            "orientation are mutually exclusive"
+            "orientation and PT palm collision refinement are mutually exclusive"
         )
     # robot_only accepts any format in the registry (already validated above)
 
@@ -524,6 +532,7 @@ def build_retargeter_kwargs_from_config(
         "hand_orientation": retargeter_config.hand_orientation,
         "plan_b_palm_contact": retargeter_config.plan_b_palm_contact,
         "pt_wrist_orientation": retargeter_config.pt_wrist_orientation,
+        "pt_palm_collision": retargeter_config.pt_palm_collision,
         "elastic_constraints": retargeter_config.elastic_constraints,
         "step_size": retargeter_config.step_size,
         "visualize": retargeter_config.visualize,
@@ -723,9 +732,12 @@ def run_fixed_object_size_adaptation(
 
     nominal_result_path = save_dir / f"{task_name}_nominal_scaled.npz"
     refine_plan_b = cfg.retargeter.plan_b_palm_contact.enable
+    refine_pt_palm_collision = cfg.retargeter.pt_palm_collision.enable
     final_result_path = save_dir / (
         f"{task_name}_fixed_object_plan_b.npz"
         if refine_plan_b
+        else f"{task_name}_fixed_object_pt_palm_collision.npz"
+        if refine_pt_palm_collision
         else f"{task_name}_fixed_object.npz"
     )
     refine_hand_orientation = cfg.retargeter.hand_orientation.enable
@@ -734,6 +746,7 @@ def run_fixed_object_size_adaptation(
         refine_hand_orientation
         or refine_plan_b
         or refine_pt_wrist_orientation
+        or refine_pt_palm_collision
     )
     fixed_base_result_path = (
         save_dir / f"{task_name}_fixed_object_base.npz"
@@ -756,6 +769,7 @@ def run_fixed_object_size_adaptation(
         )
         nominal_config = replace(
             cfg.retargeter,
+            pt_palm_collision=replace(cfg.retargeter.pt_palm_collision, enable=False),
             visualize=False,
             debug=False,
             hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
@@ -793,6 +807,7 @@ def run_fixed_object_size_adaptation(
     if refine_orientation:
         fixed_base_config = replace(
             cfg.retargeter,
+            pt_palm_collision=replace(cfg.retargeter.pt_palm_collision, enable=False),
             visualize=False,
             debug=False,
             hand_orientation=replace(cfg.retargeter.hand_orientation, enable=False),
@@ -871,6 +886,32 @@ def run_fixed_object_size_adaptation(
         logger.info(
             "Three-stage retargeting complete. Base: %s; refined: %s",
             fixed_base_result_path,
+            final_result_path,
+        )
+    elif refine_pt_palm_collision:
+        if pt_wrist_palm_orientations is None:
+            raise RuntimeError("PT palm collision refinement requires demonstrated palm targets")
+        logger.info("Stage 3/3: refining demonstrated palm orientations with hard arm collisions")
+        q_final, diagnostics = retargeter.apply_pt_palm_collision_postprocess(
+            q_fixed_base, pt_wrist_palm_orientations,
+        )
+        with np.load(fixed_base_result_path, allow_pickle=False) as base_result:
+            np.savez(
+                final_result_path,
+                qpos=q_final,
+                human_joints=base_result["human_joints"],
+                fps=base_result["fps"],
+                cost=base_result["cost"],
+                cost_is_inherited_from_stage2=True,
+            )
+        np.savez(final_result_path.with_suffix(".diagnostics.npz"), **diagnostics)
+        logger.info(
+            "Palm errors p95/max %.3f/%.3f deg; minimum movable-arm distance %.6f m; "
+            "inherited frozen-body penetration %.6f m; result: %s",
+            np.percentile(diagnostics["orientation_errors_deg"], 95),
+            diagnostics["orientation_errors_deg"].max(),
+            diagnostics["minimum_arm_collision_distance_m"].min(),
+            diagnostics["inherited_frozen_body_penetration_m"].max(),
             final_result_path,
         )
     elif refine_pt_wrist_orientation:
@@ -991,7 +1032,7 @@ def main(cfg: RetargetingConfig) -> None:
         )
 
     pt_wrist_palm_orientations = None
-    if cfg.retargeter.pt_wrist_orientation.enable:
+    if cfg.retargeter.pt_wrist_orientation.enable or cfg.retargeter.pt_palm_collision.enable:
         if data_format != "smplh":
             raise ValueError("PT wrist orientation tracking currently requires the smplh InterMimic format")
         if cfg.augmentation:

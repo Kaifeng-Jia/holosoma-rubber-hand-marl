@@ -92,7 +92,13 @@ def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
         "--baseline-dir",
         type=Path,
         required=True,
-        help="Frozen position-only CORE4D pair directory (the accepted v4 run).",
+        help="Frozen position-only CORE4D pair directory.",
+    )
+    parser.add_argument(
+        "--baseline-kind",
+        choices=("fixed-object", "shared-scaled-preview"),
+        default="fixed-object",
+        help="Explicit input contract; the original fixed-object checks remain the default.",
     )
     parser.add_argument(
         "--output-dir",
@@ -211,6 +217,75 @@ def _compose_person_qpos(pair: dict[str, np.ndarray], person_index: int) -> np.n
         ),
         axis=1,
     )
+
+
+def _load_shared_scaled_source(
+    baseline_dir: Path,
+    manifest: dict[str, object],
+    pair: dict[str, np.ndarray],
+) -> dict[str, object]:
+    """Validate the existing scaled-preview export without pretending it is full-size."""
+    if (
+        manifest.get("kind") != "diagnostic_preview_not_training_asset"
+        or manifest.get("robot_reference") != "per-person Stage1 nominal_scaled qpos"
+        or manifest.get("training_ready") is not False
+    ):
+        raise ValueError("Expected an unrefined shared-scaled Stage1 preview")
+    object_name = str(pair["object_name"].item())
+    if Path(object_name).name != object_name or object_name in {"", ".", ".."}:
+        raise ValueError("Preview object_name must be a plain filename stem")
+    for path, hash_key in (
+        (baseline_dir / "core4d_pair_reference.npz", "pair_sha256"),
+        (baseline_dir / "assets" / f"{object_name}.urdf", "object_urdf_sha256"),
+        (Path(str(manifest["source_manifest"])), "source_manifest_sha256"),
+    ):
+        if not manifest.get(hash_key) or _sha256(path) != manifest[hash_key]:
+            raise ValueError(f"Shared-scaled preview {hash_key} mismatch")
+    source_manifest = _load_json_object(Path(str(manifest["source_manifest"])))
+    scales = np.asarray(pair["human_to_robot_scales"], dtype=np.float64)
+    shared_scale = np.asarray(pair["shared_object_scale"], dtype=np.float64)
+    if (
+        scales.shape != (2,)
+        or not np.isfinite(scales).all()
+        or np.any(scales <= 0)
+        or shared_scale.shape != ()
+        or float(shared_scale) != float(scales.mean())
+        or float(shared_scale) != manifest.get("shared_object_scale")
+        or not np.array_equal(scales, source_manifest.get("human_to_robot_scales"))
+    ):
+        raise ValueError("Shared-scaled preview scale differs from its source")
+    paths = manifest.get("source_person_nominal")
+    if not isinstance(paths, list) or len(paths) != 2:
+        raise ValueError("Preview must identify both Stage1 nominal files")
+    nominal_objects = []
+    for index, path in enumerate(paths):
+        nominal = _load_npz_copy(Path(str(path)))
+        qpos = np.asarray(nominal["qpos"], dtype=np.float64)
+        if (
+            qpos.shape != (len(pair["robot_qpos"]), 43)
+            or not np.isfinite(qpos).all()
+            or not np.array_equal(nominal["fps"], pair["fps"])
+            or not np.array_equal(qpos[:, :36], pair["robot_qpos"][:, index])
+        ):
+            raise ValueError(f"Preview person{index + 1} differs from Stage1 nominal")
+        nominal_objects.append(qpos[:, 36:])
+    first, second = nominal_objects
+    norms = np.linalg.norm(first[:, 3:], axis=1, keepdims=True)
+    if (
+        np.any(norms < 1e-12)
+        or not np.allclose(first[:, 3:], second[:, 3:], atol=1e-12, rtol=0)
+        or not np.array_equal(pair["object_qpos"][:, :3], (first[:, :3] + second[:, :3]) / 2)
+        or not np.allclose(pair["object_qpos"][:, 3:], first[:, 3:] / norms, atol=1e-12, rtol=0)
+    ):
+        raise ValueError("Preview shared object differs from the Stage1 averaging contract")
+    return source_manifest
+
+
+def _require_frozen_object(qpos_sequence: list[np.ndarray], object_qpos: np.ndarray) -> None:
+    """The frozen object may be full-size or scaled; never substitute another trajectory."""
+    for qpos in qpos_sequence:
+        if not np.array_equal(np.asarray(qpos)[:, ROBOT_QPOS_WIDTH:], object_qpos):
+            raise RuntimeError("A.1 changed the frozen baseline object trajectory")
 
 
 def _allowed_qpos_indices(solver_mode: str) -> np.ndarray:
@@ -613,21 +688,27 @@ def run(args: argparse.Namespace) -> Path:
     parent_manifest = _load_json_object(parent_manifest_path)
     pair = _load_npz_copy(parent_pair_path)
     frames, fps, object_name = _validate_pair_data(pair)
-    if parent_manifest.get("robot") != "g1_29dof_rubber_hands":
+    scaled_preview = args.baseline_kind == "shared-scaled-preview"
+    source_manifest = (
+        _load_shared_scaled_source(baseline_dir, parent_manifest, pair)
+        if scaled_preview
+        else parent_manifest
+    )
+    if source_manifest.get("robot") != "g1_29dof_rubber_hands":
         raise ValueError("The baseline manifest is not a rubber-hand G1 run")
-    if not str(parent_manifest.get("wrist_mode", "")).startswith("position_only_baseline"):
+    if not str(source_manifest.get("wrist_mode", "")).startswith("position_only_baseline"):
         raise ValueError("The baseline manifest is not the frozen position-only wrist run")
-    if parent_manifest.get("object_name") != object_name:
+    if any(value.get("object_name") != object_name for value in (parent_manifest, source_manifest)):
         raise ValueError("The baseline manifest and pair object names differ")
 
     canonical_path = (
         args.canonical.expanduser().resolve()
         if args.canonical is not None
-        else Path(str(parent_manifest["input"])).expanduser().resolve()
+        else Path(str(source_manifest["input"])).expanduser().resolve()
     )
     if not canonical_path.is_file():
         raise FileNotFoundError(f"Canonical CORE4D source does not exist: {canonical_path}")
-    expected_input_hash = str(parent_manifest.get("input_sha256", ""))
+    expected_input_hash = str(source_manifest.get("input_sha256", ""))
     if expected_input_hash and _sha256(canonical_path) != expected_input_hash:
         raise ValueError("Canonical source SHA256 differs from the frozen baseline manifest")
 
@@ -643,8 +724,14 @@ def run(args: argparse.Namespace) -> Path:
         raise ValueError("Canonical and baseline object names differ")
 
     baseline_qpos = [_compose_person_qpos(pair, index) for index in range(2)]
-    require_shared_physical_object_qpos(baseline_qpos, sequence.object_poses)
+    if not scaled_preview:
+        require_shared_physical_object_qpos(baseline_qpos, sequence.object_poses)
+    _require_frozen_object(baseline_qpos, pair["object_qpos"])
+    person_baselines: list[dict[str, np.ndarray]] = []
     for person_index, qpos in enumerate(baseline_qpos):
+        if scaled_preview:
+            person_baselines.append({"qpos": qpos.copy(), "fps": pair["fps"].copy()})
+            continue
         person_path = (
             baseline_dir
             / f"person{person_index + 1}"
@@ -653,13 +740,16 @@ def run(args: argparse.Namespace) -> Path:
         person_data = _load_npz_copy(person_path)
         if "qpos" not in person_data or not np.array_equal(person_data["qpos"], qpos):
             raise ValueError(f"{person_path} does not exactly match the baseline pair")
+        person_baselines.append(person_data)
 
     object_urdf_path = baseline_dir / "assets" / f"{object_name}.urdf"
     scene_xml_path = baseline_dir / "assets" / f"g1_29dof_w_{object_name}.xml"
+    if scaled_preview:
+        scene_xml_path = Path(str(source_manifest["scene_xml"]))
     for asset in (BASE_G1_URDF, object_urdf_path, scene_xml_path):
         if not asset.is_file():
             raise FileNotFoundError(f"Required A.1 asset does not exist: {asset}")
-    foot_anchor = parent_manifest.get("foot_anchor")
+    foot_anchor = source_manifest.get("foot_anchor")
     if not isinstance(foot_anchor, dict) or not isinstance(foot_anchor.get("links"), list):
         raise ValueError("Baseline manifest is missing the frozen foot-anchor links")
     foot_links = [str(value) for value in foot_anchor["links"]]
@@ -680,6 +770,21 @@ def run(args: argparse.Namespace) -> Path:
             errors[0],
             errors[1],
         )
+
+    if scaled_preview:
+        from holosoma_retargeting.src.utils import create_uniformly_scaled_object_scene_xml
+
+        # Start from the original-size scene, scaling the object exactly once.
+        # The preview URDF is already scaled and is copied verbatim.
+        output_dir.mkdir(parents=True, exist_ok=True)
+        shutil.copytree(baseline_dir / "assets", output_dir / "assets")
+        scene_xml_path = Path(create_uniformly_scaled_object_scene_xml(
+            scene_xml_path,
+            object_name,
+            float(pair["shared_object_scale"]),
+            output_dir / "assets" / f"g1_29dof_w_{object_name}.xml",
+        ))
+        object_urdf_path = output_dir / "assets" / object_urdf_path.name
 
     retargeter = _build_a1_retargeter(
         object_name=object_name,
@@ -734,18 +839,16 @@ def run(args: argparse.Namespace) -> Path:
             errors[:, 0].max(),
             errors[:, 1].max(),
         )
-    require_shared_physical_object_qpos(refined_qpos, sequence.object_poses)
+    if not scaled_preview:
+        require_shared_physical_object_qpos(refined_qpos, sequence.object_poses)
+    _require_frozen_object(refined_qpos, pair["object_qpos"])
 
     output_dir.mkdir(parents=True, exist_ok=True)
-    shutil.copytree(baseline_dir / "assets", output_dir / "assets")
+    if not scaled_preview:
+        shutil.copytree(baseline_dir / "assets", output_dir / "assets")
     person_result_paths: list[Path] = []
     for person_index in range(2):
-        source_path = (
-            baseline_dir
-            / f"person{person_index + 1}"
-            / f"person{person_index + 1}_fixed_object.npz"
-        )
-        source_data = _load_npz_copy(source_path)
+        source_data = {key: value.copy() for key, value in person_baselines[person_index].items()}
         source_data["qpos"] = refined_qpos[person_index]
         source_data["a1_calibration_errors_deg"] = calibration_errors[person_index]
         source_data["a1_solver_errors_deg"] = solver_diagnostics[person_index][
@@ -757,9 +860,10 @@ def run(args: argparse.Namespace) -> Path:
         person_dir = output_dir / f"person{person_index + 1}"
         person_dir.mkdir()
         result_suffix = _result_suffix(args.solver_mode)
+        object_label = "shared_scaled" if scaled_preview else "fixed_object"
         result_path = (
             person_dir
-            / f"person{person_index + 1}_fixed_object_{result_suffix}.npz"
+            / f"person{person_index + 1}_{object_label}_{result_suffix}.npz"
         )
         np.savez_compressed(result_path, **source_data)
         person_result_paths.append(result_path)
@@ -778,6 +882,15 @@ def run(args: argparse.Namespace) -> Path:
         axis=1,
     )
     pair_output["a1_solver_mode"] = np.asarray(args.solver_mode)
+    if scaled_preview:
+        provenance = json.loads(str(pair["provenance_json"].item()))
+        provenance.update({
+            "robot_reference": f"Stage1 nominal plus existing A1 {args.solver_mode} postprocess",
+            "parent_baseline_pair": str(parent_pair_path),
+            "parent_pair_sha256": _sha256(parent_pair_path),
+            "training_ready": False,
+        })
+        pair_output["provenance_json"] = np.asarray(json.dumps(provenance, sort_keys=True))
     common_diagnostics = set.intersection(
         *(set(values) for values in solver_diagnostics)
     )
@@ -803,6 +916,15 @@ def run(args: argparse.Namespace) -> Path:
             "wrist_dominant_surface_postprocess"
         ),
     }[args.solver_mode]
+    if scaled_preview:
+        solver_label = f"shared_scaled_Stage1_baseline_plus_existing_A1_{args.solver_mode}_postprocess"
+        manifest.update({
+            "robot": source_manifest["robot"],
+            "input": str(canonical_path),
+            "input_sha256": _sha256(canonical_path),
+            "robot_reference": provenance["robot_reference"],
+            "training_ready": False,
+        })
     wrist_mode = {
         "wrist-only": "A1_demonstrated_palm_orientation_wrist_only",
         "full-arm": "A1_demonstrated_palm_orientation_full_arm",
@@ -820,11 +942,14 @@ def run(args: argparse.Namespace) -> Path:
     manifest.update(
         {
             "parent_baseline_dir": str(baseline_dir),
+            "baseline_kind": args.baseline_kind,
             "parent_manifest_sha256": _sha256(parent_manifest_path),
             "parent_pair_sha256": _sha256(parent_pair_path),
             "pair_reference": str(pair_path),
+            "pair_sha256": _sha256(pair_path),
             "person_result_paths": [str(path) for path in person_result_paths],
             "object_urdf": str(output_dir / "assets" / object_urdf_path.name),
+            "object_urdf_sha256": _sha256(output_dir / "assets" / object_urdf_path.name),
             "scene_xml": str(output_dir / "assets" / scene_xml_path.name),
             "solver": solver_label,
             "solver_mode": args.solver_mode,

@@ -1,0 +1,284 @@
+{
+  "a1": {
+    "allowed_qpos_indices": [
+      26,
+      27,
+      28,
+      33,
+      34,
+      35
+    ],
+    "calibration_errors_deg": {
+      "person1": {
+        "left": 0.0896458612361724,
+        "right": 0.01904584872836826
+      },
+      "person2": {
+        "left": 0.021775457222796175,
+        "right": 0.02270478391247287
+      }
+    },
+    "collision_reoptimized": false,
+    "max_calibration_error_deg": 1.0,
+    "max_solver_error_deg": 0.01,
+    "non_allowed_qpos_exact": true,
+    "non_wrist_qpos_exact": true,
+    "palm_landmarks": [
+      {
+        "name": "L_Wrist",
+        "smplx_index": 20
+      },
+      {
+        "name": "L_Index1",
+        "smplx_index": 25
+      },
+      {
+        "name": "L_Middle1",
+        "smplx_index": 28
+      },
+      {
+        "name": "L_Pinky1",
+        "smplx_index": 31
+      },
+      {
+        "name": "R_Wrist",
+        "smplx_index": 21
+      },
+      {
+        "name": "R_Index1",
+        "smplx_index": 40
+      },
+      {
+        "name": "R_Middle1",
+        "smplx_index": 43
+      },
+      {
+        "name": "R_Pinky1",
+        "smplx_index": 46
+      }
+    ],
+    "quaternion_convention": "canonical wrist xyzw",
+    "root_waist_legs_object_qpos_exact": true,
+    "shared_object_qpos_exact": true,
+    "solver_configuration": {
+      "enable": true,
+      "max_calibration_error_deg": 1.0,
+      "max_solver_error_deg": 0.01
+    },
+    "solver_diagnostics": {
+      "person1": {
+        "orientation_errors_deg": {
+          "left": {
+            "max": 6.779214419160598e-12,
+            "p90": 6.512897420439601e-13,
+            "p95": 1.3732469581920915e-12
+          },
+          "right": {
+            "max": 1.0714394946597578e-11,
+            "p90": 7.038172323564139e-13,
+            "p95": 1.8161553798259478e-12
+          }
+        }
+      },
+      "person2": {
+        "orientation_errors_deg": {
+          "left": {
+            "max": 7.043361111047806e-12,
+            "p90": 8.638609848075519e-13,
+            "p95": 1.7894637902895245e-12
+          },
+          "right": {
+            "max": 5.982937815352145e-12,
+            "p90": 7.592390800364767e-13,
+            "p95": 1.8917861827978617e-12
+          }
+        }
+      }
+    },
+    "solver_errors_deg": {
+      "person1": {
+        "left": {
+          "max": 6.779214419160598e-12,
+          "p90": 6.512897420439601e-13,
+          "p95": 1.3732469581920915e-12
+        },
+        "right": {
+          "max": 1.0714394946597578e-11,
+          "p90": 7.038172323564139e-13,
+          "p95": 1.8161553798259478e-12
+        }
+      },
+      "person2": {
+        "left": {
+          "max": 7.043361111047806e-12,
+          "p90": 8.638609848075519e-13,
+          "p95": 1.7894637902895245e-12
+        },
+        "right": {
+          "max": 5.982937815352145e-12,
+          "p90": 7.592390800364767e-13,
+          "p95": 1.8917861827978617e-12
+        }
+      }
+    },
+    "solver_mode": "wrist-only",
+    "wrist_motion": {
+      "person1": {
+        "absolute_delta_rad_max": 1.8302358414407096,
+        "absolute_delta_rad_p90": 1.1698920469493697,
+        "absolute_velocity_rad_s_max": 4.836566881091782,
+        "absolute_velocity_rad_s_p90": 0.9659664186972627,
+        "actually_changed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ],
+        "allowed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ]
+      },
+      "person2": {
+        "absolute_delta_rad_max": 1.1441768553190101,
+        "absolute_delta_rad_p90": 0.9946979628614926,
+        "absolute_velocity_rad_s_max": 5.996630613482571,
+        "absolute_velocity_rad_s_p90": 1.070600820809417,
+        "actually_changed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ],
+        "allowed_qpos_indices": [
+          26,
+          27,
+          28,
+          33,
+          34,
+          35
+        ]
+      }
+    }
+  },
+  "baseline_kind": "fixed-object",
+  "dataset": "CORE4D",
+  "elastic_diagnostics_max_per_person": [
+    {
+      "foot_constraint_slack_max_m": 2.7376778453827917e-11,
+      "foot_height_deviation_max_m": 0.005020370593523237,
+      "foot_xy_deviation_max_m": 0.0014208655300185463,
+      "object_collision_slack_max_m": 1.4365977130429803e-12,
+      "object_penetration_max_m": 0.002383173249479045
+    },
+    {
+      "foot_constraint_slack_max_m": 1.8731348483123993e-11,
+      "foot_height_deviation_max_m": 0.005006606605126071,
+      "foot_xy_deviation_max_m": 0.0014216248799325379,
+      "object_collision_slack_max_m": 5.767468225795506e-12,
+      "object_penetration_max_m": 0.0018633019260682162
+    }
+  ],
+  "foot_anchor": {
+    "links": [
+      "left_ankle_roll_sphere_1_link",
+      "right_ankle_roll_sphere_1_link",
+      "left_ankle_roll_sphere_2_link",
+      "right_ankle_roll_sphere_2_link",
+      "left_ankle_roll_sphere_3_link",
+      "right_ankle_roll_sphere_3_link",
+      "left_ankle_roll_sphere_4_link",
+      "right_ankle_roll_sphere_4_link"
+    ],
+    "nominal_height_tolerance_m": 0.005,
+    "strategy": "official_g1_default_eight_surface_points"
+  },
+  "ground_offsets_m": [
+    -0.008478045463562012,
+    -0.04367208480834961
+  ],
+  "height_method": [
+    "raw_vertex_max_vertical_extent",
+    "raw_vertex_max_vertical_extent"
+  ],
+  "human_heights_m": [
+    1.7334809303283691,
+    1.8275102376937866
+  ],
+  "human_to_robot_scales": [
+    0.7614736204510514,
+    0.7222941753069272
+  ],
+  "input": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/source_canonical.npz",
+  "input_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+  "method": "two-stage",
+  "object_collision": {
+    "box_count": 0,
+    "boxes": [],
+    "geometry_type": "source_mesh",
+    "strategy": "source_mesh_visual_and_collision"
+  },
+  "object_mesh_path": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket003_m.obj",
+  "object_mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+  "object_name": "bucket003",
+  "object_sampling": {
+    "actual_count_per_person": [
+      89,
+      89
+    ],
+    "nominal_points_sha256": [
+      "ffce4803994cdeea8ad4f375a55333704844420de8b84edef2a867c20b782ba9",
+      "fbe51cfba845b587e8951e3da4fa7fccaa5080da94ae87d791fb4bb27af7e7f5"
+    ],
+    "physical_points_sha256": [
+      "d24a963c45b6c63ed4da0969be505a65b7812c850a120b53600ec0c31056bacc",
+      "d24a963c45b6c63ed4da0969be505a65b7812c850a120b53600ec0c31056bacc"
+    ],
+    "requested_count": 100,
+    "seed": 42
+  },
+  "object_urdf": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/assets/bucket003.urdf",
+  "object_urdf_sha256": "6cac97e83536feaf9f8e13e1a94ab7badc316948f23777b7376b9a29208cfc73",
+  "pair_reference": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/core4d_pair_reference.npz",
+  "pair_sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+  "parent_baseline_dir": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/two_stage",
+  "parent_manifest_sha256": "f523e89cb66fa909aee67bbdd4bb82709d12ee2207014c844c2d17ffaa8b6fdf",
+  "parent_pair_sha256": "089d3a36a39442e055f01a8111d6145475c062928c28727062f951887020ceec",
+  "person_result_paths": [
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/person1/person1_fixed_object_a1.npz",
+    "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/person2/person2_fixed_object_a1.npz"
+  ],
+  "retarget_fps": 30,
+  "retarget_frames": 299,
+  "retarget_scene_mass_kg": 1.0,
+  "retarget_scene_mass_scope": "kinematic_retarget_only_not_training",
+  "robot": "g1_29dof_rubber_hands",
+  "scale_anchor_policy": "initial_object_origin_projected_to_ground",
+  "scale_anchors_m": [
+    [
+      -0.9986100769042969,
+      -1.8847538757324218,
+      0.0
+    ],
+    [
+      -0.9986100769042969,
+      -1.8847538757324218,
+      0.0
+    ]
+  ],
+  "scene_xml": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/assets/g1_29dof_w_bucket003.xml",
+  "shared_physical_object_qpos_exact": true,
+  "solver": "frozen_v4_fixed_object_baseline_plus_existing_A1_wrist_only_postprocess",
+  "solver_mode": "wrist-only",
+  "source_fps": 15,
+  "source_frames": 150,
+  "wrist_mode": "A1_demonstrated_palm_orientation_wrist_only"
+}

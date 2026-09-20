@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import importlib.util
+import json
 from pathlib import Path
 
 import numpy as np
@@ -40,6 +41,7 @@ def test_parse_args_keeps_existing_a1_thresholds() -> None:
     assert args.baseline_dir == Path("v4")
     assert args.output_dir == Path("v5")
     assert args.canonical is None
+    assert args.baseline_kind == "fixed-object"
     assert args.solver_mode == "wrist-only"
     assert args.max_calibration_error_deg == pytest.approx(1.0)
     assert args.max_solver_error_deg == pytest.approx(0.01)
@@ -323,3 +325,110 @@ def test_require_empty_output_dir_never_mixes_runs(tmp_path: Path) -> None:
 
     with pytest.raises(FileExistsError, match="Refusing to mix"):
         module._require_empty_output_dir(output)
+
+
+def test_parse_args_shared_scaled_is_explicit_and_keeps_wrist_solver() -> None:
+    module = _load_script()
+    args = module.parse_args([
+        "--baseline-dir", "preview", "--output-dir", "a1",
+        "--baseline-kind", "shared-scaled-preview",
+    ])
+    assert args.baseline_kind == "shared-scaled-preview"
+    assert args.solver_mode == "wrist-only"
+    assert args.max_solver_error_deg == pytest.approx(0.01)
+
+
+def _scaled_preview_fixture(module, tmp_path: Path):
+    preview = tmp_path / "preview"
+    (preview / "assets").mkdir(parents=True)
+    pair = _pair()
+    scales = np.array([0.78, 0.72])
+    source = tmp_path / "source.json"
+    source.write_text(json.dumps({"human_to_robot_scales": scales.tolist()}))
+    nominal_paths = []
+    for index in range(2):
+        obj = np.tile([0.1 + index * 0.02, 0.0, 0.3, 1.0, 0.0, 0.0, 0.0], (3, 1))
+        nominal = np.concatenate([pair["robot_qpos"][:, index], obj], axis=1)
+        path = tmp_path / f"person{index + 1}_nominal.npz"
+        np.savez_compressed(path, qpos=nominal, fps=pair["fps"])
+        nominal_paths.append(str(path))
+    pair["object_qpos"] = np.tile([0.11, 0.0, 0.3, 1.0, 0.0, 0.0, 0.0], (3, 1))
+    # Match the exporter's exact floating-point averaging, not a decimal literal.
+    pair["object_qpos"][:, 0] = (0.1 + (0.1 + 0.02)) / 2
+    pair["human_to_robot_scales"] = scales
+    pair["shared_object_scale"] = np.asarray(scales.mean())
+    np.savez_compressed(preview / "core4d_pair_reference.npz", **pair)
+    urdf = preview / "assets" / "Box026.urdf"
+    urdf.write_text('<robot name="Box026"/>')
+    manifest = {
+        "kind": "diagnostic_preview_not_training_asset",
+        "robot_reference": "per-person Stage1 nominal_scaled qpos",
+        "training_ready": False,
+        "shared_object_scale": float(scales.mean()),
+        "source_manifest": str(source),
+        "source_manifest_sha256": module._sha256(source),
+        "source_person_nominal": nominal_paths,
+        "pair_sha256": module._sha256(preview / "core4d_pair_reference.npz"),
+        "object_urdf_sha256": module._sha256(urdf),
+    }
+    return preview, manifest, pair
+
+
+def test_shared_scaled_input_preserves_export_recipe(tmp_path: Path) -> None:
+    module = _load_script()
+    preview, manifest, pair = _scaled_preview_fixture(module, tmp_path)
+    source = module._load_shared_scaled_source(preview, manifest, pair)
+    assert source["human_to_robot_scales"] == [0.78, 0.72]
+    qposes = [module._compose_person_qpos(pair, index) for index in range(2)]
+    module._require_frozen_object(qposes, pair["object_qpos"])
+    qposes[1][0, 36] += 1e-12
+    with pytest.raises(RuntimeError, match="frozen baseline object"):
+        module._require_frozen_object(qposes, pair["object_qpos"])
+
+
+@pytest.mark.parametrize("change", ["hash", "scale", "robot", "object", "already_refined"])
+def test_shared_scaled_input_rejects_mismatched_sources(tmp_path: Path, change: str) -> None:
+    module = _load_script()
+    preview, manifest, pair = _scaled_preview_fixture(module, tmp_path)
+    if change == "hash":
+        manifest["pair_sha256"] = "invalid"
+    elif change == "scale":
+        pair["shared_object_scale"] = np.asarray(0.75**2)
+    elif change == "robot":
+        pair["robot_qpos"][0, 0, 26] += 0.01
+    elif change == "object":
+        pair["object_qpos"][0, 0] += 0.01
+    else:
+        manifest["robot_reference"] = "already wrist refined"
+    with pytest.raises(ValueError):
+        module._load_shared_scaled_source(preview, manifest, pair)
+
+
+def test_scaled_scene_changes_only_object_once_and_preserves_source(tmp_path: Path) -> None:
+    from holosoma_retargeting.src.utils import create_uniformly_scaled_object_scene_xml
+    import xml.etree.ElementTree as ET
+
+    source = tmp_path / "original.xml"
+    original = '''<mujoco><asset>
+      <mesh name="robot_mesh" file="robot.obj" scale="1 1 1"/>
+      <mesh name="chair_mesh" file="chair.obj" scale="1 1 1"/>
+      </asset><worldbody>
+      <body name="robot" pos="0 0 1"><geom mesh="robot_mesh"/></body>
+      <body name="chair021" pos="1 2 3">
+        <geom mesh="chair_mesh"/><inertial pos="0 1 0" mass="1" diaginertia="2 3 4"/>
+      </body></worldbody></mujoco>'''
+    source.write_text(original)
+    output = tmp_path / "output.xml"
+    create_uniformly_scaled_object_scene_xml(source, "chair021", 0.75, output)
+    root = ET.parse(output).getroot()
+    assert source.read_text() == original
+    assert root.find(".//mesh[@name='robot_mesh']").get("scale") == "1 1 1"
+    assert root.find(".//body[@name='robot']").get("pos") == "0 0 1"
+    np.testing.assert_allclose(
+        np.fromstring(root.find(".//mesh[@name='chair_mesh']").get("scale"), sep=" "),
+        [0.75, 0.75, 0.75],
+    )
+    inertial = root.find(".//body[@name='chair021']/inertial")
+    assert inertial.get("mass") == "1"
+    np.testing.assert_allclose(np.fromstring(inertial.get("diaginertia"), sep=" "),
+                               np.array([2, 3, 4]) * 0.75**2)

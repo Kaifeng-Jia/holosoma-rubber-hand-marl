@@ -17,15 +17,28 @@ sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma"))
 sys.path.insert(0, str(REPO_ROOT / "src" / "holosoma_retargeting"))
 
 PARSER = argparse.ArgumentParser(description=__doc__)
-PARSER.add_argument("--experiment", choices=("smalltable", "chair021"), default="smalltable")
+PARSER.add_argument("--experiment", choices=("smalltable", "chair021", "bucket003", "smalltable5kg_A"), default="smalltable")
 PARSER.add_argument("--num-envs", type=int, default=1)
 PARSER.add_argument("--steps", type=int, default=8)
+PARSER.add_argument("--reference-frame", type=int, default=0,
+                    help="Diagnostic reset phase only; does not change formal training initialization")
 PARSER.add_argument("--seed", type=int, default=721)
 PARSER.add_argument("--ppo-update", action="store_true")
 PARSER.add_argument("--output", type=Path, default=None)
-PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh"), default="baseline")
+BUCKET_REWARD_CHOICES = ("bucket_A", "bucket_B", "bucket_A_no_rel", "bucket_A_no_height", "bucket_A_no_rel_no_height")
+PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh", *BUCKET_REWARD_CHOICES), default="baseline")
+PARSER.add_argument("--bucket-reference", type=Path, default=None)
 PARSER.add_argument("--interaction-reference", type=Path, default=None)
 ARGS = PARSER.parse_args()
+IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
+if ARGS.experiment == "smalltable5kg_A" and ARGS.reward_variant not in ("bucket_A", "bucket_A_no_rel_no_height"):
+    PARSER.error("smalltable5kg_A requires bucket_A or bucket_A_no_rel_no_height")
+if IS_BUCKET != (ARGS.experiment in ("bucket003", "smalltable5kg_A")):
+    PARSER.error(f"bucket003 smoke requires an explicit reward variant from {BUCKET_REWARD_CHOICES}")
+if ARGS.bucket_reference is not None and not IS_BUCKET:
+    PARSER.error("--bucket-reference is only for bucket reward variants")
+if IS_BUCKET and ARGS.interaction_reference is not None:
+    PARSER.error("Bucket vectors use --bucket-reference, not the legacy Laplacian artifact")
 if ARGS.num_envs < 1 or ARGS.steps < 1:
     PARSER.error("--num-envs and --steps must be positive")
 if ARGS.reward_variant == "interaction_mesh" and ARGS.interaction_reference is None:
@@ -52,9 +65,14 @@ from holosoma.config_values.marl.g1.core4d_smalltable_experiment import (  # noq
     with_pair_experiment,
 )
 from holosoma.utils.eval_utils import init_sim_imports  # noqa: E402
+from holosoma.config_values.marl.g1.core4d_bucket_contract import (  # noqa: E402
+    BUCKET_DATA_DIR, build_bucket_reward_contract,
+)
 
 
 EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+if not 0 <= ARGS.reference_frame < EXPERIMENT.reference_frames:
+    PARSER.error("--reference-frame must be inside the selected clip")
 if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
     PARSER.error(f"--experiment {ARGS.experiment} does not allow interaction_mesh")
 if ARGS.ppo_update and not EXPERIMENT.training_ready:
@@ -71,6 +89,16 @@ BASE_CONFIG = (
     if INTERACTION_REFERENCE is None
     else with_interaction_mesh_reward(PAIR_CONFIG, str(INTERACTION_REFERENCE))
 )
+BUCKET_CONTRACT = None
+if IS_BUCKET:
+    from holosoma.config_values.marl.g1.core4d_bucket_reward import with_bucket_reward
+    bucket_reference = (
+        ARGS.bucket_reference.expanduser().resolve() if ARGS.bucket_reference is not None
+        else REPO_ROOT / "src/holosoma" / Path(EXPERIMENT.training_promotion_file).parent / "interaction_vectors_v1.npz"
+    )
+    bucket_variant = ARGS.reward_variant.removeprefix("bucket_")
+    BUCKET_CONTRACT = build_bucket_reward_contract(bucket_reference, bucket_variant, experiment=EXPERIMENT)
+    BASE_CONFIG = with_bucket_reward(BASE_CONFIG, str(bucket_reference), bucket_variant)
 CONFIG = replace(
     BASE_CONFIG,
     training=replace(
@@ -137,9 +165,14 @@ def main() -> int:
 
         # Verify the exact reset write before taking another physics step.
         env_ids = torch.arange(env.num_envs, device=env.device)
-        command.time_steps.zero_()
         env.reset_envs_idx(env_ids)
+        if ARGS.reference_frame:
+            command.time_steps.fill_(ARGS.reference_frame)
+            command._write_reference_state(env_ids)
+            env.simulator.write_state_updates()
         env._refresh_envs_after_reset(env_ids)
+        if not bool(torch.all(command.time_steps == ARGS.reference_frame).item()):
+            raise RuntimeError("Smoke diagnostic phase did not survive reset")
         object_state = env.simulator.all_root_states[command.object_indices_in_simulator]
         sample = command.reference.sample(command.time_steps)
         expected_com_velocity = object_origin_velocity_to_com_velocity(
@@ -168,6 +201,7 @@ def main() -> int:
             if "interaction_mesh" in env.reward_manager.active_terms else None
         )
         interaction_check = None
+        bucket_term = env.reward_manager.get_term("bucket_interaction") if IS_BUCKET else None
         if interaction_term is not None:
             params = CONFIG.reward.terms["interaction_mesh"].params
             raw = interaction_term(env, **params)
@@ -222,6 +256,8 @@ def main() -> int:
             raise RuntimeError(f"Unexpected action shape: {tuple(decision.actions.shape)}")
 
         update_metrics = None
+        if bucket_term is not None:
+            bucket_term.get_iteration_diagnostics(reset=True)
         if ARGS.ppo_update:
             learner = Core4DSmallTablePPO(
                 models,
@@ -231,6 +267,7 @@ def main() -> int:
                 device=env.device,
                 interaction_contract=INTERACTION_CONTRACT,
                 experiment_contract=EXPERIMENT.checkpoint_contract,
+                bucket_contract=BUCKET_CONTRACT,
             )
             observations = learner.collect_rollout(env, observations)
             update_metrics = learner.update().__dict__
@@ -267,6 +304,7 @@ def main() -> int:
             "object_mesh_collision_approximations": object_mesh_collision_approximations,
             "num_envs": env.num_envs,
             "steps": ARGS.steps,
+            "diagnostic_initial_reference_frame": ARGS.reference_frame,
             "ppo_update": ARGS.ppo_update,
             "ppo_update_metrics": update_metrics,
             "reference_frames": command.reference.num_frames,
@@ -287,6 +325,13 @@ def main() -> int:
             "reward_variant": ARGS.reward_variant,
             "interaction_contract": INTERACTION_CONTRACT,
             "interaction_initial_check": interaction_check,
+            "bucket_reward_contract": BUCKET_CONTRACT,
+            "bucket_rollout_diagnostics": (
+                None if bucket_term is None else {
+                    name: value.item() for name, value in
+                    bucket_term.get_iteration_diagnostics(reset=True).items()
+                }
+            ),
             "interaction_rollout_diagnostics": (
                 None if interaction_term is None else {
                     name: value.item()
@@ -301,8 +346,13 @@ def main() -> int:
             output.parent.mkdir(parents=True, exist_ok=True)
             output.write_text(text + "\n")
         return 0
-    except BaseException:
+    except BaseException as exc:
         traceback.print_exc()
+        if ARGS.output is not None:
+            output = ARGS.output.expanduser().resolve()
+            output.parent.mkdir(parents=True, exist_ok=True)
+            output.write_text(json.dumps({"passed": False, "error_type": type(exc).__name__,
+                                          "error": str(exc)}, indent=2) + "\n")
         return 1
     finally:
         if env is not None and hasattr(env.simulator, "close"):

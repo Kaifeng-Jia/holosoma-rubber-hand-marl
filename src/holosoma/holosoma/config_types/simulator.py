@@ -519,6 +519,13 @@ class SimulatorInitConfig:
     original sensor graph and runtime cost.
     """
 
+    enable_object_hand_contact: bool = False
+    """Opt-in current-sample object/hand normal forces, without point tracking.
+
+    Used identically by bucket A/B rewards. Does not expose new observations
+    or enable the heavier full-body contact-position diagnostic sensors.
+    """
+
     robot_mjcf_filter: MujocoXMLFilterCfg = field(default_factory=MujocoXMLFilterCfg)
     """MuJoCo-specific XML filtering configuration for robot MJCF files."""
 

@@ -23,6 +23,7 @@ from holosoma_retargeting.config_types.retargeter import (
     HandOrientationConfig,
     PlanBPalmContactConfig,
     PTFullArmOrientationConfig,
+    PTPalmCollisionConfig,
     PTWristDominantSurfaceConfig,
     PTWristOrientationConfig,
     SelfCollisionConfig,
@@ -88,6 +89,7 @@ class InteractionMeshRetargeter:
         pt_wrist_orientation: PTWristOrientationConfig | None = None,
         pt_full_arm_orientation: PTFullArmOrientationConfig | None = None,
         pt_wrist_dominant_surface: PTWristDominantSurfaceConfig | None = None,
+        pt_palm_collision: PTPalmCollisionConfig | None = None,
         elastic_constraints: ElasticConstraintConfig | None = None,
     ):
         """This kinematic retargeter solves the diffIK problem with hard constraints in SQP style.
@@ -158,6 +160,7 @@ class InteractionMeshRetargeter:
             pt_wrist_dominant_surface or PTWristDominantSurfaceConfig()
         )
         self._validate_pt_wrist_dominant_surface_config()
+        self.pt_palm_collision = pt_palm_collision or PTPalmCollisionConfig()
         self.elastic_constraints = elastic_constraints or ElasticConstraintConfig()
         if (
             not np.isfinite(self.elastic_constraints.object_collision_weight)
@@ -187,13 +190,14 @@ class InteractionMeshRetargeter:
                 self.pt_wrist_orientation.enable,
                 self.pt_full_arm_orientation.enable,
                 self.pt_wrist_dominant_surface.enable,
+                self.pt_palm_collision.enable,
             )
         )
         if enabled_hand_modes > 1:
             raise ValueError(
                 "Legacy hand orientation, Plan B palm contact, A.1 PT wrist "
                 "orientation, PT full-arm orientation, and PT wrist-dominant "
-                "surface refinement are mutually exclusive"
+                "surface refinement, and PT palm collision refinement are mutually exclusive"
             )
 
         # Setup visualization if requested
@@ -344,6 +348,7 @@ class InteractionMeshRetargeter:
             or self.pt_wrist_orientation.enable
             or self.pt_full_arm_orientation.enable
             or self.pt_wrist_dominant_surface.enable
+            or self.pt_palm_collision.enable
         ):
             return
         if not self.has_dynamic_object:
@@ -1250,6 +1255,7 @@ class InteractionMeshRetargeter:
                 "pt_wrist_dominant_surface",
                 PTWristDominantSurfaceConfig(),
             ).enable
+            or getattr(self, "pt_palm_collision", PTPalmCollisionConfig()).enable
         ):
             return targets
         if palm_orientations is None:
@@ -1268,6 +1274,16 @@ class InteractionMeshRetargeter:
             palm_basis = np.asarray(spec["palm_basis"], dtype=float)
             targets[:, hand_idx] = palm_orientations[:, source_idx] @ palm_basis.T
         return targets
+
+    def apply_pt_palm_collision_postprocess(
+        self,
+        qpos: np.ndarray,
+        palm_orientations: np.ndarray,
+    ) -> tuple[np.ndarray, dict[str, np.ndarray]]:
+        """Refine only the arms, reusing the existing MuJoCo collision geometry."""
+        from holosoma_retargeting.src.pt_palm_collision import refine_pt_palms_with_collision
+
+        return refine_pt_palms_with_collision(self, qpos, palm_orientations)
 
     def apply_pt_wrist_orientation_postprocess(
         self,

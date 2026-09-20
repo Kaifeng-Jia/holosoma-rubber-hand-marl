@@ -459,7 +459,9 @@ class IsaacSim(BaseSimulator):
             self._object = RigidObject(object_cfg)
             self.scene.rigid_objects[object_name] = self._object
 
-            if self.simulator_config.enable_object_contact_diagnostics:
+            if (self.simulator_config.enable_object_contact_diagnostics
+                    or self.simulator_config.enable_object_hand_contact):
+                full_contact_diagnostics = self.simulator_config.enable_object_contact_diagnostics
                 object_contact_body_names = [
                     prim.GetPath().pathString.rsplit("/", 1)[-1]
                     for prim in sim_utils.find_matching_prims("/World/envs/env_0/Object/.*")
@@ -483,28 +485,26 @@ class IsaacSim(BaseSimulator):
                     # container prim. ContactSensor must target the body that
                     # owns the contact reporter API, not the /Object scope.
                     "prim_path": f"/World/envs/env_.*/Object/{object_contact_body_names[0]}",
-                    "history_length": self.simulator_config.contact_sensor_history_length,
+                    "history_length": self.simulator_config.contact_sensor_history_length if full_contact_diagnostics else 1,
                     "update_period": 0.005,
-                    "track_pose": True,
-                    "track_contact_points": True,
+                    "track_pose": full_contact_diagnostics,
+                    "track_contact_points": full_contact_diagnostics,
                     "max_contact_data_count_per_prim": 32,
                     "debug_vis": False,
                 }
-                self.object_robot_contact_sensor = ContactSensor(
-                    ContactSensorCfg(
-                        **common_object_contact_sensor_kwargs,
-                        # PhysX filtered contacts are reliable here when each
-                        # opposing rigid body is named explicitly. A single
-                        # broad Robot/.* filter produced an all-zero aggregate
-                        # even while the hand-specific filters reported force.
-                        filter_prim_paths_expr=[
-                            f"{robot_prim_path}/{body_name}"
-                            for robot_prim_path in self._robot_prim_path_expressions()
-                            for body_name in robot_contact_body_names
-                        ],
+                if full_contact_diagnostics:
+                    self.object_robot_contact_sensor = ContactSensor(
+                        ContactSensorCfg(
+                            **common_object_contact_sensor_kwargs,
+                            # Explicit filters avoid broad Robot/.* aggregation.
+                            filter_prim_paths_expr=[
+                                f"{robot_prim_path}/{body_name}"
+                                for robot_prim_path in self._robot_prim_path_expressions()
+                                for body_name in robot_contact_body_names
+                            ],
+                        )
                     )
-                )
-                self.scene.sensors["object_robot_contact_sensor"] = self.object_robot_contact_sensor
+                    self.scene.sensors["object_robot_contact_sensor"] = self.object_robot_contact_sensor
 
                 self.object_hand_contact_sensor = ContactSensor(
                     ContactSensorCfg(
