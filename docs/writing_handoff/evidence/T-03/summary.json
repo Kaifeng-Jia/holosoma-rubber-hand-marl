@@ -1,0 +1,83 @@
+{
+  "checkpoint": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTable/baseline_z2_fresh12000_save2000_actor158_seed721_env2048_20260915/model_12000.pt",
+  "checkpoint_iteration": 12000,
+  "completion_rate": 1.0,
+  "episodes": [
+    {
+      "actual_table_displacement_m": 1.774644374847412,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 0,
+      "object_position_rmse_m": 0.07612782066726168,
+      "reward_sum": 89.40709229558706,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.692164421081543,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 1,
+      "object_position_rmse_m": 0.07708757235907848,
+      "reward_sum": 89.81034146249294,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.7271641492843628,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 2,
+      "object_position_rmse_m": 0.07018050336543893,
+      "reward_sum": 89.87372625619173,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.735530138015747,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 3,
+      "object_position_rmse_m": 0.07746689363567366,
+      "reward_sum": 89.72319186478853,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.7405191659927368,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 4,
+      "object_position_rmse_m": 0.0779181700927763,
+      "reward_sum": 89.72660622000694,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 686
+    }
+  ],
+  "evaluation_object_z_error_weight": 1.0,
+  "evaluation_reward_contract": "plan5_tracking_with_object_v1",
+  "evaluation_reward_matches_training": false,
+  "evaluation_reward_note": "reward_sum uses the unchanged isotropic baseline position reward (z weight=1) and excludes interaction_mesh; the anisotropic training position contract is reported separately; shared Actor-only inference, physics and termination are unchanged",
+  "experiment": "smalltable",
+  "inference": "shared_actor_only_critic_not_called",
+  "object_position_tracking_training_contract": {
+    "frame": "world",
+    "reward_weight": 1.0,
+    "sigma_m": 0.3,
+    "squared_error_weights_xyz": [
+      1.0,
+      1.0,
+      2.0
+    ],
+    "version": "world_xyz_squared_error_weighting_v1"
+  },
+  "object_urdf_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_core4d_desk001_small_training.urdf",
+  "observation_noise": false,
+  "representative_episode": 2,
+  "representative_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTable/baseline_z2_fresh12000_save2000_actor158_seed721_env2048_20260915/evaluation_20260916/model12000_seed721/representative_episode.npz",
+  "runtime_reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/core4d_pair_runtime_fps50.npz",
+  "scenario": "core4d_paired_small_table_reference_tracking",
+  "seed": 721,
+  "training_reward_contract": "plan5_tracking_with_object_v1",
+  "training_reward_variant": "baseline"
+}

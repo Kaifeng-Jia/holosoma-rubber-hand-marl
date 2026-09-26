@@ -1,31 +1,39 @@
 # Demo、腕部对照与待办台账
 
-核对更新：2026-09-20 UTC。本文是 `MULTI_AGENT_EMERGENCE_ROADMAP.md` 的证据台账，
-不另立研究路线。奖励以实际训练配置、对应实现和运行记录为依据，不凭Demo名字推断。
-桶A/B均完成12000轮，B收件归档与共同本地评测完成；用户已认可两组为展示Demo，
-并观察到交接时交出者额外用手支撑/顶一下的行为。将其记录为观察，不直接称为已证明的
-因果协作或信用分配成果。各5回合A到达参考末尾2/5、B为1/5；认可视频不改写完整评测。
-详见`logs/Core4DBucket/comparison_20260919/RESULTS_CN.md`（该报告保留首次评测时点）。
+核对更新：2026-09-25。本文是 `MULTI_AGENT_EMERGENCE_ROADMAP.md` 的证据台账，
+不另立研究路线。训练评测结果依据截至09-20的归档；09-25完成身份统一并继续离线方法核查，
+含NPZ逐值/哈希检查和已有viewer的validate-only，不重求解、不做动力学步进、不训练或加载策略模型，
+资料先在本地完成，随后用户授权本轮同步到个人GitHub的 `core4d-base`；原始训练数据、模型和完整日志不随本轮提交。
 
-**当前整理结论：扶椅子是基础11项；桶A不是基础11项，桶B也不是桶A的同义名称。**
-具体差异见第3节矩阵；桶两项消融均完成12000轮和本地评测：去关系4/5完整、去独立高度0/5。
-用户已复核：A与去关系版语义接近，A整体观感稍好；去高度版抬起后一个机器人跌倒。
-云端去高度真实退出0，全部7个模型和训练记录已下载并通过SHA256/CPU加载及本地物理评测。
-云端Vulkan渲染仍有初始化报错，无窗口训练已完成；回放继续在本地。
-OMOMO单人Push两组前置结果已齐，奖励配方待共同确认，现在不实施或训练。
-09-20双删除对照（仍保留wz2）已完成fresh12000，云端真实退出0；19文件/7模型取回并校验。
-本地5回合真实退出0，5/5完整；用户观看8084后确认“最好、和原视频一样”，列为桶交接当前优先展示。
-交出者手接触覆盖较少的数值保留，不单独据此否定动作语义；见第6.2节及09-20新报告。
-此新增组不阻塞此前两组共同评测及OMOMO配方讨论，不开启大规模多种子。
-用户后续批准的独立高度惩罚已完成12000轮及新旧模型各5回合对照：原点高度改善，持续整桌抬升未实现。
-2026-09-18用户暂停小桌；09-19批准有限复试，09-20两组5kg实验均完成12000轮、真实退出0。
-完整A与双删除均已收件，14模型SHA256/CPU严格加载通过；同协议本地评测真实退出0。
-完整A 5/5完整、双删除3/5；完整回合位置RMSE 5.57/10.25cm，均未持续整桌离地>1cm；回放8080/8081/8082待用户复核。
-两组新实验额度已用完，见6.5/6.6及[收件报告](logs/Core4DSmallTableA/collection_20260920/RECEIPT_CN.md)。
-“用户认可”“固定场景完成”“跨条件稳健”分开记录；不能用成功展示片段代表全部评测。
+**当前阶段：实验结果收束与论文材料整理。** 桶5组、小桌7组、椅子1组共13组正式训练均已完成12000轮，
+各组最终模型、run_config、status和评测summary在本地；实验身份与入口统一见第9节。
+小桌原20kg五组＋5kg两组，共84000轮；导入副本、smoke、同模型复测不重复计组。
 
-GitHub可读的本次小桌结果：[5kg对照实验快照](docs/experiments/core4d_smalltable_5kg_20260920.md)。
-本台账中的`logs/`链接为本地证据索引，模型、原始日志与回放不随文档提交上传。
+| 系列 | 最终状态 | 当前用途 |
+|---|---|---|
+| 桶交接 | A/B/去关系/去独立高度/双删除：2/5、1/5、4/5、0/5、5/5完整 | 双删除为用户首选展示；其他组保留奖励对照与辅助接触素材 |
+| 小桌5kg | 完整A 5/5、双删除3/5；完整回合位置RMSE 5.57/10.25cm，均未持续整桌离地>1cm | 已收件/校验/评测；回放待用户复核，不追加训练 |
+| 椅子 | 基础11项、5kg，固定场景9/9完整；位置RMSE约3.42cm | 已认可的动作展示；参与不均作行为分析 |
+| OMOMO及其他Demo | Push/Pull/Kick已有认可回放；Demo3/4保留诊断结果 | 完整分类见第2节，不混用奖励或模型 |
+
+**奖励结论**：扶椅子是基础11项；桶A/B并非同一配置；桶双删除仍保留位置项wz2，
+不是“不管高度”。桶结果不支持独立高度普遍必要或新增关系必然有效；小桌5kg完整A的跟踪反而更好，
+应按任务和组合讨论。公式见第3节，桶五组完整对照见第6.2节。
+
+身份统一及本轮方法对照核查已完成，见第4.1节；椅子误差图已生成。
+8组训练回放素材与Mac交接已整理，见[交接入口](docs/writing_handoff/README.md)及[素材清单](docs/writing_handoff/media/README.md)。
+腕部前后同相机图、共同几何质量指标和定量行为时序仍可后续补充。
+OMOMO单人奖励验证尚未配置/训练，需另行确认。两次小桌有限复试额度已用完。
+09-22写作是历史目标，不当作未来排期；本工作区提供实验材料，用户在别处撰写正文。
+
+“用户认可”“固定场景到达参考末尾”“跨条件稳健”分别记录；评测回合不是独立训练种子。
+后续带日期的启动/收件段落是历史过程，不表示当前任务仍运行。旧Viser端口是回放索引，
+不保证09-25仍在线；本次未连接或停止云端实例。
+
+结果入口：[桶最终对照](logs/Core4DBucket/ablation_comparison_20260920/RESULTS_CN.md)、
+[5kg小桌结果](logs/Core4DSmallTableA/comparison_20260920/RESULTS_CN.md)、
+[GitHub可读小桌快照](docs/experiments/core4d_smalltable_5kg_20260920.md)。
+`logs/`为本地证据，模型/完整日志/回放不随文档提交上传。
 
 ## 1. 已对齐的定位
 
@@ -82,8 +90,8 @@ GitHub可读的本次小桌结果：[5kg对照实验快照](docs/experiments/cor
 **对下一步最有用的机制**：小桌参考整桌最高离地约6.42cm，旧高度惩罚确实改善了物体原点z，
 但倾斜也能让原点升高。报告中的episode4/frame283原点上升5.547cm、桌子偏离参考姿态
 11.499°，最低碰撞点仍接近地面。改成正指数奖励仍追踪原点，并不自动消除这个替代方式。
-用户最新选择先做5kg完整桶A配方的组合试验，再决定是否拆分因素；最多两次小桌新训练，
-不以修好这条数据为论文前提。组合试验不是历史单因素消融的延续。
+09-19用户曾选择先做5kg完整桶A配方的组合试验，再比较两项均删除；这两次有限复试现已完成，
+结果见6.5/6.6，不再追加训练，也不以修好这条数据为论文前提。组合试验不是历史单因素消融的延续。
 
 高度新旧对照报告与所有回合：
 `logs/Core4DSmallTable/interaction_mesh_z2_height1_scale005_fresh12000_save2000_actor158_seed721_env2048_20260916/evaluation_20260917/RESULTS_CN.md`。
@@ -126,6 +134,11 @@ Push最终live-PD链、Pull、Kick、小桌baseline、椅子baseline使用同11�
 | 小桌interaction、wz2、高度惩罚 | 2 | 权重1，sigma=0.06m | 无 | −(ez/0.05m)² | 无 |
 | 桶A | 2 | 无 | 权重2，sigma=0.04m | +exp(−ez²/0.10²)，权重1 | 无 |
 | 桶B | 2 | 无 | 与A相同 | 与A相同 | 对物体位置、朝向、高度、关系整个正奖励块乘g |
+| 桶去关系 | 2 | 无 | 无 | 与A相同 | 无 |
+| 桶去独立高度 | 2 | 无 | 与A相同 | 无 | 无 |
+| 桶双删除 | 2 | 无 | 无 | 无 | 无 |
+| 小桌5kg完整A | 2 | 无 | 权重2，sigma=0.04m；小桌自身点集 | 与A相同 | 无 |
+| 小桌5kg双删除 | 2 | 无 | 无 | 无 | 无 |
 
 物体位置统一写作 `rp(wz)=exp(-(ex²+ey²+wz*ez²)/0.3²)`。
 因此扶椅子与桶A至少有三处奖励差别：wz从1变2、增加独立高度、增加相对向量；
@@ -240,8 +253,23 @@ OMOMO双机器人历史正式产物仍在`/home/kevin/holosoma-rubber-hand-marl/
 `[26,27,28,33,34,35]`变化，物体轨迹不变。椅子是优先制作的方向改善正例；OMOMO可用
 09-11同次`fixed_object_base`与`matched_a1`作配对，区别于未获认可的14关节避碰版本。
 
-待办：按同一相机、帧段、播放速度制作上述前后对照；保留穿透、跳变和失败，不只截好看的帧。
-本轮完成文件配对与证据核对，没有新录制对照视频，也未证明腕优化独立提高训练成功率。
+### 4.1 09-25方法对照整理结果
+
+[专项报告](docs/experiments/retarget_method_comparison_20260925.md)、
+[指标及配对哈希](docs/experiments/retarget_method_comparison_20260925.json)、
+[椅子方向误差图](docs/experiments/assets/chair_wrist_orientation_20260925.svg)已经生成。
+本轮重新检查三类腕部配对；椅子非腕/物体/尺度逐值相同、URDF及报告来源哈希匹配，
+最大关节步长复算一致，两个viewer validate-only均退出0。椅子四手全帧平均方向误差
+62.725°→0.059°；方向数值引用哈希匹配的已有FK报告，不冒称新跑动力学或训练消融。
+
+原尺寸小桌现有单阶段140帧、两阶段413帧，共同前140帧的人体/物体目标及资产匹配；
+但脚高、限位覆盖、弹性约束和nominal先验也改变，可作pipeline整体比较，不能单归因于阶段数。
+140帧是命令主动截断，不是已知失败；尚缺同定义的共同前缀质量指标。
+训练用小桌来自Stage1共享缩小预览，与原尺寸Stage2不同；椅子为Stage1共享小物体+A1，
+桶为原尺寸两阶段+A1。没有找到相同共享小桌目标下另行求解的Omni结果，不能用原尺寸组替代。
+
+待办：报告第6节已列同帧/同相机素材清单；实际机器人截图和视频还未制作。
+桶和OMOMO的方向/几何代价分别呈现，不串用两次求解的baseline；不将现有训练成功率归因为腕部收益。
 
 ## 5. 下一批数据：现有候选与新来源分开
 
@@ -275,28 +303,27 @@ OMOMO双机器人历史正式产物仍在`/home/kevin/holosoma-rubber-hand-marl/
 
 ## 6. 接下来要解决的事情与真实进度
 
-### 6.1 执行次序：先拆分有效因素，再检验跨动作复用
+### 6.1 当前执行次序：统一进度 → 方法对照 → 展示与分析（09-25）
 
-| 优先级 | 工作 | 要回答的问题 | 当前状态 |
-|---|---|---|---|
-| P0 | 整理已有Demo、冻结桶A/B身份和完整评测，记录用户认可 | 我们究竟训练了什么，哪些只是选优展示？ | 本台账已更新；原模型/日志未改；统一视频仍待制作 |
-| P1 | 本地桶`A-no-rel`：仅去掉相对向量奖励 | A的交互改善是否需要新增关系项？ | fresh12000及评测完成，4/5；用户认为与A语义接近，A观感稍好 |
-| P2 | 云端桶`A-no-height`：仅去掉独立正高度奖励 | 独立高度在已有wz2和关系项之外还有多少作用？ | fresh12000及评测完成，0/5；用户看到抬起后一个机器人跌倒 |
-| P2补充 | 云端桶`A-no-rel-no-height`：两项均删除 | 固定wz2下，不加两项的结果如何，组合是否存在额外作用？ | 09-20完成12000轮、全部收件；本地5/5完整，用户认可8084最好且与原视频一致，当前优先展示 |
-| P3 | OMOMO **单人** A1：采用共同确认的奖励组合 | 桶上奖励设计能否迁移到手推桌？ | 前置结果已齐，原WBT与仅增加关系的配对为候选；待确认，不恢复被否决的新避碰参考 |
-| 有限复试 | 小桌5kg，完整桶A配方：独立正高度＋新相对关系，位置wz2 | 先验证整体组合能否学出搬运 | 准备及短检查通过；用户确认后于09-19 21:01 UTC云端从零启动12000轮，未完成 |
-| 并行材料 | 腕部同数据对照、桶交接事件、论文主张与证据 | 具体变化发生在哪里？ | 三组腕部pair已核查；接触时间索引见第7节；统一图/视频待制作 |
+| 类别 | 工作 | 当前状态/下一步 |
+|---|---|---|
+| 已完成训练 | 桶A/B、去关系、去独立高度、双删除 | 五组12000及共同本地评测已完成；完整对照见6.2 |
+| 已完成训练 | 小桌20kg五组、5kg完整A与双删除 | 七组均已完成；新两组收件/校验/评测完成，见6.5/6.6 |
+| 已完成训练 | 椅子baseline | 12000及固定场景重复评测完成，用户认可 |
+| 阶段1 已完成 | 统一路线图/story/台账；核对身份和文件入口 | 09-25本地同步；第9节列模型、配置、参考和评测 |
+| 阶段2 本轮核查完成 | 腕部同数据对照；单阶段/两阶段条件审计 | 报告、JSON和椅子数值图完成，见4.1；共同几何指标/实景图待制作 |
+| 阶段3 待整理 | 主展示、参考/实际交接时序、统一结果表 | 保留全部回合，代表视频单列；现有时序索引见第7节 |
+| 另行确认 | OMOMO单人历史A1奖励比较 | 原WBT与加关系项只是候选；配方/物理/预算未定，不恢复被暂停的新避碰参考 |
 
-P1、P2是从零重新训练的消融，不从已经学过完整A奖励的checkpoint续训。沿用A的
-2048env×24步×12000轮、seed721、每2000保存，以保证可比。用户已授权本地/云端开始，
-本地去关系、云端去独立高度。284项CPU回归和两组2048环境×2轮真实检查通过；本地正式
-启动证据见`logs/Core4DBucket/ablations_20260919_launch/LAUNCH_CN.md`，不自动重启。
-云端正式训练独立于短检查，已正常结束。收件说明见
-`logs/Core4DBucket/A_no_height_fresh12000_env2048_seed721_cloud_20260919/IMPORT_CN.md`。
-Vulkan图形初始化仍报错，但无窗口物理PPO已完成；云端渲染未验证，评测仍在本地。
-设置与命令见桶说明第9节，
-包内说明为冻结时点状态，实际连接/进程信息以launch记录为准。
-结果按完整预算判断，不设几百轮动作质量淘汰gate。已有A/B不因消融而重跑或续训。
+桶两项单删除、双删除和两组5kg对照都是从零训练，不续接A或短检查模型。
+原启动、安装及收件记录不重写：
+[桶消融启动](logs/Core4DBucket/ablations_20260919_launch/LAUNCH_CN.md)、
+[去高度收件](logs/Core4DBucket/A_no_height_fresh12000_env2048_seed721_cloud_20260919/IMPORT_CN.md)、
+[桶双删除启动](logs/Core4DBucket/both_removed_20260919_launch/LAUNCH_CN.md)、
+[小桌收件](logs/Core4DSmallTableA/collection_20260920/RECEIPT_CN.md)。
+
+这一轮不追加训练/评测，不更改任何旧Demo奖励或checkpoint；如材料整理发现必须新增实验，
+先给出问题、比较条件和预算，再与用户确认。不以短检查代替完整学习评价，也不凑实验次数。
 
 ### 6.2 桶的最小消融矩阵
 
@@ -327,8 +354,8 @@ Vulkan图形初始化仍报错，但无窗口物理PPO已完成；云端渲染�
 
 ### 6.3 OMOMO单人Push的复用边界
 
-2026-09-19最新决定：先看两项桶消融，再选择奖励组合。下述“只加关系”保留为候选，
-不是已确定的配方或当前执行任务；届时允许由结果支持采用其他组合，再说明并确认。
+2026-09-25状态：桶五组结果已齐，但尚未共同选择OMOMO配方。下述“只加关系”保留为候选，
+不是已确定的配方或当前执行任务；结合最终对照重新说明目的与配置，再确认是否实施。
 
 - 用户指的是历史认可的单人`sub6_largetable_033` A1，不是双机器人Push，也不是09-11
   被暂停的新14关节避碰候选；两组使用同一参考，不把换参考的效果算作奖励收益。
@@ -351,13 +378,13 @@ Vulkan图形初始化仍报错，但无窗口物理PPO已完成；云端渲染�
   失败前缀与完整回合分开。单训练seed和跨GPU的局限保留；必要重复种子后续确认，不自动开跑。
 - 额外支撑不默认惩罚：先看是否维持物体并帮助交接。已有法向力不能单独量化承重/因果贡献；
   不强制50:50、不把接触覆盖提升等同信用分配已解决。椅子缺少接触力记录，暂作现象分析。
-- 小桌五组保留，最多两次新复试待确认；椅子/Push/Pull/Kick不换奖励、不覆写模型；Demo3/4失败记录保留。
+- 小桌七组全部保留，两次5kg有限复试已完成，不再自动追加；椅子/Push/Pull/Kick不换奖励、不覆写模型；Demo3/4诊断记录保留。
   FORCE、更多CORE4D片段、人—人图、attention、信用分配新网络暂不同时展开。
 - 论文仍按老师主线；动作语义优先，分工能解释则分析。两阶段/掌面模块作为支撑贡献；
   整理同一数据腕部前后对照与统一视频，不把缩物体收益算成腕部收益。
-  按09-19最新三天安排，9月22日开始正式写作，不把小桌成功或彻底消除参与不均当作前提。
-  新增5–6次实验容量中先准备3个候选（小桌完整A配方1、OMOMO2），余下2–3次按信息价值使用；
-  不凑满数量、不自动训练。具体单因素设计与排期以路线图第1.1节为准。
+  09-25先统一进度，再整理方法对照、展示与行为分析；旧09-22日期仅保留为历史目标。
+  不把小桌成功或彻底消除参与不均当作交付前提，不再按旧5–6次容量自动安排新实验。
+  当前顺序与授权范围以路线图第1.1节为准；本次只同步本地文档。
 
 结果入口：
 [椅子复核](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/TRAINING_REVIEW.md)、
@@ -382,9 +409,11 @@ Vulkan图形初始化仍报错，但无窗口物理PPO已完成；云端渲染�
 | 奖励尺度 | 位置0.3m且xyz权重1/1/2，朝向0.4rad，高度0.10m，关系0.04m |
 | 不启用 | B接触调制、旧Laplacian、旧负平方高度惩罚 |
 | 关系数据 | 已按小桌生成每人19点、物体85点（预算100）；不复制桶点或源接触标签 |
-| 策略 | 共享Actor158、全局Critic527，建议从零；不加载桶checkpoint |
+| 策略 | 共享Actor158、全局Critic527，实际从零训练；未加载桶checkpoint |
 | 已确认预算 | 从零12000轮、2048env×24步、seed721、每2000保存；不加载短检查模型 |
 | 执行位置 | 云端独立目录；09-20 13:25:54 UTC正常结束，真实退出0；已按同名本地目录归档 |
+
+以下为09-19准备/启动时的历史记录；当前已完成训练及评测，结果见6.6节，不表示云端仍运行。
 
 最初只读核对：远端RTX4090共24564MiB，已用6396MiB、利用率71%，一个训练进程214432；
 桶双删除组读取时为3780轮，最近100轮平均2.649秒/轮。它仍在运行，未启动/停止其他进程。
@@ -429,6 +458,8 @@ Vulkan图形初始化仍报错，但无窗口物理PPO已完成；云端渲染�
 | 身体跟踪/正则/终止/网络 | 原配置 | 不变，Actor158、Critic527 |
 | 训练 | fresh12000，2048×24，seed721，每2000保存 | 相同，不加载短检查模型 |
 
+以下准备与启动信息保留09-20时序；当前完成状态见本节末尾。
+
 实验入口 `--experiment smalltable5kg_A --reward-variant bucket_A_no_rel_no_height`：
 前者是共用场景身份，后者才是本组奖励身份，明确写入run_config和checkpoint。
 没有旧Laplacian或B接触调制，不强制手接触；高度及关系诊断仍记录，只有奖励贡献归零。
@@ -445,7 +476,8 @@ PID288351，tmux=`smalltable5kg-bothremoved-train12000`；旧A PID249989不停�
 
 09-20收件更新（覆盖上述启动时状态）：双删除于19:48:01 UTC正常结束，真实退出0。
 两组共37原始文件393865900字节已归档；14个模型（含2个最终12000）全部SHA256/CPU严格加载通过，
-每组12000条连续指标均有限。云端原件不删、实例未停、未推送GitHub；尚未运行本地评测。
+每组12000条连续指标均有限。在这个收件时点，云端原件未删、实例未停，尚未运行本地评测；
+当日晚间评测已完成（见下段），随后09-20文档/源码已按用户授权推送。09-25未核查远端实例状态。
 完整配置仍只差奖励两项贡献/身份、独立路径和开始时间。
 目录入口与全部校验见[收件报告](logs/Core4DSmallTableA/collection_20260920/RECEIPT_CN.md)。
 
@@ -506,3 +538,122 @@ PID288351，tmux=`smalltable5kg-bothremoved-train12000`；旧A PID249989不停�
 能以同一套入口处理已接入来源的新序列，并保存来源与运行配置。
 未做的全数据集自动选优/自动修复、统一语义评分和批量通过率，不作为现有贡献。
 论文先把已实现步骤、已有案例及人工确认位置讲清楚，无需为补故事新造复杂筛选系统。
+
+## 9. 实验身份与文件入口（2026-09-25统一核查）
+
+这是第2/3节的可执行文件索引，不是新路线或重新运行结果。只读核对run_config、status、
+逐回合summary、报告及文件存在性；没有加载模型、重新计算所有资产hash或启动仿真。
+表中短ID仅方便引用，不重命名目录、不搬运文件、不修改历史JSON。
+
+### 9.1 CORE4D十三组正式实验
+
+全部从零12000轮；2048环境×24步、训练seed721、每2000保存、共享Actor158/全局Critic527。
+13个最终模型、配置、status和对应summary均存在，status均记录final_iteration=12000、passed=true。
+这不是从status推断正常退出；真实进程退出码须看各组原始exit/收件报告。完成数由summary逐回合
+completed_reference统计，指到参考末尾，不等同于操作语义或泛化成功。
+
+| ID | 配置/奖励身份 | 质量/参考 | 最终模型与实际配置 | 最终模型评测 | 完整回合 |
+|---|---|---|---|---|---|
+| B-A | 桶A：R0(2)+rz+2rrel | 1kg / BKT | [12000](logs/Core4DBucket/A_fresh12000_env2048_seed721/model_12000.pt) · [配置](logs/Core4DBucket/A_fresh12000_env2048_seed721/run_config.json) | [summary](logs/Core4DBucket/A_fresh12000_env2048_seed721/evaluation_20260919_seed721/summary.json) | 2/5 |
+| B-B | 桶B：A物体/关系块乘g | 1kg / BKT | [12000](logs/Core4DBucket/B_fresh12000_env2048_seed721_cloud_20260918/model_12000.pt) · [配置](logs/Core4DBucket/B_fresh12000_env2048_seed721_cloud_20260918/run_config.json) | [summary](logs/Core4DBucket/B_fresh12000_env2048_seed721_cloud_20260918/evaluation_20260919_seed721/summary.json) | 1/5 |
+| B-R0 | 桶去关系：R0(2)+rz | 1kg / BKT | [12000](logs/Core4DBucket/A_no_rel_fresh12000_env2048_seed721_20260919/model_12000.pt) · [配置](logs/Core4DBucket/A_no_rel_fresh12000_env2048_seed721_20260919/run_config.json) | [summary](logs/Core4DBucket/A_no_rel_fresh12000_env2048_seed721_20260919/evaluation_20260919_seed721/summary.json) | 4/5 |
+| B-Z0 | 桶去独立高度：R0(2)+2rrel | 1kg / BKT | [12000](logs/Core4DBucket/A_no_height_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt) · [配置](logs/Core4DBucket/A_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json) | [summary](logs/Core4DBucket/A_no_height_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260919_seed721/summary.json) | 0/5 |
+| B-RZ0 | 桶双删除：R0(2)；当前首选展示 | 1kg / BKT | [12000](logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt) · [配置](logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json) | [summary](logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/summary.json) | 5/5 |
+| T-01 | 小桌基础11项，wz1 | 20kg / ST20 | [12000](logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/model_12000.pt) · [配置](logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/run_config.json) | [summary](logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/evaluation/model12000_seed721/summary.json) | 5/5 |
+| T-02 | 小桌wz1+旧Laplacian | 20kg / ST20+LAP | [12000](logs/Core4DSmallTable/interaction_mesh_fresh12000_save2000_actor158_seed721_env2048/model_12000.pt) · [配置](logs/Core4DSmallTable/interaction_mesh_fresh12000_save2000_actor158_seed721_env2048/run_config.json) | [summary](logs/Core4DSmallTable/interaction_mesh_fresh12000_save2000_actor158_seed721_env2048/evaluation/model12000_seed721/summary.json) | 2/5 |
+| T-03 | 小桌基础11项，wz2 | 20kg / ST20 | [12000](logs/Core4DSmallTable/baseline_z2_fresh12000_save2000_actor158_seed721_env2048_20260915/model_12000.pt) · [配置](logs/Core4DSmallTable/baseline_z2_fresh12000_save2000_actor158_seed721_env2048_20260915/run_config.json) | [summary](logs/Core4DSmallTable/baseline_z2_fresh12000_save2000_actor158_seed721_env2048_20260915/evaluation_20260916/model12000_seed721/summary.json) | 5/5 |
+| T-04 | 小桌wz2+旧Laplacian | 20kg / ST20+LAP | [12000](logs/Core4DSmallTable/interaction_mesh_z2_fresh12000_save2000_actor158_seed721_env2048_cloud_20260915/model_12000.pt) · [配置](logs/Core4DSmallTable/interaction_mesh_z2_fresh12000_save2000_actor158_seed721_env2048_cloud_20260915/run_config.json) | [summary](logs/Core4DSmallTable/interaction_mesh_z2_fresh12000_save2000_actor158_seed721_env2048_cloud_20260915/evaluation/model12000_seed721/summary.json) | 5/5 |
+| T-05 | 小桌wz2+旧图+独立高度负惩罚 | 20kg / ST20+LAP | [12000](logs/Core4DSmallTable/interaction_mesh_z2_height1_scale005_fresh12000_save2000_actor158_seed721_env2048_20260916/model_12000.pt) · [配置](logs/Core4DSmallTable/interaction_mesh_z2_height1_scale005_fresh12000_save2000_actor158_seed721_env2048_20260916/run_config.json) | [summary](logs/Core4DSmallTable/interaction_mesh_z2_height1_scale005_fresh12000_save2000_actor158_seed721_env2048_20260916/evaluation_20260917/model12000_seed721/summary.json) | 4/5 |
+| T-06 | 5kg小桌完整A：R0(2)+rz+2rrel | 5kg / ST5 | [12000](logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt) · [配置](logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/run_config.json) | [summary](logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/summary.json) | 5/5 |
+| T-07 | 5kg小桌双删除：R0(2) | 5kg / ST5 | [12000](logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/model_12000.pt) · [配置](logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json) | [summary](logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/summary.json) | 3/5 |
+| C-01 | 椅子基础11项，wz1 | 5kg / CHR | [12000](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/model_12000.pt) · [配置](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/run_config.json) | [summary](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/model12000_seed/summary.json) | 9/9（3×3） |
+
+椅子的另外两份summary：[seed722](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/model12000_seed722/summary.json)、
+[seed723](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/model12000_seed723/summary.json)；第一份目录确实叫
+`model12000_seed`，不要补造seed721路径。三份回放数值相同，仅作重复性记录。
+T-04另有[09-17同模型复测](logs/Core4DSmallTable/interaction_mesh_z2_fresh12000_save2000_actor158_seed721_env2048_cloud_20260915/evaluation_20260917/model12000_seed721/summary.json)，
+与T-05进行高度惩罚比较；不另算一次训练。
+
+**共同物理与配置追溯**：上述CORE4D资产采用静/动摩擦0.5/0.5、恢复0，物理200Hz/控制50Hz。
+具体reference和资产清单见下表；精确训练参数、运行身份和hash以每行实际配置及云端冻结清单为准。
+云端旧绝对路径保留原样，本表提供本地对应文件，不重写历史来源。
+
+| 参考代号 | 数据与处理路径 | 本地运行参考 | 资产清单/关系artifact |
+|---|---|---|---|
+| BKT | 20231020/071 / bucket003；原尺寸、两阶段后wrist-only A1 | [runtime](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz) | [manifest](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/training_asset_manifest.json) · [关系](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/interaction_vectors_v1.npz) |
+| ST20 | 20231030/001 / desk001；共享缩小物体Stage1 nominal | [runtime](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/core4d_pair_runtime_fps50.npz) | [manifest](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/training_asset_manifest.json) |
+| ST5 | 与ST20同一运动参考；5kg资产独立身份 | [runtime](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz) | [manifest](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/training_asset_manifest.json) · [关系](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/interaction_vectors_v1.npz) |
+| CHR | 20231020/074 / chair021；共享小椅子A1 | [runtime](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz) | [manifest](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/training_asset_manifest.json) |
+
+LAP使用[小桌旧Laplacian artifact](src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/interaction_mesh_100_v1.npz)；
+BKT与ST5各用自己的采样点及相对向量，不能互换。ST20/ST5在run_config记录相同runtime SHA，
+与“不重新retarget、只换质量资产”的设计一致；本次未重新计算NPZ hash。
+
+身份解释与保留范围：
+
+- T-01旧配置没有显式reward_variant/wz字段，T-02也无显式wz；基础项和wz1由实际reward_terms、
+  旧报告与配置说明联合确定，不回填原始JSON。
+- 桶与ST5顶层旧通用object_z_error_weight字段不控制专用块；实际contract为xyz=[1,1,2]。
+  第3节矩阵记录生效奖励，不据顶层旧字段误写wz1。
+- B-B和T-04标准目录本地只保留最终model_12000；其余11组各有0、2000至12000七个模型。
+  最终模型均在；不声称未收取的中间模型在其他机器上仍可用。
+- 旧收件目录与标准归档目录不是两个实验，smoke及失败预评测也不追加计入正式比较。
+- 代表回放：桶B-RZ0为evaluation_20260920_seed721/episode_000.npz；
+  T-06为同名评测目录episode_001.npz；T-07完整代表为episode_003.npz，
+  失败例为episode_000.npz。全部回合保留，旧端口不作为唯一定位方式。
+
+报告汇总：
+[桶A/B](logs/Core4DBucket/comparison_20260919/RESULTS_CN.md)、
+[桶最终消融](logs/Core4DBucket/ablation_comparison_20260920/RESULTS_CN.md)、
+[旧小桌高度对照](logs/Core4DSmallTable/interaction_mesh_z2_height1_scale005_fresh12000_save2000_actor158_seed721_env2048_20260916/evaluation_20260917/RESULTS_CN.md)、
+[5kg两组](logs/Core4DSmallTableA/comparison_20260920/RESULTS_CN.md)、
+[椅子](logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/TRAINING_REVIEW.md)。
+
+### 9.2 历史OMOMO五类Demo（只索引，不搬入当前工作树）
+
+根目录为 `/home/kevin/holosoma-rubber-hand-marl`。下表均有实际文件；质量从各run_config物理读回为20kg，
+机器人为rubber-hand G1。精确摩擦、参考构造、预算、保存间隔及控制实现以各自配置为准，
+不套用CORE4D的fresh12000。前三类WBT初始化，Demo3/4奖励及桌轨迹用途不同。
+
+| Demo | 当前保留模型/配置 | 评测入口 | 奖励身份与结果 |
+|---|---|---|---|
+| Push live-PD | [model_13050.pt](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt) · [配置](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/run_config.json) | [日志/回放](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827) | 基础11项；无joint-acceleration schedule；13050为1/9；14050、15050均0/9 |
+| Pull | [model_08050.pt](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_08050.pt) · [配置](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/run_config.json) | [日志/回放](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/eval_full8000_seed721/model_08050_object_centric.npz) | 基础11项；已有单条完整回放316/316帧 |
+| Kick | [model_08000.pt](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Kick/mirrored_kick_full8000_seed721_env2048/model_08000.pt) · [配置](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Kick/mirrored_kick_full8000_seed721_env2048/run_config.json) | [日志/回放](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Kick/eval_model08000_seed721/model_08000_actor_only_rollout.npz) | 基础11项；已有单条完整回放step0–297 |
+| Demo3对抗 | [model_10100.pt](/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/model_10100.pt) · [配置](/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/run_config_resume_from_06800.json) | [日志/回放](/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/eval_model10100_seed721/evaluation.json) | 8项身体/正则+相反拉轴速度；5回合均6步跌倒；诊断用途 |
+| Demo4旋转 | [model_10000.pt](/home/kevin/holosoma-rubber-hand-marl/logs/Demo4Rotate/rectangular_pull_pull_rotate90_full10000_save1000_seed721_env2048/model_10000.pt) · [配置](/home/kevin/holosoma-rubber-hand-marl/logs/Demo4Rotate/rectangular_pull_pull_rotate90_full10000_save1000_seed721_env2048/run_config.json) | [日志/回放](/home/kevin/holosoma-rubber-hand-marl/logs/Demo4Rotate/eval_model10000_seed721/evaluation.json) | 8项身体/正则+yaw进度/首次达标；5/5触发角度目标，但猛烈甩转；非质量合格 |
+
+| Demo | 实际参考入口/构造 | 配置中的物体资产名 |
+|---|---|---|
+| Push live-PD | [单人A1](/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz)；运行时横向配对，间距0.8m，paired_reference_file=null | objects_widetable_plan5_training.urdf |
+| Pull | [镜像双人参考](/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz) | objects_widetable_plan5_pull_training.urdf |
+| Kick | [镜像双人参考](/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz) | objects_widetable_plan5_pull_training.urdf |
+| Demo3 | [对角对抗参考](/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/demo3_tug/sub3_010_diagonal_tug_runtime.npz)；桌轨迹用于reset/schema，不作共同轨迹奖励 | objects_squaretable_demo3_training.urdf |
+| Demo4 | [机器人拉动/静态桌reset参考](/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/demo4_rotate/demo4_pull_pull_static_table_runtime.npz)；不跟踪桌轨迹 | objects_widetable_plan5_pull_training.urdf |
+
+**Push两条链必须区分**：表中为live-PD 13050，不是
+[旧smooth 13050](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_10050_jointacc_continue_to15000_seed721_env2048/model_13050.pt)。
+旧smooth带joint-acceleration schedule（目标−5e−9、ramp500）；其
+[旧评测目录](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_10050_jointacc_continue_eval/)不能支持live-PD的成功率。
+live-PD续训目录另保留14050/15050，同链前驱为
+[live-PD 08050](/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_livepd_20kg_full8000_from_critic50_seed721_env2048/model_08050.pt)。
+后续统一视频必须标出模型完整路径，不能只写“13050”。
+
+Demo3目录名包含15000，但恢复运行实际按要求止于10100，不把原计划终点当完成量。
+Demo4当前只保留最终10000，不能依据save1000目录名推断中间模型还在。
+Push/Pull/Kick对应评测没有独立summary.json，已有日志/NPZ及
+[历史路线图报告](/home/kevin/holosoma-rubber-hand-marl/MULTI_AGENT_EMERGENCE_ROADMAP.md)；不编造summary路径。
+这些结果与CORE4D评测口径分别标注，不把单条完整回放和多回合比例当作同一统计。
+
+### 9.3 09-25本次统一完成项与剩余材料
+
+- 已完成：三份现有文档同步；CORE4D十三组和OMOMO五类的模型/配置/参考/奖励/评测入口核对。
+  已存在模型采用索引；原日志、配置和资产未改。可读配置/评测副本另存交接证据目录，按本轮授权同步GitHub。
+- 已完成方法核查：三类腕部配对、椅子数值图、同目标单/两阶段条件表和参考来源追溯，见4.1。
+- 已整理Mac交接：五类主展示＋桶A/B＋5kg小桌分析，共8段MP4、48张PNG、8张六宫格；
+  从已有物理回放离线重新渲染，不重新求解、运行策略或动力学步进。
+  同时提供源码导航、主张索引和13组便携配置/评测（原日志不动）。
+- 可选补充：腕部前后同相机图、方法共同几何指标、桶交接定量时序；不混称已完成。
+- 待用户复核：最新5kg小桌两组回放；不把这项反馈设为继续写作的障碍。
+- 需另行确认：OMOMO单人奖励实验、任何新训练/新数据/改奖励/重求解。
+- 用户已授权本轮文档、便携证据、展示素材及独立导出工具提交/推送；未删除备份或checkpoint。

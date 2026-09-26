@@ -1,0 +1,394 @@
+{
+  "_artifact_kind": "derived_readable_config_not_the_original",
+  "_source_sha256": "e3c7cd2ef2d6482bb267c55e42d20f2d73b3d8048f00537919ed7b68651d96b4",
+  "_original_lossless_copy": "run_config.json.gz",
+  "_transformation": "All keys retained; arrays longer than 32 entries summarized.",
+  "config": {
+    "actor_forward_contract": "[E,2,164] -> [E*2,164] -> [E,2,29]",
+    "actor_observation_groups": {
+      "actor_obs": 154,
+      "table_obs": 6,
+      "teammate_obs": 4
+    },
+    "actor_parameters_shared": true,
+    "asset_sha256": {
+      "robot_urdf": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "runtime_reference": "5baedb3f109402c521590701263facfa6b42649f4f18bdcefb5933d9b4a7caf5",
+      "table_urdf": "386da8a4201a9365f7d4eef9e6ae2fb326c2777fac4998b72c4af6de693f9d1b",
+      "warm_start": "048f952cad01d5fda42851502347ee626751dccab923905af303eb44807ef01b"
+    },
+    "checkpoint_interval": 150,
+    "clip_param": 0.2,
+    "config": "g1_29dof_demo3_tug_baseline",
+    "critic_forward_contract": "[E,2,527] -> [E*2,527] -> [E,2,1]",
+    "critic_initialization": "restored_from_demo3_resume",
+    "critic_observation_dim": 527,
+    "critic_only_iterations": 50,
+    "done_model": "shared_physical_episode",
+    "entropy_coef": 0.005,
+    "final_iteration": 15050,
+    "full_actor_iterations": 15000,
+    "gamma": 0.99,
+    "git_commit": "ba40922504f57b318bfda0946dd3faea3a814134",
+    "lambda": 0.95,
+    "learning_rates": {
+      "actor": {
+        "actual": 1.5000000000000002e-05,
+        "requested_override": null,
+        "source": "restored_checkpoint"
+      },
+      "critic": {
+        "actual": 0.001,
+        "requested_override": null,
+        "source": "restored_checkpoint"
+      }
+    },
+    "ledger_origin_output_dir": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048",
+    "ledger_relocated": false,
+    "metrics_path": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/metrics_resume_from_06800.jsonl",
+    "num_agents": 2,
+    "num_envs": 2048,
+    "num_learning_epochs": 5,
+    "num_mini_batches": 4,
+    "object_physics": {
+      "com_pose_body_xyzw": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          0.0,
+          -0.012413473799824715,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "last_entry": [
+          0.0,
+          -0.012413473799824715,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "inertia_kg_m2_row_major": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          0.8219720125198364,
+          0.0,
+          0.0,
+          0.0,
+          1.2061833143234253,
+          0.0,
+          0.0,
+          0.0,
+          0.8219720125198364
+        ],
+        "last_entry": [
+          0.8219720125198364,
+          0.0,
+          0.0,
+          0.0,
+          1.2061833143234253,
+          0.0,
+          0.0,
+          0.0,
+          0.8219720125198364
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "mass_kg": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": 20.0,
+        "last_entry": 20.0,
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "material_static_dynamic_restitution": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "last_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      }
+    },
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_squaretable_demo3_training.urdf",
+    "opponent_update": "synchronous_current_shared_actor",
+    "optimizer_initialization": "restored_from_demo3_resume",
+    "original_run_config": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/run_config.json",
+    "output_dir": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048",
+    "ppo_contract": {
+      "actor_optimizer": {
+        "target": "torch.optim.AdamW",
+        "weight_decay": 0.0
+      },
+      "clip_param": 0.2,
+      "critic_optimizer": {
+        "target": "torch.optim.AdamW",
+        "weight_decay": 0.0
+      },
+      "desired_kl": 0.01,
+      "empirical_normalization": true,
+      "entropy_coef": 0.005,
+      "gae_lambda": 0.95,
+      "gamma": 0.99,
+      "init_noise_std": 1.0,
+      "learning_rate_resume_policy": "restore_optimizer_state_unless_explicit_cli_override",
+      "max_actor_learning_rate": null,
+      "max_grad_norm": 1.0,
+      "min_actor_learning_rate": null,
+      "module_dict": {
+        "actor": {
+          "input_dim": [
+            "actor_obs",
+            "teammate_obs",
+            "table_obs"
+          ],
+          "layer_config": {
+            "activation": "ELU",
+            "dropout_prob": 0.0,
+            "encoder_activation": "ELU",
+            "encoder_hidden_dims": null,
+            "encoder_input_name": "",
+            "encoder_output_dim": null,
+            "hidden_channels": null,
+            "hidden_dims": [
+              512,
+              256,
+              128
+            ],
+            "input_channels": 1,
+            "input_height": 1,
+            "input_width": 1,
+            "kernel_size": 3,
+            "module_input_name": [],
+            "padding": "same",
+            "stride": 1,
+            "use_layer_norm": false
+          },
+          "min_mean_noise_std": null,
+          "min_noise_std": null,
+          "output_dim": [
+            "robot_action_dim"
+          ],
+          "type": "MLP"
+        },
+        "critic": {
+          "input_dim": [
+            "critic_obs"
+          ],
+          "layer_config": {
+            "activation": "ELU",
+            "dropout_prob": 0.0,
+            "encoder_activation": "ELU",
+            "encoder_hidden_dims": null,
+            "encoder_input_name": "",
+            "encoder_output_dim": null,
+            "hidden_channels": null,
+            "hidden_dims": [
+              512,
+              256,
+              128
+            ],
+            "input_channels": 1,
+            "input_height": 1,
+            "input_width": 1,
+            "kernel_size": 3,
+            "module_input_name": [],
+            "padding": "same",
+            "stride": 1,
+            "use_layer_norm": false
+          },
+          "min_mean_noise_std": null,
+          "min_noise_std": null,
+          "output_dim": [
+            1
+          ],
+          "type": "MLP"
+        }
+      },
+      "num_learning_epochs": 5,
+      "num_mini_batches": 4,
+      "num_steps_per_env": 24,
+      "schedule": "adaptive",
+      "symmetry_actor_coef": 1.0,
+      "symmetry_critic_coef": 0.0,
+      "use_symmetry": false,
+      "value_loss_coef": 1.0
+    },
+    "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/demo3_tug/sub3_010_diagonal_tug_runtime.npz",
+    "reference_table_policy": "reset_only_no_trajectory_tracking",
+    "requested_stop_iteration": 10100,
+    "resume_checkpoint": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/model_06800.pt",
+    "return_model": "per_agent_reward_value_return_advantage",
+    "reward_terms": [
+      "motion_global_ref_position_error_exp",
+      "motion_global_ref_orientation_error_exp",
+      "motion_relative_body_position_error_exp",
+      "motion_relative_body_orientation_error_exp",
+      "motion_global_body_lin_vel",
+      "motion_global_body_ang_vel",
+      "action_rate_l2",
+      "limits_dof_pos",
+      "signed_table_progress_velocity"
+    ],
+    "reward_weights": {
+      "action_rate_l2": -0.1,
+      "limits_dof_pos": -10.0,
+      "motion_global_body_ang_vel": 1.0,
+      "motion_global_body_lin_vel": 1.0,
+      "motion_global_ref_orientation_error_exp": 0.5,
+      "motion_global_ref_position_error_exp": 0.5,
+      "motion_relative_body_orientation_error_exp": 1.0,
+      "motion_relative_body_position_error_exp": 1.0,
+      "signed_table_progress_velocity": 10.0
+    },
+    "robot_urdf": "g1/main_mesh_collision_rubberhand.urdf",
+    "run_config_path": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/run_config_resume_from_06800.json",
+    "run_end_iteration": 10100,
+    "runtime_process": {
+      "cuda_visible_devices": "0",
+      "device_within_visible_set": "cuda:0",
+      "distributed_data_parallel": false,
+      "world_size": 1
+    },
+    "scenario": "competitive_square_table_diagonal_tug",
+    "seed": 721,
+    "source_checkpoint": "logs/Demo3Tug/checkpoints/model_07999_actor164_table_neutral.pt",
+    "source_checkpoint_sha256": "048f952cad01d5fda42851502347ee626751dccab923905af303eb44807ef01b",
+    "source_iteration": 7999,
+    "source_state_loaded": "full_demo3_resume_after_warm_start_architecture",
+    "start_iteration": 6800,
+    "started_unix_time": 1788027586.5481503,
+    "steps_per_env": 24,
+    "table_observation_contains_yaw_rate": false,
+    "termination_terms": [
+      "reference_horizon",
+      "clear_robot_fall"
+    ],
+    "training_contract": {
+      "actor_parameter_sharing": "one_current_shared_actor_for_both_agents",
+      "checkpoint_interval": 150,
+      "critic_only_iterations": 50,
+      "done_model": "shared_physical_episode",
+      "full_actor_iterations": 15000,
+      "object_com_m": [
+        0.0,
+        -0.012413473401914,
+        0.0
+      ],
+      "object_inertia_kg_m2_row_major": [
+        0.821972006993735,
+        0.0,
+        0.0,
+        0.0,
+        1.206183371508506,
+        0.0,
+        0.0,
+        0.0,
+        0.821972006993735
+      ],
+      "object_mass_kg": 20.0,
+      "object_material_static_dynamic_restitution": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "opponent_policy": "synchronous_current_shared_actor",
+      "randomization": "fixed_frame0_fixed_mass_fixed_material_no_opponent_randomization",
+      "reference_end": "clamp_without_looping",
+      "reference_fps": 50,
+      "reference_frames": 317,
+      "reference_start": "fixed_frame_zero",
+      "return_model": "per_agent_reward_value_return_advantage",
+      "reward_weights": {
+        "action_rate_l2": -0.1,
+        "limits_dof_pos": -10.0,
+        "motion_global_body_ang_vel": 1.0,
+        "motion_global_body_lin_vel": 1.0,
+        "motion_global_ref_orientation_error_exp": 0.5,
+        "motion_global_ref_position_error_exp": 0.5,
+        "motion_relative_body_orientation_error_exp": 1.0,
+        "motion_relative_body_position_error_exp": 1.0,
+        "signed_table_progress_velocity": 10.0
+      },
+      "robot_asset": "main_mesh_collision_rubberhand.urdf",
+      "robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "rubber_hand_collision": true,
+      "runtime_reference_sha256": "5baedb3f109402c521590701263facfa6b42649f4f18bdcefb5933d9b4a7caf5",
+      "scenario": "competitive_square_table_diagonal_tug",
+      "signed_progress_reward_weight": 10.0,
+      "square_table_urdf_sha256": "386da8a4201a9365f7d4eef9e6ae2fb326c2777fac4998b72c4af6de693f9d1b",
+      "table_asset": "objects_squaretable_demo3_training.urdf",
+      "table_obs_contains_yaw_rate": false,
+      "table_reference_role": "reset_and_schema_only_not_tracking_target",
+      "termination": {
+        "maximum_gravity_z": -0.2,
+        "minimum_ref_body_height_m": 0.25,
+        "reference_horizon_frames": 317
+      },
+      "warm_start_iteration": 7999,
+      "warm_start_sha256": "048f952cad01d5fda42851502347ee626751dccab923905af303eb44807ef01b"
+    }
+  }
+}

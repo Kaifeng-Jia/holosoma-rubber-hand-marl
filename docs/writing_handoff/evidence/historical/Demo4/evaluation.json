@@ -1,0 +1,83 @@
+{
+  "checkpoint": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo4Rotate/rectangular_pull_pull_rotate90_full10000_save1000_seed721_env2048/model_10000.pt",
+  "checkpoint_iteration": 10000,
+  "deterministic_inference": true,
+  "episode_results": [
+    {
+      "episode": 0,
+      "fall": false,
+      "final_unwrapped_yaw_deg": 99.92314038729364,
+      "final_unwrapped_yaw_rad": 1.743987798690796,
+      "max_unwrapped_yaw_deg": 99.92314038729364,
+      "max_unwrapped_yaw_rad": 1.743987798690796,
+      "reward_sum": 15.137889224570245,
+      "steps": 14,
+      "success": true,
+      "table_safety": false,
+      "timeout": false
+    },
+    {
+      "episode": 1,
+      "fall": false,
+      "final_unwrapped_yaw_deg": 98.08601757604615,
+      "final_unwrapped_yaw_rad": 1.7119239568710327,
+      "max_unwrapped_yaw_deg": 98.08601757604615,
+      "max_unwrapped_yaw_rad": 1.7119239568710327,
+      "reward_sum": 15.131501325406134,
+      "steps": 14,
+      "success": true,
+      "table_safety": false,
+      "timeout": false
+    },
+    {
+      "episode": 2,
+      "fall": false,
+      "final_unwrapped_yaw_deg": 100.60037413406792,
+      "final_unwrapped_yaw_rad": 1.7558077573776245,
+      "max_unwrapped_yaw_deg": 100.60037413406792,
+      "max_unwrapped_yaw_rad": 1.7558077573776245,
+      "reward_sum": 15.151671846397221,
+      "steps": 15,
+      "success": true,
+      "table_safety": false,
+      "timeout": false
+    },
+    {
+      "episode": 3,
+      "fall": false,
+      "final_unwrapped_yaw_deg": 97.00639006450973,
+      "final_unwrapped_yaw_rad": 1.6930809020996094,
+      "max_unwrapped_yaw_deg": 97.00639006450973,
+      "max_unwrapped_yaw_rad": 1.6930809020996094,
+      "reward_sum": 15.129541757516563,
+      "steps": 14,
+      "success": true,
+      "table_safety": false,
+      "timeout": false
+    },
+    {
+      "episode": 4,
+      "fall": false,
+      "final_unwrapped_yaw_deg": 99.18196240950971,
+      "final_unwrapped_yaw_rad": 1.7310518026351929,
+      "max_unwrapped_yaw_deg": 99.18196240950971,
+      "max_unwrapped_yaw_rad": 1.7310518026351929,
+      "reward_sum": 15.137920183129609,
+      "steps": 14,
+      "success": true,
+      "table_safety": false,
+      "timeout": false
+    }
+  ],
+  "episodes": 5,
+  "fall_count": 0,
+  "inference_network": "shared_actor_only_critic_not_called",
+  "representative_episode": 2,
+  "representative_viser_npz": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo4Rotate/eval_model10000_seed721/representative_episode.npz",
+  "scenario": "cooperative_rectangular_table_rotate_90deg",
+  "seed": 721,
+  "success_count": 5,
+  "success_rate": 1.0,
+  "table_safety_count": 0,
+  "timeout_count": 0
+}

@@ -1,0 +1,355 @@
+{
+  "_artifact_kind": "derived_readable_config_not_the_original",
+  "_source_sha256": "2e36bb191ff9c39ee327dff65c5710203ded9121dd8244ee1e51346474a6a40e",
+  "_original_lossless_copy": "run_config.json.gz",
+  "_transformation": "All keys retained; arrays longer than 32 entries summarized.",
+  "config": {
+    "action_dim_per_agent": 29,
+    "actor_input_dim": 158,
+    "actor_learning_rate": 0.001,
+    "actor_observation_groups": {
+      "actor_obs": 154,
+      "teammate_obs": 4
+    },
+    "bucket_reference": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/interaction_vectors_v1.npz",
+    "bucket_reward_contract": {
+      "artifact_sha256": "3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f",
+      "block_weights_position_rotation_height_relation": [
+        1.0,
+        1.0,
+        1.0,
+        0.0
+      ],
+      "contact_detection": "current_physics_sample_any_hand_per_agent_normal_force",
+      "contact_error_normalization": "sum(alpha*(1-contact))/max(1,sum(alpha))",
+      "contact_gate_floor": 0.5,
+      "contact_gate_scale": 2.0,
+      "contact_target": "source_human_geometry_confidence_not_force_ground_truth",
+      "contact_threshold_n": 1.0,
+      "height_sigma_m": 0.1,
+      "position_error_weights_xyz": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "position_sigma_m": 0.3,
+      "relation_distance_floor_m": 0.1,
+      "relation_sigma_m": 0.04,
+      "reward_composition": "unchanged_body_and_regularizers_plus_gated_interaction_block",
+      "rotation_sigma_rad": 0.4,
+      "runtime_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+      "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "variant": "A_no_rel",
+      "version": "core4d_bucket_vectors_soft_contact_v1"
+    },
+    "clip_param": 0.2,
+    "control_hz": 50.0,
+    "critic_input_dim": 527,
+    "critic_learning_rate": 0.001,
+    "entropy_coef": 0.005,
+    "experiment": "bucket003",
+    "experiment_contract": {
+      "experiment_id": "bucket003",
+      "object_name": "bucket003",
+      "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+      "physics_contract": {
+        "control_hz": 50,
+        "material_static_dynamic_restitution": [
+          0.5,
+          0.5,
+          0.0
+        ],
+        "object_collider_type": "convex_decomposition",
+        "object_mass_kg": 1.0,
+        "physics_hz": 200
+      },
+      "reference_fps": 50,
+      "reference_frames": 497,
+      "runtime_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+      "source_pair_sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+      "training_promotion_sha256": "c046024e7df74ae803f8231cfc406b1e3997ca2f3756f85292d37e251b77814d"
+    },
+    "gamma": 0.99,
+    "git_commit": "a21858b27da212f02f6dcf2bdb978a54743bcbae",
+    "initialization": "fresh",
+    "interaction_contract": null,
+    "interaction_reference": null,
+    "iterations_requested": 12000,
+    "lambda": 0.95,
+    "num_agents": 2,
+    "num_envs": 2048,
+    "object_collider_type": "convex_decomposition",
+    "object_physics": {
+      "com_pose_body_xyzw": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          -0.008895802311599255,
+          0.03501851111650467,
+          0.0007573200855404139,
+          0.0001318706345045939,
+          0.01467776857316494,
+          0.011216899380087852,
+          0.9998294115066528
+        ],
+        "last_entry": [
+          -0.008895802311599255,
+          0.03501851111650467,
+          0.0007573200855404139,
+          0.0001318706345045939,
+          0.01467776857316494,
+          0.011216899380087852,
+          0.9998294115066528
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "inertia_kg_m2_row_major": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          0.05640510097146034,
+          0.0007428647950291634,
+          -9.573530405759811e-06,
+          0.0007428647368215024,
+          0.02330535463988781,
+          -1.966467607417144e-05,
+          -9.573646821081638e-06,
+          -1.9664679712150246e-05,
+          0.05608103424310684
+        ],
+        "last_entry": [
+          0.05640510097146034,
+          0.0007428647950291634,
+          -9.573530405759811e-06,
+          0.0007428647368215024,
+          0.02330535463988781,
+          -1.966467607417144e-05,
+          -9.573646821081638e-06,
+          -1.9664679712150246e-05,
+          0.05608103424310684
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "mass_kg": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": 1.0,
+        "last_entry": 1.0,
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "material_static_dynamic_restitution": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "last_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      }
+    },
+    "object_position_tracking_contract": null,
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+    "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+    "object_z_error_weight": 1.0,
+    "physics_hz": 200.0,
+    "project": "Core4DBucket",
+    "reference_fps": 50,
+    "reference_frames": 497,
+    "reference_policy": "non_looping_position_and_orientation_tracking",
+    "resume_checkpoint": null,
+    "resume_checkpoint_sha256": null,
+    "reward_terms": [
+      "motion_global_ref_position_error_exp",
+      "motion_global_ref_orientation_error_exp",
+      "motion_relative_body_position_error_exp",
+      "motion_relative_body_orientation_error_exp",
+      "motion_global_body_lin_vel",
+      "motion_global_body_ang_vel",
+      "action_rate_l2",
+      "limits_dof_pos",
+      "undesired_contacts",
+      "bucket_interaction"
+    ],
+    "reward_variant": "bucket_A_no_rel",
+    "runtime_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+    "runtime_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+    "save_interval": 2000,
+    "scenario": "core4d_paired_bucket003_handover_reference_tracking",
+    "seed": 721,
+    "shared_actor": true,
+    "start_iteration": 0,
+    "started_unix_time": 1789789756.1407049,
+    "steps_per_env": 24,
+    "termination_terms": [
+      "reference_horizon",
+      "joint_bad_tracking"
+    ],
+    "training_promotion": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/training_asset_manifest.json",
+    "training_promotion_sha256": "c046024e7df74ae803f8231cfc406b1e3997ca2f3756f85292d37e251b77814d",
+    "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+  }
+}

@@ -1,0 +1,323 @@
+{
+  "_artifact_kind": "derived_readable_config_not_the_original",
+  "_source_sha256": "244eb0b03d61b9ca095db6b4ae59faedf0b70ae6b548486f513c04d16b093a78",
+  "_original_lossless_copy": "run_config.json.gz",
+  "_transformation": "All keys retained; arrays longer than 32 entries summarized.",
+  "config": {
+    "action_dim_per_agent": 29,
+    "actor_input_dim": 158,
+    "actor_learning_rate": 0.001,
+    "actor_observation_groups": {
+      "actor_obs": 154,
+      "teammate_obs": 4
+    },
+    "clip_param": 0.2,
+    "control_hz": 50.0,
+    "critic_input_dim": 527,
+    "critic_learning_rate": 0.001,
+    "entropy_coef": 0.005,
+    "experiment": "chair021",
+    "experiment_contract": {
+      "experiment_id": "chair021",
+      "object_name": "chair021",
+      "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+      "physics_contract": {
+        "control_hz": 50,
+        "material_static_dynamic_restitution": [
+          0.5,
+          0.5,
+          0.0
+        ],
+        "object_collider_type": "convex_decomposition",
+        "object_mass_kg": 5.0,
+        "physics_hz": 200
+      },
+      "reference_fps": 50,
+      "reference_frames": 391,
+      "runtime_reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+      "source_pair_sha256": "1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b",
+      "training_promotion_sha256": "13f11fe557c959c1b8b2e3d7c56533b29dbe6755b0ae9264f27e98f1ea1ec3db"
+    },
+    "gamma": 0.99,
+    "git_commit": "25c48aeb21841d88a14dcb0ce2522018e5c74f9b",
+    "initialization": "fresh",
+    "interaction_contract": null,
+    "interaction_reference": null,
+    "iterations_requested": 12000,
+    "lambda": 0.95,
+    "num_agents": 2,
+    "num_envs": 2048,
+    "object_collider_type": "convex_decomposition",
+    "object_physics": {
+      "com_pose_body_xyzw": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          -0.015340856276452541,
+          0.07486505806446075,
+          -0.0038091144524514675,
+          -0.017675086855888367,
+          0.023557094857096672,
+          -0.3771211802959442,
+          0.925695538520813
+        ],
+        "last_entry": [
+          -0.015340856276452541,
+          0.07486505806446075,
+          -0.0038091144524514675,
+          -0.017675086855888367,
+          0.023557094857096672,
+          -0.3771211802959442,
+          0.925695538520813
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "inertia_kg_m2_row_major": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          0.1253102421760559,
+          0.031546734273433685,
+          -0.0006530364044010639,
+          0.031546734273433685,
+          0.1267954558134079,
+          -0.0018691750010475516,
+          -0.0006530359387397766,
+          -0.0018691750010475516,
+          0.12221278250217438
+        ],
+        "last_entry": [
+          0.1253102421760559,
+          0.031546734273433685,
+          -0.0006530364044010639,
+          0.031546734273433685,
+          0.1267954558134079,
+          -0.0018691750010475516,
+          -0.0006530359387397766,
+          -0.0018691750010475516,
+          0.12221278250217438
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "mass_kg": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": 5.0,
+        "last_entry": 5.0,
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "material_static_dynamic_restitution": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "last_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      }
+    },
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+    "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+    "physics_hz": 200.0,
+    "project": "Core4DChair",
+    "reference_fps": 50,
+    "reference_frames": 391,
+    "reference_policy": "non_looping_position_and_orientation_tracking",
+    "resume_checkpoint": null,
+    "resume_checkpoint_sha256": null,
+    "reward_terms": [
+      "motion_global_ref_position_error_exp",
+      "motion_global_ref_orientation_error_exp",
+      "motion_relative_body_position_error_exp",
+      "motion_relative_body_orientation_error_exp",
+      "motion_global_body_lin_vel",
+      "motion_global_body_ang_vel",
+      "action_rate_l2",
+      "limits_dof_pos",
+      "undesired_contacts",
+      "object_global_ref_position_error_exp",
+      "object_global_ref_orientation_error_exp"
+    ],
+    "reward_variant": "baseline",
+    "runtime_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+    "runtime_reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+    "save_interval": 2000,
+    "scenario": "core4d_paired_chair021_reference_tracking",
+    "seed": 721,
+    "shared_actor": true,
+    "start_iteration": 0,
+    "started_unix_time": 1789020016.2810245,
+    "steps_per_env": 24,
+    "termination_terms": [
+      "reference_horizon",
+      "joint_bad_tracking"
+    ],
+    "training_promotion": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/training_asset_manifest.json",
+    "training_promotion_sha256": "13f11fe557c959c1b8b2e3d7c56533b29dbe6755b0ae9264f27e98f1ea1ec3db",
+    "training_robot_urdf_sha256": null
+  }
+}

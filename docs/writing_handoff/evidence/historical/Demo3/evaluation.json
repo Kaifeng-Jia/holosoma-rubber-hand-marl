@@ -1,0 +1,139 @@
+{
+  "checkpoint": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/square_table_diagonal_tug_full15000_seed721_env2048/model_10100.pt",
+  "checkpoint_iteration": 10100,
+  "consistent_explicit_reset_path": true,
+  "deterministic_inference": true,
+  "episode_initialization": "explicit_reset_all_with_zero_action_settle_before_every_episode",
+  "episode_results": [
+    {
+      "episode": 0,
+      "fall": true,
+      "planar_displacement_xy_m": [
+        0.015177428722381592,
+        -0.1013057753443718
+      ],
+      "reward_sum_agent_a": -1.285200122743845,
+      "reward_sum_agent_b": 1.0652063190937042,
+      "signed_displacement_m": -0.09885263442993164,
+      "steps": 6,
+      "timeout": false,
+      "winner": "agent_b"
+    },
+    {
+      "episode": 1,
+      "fall": true,
+      "planar_displacement_xy_m": [
+        0.01838962733745575,
+        -0.10183229297399521
+      ],
+      "reward_sum_agent_a": -1.2393580125644803,
+      "reward_sum_agent_b": 1.037925723940134,
+      "signed_displacement_m": -0.0990019291639328,
+      "steps": 6,
+      "timeout": false,
+      "winner": "agent_b"
+    },
+    {
+      "episode": 2,
+      "fall": true,
+      "planar_displacement_xy_m": [
+        0.018708452582359314,
+        -0.09263163059949875
+      ],
+      "reward_sum_agent_a": -1.3149516033008695,
+      "reward_sum_agent_b": 1.0787927471101284,
+      "signed_displacement_m": -0.08982664346694946,
+      "steps": 6,
+      "timeout": false,
+      "winner": "agent_b"
+    },
+    {
+      "episode": 3,
+      "fall": true,
+      "planar_displacement_xy_m": [
+        0.015229210257530212,
+        -0.09996598213911057
+      ],
+      "reward_sum_agent_a": -1.156141915358603,
+      "reward_sum_agent_b": 0.9448606669902802,
+      "signed_displacement_m": -0.09751591086387634,
+      "steps": 6,
+      "timeout": false,
+      "winner": "agent_b"
+    },
+    {
+      "episode": 4,
+      "fall": true,
+      "planar_displacement_xy_m": [
+        0.01675345003604889,
+        -0.08810827881097794
+      ],
+      "reward_sum_agent_a": -1.2776963068172336,
+      "reward_sum_agent_b": 1.0461893437895924,
+      "signed_displacement_m": -0.08556140214204788,
+      "steps": 6,
+      "timeout": false,
+      "winner": "agent_b"
+    }
+  ],
+  "episodes": 5,
+  "equal_reference_start_phase_assertion": true,
+  "fall_count": 5,
+  "horizon_actor_step_count_assertion": true,
+  "inference_network": "shared_actor_only_critic_not_called",
+  "initial_reset_max_absolute_error_by_channel": {
+    "dof_pos": 4.89652156829834e-05,
+    "object_pos_w": 0.00014550983905792236,
+    "object_quat_xyzw": 1.9729137420654297e-05,
+    "root_pos": 4.470348358154297e-07,
+    "root_quat_xyzw": 8.642673492431641e-07
+  },
+  "initial_reset_sanity_absolute_tolerance_by_channel": {
+    "dof_pos": 0.01,
+    "object_pos_w": 0.001,
+    "object_quat_xyzw": 0.001,
+    "root_pos": 0.001,
+    "root_quat_xyzw": 0.01
+  },
+  "initial_reset_sanity_assertion": true,
+  "reference_start_phase": 1,
+  "representative_rule": "strongest_agent_a_win_and_strongest_agent_b_win_when_present_plus_largest_absolute_displacement; duplicate episodes share one NPZ",
+  "representatives": {
+    "agent_b_win": {
+      "episode": 1,
+      "path": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/eval_model10100_seed721/representative_episode_001.npz"
+    },
+    "max_absolute_displacement": {
+      "episode": 1,
+      "path": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/eval_model10100_seed721/representative_episode_001.npz"
+    }
+  },
+  "scenario": "competitive_square_table_diagonal_tug",
+  "seed": 721,
+  "signed_displacement_max_m": -0.08556140214204788,
+  "signed_displacement_mean_m": -0.09415170401334763,
+  "signed_displacement_min_m": -0.0990019291639328,
+  "timeout_count": 0,
+  "validated_assets": {
+    "actor164_warm_start": "/home/kevin/holosoma-rubber-hand-marl/logs/Demo3Tug/checkpoints/model_07999_actor164_table_neutral.pt",
+    "rubber_hand_robot_urdf": "/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+    "runtime_reference": "/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/demo3_tug/sub3_010_diagonal_tug_runtime.npz",
+    "square_table_urdf": "/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_squaretable_demo3_training.urdf"
+  },
+  "win_counts": {
+    "agent_a": 0,
+    "agent_b": 5,
+    "draw": 0
+  },
+  "win_rates": {
+    "agent_a": 0.0,
+    "agent_b": 1.0,
+    "draw": 0.0
+  },
+  "winner_definition": {
+    "agent_a": "signed_displacement_m > 0.05",
+    "agent_b": "signed_displacement_m < -0.05",
+    "axis": "agent_a_initial_pull_axis_world_xy",
+    "draw": "-0.05 <= signed_displacement_m <= 0.05"
+  }
+}
