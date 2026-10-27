@@ -1,5 +1,7 @@
 # 图表轮 Ubuntu 交接：本版替代 commit 4ce7fc0 的旧 F1–F3；停止旧蓝橙、三行方案的批量渲染
 
+**已合入作者确认的 Patch 01：图1／图4保留G1本色；只有图3／图5及图2对应缩略图用C+。这条覆盖 d6fe681 中的全局C+要求。R0改为Pull参考＋Chair共享场景两张色样。**
+
 2026-10-27。仓库 `Kaifeng-Jia/holosoma-rubber-hand-marl`，分支 `core4d-base`；发布时沿用 `docs/experiments/ubuntu_handoff_figures_r2_20261027_zh.md`。本文件自包含，无需 Mac 文件、论文或旧 brief。旧图表渲染若正在运行，在当前输出文件写完后停止，不再启动其后续批量步骤；保留已完成素材、脚本和记录，按本版重新清点，不删除或覆盖旧结果。
 
 **当前只授权 R0、输入清点和 CPU metadata/几何准备。R1–R6 的批量渲染必须等作者明确批准本次 R0 样张后才运行。** 本文描述完整后续规格不等于已批准后续执行；之前的 C+ 改色截图、旧任务批准、GitHub 文档更新、超时或无人回复都不是本次样张批准。
@@ -26,12 +28,14 @@
 
 路径若迁移，按既有 manifest/hash 定位同一资产，不能挑名称相近的替代。部分脚本可能未提交，交付 commit 之外还须有实际脚本快照与 SHA256。
 
-## 共用材质、相机和原图规格
+## 分图材质、共用相机和原图规格（Patch 01）
 
 - 真实 G1 视觉网格；执行及 R6 已知 URDF 为 `ROOT/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf`，SHA256 `7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25`。其他参考特别是 R5 按其原 manifest 的 URDF/关节顺序读取，不能静默换机器人模型。
-- C+ 基础材质：角色0/源角色 `#AAC0DE`，角色1/伙伴 `#E8C8A0`；正常明暗、粗糙、弱高光，用现有渲染器支持的低specular/shininess等设置实现，不假定MuJoCo有roughness字段。物体中性灰 `#B5B5B5`、基本不透明；人体中性浅灰且比物体略浅。固定角色 ID 与颜色，不随屏幕左右交换。
-- 深色标记/副本色为 `#4A6FA5`、`#B07D3E`；角色等距变换强调色为低饱和紫 `#6B5B95`（Mac 矢量绘制）。反射线灰色虚线。R6(a) 是半透明物体的指定例外，其余不要浅蓝半透明桌或蓝灰椅。
-- 纯色浅背景、无棋盘地面，有接触阴影。光源、曝光、抗锯齿同组固定；只在渲染场景中覆盖显示材质，不修改资产物理属性。用 agent/body/link/geom 映射着色，保存映射，勿因共享 material/mesh 把两角色一起改色。
+- **R2／图1：G1默认本色**，灰白外壳及黑色部件，两台同色。物体、地面、光照沿用原执行图观感：桌子浅蓝半透明，椅子和桶保留原材质；不要套用C+或统一改成灰物体／纯色背景。Ubuntu以 `OLD_EVAL/media/{model_id}/manifest.json` 及对应原图、`WRIST/render_tools/export_recorded_demo_media.py` 的旧渲染设置核对材质、地面与灯光；新Push仍回放R2指定的配准成功回合，只复用原执行场景的显示风格。保留本轮固定相机和8候选帧要求。
+- **R5／图4：G1本色灰**，沿用现有腕部图的材质。Push桌子仍为浅蓝，但降低透明度，即提高alpha、使其更不透明；从桌面上方取景看清手部。其余场景沿用原腕部图，不做角色着色。
+- **R4／图3、R6／图5以及R3对应缩略图：C+**，角色0/源角色 `#AAC0DE`、角色1/伙伴 `#E8C8A0`；固定角色ID，不随屏幕左右交换。保持正常明暗、粗糙和弱高光，用渲染器实际支持的低specular/shininess等参数实现。物体中性灰 `#B5B5B5`、基本不透明；R6(a)两份椅副本按专节用深色半透明材质。此组使用纯色浅背景、无棋盘地面和接触阴影。
+- 深色标记/副本色为 `#4A6FA5`、`#B07D3E`；角色等距变换强调色为低饱和紫 `#6B5B95`（Mac 矢量绘制），反射线灰色虚线。R1人体保持中性浅灰，不赋予角色色；配套物体、地面和灯光与图1对应执行行协调。
+- 光源、曝光、抗锯齿在各组内固定；只在渲染场景中调整显示材质，不修改物理属性。C+组使用agent/body/link/geom映射着色并保存映射；本色组恢复原始材质，不受共用material的颜色覆盖影响。manifest增加 `material_preset`，区分 `g1_native_execution`、`g1_native_wrist`、`cplus_reference`、`cplus_sharedscene`。
 - 原 PNG **不烧入文字、时间、UI、坐标轴、框、箭头、公式或标记**。字体、标签、矢量叠加、论文版心由 Mac 做。R1/R2 为 1920×1280（3:2）；其余原图宽统一 1920 px，高度按下述取景，保留少量安全边距。不得将旧低分辨率图拉大当作重渲。
 - 同一任务执行序列锁定相机和 framing，以所有候选姿态的范围一次确定；禁止逐帧跟踪中心/自动缩放。旧 U7 `follow-pair` 会移动 lookat，不能称固定相机。R4 左右保持观察方向一致，各自 framing 固定；R5 同一行 Before/After 相机完全相同；R6 两版相机完全相同。
 - 人体与对应执行行采用同一观察方向与投影规格；如世界原点/轴不同，先用已知坐标转换建立共同显示系，再选锁定相机。整段“人/机器人＋物体”一起施加同一刚体变换，记录 4×4 矩阵；不独立挪人物/物体、不逐帧对齐、不为构图缩放人体，不抹掉真实物体尺寸差异。
@@ -40,8 +44,8 @@
 ## R0：先交材质样张，等待作者确认
 
 1. 完成 CPU smoke test 与输入清点。可并行准备下面各项的路径/hash、候选帧 metadata、FK/几何 JSON；**暂不生成 R1–R6 批量图片、contact sheet 或批量深度渲染**。
-2. 只渲两张正式材质样张：Chair 双机器人＋灰色椅子（用 R6 共享版 frame117），Push 机器人＋灰色不透明桌（用 R2 的配准策略 `perturbed_000` 既有中段帧，记录所选帧）。使用上述 C+、新背景和阴影；这两张不是新的成功评测。
-3. 输出 `R0/chair_material.png`、`R0/push_material.png`、`R0/manifest.json`、CPU 预检和 `input_inventory.json`；manifest 记录样张及材质/灯光配置 SHA256。另交一张R0 contact sheet，同时含两张全图和缩到图1单格大小的预览，检查浅色材质是否仍能辨认。交作者查看后，记录 `approval_status=pending` 并停止渲染。
+2. 只渲C+用途的两张正式色样：**图3的一帧Pull协作参考**（R4的 `GEOM/pull/new_pair_reference.npz`，从已有接近窗口选一帧并记录），以及**图5的Chair共享版frame117**（R6）。两张均用C+、中性灰物体、纯色浅背景和阴影。图1／图4沿用原材质，不要求色样；旧R0的Push样张取消。
+3. 输出 `R0/pull_material.png`、`R0/chair_material.png`、`R0/manifest.json`、CPU预检和 `input_inventory.json`；manifest记录Patch 01版本、两张样图及材质/灯光配置SHA256。另交一张R0 contact sheet，含全图和按图3／图5用途缩小的预览。交作者查看后记录 `approval_status=pending` 并停止渲染；旧Push＋Chair样张的批准不得套用到本次Pull＋Chair组合。
 4. **必须等作者明确确认这次样张，才可启动R1–R6。** 收到后在README记录确认原文/时间/来源及对应两图、manifest SHA256；没有确认不执行。不得将以前C+改色截图视为通过，也不因为本文已发布而自动通过。
 5. 作者要求改色时只重做两张样张再等确认；若已确认样张或材质/灯光配置变化，重新确认。保持已批准材质不变的相机取景调整按以下规格做并记录。无需另建审批系统。
 
@@ -64,6 +68,8 @@
 
 表I Bucket配置为 **B-RZ0**，使用该配置 seed721，不能改用 B-A 或旧 `bucket_best`。四回合均已有成功记录；本任务只回放保存状态。
 
+本组明确采用 `g1_native_execution`：两机器人同为G1本色，沿用原执行图的浅蓝半透明桌、椅桶原材质、地面与灯光。Pull伙伴仍按数据中的role ID记录；Mac将“mirrored partner”直接标在伙伴旁，不依赖颜色指认。图1图注不写颜色说明。
+
 | 行 | Ubuntu 保存状态 | 回合与状态帧数 |
 |---|---|---|
 | Push | `NEW_EVAL/U5_push_registered/results/Push-registered_seed721/perturbed_000.trajectory.npz` | seed721，扰动成功；310帧，50Hz |
@@ -81,6 +87,8 @@
 ## R3：图2真实缩略图（批准后渲染）
 
 图2上道为单人示范→重定向→角色等距变换，下道为双人示范→重定向→共享场景；合并协作参考后进入多智能体RL。Ubuntu只提供真实缩略图/几何，箭头、公式和网络框由Mac画。
+
+按所在节点保留材质：示范复用R1的原色场景；重定向机器人用G1本色；RL执行图复用R2本色。角色等距变换／协作参考复用R4的C+参考， shared-scene复用R6的C+图。相同姿态需要两种材质用途时，分别导出并记录不同 `material_preset`；不得将C+参考图复用到本色重定向节点。
 
 - Pull 单机器人 **原始 retarget** 1帧：定位 `sub3_largetable_010_pull_a1_mj_fps50_w_obj.npz`（`src/holosoma/tests/envs/marl/test_plan5_push_manager.py` 有引用），核验原始 retarget/source manifest、配置、模型及 hash。找不到可验证产物则报缺，不重新求解。
 - `GEOM/pull/preprocessed_source.npz` 是成功单机器人 rollout 的预处理，适合 R4 配准实际输入，**不可填入 R3“重定向输出”节点**；不得以策略 rollout 冒充 retarget。
@@ -126,7 +134,7 @@ E_i = sum_m w_m ||r_im||^2;  sum_m w_m = 1
 | Chair，person1/agent0左手 | 原始30Hz frame122，4.0666666667s | `CHAIR/shared_small_preview/core4d_pair_reference.npz` → `CHAIR/shared_small_a1_preview_tol6/core4d_pair_reference.npz` | `chair/frame_122_before_hand.png`、`chair/frame_122_after_hand.png` |
 
 - 四参考SHA256依序为 `27f9f6c73579aab479aadd4991b08231e4459431c50b625976f8fcc4775cbc29`、`a902e79abb69974c4b4af41ee73efa3101b150e4f9a41d06c7c48d0ebfceb511`、`d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586`、`1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b`。
-- 拉近到手和接触面占画面一半以上；**无箭头、无高亮框**。Push相机从桌面上方向下看手，桌子中性灰且基本不透明，不隔半透明桌面看手。Chair同帧近景、两机器人保持角色颜色。每张宽1920px。
+- 拉近到手和接触面占画面一半以上；**无箭头、无高亮框**。机器人均用G1本色灰。Push相机从桌面上方向下看手；保留浅蓝桌面，提高alpha以降低透明度，并在manifest记录前后相同的实际alpha。Chair同帧近景，两机器人保持本色。每张宽1920px，图4不需要额外色样。
 - 每行before/after使用完全相同相机/光照/裁切，非腕部参考字段按原manifest核验不变；不得重做腕优化。Push保留 `historical_wrist_only_reference`，Chair保留 `diagnostic_preview_not_training_asset` 的内部来源状态，不能把这两对替换成正式策略rollout。
 
 ## R6：图5共享场景两版，保持当前Chair117帧
@@ -138,6 +146,8 @@ E_i = sum_m w_m ||r_im||^2;  sum_m w_m = 1
 - 新机位稍高，从机器人不挡椅子的一侧观察；人物保留头到膝，椅子居中约占每格1/3，减少空白。两panel同相机/光照，独立raw PNG，无(a)/(b)或子标题。R3共享场景缩略图直接复用此对。
 
 ## 分阶段交付与验收
+
+Mac后续标注规则也按Patch 01：图1／图4图注不写颜色；图3／图5使用“Light blue and sand distinguish the roles”；图1 Pull的“mirrored partner”靠近对应机器人。Ubuntu只导出原图，不将这些标签烧入PNG。
 
 新建 `ROOT/paper_handoff_exports/FIGURES_R2_<YYYYMMDD>/`，若同日已有输出则加版本后缀避免覆盖。R0阶段先交小包；批准后补齐完整包，README明确哪阶段完成、哪些因审批/缺输入待执行。
 
