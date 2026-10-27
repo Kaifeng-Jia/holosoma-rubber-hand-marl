@@ -1,142 +1,158 @@
-# 图 1–3 合并渲染交接（F1 / F2 / F3）
+# 图表轮 Ubuntu 交接：本版替代 commit 4ce7fc0 的旧 F1–F3；停止旧蓝橙、三行方案的批量渲染
 
-2026-10-27。Ubuntu 从本文件即可执行，不需要 Mac 文件、论文或另一本 brief。只处理已有数据的显示和几何导出；不训练、不重新评测、不重新 retarget/配准/腕部优化、不修改参考、模型或训练资产。图的文字、公式、箭头和最终排版由 Mac 完成。
+2026-10-27。仓库 `Kaifeng-Jia/holosoma-rubber-hand-marl`，分支 `core4d-base`；发布时沿用 `docs/experiments/ubuntu_handoff_figures_r2_20261027_zh.md`。本文件自包含，无需 Mac 文件、论文或旧 brief。旧图表渲染若正在运行，在当前输出文件写完后停止，不再启动其后续批量步骤；保留已完成素材、脚本和记录，按本版重新清点，不删除或覆盖旧结果。
 
-## 0. 工作目录、CPU 预检和执行顺序
+**当前只授权 R0、输入清点和 CPU metadata/几何准备。R1–R6 的批量渲染必须等作者明确批准本次 R0 样张后才运行。** 本文描述完整后续规格不等于已批准后续执行；之前的 C+ 改色截图、旧任务批准、GitHub 文档更新、超时或无人回复都不是本次样张批准。
 
-- 仓库：`Kaifeng-Jia/holosoma-rubber-hand-marl`，分支 `core4d-base`；已知工作目录 `ROOT=/home/kevin/holosoma-core4d-base`。不要 reset/clean 工作树；先记录 commit 和 dirty diff。
-- 已有 Python：`/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting/bin/python`。本任务与 U2 补测独立，不改它的脚本、定义或交付物。
-- **只用 CPU 软件渲染，先 smoke test。** 已有 MuJoCo 渲染器默认 `MUJOCO_GL=egl`，不能直接沿用。启动进程前显式选软件后端，例如已有 OSMesa，设置 `MUJOCO_GL=osmesa`、`PYOPENGL_PLATFORM=osmesa`、`LIBGL_ALWAYS_SOFTWARE=1`、`CUDA_VISIBLE_DEVICES=""`；所有人体模型张量也放 CPU。
-- 上述环境变量本身不是证明：预检记录实际 GL vendor/renderer/version、后端、Python/依赖版本，确认 renderer 为 CPU 软件实现；用一个已有姿态做低分辨率试渲并检查输出。后端缺失或实际使用 GPU 时停止渲染并反馈，不静默改用 EGL/GPU。可继续输入核验和 CPU 几何导出。
-- 顺序：①输入与软件后端核验；②建立共用素材/相机清单；③F1 人体与执行、F2 参考、F3 几何；④自检、打包。相同输入/帧/相机/材质只渲一次，通过 manifest 复用，不复制为另一个时间点。
-- 可新增 `scripts/export_figures_r2_cpu.py` 等只读导出脚本；这是待实现接口，不是假定现有命令。沿用现有 FK/loader/渲染逻辑，保存实际执行代码。只向新输出目录写文件。
+## 执行边界、路径与 CPU 预检
 
-## 1. 共用显示规格
+- 只读已有参考和保存轨迹；不训练、不重新评测、不重跑 retarget/配准/腕部优化，不改模型、参考或训练资产。不调用策略或 `mj_step`。本任务不改 U2 补测及其交付。
+- `ROOT=/home/kevin/holosoma-core4d-base`；已有 Python 为 `/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting/bin/python`。先记录 commit、dirty diff；不得 reset/clean 工作树。
+- **只用 CPU 软件渲染。** 现有脚本默认 `MUJOCO_GL=egl`，不能直接视为 CPU。启动前选已有软件后端，例如 OSMesa：`MUJOCO_GL=osmesa`、`PYOPENGL_PLATFORM=osmesa`、`LIBGL_ALWAYS_SOFTWARE=1`、`CUDA_VISIBLE_DEVICES=""`；人体模型张量也放 CPU。
+- 环境变量不是验收证明：先用一个已有姿态低分辨率 smoke test，记录实际 GL vendor/renderer/version、后端及依赖版本，确认 CPU 软件实现。若后端缺失或实际使用 GPU，停止渲染并反馈，可继续只读清点和 CPU 几何导出；不静默退回 EGL/GPU。
+- 可新增只读导出脚本（例如 `scripts/export_figures_round_cpu.py`，是待实现入口），复用现有 loader/FK/render 逻辑，保存实际代码和 hash；只写新输出目录。不要把下表中的旧命令直接当作已满足新材质/CPU/固定相机的命令。
 
-- 机器人必须为真实 G1 视觉网格：`ROOT/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf`；已记录 SHA256 `7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25`。关节顺序与参考的 `joint_names` 核对。
-- 角色0/源角色：蓝 `#266BD1`；角色1/伙伴：橙 `#F27A1F`；人体中性浅灰，物体中性灰，背景 `#FAFAFA`。颜色跟随角色 ID，不随屏幕左右位置交换。材质仅改变显示，不修改 URDF 或物理属性。
-- 所有正式原图为 **1920×1440、4:3 PNG**，无文字、时间、坐标轴、UI、公式、箭头或标记。无损保存，不拉伸原16:9图片；主体四周留约5–8%安全边距，头、脚、手和物体完整。需要局部图时另交原分辨率局部视角并记录相机。
-- 同一任务的时间序列固定相机和 framing，不逐帧自动居中/缩放。先用候选帧整体范围确定视角与取景，再一次锁定；F3左右面板观察方向一致，允许各自固定距离/中心。F1人体与对应执行行用一致观察方向，不要求不同世界原点直接共享未经变换的外参。
-- 旧 U7 的 `follow-pair` 会逐帧移动 lookat，不能直接称为固定相机。可参考旧 azimuth=135°、elevation=−22°、fovy=45°，但须为本轮重新冻结实际相机；视角以看清两角色和操作区域为准，不改变姿态。
-- 若为显示统一坐标，整段“人/机器人＋物体”一起施加同一刚体变换，保存原始→显示的4×4矩阵；不得分别移动人和物体、逐帧对齐或为构图缩放人体。源物体与目标共享物体保留各自真实尺寸。
-- 同组固定背景、地面、光源、阴影、曝光和抗锯齿；记录设置及软件版本。复用 `VisualScene.mapping` 按 agent/body/geom 修改角色颜色，避免共享 mesh/material 误改两角色；保存角色→body/link/geom 的映射，不依赖跨场景不稳定的数字 ID。
-- 每张图保存相机模式、图像大小、投影类型、fovy/内参、world-to-camera外参、裁切/显示变换；给出明确的坐标与像素约定。不要仅交方位角和一个“默认相机”名称。
-
-## 2. Ubuntu 输入与可复用脚本
-
-下表路径以 `ROOT` 为根；若文件迁移，用旧 manifest/hash 找同一资产，不重新生成或替换。
-
-| 用途 | Ubuntu 路径/入口 |
+| 简称/用途 | Ubuntu 路径（相对 ROOT，除非写绝对路径） |
 |---|---|
-| 第一批源姿态与接近窗口，记 `PILOT` | `logs/ReferenceGeometry/reference_geometry_pilot_20261017/` |
-| 第二轮配准，记 `GEOM` | `logs/ReferenceGeometry/reference_geometry_round2_20261017/` |
-| R2已交付素材，记 `R2` | `paper_handoff_exports/EXPERIMENTS_R2_20261026/` |
-| 旧统一评测，记 `OLD_EVAL` | `logs/PaperSupplement20260929/unified_evaluation_20261003/` |
-| 新Push评测，记 `NEW_EVAL` | `logs/ExperimentsR2_evaluation_20261026_retry01/` |
-| 参考渲染 | `scripts/render_reference_geometry_round2.py`、`scripts/render_reference_geometry_pilot.py`、`scripts/render_wrist_reference_pairs.py` |
-| 执行回放渲染 | `scripts/export_recorded_demo_media.py`、`scripts/render_r2_handoff.py` |
-| Chair共享场景 | `scripts/render_r2_shared_chair.py`；已有输出 `R2/U7_media/shared_scene/` |
-| 几何/FK/映射入口 | `scripts/reference_geometry_pilot.py`、`scripts/reference_geometry_round2_correspondence.py`、`scripts/reference_geometry_math.py`；`src/holosoma_retargeting/holosoma_retargeting/dual_a1_layout.py`、`dual_pull_reference.py` |
+| `PILOT`、`GEOM` | `logs/ReferenceGeometry/reference_geometry_pilot_20261017/`、`logs/ReferenceGeometry/reference_geometry_round2_20261017/` |
+| `R2` | `paper_handoff_exports/EXPERIMENTS_R2_20261026/` |
+| `OLD_EVAL` | `logs/PaperSupplement20260929/unified_evaluation_20261003/` |
+| `NEW_EVAL` | `logs/ExperimentsR2_evaluation_20261026_retry01/` |
+| `CHAIR` | `logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/` |
+| `WRIST` | `paper_handoff_exports/WRIST_FIGURE3_BUCKET_AUDIT_20261005/` |
+| 参考与执行渲染 | `scripts/render_reference_geometry_round2.py`、`render_reference_geometry_pilot.py`、`render_wrist_reference_pairs.py`；`scripts/export_recorded_demo_media.py`、`render_r2_handoff.py` |
+| 共享场景渲染 | `scripts/render_r2_shared_chair.py`；原输出 `R2/U7_media/shared_scene/` |
+| 几何/FK/映射 | `scripts/reference_geometry_pilot.py`、`reference_geometry_round2_correspondence.py`、`reference_geometry_math.py`；`src/holosoma_retargeting/holosoma_retargeting/dual_a1_layout.py`、`dual_pull_reference.py` |
 
-保留上述脚本现有资产校验，显示时只做 FK 和场景更新，不调用 `mj_step` 或策略。部分脚本曾为 Ubuntu 未提交文件，不能只凭 Git commit 追溯；交付实际代码快照及 hash。
+路径若迁移，按既有 manifest/hash 定位同一资产，不能挑名称相近的替代。部分脚本可能未提交，交付 commit 之外还须有实际脚本快照与 SHA256。
 
-## F1. Teaser：Push、Pull、Chair 三行
+## 共用材质、相机和原图规格
 
-Mac 将排为每行1帧真实人体示范＋4帧机器人执行。Ubuntu 每任务交6张执行候选、最多3张人体候选；Mac再选择。候选帧只表示时间位置，未经核查不标“接触/受力/开始移动”。
+- 真实 G1 视觉网格；执行及 R6 已知 URDF 为 `ROOT/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf`，SHA256 `7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25`。其他参考特别是 R5 按其原 manifest 的 URDF/关节顺序读取，不能静默换机器人模型。
+- C+ 基础材质：角色0/源角色 `#AAC0DE`，角色1/伙伴 `#E8C8A0`；正常明暗、粗糙、弱高光，用现有渲染器支持的低specular/shininess等设置实现，不假定MuJoCo有roughness字段。物体中性灰 `#B5B5B5`、基本不透明；人体中性浅灰且比物体略浅。固定角色 ID 与颜色，不随屏幕左右交换。
+- 深色标记/副本色为 `#4A6FA5`、`#B07D3E`；角色等距变换强调色为低饱和紫 `#6B5B95`（Mac 矢量绘制）。反射线灰色虚线。R6(a) 是半透明物体的指定例外，其余不要浅蓝半透明桌或蓝灰椅。
+- 纯色浅背景、无棋盘地面，有接触阴影。光源、曝光、抗锯齿同组固定；只在渲染场景中覆盖显示材质，不修改资产物理属性。用 agent/body/link/geom 映射着色，保存映射，勿因共享 material/mesh 把两角色一起改色。
+- 原 PNG **不烧入文字、时间、UI、坐标轴、框、箭头、公式或标记**。字体、标签、矢量叠加、论文版心由 Mac 做。R1/R2 为 1920×1280（3:2）；其余原图宽统一 1920 px，高度按下述取景，保留少量安全边距。不得将旧低分辨率图拉大当作重渲。
+- 同一任务执行序列锁定相机和 framing，以所有候选姿态的范围一次确定；禁止逐帧跟踪中心/自动缩放。旧 U7 `follow-pair` 会移动 lookat，不能称固定相机。R4 左右保持观察方向一致，各自 framing 固定；R5 同一行 Before/After 相机完全相同；R6 两版相机完全相同。
+- 人体与对应执行行采用同一观察方向与投影规格；如世界原点/轴不同，先用已知坐标转换建立共同显示系，再选锁定相机。整段“人/机器人＋物体”一起施加同一刚体变换，记录 4×4 矩阵；不独立挪人物/物体、不逐帧对齐、不为构图缩放人体，不抹掉真实物体尺寸差异。
+- 保存内参/投影类型、world-to-camera 外参、near/far、图像尺寸、显示变换、裁切规则、光照/材质与软件版本；仅方位角和“默认相机”不足以复现。原图应支持最终放置尺寸 ≥300 dpi，实际排版与 dpi 由 Mac 验收。
 
-### F1-A 机器人执行（保存的真实回合）
+## R0：先交材质样张，等待作者确认
 
-| 任务 | 保存轨迹 | 建议候选源状态帧（零起始） | 回合身份 |
-|---|---|---|---|
-| Push | `NEW_EVAL/U5_push_registered/results/Push-registered_seed721/perturbed_000.trajectory.npz` | 0,62,103,206,247,309 | 配准策略，seed721，扰动成功回合 |
-| Pull | `OLD_EVAL/results/Pull-baseline_seed721/nominal_viser.npz` | 0,63,126,190,253,316 | seed721，nominal成功回合 |
-| Chair | `OLD_EVAL/results/C-01_seed721/nominal_viser.npz` | 0,78,156,235,313,391 | C-01，seed721，nominal成功回合 |
+1. 完成 CPU smoke test 与输入清点。可并行准备下面各项的路径/hash、候选帧 metadata、FK/几何 JSON；**暂不生成 R1–R6 批量图片、contact sheet 或批量深度渲染**。
+2. 只渲两张正式材质样张：Chair 双机器人＋灰色椅子（用 R6 共享版 frame117），Push 机器人＋灰色不透明桌（用 R2 的配准策略 `perturbed_000` 既有中段帧，记录所选帧）。使用上述 C+、新背景和阴影；这两张不是新的成功评测。
+3. 输出 `R0/chair_material.png`、`R0/push_material.png`、`R0/manifest.json`、CPU 预检和 `input_inventory.json`；manifest 记录样张及材质/灯光配置 SHA256。另交一张R0 contact sheet，同时含两张全图和缩到图1单格大小的预览，检查浅色材质是否仍能辨认。交作者查看后，记录 `approval_status=pending` 并停止渲染。
+4. **必须等作者明确确认这次样张，才可启动R1–R6。** 收到后在README记录确认原文/时间/来源及对应两图、manifest SHA256；没有确认不执行。不得将以前C+改色截图视为通过，也不因为本文已发布而自动通过。
+5. 作者要求改色时只重做两张样张再等确认；若已确认样张或材质/灯光配置变化，重新确认。保持已批准材质不变的相机取景调整按以下规格做并记录。无需另建审批系统。
 
-三者状态帧率均为50 Hz；帧数分别310/317/392。核对同目录 `episodes.json` 的 `completed_reference` 和 R2 `U7_media/render_manifest.json`，记录 checkpoint SHA256与轨迹SHA256。Push同seed的nominal失败回合不属于本组，不能换用 `U5_push_registered/videos/` 的 nominal 视频。
+## R1：图1/图2的人类示范（批准后渲染）
 
-已知轨迹 SHA256：Push `4bcb6a3eaa3f66fb3b67e8b308e6ae145bd8bc8887d37adb70cfc91d9f479443`；Pull `fa69703a6cc71c73df7281be33e63ad023ca7d19d5eee7e78932fb0a932a24aa`；Chair `b895b60421b039d75476ce2634f6f471b3992eab875423433b4e5abe7c2ff74a`。
+四任务各交接触阶段1帧＋2备选，真实人体网格；图1最终每行1帧人体＋5帧执行。图2复用 Pull/Chair 人体，不重复渲染。
 
-物体使用各回合 manifest 的 `object_urdf_source` 和训练资产 hash。旧视频是25 fps，不能将视频帧号当50 Hz状态帧；直接回放保存状态。图中不添加物理效果、估算力或改变物体轨迹。
+| 任务 | 原始输入与已有读取入口 |
+|---|---|
+| Push | OMOMO `sub6_largetable_033`，根 `/home/kevin/holosoma/OMOMO_new`，按任务名定位 `.pt`、格式 `smplh` |
+| Pull | 同根 `sub3_largetable_010`；loader 为 `ROOT/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py:load_motion_data` 及 `load_intermimic_data` |
+| Chair（两人） | `/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/human_object_motions/20231020/074/{person1_poses.npz,person2_poses.npz}`；已有 `CHAIR/source_canonical.npz` 及 provenance |
+| Bucket（两人） | 同数据根 `human_object_motions/20231020/071/{person1_poses.npz,person2_poses.npz}`；已有 `ROOT/logs/Core4DPreviews/bucket003_20231020_071_20260918/source_canonical.npz`（150帧、15Hz，SHA256 `1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083`） |
 
-### F1-B 真实人体示范（与F2共用）
+- 只复用 loader、已有 pose/vertices 与正确人体模型/face topology。CORE4D 原始人体含 `vertices[T,10475,3]`，canonical 文件不能代替缺失网格；`visualize_core4d_source.py` 的骨架/点云也不是人体网格。若原始 pose/模型/faces 不全，报告缺项，不能从 joints 假造 mesh 或用机器人代替人体。
+- Chair 对象为 `object_models/chair/chair021_m.obj`，Bucket 为 `object_models/bucket/bucket003_m.obj`，都在 `/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/` 下。复用 canonical provenance 中坐标/物体转换，避免重复旋转或把仿射物体变换误当纯旋转。
+- 源与机器人 FPS/裁剪范围可能不同，保存原始帧、原始时间、裁剪起点、重采样/索引对应；不能以相同帧号冒充同时刻。依据已有接近窗口/真实几何选帧，仅表达几何接近，不新增物理接触判定。
 
-- Push：OMOMO `sub6_largetable_033`；Pull：OMOMO `sub3_largetable_010`。已知数据根 `/home/kevin/holosoma/OMOMO_new`，现有 loader 按任务名读取 `.pt`，格式 `smplh`；入口 `ROOT/src/holosoma_retargeting/holosoma_retargeting/examples/robot_retarget.py:load_motion_data` 及其 `load_intermimic_data`。这里只复用读取/坐标转换，不运行重定向求解。
-- Chair：原始目录 `/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/human_object_motions/20231020/074/`，读取 `person1_poses.npz`、`person2_poses.npz`、物体轨迹及 metadata；两人必须同帧。原源物体 `/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair021_m.obj`。
-- Chair canonical：`ROOT/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/source_canonical.npz`。用 `core4d_adapter.py` 核对时序与 `Rx(+90°)` 的Y-up→Z-up转换。原人体已有10475个surface vertices；须配正确SMPL-X faces，保留原人物形状。canonical的关节点不能代替surface mesh；`visualize_core4d_source.py`现有骨架预览不是人体网格图。
-- 先确认真实 mesh/原始pose/相应人体模型和faces存在；可用现有模型在CPU恢复原始mesh，不从稀疏关节点拟造人体。若输入缺失，报告准确缺项，交付其他素材，不用AI图片、机器人或通用人体替代。
-- 每任务选最多3个原示范中手部靠近物体、姿态可辨的候选帧，交原帧号、FPS、秒数、读取配置和坐标转换。若与机器人参考有重采样/裁剪，记录真实时间映射；没有明确映射时只标“示范候选”，不声称与执行帧同步。人体保持源尺寸、中性浅灰；Pull/Chair人体图供F2复用。
+## R2：图1的四任务执行（批准后渲染）
 
-## F2. 方法总览需要的真实小图
+表I Bucket配置为 **B-RZ0**，使用该配置 seed721，不能改用 B-A 或旧 `bucket_best`。四回合均已有成功记录；本任务只回放保存状态。
 
-1. **人体输入：** 复用F1的Pull一人和Chair两人素材，不再渲同一图。
-2. **重定向输出：** Pull原始单机器人retarget参考1–3帧；Chair两人的nominal参考1帧。必须是保存的retarget结果，不以策略rollout冒充。
-   - Pull定位 basename `sub3_largetable_010_pull_a1_mj_fps50_w_obj.npz`（既有 `src/holosoma/tests/envs/marl/test_plan5_push_manager.py` 有引用），追溯其原始 retarget/source manifest及生成配置后使用；只按文件名不能证明来源。找不到可验证的retarget产物时记缺失，不重新求解。
-   - `GEOM/pull/preprocessed_source.npz` 来自成功单机器人rollout的预处理，**可供F3显示配准实际输入，但不可用来填F2的“重定向输出”节点**。如仅交此资产，manifest类型必须标 `source_skill_rollout`，该节点保留缺失。
-   - Chair读取 `ROOT/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/person1/person1_nominal_scaled.npz` 及person2同名文件；机器人取 `qpos[:,:36]`。不混入后续腕部优化结果。
-3. **共享场景：** 复用 `R2/U7_media/shared_scene/` 的 `individual_nominal` / `shared_mean` 来源；原文件为pre-wrist第117帧、30 Hz（3.9 s），两面板机器人姿态完全相同。若为统一4:3/材质需重渲，只渲这一对，保持相同相机和真实物体缩放；来源规则见 `render_r2_shared_chair.py`。
-4. **协作参考：** 复用F3的Pull右侧候选，或另取同一 `GEOM/pull/new_pair_reference.npz` 的2–3帧；优先共用F3，不用执行图替代参考。无需做残影合成，Mac可从原图选择。
-5. **执行：** 复用F1的一张执行候选。角色等距变换俯视图和网络结构由Mac画矢量；只交F3已有几何数据，不另造网络/机器人图片。
-6. 腕部小图若Mac需要，可复用 `ROOT/paper_handoff_exports/WRIST_FIGURE3_BUCKET_AUDIT_20261005/figure3/chair/frame_110_before_hand.png` 与 `frame_110_after_hand.png` 及该包render manifest；只建立引用，本轮不补腕部实验。若包内部层级不同按其manifest定位。
+| 行 | Ubuntu 保存状态 | 回合与状态帧数 |
+|---|---|---|
+| Push | `NEW_EVAL/U5_push_registered/results/Push-registered_seed721/perturbed_000.trajectory.npz` | seed721，扰动成功；310帧，50Hz |
+| Pull | `OLD_EVAL/results/Pull-baseline_seed721/nominal_viser.npz` | seed721，nominal成功；317帧，50Hz |
+| Chair | `OLD_EVAL/results/C-01_seed721/nominal_viser.npz` | C-01 seed721，nominal成功；392帧，50Hz |
+| Bucket | `OLD_EVAL/results/B-RZ0_seed721/nominal_viser.npz`（同目录有 `nominal.trajectory.npz`） | B-RZ0 seed721，nominal成功；498帧，50Hz |
 
-## F3. 单栏两行的角色等距变换机制图
+- 以上四份显示状态 SHA256 依次为 `4bcb6a3eaa3f66fb3b67e8b308e6ae145bd8bc8887d37adb70cfc91d9f479443`、`fa69703a6cc71c73df7281be33e63ad023ca7d19d5eee7e78932fb0a932a24aa`、`b895b60421b039d75476ce2634f6f471b3992eab875423433b4e5abe7c2ff74a`、`c16e43a05b33583d6c9342faaf88223a0980a47e9b7fa3775e3f9cc09db8c96f`。
+- 核对同目录 `episodes.json`/旧 media manifest 的回合身份、`completed_reference`、时间轴及 checkpoint；Push同seed的nominal失败回合不能替代本行。旧视频25fps不能当50Hz状态帧索引。
+- Bucket nominal trajectory SHA256 `459ac575428da98758c1c688ead61e3f80315faeda2aa4d2662fbc91ed3640c3`；checkpoint 为 `ROOT/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt`，SHA256 `7ba039fbb608211f8b2866b4f80810c082313bca6232a028c07743391656a225`。目录名含 A 不能据此改标 B-A，当前来源审计状态为 `historical_effective_code_verified`。
+- Bucket 物体 `ROOT/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf`，SHA256 `6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde`。其他物体同样使用各回合 manifest 的训练资产及 hash。
+- 每任务用保存数据确定交互/几何接近阶段起点 `start` 与成功回合末帧 `end`，再以 `linspace(start,end,8)` 取整得到8个不同状态候选，记录起止依据和精确索引，不沿用旧手选6帧；没有可核验起点则先交完整时域8候选并明确“接触起点未确定”，不猜阶段、不重仿真证明contact。分别保存 `state_frame` 与已存 `reference_frame`（缺失记null，不假定相等）及时间对应。Mac最终选5帧，不重复图片充当新时间点。
+- 四行最终顺序 Push、Pull、Chair、Bucket，3:2取景紧贴主体，整行固定相机。无人类输入与策略执行共享时间轴的证据时只说明是同任务示范，不声称逐帧复现。图注条件需保留 Push perturbed、其余 nominal。
 
-最终由Mac按论文实际 `\columnwidth` 排版（当前模板为3.4 in宽），高约2.4 in，上Push、下Pull；每行左窄右宽，左为单机器人与源物体，右为同帧协作参考与共享物体。Ubuntu只交原图和独立几何，版式/字号不在Ubuntu固定。
+## R3：图2真实缩略图（批准后渲染）
 
-### F3-A 输入、帧与手点
+图2上道为单人示范→重定向→角色等距变换，下道为双人示范→重定向→共享场景；合并协作参考后进入多智能体RL。Ubuntu只提供真实缩略图/几何，箭头、公式和网络框由Mac画。
 
-- 每任务读 `GEOM/{push,pull}/preprocessed_source.npz`、`new_pair_reference.npz`、`input_manifest.json`、`correspondence_spec.json`、`fitted_candidates.json`、`selection.json`、`hand_samples.npz`。源 `robot_qpos:T×36`；配对 `T×2×36`；物体 `T×7=[xyz,wxyz]`；机器人 `[root_xyz,root_quat_wxyz,29 joints]`。Push为309帧、Pull为316帧，均50 Hz；同帧源与配对物体时间轴必须一致。
-- 使用 `selection.json` 指定的role候选及实际 `Q,c`，不重拟合。读取源/目标物体URDF和hash自 `input_manifest.json`。本轮Push已存状态为 `diagnostic_only`、Pull为 `passes_source_relative_geometry`，原样保留在内部manifest；这不妨碍画映射机制，但不得把配准图说成新的可执行性证明。
-- 接近窗口读 `correspondence_spec.json:weighted_source.windows`，结合 `PILOT/{case}/source_interactions.json`、`source_distances.npz` 的真实支持帧；保留原阈值和窗口定义，不把填补gap本身视为支持。每任务选3个双手均有几何接近证据、手部不被躯干/物体遮住且可辨认的候选帧；不要求link原点穿出自身mesh。隐藏anchor如实标可见性，不移动点或几何；不足3帧时交实际数量和原因，不伪称动力学接触。
-- `hand_samples.npz` 的 `*_fit` 为256×3、`*_validation`为1024×3，都是**手link局部网格采样**，不是轨迹。通过 `reference_geometry_pilot.py:RobotFK` / `render_wrist_reference_pairs.py:VisualScene` 对当前qpos做FK后才能投到世界系；不把第k个采样点当第k帧。
-- 主手点固定为 `left_rubber_hand_link`、`right_rubber_hand_link` 的FK原点，明确 `local_point=[0,0,0]`。另保留整组validation表面采样的FK结果用于接近/遮挡诊断；若原点位于自身网格内，诚实标注自遮挡，不把它移动到表面来伪造可见性。
-- 对每个候选帧/源手，只在该手当帧有支持的face角点中选一次最近源anchor，等距时按稳定face/角点索引排序。之后所有目标角色用对应的anchor索引，不在目标侧重新找最近点。保留 `hand,window_id,anchor_slice,anchor_index,source_face_id,target_face_id,corner_permutation`；同时导出该面全部角点供Mac选择稀疏标记。
-- Pull的手对应由现有构型映射确认：源L→伙伴R、源R→伙伴L；记录role的parity、关节index/sign映射及hand link对应。角色0仍蓝、角色1仍橙，手的左右与角色颜色是两个概念。
+- Pull 单机器人 **原始 retarget** 1帧：定位 `sub3_largetable_010_pull_a1_mj_fps50_w_obj.npz`（`src/holosoma/tests/envs/marl/test_plan5_push_manager.py` 有引用），核验原始 retarget/source manifest、配置、模型及 hash。找不到可验证产物则报缺，不重新求解。
+- `GEOM/pull/preprocessed_source.npz` 是成功单机器人 rollout 的预处理，适合 R4 配准实际输入，**不可填入 R3“重定向输出”节点**；不得以策略 rollout 冒充 retarget。
+- Chair 重定向双机器人1帧：`CHAIR/two_stage/person1/person1_nominal_scaled.npz` 与 `CHAIR/two_stage/person2/person2_nominal_scaled.npz`；机器人取 `qpos[:,:36]`，不混入后续腕部优化。
+- Pull 协作参考复用 R4 右图的2–3帧，不必额外合成残影。共享场景缩略图直接复用 R6 两版；人体复用 R1；执行复用 R2。所有复用在 manifest 用 `used_by`/asset ID表达。
+- 可选交互网格仅在原重定向器已保存真实边/点时导出；缺失时跳过，不为图重优化或凭空连线。角色等距变换俯视小图使用 R4 的真实几何JSON，强调色与公式不烧入PNG。
 
-### F3-B 几何公式与导出
+## R4：图3单栏两行，Push / Pull 各3个候选
 
-下面 `a_m,a'_im,Q_i,c_i` 都在物体局部坐标，`R_o,p_o` 为该帧物体到原世界的刚体变换。FK返回原世界点；显示用刚体变换只在投影前施加。
+每候选帧左为单机器人＋源物体，右为同帧协作参考＋共享物体；上Push（η=+1）、下Pull（η=−1）。每任务最多3帧×左右2张，批准后渲染；不足3个可见几何接近帧就报实际数量。左右观察方向一致，同序列framing固定，不通过新物理仿真证明接触。
+
+- 每任务读取 `GEOM/{push,pull}/{preprocessed_source.npz,new_pair_reference.npz,input_manifest.json,correspondence_spec.json,fitted_candidates.json,selection.json,hand_samples.npz}`。源 `robot_qpos:T×36`、配对 `T×2×36`；机器人 `[root_xyz,root_quat_wxyz,29 joints]`，物体 `[xyz,wxyz]`；Push309帧、Pull316帧、均50Hz。核验源/配对同帧时间映射与物体姿态。
+- 复用 `selection.json` 选定的 `Q_i,c_i,parity,part_map`，不重拟合；源/目标物体URDF、hash按 `input_manifest.json`。内部保留既有状态 Push `diagnostic_only`、Pull `passes_source_relative_geometry`，不把机制图标成新可执行性证明。
+- 源接近窗口读 `correspondence_spec.json:weighted_source.windows`，结合 `PILOT/{case}/source_interactions.json`、`source_distances.npz` 的支持帧；沿用阈值与窗口定义，gap填补本身不视为支持。选双手几何接近且可辨认、未被躯干/物体严重遮住的帧。
+- `hand_samples.npz` 中 fit256×3/validation1024×3 是 **手link局部表面采样，不是时间轨迹**。用 `reference_geometry_pilot.py:RobotFK` / `render_wrist_reference_pairs.py:VisualScene` 对每帧做FK；主手点固定为左右 `rubber_hand_link` 的 `local_point=[0,0,0]`，另存表面样本的FK结果用于接近/遮挡诊断。
+- 每候选帧/源手只在当帧有支持的face角点中选一次最近源anchor；等距时按稳定face/角点索引。所有目标角色复用其对应anchor索引，不在目标侧重找最近点。保留 `hand,window_id,anchor_slice,anchor_index,source_face_id,target_face_id,corner_permutation`，并导出该face全部角点。
+- Pull保留源L→伙伴R、源R→伙伴L及真实关节index/sign映射。手左右与角色色是两件事。源/目标anchors与selected候选 `target_anchors` 按存档顺序对应，保留face/permutation。
+
+令源/目标物体姿态分别为 `(R_s,p_s)`、`(R_t,p_t)`，anchors及 `Q_i,c_i` 在物体局部系；两物体姿态只有经核验相同才可共用一个变换。导出定义：
 
 ```text
-h_s^local = R_o^T (h_s^FK_world - p_o)
-h_i^ideal_local = Q_i h_s^local + c_i
-h_i^ideal_world = R_o h_i^ideal_local + p_o
-a_m^world = R_o a_m + p_o;   a'_im^world = R_o a'_im + p_o
+h_s_local = R_s^T (h_s_FK_world - p_s)
+h_i_ideal_local = Q_i h_s_local + c_i
+h_i_ideal_world = R_t h_i_ideal_local + p_t
+a_m_world = R_s a_m + p_s;  a'_im_world = R_t a'_im + p_t
 r_im = Q_i a_m + c_i - a'_im
-E_i = sum_m w_m ||r_im||^2,   sum_m w_m = 1
+E_i = sum_m w_m ||r_im||^2;  sum_m w_m = 1
 ```
 
-- `w_m` 原样用 `correspondence_spec.json:weighted_source.weights`，不按显示点子集重新归一化；源anchors与该selected候选的 `target_anchors` 按原顺序一一对应，复用face/permutation检查。
-- **分别导出**源FK手点、配对参考中实际FK手点 `h_i^actual_world`、理想映射点 `h_i^ideal_world`，以及actual−ideal差值。箭头的端点类型在JSON明确；不能用ideal点覆盖actual点，或宣称实际G1网格满足严格镜像等式。
-- 右侧虚线表示已放置role0→role1的相对反射：`Q10=Q1 Q0^T`，`c10=c1-Q10 c0`，固定平面满足 `(I-Q10)x=c10`。本Pull两平移约为local z方向±0.4390236 m，故平面是共享物体local `z=0`；**不是world z=0**。
-- 将该平面与真实tabletop平面求交、按实际有限桌面范围截取线段，再变换到世界/显示系并投影；记录两平面方程、坐标系、3D端点和2D端点。无交线/投影退化时报告，不手画一条看似合理的虚线。
-- 每图一个JSON：任务/asset ID、帧/秒数/FPS、输入hash、源/目标URDF、角色/关节/手映射；相机K、world-to-camera矩阵、投影类型、near/far、图像尺寸；display变换；全部标记的local/world/display/camera/2D坐标、点类型、对应ID和权重。
-- 像素约定固定为原图左上角原点、u向右/v向下；注明像素中心、相机轴方向、深度定义及矩阵乘法约定。投影和深度图必须使用渲染该PNG的同一相机/场景，而不是另写近似投影。
-- 导出线性深度（NPZ即可）及基于同相机深度缓冲的可见性：`in_front,in_image,projected_depth,buffer_depth,depth_tolerance_m,visibility,occluder_geom_id`。区分 `visible/occluded_self/occluded_other/out_of_frame/behind_camera/unknown`；容差和取样邻域写清。可借助geom/segmentation ID区分自遮挡；无法区分则记unknown，不猜测。手原点在网格内时同时报告对应手表面是否可见，供Mac决定标记显示。
-- 内部 `checks.json` 重算全anchor的 `E_i`、`max_m||r_im||`、det Q、正交性、权重和、FK/ideal差值、像素投影一致性，与已存fit核对。`E_i`单位为m²，与存档 `weighted_rmse_m` 比较时用 `sqrt(E_i)`；最大残差单位为m。保留实际误差，不改数据以追求“零”；这些数值/微米误差/调试说明不放进论文原图。
+- 权重原样取 `weighted_source.weights`（两手总权重相同），不用显示子集重归一化。**分开保存**源FK点、配对参考实际FK点 `h_i_actual_world`、理想映射点及 actual−ideal，不能用ideal替换真实G1手点。
+- Pull右图反射线表示已放置role0→role1相对映射：`Q10=Q1 Q0^T`、`c10=c1-Q10 c0`；固定平面 `(I-Q10)x=c10`。本例平移约local z方向±0.4390236m，固定平面为共享物体local `z=0`，不是world z=0。与真实tabletop平面求交，按有限桌面截取，再变换/投影；导出平面坐标系和3D/2D端点，退化则报告。
+- 每图JSON含输入hash、帧/秒/FPS、坐标约定、相机K/外参/near/far/投影、显示矩阵；每点含local/world/display/camera/2D、类型/对应ID/权重。像素左上为原点、u右v下，注明像素中心及深度定义；使用该PNG的真实相机投影。
+- 批准后导出线性深度NPZ及 `in_front,in_image,projected_depth,buffer_depth,depth_tolerance_m,visibility,occluder_geom_id`；区分visible/self-occluded/other-occluded/out-of-frame/behind/unknown。手link原点常在自身mesh内，保留自遮挡结果，并以对应手部可辨认为选帧标准，不能移动原点/anchor求好看。
+- 内部 `checks.json` 核验全anchor的 `E_i`、`max_m||r_im||`、det/正交性、权重和、FK/ideal差及投影；E单位m²，与存档RMSE比较用sqrt(E)。真实残差不调成零，不把微米误差/调试数字放论文图。另交独立diagnostic overlay preview供检查；论文只用raw PNG+JSON矢量重画。
 
-### F3-C 渲染和自检预览
+## R5：图4腕部2×2，保持当前帧/时间
 
-- 每任务3候选×左右2面板，最多12张原PNG，统一1920×1440；左右同帧、相同方位角/俯仰角，分别锁定framing。源左面板用源物体，协作右面板用真实共享物体；左面板机器人蓝色，右侧角色蓝/橙。
-- 原PNG完全无标记。另交一张独立 `diagnostics/geometry_overlay_preview.png`，在原图上按JSON投影叠加稀疏anchor/手点/偏移及Pull反射线，供检查投影；明确标diagnostic，Mac只用raw PNG＋JSON重新做矢量叠加。
-- 遮挡多时先从现有窗口换候选或为整行统一调整视角，不改手、物体或参考。允许少于3候选并说明；不以新仿真“证明接触”，不导出假想作用力。
+原渲染脚本 `ROOT/scripts/render_wrist_reference_pairs.py`，规格 `WRIST/render_spec.json`，来源manifest `WRIST/figure3/render_manifest.json`；按包内manifest实际层级核验。如下before/after顺序固定，不使用旧建议的Chair110帧。
 
-## 3. 交付与复用清单
+| 行与手部 | 帧/时间 | Before参考 → After参考 | 原图（相对 WRIST/figure3） |
+|---|---|---|---|
+| Push，agent0右手 | 原始30Hz frame117，3.9s | `/home/kevin/holosoma-rubber-hand-largetable/data/retargeted/rubber_hand_largetable_v1/sub6_largetable_033/a1/sub6_largetable_033_fixed_object_base.npz` → 同目录 `sub6_largetable_033_fixed_object.npz` | `push/frame_117_before_hand.png`、`push/frame_117_after_hand.png` |
+| Chair，person1/agent0左手 | 原始30Hz frame122，4.0666666667s | `CHAIR/shared_small_preview/core4d_pair_reference.npz` → `CHAIR/shared_small_a1_preview_tol6/core4d_pair_reference.npz` | `chair/frame_122_before_hand.png`、`chair/frame_122_after_hand.png` |
 
-输出目录必须新建：`ROOT/paper_handoff_exports/FIGURES_R2_<YYYYMMDD>/`。`manifest.json` 用独立asset ID列出文件及 `used_by:[F1,F2,F3]`，避免重复渲染或混淆reference/execution/source_skill/retarget/human类型。
+- 四参考SHA256依序为 `27f9f6c73579aab479aadd4991b08231e4459431c50b625976f8fcc4775cbc29`、`a902e79abb69974c4b4af41ee73efa3101b150e4f9a41d06c7c48d0ebfceb511`、`d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586`、`1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b`。
+- 拉近到手和接触面占画面一半以上；**无箭头、无高亮框**。Push相机从桌面上方向下看手，桌子中性灰且基本不透明，不隔半透明桌面看手。Chair同帧近景、两机器人保持角色颜色。每张宽1920px。
+- 每行before/after使用完全相同相机/光照/裁切，非腕部参考字段按原manifest核验不变；不得重做腕优化。Push保留 `historical_wrist_only_reference`，Chair保留 `diagnostic_preview_not_training_asset` 的内部来源状态，不能把这两对替换成正式策略rollout。
+
+## R6：图5共享场景两版，保持当前Chair117帧
+
+- 使用 `R2/U7_media/shared_scene/render_manifest.json` 的原始30Hz **frame117=3.9s**，比较在腕优化前。输入为 `CHAIR/two_stage/person1/person1_nominal_scaled.npz`、`CHAIR/two_stage/person2/person2_nominal_scaled.npz`、`CHAIR/shared_small_preview/core4d_pair_reference.npz`；R2中对应 `source_0.npz/source_1.npz/source_2.npz`。
+- 三输入SHA256依次 `6c36ccd2f826b4ad9fbe2d3133dc04540543566fba20f3f12dfd09d3786f0d78`、`45bbeeba07af1bee87402386b0c3224c7b64312089b1b31167f50a225235d2c9`、`d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586`。源椅mesh `.../CORE4D_Real/object_models/chair/chair021_m.obj`，SHA256 `7fb3283f1b67c8d08bb1f68c51d15aab5e6c940b8571e704bca265701b776161`。
+- (a)沿用原 `individual_nominal`：两份椅子使用各自真实缩放/位姿，颜色深蓝 `#4A6FA5`、深沙 `#B07D3E`，alpha0.35–0.45（建议0.42）；(b)沿用 `shared_mean`：一个中性灰实体椅子，平均缩放。两panel机器人qpos完全相同；不移动两份椅子扩大差别。
+- 原person尺度约0.7616803111/0.7267058143，共享0.7441930627；以NPZ/manifest完整精度为准。参考 `render_r2_shared_chair.py` 和旧 `individual_nominal_visual_only.urdf` / `shared_mean_visual_only.urdf`，不改真实缩放规则。
+- 新机位稍高，从机器人不挡椅子的一侧观察；人物保留头到膝，椅子居中约占每格1/3，减少空白。两panel同相机/光照，独立raw PNG，无(a)/(b)或子标题。R3共享场景缩略图直接复用此对。
+
+## 分阶段交付与验收
+
+新建 `ROOT/paper_handoff_exports/FIGURES_R2_<YYYYMMDD>/`，若同日已有输出则加版本后缀避免覆盖。R0阶段先交小包；批准后补齐完整包，README明确哪阶段完成、哪些因审批/缺输入待执行。
 
 ```text
 FIGURES_R2_<YYYYMMDD>/
-  README.md
-  manifest.json
-  cameras.json
-  raw/                          # 无标记PNG；按asset ID组织，共用素材只存一份
-  geometry/                     # F3逐图JSON、深度/必要表面采样NPZ
-  diagnostics/                  # CPU smoke test、checks.json、overlay preview
-  sources/                      # 执行脚本/配置快照、输入manifest、必要小型NPZ
+  README.md, manifest.json, input_inventory.json, cameras.json
+  R0/                         # 两张样张、manifest、全图与缩略contact sheet
+  raw/                        # 批准后的无标记PNG；共用素材只存一份
+  geometry/                   # 独立JSON、批准后的深度NPZ
+  diagnostics/                # CPU预检、checks、批准后的各R1–R6 contact sheet/overlay
+  sources/                    # 实际代码/配置快照、必要输入manifest、dirty diff
   SHA256SUMS
 ```
 
-- README逐项写F1/F2/F3完成状态、缺失项、候选选择依据和共享资产ID；记录Ubuntu源路径、代码commit、dirty diff、执行脚本/配置/命令、环境/软件后端、每个输入与输出SHA256。模型/mesh/人体faces也要追溯；大原始数据无需全复制，保留路径和hash及复现步骤。
-- 保存所有参考和执行的真实来源、时间映射、模型checkpoint hash（只有执行图关联checkpoint；未加载者记 `not_loaded`）。不要只给commit或匿名图片；源姿态与训练资产本轮不得改变。
-- 核查相机固定、角色颜色、时间帧、文件数、图像尺寸、2D投影/深度、输入输出hash；为包内文件生成 `SHA256SUMS`（自身除外），压缩后另附压缩包SHA256。
-- 由作者把包带回Mac，放入 `What my Ubuntu agent wants to tell you/FIGURES_R2_<YYYYMMDD>/`。只交素材，不改论文正文或最终图编号；遇到无法核验的来源/CPU后端/人体输入，提前反馈具体问题并继续可独立完成的部分。
+- 每资产manifest记录 `used_by:[R1,...,R6]`、类型human/retarget/source_skill/reference/execution、源路径及hash、模型/任务/seed/回合、帧/时间/FPS/时间映射、相机、材质、文件名、选择依据。参考不冒充执行，回合条件不混用；执行须追溯checkpoint SHA256，未加载checkpoint明确记 `not_loaded`。
+- README记录代码commit、实际脚本/配置/命令、输入与输出SHA256、人体模型/faces与对象mesh来源、CPU后端版本、真实审批证据、缺失/退化项及复现方式。大数据无需全复制，但路径和hash必须充分；不用Mac路径作为输入。
+- 批准后每R1–R6交一张诊断contact sheet（允许诊断标签，与raw分开），R4另交投影overlay；共用素材用引用避免重渲。核验固定相机、角色色、帧身份、PNG尺寸、投影/深度和完整hash。为包内文件生成SHA256SUMS（自身除外），压缩包另附SHA256。
+- 由作者带回Mac，放入 `What my Ubuntu agent wants to tell you/FIGURES_R2_<YYYYMMDD>/`。Ubuntu只交素材与来源，不修改论文、字号、最终图布局或图注；任何无法核验的输入/软件后端及时报告，不虚构替代，不自行扩展为实验。
