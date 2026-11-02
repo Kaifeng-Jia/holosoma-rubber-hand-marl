@@ -1,5 +1,7 @@
 # DuetMimic v3：Ubuntu 两批任务执行令（自包含，2026-11-02）
 
+**修订 1.1：作者于 2026-11-02 确认 Fig.2(c) 改为单侧尺度实体 + 第二参与者 nominal 虚影；下方 U5 已同步。原训练任务、预算与截止不变。**
+
 **授权：Kevin 已授权现在执行 U1–U5、27 个正式训练 run（条件满足时最多 30 个）及下列全部评测。** 不要再次等待“是否开训”确认。每个受影响项须先完成本文件的输入核验和 smoke test，再启动；独立项并行。旧交接中“未授权训练”“先看参考再确认”的限制被本轮明确授权覆盖，但不能擅改实验定义、缩短预算、增加 run 或改变资产来赶时间。
 
 **时间统一为 America/New_York（本轮 UTC−05:00）。** 第一节点：2026-11-02 23:59 前回传 U1/U2、已完成 U5 和全部可独立完成的评测；最终节点：**2026-11-03 12:00−05:00 前回传训练与全部评测**。收到任务后立即登记接收时间和实际资源，并给各 run ETA。截止是目标，不能为了兑现日期伪报完成、降低训练预算或省种子。预计超期立即报告剩余 GPU 小时、已完成项、受阻项和最早可交付时间。
@@ -203,14 +205,18 @@ Full 总计18个主模型；六任务全部用最新正式配置（Push register
 | F2a_push_prescribed / registered | Push prescribed0.80m与role isometry；同帧同相机 | 2图 + 与 `R4_push_0126_pair.json` 同格式的锚点面片、目标锚点、真实hand FK像素JSON |
 | F2a_push_top_prescribed / registered | 同一比较俯视放大，能分辨39mm偏移 | 2图+独立camera/overlay JSON；数值从CSV追溯 |
 | F2b_pull_plus / minus | 仅U2≥10mm时；η=+1/−1同帧相机，不能用旧“两种角色”画面冒充奇偶性消融 | 2图+同格式面片/锚点/FK JSON |
-| F2c_chair_individual / shared | 两份缩放物体 vs 一份mean共享物体 | 已有 `raw/R6_chair_individual_nominal.png` / `R6_chair_shared_mean.png`（frame117,30Hz），可核验复用 |
+| F2c_chair_one_sided_ghost / shared | 上图U3a单侧尺度物体实体，叠加参与者2 nominal缩放物体的半透明虚影；下图一份mean共享物体 | 上图新渲；与 `raw/R6_chair_shared_mean.png`（frame117,30Hz）同帧、同相机，下图可核验复用；详见下方已批准规则 |
 | F2d_chair_before / after | Chair wrist近景，同模型与物体 | 已有 `R5_chair_122_before/after`，核验复用；源before必须对应U3说明 |
 | F3_human_{push,pull,kick,chair,bucket,table} | 六任务各一帧真实示范，风格同R1；Mac现有R1中Push/Pull/Chair/Bucket/Small Table均找到素材，Kick缺示范；逐图核验尺寸/来源后复用合格图，其余补渲 | 6图；人体模型/参数/faces/对象/时轴来源 |
 | F3_exec_{task}_{000,025,050,075,100} | **seed721，按state_id顺序第一个完成的±2扰动回合**，取完整reference horizon的0/25/50/75/100% | 六任务各5图=30图；固定每任务相机，保存选择证明和帧号 |
 | F3_traj_{task} | 同一回合reference与execution物体轨迹投影到末帧相机 | 六JSON，点序/时轴/坐标系/裁切变换/可见性；图内不画轨迹 |
 | F4_training_curves | 所有本轮训练+主结果训练的TensorBoard scalars | CSV：iteration、mean episode length、mean reward、horizon、run/seed/阶段/来源tag；不抹掉warm-up或续训段 |
 
-**Fig.2(c)语义核查：** 当前“两份各自缩放物体→一份mean共享物体”图与任务书拟标的“one-sided max size mismatch 4.81%→mean 2.41%”不一定是同一before对照。Ubuntu保留请求的原素材和相应CSV，单列报告图像场景/指标定义是否匹配；发现不匹配只STOP该图指标组合，不能自行把图换成one-sided、换数值或改论文主张。该问题不阻塞U3a单侧scale训练。
+**Fig.2(c)作者已批准的画法（2026-11-02）：** 上图在 U3a 资产生成后渲染。参与者1的缩放物体（s₁、p_nominal_person1(t)、原旋转）为不透明实体，即单侧尺度训练/仿真实际采用的那个物体；参与者2的 nominal 缩放物体（s₂、p_nominal_person2(t)、原旋转）只画成半透明虚影，说明机器人2原先的重定向参照。虚影仅为渲染辅助，不加入训练URDF/仿真碰撞、质量或动力学，也不重定向机器人。机器人动作及腕角保持 U3a/C-01 规定。下图仍为一份平均尺度共享物体，不加第二份实体。
+
+两图采用现有 `shared_mean.png` 的同帧、同相机、同光照和一致裁切。读取实际 R6 manifest 确认 frame117/30Hz 与 runtime50Hz 的时间映射；不能把索引117直接套到不同频率。如果既有 shared_mean 图机器人构型不等于 U3a/C-01 同时刻的固定构型，报告具体来源差异，暂停该配对，不能偷偷换机器人或腕角。原 `individual_nominal.png` 只作为 Mac 临时排版占位，不能作为最终单侧尺度场景。
+
+底部指标保持 `max size mismatch 4.81 → 2.41 %`，数值从对应 CSV 核准：one-sided 的 maxᵢ|s₁/sᵢ−1|×100%，mean 的 maxᵢ|s̄/sᵢ−1|×100%。前者为参与者1实体相对参与者2 nominal 尺度的差异；不是把虚影当作第二个实际物体。交 manifest 写明实体/虚影资产身份、各 scale/pose、透明度、物理开关、来源hash及CSV定位。若复算不符，只停该数字并报告，不估数。这个图修改不增加训练run、不阻塞U3a开训。
 
 人体示范使用真实SMPL-X/原始mesh，不能拿机器人nominal或骨架替代。OMOMO缺失手姿态若采用官方default，manifest标记，不能声称真实抓握细节。六任务 execution 如seed721无完成扰动回合，STOP该行素材并报告，不能换seed、选nominal或按RMSE挑最好回合。统一选帧索引 `frame_index=round_half_up(frac*(horizon_frames-1))`，frac为0/0.25/0.5/0.75/1；保存horizon_frames定义与状态/phase映射。若实际采集从frame1开始或terminal状态另存而无法遵循该定义，先报告具体差异，不能近似偷换旧帧。视频25fps不能当状态50Hz；最后一帧取合法horizon终点，不越界，也不把提前终止末帧当100%。末帧轨迹投影JSON必须绑定 `image_sha256` 与该图同一个camera ID。旧素材若1920×1280仅可作Mac预览；正式U5仍需1920×1080并保持正确投影。Mac实查旧执行Push为perturbed_000但按八等分导出，Pull/Chair/Bucket为nominal，不能直接复用为本轮五帧规范。
 
