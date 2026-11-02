@@ -1,6 +1,6 @@
 # DuetMimic v3：Ubuntu 两批任务执行令（自包含，2026-11-02）
 
-**修订 1.1：作者于 2026-11-02 确认 Fig.2(c) 改为单侧尺度实体 + 第二参与者 nominal 虚影；下方 U5 已同步。原训练任务、预算与截止不变。**
+**修订 1.2（2026-11-02）：纠正 U3c 腕部数量——每只手3维、每台机器人双手6维、两台四手共12维。Chair/Bucket 的真实 before/after 参考与优化代码均已核实；原“共六”是交接文字错误。按12维腕部范围继续既定无腕部消融，测试通过后即可启动，无需为此计数错误等待再次确认。修订1.1的Fig.2(c)单侧尺度实体＋第二参与者nominal虚影保留；训练run数量、预算与截止不变。**
 
 **授权：Kevin 已授权现在执行 U1–U5、27 个正式训练 run（条件满足时最多 30 个）及下列全部评测。** 不要再次等待“是否开训”确认。每个受影响项须先完成本文件的输入核验和 smoke test，再启动；独立项并行。旧交接中“未授权训练”“先看参考再确认”的限制被本轮明确授权覆盖，但不能擅改实验定义、缩短预算、增加 run 或改变资产来赶时间。
 
@@ -86,7 +86,9 @@ U3a Chair one-sided：物体 scale=`s1`，translation=`p_nominal_person1(t)`，r
 
 U3b Chair source-size+re-opt：物体源尺寸、源轨迹、源旋转，按 Bucket 的两阶段流程及**全构型 nominal prior**重新优化，后做 A1 wrist-only。不能以已有 Chair mean 动作直接配原尺寸物体当重优化；不能把仅关节 prior 称全构型 prior。保留原 canonical、Stage1、Stage2、A1 配置、命令、日志及 hash，明确各阶段哪些量允许改变；与主参考不同的机器人动作是该对照定义的一部分。若无法确定 Bucket 的原流程/全构型先验，STOP 该资产与三 run。
 
-U3c Chair/Bucket no-wrist：从上表各自 pre-wrist 资产导出，与 with-wrist 比较时只允许两台机器人各三腕关节（共六）及其 FK/速度等派生通道随之改变；root、非腕关节、物体、轨迹、时轴、采样、URDF/物理/任务参数逐值相同。不能把派生手 link 位置变化当作额外独立修改，也不能保留不匹配的新姿态旧 FK 缓存。
+U3c Chair/Bucket no-wrist：从上表各自 pre-wrist 资产导出，与 with-wrist 比较时只允许两台机器人各自左右手腕的 roll、pitch、yaw 关节改变（每只手3维、每台双手6维、两台四手共12维），以及由此变化的 FK/速度等派生通道；root、非腕关节、物体、轨迹、时轴、采样、URDF/物理/任务参数逐值相同。不能把派生手 link 位置变化当作额外独立修改，也不能保留不匹配的新姿态旧 FK 缓存。
+
+计数核验：Chair/Bucket 原始 pair 的 `robot_qpos[T,2,36]` 中，每台允许的零基列为 `[26,27,28,33,34,35]`，分别对应左/右 wrist roll、pitch、yaw（36维含7维浮动基）。对两个 robot index 都应用这个mask，合计12个 agent×joint 通道；不要只处理一只手或一台机器人。原G1 29关节顺序对应 `[19,20,21,26,27,28]`，runtime如重排须按 `joint_names` 映射，不能直接套索引。`scripts/refine_core4d_pair_a1.py` 的单机器人六索引与对两人的循环，以及两组实际before/after逐值差分均支持这一范围；Mac核查的非腕关节/root和物体保持一致。这是对既有腕部消融范围的准确说明，不新增优化自由度或训练run。
 
 每个变体输出 `core4d_pair_compact_fps30.npz`（源原 fps 如不同则真实标注）、`core4d_pair_runtime_fps50.npz`、URDF/依赖mesh、`source_manifest.json`、`training_asset_manifest.json`、`diff_to_full.json`。所有反算 FK/速度/接触或关系派生缓存须与实际参考一致，并明确 B-RZ0 主奖励不含旧 A/B 的独立高度/关系项；不能因复用 Bucket 脚本就训练错奖励。生成器的 accepted hash/训练 promotion 契约必须显式拓展为新变体，不能把新数据伪装成已审定旧资产。
 
