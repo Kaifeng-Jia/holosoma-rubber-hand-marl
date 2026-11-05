@@ -1,0 +1,51 @@
+"""Non-looping tracking termination for the CORE4D small-table demo."""
+
+from holosoma.config_types.termination import TerminationManagerCfg, TerminationTermCfg
+
+
+g1_29dof_core4d_smalltable_termination = TerminationManagerCfg(
+    terms={
+        "reference_horizon": TerminationTermCfg(
+            func=(
+                "holosoma.managers.termination.terms.core4d_smalltable:"
+                "reference_horizon_reached"
+            ),
+            is_timeout=True,
+        ),
+        "joint_bad_tracking": TerminationTermCfg(
+            func="holosoma.managers.termination.terms.marl:JointBadTrackingZOnly",
+            params={
+                "bad_ref_pos_threshold": 0.5,
+                "bad_ref_ori_threshold": 0.8,
+                "bad_motion_body_pos_threshold": 0.25,
+                "minimum_ref_body_height": 0.4,
+                "body_names_to_track": [
+                    "pelvis",
+                    "left_hip_roll_link",
+                    "left_knee_link",
+                    "left_ankle_roll_link",
+                    "right_hip_roll_link",
+                    "right_knee_link",
+                    "right_ankle_roll_link",
+                    "torso_link",
+                    "left_shoulder_roll_link",
+                    "left_elbow_link",
+                    "left_wrist_yaw_link",
+                    "right_shoulder_roll_link",
+                    "right_elbow_link",
+                    "right_wrist_yaw_link",
+                ],
+                "bad_motion_body_pos_body_names": [
+                    "left_ankle_roll_link",
+                    "right_ankle_roll_link",
+                    "left_wrist_yaw_link",
+                    "right_wrist_yaw_link",
+                ],
+                "bad_object_pos_threshold": 0.25,
+                "bad_object_ori_threshold": 0.8,
+            },
+        ),
+    }
+)
+
+__all__ = ["g1_29dof_core4d_smalltable_termination"]

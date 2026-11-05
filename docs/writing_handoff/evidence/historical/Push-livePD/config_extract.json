@@ -1,0 +1,223 @@
+{
+  "_artifact_kind": "derived_readable_config_not_the_original",
+  "_source_sha256": "8c43179a86b6fba84e07fa4d85629239a0c4d78ab7cb886bcf41e8205df8f0a0",
+  "_original_lossless_copy": "run_config.json.gz",
+  "_transformation": "All keys retained; arrays longer than 32 entries summarized.",
+  "config": {
+    "action_dim_per_agent": 29,
+    "actor_learning_rate": 1e-05,
+    "actor_obs_dim": 158,
+    "actor_update_mode": "full",
+    "clip_param": 0.2,
+    "command_func": "holosoma.managers.command.terms.marl:PairedA1MotionCommand",
+    "config": "g1_29dof_plan5_push_baseline",
+    "critic_learning_rate": 0.001,
+    "critic_obs_dim": 527,
+    "critic_only": false,
+    "expected_source_checkpoint_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224",
+    "fine_tune_checkpoint": null,
+    "gamma": 0.99,
+    "git_commit": "1c986973994181193fe2c82e14229c7f2d5b6828",
+    "iterations_requested": 7000,
+    "joint_acceleration_schedule": null,
+    "lambda": 0.95,
+    "lateral_spacing_m": 0.8,
+    "learning_rate_schedule": "adaptive",
+    "max_actor_learning_rate": null,
+    "motion_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "num_agents": 2,
+    "num_envs": 2048,
+    "num_learning_epochs": 5,
+    "num_mini_batches": 4,
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+    "optimizer_state_restored": true,
+    "output_dir": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048",
+    "paired_reference_file": null,
+    "reward_terms": [
+      "motion_global_ref_position_error_exp",
+      "motion_global_ref_orientation_error_exp",
+      "motion_relative_body_position_error_exp",
+      "motion_relative_body_orientation_error_exp",
+      "motion_global_body_lin_vel",
+      "motion_global_body_ang_vel",
+      "action_rate_l2",
+      "limits_dof_pos",
+      "undesired_contacts",
+      "object_global_ref_position_error_exp",
+      "object_global_ref_orientation_error_exp"
+    ],
+    "robot_urdf": "g1/main_mesh_collision_rubberhand.urdf",
+    "runtime_object_physics": {
+      "com_pose_body_xyzw": {
+        "shape": [
+          2048,
+          7
+        ],
+        "values": {
+          "_derived_large_array_summary": true,
+          "length": 2048,
+          "all_entries_equal": true,
+          "first_entry": [
+            0.0,
+            0.015111745335161686,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "last_entry": [
+            0.0,
+            0.015111745335161686,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            1.0
+          ],
+          "note": "Full original array is preserved in run_config.json.gz."
+        }
+      },
+      "inertia_kg_m2_row_major": {
+        "shape": [
+          2048,
+          9
+        ],
+        "values": {
+          "_derived_large_array_summary": true,
+          "length": 2048,
+          "all_entries_equal": true,
+          "first_entry": [
+            0.6277497410774231,
+            0.0,
+            0.0,
+            0.0,
+            4.360414981842041,
+            0.0,
+            0.0,
+            0.0,
+            3.9504892826080322
+          ],
+          "last_entry": [
+            0.6277497410774231,
+            0.0,
+            0.0,
+            0.0,
+            4.360414981842041,
+            0.0,
+            0.0,
+            0.0,
+            3.9504892826080322
+          ],
+          "note": "Full original array is preserved in run_config.json.gz."
+        }
+      },
+      "mass_kg": {
+        "shape": [
+          2048,
+          1
+        ],
+        "values": {
+          "_derived_large_array_summary": true,
+          "length": 2048,
+          "all_entries_equal": true,
+          "first_entry": [
+            20.0
+          ],
+          "last_entry": [
+            20.0
+          ],
+          "note": "Full original array is preserved in run_config.json.gz."
+        }
+      },
+      "material_static_dynamic_restitution": {
+        "shape": [
+          2048,
+          5,
+          3
+        ],
+        "values": {
+          "_derived_large_array_summary": true,
+          "length": 2048,
+          "all_entries_equal": true,
+          "first_entry": [
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ]
+          ],
+          "last_entry": [
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ],
+            [
+              0.5,
+              0.5,
+              0.0
+            ]
+          ],
+          "note": "Full original array is preserved in run_config.json.gz."
+        }
+      }
+    },
+    "runtime_process": {
+      "cuda_visible_devices": "0",
+      "device_within_visible_set": "cuda:0",
+      "distributed_data_parallel": false,
+      "local_rank": "0",
+      "world_size": 1
+    },
+    "seed": 721,
+    "skill": "push",
+    "source_checkpoint": "logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt",
+    "source_checkpoint_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224",
+    "start_iteration": 8050,
+    "started_unix_time": 1787812412.8450131,
+    "steps_per_env": 24,
+    "teammate_input_only": false,
+    "termination_terms": [
+      "timeout",
+      "joint_bad_tracking"
+    ],
+    "training_name": "a1_mappo_formal",
+    "training_project": "Plan5Push"
+  }
+}

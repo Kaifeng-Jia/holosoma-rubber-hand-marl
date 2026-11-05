@@ -1,0 +1,123 @@
+{
+  "artifact_kind": "core4d_pair_training_asset_promotion",
+  "collision_scope": "source mesh preserved; planned Isaac convex_decomposition, hollow opening not physically verified",
+  "control_hz": 50,
+  "experiment_id": "bucket003",
+  "formal_training_authorized": false,
+  "inertia_basis": "source scanned-mesh uniform-volume inertia normalized to selected 1kg experiment load; not measured hollow-shell inertia",
+  "inertia_scale_from_source": 1.0,
+  "inertia_tensor_kg_m2": [
+    [
+      0.0564051036942,
+      0.000742864866681,
+      -9.57352334507e-06
+    ],
+    [
+      0.000742864866681,
+      0.0233053563116,
+      -1.96646689426e-05
+    ],
+    [
+      -9.57352334507e-06,
+      -1.96646689426e-05,
+      0.0560810416282
+    ]
+  ],
+  "interaction_artifact_file": "interaction_vectors_v1.npz",
+  "interaction_artifact_sha256": "3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f",
+  "mass_basis": "user_selected_experiment_load_not_dataset_measured_mass",
+  "object_collider_type": "convex_decomposition",
+  "object_mass_kg": 1.0,
+  "object_material_static_dynamic_restitution": [
+    0.5,
+    0.5,
+    0.0
+  ],
+  "object_mesh_file": "bucket003_m.obj",
+  "object_mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+  "object_name": "bucket003",
+  "object_scale": 1.0,
+  "physics_hz": 200,
+  "physics_loading_check": "passed_local_Isaac_2env_24step_A_frame0_and_B_frame230_20260918; not evidence of learned handover or exact hollow-wall collision",
+  "preparation_scope": "offline_artifact_preparation_only_no_simulation_no_PPO_update",
+  "reference_fps": 50,
+  "reference_frames": 497,
+  "runtime_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+  "script_sha256": "736f57c207388819fd8a15d7df7a84680dd77d3dad1fb3a9880ec4eaffdc1fa7",
+  "source_canonical_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+  "source_geometric_contact": {
+    "dataset_contact_ground_truth": false,
+    "formula": "clip((outer-min(left_distance,right_distance))/(outer-inner),0,1)",
+    "inner_m": 0.02,
+    "kind": "source_human_geometric_proximity_proxy_not_contact_ground_truth",
+    "not_from_retargeted_robot_penetration": true,
+    "outer_m": 0.04,
+    "runtime_positive_intervals": {
+      "agent1": [
+        {
+          "first_frame": 165,
+          "first_time_s": 3.3,
+          "last_frame": 278,
+          "last_time_s": 5.56
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 222,
+          "first_time_s": 4.44,
+          "last_frame": 466,
+          "last_time_s": 9.32
+        }
+      ]
+    },
+    "runtime_unit_intervals": {
+      "agent1": [
+        {
+          "first_frame": 181,
+          "first_time_s": 3.62,
+          "last_frame": 275,
+          "last_time_s": 5.5
+        }
+      ],
+      "agent2": [
+        {
+          "first_frame": 225,
+          "first_time_s": 4.5,
+          "last_frame": 464,
+          "last_time_s": 9.28
+        }
+      ]
+    },
+    "source_canonical_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+    "source_palm_definition": "mean(wrist,index1,middle1,pinky1) of original unscaled SMPL-X joints",
+    "source_palm_joint_indices": [
+      [
+        20,
+        25,
+        28,
+        31
+      ],
+      [
+        21,
+        40,
+        43,
+        46
+      ]
+    ],
+    "threshold_status": "explicit_candidate_pending_user_review_before_formal_training",
+    "time_mapping": "linear interpolate original 15Hz hand distances to uniform runtime 50Hz, then apply soft band"
+  },
+  "source_input_hashes": {
+    "source_canonical": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+    "source_manifest": "404c1ffe508641ec68f0974b8fa2af4f85db537a1d93b4845089cb1cdd538374",
+    "source_mesh": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+    "source_pair": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+    "source_urdf": "6cac97e83536feaf9f8e13e1a94ab7badc316948f23777b7376b9a29208cfc73"
+  },
+  "source_manifest_sha256": "404c1ffe508641ec68f0974b8fa2af4f85db537a1d93b4845089cb1cdd538374",
+  "source_manifest_status_preserved": "diagnostic_preview_not_training_asset",
+  "source_pair_sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+  "training_object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+  "training_ready": true,
+  "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+}

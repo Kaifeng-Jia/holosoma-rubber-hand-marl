@@ -1,0 +1,1174 @@
+schema_version: 1
+manifest_version: "1.0.0"
+status: frozen
+created: "2026-08-05"
+frozen: "2026-08-07"
+roadmap_stage: 1
+roadmap_stage_status: closed
+object: largetable
+robot: unitree_g1_29dof_fixed_rubber_hands
+
+purpose: >-
+  Frozen registry for Behavior Library v1 and the Stage 1 candidate inventory.
+  Only entries explicitly listed in behavior_library_v1 are members of the
+  frozen library. A keep_behavioral_prior entry may be retained with a
+  documented embodiment or policy mismatch; it must not be described as a
+  validated expert. Source-language labels are inventory aids, not actor
+  observations or action commands.
+
+source_dataset:
+  raw_motion_root: /home/kevin/holosoma/OMOMO_new
+  annotation_root: /home/kevin/holosoma/omomo_text_anno/omomo_text_anno_json_data
+  raw_format: intermimic_pt_591d
+  raw_fps: 30
+  annotation_policy: exact_text_match
+  actor_receives_action_category: false
+
+decision_values:
+  keep_or_reject:
+    - keep
+    - keep_behavioral_prior
+    - candidate
+    - reject
+  validation_status:
+    - pass
+    - pass_with_documented_mismatch
+    - pending
+    - fail
+
+source_inventory:
+  push_exact:
+    annotation: "Push the largetable, and set it back down."
+    available_raw_pt_count: 39
+  push_then_drag:
+    annotation: >-
+      Push the largetable, release the hands, then drag the largetable, and set
+      it back down.
+    available_raw_pt_count: 34
+    current_scope: deferred_composite_action
+  kick_exact:
+    annotation: "Kick the largetable, and set it back down."
+    available_raw_pt_count: 36
+    motion_ids:
+      - sub15_largetable_031
+      - sub15_largetable_032
+      - sub15_largetable_033
+      - sub15_largetable_034
+      - sub15_largetable_035
+      - sub15_largetable_036
+      - sub16_largetable_026
+      - sub16_largetable_027
+      - sub16_largetable_028
+      - sub16_largetable_029
+      - sub16_largetable_030
+      - sub1_largetable_061
+      - sub1_largetable_062
+      - sub1_largetable_063
+      - sub1_largetable_064
+      - sub1_largetable_065
+      - sub1_largetable_066
+      - sub1_largetable_067
+      - sub1_largetable_068
+      - sub1_largetable_069
+      - sub1_largetable_070
+      - sub3_largetable_024
+      - sub3_largetable_025
+      - sub3_largetable_026
+      - sub5_largetable_036
+      - sub5_largetable_037
+      - sub5_largetable_038
+      - sub5_largetable_039
+      - sub5_largetable_040
+      - sub5_largetable_041
+      - sub6_largetable_038
+      - sub6_largetable_039
+      - sub6_largetable_040
+      - sub6_largetable_041
+      - sub6_largetable_042
+      - sub6_largetable_043
+  pull_exact:
+    annotation: "Pull the largetable, and set it back down."
+    available_raw_pt_count: 47
+    bounded_feasibility_only: true
+    motion_ids:
+      - sub15_largetable_000
+      - sub15_largetable_001
+      - sub15_largetable_002
+      - sub15_largetable_003
+      - sub15_largetable_004
+      - sub15_largetable_005
+      - sub15_largetable_006
+      - sub16_largetable_000
+      - sub16_largetable_001
+      - sub16_largetable_002
+      - sub16_largetable_003
+      - sub16_largetable_004
+      - sub16_largetable_005
+      - sub1_largetable_000
+      - sub1_largetable_001
+      - sub1_largetable_002
+      - sub1_largetable_003
+      - sub1_largetable_004
+      - sub1_largetable_005
+      - sub1_largetable_006
+      - sub1_largetable_007
+      - sub1_largetable_008
+      - sub1_largetable_009
+      - sub1_largetable_010
+      - sub2_largetable_000
+      - sub2_largetable_001
+      - sub2_largetable_002
+      - sub3_largetable_000
+      - sub3_largetable_001
+      - sub3_largetable_002
+      - sub3_largetable_003
+      - sub3_largetable_010
+      - sub3_largetable_011
+      - sub3_largetable_012
+      - sub5_largetable_000
+      - sub5_largetable_001
+      - sub5_largetable_002
+      - sub5_largetable_003
+      - sub5_largetable_004
+      - sub5_largetable_005
+      - sub6_largetable_000
+      - sub6_largetable_001
+      - sub6_largetable_002
+      - sub6_largetable_003
+      - sub6_largetable_004
+      - sub6_largetable_005
+      - sub6_largetable_045
+
+motions:
+  - motion_id: sub6_largetable_033_a1
+    source_path: /home/kevin/holosoma/OMOMO_new/sub6_largetable_033.pt
+    source_sha256: e0ba59bef7913fc7e36c5071bb9c30c1c6d89733660ecc475cb49e5179c2410b
+    action_category: push
+    source_annotation: "Push the largetable, and set it back down."
+    retargeting_variant: a1_pt_wrist_orientation
+    retargeted_motion_path: >-
+      src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz
+    retargeted_motion_sha256: b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207
+    frame_count: 309
+    fps: 50
+    contact_body: bilateral_rubber_hands_in_reference
+    reference_object_displacement_m: 1.505816
+    reference_displacement_direction_xyz: [-0.005547, -1.505806, 0.000934]
+    kinematic_collision_status: pass_with_documented_mismatch
+    physics_replay_status: pass
+    keep_or_reject: keep
+    notes: >-
+      Accepted push tracking prior. Reference mesh interpenetration is known and
+      deliberate; collision remains enabled during simulation. Learned contact
+      technique may include physically useful non-hand contacts.
+
+  - motion_id: sub6_largetable_033_plan_b
+    source_path: /home/kevin/holosoma/OMOMO_new/sub6_largetable_033.pt
+    source_sha256: e0ba59bef7913fc7e36c5071bb9c30c1c6d89733660ecc475cb49e5179c2410b
+    action_category: push
+    source_annotation: "Push the largetable, and set it back down."
+    retargeting_variant: plan_b_designed_palm_edge_contact
+    retargeted_motion_path: >-
+      src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/plan_b/sub6_largetable_033_plan_b_mj_fps50_w_obj.npz
+    retargeted_motion_sha256: 6bcc3111a08fc2c714a2fe671411b122b52eb49bd1712c7670b7b61d032d9d14
+    frame_count: 309
+    fps: 50
+    contact_body: bilateral_rubber_palms_in_reference
+    reference_object_displacement_m: 1.505816
+    reference_displacement_direction_xyz: [-0.005547, -1.505806, 0.000934]
+    kinematic_collision_status: pass
+    physics_replay_status: pass_with_documented_mismatch
+    keep_or_reject: keep_behavioral_prior
+    notes: >-
+      Kinematically valid palm-edge target. The trained policy did not reliably
+      reproduce that contact technique, so this is retained as a distinct
+      behavioral prior and diagnostic rather than a successful palm-edge expert.
+
+  - motion_id: sub16_largetable_028
+    source_path: /home/kevin/holosoma/OMOMO_new/sub16_largetable_028.pt
+    source_sha256: a9f4f6b105c3814e81a9679a30771c322045c43788f25380668a469d734fccc8
+    action_category: kick
+    source_annotation: "Kick the largetable, and set it back down."
+    retargeting_variant: baseline_fixed_object_size_adaptation
+    retargeted_motion_path: >-
+      src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/sub16_largetable_028_kick_mj_fps50_w_obj.npz
+    retargeted_motion_sha256: 611b3ab418f470a93c5b39bd0163a6c98aaf2c6519c1ea6e9f0e64f00f0e531f
+    source_frame_count: 180
+    source_fps: 30
+    frame_count: 299
+    fps: 50
+    contact_body:
+      primary: left_ankle_and_foot
+      additional:
+        - left_knee
+        - left_hip_yaw
+    source_reference_object_displacement_m: 0.3720
+    source_reference_displacement_direction_xyz: [0.3227, 0.1850, -0.0008]
+    reference_object_displacement_m: 0.285026
+    reference_displacement_direction_xyz: [0.247275, 0.141756, -0.000614]
+    conversion_status: pass
+    motion_loader_status: pass
+    kinematic_collision_status: pass_with_documented_mismatch
+    kinematic_collision_qc:
+      trajectory_fps: 30
+      model: models/g1/g1_29dof_w_largetable.xml
+      robot_table_contact_frames: 24
+      robot_table_minimum_signed_distance_m: -0.001000
+      contact_ranges:
+        left_hip_yaw_to_tabletop:
+          - [71, 74]
+          - [81, 82]
+          - [103, 104]
+        left_knee_to_table_leg:
+          - [106, 118]
+        left_ankle_to_table_leg:
+          - [119, 121]
+      table_peak_speed_transition: [121, 122]
+      table_peak_speed_m_s: 0.622334
+      robot_ground_contact_frames_in_prescribed_qpos: 0
+      left_foot_bottom_z_m_min_median: [0.000867, 0.003464]
+      right_foot_bottom_z_m_min_median: [0.002124, 0.003845]
+      control_comparison: >-
+        The accepted A1 reference also contains persistent adjacent-leg
+        self-contact and table-ground penetration in this MuJoCo model. Those
+        two effects are treated as model/reference-system effects rather than
+        kick-specific rejection reasons.
+    physics_replay_status: pass_with_documented_mismatch
+    keep_or_reject: keep_behavioral_prior
+    visual_review_status: pass
+    visual_review_date: "2026-08-05"
+    ppo_smoke_test:
+      status: pass
+      completed: "2026-08-05"
+      iterations: 50
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 4915200
+      log_directory: >-
+        logs/WholeBodyTracking/20260806_021834-rubberhand_kick_sub16_028_50_seed42_retry1-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260806_021834-rubberhand_kick_sub16_028_50_seed42_retry1-locomotion/model_00049.pt
+      final_checkpoint_sha256: 840c995314a8a7543ba74638c58483c5922852cc2961bf2d44cd88f0e1ae1b6e
+      initial_mean_reward: -1.11
+      final_mean_reward: 1.23
+      final_mean_episode_length: 38.31
+      numerical_failures: none_observed
+      launch_note: >-
+        The first launch stopped before training because Python resolved the
+        installed editable package in /home/kevin/holosoma, where the required
+        table URDF was absent. The successful retry explicitly selected this
+        rubber-hand worktree through PYTHONPATH; no source code or asset was
+        copied or modified to make the retry pass.
+    ppo_500_iteration_pilot:
+      training_status: pass
+      behavioral_replay_status: pending
+      completed: "2026-08-06"
+      iterations: 500
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 49152000
+      save_interval: 50
+      log_directory: >-
+        logs/WholeBodyTracking/20260806_045753-rubberhand_kick_sub16_028_500_seed42-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260806_045753-rubberhand_kick_sub16_028_500_seed42-locomotion/model_00499.pt
+      final_checkpoint_sha256: f23940f102a2fe0aa2a58bcd4480328d58758b78245cb21b453516607e108ebf
+      selected_replay_checkpoints:
+        behavior_emergence: model_00250.pt
+        best_saved_reward: model_00450.pt
+        final: model_00499.pt
+      metrics:
+        initial_mean_reward: -1.10995
+        iteration_450_mean_reward: 24.3272
+        final_mean_reward: 22.4684
+        maximum_mean_reward:
+          iteration: 473
+          value: 30.3848
+        initial_mean_episode_length: 23.93
+        iteration_450_mean_episode_length: 384.95
+        final_mean_episode_length: 352.21
+        initial_final_body_position_error: [0.104139, 0.058043]
+        initial_final_joint_position_error: [1.37765, 1.09754]
+        initial_final_reference_position_error: [0.140280, 0.267500]
+        initial_final_object_position_reward: [0.019153, 0.332743]
+        initial_final_undesired_contact_penalty: [-0.000630, -0.006905]
+      numerical_failures: none_observed
+      interpretation: >-
+        The training pipeline and numerical learning checks passed. Reward,
+        episode length, body tracking, joint tracking, and object-position
+        reward improved substantially. Reference root-position error and the
+        magnitude of the undesired-contact penalty increased, so reward alone
+        is not accepted as evidence of a correct kick. Dynamic behavioral
+        replay of the selected checkpoints is required before physics status or
+        keep_or_reject can be promoted.
+    ppo_8000_iteration_gate:
+      training_status: pass
+      behavioral_replay_status: pass_with_documented_mismatch
+      started: "2026-08-06"
+      completed: "2026-08-06"
+      iterations: 8000
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 786432000
+      save_interval: 1000
+      initialized_checkpoint: model_00000.pt
+      log_directory: >-
+        logs/WholeBodyTracking/20260806_055921-rubberhand_kick_sub16_028_8000_seed42-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260806_055921-rubberhand_kick_sub16_028_8000_seed42-locomotion/model_07999.pt
+      final_checkpoint_sha256: a84928cf4a8ba6ca91905a4105ff82bdb331f11ac0acb6ab56a034f5b6660e47
+      saved_checkpoint_iterations: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 7999]
+      replay_priority:
+        primary: model_07999.pt
+        downstream_selection: model_07999.pt
+        fallback: none
+      launch_policy: from_scratch
+      code_or_reward_change: none
+      metrics:
+        initial_final_mean_reward: [-1.10995, 62.7126]
+        final_20_iteration_mean_reward: 62.9364
+        maximum_mean_reward:
+          iteration: 6528
+          value: 69.5071
+        initial_final_mean_episode_length: [23.93, 778.17]
+        final_20_iteration_mean_episode_length: 773.5445
+        initial_final_body_position_error: [0.104139, 0.047255]
+        initial_final_joint_position_error: [1.37765, 0.856512]
+        initial_final_reference_position_error: [0.140280, 0.204002]
+        initial_final_object_position_reward: [0.019153, 0.710953]
+        initial_final_undesired_contact_penalty: [-0.000630, -0.009145]
+      numerical_failures: none_observed
+      seed_42_physics_replay:
+        status: pass_with_documented_mismatch
+        validation_scope: 20_closed_attempts_single_seed
+        recording: >-
+          logs/WholeBodyTracking/20260807_034545-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7999_seed42_physics_eval_v1.npz
+        report: >-
+          logs/WholeBodyTracking/20260807_034545-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7999_seed42_physics_eval_v1.json
+        completion_rate: 0.60
+        early_termination_rate: 0.40
+        correct_displacement_direction_rate: 0.95
+        mean_actual_table_displacement_m: 0.191002
+        mean_reference_table_displacement_m: 0.260677
+        table_trajectory_position_rmse_m: 0.073120
+        joint_position_rmse_rad: 0.171284
+        key_body_position_rmse_m: 0.042308
+        fall_proxy_rate: 0.0
+        multi_seed_robustness_status: evaluated_as_part_of_three_seed_gate
+        protocol_note: >-
+          The v1 interaction proxy is rubber-hand-specific and is not used as
+          evidence of kick success. Kick acceptance uses completion, stability,
+          actual table displacement, displacement direction, and visual contact
+          semantics.
+      three_seed_expert_evaluation:
+        status: fail
+        seeds: [42, 43, 44]
+        attempts_per_seed: 20
+        total_attempts: 60
+        reports:
+          seed_42: >-
+            logs/WholeBodyTracking/20260807_034545-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7999_seed42_physics_eval_v1.json
+          seed_43: >-
+            logs/WholeBodyTracking/20260807_043008-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7999_seed43_physics_eval_v1.json
+          seed_44: >-
+            logs/WholeBodyTracking/20260807_043455-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7999_seed44_physics_eval_v1.json
+        per_seed_completion_rate: {42: 0.60, 43: 0.60, 44: 0.75}
+        mean_completion_rate: 0.65
+        worst_seed_completion_rate: 0.60
+        mean_correct_displacement_direction_rate: 0.983333
+        mean_actual_table_displacement_m: 0.191695
+        mean_reference_table_displacement_m: 0.271160
+        mean_table_trajectory_position_rmse_m: 0.072108
+        mean_joint_position_rmse_rad: 0.171353
+        mean_key_body_position_rmse_m: 0.041763
+        mean_fall_proxy_rate: 0.0
+        frozen_gate:
+          mean_completion_at_least_0_80: fail
+          worst_seed_completion_at_least_0_60: pass
+          direction_at_least_0_90: pass
+          fall_proxy_at_most_0_10: pass
+        interpretation: >-
+          Model 07999 is stable and directionally effective but does not meet
+          the frozen expert completion threshold. It remains a useful
+          leg-contact behavioral prior and must not be labeled a validated Kick
+          expert unless another frozen checkpoint passes the same gate.
+      saved_checkpoint_screening:
+        status: complete_no_expert_checkpoint
+        protocol: >-
+          Screen models 06000 and 07000 on seed 42 with 20 closed attempts.
+          Continue seeds 43 and 44 only for a checkpoint that improves over
+          model 07999 while retaining direction rate at least 0.90 and fall
+          proxy rate at most 0.10. The frozen three-seed expert thresholds are
+          not revised after observing results.
+        model_06000_seed_42:
+          status: reject_as_replacement
+          report: >-
+            logs/WholeBodyTracking/20260807_044042-rubberhand_kick_sub16_028_8000_seed42-eval/kick_6000_seed42_physics_eval_v1.json
+          completion_rate: 0.65
+          correct_displacement_direction_rate: 0.75
+          mean_actual_table_displacement_m: 0.178685
+          table_trajectory_position_rmse_m: 0.076670
+          joint_position_rmse_rad: 0.183961
+          key_body_position_rmse_m: 0.044745
+          fall_proxy_rate: 0.0
+          rejection_reason: direction_rate_below_0_90_and_tracking_worse
+        model_07000_three_seed_evaluation:
+          status: fail_expert_gate_not_selected
+          checkpoint: >-
+            logs/WholeBodyTracking/20260806_055921-rubberhand_kick_sub16_028_8000_seed42-locomotion/model_07000.pt
+          checkpoint_sha256: aa49850ed73ae5a51f7f9f6fd4aec9e2fab73a434b12ce7558d86feed74d39a1
+          seeds: [42, 43, 44]
+          attempts_per_seed: 20
+          total_attempts: 60
+          reports:
+            seed_42: >-
+              logs/WholeBodyTracking/20260807_044543-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7000_seed42_physics_eval_v1.json
+            seed_43: >-
+              logs/WholeBodyTracking/20260807_045039-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7000_seed43_physics_eval_v1.json
+            seed_44: >-
+              logs/WholeBodyTracking/20260807_045526-rubberhand_kick_sub16_028_8000_seed42-eval/kick_7000_seed44_physics_eval_v1.json
+          per_seed_completion_rate: {42: 0.80, 43: 0.80, 44: 0.65}
+          mean_completion_rate: 0.75
+          worst_seed_completion_rate: 0.65
+          mean_correct_displacement_direction_rate: 0.966667
+          mean_actual_table_displacement_m: 0.208384
+          mean_reference_table_displacement_m: 0.276696
+          mean_table_trajectory_position_rmse_m: 0.077437
+          mean_joint_position_rmse_rad: 0.173567
+          mean_key_body_position_rmse_m: 0.041972
+          mean_fall_proxy_rate: 0.0
+          frozen_gate:
+            mean_completion_at_least_0_80: fail
+            worst_seed_completion_at_least_0_60: pass
+            direction_at_least_0_90: pass
+            fall_proxy_at_most_0_10: pass
+          interpretation: >-
+            Model 07000 showed higher completion robustness than model 07999 in
+            this limited evaluation, but its 0.75 three-seed mean remains below
+            the frozen 0.80 expert threshold. It is retained only as historical
+            screening evidence and is not selected for downstream use.
+      learned_policy_visual_review:
+        status: accepted_with_documented_mismatch
+        reviewed: "2026-08-06"
+        reference_contact_semantics: left_foot_and_ankle_kick
+        learned_contact_semantics: left_thigh_or_knee_brushing_push
+        decision: >-
+          Accepted by the user as a useful leg-driven behavior prior. It must
+          not be described as a high-fidelity foot-kick expert.
+      notes: >-
+        The user elected to proceed directly from the successful 500-iteration
+        numerical pilot to the 8,000-iteration gate. Training completed with
+        stable final metrics and no numerical failure. Reference root-position
+        error and undesired-contact magnitude remain higher than at
+        initialization, so checkpoint replay remains required and is not
+        replaced by the improved training reward.
+    notes: >-
+      Selected for the next QC stage after complete-clip Viser review. The kick
+      action looked correct and natural. Numerical QC found finite values and
+      no joint-limit violation, with documented waist-pitch limit saturation
+      that remains subject to physics replay checks. The intended left-leg
+      contact is temporally aligned with peak table speed. Short left-hip and
+      sustained left-knee contacts are documented embodiment mismatches, and
+      the prescribed trajectory leaves a small support-foot ground gap that
+      was evaluated in dynamic simulation. The learned 8,000-iteration policy
+      moves the table with a visible thigh/knee brushing action rather than the
+      reference foot kick; this semantic drift is accepted for the behavior
+      library and must remain explicit in reports.
+
+  - motion_id: sub5_largetable_040
+    source_path: /home/kevin/holosoma/OMOMO_new/sub5_largetable_040.pt
+    source_sha256: 4998aa018980b0dc1a07c397bd94ca5583023ab9f8dce4a9c5bcd0dc338a3c80
+    action_category: kick
+    source_annotation: "Kick the largetable, and set it back down."
+    retargeting_variant: pending
+    frame_count: 142
+    fps: 30
+    contact_body: pending_visual_review
+    reference_object_displacement_m: 0.4593
+    reference_displacement_direction_xyz: [0.4114, -0.2041, -0.0006]
+    kinematic_collision_status: pending
+    physics_replay_status: pending
+    keep_or_reject: candidate
+    notes: Shortlisted as a compact, moderate-displacement alternative.
+
+  - motion_id: sub6_largetable_043
+    source_path: /home/kevin/holosoma/OMOMO_new/sub6_largetable_043.pt
+    source_sha256: 2401773f8d226bd9349a2d0864bab7ad5f6ab262be987fa0037300b564a513fa
+    action_category: kick
+    source_annotation: "Kick the largetable, and set it back down."
+    retargeting_variant: pending
+    frame_count: 202
+    fps: 30
+    contact_body: pending_visual_review
+    reference_object_displacement_m: 1.4527
+    reference_displacement_direction_xyz: [-0.0751, -1.4507, -0.0006]
+    kinematic_collision_status: pending
+    physics_replay_status: pending
+    keep_or_reject: candidate
+    notes: Shortlisted because it uses the same demonstrator as the accepted push motion; displacement is comparatively large.
+
+  - motion_id: sub16_largetable_001
+    source_path: /home/kevin/holosoma/OMOMO_new/sub16_largetable_001.pt
+    source_sha256: 06565cbce2b1fb349a41e4fae07b3057b9c77e40b0f4cf00f98ff287ee1182d5
+    action_category: pull
+    source_annotation: "Pull the largetable, and set it back down."
+    retargeting_variant: pending_bounded_feasibility
+    frame_count: 152
+    fps: 30
+    contact_body: pending_visual_review
+    reference_object_displacement_m: 0.6141
+    reference_displacement_direction_xyz: [-0.5524, -0.2683, 0.0003]
+    kinematic_collision_status: pending
+    physics_replay_status: pending
+    keep_or_reject: candidate
+    notes: Shortlisted as the lowest-displacement pull clip without material vertical drift.
+
+  - motion_id: sub3_largetable_010
+    source_path: /home/kevin/holosoma/OMOMO_new/sub3_largetable_010.pt
+    source_sha256: 43773e87ff49e7dc1c65be424cc876e859029acb4cbb7c263835e521c9c509bb
+    action_category: pull
+    source_annotation: "Pull the largetable, and set it back down."
+    retargeting_variant: a1_pt_wrist_orientation_tol1deg_bounded_pull
+    retargeted_source_path: >-
+      data/retargeted/rubber_hand_largetable_v1/sub3_largetable_010/pull_a1_tol1deg/sub3_largetable_010_fixed_object.npz
+    retargeted_source_sha256: 6ac57802dbd6c202e80ae97b31678d850751c37ba133cb49f968351ba9178c05
+    retargeted_motion_path: >-
+      src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/sub3_largetable_010_pull_a1_mj_fps50_w_obj.npz
+    retargeted_motion_sha256: 7c1c554851b1ac1a0ab3998755dda2eddf76800e2460fa29da5e4d3093bd8cf7
+    source_frame_count: 191
+    source_fps: 30
+    frame_count: 317
+    fps: 50
+    contact_body:
+      primary: bilateral_rubber_hands_at_adjacent_tabletop_edges
+      additional:
+        - right_thumb_fixed_marker
+        - brief_left_knee_to_table_leg
+    source_reference_object_displacement_m: 0.9056
+    source_reference_displacement_direction_xyz: [-0.2274, 0.8766, -0.0001]
+    reference_object_displacement_m: 0.615861
+    reference_displacement_direction_xyz: [-0.154605, 0.596139, -0.000078]
+    conversion_status: pass
+    motion_loader_status: pass
+    visual_review_status: pass
+    wrist_orientation_qc:
+      strict_default_max_error_deg: 0.010
+      isolated_diagnostic_tolerance_deg: 1.0
+      left_p90_max_error_deg: [0.0, 0.0]
+      right_p90_max_error_deg: [0.0, 0.962982]
+      right_wrist_roll_limit_frames_30hz: [90, 109]
+      note: >-
+        The 1 degree tolerance was used only for this isolated bounded Pull
+        candidate. The global A1 default was not changed. Six wrist qpos
+        columns changed; root, non-wrist joints, human points, and object pose
+        remained unchanged from the fixed-object baseline.
+    kinematic_collision_qc:
+      model: models/g1/g1_29dof_w_largetable.xml
+      trajectory_fps: 50
+      object_moving_frames: 208
+      object_moving_with_rubber_hand_contact_frames: 208
+      object_velocity_toward_pelvis_cosine_mean: 0.650394
+      object_velocity_toward_pelvis_positive_fraction: 0.899038
+      left_rubber_hand_contact_frames: 254
+      right_rubber_hand_contact_frames: 263
+      either_rubber_hand_contact_frames: 265
+      other_robot_table_contact_frames: 80
+      left_knee_table_leg_contact_frames: 7
+      left_hand_penetration_m:
+        minimum: -0.038275
+        median: -0.008928
+      right_hand_penetration_m:
+        minimum: -0.058640
+        median: -0.029570
+      interpretation: >-
+        Timing and Pull direction are semantically strong, but both hands
+        contact the tabletop on adjacent near-side vertical edges. The human
+        reference relies on finger grip or edge hooking that the fixed rubber
+        hands cannot reproduce exactly. Large right-hand reference penetration
+        prevents a clean kinematic-physics pass and requires a bounded learned
+        policy test with collisions enabled.
+    kinematic_collision_status: pass_with_documented_mismatch
+    physics_replay_status: pass_with_documented_mismatch
+    keep_or_reject: keep_behavioral_prior
+    ppo_smoke_test:
+      status: pass
+      completed: "2026-08-07"
+      iterations: 50
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 4915200
+      save_interval: 10
+      log_directory: >-
+        logs/WholeBodyTracking/20260807_061008-rubberhand_pull_sub3_010_50_seed42-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260807_061008-rubberhand_pull_sub3_010_50_seed42-locomotion/model_00049.pt
+      final_checkpoint_sha256: 17bf676901fa88cfca6d6d8b0310174df205ce15dadc526731a819a2e62bc931
+      metrics:
+        initial_final_mean_reward: [-1.192289, 0.791406]
+        first_last_10_mean_reward: [-0.944613, 0.604277]
+        initial_final_mean_episode_length: [22.67, 30.81]
+        first_last_10_mean_episode_length: [23.295, 25.862]
+        first_last_10_joint_velocity_error: [23.907460, 20.403991]
+        first_last_10_object_position_raw_reward: [1.038854, 1.195187]
+      numerical_failures: none_observed
+      interpretation: >-
+        Conversion, collision-enabled Isaac Sim launch, and early PPO learning
+        passed. This does not establish physical Pull feasibility: the final
+        mean episode length covers only a small part of the 317-frame motion,
+        and a 500-iteration pilot with deterministic replay is still required.
+    ppo_500_iteration_pilot:
+      training_status: pass
+      behavioral_replay_status: fail
+      completed: "2026-08-07"
+      iterations: 500
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 49152000
+      save_interval: 50
+      log_directory: >-
+        logs/WholeBodyTracking/20260807_061740-rubberhand_pull_sub3_010_500_seed42-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260807_061740-rubberhand_pull_sub3_010_500_seed42-locomotion/model_00499.pt
+      final_checkpoint_sha256: 7d50a3ebb24418a85ab634914f85a967d52b04e9b2b2ac615b8490b15e140235
+      training_metrics:
+        initial_final_mean_reward: [-1.192289, 21.472059]
+        final_20_mean_reward: 18.399037
+        initial_final_mean_episode_length: [22.67, 350.56]
+        final_20_mean_episode_length: 304.446
+        initial_final_joint_position_error: [2.519480, 1.535257]
+        initial_final_body_position_error: [0.110167, 0.077955]
+        initial_final_object_position_raw_reward: [0.663915, 15.016590]
+        initial_final_undesired_contact_raw_magnitude: [0.473366, 5.075172]
+      numerical_failures: none_observed
+      deterministic_physics_replay:
+        seed: 42
+        attempts: 20
+        recording: >-
+          logs/WholeBodyTracking/20260807_070226-rubberhand_pull_sub3_010_500_seed42-eval/pull_500_seed42_physics_eval_v1.npz
+        recording_sha256: 24696f20097f9b72e285176abde6fe18340f3d839f0d217436261f03bd9c4418
+        report: >-
+          logs/WholeBodyTracking/20260807_070226-rubberhand_pull_sub3_010_500_seed42-eval/pull_500_seed42_physics_eval_v1.json
+        report_sha256: 403494c06c01ba895b8602e1bf4377d467bd2721fa2eaec916a9726919f26d44
+        completion_rate: 0.0
+        early_termination_rate: 1.0
+        mean_attempt_length_steps: 67.45
+        correct_displacement_direction_rate: 0.30
+        direction_evaluable_attempts: 10
+        mean_displacement_direction_cosine: -0.246313
+        mean_actual_table_displacement_m: 0.068367
+        rubber_hand_contact_attempt_rate: 0.80
+        interaction_proxy_success_rate: 0.15
+        fall_proxy_rate: 0.55
+        visual_review: not_promising
+      interpretation: >-
+        Training diagnostics improved strongly, but deterministic replay failed
+        all 20 complete-motion attempts. The policy often contacted and moved
+        the table, yet motion was short-lived, unstable, and usually not in the
+        reference Pull direction. The user authorized one final 8,000-iteration
+        bounded run to test whether longer optimization changes this outcome.
+    ppo_8000_iteration_gate:
+      training_status: pass
+      behavioral_replay_status: pass_with_documented_mismatch
+      started: "2026-08-07"
+      completed: "2026-08-07"
+      iterations: 8000
+      num_envs: 4096
+      seed: 42
+      total_timesteps: 786432000
+      save_interval: 1000
+      initialized_from: scratch
+      log_directory: >-
+        logs/WholeBodyTracking/20260807_071217-rubberhand_pull_sub3_010_8000_seed42-locomotion
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260807_071217-rubberhand_pull_sub3_010_8000_seed42-locomotion/model_07999.pt
+      final_checkpoint_sha256: fc5a5d3b66bc076598b28f6c1e8ad822798ce6ce44c9f0370056dc8ad44495dd
+      saved_checkpoint_iterations: [0, 1000, 2000, 3000, 4000, 5000, 6000, 7000, 7999]
+      training_metrics:
+        final_mean_reward: 80.3538
+        final_100_mean_reward: 77.8287
+        maximum_mean_reward:
+          iteration: 7497
+          value: 84.619
+        final_mean_episode_length: 889.94
+        final_100_mean_episode_length: 865.44
+        final_reference_position_error: 0.12137
+        final_reference_orientation_error: 0.12196
+        final_body_position_error: 0.05635
+        final_body_orientation_error: 0.22063
+        final_joint_position_error: 1.03858
+        final_joint_velocity_error: 9.76394
+        final_object_position_raw_reward: 40.8304
+        final_undesired_contact_raw_magnitude: 8.5108
+      numerical_failures: none_observed
+      seed_42_physics_replay:
+        status: pass_with_documented_mismatch
+        validation_scope: 20_closed_attempts_single_seed
+        recording: >-
+          logs/WholeBodyTracking/20260807_212122-rubberhand_pull_sub3_010_8000_seed42-eval/pull_7999_seed42_physics_eval_v1.npz
+        recording_sha256: 0bd01a2bf1de095d9dd159a4fe1032674c96fd010f793a932b4bd4516d0c7c08
+        report: >-
+          logs/WholeBodyTracking/20260807_212122-rubberhand_pull_sub3_010_8000_seed42-eval/pull_7999_seed42_physics_eval_v1.json
+        report_sha256: f42e9fc37de8224df852be266f40b49f42f43447b194eacbb58accad3276203c
+        completion_rate: 0.60
+        early_termination_rate: 0.40
+        correct_displacement_direction_rate: 0.65
+        mean_displacement_direction_cosine: 0.428517
+        mean_actual_table_displacement_m: 0.381367
+        mean_reference_table_displacement_m: 0.419317
+        table_trajectory_position_rmse_m: 0.060839
+        joint_position_rmse_rad: 0.203201
+        key_body_position_rmse_m: 0.048164
+        rubber_hand_contact_attempt_rate: 1.0
+        interaction_proxy_success_rate: 0.65
+        fall_proxy_rate: 0.90
+        expert_gate_status: fail
+        expert_gate_note: >-
+          This is a single-seed bounded feasibility result. Completion and
+          displacement direction are below the frozen expert thresholds. The
+          fall proxy is also triggered by large torso/root tilt during pulling;
+          for accepted attempt 8 the maximum tilt was 75.44 degrees while the
+          maximum reference-relative root-height drop was only 0.085 m. The
+          proxy is retained as reported and is not silently reclassified.
+      learned_policy_visual_review:
+        status: accepted_with_documented_mismatch
+        reviewed: "2026-08-07"
+        reference_contact_semantics: bilateral_adjacent_tabletop_edges_near_corner
+        observed_successful_variants:
+          - table_leg_pull
+          - adjacent_edge_or_corner_pull
+        accepted_table_edge_example:
+          attempt: 2
+          qpos_recording: >-
+            logs/WholeBodyTracking/20260807_212122-rubberhand_pull_sub3_010_8000_seed42-eval/pull_7999_seed42_attempt02_table_edge_viser_qpos.npz
+          qpos_sha256: 6398da94e48873db9343cba315f3a64776ae806f378108a1f84e57f4829a3238
+          actual_table_displacement_m: 0.608715
+          reference_table_displacement_m: 0.615887
+          displacement_direction_cosine: 0.996309
+          bilateral_contact_fraction: 0.389
+          invalid_contact_fraction: 0.022152
+        accepted_table_leg_example:
+          attempt: 8
+          qpos_recording: >-
+            logs/WholeBodyTracking/20260807_212122-rubberhand_pull_sub3_010_8000_seed42-eval/pull_7999_seed42_attempt08_success_viser_qpos.npz
+          qpos_sha256: d5c0705cfc3e643e75c9a9b1b28a21473b8b042134bd37ae935c7192c179bcdc
+          actual_table_displacement_m: 0.584296
+          reference_table_displacement_m: 0.615887
+          displacement_direction_cosine: 0.999860
+        decision: >-
+          Retain model 07999 as a physically credible Pull behavioral prior.
+          It demonstrates sustained backward table motion with fixed rubber
+          hands, but it is not a general table-edge expert and does not pass the
+          frozen multi-seed expert gate.
+      decision_boundary: >-
+        The bounded Pull study is closed. Model 07999 is retained for Behavior
+        Library v1 as a behavioral prior, not a validated expert. No additional
+        Pull training is scheduled before the Stage 2 mixed-motion baseline.
+    notes: >-
+      Selected as the sole bounded Pull candidate after a read-only audit of
+      sub16_largetable_001, sub3_largetable_010, and sub6_largetable_002. The
+      complete Viser clip was accepted by the user. The 8,000-iteration policy
+      demonstrated dynamically sustained Pull in selected rollouts, including
+      table-leg and adjacent-edge/corner variants. This closes the bounded
+      feasibility question without claiming broad table-edge generalization.
+
+  - motion_id: sub6_largetable_002
+    source_path: /home/kevin/holosoma/OMOMO_new/sub6_largetable_002.pt
+    source_sha256: 9ca06ba2e5e935461880250ab288b9dafbb3433aa3a568684d432e18098497bc
+    action_category: pull
+    source_annotation: "Pull the largetable, and set it back down."
+    retargeting_variant: pending_bounded_feasibility
+    frame_count: 190
+    fps: 30
+    contact_body: pending_visual_review
+    reference_object_displacement_m: 1.1814
+    reference_displacement_direction_xyz: [-0.2776, 1.1484, -0.0010]
+    kinematic_collision_status: pending
+    physics_replay_status: pending
+    keep_or_reject: candidate
+    notes: Shortlisted as the same-demonstrator pull counterpart to the accepted push motion.
+
+behavior_library_v1:
+  version: "1.0.0"
+  status: frozen
+  frozen: "2026-08-07"
+  reference_count: 4
+  action_category_count: 3
+  robot_asset: main_mesh_collision_rubberhand.urdf
+  object_asset: objects_largetable.urdf
+  actor_receives_action_category: false
+  raw_checkpoint_weight_averaging: prohibited
+  members:
+    - motion_id: sub6_largetable_033_a1
+      action_category: push
+      retention_class: accepted_push_prior
+      reference_path: >-
+        src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz
+      reference_sha256: b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207
+      selected_checkpoint: >-
+        logs/WholeBodyTracking/20260728_051638-rubberhand_a1_8000_seed42-locomotion/model_07999.pt
+      selected_checkpoint_sha256: 54fbfa4b38ee69ac1be33da8b5d3f6849e587b6bd02da3f407b0b27844be3c25
+    - motion_id: sub6_largetable_033_plan_b
+      action_category: push
+      retention_class: behavioral_prior_with_contact_mismatch
+      reference_path: >-
+        src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/plan_b/sub6_largetable_033_plan_b_mj_fps50_w_obj.npz
+      reference_sha256: 6bcc3111a08fc2c714a2fe671411b122b52eb49bd1712c7670b7b61d032d9d14
+      selected_checkpoint: >-
+        logs/WholeBodyTracking/20260728_132654-rubberhand_plan_b_8000_seed42-locomotion/model_07999.pt
+      selected_checkpoint_sha256: 5ba3d28bfb862321812e1f9475f69371b40ee657d639ef0a3488fbccc4a5e89e
+    - motion_id: sub16_largetable_028
+      action_category: kick
+      retention_class: leg_contact_behavioral_prior_not_expert
+      reference_path: >-
+        src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/sub16_largetable_028_kick_mj_fps50_w_obj.npz
+      reference_sha256: 611b3ab418f470a93c5b39bd0163a6c98aaf2c6519c1ea6e9f0e64f00f0e531f
+      selected_checkpoint: >-
+        logs/WholeBodyTracking/20260806_055921-rubberhand_kick_sub16_028_8000_seed42-locomotion/model_07999.pt
+      selected_checkpoint_sha256: a84928cf4a8ba6ca91905a4105ff82bdb331f11ac0acb6ab56a034f5b6660e47
+    - motion_id: sub3_largetable_010
+      action_category: pull
+      retention_class: bounded_pull_behavioral_prior_not_expert
+      reference_path: >-
+        src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/sub3_largetable_010_pull_a1_mj_fps50_w_obj.npz
+      reference_sha256: 7c1c554851b1ac1a0ab3998755dda2eddf76800e2460fa29da5e4d3093bd8cf7
+      selected_checkpoint: >-
+        logs/WholeBodyTracking/20260807_071217-rubberhand_pull_sub3_010_8000_seed42-locomotion/model_07999.pt
+      selected_checkpoint_sha256: fc5a5d3b66bc076598b28f6c1e8ad822798ce6ce44c9f0370056dc8ad44495dd
+  intended_stage2_sampling:
+    status: stage2_8000_completed_seed42_progression_diagnosed_gate_failed
+    hierarchy:
+      - uniformly_sample_action_category
+      - uniformly_sample_motion_within_category
+      - apply_adaptive_timestep_sampling_within_selected_motion
+    category_probability:
+      push: 0.3333333333
+      kick: 0.3333333333
+      pull: 0.3333333333
+    effective_motion_probability:
+      sub6_largetable_033_a1: 0.1666666667
+      sub6_largetable_033_plan_b: 0.1666666667
+      sub16_largetable_028: 0.3333333333
+      sub3_largetable_010: 0.3333333333
+    initialization: from_scratch
+    reward_and_actor_observation: exact_main_control
+    output: one_shared_mixed_motion_checkpoint
+    implementation:
+      worktree: /home/kevin/holosoma-rubber-hand-largetable
+      branch: rubber_hand_largetable_baseline
+      opt_in_only: true
+      legacy_sampling_path_changed_when_weights_absent: false
+      config_type: src/holosoma/holosoma/config_types/command.py
+      loader_and_sampler: src/holosoma/holosoma/managers/command/terms/wbt.py
+      recording_metadata: src/holosoma/holosoma/agents/callbacks/recording.py
+      cpu_test: >-
+        src/holosoma/holosoma/managers/command/terms/tests/test_wbt_motion_sampling.py
+      cpu_test_status: pass
+      focused_test_count: 13
+      real_asset_total_frames: 1234
+      real_asset_motion_boundaries:
+        start: [0, 309, 618, 917]
+        end: [309, 618, 917, 1234]
+      distribution_probe_samples: 240000
+      observed_motion_probability: [0.167396, 0.167021, 0.333129, 0.332454]
+      sampled_timestep_boundary_status: pass
+    smoke_test:
+      status: pass
+      run_date: "2026-08-07"
+      run_directory: >-
+        logs/WholeBodyTracking/20260808_002630-stage2_mixed_v1_50_seed42-locomotion
+      worktree: /home/kevin/holosoma-rubber-hand-largetable
+      branch: rubber_hand_largetable_baseline
+      initialization: from_scratch
+      seed: 42
+      num_envs: 4096
+      learning_iterations: 50
+      total_timesteps: 4915200
+      device: cuda:0
+      motion_sampling_weights: [1.0, 1.0, 2.0, 2.0]
+      final_reset_fraction:
+        sub6_largetable_033_a1: 0.169054836
+        sub6_largetable_033_plan_b: 0.166586280
+        sub16_largetable_028: 0.332027853
+        sub3_largetable_010: 0.332331002
+      final_occupancy_fraction:
+        sub6_largetable_033_a1: 0.141113281
+        sub6_largetable_033_plan_b: 0.146311447
+        sub16_largetable_028: 0.386617035
+        sub3_largetable_010: 0.325958252
+      tensorboard_scalar_tags: 80
+      tensorboard_scalar_points: 4000
+      all_tensorboard_scalars_finite: true
+      final_mean_reward: 0.973503888
+      final_checkpoint: >-
+        logs/WholeBodyTracking/20260808_002630-stage2_mixed_v1_50_seed42-locomotion/model_00049.pt
+      final_checkpoint_sha256: 5d7fba86f7817df27f0653d92d3dbd44aac6b80f6f65df894c743ff4bef0dd25
+      saved_config_exactly_matches_four_frozen_motion_paths: true
+      original_checkout_target_source_files_modified: false
+    stage2_8000_run:
+      status: completed
+      authorized_by_user: true
+      start_date: "2026-08-08"
+      run_directory: >-
+        logs/WholeBodyTracking/20260808_084714-stage2_mixed_v1_8000_seed42-locomotion
+      worktree: /home/kevin/holosoma-rubber-hand-largetable
+      branch: rubber_hand_largetable_baseline
+      initialization: from_scratch
+      seed: 42
+      num_envs: 4096
+      learning_iterations: 8000
+      total_timesteps: 786432000
+      checkpoint_interval: 500
+      device: cuda:0
+      motion_sampling_weights: [1.0, 1.0, 2.0, 2.0]
+      evaluation_checkpoints:
+        early: model_00500.pt
+        intermediate: model_02000.pt
+        final: model_07999.pt
+      checkpoint_sha256:
+        model_00500: 62152bf5cad565c64388cc6414232818d9b51d46e1f87bf5007dfd90f852a25b
+        model_02000: adc2870c2da6d3f0b51b343fce3bf7d07adfb34a8d44a1b0a96973374b2eb7f0
+        model_07999: f03d75e5c981996090884591c79b57f24bf16f9c7c6c8e2871db684111779bdb
+      initial_launch_status: pass
+      initial_motion_count: 4
+      initial_total_motion_frames: 1234
+      initial_metrics_finite: true
+      completion_date: "2026-08-08"
+      completed_without_runtime_error: true
+      all_tensorboard_scalars_finite: true
+      tensorboard_scalar_tags: 80
+      tensorboard_scalar_points: 640000
+      final_reset_fraction:
+        sub6_largetable_033_a1: 0.166538715
+        sub6_largetable_033_plan_b: 0.166772828
+        sub16_largetable_028: 0.333675146
+        sub3_largetable_010: 0.333013356
+      training_diagnostic_mean_over_previous_100_iterations:
+        checkpoint_00500:
+          mean_reward: 8.368308458
+          body_position_error: 0.076996525
+          body_rotation_error: 0.357348782
+          joint_position_error: 1.447057604
+        checkpoint_02000:
+          mean_reward: 22.160393963
+          body_position_error: 0.065630512
+          body_rotation_error: 0.282575717
+          joint_position_error: 1.250629500
+        checkpoint_07999:
+          mean_reward: 36.055298157
+          body_position_error: 0.058677358
+          body_rotation_error: 0.258534225
+          joint_position_error: 1.169161097
+      seed42_final_checkpoint_per_skill_evaluation:
+        status: fail
+        protocol: holosoma.wbt_physics_eval.v1
+        attempts_per_motion: 20
+        checkpoint: model_07999.pt
+        a1:
+          eval_directory: >-
+            logs/WholeBodyTracking/20260809_040647-stage2_mixed_v1_7999_a1_seed42-eval
+          expert_completion_rate: 0.80
+          shared_completion_rate: 0.15
+          expert_completion_retention: 0.1875
+          correct_direction_rate: 1.0
+          interaction_proxy_success_rate: 1.0
+          fall_proxy_rate: 0.20
+        plan_b:
+          eval_directory: >-
+            logs/WholeBodyTracking/20260809_041204-stage2_mixed_v1_7999_plan_b_seed42-eval
+          expert_completion_rate: 0.85
+          shared_completion_rate: 0.25
+          expert_completion_retention: 0.2941176471
+          correct_direction_rate: 1.0
+          interaction_proxy_success_rate: 0.90
+          fall_proxy_rate: 0.80
+        kick:
+          eval_directory: >-
+            logs/WholeBodyTracking/20260809_041718-stage2_mixed_v1_7999_kick_seed42-eval
+          behavioral_prior_completion_rate: 0.60
+          shared_completion_rate: 0.75
+          prior_completion_retention: 1.25
+          correct_direction_rate: 0.90
+          fall_proxy_rate: 0.0
+        pull:
+          eval_directory: >-
+            logs/WholeBodyTracking/20260809_042220-stage2_mixed_v1_7999_pull_seed42-eval
+          behavioral_prior_completion_rate: 0.60
+          shared_completion_rate: 0.0
+          prior_completion_retention: 0.0
+          correct_direction_rate: 0.0
+          interaction_proxy_success_rate: 0.0
+          mean_actual_displacement_m: 0.028094011
+          mean_direction_cosine: -0.788224549
+          fall_proxy_rate: 0.20
+        failed_retention_skills: [a1, plan_b, pull]
+        acceptance_threshold: >-
+          Each retained skill must reach at least 80 percent of its corresponding
+          expert or behavioral-prior completion performance.
+        interpretation: >-
+          Aggregate reward and aggregate tracking diagnostics improved throughout
+          training, but they hid severe per-skill interference. One evaluation
+          seed is sufficient to reject checkpoint freezing at this gate, but not
+          sufficient for final confidence intervals or a complete robustness
+          characterization.
+      seed42_checkpoint_progression_per_skill_evaluation:
+        status: complete
+        protocol: holosoma.wbt_physics_eval.v1
+        attempts_per_motion_per_checkpoint: 20
+        checkpoints: [model_00500.pt, model_02000.pt, model_07999.pt]
+        a1:
+          single_skill_completion_rate: 0.80
+          model_00500:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_045616-stage2_mixed_v1_0500_a1_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 0.6842105263
+            mean_actual_displacement_m: 0.061404279
+            interaction_proxy_success_rate: 0.65
+            fall_proxy_rate: 0.20
+            joint_position_rmse_rad: 0.407622606
+          model_02000:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_052018-stage2_mixed_v1_2000_a1_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 0.9473684211
+            mean_actual_displacement_m: 0.427826873
+            interaction_proxy_success_rate: 0.85
+            fall_proxy_rate: 0.10
+            joint_position_rmse_rad: 0.289271444
+          model_07999:
+            completion_rate: 0.15
+            correct_direction_rate: 1.0
+            mean_actual_displacement_m: 0.941104510
+            interaction_proxy_success_rate: 1.0
+            fall_proxy_rate: 0.20
+            joint_position_rmse_rad: 0.222820476
+          diagnosis: late_partial_acquisition_below_single_skill_prior
+        plan_b:
+          single_skill_completion_rate: 0.85
+          model_00500:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_050312-stage2_mixed_v1_0500_plan_b_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 1.0
+            mean_actual_displacement_m: 0.201566970
+            interaction_proxy_success_rate: 0.80
+            fall_proxy_rate: 0.10
+            joint_position_rmse_rad: 0.308860540
+          model_02000:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_052605-stage2_mixed_v1_2000_plan_b_seed42-eval
+            completion_rate: 0.10
+            correct_direction_rate: 1.0
+            mean_actual_displacement_m: 0.574150485
+            interaction_proxy_success_rate: 0.85
+            fall_proxy_rate: 0.75
+            joint_position_rmse_rad: 0.248565421
+          model_07999:
+            completion_rate: 0.25
+            correct_direction_rate: 1.0
+            mean_actual_displacement_m: 0.794744640
+            interaction_proxy_success_rate: 0.90
+            fall_proxy_rate: 0.80
+            joint_position_rmse_rad: 0.223177627
+          diagnosis: gradual_partial_acquisition_with_persistent_stability_failure
+        kick:
+          single_skill_behavioral_prior_completion_rate: 0.60
+          model_00500:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_050907-stage2_mixed_v1_0500_kick_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 0.45
+            mean_actual_displacement_m: 0.073156887
+            interaction_proxy_success_rate: 0.30
+            fall_proxy_rate: 0.20
+            joint_position_rmse_rad: 0.231568098
+          model_02000:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_053154-stage2_mixed_v1_2000_kick_seed42-eval
+            completion_rate: 0.05
+            correct_direction_rate: 0.10
+            mean_actual_displacement_m: 0.007783789
+            interaction_proxy_success_rate: 0.0
+            fall_proxy_rate: 0.0
+            joint_position_rmse_rad: 0.243249163
+          model_07999:
+            completion_rate: 0.75
+            correct_direction_rate: 0.90
+            mean_actual_displacement_m: 0.222854368
+            interaction_proxy_success_rate: 0.65
+            fall_proxy_rate: 0.0
+            joint_position_rmse_rad: 0.213039905
+          diagnosis: late_dominant_acquisition_above_single_skill_prior
+        pull:
+          single_skill_behavioral_prior_completion_rate: 0.60
+          model_00500:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_051442-stage2_mixed_v1_0500_pull_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 0.3076923077
+            mean_actual_displacement_m: 0.131859174
+            interaction_proxy_success_rate: 0.20
+            fall_proxy_rate: 0.50
+            joint_position_rmse_rad: 0.339250565
+          model_02000:
+            eval_directory: >-
+              logs/WholeBodyTracking/20260809_053725-stage2_mixed_v1_2000_pull_seed42-eval
+            completion_rate: 0.0
+            correct_direction_rate: 0.15
+            mean_actual_displacement_m: 0.058853592
+            interaction_proxy_success_rate: 0.15
+            fall_proxy_rate: 0.10
+            joint_position_rmse_rad: 0.253520310
+          model_07999:
+            completion_rate: 0.0
+            correct_direction_rate: 0.0
+            mean_actual_displacement_m: 0.028094011
+            interaction_proxy_success_rate: 0.0
+            fall_proxy_rate: 0.20
+            joint_position_rmse_rad: 0.214417413
+          diagnosis: never_acquired_with_declining_pull_semantics
+        interpretation: >-
+          The progression does not show a previously competent shared policy
+          being forgotten. A1 and Plan B are acquired only partially and remain
+          far below their single-skill priors; Kick becomes the dominant late
+          skill; Pull never completes an attempt and its direction and motion
+          semantics decline throughout training. Aggregate reward therefore
+          hides asymmetric acquisition and skill competition.
+      note: >-
+        The user authorized a direct 8000-iteration run after the smoke test.
+        Standalone 500- and 2000-iteration jobs were skipped. The retained
+        model_00500 and model_02000 checkpoints were evaluated separately per
+        motion under the same frozen protocol as model_07999. The final
+        checkpoint remains a diagnostic artifact and is not accepted as the
+        shared mixed-motion prior.
+    note: >-
+      These probabilities prevent Push from receiving double category weight
+      merely because it has two retained references. The loader and sampler are
+      implemented as an explicit opt-in path so configurations without weights
+      retain legacy behavior. The 50-iteration smoke test passed, and the
+      user-authorized 8000-iteration mixed-policy run completed, but the seed42
+      per-skill gate exposed severe interference despite improving aggregate
+      training metrics.
+
+next_decision:
+  action: discuss_minimum_interference_mitigation_before_any_new_training
+  stage_1_status: closed
+  behavior_library_v1_status: frozen
+  selected_push_priors:
+    - sub6_largetable_033_a1_model_07999
+    - sub6_largetable_033_plan_b_model_07999
+  selected_kick_behavioral_prior: sub16_largetable_028_model_07999
+  selected_pull_behavioral_prior: sub3_largetable_010_model_07999
+  pull_bounded_feasibility_status: pass_with_documented_mismatch
+  expert_label_policy: >-
+    A retained behavioral prior is not a validated expert unless it passes the
+    frozen multi-seed expert gate. Kick and Pull model 07999 remain behavioral
+    priors.
+  code_change_authorized: false
+  training_authorized: false
+  entry_condition: stage2_seed42_checkpoint_progression_diagnosed
+  next_checks:
+    - discuss_the_minimum_interference_mitigation_change_with_the_user
+    - select_a_single_testable_baseline_revision_that_preserves_exact_main_reward_semantics
+    - define_per_skill_acceptance_gates_before_launch
+    - obtain_explicit_user_approval_before_any_code_change_or_new_training

@@ -1,0 +1,57 @@
+{
+  "checkpoint": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/model_12000.pt",
+  "checkpoint_iteration": 12000,
+  "completion_rate": 1.0,
+  "episodes": [
+    {
+      "actual_table_displacement_m": 1.7826963663101196,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 0,
+      "object_position_rmse_m": 0.09495857767132439,
+      "reward_sum": 89.03645800054073,
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.7691247463226318,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 1,
+      "object_position_rmse_m": 0.09016926692062313,
+      "reward_sum": 89.5054983869195,
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.777755618095398,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 2,
+      "object_position_rmse_m": 0.0906741074474503,
+      "reward_sum": 89.48133911937475,
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.7687294483184814,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 3,
+      "object_position_rmse_m": 0.08724898445308049,
+      "reward_sum": 89.59036432951689,
+      "steps": 686
+    },
+    {
+      "actual_table_displacement_m": 1.7789034843444824,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 4,
+      "object_position_rmse_m": 0.09195086255425299,
+      "reward_sum": 89.42043936252594,
+      "steps": 686
+    }
+  ],
+  "inference": "shared_actor_only_critic_not_called",
+  "observation_noise": false,
+  "representative_episode": 3,
+  "representative_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/evaluation/model12000_seed721/representative_episode.npz",
+  "seed": 721
+}

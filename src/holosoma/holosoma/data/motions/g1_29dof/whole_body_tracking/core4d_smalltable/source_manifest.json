@@ -1,0 +1,29 @@
+{
+  "fps": 30,
+  "frames": 413,
+  "inertia_contract": "fixed-mass geometric preview: inertia multiplied by scale^2",
+  "kind": "diagnostic_preview_not_training_asset",
+  "mass_contract": "unchanged retarget placeholder mass; preview only, not approved for training",
+  "maximum_nominal_object_translation_disagreement_m": 0.030395435165007978,
+  "maximum_scale_mismatch_fraction": 0.008781098188819818,
+  "object_name": "desk001",
+  "object_urdf": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/small_table_nominal_preview/assets/desk001.urdf",
+  "object_urdf_sha256": "dd24c2087c4a89b47d4eef9677c5f6e2ef414e851e60be9c039ce5ee602e48d5",
+  "pair_reference": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/small_table_nominal_preview/core4d_pair_reference.npz",
+  "pair_sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05",
+  "robot_reference": "per-person Stage1 nominal_scaled qpos",
+  "scale_choice": "arithmetic_mean_balancing_two_person_scales",
+  "shared_object_pose": "arithmetic mean of the two person-specific nominal translations; common rotation",
+  "shared_object_scale": 0.7412283856190455,
+  "source_human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+  ],
+  "source_object_urdf": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal/assets/desk001.urdf",
+  "source_pair": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal/core4d_pair_reference.npz",
+  "source_person_nominal": [
+    "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal/person1/person1_nominal_scaled.npz",
+    "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal/person2/person2_nominal_scaled.npz"
+  ],
+  "training_ready": false
+}

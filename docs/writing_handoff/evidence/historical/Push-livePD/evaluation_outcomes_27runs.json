@@ -1,0 +1,1032 @@
+{
+  "artifact_kind": "selected_fields_from_existing_logs_no_re_evaluation",
+  "protocol": "Fixed frame-0 scene, actor mean, 3 seeds x 3 process launches per checkpoint; no scenario randomization.",
+  "runs": [
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed721_repeat1.log",
+      "source_sha256": "d603fafb810e2196343c19364676fb82d4336437cacf5f770fe2ed8d23e66737",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 721,
+        "rollout_steps": 170,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.1847879886627197,
+          "actual_path_length_m": 1.2296030521392822,
+          "along_track_error_rmse_m": 0.09769143164157867,
+          "along_track_progress_m": 1.1370676755905151,
+          "along_track_progress_ratio": 0.7551173567771912,
+          "completed_reference": false,
+          "completion_ratio": 0.5501618122977346,
+          "direction_cosine": 0.9597224593162537,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25152888894081116,
+          "final_yaw_error_abs_deg": 0.8689366579055786,
+          "lateral_error_rmse_m": 0.058787424117326736,
+          "planar_error_max_m": 0.25152888894081116,
+          "planar_error_mean_m": 0.09028597176074982,
+          "planar_error_rmse_m": 0.11401568353176117,
+          "reference_frames_evaluated": 170,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 11.571331977844238,
+          "yaw_error_mean_abs_deg": 3.900710344314575,
+          "yaw_error_rmse_deg": 5.144420146942139
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed721_repeat2.log",
+      "source_sha256": "9ba2343bf06ecfa6308deeef10f8a706c44aa46049345d9d485140235cc5db73",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 721,
+        "rollout_steps": 172,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.2085684537887573,
+          "actual_path_length_m": 1.2584974765777588,
+          "along_track_error_rmse_m": 0.11406754702329636,
+          "along_track_progress_m": 1.1728625297546387,
+          "along_track_progress_ratio": 0.7788884043693542,
+          "completed_reference": false,
+          "completion_ratio": 0.5566343042071198,
+          "direction_cosine": 0.9704560041427612,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2514879107475281,
+          "final_yaw_error_abs_deg": 0.6649599075317383,
+          "lateral_error_rmse_m": 0.04779661074280739,
+          "planar_error_max_m": 0.2514879107475281,
+          "planar_error_mean_m": 0.09981521219015121,
+          "planar_error_rmse_m": 0.12367668002843857,
+          "reference_frames_evaluated": 172,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 16.37032699584961,
+          "yaw_error_mean_abs_deg": 3.9397387504577637,
+          "yaw_error_rmse_deg": 5.865379333496094
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed721_repeat3.log",
+      "source_sha256": "f6910ecf2b13b11800f75c988710970c45a303ddc5946a5aa839a2cab4a7be32",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 721,
+        "rollout_steps": 89,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.030451634898781776,
+          "actual_path_length_m": 0.039789147675037384,
+          "along_track_error_rmse_m": 0.10074593871831894,
+          "along_track_progress_m": 0.030302241444587708,
+          "along_track_progress_ratio": 0.020123470574617386,
+          "completed_reference": false,
+          "completion_ratio": 0.28802588996763756,
+          "direction_cosine": 0.9950940608978271,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2530454993247986,
+          "final_yaw_error_abs_deg": 23.493610382080078,
+          "lateral_error_rmse_m": 0.005906646605581045,
+          "planar_error_max_m": 0.2530454993247986,
+          "planar_error_mean_m": 0.06873783469200134,
+          "planar_error_rmse_m": 0.10091894119977951,
+          "reference_frames_evaluated": 89,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 23.493610382080078,
+          "yaw_error_mean_abs_deg": 5.429339408874512,
+          "yaw_error_rmse_deg": 9.032769203186035
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed722_repeat1.log",
+      "source_sha256": "6c1296f3894cef1621c59e18b0ff38fe792074818532a80a58c2e8fbda68aaf2",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 722,
+        "rollout_steps": 188,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.3528391122817993,
+          "actual_path_length_m": 1.4417273998260498,
+          "along_track_error_rmse_m": 0.11048245429992676,
+          "along_track_progress_m": 1.3362350463867188,
+          "along_track_progress_ratio": 0.8873827457427979,
+          "completed_reference": false,
+          "completion_ratio": 0.6084142394822006,
+          "direction_cosine": 0.9877265095710754,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25013670325279236,
+          "final_yaw_error_abs_deg": 5.191326141357422,
+          "lateral_error_rmse_m": 0.04848882928490639,
+          "planar_error_max_m": 0.25013670325279236,
+          "planar_error_mean_m": 0.09796828031539917,
+          "planar_error_rmse_m": 0.1206546351313591,
+          "reference_frames_evaluated": 188,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 12.236373901367188,
+          "yaw_error_mean_abs_deg": 3.512246608734131,
+          "yaw_error_rmse_deg": 4.721878528594971
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed722_repeat2.log",
+      "source_sha256": "0fdcb7088570c63a011e91d96d759ee429b5f5c6b2f9f613175233bd02a2b4f4",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 722,
+        "rollout_steps": 164,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.1407842636108398,
+          "actual_path_length_m": 1.174285650253296,
+          "along_track_error_rmse_m": 0.12153729051351547,
+          "along_track_progress_m": 1.0869184732437134,
+          "along_track_progress_ratio": 0.7218136787414551,
+          "completed_reference": false,
+          "completion_ratio": 0.5307443365695793,
+          "direction_cosine": 0.9527817964553833,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25139570236206055,
+          "final_yaw_error_abs_deg": 5.692389011383057,
+          "lateral_error_rmse_m": 0.055143602192401886,
+          "planar_error_max_m": 0.25139570236206055,
+          "planar_error_mean_m": 0.10590854287147522,
+          "planar_error_rmse_m": 0.1334620863199234,
+          "reference_frames_evaluated": 164,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 9.65800666809082,
+          "yaw_error_mean_abs_deg": 3.5440731048583984,
+          "yaw_error_rmse_deg": 4.73812198638916
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed722_repeat3.log",
+      "source_sha256": "2f49c6adbd68b649a5aef4a8de05118115f9c57eda56fb787d6b2efb97f57f82",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 722,
+        "rollout_steps": 309,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.7357659339904785,
+          "actual_path_length_m": 1.853567361831665,
+          "along_track_error_rmse_m": 0.15654918551445007,
+          "along_track_progress_m": 1.7352286577224731,
+          "along_track_progress_ratio": 1.1523511409759521,
+          "completed_reference": true,
+          "completion_ratio": 1.0,
+          "direction_cosine": 0.9996904730796814,
+          "direction_defined": true,
+          "final_planar_error_m": 0.23463758826255798,
+          "final_yaw_error_abs_deg": 5.834894180297852,
+          "lateral_error_rmse_m": 0.03372485190629959,
+          "planar_error_max_m": 0.24231335520744324,
+          "planar_error_mean_m": 0.13765189051628113,
+          "planar_error_rmse_m": 0.16014061868190765,
+          "reference_frames_evaluated": 309,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 12.74026870727539,
+          "yaw_error_mean_abs_deg": 4.755866050720215,
+          "yaw_error_rmse_deg": 5.569942951202393
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 0,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed723_repeat1.log",
+      "source_sha256": "7ecc4411644f800706614277c5bb17fe118b1d0ddaab301be02e48e703bd0ad0",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 723,
+        "rollout_steps": 188,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.3572592735290527,
+          "actual_path_length_m": 1.437437653541565,
+          "along_track_error_rmse_m": 0.10721731185913086,
+          "along_track_progress_m": 1.3393653631210327,
+          "along_track_progress_ratio": 0.8894615769386292,
+          "completed_reference": false,
+          "completion_ratio": 0.6084142394822006,
+          "direction_cosine": 0.9868161678314209,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2560816705226898,
+          "final_yaw_error_abs_deg": 8.523229598999023,
+          "lateral_error_rmse_m": 0.05307888984680176,
+          "planar_error_max_m": 0.2560816705226898,
+          "planar_error_mean_m": 0.09705918282270432,
+          "planar_error_rmse_m": 0.11963661760091782,
+          "reference_frames_evaluated": 188,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 18.6977481842041,
+          "yaw_error_mean_abs_deg": 4.6301164627075195,
+          "yaw_error_rmse_deg": 6.61037540435791
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed723_repeat2.log",
+      "source_sha256": "78ddc8d6ffe3be4c01884e20c89a7bd1a059c1d7de9d355a8b7f5e5fdc29fb43",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 723,
+        "rollout_steps": 188,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.3582103252410889,
+          "actual_path_length_m": 1.4428566694259644,
+          "along_track_error_rmse_m": 0.11534928530454636,
+          "along_track_progress_m": 1.3486108779907227,
+          "along_track_progress_ratio": 0.8956014513969421,
+          "completed_reference": false,
+          "completion_ratio": 0.6084142394822006,
+          "direction_cosine": 0.9929322600364685,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2493848204612732,
+          "final_yaw_error_abs_deg": 5.343284606933594,
+          "lateral_error_rmse_m": 0.03197498619556427,
+          "planar_error_max_m": 0.2493848204612732,
+          "planar_error_mean_m": 0.09599099308252335,
+          "planar_error_rmse_m": 0.11969903111457825,
+          "reference_frames_evaluated": 188,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 9.942754745483398,
+          "yaw_error_mean_abs_deg": 3.581737756729126,
+          "yaw_error_rmse_deg": 4.535400390625
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_13050_multiseed_20260827/model_13050_seed723_repeat3.log",
+      "source_sha256": "d33fb30ee26e78eee4d66c4015e8da95b78e5b6975880022470d01c2f5c42840",
+      "checkpoint_iteration": 13050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_13050.pt",
+        "seed": 723,
+        "rollout_steps": 170,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 1.1943893432617188,
+          "actual_path_length_m": 1.2417876720428467,
+          "along_track_error_rmse_m": 0.11410064250230789,
+          "along_track_progress_m": 1.1556611061096191,
+          "along_track_progress_ratio": 0.7674651145935059,
+          "completed_reference": false,
+          "completion_ratio": 0.5501618122977346,
+          "direction_cosine": 0.9675748348236084,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25347471237182617,
+          "final_yaw_error_abs_deg": 1.9300475120544434,
+          "lateral_error_rmse_m": 0.045993950217962265,
+          "planar_error_max_m": 0.25347471237182617,
+          "planar_error_mean_m": 0.09899644553661346,
+          "planar_error_rmse_m": 0.12302195280790329,
+          "reference_frames_evaluated": 170,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 14.070695877075195,
+          "yaw_error_mean_abs_deg": 4.21390438079834,
+          "yaw_error_rmse_deg": 5.666855812072754
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed721_repeat1.log",
+      "source_sha256": "48d2881143f2f6349eec5cc5f8ac57243709cd8f48e36230d9520a733c81ef9e",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 721,
+        "rollout_steps": 68,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.01641720160841942,
+          "actual_path_length_m": 0.01668599061667919,
+          "along_track_error_rmse_m": 0.045224882662296295,
+          "along_track_progress_m": 0.016273371875286102,
+          "along_track_progress_ratio": 0.010807013139128685,
+          "completed_reference": false,
+          "completion_ratio": 0.22006472491909385,
+          "direction_cosine": 0.991239070892334,
+          "direction_defined": true,
+          "final_planar_error_m": 0.12819281220436096,
+          "final_yaw_error_abs_deg": 7.97961950302124,
+          "lateral_error_rmse_m": 0.0045114848762750626,
+          "planar_error_max_m": 0.12819281220436096,
+          "planar_error_mean_m": 0.030103536322712898,
+          "planar_error_rmse_m": 0.04544935002923012,
+          "reference_frames_evaluated": 68,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 7.97961950302124,
+          "yaw_error_mean_abs_deg": 1.8425599336624146,
+          "yaw_error_rmse_deg": 2.7061383724212646
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed721_repeat2.log",
+      "source_sha256": "0ce2cffe9bb6cd7d55615699313e59cf7332c28a4395f8fddaf806259f554c45",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 721,
+        "rollout_steps": 94,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.07042841613292694,
+          "actual_path_length_m": 0.07129319757223129,
+          "along_track_error_rmse_m": 0.10163109004497528,
+          "along_track_progress_m": 0.06972523778676987,
+          "along_track_progress_ratio": 0.04630396142601967,
+          "completed_reference": false,
+          "completion_ratio": 0.3042071197411003,
+          "direction_cosine": 0.9900156855583191,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2536033093929291,
+          "final_yaw_error_abs_deg": 25.838333129882812,
+          "lateral_error_rmse_m": 0.010335799306631088,
+          "planar_error_max_m": 0.2536033093929291,
+          "planar_error_mean_m": 0.07091250270605087,
+          "planar_error_rmse_m": 0.10215531289577484,
+          "reference_frames_evaluated": 94,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 25.838333129882812,
+          "yaw_error_mean_abs_deg": 6.768803596496582,
+          "yaw_error_rmse_deg": 10.895764350891113
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed721_repeat3.log",
+      "source_sha256": "8e2afe4f38828002a468eaedd2291ef74203f499b86d77ebbcd4b3d033ac43b0",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 721,
+        "rollout_steps": 88,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.020385390147566795,
+          "actual_path_length_m": 0.0208104457706213,
+          "along_track_error_rmse_m": 0.1022801324725151,
+          "along_track_progress_m": 0.019934989511966705,
+          "along_track_progress_ratio": 0.013238663785159588,
+          "completed_reference": false,
+          "completion_ratio": 0.284789644012945,
+          "direction_cosine": 0.9779056906700134,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2571258842945099,
+          "final_yaw_error_abs_deg": 21.059175491333008,
+          "lateral_error_rmse_m": 0.006242761854082346,
+          "planar_error_max_m": 0.2571258842945099,
+          "planar_error_mean_m": 0.06709130108356476,
+          "planar_error_rmse_m": 0.10247047990560532,
+          "reference_frames_evaluated": 88,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 21.059175491333008,
+          "yaw_error_mean_abs_deg": 4.870298862457275,
+          "yaw_error_rmse_deg": 7.8989338874816895
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed722_repeat1.log",
+      "source_sha256": "b9b5138847c6d7fb9ae4fcb2ecc8b04c5bc812028001200595691dbcbf7b9141",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 722,
+        "rollout_steps": 79,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.08942455798387527,
+          "actual_path_length_m": 0.10198956727981567,
+          "along_track_error_rmse_m": 0.0683467760682106,
+          "along_track_progress_m": 0.06789375096559525,
+          "along_track_progress_ratio": 0.04508768394589424,
+          "completed_reference": false,
+          "completion_ratio": 0.255663430420712,
+          "direction_cosine": 0.7592293620109558,
+          "direction_defined": true,
+          "final_planar_error_m": 0.15962208807468414,
+          "final_yaw_error_abs_deg": 14.43548583984375,
+          "lateral_error_rmse_m": 0.00976791512221098,
+          "planar_error_max_m": 0.16260814666748047,
+          "planar_error_mean_m": 0.04696692153811455,
+          "planar_error_rmse_m": 0.06904125213623047,
+          "reference_frames_evaluated": 79,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 14.43548583984375,
+          "yaw_error_mean_abs_deg": 3.2378275394439697,
+          "yaw_error_rmse_deg": 5.01167106628418
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed722_repeat2.log",
+      "source_sha256": "89832b123a8c079b95c2ccc165b4f260fd96571f2bdf67870a9ec4a72dc45386",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 722,
+        "rollout_steps": 90,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.040487371385097504,
+          "actual_path_length_m": 0.04097321256995201,
+          "along_track_error_rmse_m": 0.10140522569417953,
+          "along_track_progress_m": 0.040487319231033325,
+          "along_track_progress_ratio": 0.02688729763031006,
+          "completed_reference": false,
+          "completion_ratio": 0.2912621359223301,
+          "direction_cosine": 0.9999986886978149,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25154635310173035,
+          "final_yaw_error_abs_deg": 23.06293487548828,
+          "lateral_error_rmse_m": 0.0076246666721999645,
+          "planar_error_max_m": 0.25154635310173035,
+          "planar_error_mean_m": 0.06820949912071228,
+          "planar_error_rmse_m": 0.10169147700071335,
+          "reference_frames_evaluated": 90,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 23.06293487548828,
+          "yaw_error_mean_abs_deg": 5.601251125335693,
+          "yaw_error_rmse_deg": 9.065739631652832
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed722_repeat3.log",
+      "source_sha256": "cc1401cf7cadd1b00a064301430a113e6946667f743d83703710c24d4f666193",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 722,
+        "rollout_steps": 59,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.011141831986606121,
+          "actual_path_length_m": 0.011303683742880821,
+          "along_track_error_rmse_m": 0.025340603664517403,
+          "along_track_progress_m": 0.011048680171370506,
+          "along_track_progress_ratio": 0.007337338291108608,
+          "completed_reference": false,
+          "completion_ratio": 0.19093851132686085,
+          "direction_cosine": 0.9916394352912903,
+          "direction_defined": true,
+          "final_planar_error_m": 0.08042355626821518,
+          "final_yaw_error_abs_deg": 4.650328159332275,
+          "lateral_error_rmse_m": 0.004073898307979107,
+          "planar_error_max_m": 0.08042355626821518,
+          "planar_error_mean_m": 0.017888514325022697,
+          "planar_error_rmse_m": 0.02566598355770111,
+          "reference_frames_evaluated": 59,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 4.650328159332275,
+          "yaw_error_mean_abs_deg": 1.1724964380264282,
+          "yaw_error_rmse_deg": 1.6353700160980225
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed723_repeat1.log",
+      "source_sha256": "df8387bd0779d1b23b8c69525e72b8fa331b5906c0cc54f332897b532d2ad1ad",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 723,
+        "rollout_steps": 90,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04121757671236992,
+          "actual_path_length_m": 0.04216639697551727,
+          "along_track_error_rmse_m": 0.10076344013214111,
+          "along_track_progress_m": 0.04111574590206146,
+          "along_track_progress_ratio": 0.02730463072657585,
+          "completed_reference": false,
+          "completion_ratio": 0.2912621359223301,
+          "direction_cosine": 0.9975294470787048,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2505437731742859,
+          "final_yaw_error_abs_deg": 23.389604568481445,
+          "lateral_error_rmse_m": 0.006958423648029566,
+          "planar_error_max_m": 0.2505437731742859,
+          "planar_error_mean_m": 0.0679842010140419,
+          "planar_error_rmse_m": 0.10100341588258743,
+          "reference_frames_evaluated": 90,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 23.389604568481445,
+          "yaw_error_mean_abs_deg": 5.655735969543457,
+          "yaw_error_rmse_deg": 9.173527717590332
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed723_repeat2.log",
+      "source_sha256": "5f4d9540ccbd49c94ff45575f18ae41a46349d848c89ec181fe58a663fbe80b4",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 723,
+        "rollout_steps": 93,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.059936992824077606,
+          "actual_path_length_m": 0.060691118240356445,
+          "along_track_error_rmse_m": 0.10345310717821121,
+          "along_track_progress_m": 0.059615038335323334,
+          "along_track_progress_ratio": 0.039589859545230865,
+          "completed_reference": false,
+          "completion_ratio": 0.30097087378640774,
+          "direction_cosine": 0.9946284294128418,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25583669543266296,
+          "final_yaw_error_abs_deg": 24.82771110534668,
+          "lateral_error_rmse_m": 0.009694940410554409,
+          "planar_error_max_m": 0.25583669543266296,
+          "planar_error_mean_m": 0.07147049903869629,
+          "planar_error_rmse_m": 0.10390638560056686,
+          "reference_frames_evaluated": 93,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 24.82771110534668,
+          "yaw_error_mean_abs_deg": 6.355114459991455,
+          "yaw_error_rmse_deg": 10.240242004394531
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_14050_multiseed_20260827/model_14050_seed723_repeat3.log",
+      "source_sha256": "0a0d4fc2a575bc01b16b66f8899a720587a5b2258d21009f5d83642377e0b606",
+      "checkpoint_iteration": 14050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_14050.pt",
+        "seed": 723,
+        "rollout_steps": 93,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.06221873685717583,
+          "actual_path_length_m": 0.06293464452028275,
+          "along_track_error_rmse_m": 0.10333853960037231,
+          "along_track_progress_m": 0.06204842031002045,
+          "along_track_progress_ratio": 0.04120584949851036,
+          "completed_reference": false,
+          "completion_ratio": 0.30097087378640774,
+          "direction_cosine": 0.9972625970840454,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2537316083908081,
+          "final_yaw_error_abs_deg": 24.68269157409668,
+          "lateral_error_rmse_m": 0.010011125355958939,
+          "planar_error_max_m": 0.2537316083908081,
+          "planar_error_mean_m": 0.07127372920513153,
+          "planar_error_rmse_m": 0.10382232815027237,
+          "reference_frames_evaluated": 93,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 24.68269157409668,
+          "yaw_error_mean_abs_deg": 6.308261871337891,
+          "yaw_error_rmse_deg": 10.185869216918945
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed721_repeat1.log",
+      "source_sha256": "eb3a9c7802b4a19eb19f237c926d7d7e62eeddc7b1b8e4966725197e66477049",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 721,
+        "rollout_steps": 91,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.047632940113544464,
+          "actual_path_length_m": 0.04807136580348015,
+          "along_track_error_rmse_m": 0.0986960381269455,
+          "along_track_progress_m": 0.04748290404677391,
+          "along_track_progress_ratio": 0.03153300657868385,
+          "completed_reference": false,
+          "completion_ratio": 0.29449838187702265,
+          "direction_cosine": 0.9968501329421997,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2514442801475525,
+          "final_yaw_error_abs_deg": 21.382259368896484,
+          "lateral_error_rmse_m": 0.010722577571868896,
+          "planar_error_max_m": 0.2514442801475525,
+          "planar_error_mean_m": 0.07592764496803284,
+          "planar_error_rmse_m": 0.09927680343389511,
+          "reference_frames_evaluated": 91,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 21.382259368896484,
+          "yaw_error_mean_abs_deg": 5.4339985847473145,
+          "yaw_error_rmse_deg": 8.43859577178955
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed721_repeat2.log",
+      "source_sha256": "bd4cce145942659414bbf053fcf6af4cf6600822c8cea5436cd63869020c1236",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 721,
+        "rollout_steps": 79,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04752819612622261,
+          "actual_path_length_m": 0.047886062413454056,
+          "along_track_error_rmse_m": 0.06626645475625992,
+          "along_track_progress_m": 0.04703254997730255,
+          "along_track_progress_ratio": 0.031233930960297585,
+          "completed_reference": false,
+          "completion_ratio": 0.255663430420712,
+          "direction_cosine": 0.9895715117454529,
+          "direction_defined": true,
+          "final_planar_error_m": 0.1687021106481552,
+          "final_yaw_error_abs_deg": 15.983133316040039,
+          "lateral_error_rmse_m": 0.011921619065105915,
+          "planar_error_max_m": 0.1687021106481552,
+          "planar_error_mean_m": 0.05604824796319008,
+          "planar_error_rmse_m": 0.06733028590679169,
+          "reference_frames_evaluated": 79,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 15.983133316040039,
+          "yaw_error_mean_abs_deg": 3.316696882247925,
+          "yaw_error_rmse_deg": 5.127666473388672
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed721_repeat3.log",
+      "source_sha256": "b187c9cfc05a141b4b6382aa64214c6d3eb3b75885ac891ea05d57478e97c986",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 721,
+        "rollout_steps": 91,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04182618483901024,
+          "actual_path_length_m": 0.04205889254808426,
+          "along_track_error_rmse_m": 0.10093432664871216,
+          "along_track_progress_m": 0.0413343608379364,
+          "along_track_progress_ratio": 0.02744981087744236,
+          "completed_reference": false,
+          "completion_ratio": 0.29449838187702265,
+          "direction_cosine": 0.9882412552833557,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25718778371810913,
+          "final_yaw_error_abs_deg": 22.43456268310547,
+          "lateral_error_rmse_m": 0.012221643701195717,
+          "planar_error_max_m": 0.25718778371810913,
+          "planar_error_mean_m": 0.07631558924913406,
+          "planar_error_rmse_m": 0.10167156159877777,
+          "reference_frames_evaluated": 91,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 22.43456268310547,
+          "yaw_error_mean_abs_deg": 5.584519863128662,
+          "yaw_error_rmse_deg": 9.00553035736084
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed722_repeat1.log",
+      "source_sha256": "c0645ca7d7852ed25733d12ab1cc37e4d4453fb9424e2c751a7976eec1ef50cf",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 722,
+        "rollout_steps": 86,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04082829877734184,
+          "actual_path_length_m": 0.04115533456206322,
+          "along_track_error_rmse_m": 0.0862775444984436,
+          "along_track_progress_m": 0.0405694805085659,
+          "along_track_progress_ratio": 0.02694186009466648,
+          "completed_reference": false,
+          "completion_ratio": 0.2783171521035599,
+          "direction_cosine": 0.9936608076095581,
+          "direction_defined": true,
+          "final_planar_error_m": 0.22072486579418182,
+          "final_yaw_error_abs_deg": 19.963300704956055,
+          "lateral_error_rmse_m": 0.009575512260198593,
+          "planar_error_max_m": 0.22072486579418182,
+          "planar_error_mean_m": 0.0661703497171402,
+          "planar_error_rmse_m": 0.08680729568004608,
+          "reference_frames_evaluated": 86,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 19.963300704956055,
+          "yaw_error_mean_abs_deg": 4.553476810455322,
+          "yaw_error_rmse_deg": 7.145439624786377
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed722_repeat2.log",
+      "source_sha256": "7d2b48e9c44d544e1aa62632acbca29416357995c2bbc49eb4589751287f1830",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 722,
+        "rollout_steps": 91,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04609101265668869,
+          "actual_path_length_m": 0.04650328680872917,
+          "along_track_error_rmse_m": 0.09928290545940399,
+          "along_track_progress_m": 0.04579569399356842,
+          "along_track_progress_ratio": 0.030412545427680016,
+          "completed_reference": false,
+          "completion_ratio": 0.29449838187702265,
+          "direction_cosine": 0.9935926795005798,
+          "direction_defined": true,
+          "final_planar_error_m": 0.252906858921051,
+          "final_yaw_error_abs_deg": 21.65121841430664,
+          "lateral_error_rmse_m": 0.011517303064465523,
+          "planar_error_max_m": 0.252906858921051,
+          "planar_error_mean_m": 0.07616330683231354,
+          "planar_error_rmse_m": 0.0999487042427063,
+          "reference_frames_evaluated": 91,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 21.65121841430664,
+          "yaw_error_mean_abs_deg": 5.463563442230225,
+          "yaw_error_rmse_deg": 8.575754165649414
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed722_repeat3.log",
+      "source_sha256": "94ec4260e23a8424d8e7eb50ffc9db571da81ae23abf78a6b9f099fa0d99f59a",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 722,
+        "rollout_steps": 91,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04741301015019417,
+          "actual_path_length_m": 0.047737717628479004,
+          "along_track_error_rmse_m": 0.0988500565290451,
+          "along_track_progress_m": 0.047109443694353104,
+          "along_track_progress_ratio": 0.03128499537706375,
+          "completed_reference": false,
+          "completion_ratio": 0.29449838187702265,
+          "direction_cosine": 0.9935973882675171,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25159963965415955,
+          "final_yaw_error_abs_deg": 22.202938079833984,
+          "lateral_error_rmse_m": 0.011582629755139351,
+          "planar_error_max_m": 0.25159963965415955,
+          "planar_error_mean_m": 0.07629231363534927,
+          "planar_error_rmse_m": 0.09952633827924728,
+          "reference_frames_evaluated": 91,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 22.202938079833984,
+          "yaw_error_mean_abs_deg": 5.540931701660156,
+          "yaw_error_rmse_deg": 8.873851776123047
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed723_repeat1.log",
+      "source_sha256": "daaccf27bd80f1061636a6d3883f83dd8c8d4e304ab8e70a9f30cd09b5c5e4b5",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 723,
+        "rollout_steps": 91,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.04664340615272522,
+          "actual_path_length_m": 0.04698839411139488,
+          "along_track_error_rmse_m": 0.09904911369085312,
+          "along_track_progress_m": 0.04642762616276741,
+          "along_track_progress_ratio": 0.030832206830382347,
+          "completed_reference": false,
+          "completion_ratio": 0.29449838187702265,
+          "direction_cosine": 0.9953738451004028,
+          "direction_defined": true,
+          "final_planar_error_m": 0.2523864805698395,
+          "final_yaw_error_abs_deg": 21.595054626464844,
+          "lateral_error_rmse_m": 0.011093919165432453,
+          "planar_error_max_m": 0.2523864805698395,
+          "planar_error_mean_m": 0.07598784565925598,
+          "planar_error_rmse_m": 0.0996684655547142,
+          "reference_frames_evaluated": 91,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 21.595054626464844,
+          "yaw_error_mean_abs_deg": 5.4589338302612305,
+          "yaw_error_rmse_deg": 8.54684066772461
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed723_repeat2.log",
+      "source_sha256": "0d26087a048c2e7edb729c0f5d0ec1cf5402a8491322fa73f9bda3018afa5286",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 723,
+        "rollout_steps": 80,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.042153697460889816,
+          "actual_path_length_m": 0.042417898774147034,
+          "along_track_error_rmse_m": 0.06948422640562057,
+          "along_track_progress_m": 0.041898276656866074,
+          "along_track_progress_ratio": 0.02782430313527584,
+          "completed_reference": false,
+          "completion_ratio": 0.2588996763754045,
+          "direction_cosine": 0.9939407110214233,
+          "direction_defined": true,
+          "final_planar_error_m": 0.18017728626728058,
+          "final_yaw_error_abs_deg": 16.52691078186035,
+          "lateral_error_rmse_m": 0.009844358079135418,
+          "planar_error_max_m": 0.18017728626728058,
+          "planar_error_mean_m": 0.05603812262415886,
+          "planar_error_rmse_m": 0.07017812132835388,
+          "reference_frames_evaluated": 80,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 16.52691078186035,
+          "yaw_error_mean_abs_deg": 3.494374990463257,
+          "yaw_error_rmse_deg": 5.338837623596191
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    },
+    {
+      "source_absolute": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Push/eval_livepd_15050_multiseed_20260827/model_15050_seed723_repeat3.log",
+      "source_sha256": "d3190a9624be6491f98f08b10750724ebdd2fe0967aca5b664748d14cef8fce8",
+      "checkpoint_iteration": 15050,
+      "fields_copied_verbatim": {
+        "mappo_checkpoint": "logs/Plan5Push/a1_livepd_20kg_continue7000_from_08050_seed721_env2048/model_15050.pt",
+        "seed": 723,
+        "rollout_steps": 90,
+        "object_reference_metrics": {
+          "actual_net_displacement_m": 0.040836699306964874,
+          "actual_path_length_m": 0.04107023775577545,
+          "along_track_error_rmse_m": 0.09815565496683121,
+          "along_track_progress_m": 0.040531616657972336,
+          "along_track_progress_ratio": 0.026916714385151863,
+          "completed_reference": false,
+          "completion_ratio": 0.2912621359223301,
+          "direction_cosine": 0.9925292134284973,
+          "direction_defined": true,
+          "final_planar_error_m": 0.25035709142684937,
+          "final_yaw_error_abs_deg": 21.396337509155273,
+          "lateral_error_rmse_m": 0.010813118889927864,
+          "planar_error_max_m": 0.25035709142684937,
+          "planar_error_mean_m": 0.07393252104520798,
+          "planar_error_rmse_m": 0.09874945878982544,
+          "reference_frames_evaluated": 90,
+          "reference_frames_total": 309,
+          "reference_net_displacement_m": 1.505815863609314,
+          "reference_path_length_m": 1.6348836421966553,
+          "yaw_error_max_abs_deg": 21.396337509155273,
+          "yaw_error_mean_abs_deg": 5.293734073638916,
+          "yaw_error_rmse_deg": 8.324409484863281
+        },
+        "termination_counts": {
+          "joint_bad_tracking": 1,
+          "timeout": 0
+        }
+      }
+    }
+  ]
+}

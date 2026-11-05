@@ -1,0 +1,646 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-09-25",
+  "scope": "Existing retarget references only; no solver, dynamics rollout or training executed",
+  "chair": {
+    "sample": "CORE4D 20231020/074 chair021",
+    "computed_now": "NPZ invariants, source hashes and joint increments; orientation uses matching archived FK comparison",
+    "source_report": "logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/comparison.json",
+    "baseline": "logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_preview/core4d_pair_reference.npz",
+    "refined": "logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/core4d_pair_reference.npz",
+    "invariants": {
+      "shape": [
+        235,
+        2,
+        36
+      ],
+      "fps": 30,
+      "fps_equal": true,
+      "non_wrist_bit_exact": true,
+      "object_bit_exact": true,
+      "scale_bit_exact": true,
+      "changed_columns": [
+        26,
+        27,
+        28,
+        33,
+        34,
+        35
+      ],
+      "finite": true
+    },
+    "sha256": {
+      "baseline_pair": "d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586",
+      "refined_pair": "1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b",
+      "comparison": "ad03f0614ae67771617edbd47ead2bea5ce99d2fe1b76d54ef5c6255c5a764c9",
+      "baseline_urdf": "1409a2c1577ed49ecd0ec4724ad6ea6117f3fb960338651cbeaff332ea6b7a12",
+      "refined_urdf": "1409a2c1577ed49ecd0ec4724ad6ea6117f3fb960338651cbeaff332ea6b7a12",
+      "canonical": "e496e71901d50808b1d29d533b358117c64a1301b5244dfa134850fb8d729acc"
+    },
+    "all_source_hashes_match": true,
+    "hands": [
+      {
+        "person": "person1",
+        "side": "left",
+        "baseline_orientation_deg": {
+          "mean": 42.421408357759894,
+          "p90": 75.10185904564203,
+          "max": 84.75806472706044,
+          "max_frame": 23
+        },
+        "refined_orientation_deg": {
+          "mean": 4.0524909903076657e-13,
+          "p90": 1.134094968932049e-12,
+          "max": 8.828071956872495e-12,
+          "max_frame": 17
+        },
+        "baseline_normal_deg": {
+          "mean": 41.492803992712325,
+          "p90": 74.0842229149711,
+          "max": 84.67850567871233,
+          "max_frame": 23
+        },
+        "refined_normal_deg": {
+          "mean": 3.6407876353052547e-13,
+          "p90": 9.967219567843146e-13,
+          "max": 8.744408784069145e-12,
+          "max_frame": 17
+        },
+        "max_wrist_step_baseline_deg": 4.352943798466086,
+        "max_wrist_step_refined_deg": 7.760711673664134,
+        "max_wrist_step_frames": [
+          35,
+          36
+        ],
+        "refined_limit_violation_rad": 0,
+        "refined_error_frames_gt_0_01": [],
+        "palm_sample_displacement_m": {
+          "mean": 0.03330493878710697,
+          "p90": 0.06484041708455482,
+          "max": 0.07847129059900201,
+          "max_frame": 122
+        }
+      },
+      {
+        "person": "person1",
+        "side": "right",
+        "baseline_orientation_deg": {
+          "mean": 86.34471528435711,
+          "p90": 104.4698346569808,
+          "max": 123.26881185852997,
+          "max_frame": 198
+        },
+        "refined_orientation_deg": {
+          "mean": 5.920497521167469e-13,
+          "p90": 1.3410319971173965e-12,
+          "max": 1.1318600596744745e-11,
+          "max_frame": 134
+        },
+        "baseline_normal_deg": {
+          "mean": 84.93953098728008,
+          "p90": 104.46490558976882,
+          "max": 122.8925528507931,
+          "max_frame": 198
+        },
+        "refined_normal_deg": {
+          "mean": 5.493044364038724e-13,
+          "p90": 9.633140057506601e-13,
+          "max": 1.0407042228660695e-11,
+          "max_frame": 172
+        },
+        "max_wrist_step_baseline_deg": 2.6057849632073276,
+        "max_wrist_step_refined_deg": 7.767377288431525,
+        "max_wrist_step_frames": [
+          0,
+          1
+        ],
+        "refined_limit_violation_rad": 0,
+        "refined_error_frames_gt_0_01": [],
+        "palm_sample_displacement_m": {
+          "mean": 0.036224922777109377,
+          "p90": 0.05832319246725954,
+          "max": 0.0678971663627335,
+          "max_frame": 190
+        }
+      },
+      {
+        "person": "person2",
+        "side": "left",
+        "baseline_orientation_deg": {
+          "mean": 53.16682860752486,
+          "p90": 89.7384576878314,
+          "max": 95.72666086323149,
+          "max_frame": 194
+        },
+        "refined_orientation_deg": {
+          "mean": 1.885804701074292e-13,
+          "p90": 3.371245183078764e-13,
+          "max": 4.718814488303368e-12,
+          "max_frame": 122
+        },
+        "baseline_normal_deg": {
+          "mean": 51.244851980071985,
+          "p90": 84.48855218970421,
+          "max": 89.00097408675083,
+          "max_frame": 193
+        },
+        "refined_normal_deg": {
+          "mean": 1.6704896864071663e-13,
+          "p90": 2.6010859191341235e-13,
+          "max": 4.381800214775956e-12,
+          "max_frame": 122
+        },
+        "max_wrist_step_baseline_deg": 3.6222380065456337,
+        "max_wrist_step_refined_deg": 11.676841959532803,
+        "max_wrist_step_frames": [
+          199,
+          200
+        ],
+        "refined_limit_violation_rad": 0,
+        "refined_error_frames_gt_0_01": [],
+        "palm_sample_displacement_m": {
+          "mean": 0.03407580507709789,
+          "p90": 0.06636018646485577,
+          "max": 0.07319399617778624,
+          "max_frame": 197
+        }
+      },
+      {
+        "person": "person2",
+        "side": "right",
+        "baseline_orientation_deg": {
+          "mean": 68.96661106845977,
+          "p90": 96.2877770356693,
+          "max": 103.32879738913508,
+          "max_frame": 128
+        },
+        "refined_orientation_deg": {
+          "mean": 0.23583182227977934,
+          "p90": 5.407554394167943e-12,
+          "max": 5.0077989301605434,
+          "max_frame": 128
+        },
+        "baseline_normal_deg": {
+          "mean": 63.50041138742805,
+          "p90": 80.18161391369064,
+          "max": 87.9818596450117,
+          "max_frame": 122
+        },
+        "refined_normal_deg": {
+          "mean": 0.185190988555663,
+          "p90": 4.696424472911478e-12,
+          "max": 3.975124491512826,
+          "max_frame": 128
+        },
+        "max_wrist_step_baseline_deg": 2.820498661447548,
+        "max_wrist_step_refined_deg": 6.994740551573949,
+        "max_wrist_step_frames": [
+          173,
+          174
+        ],
+        "refined_limit_violation_rad": 0,
+        "refined_error_frames_gt_0_01": [
+          {
+            "frame": 121,
+            "error_deg": 0.9903169939232145
+          },
+          {
+            "frame": 122,
+            "error_deg": 2.115826455599751
+          },
+          {
+            "frame": 123,
+            "error_deg": 2.832387200994627
+          },
+          {
+            "frame": 124,
+            "error_deg": 3.525916741053897
+          },
+          {
+            "frame": 125,
+            "error_deg": 3.8846040661952346
+          },
+          {
+            "frame": 126,
+            "error_deg": 4.254369994418363
+          },
+          {
+            "frame": 127,
+            "error_deg": 4.7701514460314405
+          },
+          {
+            "frame": 128,
+            "error_deg": 5.0077989301605434
+          },
+          {
+            "frame": 129,
+            "error_deg": 4.858766131712927
+          },
+          {
+            "frame": 130,
+            "error_deg": 4.50932819923904
+          },
+          {
+            "frame": 131,
+            "error_deg": 4.669729638372969
+          },
+          {
+            "frame": 132,
+            "error_deg": 4.983622245161429
+          },
+          {
+            "frame": 133,
+            "error_deg": 4.11085882140601
+          },
+          {
+            "frame": 134,
+            "error_deg": 3.090687226078312
+          },
+          {
+            "frame": 135,
+            "error_deg": 1.6607421875179047
+          },
+          {
+            "frame": 136,
+            "error_deg": 0.1553719574499283
+          }
+        ],
+        "palm_sample_displacement_m": {
+          "mean": 0.09645768514606627,
+          "p90": 0.1784302250246834,
+          "max": 0.18310111967339518,
+          "max_frame": 136
+        }
+      }
+    ],
+    "mean_orientation_baseline_deg": 62.72489082952541,
+    "mean_orientation_refined_deg": 0.058957955570241305,
+    "viewer_validate_only": [
+      {
+        "kind": "shared_small_preview",
+        "exit_code": 0,
+        "validated": {
+          "fps": 30,
+          "frames": 235,
+          "object_name": "chair021",
+          "object_qpos_shape": [
+            235,
+            7
+          ],
+          "object_urdf": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_preview/assets/chair021.urdf",
+          "pickle_free_input_verified": true,
+          "quaternion_convention": "wxyz",
+          "robot_count": 2,
+          "robot_dof": 29,
+          "robot_qpos_shape": [
+            235,
+            2,
+            36
+          ],
+          "robot_urdf": "/home/kevin/holosoma-core4d-base/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof.urdf"
+        }
+      },
+      {
+        "kind": "shared_small_a1_preview_tol6",
+        "exit_code": 0,
+        "validated": {
+          "fps": 30,
+          "frames": 235,
+          "object_name": "chair021",
+          "object_qpos_shape": [
+            235,
+            7
+          ],
+          "object_urdf": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/assets/chair021.urdf",
+          "pickle_free_input_verified": true,
+          "quaternion_convention": "wxyz",
+          "robot_count": 2,
+          "robot_dof": 29,
+          "robot_qpos_shape": [
+            235,
+            2,
+            36
+          ],
+          "robot_urdf": "/home/kevin/holosoma-core4d-base/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof.urdf"
+        }
+      }
+    ]
+  },
+  "bucket": {
+    "source_report": "logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/comparison/summary.json",
+    "report_sha256": "531143bb579a1465609fac379b93537de58fa9eea617f09094066b636d448a70",
+    "frames": 299,
+    "fps": 30,
+    "baseline_pair_sha256": "089d3a36a39442e055f01a8111d6145475c062928c28727062f951887020ceec",
+    "refined_pair_sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+    "frozen": {
+      "non_wrist_qpos_exact": true,
+      "object_qpos_exact": true,
+      "shared_pair_metadata_exact": true,
+      "scene_xml_and_object_urdf_sha256_equal": true
+    },
+    "hands": {
+      "person1_left": {
+        "baseline": {
+          "orientation_errors_deg": {
+            "min": 12.841079005874867,
+            "mean": 45.03413872735454,
+            "p50": 45.93977513505969,
+            "p95": 80.03783534000183,
+            "p99": 86.04464372779307,
+            "max": 86.630493585523
+          },
+          "palm_normal_errors_deg": {
+            "min": 3.0563989895035832,
+            "mean": 42.397248791766415,
+            "p50": 44.380717060810866,
+            "p95": 79.87391447043316,
+            "p99": 86.0434514782722,
+            "max": 86.62703764681802
+          }
+        },
+        "candidate": {
+          "orientation_errors_deg": {
+            "min": 9.51447270170002e-16,
+            "mean": 2.478927227217637e-13,
+            "p50": 1.6319097389915024e-14,
+            "p95": 1.373981495532786e-12,
+            "p99": 3.906002146097121e-12,
+            "max": 6.780052743263805e-12
+          },
+          "palm_normal_errors_deg": {
+            "min": 0,
+            "mean": 7.055807356004076e-8,
+            "p50": 0,
+            "p95": 8.537736462515939e-7,
+            "p99": 0.0000017075472925031877,
+            "max": 0.000002091309789151873
+          }
+        }
+      },
+      "person1_right": {
+        "baseline": {
+          "orientation_errors_deg": {
+            "min": 8.762874815678165,
+            "mean": 62.31704774806941,
+            "p50": 72.61989313609239,
+            "p95": 100.48557448495718,
+            "p99": 103.96911754896063,
+            "max": 104.873437477286
+          },
+          "palm_normal_errors_deg": {
+            "min": 5.491934534427098,
+            "mean": 60.01669338037638,
+            "p50": 72.51861004608774,
+            "p95": 100.06868850966752,
+            "p99": 103.37221982453336,
+            "max": 104.3019716227585
+          }
+        },
+        "candidate": {
+          "orientation_errors_deg": {
+            "min": 1.5109370399785144e-15,
+            "mean": 3.4530540792398944e-13,
+            "p50": 2.0278609398747403e-14,
+            "p95": 1.8164981815760032e-12,
+            "p99": 5.794060583566138e-12,
+            "max": 1.0712856012948458e-11
+          },
+          "palm_normal_errors_deg": {
+            "min": 0,
+            "mean": 1.1907682297310135e-7,
+            "p50": 0,
+            "p95": 0.0000012074182697257333,
+            "p99": 0.0000017075472925031877,
+            "max": 0.0000017075472925031877
+          }
+        }
+      },
+      "person2_left": {
+        "baseline": {
+          "orientation_errors_deg": {
+            "min": 15.804961031963433,
+            "mean": 44.79805694312216,
+            "p50": 41.20752328556786,
+            "p95": 66.8545872409294,
+            "p99": 68.4900316762746,
+            "max": 68.71052363147027
+          },
+          "palm_normal_errors_deg": {
+            "min": 8.82195649486885,
+            "mean": 39.92247969657897,
+            "p50": 34.996909563130565,
+            "p95": 63.944699912072984,
+            "p99": 65.45422284888288,
+            "max": 65.65100556784373
+          }
+        },
+        "candidate": {
+          "orientation_errors_deg": {
+            "min": 1.926963663591532e-15,
+            "mean": 2.866764617503137e-13,
+            "p50": 1.7314271550391345e-14,
+            "p95": 1.7912605801223451e-12,
+            "p99": 4.168739631991035e-12,
+            "max": 7.043915032343145e-12
+          },
+          "palm_normal_errors_deg": {
+            "min": 0,
+            "mean": 1.1597674035551662e-7,
+            "p50": 0,
+            "p95": 0.0000012074182697257333,
+            "p99": 0.0000017075472925031877,
+            "max": 0.000002091309789151873
+          }
+        }
+      },
+      "person2_right": {
+        "baseline": {
+          "orientation_errors_deg": {
+            "min": 7.7696611580723305,
+            "mean": 49.86517294626975,
+            "p50": 56.26452941571698,
+            "p95": 63.06492787135134,
+            "p99": 65.69720863894345,
+            "max": 66.12836301018737
+          },
+          "palm_normal_errors_deg": {
+            "min": 3.6527706152782886,
+            "mean": 48.74326246918165,
+            "p50": 54.24284104433546,
+            "p95": 62.95630603273186,
+            "p99": 65.57088256185807,
+            "max": 66.00266154516096
+          }
+        },
+        "candidate": {
+          "orientation_errors_deg": {
+            "min": 2.8286810666951093e-15,
+            "mean": 2.814849140768109e-13,
+            "p50": 2.0506277529259252e-14,
+            "p95": 1.8911769058379005e-12,
+            "p99": 3.711014182651838e-12,
+            "max": 5.985585026167671e-12
+          },
+          "palm_normal_errors_deg": {
+            "min": 0,
+            "mean": 1.328725937794802e-7,
+            "p50": 0,
+            "p95": 0.0000012074182697257333,
+            "p99": 0.000001912740187991128,
+            "max": 0.0000022588727439225506
+          }
+        }
+      }
+    },
+    "audit_20260925": {
+      "pair_read_verified": true,
+      "only_changed_columns_per_robot": [
+        26,
+        27,
+        28,
+        33,
+        34,
+        35
+      ],
+      "shared_metadata_exact": true,
+      "report_max_errors_match_archived_arrays": true,
+      "orientation_metrics": "Archived FK; no new FK or dynamics rollout",
+      "proxy_penetration_max_mm_baseline": [
+        2.383,
+        1.274,
+        1.863,
+        1.008
+      ],
+      "proxy_penetration_max_mm_refined": [
+        54.632,
+        29.423,
+        61.218,
+        140.667
+      ],
+      "proxy_warning": "Convex collision proxy / closed source mesh is not the material volume of a hollow bucket."
+    }
+  },
+  "omomo": {
+    "sequence": "sub6_largetable_033",
+    "frames": 186,
+    "fps": 30,
+    "changed_columns": [
+      26,
+      27,
+      28,
+      33,
+      34,
+      35
+    ],
+    "non_wrist_and_object_exact_within_each_pair": true,
+    "historical_pair": {
+      "root": "/home/kevin/holosoma-rubber-hand-largetable/data/retargeted/rubber_hand_largetable_v1/sub6_largetable_033/a1",
+      "baseline": "sub6_largetable_033_fixed_object_base.npz",
+      "refined": "sub6_largetable_033_fixed_object.npz",
+      "baseline_sha256": "27f9f6c73579aab479aadd4991b08231e4459431c50b625976f8fcc4775cbc29",
+      "refined_sha256": "a902e79abb69974c4b4af41ee73efa3101b150e4f9a41d06c7c48d0ebfceb511",
+      "max_wrist_steps_deg_baseline": [
+        1.9198,
+        2.6177
+      ],
+      "max_wrist_steps_deg_refined": [
+        9.7634,
+        7.7874
+      ],
+      "orientation_metrics_source": "retarget-rubberhand-A1.md section 9, historical report only; not recomputed in this audit"
+    },
+    "matched_20260911": {
+      "root": "logs/OMOMOPush/retarget_pt_collision_20260911/pt_palm_collision",
+      "baseline": "sub6_largetable_033_fixed_object_base.npz",
+      "refined": "sub6_largetable_033_matched_a1.npz",
+      "baseline_sha256": "20ea6a81e8fec244527baf1188b9ba9dffef408e82d46f5b0cf9992e17b826d2",
+      "refined_sha256": "387f4962d419d48f941bda2e3cebd7ce788e0f1f52ebe8e5d5c6c336ef06ef3a",
+      "archived_orientation_deg_baseline": {
+        "p95": 97.12,
+        "max": 99.68
+      },
+      "archived_orientation_deg_refined": "numerical zero",
+      "archived_max_sample_penetration_mm": {
+        "baseline": 1.001,
+        "refined": 85.606
+      },
+      "source_report": "logs/OMOMOPush/retarget_pt_collision_20260911/README.md"
+    },
+    "pair_boundary": "Historical and 09-11 baseline qpos differ; never mix them in a comparison. 14-arm-joint collision refinement is a separate, unselected method."
+  },
+  "stage_methods": {
+    "root": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move",
+    "comparison_manifest": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/comparison_manifest.json",
+    "omni": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/omni_single_stage_prefix140/core4d_pair_reference.npz",
+    "two_stage": "/home/kevin/datasets/CORE4D-V1-full/retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal/core4d_pair_reference.npz",
+    "canonical_sha256": "5e27c929999bde64187ec5d71d4da02ea93bb12f78fedfcb36f7200e7990ed90",
+    "frames": {
+      "omni": 140,
+      "two_stage": 413,
+      "common_prefix": 140
+    },
+    "fps": 30,
+    "prefix_checks": {
+      "human_joints_exact": true,
+      "object_qpos_exact": true,
+      "height_scale_anchor_offset_exact": true,
+      "urdf_xml_hash_equal": true,
+      "surface_samples_hash_equal": true,
+      "postprocess": "position_only_baseline, no A1"
+    },
+    "human_height_m": [
+      1.7653261423,
+      1.7966037989
+    ],
+    "human_to_robot_scales": [
+      0.7477371849,
+      0.7347195864
+    ],
+    "scale_anchor": [
+      0.5283552551,
+      0.3630169678,
+      0
+    ],
+    "ground_offsets_m": [
+      0.0195837021,
+      -0.0189697742
+    ],
+    "target_urdf_sha256": "e1baca4f5489b0e8aa14004d0c9f9bbabe724262c8e7466c58e04873e4145afa",
+    "target_xml_sha256": "2dfd389c8b301c8ebe67711e07e3f88136efaa185f0e562ad3566386f2b1b873",
+    "differences": {
+      "foot_height_anchor": {
+        "omni": false,
+        "two_stage": true,
+        "tolerance_m": 0.005
+      },
+      "manual_joint_overrides": {
+        "omni": true,
+        "two_stage_final": false
+      },
+      "elastic_constraints": {
+        "omni": false,
+        "two_stage_final": true
+      },
+      "nominal_prior": {
+        "omni": "none",
+        "two_stage_final": "full 36-D Stage1 nominal, soft weight initially 5"
+      }
+    },
+    "omni_length_reason": "Explicit --max-frames 140, requested and actual lengths 140, validation passed. Reason for choosing this cap unknown; not a recorded solver failure.",
+    "comparison_scope": "Existing pipeline comparison over frames 0..139; not stage-count-only ablation and not a full-sequence quality benchmark.",
+    "training_smalltable": {
+      "shared_scale": 0.7412283856190455,
+      "origin": "Stage1 nominal robot qpos + shared mean nominal object translation, not Stage2",
+      "pair_sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05",
+      "compact_exact_to_preview": true,
+      "source_manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/source_manifest.json",
+      "shared_small_target_independent_omni_found": false
+    },
+    "missing": [
+      "Common-prefix geometric/body quality metrics computed identically for both methods",
+      "Full-length single-stage run under matched target and solver conditions",
+      "Separate same-shared-small-target Omni result; not found in searched existing archives"
+    ]
+  }
+}

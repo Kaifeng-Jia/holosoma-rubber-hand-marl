@@ -1,0 +1,200 @@
+{
+  "_artifact_kind": "derived_readable_config_not_the_original",
+  "_source_sha256": "12ab3b8d7c008f4a8947e29d824f42d19dee561f853606482e3cb886fb79f405",
+  "_original_lossless_copy": "run_config.json.gz",
+  "_transformation": "All keys retained; arrays longer than 32 entries summarized.",
+  "config": {
+    "action_dim_per_agent": 29,
+    "actor_input_dim": 158,
+    "actor_learning_rate": 0.001,
+    "actor_observation_groups": {
+      "actor_obs": 154,
+      "teammate_obs": 4
+    },
+    "clip_param": 0.2,
+    "control_hz": 50.0,
+    "critic_input_dim": 527,
+    "critic_learning_rate": 0.001,
+    "entropy_coef": 0.005,
+    "gamma": 0.99,
+    "git_commit": "25c48aeb21841d88a14dcb0ce2522018e5c74f9b",
+    "initialization": "fresh",
+    "interaction_contract": {
+      "actual_object_points": 85,
+      "num_body_points": 19,
+      "object_points_sha256": "af76c071845dcb7bf10d41744dd302f17404caf4f4012fae29eb649ed61f6994",
+      "object_urdf_sha256": "d4f166913ee6464dae1155428bdfe5169f63be94fbc8869535710bb6b672fc60",
+      "reference_file_sha256": "caa1f9bb47425254253b588112800a5a32000435027352ceb496d66d55decf3e",
+      "requested_object_points": 100,
+      "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+      "sigma": 0.06,
+      "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "version": "core4d_smalltable_interaction_mesh_v1",
+      "weight": 1.0
+    },
+    "interaction_reference": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/interaction_mesh_100_v1.npz",
+    "iterations_requested": 12000,
+    "lambda": 0.95,
+    "num_agents": 2,
+    "num_envs": 2048,
+    "object_physics": {
+      "com_pose_body_xyzw": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          0.0,
+          0.12641499936580658,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "last_entry": [
+          0.0,
+          0.12641499936580658,
+          0.0,
+          0.0,
+          0.0,
+          0.0,
+          1.0
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "inertia_kg_m2_row_major": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          1.5083532333374023,
+          0.0,
+          0.0,
+          0.0,
+          0.9644736647605896,
+          0.0,
+          0.0,
+          0.0,
+          1.070457100868225
+        ],
+        "last_entry": [
+          1.5083532333374023,
+          0.0,
+          0.0,
+          0.0,
+          0.9644736647605896,
+          0.0,
+          0.0,
+          0.0,
+          1.070457100868225
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "mass_kg": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": 20.0,
+        "last_entry": 20.0,
+        "note": "Full original array is preserved in run_config.json.gz."
+      },
+      "material_static_dynamic_restitution": {
+        "_derived_large_array_summary": true,
+        "length": 2048,
+        "all_entries_equal": true,
+        "first_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "last_entry": [
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ],
+          [
+            0.5,
+            0.5,
+            0.0
+          ]
+        ],
+        "note": "Full original array is preserved in run_config.json.gz."
+      }
+    },
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_core4d_desk001_small_training.urdf",
+    "object_urdf_sha256": "d4f166913ee6464dae1155428bdfe5169f63be94fbc8869535710bb6b672fc60",
+    "physics_hz": 200.0,
+    "reference_policy": "non_looping_position_and_orientation_tracking",
+    "resume_checkpoint": null,
+    "resume_checkpoint_sha256": null,
+    "reward_terms": [
+      "motion_global_ref_position_error_exp",
+      "motion_global_ref_orientation_error_exp",
+      "motion_relative_body_position_error_exp",
+      "motion_relative_body_orientation_error_exp",
+      "motion_global_body_lin_vel",
+      "motion_global_body_ang_vel",
+      "action_rate_l2",
+      "limits_dof_pos",
+      "undesired_contacts",
+      "object_global_ref_position_error_exp",
+      "object_global_ref_orientation_error_exp",
+      "interaction_mesh"
+    ],
+    "reward_variant": "interaction_mesh",
+    "runtime_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/core4d_pair_runtime_fps50.npz",
+    "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "save_interval": 2000,
+    "scenario": "core4d_paired_small_table_reference_tracking",
+    "seed": 721,
+    "shared_actor": true,
+    "start_iteration": 0,
+    "started_unix_time": 1788766094.8680882,
+    "steps_per_env": 24,
+    "termination_terms": [
+      "reference_horizon",
+      "joint_bad_tracking"
+    ],
+    "training_promotion": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/training_asset_manifest.json",
+    "training_promotion_sha256": "6d55d7235c49456dd2793cf5ecafe6abd2420800504eb664e7ac0027efcba584",
+    "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+  }
+}

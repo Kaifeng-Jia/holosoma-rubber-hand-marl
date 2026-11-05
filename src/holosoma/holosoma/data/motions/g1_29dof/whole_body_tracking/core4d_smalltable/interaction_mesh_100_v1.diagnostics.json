@@ -1,0 +1,902 @@
+{
+  "metadata": {
+    "version": "core4d_smalltable_interaction_mesh_v1",
+    "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "object_urdf_sha256": "d4f166913ee6464dae1155428bdfe5169f63be94fbc8869535710bb6b672fc60",
+    "reference_robot_xml_sha256": "8c586e4747da85804180fe44d8692e0fd8231356728b6327e256dca498087a78",
+    "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+    "robot_config_sha256": "55009b1afff7522eae7b6a28df96c194fec4537a6ddcbe7c7ce2c5594234c3b2",
+    "object_points_sha256": "af76c071845dcb7bf10d41744dd302f17404caf4f4012fae29eb649ed61f6994",
+    "num_frames": 687,
+    "fps": 50.0,
+    "num_agents": 2,
+    "num_body_points": 19,
+    "requested_object_points": 100,
+    "actual_object_points": 85,
+    "seed": 42,
+    "grouped_formula": "0.5 * mean_over_15_body_groups(mean_rows_squared_L_delta) + 0.5 * mean_over_reference_object_rows_adjacent_to_body(squared_L_delta)",
+    "q_definition": "K=L[:, :19]; Q=K.T@diag(grouped_row_weights)@K; E=sum_xyz(delta.T@Q@delta)",
+    "reference_definition": "Original runtime body poses and reviewed XML landmarks, unmodified; not training-URDF FK",
+    "coordinate_frame": "respective object URDF link origin (not COM), metres",
+    "point_groups": [
+      "Pelvis",
+      "L_Hip",
+      "R_Hip",
+      "L_Knee",
+      "R_Knee",
+      "L_Shoulder",
+      "R_Shoulder",
+      "L_Elbow",
+      "R_Elbow",
+      "L_Ankle",
+      "R_Ankle",
+      "L_Foot",
+      "R_Foot",
+      "left_hand",
+      "right_hand",
+      "left_hand",
+      "left_hand",
+      "right_hand",
+      "right_hand"
+    ],
+    "point_mapping": {
+      "available_bodies": [
+        "pelvis",
+        "left_hip_pitch_link",
+        "left_hip_roll_link",
+        "left_hip_yaw_link",
+        "left_knee_link",
+        "left_ankle_pitch_link",
+        "left_ankle_roll_link",
+        "left_foot_contact_point",
+        "right_hip_pitch_link",
+        "right_hip_roll_link",
+        "right_hip_yaw_link",
+        "right_knee_link",
+        "right_ankle_pitch_link",
+        "right_ankle_roll_link",
+        "right_foot_contact_point",
+        "waist_yaw_link",
+        "waist_roll_link",
+        "torso_link",
+        "left_shoulder_pitch_link",
+        "left_shoulder_roll_link",
+        "left_shoulder_yaw_link",
+        "left_elbow_link",
+        "left_wrist_roll_link",
+        "left_wrist_pitch_link",
+        "left_wrist_yaw_link",
+        "right_shoulder_pitch_link",
+        "right_shoulder_roll_link",
+        "right_shoulder_yaw_link",
+        "right_elbow_link",
+        "right_wrist_roll_link",
+        "right_wrist_pitch_link",
+        "right_wrist_yaw_link"
+      ],
+      "points": [
+        {
+          "name": "Pelvis",
+          "source_body": "pelvis_contour_link",
+          "online_body": "pelvis",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "pelvis_contour_link",
+              "parent": "pelvis",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "L_Hip",
+          "source_body": "left_hip_pitch_link",
+          "online_body": "left_hip_pitch_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "R_Hip",
+          "source_body": "right_hip_pitch_link",
+          "online_body": "right_hip_pitch_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "L_Knee",
+          "source_body": "left_knee_link",
+          "online_body": "left_knee_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "R_Knee",
+          "source_body": "right_knee_link",
+          "online_body": "right_knee_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "L_Shoulder",
+          "source_body": "left_shoulder_roll_link",
+          "online_body": "left_shoulder_roll_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "R_Shoulder",
+          "source_body": "right_shoulder_roll_link",
+          "online_body": "right_shoulder_roll_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "L_Elbow",
+          "source_body": "left_elbow_link",
+          "online_body": "left_elbow_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "R_Elbow",
+          "source_body": "right_elbow_link",
+          "online_body": "right_elbow_link",
+          "source": "training_urdf",
+          "fixed_chain": [],
+          "online_offset": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "name": "L_Ankle",
+          "source_body": "left_ankle_intermediate_1_link",
+          "online_body": "left_knee_link",
+          "source": "reference_xml_virtual_fixed_point",
+          "fixed_chain": [
+            {
+              "child": "left_ankle_intermediate_1_link",
+              "parent": "left_knee_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.28
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.0,
+            0.0,
+            -0.28
+          ]
+        },
+        {
+          "name": "R_Ankle",
+          "source_body": "right_ankle_intermediate_1_link",
+          "online_body": "right_knee_link",
+          "source": "reference_xml_virtual_fixed_point",
+          "fixed_chain": [
+            {
+              "child": "right_ankle_intermediate_1_link",
+              "parent": "right_knee_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.28
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.0,
+            0.0,
+            -0.28
+          ]
+        },
+        {
+          "name": "L_Foot",
+          "source_body": "left_ankle_roll_sphere_5_link",
+          "online_body": "left_ankle_roll_link",
+          "source": "reference_xml_virtual_fixed_point",
+          "fixed_chain": [
+            {
+              "child": "left_ankle_roll_sphere_5_link",
+              "parent": "left_ankle_roll_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.14
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.03
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.14,
+            0.0,
+            -0.03
+          ]
+        },
+        {
+          "name": "R_Foot",
+          "source_body": "right_ankle_roll_sphere_5_link",
+          "online_body": "right_ankle_roll_link",
+          "source": "reference_xml_virtual_fixed_point",
+          "fixed_chain": [
+            {
+              "child": "right_ankle_roll_sphere_5_link",
+              "parent": "right_ankle_roll_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.14
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  -0.03
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.14,
+            0.0,
+            -0.03
+          ]
+        },
+        {
+          "name": "L_Wrist",
+          "source_body": "left_rubber_hand_link",
+          "online_body": "left_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "left_rubber_hand_link",
+              "parent": "left_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.0415,
+            0.003,
+            0.0
+          ]
+        },
+        {
+          "name": "R_Wrist",
+          "source_body": "right_rubber_hand_link",
+          "online_body": "right_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "right_rubber_hand_link",
+              "parent": "right_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.0415,
+            -0.003,
+            0.0
+          ]
+        },
+        {
+          "name": "left_rubber_hand_surface_farthest",
+          "source_body": "left_rubber_hand_link",
+          "online_body": "left_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "left_rubber_hand_link",
+              "parent": "left_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.17260196343684261,
+            -0.04289801989046688,
+            0.00697366985052011
+          ]
+        },
+        {
+          "name": "left_rubber_hand_surface_off_axis",
+          "source_body": "left_rubber_hand_link",
+          "online_body": "left_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "left_rubber_hand_link",
+              "parent": "left_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.11746269290731573,
+            -0.008872160331592237,
+            0.062005638685433316
+          ]
+        },
+        {
+          "name": "right_rubber_hand_surface_farthest",
+          "source_body": "right_rubber_hand_link",
+          "online_body": "right_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "right_rubber_hand_link",
+              "parent": "right_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.1726019629600595,
+            0.042898019743079156,
+            0.006973669776253627
+          ]
+        },
+        {
+          "name": "right_rubber_hand_surface_off_axis",
+          "source_body": "right_rubber_hand_link",
+          "online_body": "right_wrist_yaw_link",
+          "source": "training_urdf",
+          "fixed_chain": [
+            {
+              "child": "right_rubber_hand_link",
+              "parent": "right_wrist_yaw_link",
+              "fixed_transform": [
+                [
+                  1.0,
+                  0.0,
+                  0.0,
+                  0.0415
+                ],
+                [
+                  0.0,
+                  1.0,
+                  0.0,
+                  -0.003
+                ],
+                [
+                  0.0,
+                  0.0,
+                  1.0,
+                  0.0
+                ],
+                [
+                  0.0,
+                  0.0,
+                  0.0,
+                  1.0
+                ]
+              ]
+            }
+          ],
+          "online_offset": [
+            0.11746269219560437,
+            0.008872160222586297,
+            0.062005640591347576
+          ]
+        }
+      ]
+    },
+    "robot_landmarks": {
+      "version": "omni15_plus_four_rubber_hand_mesh_points_v1",
+      "xml_path": "/home/kevin/holosoma-core4d-base/src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof.xml",
+      "xml_sha256": "8c586e4747da85804180fe44d8692e0fd8231356728b6327e256dca498087a78",
+      "original_mapping": {
+        "Pelvis": "pelvis_contour_link",
+        "L_Hip": "left_hip_pitch_link",
+        "R_Hip": "right_hip_pitch_link",
+        "L_Knee": "left_knee_link",
+        "R_Knee": "right_knee_link",
+        "L_Shoulder": "left_shoulder_roll_link",
+        "R_Shoulder": "right_shoulder_roll_link",
+        "L_Elbow": "left_elbow_link",
+        "R_Elbow": "right_elbow_link",
+        "L_Ankle": "left_ankle_intermediate_1_link",
+        "R_Ankle": "right_ankle_intermediate_1_link",
+        "L_Foot": "left_ankle_roll_sphere_5_link",
+        "R_Foot": "right_ankle_roll_sphere_5_link",
+        "L_Wrist": "left_rubber_hand_link",
+        "R_Wrist": "right_rubber_hand_link"
+      },
+      "num_landmarks": 19,
+      "selection": "original origins unchanged; farthest mesh vertex then farthest from origin-first axis",
+      "quaternion_order": "wxyz",
+      "hands": {
+        "left": {
+          "body": "left_rubber_hand_link",
+          "geom_name": "left_rubber_hand_link",
+          "mesh_name": "left_rubber_hand_link",
+          "mesh_vertex_count": 22876,
+          "mesh_face_count": 45748,
+          "compiled_geom_pos_body": [
+            0.06463010116973655,
+            -0.006684766520596889,
+            0.003099938120244002
+          ],
+          "compiled_geom_quat_wxyz": [
+            0.5425682206005373,
+            0.5798537576262754,
+            0.42500863174213116,
+            0.4344617459635997
+          ],
+          "selected_vertex_indices": [
+            22646,
+            11577
+          ],
+          "origin_surface_surface_triangle_area_m2": 0.00415661655741201,
+          "body_local_vertices_sha256": "e051f3eb8e3d0fa85e0ef90790eb913ecc1cf87250745f1473b346b91d287ae3"
+        },
+        "right": {
+          "body": "right_rubber_hand_link",
+          "geom_name": "right_rubber_hand_link",
+          "mesh_name": "right_rubber_hand_link",
+          "mesh_vertex_count": 21928,
+          "mesh_face_count": 43852,
+          "compiled_geom_pos_body": [
+            0.06462782277828494,
+            0.006684169751616169,
+            0.0030997910782820195
+          ],
+          "compiled_geom_quat_wxyz": [
+            0.43445763604713084,
+            0.4250188918772497,
+            0.5798476144246696,
+            0.5425700397863822
+          ],
+          "selected_vertex_indices": [
+            196,
+            10750
+          ],
+          "origin_surface_surface_triangle_area_m2": 0.004156616673468692,
+          "body_local_vertices_sha256": "dad401c5002210a4aa572a3dc24b5b554c76ceb528e21925971fdd193e5199e2"
+        }
+      },
+      "contact_semantics": "geometric landmarks only; no force or contact or precise palm-normal claim"
+    },
+    "sampling": {
+      "sampler": "trimesh.sample.sample_surface_even",
+      "requested_count": 100,
+      "actual_count": 85,
+      "seed": 42,
+      "filled_shortfall": false,
+      "sampling_mesh_sha256": "15efb581f5c47c7e636d13222a7487e0b6f579e7b30ee5c2a003ebdd99f4417d",
+      "points_sha256": "af76c071845dcb7bf10d41744dd302f17404caf4f4012fae29eb649ed61f6994",
+      "face_indices": [
+        294,
+        447,
+        184,
+        444,
+        376,
+        293,
+        442,
+        217,
+        166,
+        303,
+        293,
+        99,
+        26,
+        302,
+        212,
+        229,
+        99,
+        216,
+        289,
+        330,
+        45,
+        203,
+        184,
+        98,
+        149,
+        299,
+        289,
+        188,
+        70,
+        220,
+        179,
+        255,
+        220,
+        131,
+        335,
+        224,
+        300,
+        63,
+        340,
+        309,
+        432,
+        167,
+        291,
+        115,
+        363,
+        125,
+        301,
+        220,
+        99,
+        293,
+        251,
+        296,
+        298,
+        99,
+        185,
+        291,
+        438,
+        135,
+        266,
+        301,
+        339,
+        303,
+        221,
+        282,
+        359,
+        275,
+        184,
+        131,
+        130,
+        94,
+        162,
+        413,
+        135,
+        103,
+        89,
+        262,
+        220,
+        130,
+        221,
+        342,
+        98,
+        385,
+        452,
+        303,
+        290
+      ],
+      "per_component": {
+        "desk001_tabletop": {
+          "count": 49,
+          "face_axis_counts": {
+            "-x": 1,
+            "+x": 3,
+            "-y": 18,
+            "+y": 21,
+            "-z": 4,
+            "+z": 2
+          }
+        },
+        "desk001_vertical_support_negative_z": {
+          "count": 9,
+          "face_axis_counts": {
+            "-x": 2,
+            "+x": 3,
+            "-y": 0,
+            "+y": 0,
+            "-z": 3,
+            "+z": 1
+          }
+        },
+        "desk001_vertical_support_positive_z": {
+          "count": 10,
+          "face_axis_counts": {
+            "-x": 1,
+            "+x": 2,
+            "-y": 0,
+            "+y": 0,
+            "-z": 3,
+            "+z": 4
+          }
+        },
+        "desk001_bottom_foot_negative_z": {
+          "count": 10,
+          "face_axis_counts": {
+            "-x": 1,
+            "+x": 0,
+            "-y": 5,
+            "+y": 1,
+            "-z": 1,
+            "+z": 2
+          }
+        },
+        "desk001_bottom_foot_positive_z": {
+          "count": 7,
+          "face_axis_counts": {
+            "-x": 0,
+            "+x": 0,
+            "-y": 1,
+            "+y": 3,
+            "-z": 3,
+            "+z": 0
+          }
+        }
+      }
+    },
+    "semantic_limit": "Geometry only, not contact, force, load sharing or hand-only behavior"
+  },
+  "inputs_unchanged": true,
+  "fixed_chain_reference_equivalence_max_m": 4.041272810440265e-16,
+  "q_vs_full_laplacian_max_abs_m2": 1.0411586523484395e-10,
+  "q_min_eigenvalue_float64": 0.0020172951605494766,
+  "checked_frames": 21,
+  "checked_synthetic_cases": 168,
+  "q_float32_bytes": 1984056,
+  "reference_float32_rounding_max_m": 4.3966217234661966e-08,
+  "historical_replay_validation": {
+    "path": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTable/paired_reference_fresh12000_save2000_actor158_seed721_env2048/evaluation/model12000_seed721/representative_episode.npz",
+    "sha256": "de66050c0133bd411c0e25f1921248bd3453fb5375d3da055816cba9dc952033",
+    "frames": 687,
+    "max_abs_score_difference_m2": 3.055527289519411e-10,
+    "per_agent_mean_mse_m2": [
+      0.0028349969499331788,
+      0.003139141827024459
+    ],
+    "pair_mean_reward_sigma006": 0.47891323004084446,
+    "note": "Recorded replay FK comparison only; no policy or new physics rollout"
+  },
+  "artifact_path": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/interaction_mesh_100_v1.npz",
+  "artifact_sha256": "caa1f9bb47425254253b588112800a5a32000435027352ceb496d66d55decf3e"
+}

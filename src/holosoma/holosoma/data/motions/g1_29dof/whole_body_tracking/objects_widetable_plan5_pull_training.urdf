@@ -1,0 +1,97 @@
+<?xml version="1.0" ?>
+<robot name="widetable_plan5_pull_training">
+  <material name="widetable_pull_material">
+    <color rgba="0.7 0.8 0.9 0.7"/>
+  </material>
+  <link name="widetable_pull_link">
+    <!--
+      Formal Plan 5 Pull asset. This is the local-X/local-Z counterpart of
+      objects_widetable_plan5_training.urdf: the 1.4 m span and corresponding
+      leg offsets lie along local Z so two robots can pull from opposite
+      lateral sides of the demonstrated Pull motion. Mass, COM, material, and
+      total rotational inertia are preserved while Ixx and Izz are exchanged.
+    -->
+    <inertial>
+      <mass value="20.0"/>
+      <origin rpy="0 0 0" xyz="0 0.015111745244133 0"/>
+      <inertia
+        ixx="3.95048914424628"
+        ixy="0"
+        ixz="0"
+        iyy="4.36041519206568"
+        iyz="0"
+        izz="0.62774975216702"
+      />
+    </inertial>
+
+    <visual name="widetable_pull_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="0.5219528 0.04745 1.4"/>
+      </geometry>
+      <material name="widetable_pull_material"/>
+    </visual>
+    <collision name="widetable_pull_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="0.5219528 0.04745 1.4"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_pull_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.23525 -0.17835 -0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_pull_material"/>
+    </visual>
+    <collision name="widetable_pull_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.23525 -0.17835 -0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_pull_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.23525 -0.17835 0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_pull_material"/>
+    </visual>
+    <collision name="widetable_pull_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.23525 -0.17835 0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_pull_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.23525 -0.17835 -0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_pull_material"/>
+    </visual>
+    <collision name="widetable_pull_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.23525 -0.17835 -0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_pull_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.23525 -0.17835 0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_pull_material"/>
+    </visual>
+    <collision name="widetable_pull_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.23525 -0.17835 0.6742736"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>

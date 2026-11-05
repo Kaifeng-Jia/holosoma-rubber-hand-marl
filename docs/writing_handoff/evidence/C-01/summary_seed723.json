@@ -1,0 +1,74 @@
+{
+  "checkpoint": "/home/kevin/holosoma-core4d-base/logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/model_12000.pt",
+  "checkpoint_iteration": 12000,
+  "completion_rate": 1.0,
+  "episodes": [
+    {
+      "actual_table_displacement_m": 0.45967552065849304,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 0,
+      "object_position_rmse_m": 0.031754580560010445,
+      "reward_sum": 49.011289551854134,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 390
+    },
+    {
+      "actual_table_displacement_m": 0.4577079117298126,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 1,
+      "object_position_rmse_m": 0.036216715678106665,
+      "reward_sum": 48.803249552845955,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 390
+    },
+    {
+      "actual_table_displacement_m": 0.45336878299713135,
+      "bad_tracking": false,
+      "completed_reference": true,
+      "episode": 2,
+      "object_position_rmse_m": 0.034554720186298106,
+      "reward_sum": 48.697146050632,
+      "reward_sum_contract": "plan5_tracking_with_object_v1",
+      "steps": 390
+    }
+  ],
+  "evaluation_reward_contract": "plan5_tracking_with_object_v1",
+  "evaluation_reward_matches_training": true,
+  "evaluation_reward_note": "reward_sum uses the unchanged baseline reward and excludes interaction_mesh; shared Actor-only inference, physics and termination are unchanged",
+  "experiment": "chair021",
+  "experiment_contract": {
+    "experiment_id": "chair021",
+    "object_name": "chair021",
+    "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+    "physics_contract": {
+      "control_hz": 50,
+      "material_static_dynamic_restitution": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "object_collider_type": "convex_decomposition",
+      "object_mass_kg": 5.0,
+      "physics_hz": 200
+    },
+    "reference_fps": 50,
+    "reference_frames": 391,
+    "runtime_reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+    "source_pair_sha256": "1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b",
+    "training_promotion_sha256": "13f11fe557c959c1b8b2e3d7c56533b29dbe6755b0ae9264f27e98f1ea1ec3db"
+  },
+  "experiment_id": "chair021",
+  "inference": "shared_actor_only_critic_not_called",
+  "object_name": "chair021",
+  "object_urdf_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+  "observation_noise": false,
+  "representative_episode": 0,
+  "representative_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DChair/chair021_a1_fresh12000_save2000_actor158_seed721_env2048_20260910/evaluation/model12000_seed723/representative_episode.npz",
+  "runtime_reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+  "scenario": "core4d_paired_chair021_reference_tracking",
+  "seed": 723,
+  "training_reward_contract": "plan5_tracking_with_object_v1",
+  "training_reward_variant": "baseline"
+}

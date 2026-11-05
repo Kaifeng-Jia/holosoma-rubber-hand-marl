@@ -1,0 +1,644 @@
+{
+  "reference_frames": 687,
+  "fps": 50.0,
+  "reference_clearance": {
+    "above_1cm": {
+      "fraction_frames": 0.388646288209607,
+      "frames": 267,
+      "longest_run_samples": 267,
+      "longest_observed_span_s": 5.32
+    },
+    "above_2cm": {
+      "fraction_frames": 0.3522561863173217,
+      "frames": 242,
+      "longest_run_samples": 242,
+      "longest_observed_span_s": 4.82
+    }
+  },
+  "reference_lowest_point_max_m": 0.06420050108677855,
+  "geometry_definition": "Minimum world-z of 40 corners of the exact five collision boxes; ground z=0.",
+  "contact_definition": "Current physics sample, any rubber hand per agent, object-filtered normal-force magnitude >1 N; invalid initial sample excluded.",
+  "scope": "Five fixed-scene, deterministic Actor-only repeated episodes per checkpoint; no independent training seeds.",
+  "runs": {
+    "full_A": {
+      "evaluation_dir": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721",
+      "complete_count": 5,
+      "episode_count": 5,
+      "representative_episode": 1,
+      "episodes": [
+        {
+          "actual_table_displacement_m": 1.7841256856918335,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 0,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/episode_000.npz",
+          "object_height_abs_error_max_m": 0.05907374620437622,
+          "object_height_bias_m": -0.014774187813679724,
+          "object_height_rmse_m": 0.02178213349835189,
+          "object_position_rmse_m": 0.08359843690401925,
+          "reward_sum": 88.37179831415415,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "53ac1282c87bba2ede362d8cc4b049aad217b890986c253497ccd62aa90de794",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -6.473850759425304e-05,
+            0.008327906248604744
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 4.510462619166618,
+          "contact_fraction_by_agent": [
+            0.1965065502183406,
+            0.6695778748180495
+          ],
+          "both_agents_hand_contact_fraction": 0.10771470160116449,
+          "contact_fraction_by_hand": [
+            [
+              0.09606986899563319,
+              0.10189228529839883
+            ],
+            [
+              0.611353711790393,
+              0.4366812227074236
+            ]
+          ],
+          "max_hand_normal_force_n": 1581.017333984375
+        },
+        {
+          "actual_table_displacement_m": 1.715358853340149,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 1,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/episode_001.npz",
+          "object_height_abs_error_max_m": 0.059213489294052124,
+          "object_height_bias_m": -0.015578120990264538,
+          "object_height_rmse_m": 0.02320670366100257,
+          "object_position_rmse_m": 0.03717150612228333,
+          "reward_sum": 89.89967800676823,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "ec1ecc5341f751e1efbfa2e9bdee722214d399ae28b50ab47c3f669f47aefc0e",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -2.7128505904583378e-05,
+            0.0035705345968565227
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 4.120186556386616,
+          "contact_fraction_by_agent": [
+            0.20408163265306123,
+            0.673469387755102
+          ],
+          "both_agents_hand_contact_fraction": 0.11078717201166181,
+          "contact_fraction_by_hand": [
+            [
+              0.09329446064139942,
+              0.11661807580174927
+            ],
+            [
+              0.6545189504373178,
+              0.40816326530612246
+            ]
+          ],
+          "max_hand_normal_force_n": 599.435302734375
+        },
+        {
+          "actual_table_displacement_m": 1.7474817037582397,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 2,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/episode_002.npz",
+          "object_height_abs_error_max_m": 0.056367963552474976,
+          "object_height_bias_m": -0.014899253454791407,
+          "object_height_rmse_m": 0.021938012144652092,
+          "object_position_rmse_m": 0.05470275861047688,
+          "reward_sum": 89.36113435029984,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "fb5b3a872ed12de12509d9cd354d3c25504e728a8e4d4afacae40eaf9aad40d1",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -1.8859973710094735e-05,
+            0.008052632604815813
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 4.438359016514691,
+          "contact_fraction_by_agent": [
+            0.20116618075801748,
+            0.6865889212827988
+          ],
+          "both_agents_hand_contact_fraction": 0.11224489795918367,
+          "contact_fraction_by_hand": [
+            [
+              0.09475218658892129,
+              0.11661807580174927
+            ],
+            [
+              0.6559766763848397,
+              0.3877551020408163
+            ]
+          ],
+          "max_hand_normal_force_n": 571.0938720703125
+        },
+        {
+          "actual_table_displacement_m": 1.7495030164718628,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 3,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/episode_003.npz",
+          "object_height_abs_error_max_m": 0.05423390865325928,
+          "object_height_bias_m": -0.014494735427645443,
+          "object_height_rmse_m": 0.02138694373335824,
+          "object_position_rmse_m": 0.051963306150705775,
+          "reward_sum": 89.52315617352724,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "35cbe4bd302c23cef16ba23d607ee675cd2f4feb59a47d28256c6c6985d76739",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -1.820726154572183e-05,
+            0.005191316358200804
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 4.526691118338811,
+          "contact_fraction_by_agent": [
+            0.1880466472303207,
+            0.6895043731778425
+          ],
+          "both_agents_hand_contact_fraction": 0.10058309037900874,
+          "contact_fraction_by_hand": [
+            [
+              0.09620991253644315,
+              0.09329446064139942
+            ],
+            [
+              0.6472303206997084,
+              0.4329446064139942
+            ]
+          ],
+          "max_hand_normal_force_n": 105.09577941894531
+        },
+        {
+          "actual_table_displacement_m": 1.747021198272705,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 4,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_5kg_fresh12000_env2048_seed721_cloud_20260919/evaluation_20260920_seed721/episode_004.npz",
+          "object_height_abs_error_max_m": 0.059328675270080566,
+          "object_height_bias_m": -0.015260204260699788,
+          "object_height_rmse_m": 0.022719193472245647,
+          "object_position_rmse_m": 0.05090615604732474,
+          "reward_sum": 89.59480369091034,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "e75cd549b59545166c7a2fd23937791ff398f10a94690eab0e0b62f0237a09cc",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -1.7947164985987474e-05,
+            0.0103162168781602
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.001455604075691412,
+              "frames": 1,
+              "longest_run_samples": 1,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.003745318352059925,
+          "orientation_rmse_deg": 4.262426977812053,
+          "contact_fraction_by_agent": [
+            0.20408163265306123,
+            0.6793002915451894
+          ],
+          "both_agents_hand_contact_fraction": 0.11078717201166181,
+          "contact_fraction_by_hand": [
+            [
+              0.09329446064139942,
+              0.11370262390670553
+            ],
+            [
+              0.6399416909620991,
+              0.4110787172011662
+            ]
+          ],
+          "max_hand_normal_force_n": 77.14170837402344
+        }
+      ],
+      "all_observed": {
+        "count": 5,
+        "mean_position_rmse_m": 0.055668432766962,
+        "mean_height_rmse_m": 0.022206597301922086,
+        "mean_clearance_above_1cm_fraction": 0.0002911208151382824,
+        "mean_longest_lift_s": 0.0,
+        "mean_contact_fraction_by_agent": [
+          0.19877652870256027,
+          0.6796881697157964
+        ]
+      },
+      "complete_only": {
+        "count": 5,
+        "mean_position_rmse_m": 0.055668432766962,
+        "mean_height_rmse_m": 0.022206597301922086,
+        "mean_clearance_above_1cm_fraction": 0.0002911208151382824,
+        "mean_longest_lift_s": 0.0,
+        "mean_contact_fraction_by_agent": [
+          0.19877652870256027,
+          0.6796881697157964
+        ]
+      }
+    },
+    "both_removed": {
+      "evaluation_dir": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721",
+      "complete_count": 3,
+      "episode_count": 5,
+      "representative_episode": 3,
+      "episodes": [
+        {
+          "actual_table_displacement_m": 0.4316308796405792,
+          "bad_tracking": true,
+          "completed_reference": false,
+          "episode": 0,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/episode_000.npz",
+          "object_height_abs_error_max_m": 0.06620994210243225,
+          "object_height_bias_m": -0.021571595889819068,
+          "object_height_rmse_m": 0.03160976209422975,
+          "object_position_rmse_m": 0.06894150950342688,
+          "reward_sum": 42.60626793652773,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 328,
+          "replay_sha256": "02d7737523add527a17dab9738bd0cf67aee78a0a734c9a8863ff97c629eedfe",
+          "sample_count": 329,
+          "phase_start": 1,
+          "phase_end": 328,
+          "scope": "failed_prefix",
+          "lowest_point_min_max_m": [
+            -1.8429421767884868e-05,
+            0.0011348437810626
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 135,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 2.9617918518108497,
+          "contact_fraction_by_agent": [
+            0.00911854103343465,
+            0.7720364741641338
+          ],
+          "both_agents_hand_contact_fraction": 0.00911854103343465,
+          "contact_fraction_by_hand": [
+            [
+              0.0,
+              0.00911854103343465
+            ],
+            [
+              0.7598784194528876,
+              0.2978723404255319
+            ]
+          ],
+          "max_hand_normal_force_n": 93.98490905761719
+        },
+        {
+          "actual_table_displacement_m": 1.7243671417236328,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 1,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/episode_001.npz",
+          "object_height_abs_error_max_m": 0.06833794713020325,
+          "object_height_bias_m": -0.023548485844069347,
+          "object_height_rmse_m": 0.035623454578111675,
+          "object_position_rmse_m": 0.14432677018190088,
+          "reward_sum": 87.98137149214745,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "6e1f859828a33d6854a5cddd38083afc5102132a6023016826e43b4d0fafb867",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -3.379447832707605e-05,
+            0.0035705345968565227
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 2.4740938224477516,
+          "contact_fraction_by_agent": [
+            0.0014577259475218659,
+            0.826530612244898
+          ],
+          "both_agents_hand_contact_fraction": 0.0014577259475218659,
+          "contact_fraction_by_hand": [
+            [
+              0.0014577259475218659,
+              0.0
+            ],
+            [
+              0.6064139941690962,
+              0.8002915451895044
+            ]
+          ],
+          "max_hand_normal_force_n": 49.025352478027344
+        },
+        {
+          "actual_table_displacement_m": 0.38776275515556335,
+          "bad_tracking": true,
+          "completed_reference": false,
+          "episode": 2,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/episode_002.npz",
+          "object_height_abs_error_max_m": 0.06630760431289673,
+          "object_height_bias_m": -0.022470945045584088,
+          "object_height_rmse_m": 0.03302076226120109,
+          "object_position_rmse_m": 0.06693652778791849,
+          "reward_sum": 41.64447172731161,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 320,
+          "replay_sha256": "a5193ab4f1d61ddfc5e4ada59fbb50a22ffa5f647fd83e1b15f37ecd2054d68d",
+          "sample_count": 321,
+          "phase_start": 1,
+          "phase_end": 320,
+          "scope": "failed_prefix",
+          "lowest_point_min_max_m": [
+            -1.2599426740034225e-05,
+            0.0035705345968565227
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 127,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 2.8155147856238125,
+          "contact_fraction_by_agent": [
+            0.00625,
+            0.778125
+          ],
+          "both_agents_hand_contact_fraction": 0.00625,
+          "contact_fraction_by_hand": [
+            [
+              0.0,
+              0.00625
+            ],
+            [
+              0.775,
+              0.3125
+            ]
+          ],
+          "max_hand_normal_force_n": 43.30667495727539
+        },
+        {
+          "actual_table_displacement_m": 1.6679236888885498,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 3,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/episode_003.npz",
+          "object_height_abs_error_max_m": 0.06798538565635681,
+          "object_height_bias_m": -0.021245733055311865,
+          "object_height_rmse_m": 0.032403048225367125,
+          "object_position_rmse_m": 0.07294994298970346,
+          "reward_sum": 90.11896480619907,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "dc8f07d50c48a5b3138fdebccf239e0ae667b609a7d031dc71ccd62499e22a02",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -4.0277183611658884e-05,
+            0.0041521487840736615
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 3.25518640600126,
+          "contact_fraction_by_agent": [
+            0.011661807580174927,
+            0.8192419825072886
+          ],
+          "both_agents_hand_contact_fraction": 0.011661807580174927,
+          "contact_fraction_by_hand": [
+            [
+              0.008746355685131196,
+              0.0029154518950437317
+            ],
+            [
+              0.6909620991253644,
+              0.5787172011661808
+            ]
+          ],
+          "max_hand_normal_force_n": 543.6419677734375
+        },
+        {
+          "actual_table_displacement_m": 1.6866108179092407,
+          "bad_tracking": false,
+          "completed_reference": true,
+          "episode": 4,
+          "episode_viser": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/evaluation_20260920_seed721/episode_004.npz",
+          "object_height_abs_error_max_m": 0.06764650344848633,
+          "object_height_bias_m": -0.023070904278512258,
+          "object_height_rmse_m": 0.035175505496127496,
+          "object_position_rmse_m": 0.09022220918466019,
+          "reward_sum": 89.0609328225255,
+          "reward_sum_contract": "plan5_tracking_with_object_v1",
+          "steps": 686,
+          "replay_sha256": "87b07d06c8e18a02c16255e4eac33e3303ff4d499bb3bb201f30a8889117ca43",
+          "sample_count": 687,
+          "phase_start": 1,
+          "phase_end": 686,
+          "scope": "full_reference",
+          "lowest_point_min_max_m": [
+            -4.979958234857529e-05,
+            0.003882289369048997
+          ],
+          "clearance": {
+            "above_1cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            },
+            "above_2cm": {
+              "fraction_frames": 0.0,
+              "frames": 0,
+              "longest_run_samples": 0,
+              "longest_observed_span_s": 0.0
+            }
+          },
+          "matched_reference_lift_samples": 267,
+          "clearance_during_reference_lift_fraction": 0.0,
+          "orientation_rmse_deg": 4.159166513236141,
+          "contact_fraction_by_agent": [
+            0.014577259475218658,
+            0.7886297376093294
+          ],
+          "both_agents_hand_contact_fraction": 0.014577259475218658,
+          "contact_fraction_by_hand": [
+            [
+              0.011661807580174927,
+              0.0029154518950437317
+            ],
+            [
+              0.7871720116618076,
+              0.43002915451895046
+            ]
+          ],
+          "max_hand_normal_force_n": 704.5006103515625
+        }
+      ],
+      "all_observed": {
+        "count": 5,
+        "mean_position_rmse_m": 0.08867539192952198,
+        "mean_height_rmse_m": 0.03356650653100743,
+        "mean_clearance_above_1cm_fraction": 0.0,
+        "mean_longest_lift_s": 0.0,
+        "mean_contact_fraction_by_agent": [
+          0.00861306680727002,
+          0.79691276130513
+        ]
+      },
+      "complete_only": {
+        "count": 3,
+        "mean_position_rmse_m": 0.10249964078542151,
+        "mean_height_rmse_m": 0.0344006694332021,
+        "mean_clearance_above_1cm_fraction": 0.0,
+        "mean_longest_lift_s": 0.0,
+        "mean_contact_fraction_by_agent": [
+          0.00923226433430515,
+          0.8114674441205053
+        ]
+      }
+    }
+  }
+}

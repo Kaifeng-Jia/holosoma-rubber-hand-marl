@@ -1,0 +1,95 @@
+<?xml version="1.0" ?>
+<robot name="widetable_geometry_preflight">
+  <material name="widetable_material">
+    <color rgba="0.7 0.8 0.9 0.7"/>
+  </material>
+  <link name="widetable_link">
+    <!--
+      Geometry-preflight inertia only.  The 1 kg mass, COM, and inertia below
+      model the five solid boxes at a uniform density.  They must be replaced
+      by the Stage-4 calibrated physics values before training or reporting.
+    -->
+    <inertial>
+      <mass value="1.0"/>
+      <origin rpy="0 0 0" xyz="0 0.015111745244133 0"/>
+      <inertia
+        ixx="0.031387487608351"
+        ixy="0"
+        ixz="0"
+        iyy="0.218020759603284"
+        iyz="0"
+        izz="0.197524457212314"
+      />
+    </inertial>
+
+    <visual name="widetable_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="1.4 0.04745 0.5219528"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_tabletop">
+      <origin rpy="0 0 0" xyz="0 0.036275 0"/>
+      <geometry>
+        <box size="1.4 0.04745 0.5219528"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_neg_x_neg_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_neg_x_pos_z">
+      <origin rpy="0 0 0" xyz="-0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_pos_x_neg_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 -0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+
+    <visual name="widetable_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+      <material name="widetable_material"/>
+    </visual>
+    <collision name="widetable_leg_pos_x_pos_z">
+      <origin rpy="0 0 0" xyz="0.6742736 -0.17835 0.23525"/>
+      <geometry>
+        <box size="0.05 0.3793 0.05"/>
+      </geometry>
+    </collision>
+  </link>
+</robot>
