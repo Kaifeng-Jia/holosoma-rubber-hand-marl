@@ -15,14 +15,17 @@ sys.path.insert(0,str(ROOT/'src/holosoma_retargeting'))
 p=argparse.ArgumentParser(description=__doc__)
 p.add_argument('--case',choices=('push','pull','kick','chair','bucket','table'),required=True)
 p.add_argument('--push-placement-proof',type=Path,default=None)
-p.add_argument('--checkpoint',type=Path,required=True)
+p.add_argument('--checkpoint',type=Path,default=None)
 p.add_argument('--states',type=Path,required=True)
 p.add_argument('--model-id',required=True)
 p.add_argument('--output-dir',type=Path,required=True)
 p.add_argument('--limit',type=int,default=0)
 p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
+p.add_argument('--controller',choices=('policy','sonic'),default='policy',help='System1: policy (paper actor) or sonic (scheme A)')
+p.add_argument('--device',default='cuda:0')
 a=p.parse_args()
+if a.controller=='policy' and a.checkpoint is None:p.error('--checkpoint is required for --controller policy')
 if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
 record=json.loads(a.states.read_text());states=record['states'][:a.limit or None]
 if record['case']!=a.case:raise ValueError('Initial-state case mismatch')
@@ -59,6 +62,10 @@ else:
 config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observation,
                training=replace(config.training,num_envs=1,seed=241003,headless=True))
 config,placement_provenance=configure_push_placement(config,a.push_placement_proof,skill=a.case,root=ROOT)
+if a.controller=='sonic':
+    sys.path.insert(0,str(ROOT))
+    from system1.scheme_a import with_sonic_pd
+    config=with_sonic_pd(config)
 app=init_sim_imports(config)
 import torch
 from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
@@ -73,7 +80,12 @@ def main():
         out=a.output_dir.resolve()
         if out.exists():raise FileExistsError(out)
         out.mkdir(parents=True)
-        checkpoint=a.checkpoint.resolve();state=torch.load(checkpoint,map_location='cuda:0',weights_only=False)
+        dev=a.device
+        if a.controller=='sonic':
+            from system1 import sonic_controller as _sc
+            checkpoint=_sc.DEFAULT_CHECKPOINT;state={'iter':None,'plan5_skill':a.case,'placement_provenance':placement_provenance}
+        else:
+            checkpoint=a.checkpoint.resolve();state=torch.load(checkpoint,map_location=dev,weights_only=False)
         ablation=state.get('v3_ablation')
         if ablation is not None:
             from holosoma.agents.mappo.v3_plan5_ablation import ablation_contract
@@ -84,25 +96,32 @@ def main():
             raise ValueError('Checkpoint and evaluation placement differ')
         if state.get('plan5_skill',a.case) != a.case:
             raise ValueError('Checkpoint skill differs from evaluation case')
-        if experiment:
+        if experiment and a.controller=='policy':
             validate_core4d_smalltable_checkpoint(state,experiment_contract=experiment.checkpoint_contract)
+        if experiment:
             for path,expected in ((experiment.runtime_reference_file,experiment.runtime_reference_sha256),
                                   (experiment.object_urdf_file,experiment.object_urdf_sha256),
                                   (experiment.training_promotion_file,experiment.training_promotion_sha256)):
                 if sha(ROOT/'src/holosoma'/path)!=expected:raise ValueError('Asset hash mismatch: '+path)
-        else:
+        elif a.controller=='policy':
             c=state['plan5_mappo']
             if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=[2,158,527,29]:raise ValueError('Plan5 shape contract')
-        models=initialize_core4d_smalltable_model_bundle(config.algo.config,device='cuda:0')
-        models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
-        models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
-        models.actor.eval();models.actor_obs_normalizer.eval()
-        # A forbidden Critic call fails immediately rather than silently scoring with it.
-        def forbidden(*args,**kwargs):raise RuntimeError('Critic invoked during actor-only evaluation')
-        models.critic.evaluate=forbidden
+        models=None
+        if a.controller=='policy':
+            models=initialize_core4d_smalltable_model_bundle(config.algo.config,device=dev)
+            models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
+            models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
+            models.actor.eval();models.actor_obs_normalizer.eval()
+            # A forbidden Critic call fails immediately rather than silently scoring with it.
+            def forbidden(*args,**kwargs):raise RuntimeError('Critic invoked during actor-only evaluation')
+            models.critic.evaluate=forbidden
         torch.manual_seed(241003)
-        env=get_class(config.env_class)(get_tyro_env_config(config),device='cuda:0')
+        env=get_class(config.env_class)(get_tyro_env_config(config),device=dev)
         env.set_is_evaluating();command=env.command_manager.get_state('paired_motion_command')
+        driver=None
+        if a.controller=='sonic':
+            from system1.scheme_a import SonicDualDriver
+            driver=SonicDualDriver(env,dev)
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         ids=torch.tensor([0],device=env.device)
         n=int(command.reference.num_frames)
@@ -124,11 +143,14 @@ def main():
             sensor=getattr(env.simulator,'object_hand_contact_sensor',None)
             if sensor is not None:result['hand_object_normal_force_w']=array(sensor.data.force_matrix_w[:,0].reshape(-1,2,2,3))
             return result
-        captured=None
+        captured=None;captured_sonic=None
         original_reward=env._compute_reward
         def capturing_reward():
-            nonlocal captured
+            nonlocal captured,captured_sonic
             original_reward();captured=snapshot()
+            if driver is not None:
+                fr=min(int(env.episode_length_buf[0].item()),n-1)
+                captured_sonic={k:v[0].detach().cpu().numpy().copy() for k,v in driver.tracking(command,fr).items()}
         env._compute_reward=capturing_reward
         physics={k:v.detach().cpu().tolist() for k,v in dict(mass=env.simulator._object.root_physx_view.get_masses(),
                    material=env.simulator._object.root_physx_view.get_material_properties()).items()}
@@ -142,6 +164,12 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        if driver is not None:
+            manifest.update(controller='sonic',inference='sonic_release_g1_encoder_action_mean',checkpoint_sha256=sha(checkpoint),
+                            sonic_spec=str(_sc.DEFAULT_SPEC),sonic_spec_sha256=sha(_sc.DEFAULT_SPEC),
+                            sonic_pd=dict(hip_pitch_kp=float(env.p_gains.reshape(-1)[0].item()),p_gains=env.p_gains.reshape(-1).tolist(),
+                                          d_gains=env.d_gains.reshape(-1).tolist(),action_scales=env.action_scales.reshape(-1).tolist()),
+                            sonic_fall_rule='|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)')
         write_json(out/'run_manifest.json',manifest)
         results=[]
         for init in states:
@@ -154,12 +182,17 @@ def main():
             actual=env.simulator.agent_root_states[0].detach().cpu().numpy()
             if not np.isfinite(actual).all() or not np.allclose(actual,transformed,atol=1e-5):raise ValueError('Perturbation not applied to actual reset state')
             env._compute_observations();env._clip_observations();observations=env.obs_buf_dict
-            start=snapshot();frames=[start];terms={};reward=0.;captured=None
+            start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[]
+            if driver is not None:driver.reset()
             for step in range(1,n+1):
-                actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
+                if driver is not None:
+                    actions,_=driver.actions(command)
+                else:
+                    actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
                 observations,rewards,dones,extras=env.step({'actions':actions})
                 if captured is None:raise RuntimeError('Pre-reset state capture missing')
                 frames.append(captured);reward+=float(rewards[0].item())
+                if driver is not None:sonic_frames.append(captured_sonic)
                 terms={k:bool(v[0].item()) for k,v in extras['termination_terms'].items()}
                 if bool(dones[0].item()):break
             channels={k:np.stack([f[k] for f in frames]) for k in start}
@@ -172,6 +205,13 @@ def main():
                        actual_roots=actual.tolist(),actual_initial_state={k:v.tolist() for k,v in start.items()},
                        valid=True,validity_rule='finite states; requested XY/yaw applied; root heights and joint pose unchanged; no outcome filtering'))
             np.savez_compressed(out/(init['state_id']+'.trajectory.npz'),**channels)
+            if driver is not None:
+                sch={k:np.stack([f[k] for f in sonic_frames]) for k in sonic_frames[0]}
+                np.savez_compressed(out/(init['state_id']+'.sonic.npz'),**sch)
+                fall=sch['fall']
+                result['sonic_mpjpe_mm_per_robot']=sch['mpjpe_mm'].mean(axis=0).tolist()
+                result['sonic_fall_step_per_robot']=[int(np.argmax(fall[:,r]))+1 if fall[:,r].any() else None for r in range(fall.shape[1])]
+                result['sonic_fell_any']=bool(fall.any())
             result['trajectory']=str(out/(init['state_id']+'.trajectory.npz'))
             if init['kind']=='nominal':
                 save_core4d_smalltable_viser(out/'nominal_viser.npz',channels,metadata=dict(manifest,fps=int(command.reference.fps),result=result,

@@ -1,0 +1,243 @@
+{
+  "status": "cpu_reference_preflight_passed_training_not_started",
+  "assets": [
+    {
+      "path": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+      "exists": true,
+      "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+      "manifest_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207"
+    },
+    {
+      "path": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_largetable.urdf",
+      "exists": true,
+      "sha256": "7e69319366888310890e1accac8fd137bb9cbd85ad04a922e20e97cade3109e2",
+      "manifest_sha256": "7e69319366888310890e1accac8fd137bb9cbd85ad04a922e20e97cade3109e2"
+    },
+    {
+      "path": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+      "exists": true,
+      "sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a",
+      "manifest_sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a"
+    },
+    {
+      "path": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+      "exists": true,
+      "sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "manifest_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+    }
+  ],
+  "selection": {
+    "path": "/home/kevin/holosoma-core4d-base/logs/ReferenceGeometry/reference_geometry_round2_20261017/push/selection.json",
+    "exists": true,
+    "sha256": "262075b5e9a0610e15e01b473dc8a0f22f48567941cb98880de05681bfdc2966"
+  },
+  "original_diagnostic_status": "diagnostic_only",
+  "source_width_m": 0.5219528,
+  "target_axis_length_m": 1.4,
+  "role_parameters": [
+    {
+      "id": "role0/widetable_tabletop/axes03",
+      "parity": 1,
+      "status": "solved",
+      "Q": [
+        [
+          1.0,
+          -3.5970018873128474e-20,
+          -1.100394207507949e-18
+        ],
+        [
+          3.597001887312833e-20,
+          1.0000000000000002,
+          -1.4256658943708628e-16
+        ],
+        [
+          1.100394207507949e-18,
+          -1.5601070304242726e-16,
+          1.0000000000000002
+        ]
+      ],
+      "c": [
+        -0.43902359999999996,
+        -6.938893903907228e-18,
+        6.938893903907228e-18
+      ],
+      "singular_values": [
+        0.06810868135696,
+        0.06808440402342493,
+        0.0005534321951632504
+      ],
+      "determinant": 1.0000000000000004,
+      "weighted_rmse_m": 6.613232976927951e-17,
+      "inverse_error": 1.1102230246251565e-16
+    },
+    {
+      "id": "role1/widetable_tabletop/axes03",
+      "parity": 1,
+      "status": "solved",
+      "Q": [
+        [
+          1.0,
+          -1.2786326052666904e-18,
+          6.894299079550981e-19
+        ],
+        [
+          1.2786326052666906e-18,
+          1.0000000000000002,
+          3.920037058409762e-16
+        ],
+        [
+          -6.894299079550979e-19,
+          1.7564452371330284e-16,
+          1.0000000000000002
+        ]
+      ],
+      "c": [
+        0.4390235999999999,
+        -6.938893903907228e-18,
+        -6.071532165918825e-18
+      ],
+      "singular_values": [
+        0.06810868135695998,
+        0.06808440402342493,
+        0.000553432195163253
+      ],
+      "determinant": 1.0000000000000004,
+      "weighted_rmse_m": 1.238150793236377e-16,
+      "inverse_error": 1.8041124150158794e-16
+    }
+  ],
+  "lateral_spacing_m": 0.8780471999999999,
+  "hooks": {
+    "setup_terms": {
+      "lateral_spacing_m": 0.8780471999999999,
+      "paired_reference_file": null,
+      "full_phase_cycle_verified": true,
+      "reset_to_zero_verified": true
+    },
+    "reset_terms": {
+      "lateral_spacing_m": 0.8780471999999999,
+      "paired_reference_file": null,
+      "full_phase_cycle_verified": true,
+      "reset_to_zero_verified": true
+    },
+    "step_terms": {
+      "lateral_spacing_m": 0.8780471999999999,
+      "paired_reference_file": null,
+      "full_phase_cycle_verified": true,
+      "reset_to_zero_verified": true
+    }
+  },
+  "differences": {
+    "root_position_m": {
+      "max_abs": 7.228175524787162e-08,
+      "rms": 1.9872499770585055e-08
+    },
+    "root_rotation": {
+      "max_rad": 8.583680560770075e-08,
+      "rms_rad": 1.9248875213715372e-08
+    },
+    "joint_position_rad": {
+      "max_abs": 0.0,
+      "rms": 0.0
+    },
+    "object_position_m": {
+      "max_abs": 0.0,
+      "rms": 0.0
+    },
+    "object_rotation": {
+      "max_rad": 0.0,
+      "rms_rad": 0.0
+    }
+  },
+  "comparison_tolerance_m_rad": 2e-06,
+  "tolerance_reason": "Original loader uses float32; offline geometry uses float64. Rotation error normalizes quaternions.",
+  "invariant_channels_bitwise_equal": {
+    "agent_joint_pos": true,
+    "agent_joint_vel": true,
+    "agent_body_quat_w": true,
+    "agent_body_ang_vel_w": true,
+    "object_pos_w": true,
+    "object_quat_w": true,
+    "object_lin_vel_w": true
+  },
+  "only_changed_channels": [
+    "agent_body_pos_w",
+    "agent_body_lin_vel_w"
+  ],
+  "body_velocity_reason": "Unchanged original torch.gradient(offset), not new runtime velocities",
+  "loader_output": {
+    "path": "/home/kevin/holosoma-core4d-base/paper_handoff_exports/EXPERIMENTS_R2_20261024_CPU_v2/checks/push_registered_loader_channels.npz",
+    "exists": true,
+    "sha256": "a810913a69ab48b510c9aa8cce6381c73c7da2210abd7f898525f4fdc28aaeec"
+  },
+  "offline_runtime_crosscheck": {
+    "path": "/home/kevin/holosoma-core4d-base/logs/ReferenceGeometry/reference_geometry_round2_20261017/push/new_runtime.npz",
+    "exists": true,
+    "sha256": "cffbbfd9f8fee3ea7b8959db52492c9719dfd9ff5369eeaa065d7ff78460d709"
+  },
+  "offline_runtime_used_for_training": false,
+  "source_checkpoint": {
+    "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt",
+    "exists": true,
+    "sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+  },
+  "stages": [
+    {
+      "evidence": {
+        "path": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/training_evidence/Push-livePD_seed722/stage0_run_config.json",
+        "exists": true,
+        "sha256": "79af3861d0f79af5be33125b2fbcf2b88663c720c42fabd09a352941e95141c3"
+      },
+      "start": 0,
+      "count": 50,
+      "critic_only": true,
+      "actor_lr": 1e-05,
+      "critic_lr": 0.001,
+      "source_checkpoint_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+    },
+    {
+      "evidence": {
+        "path": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/training_evidence/Push-livePD_seed722/stage1_run_config.json",
+        "exists": true,
+        "sha256": "a67219518c6e92808b3972c447bfc381e95b5defe0b6a42cbd99635b215ff764"
+      },
+      "start": 50,
+      "count": 8000,
+      "critic_only": false,
+      "actor_lr": 1e-05,
+      "critic_lr": 0.001,
+      "source_checkpoint_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+    },
+    {
+      "evidence": {
+        "path": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/training_evidence/Push-livePD_seed722/stage2_run_config.json",
+        "exists": true,
+        "sha256": "ef4b0ba1d1a5797871ad6efe9ec26d7022e177e4abc2432b4e54851cdab651ad"
+      },
+      "start": 8050,
+      "count": 5000,
+      "critic_only": false,
+      "actor_lr": 1e-05,
+      "critic_lr": 0.001,
+      "source_checkpoint_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+    }
+  ],
+  "actor_updates": 13000,
+  "critic_updates": 13050,
+  "mass_kg": 20,
+  "num_envs": 2048,
+  "steps_per_env": 24,
+  "seeds": [
+    721,
+    722,
+    723
+  ],
+  "paired_states": {
+    "path": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/push_states.json",
+    "exists": true,
+    "sha256": "1799ea1eec1a3ff097d46e08e6492694d6455490ccf9f2de26586e079fef895d"
+  },
+  "actual_training_command": null,
+  "command_missing_reason": "Awaiting cloud GPU availability; launcher not started",
+  "diagnostic_note": "Original source-relative foot drift failure retained. No IK, reward or tolerance repair."
+}
