@@ -27,7 +27,9 @@
 ## 隔离（最重要）
 
 - **只在本目录写代码和输出。** 本目录是新克隆的 `system1-sonic` 分支。
-  - 运行输出放 `logs_system1/`，返包放 `exports_system1/`，两者都不进 git。
+  - 运行输出放 `logs_system1/`，不进 git。
+  - 返包里的小文件放 `results_system1/<任务号>/`，提交并 push，云端 Claude 直接从 GitHub 读。小文件包括 README_CN.md、CSV、配置、diff、SHA256SUMS，单个文件不超过 5 MB。
+  - 视频和 checkpoint 只留本地 `exports_system1/`，不进 git。
 - **以下目录只读：**
   - `/home/kevin/holosoma-core4d-base`
   - `/home/kevin/holosoma-rubber-hand-marl`
@@ -40,12 +42,13 @@
   - 需要在 holosoma 仿真里加载 SONIC 时，用 `conda create --clone hssim -n hssim_s1` 复制一份，只在副本里装依赖。
 - **不碰不是你启动的进程：** 不 kill、不 renice。开训前先看 `nvidia-smi`；需要和正在跑的训练共用 GPU 时，先回报。
 - **不删除任何文件。** 确实需要清理的，移到本目录 `_to_delete/`，并在汇报里列出。
-- **不开新的付费云资源、不续租。** 需要时先问 Kevin。
+- **GPU：** 本轮所需的 GPU 由 Kevin 提供，用 Kevin 指定的机器。不自己开新的付费云资源，也不自己续租。
 
 ## Git
 
-- 只提交到 `system1-sonic` 分支。
+- 只提交和 push 到 `system1-sonic` 分支。
   - 不 push 到 `core4d-base`、`main` 或其他分支。
+  - 开工前先 `git pull`，拿到云端新发的任务书。
   - 不 force-push，不改写历史。
 - 不提交大文件：checkpoint、视频、SONIC 权重、仿真缓存。
 - 每完成一个能用的阶段提交一次，提交信息写清楚做了什么。
