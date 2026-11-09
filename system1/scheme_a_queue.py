@@ -66,7 +66,9 @@ def main():
                 raise RuntimeError(f"frozen state hash mismatch: {states}")
             label = f"{case}_pm{lvl}"
             ex = out / "ops" / f"{label}.exit.json"
-            if ex.exists() and json.loads(ex.read_text()).get("returncode") == 0:
+            summ0 = out / label / "summary.json"
+            if ex.exists() and (json.loads(ex.read_text()).get("completed")
+                                or (summ0.exists() and json.loads(summ0.read_text()).get("complete"))):
                 continue
             argv = [PY, "-B", "scripts/evaluate_paper_supplement.py", "--case", case, "--controller", "sonic",
                     "--device", a.device, "--states", str(states), "--model-id", f"SchemeA_{label}",
@@ -82,9 +84,14 @@ def main():
             (out / "ops" / f"{label}.launch.json").write_text(json.dumps(launch, indent=1))
             with (out / "ops" / f"{label}.stdout.log").open("w") as log:
                 rc = subprocess.run(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=env).returncode
-            ex.write_text(json.dumps(dict(label=label, returncode=rc, ended=datetime.now(NY).isoformat(timespec="seconds")), indent=1))
-            print(f"{label} rc={rc}", flush=True)
-            rc_all = rc_all or rc
+            # The evaluator hard-exits with 0 from close_simulation_app even after an exception,
+            # so success is a complete summary.json, not the return code alone.
+            summ = out / label / "summary.json"
+            completed = rc == 0 and summ.exists() and bool(json.loads(summ.read_text()).get("complete"))
+            ex.write_text(json.dumps(dict(label=label, returncode=rc, completed=completed,
+                                          ended=datetime.now(NY).isoformat(timespec="seconds")), indent=1))
+            print(f"{label} rc={rc} completed={completed}", flush=True)
+            rc_all = rc_all or (0 if completed else 1)
     return rc_all
 
 
