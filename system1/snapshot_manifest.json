@@ -1,0 +1,576 @@
+{
+ "format": "system1_snapshot_manifest_v1",
+ "snapshot_time": "2026-11-09T15:53:26-0500",
+ "source_worktree": "/home/kevin/holosoma-core4d-base",
+ "source_branch": "core4d-base",
+ "source_head": "7df11c92b07c204fc0ca86654669298ec24184ce",
+ "source_head_vs_branch_base_6acb096": "code identical; 6acb096 differs from source HEAD only in docs/experiments/ubuntu_push_placement_more_seeds_20261107_zh.md",
+ "patch": {
+  "command": "git diff HEAD --binary",
+  "sha256": "e1f2f19e136553fddc85db96c2136bfcc1d87cfa84c2714b92bcce3f002be1c1",
+  "files": 8
+ },
+ "selection_rule": "modified tracked files: whole `git diff HEAD` applied; untracked: files under scripts/, src/ (excluding src/holosoma/holosoma/data/), tests/ with suffix .py/.yaml/.yml/.toml/.json/.sh/.cfg",
+ "files": [
+  {
+   "path": "MULTI_AGENT_EMERGENCE_ROADMAP.md",
+   "source": "/home/kevin/holosoma-core4d-base/MULTI_AGENT_EMERGENCE_ROADMAP.md",
+   "kind": "modified_tracked",
+   "source_sha256": "06904d840cf44c8a5ed8c571225c035f942871acff0b2c2c095cac7e656293fb",
+   "branch_sha256": "06904d840cf44c8a5ed8c571225c035f942871acff0b2c2c095cac7e656293fb"
+  },
+  {
+   "path": "docs/writing_handoff/README.md",
+   "source": "/home/kevin/holosoma-core4d-base/docs/writing_handoff/README.md",
+   "kind": "modified_tracked",
+   "source_sha256": "8afae6a33ddde7bbf3b853e8b784ad4b4a25d1ad316ff3bcd41f552f5aad3b7c",
+   "branch_sha256": "8afae6a33ddde7bbf3b853e8b784ad4b4a25d1ad316ff3bcd41f552f5aad3b7c"
+  },
+  {
+   "path": "scripts/export_recorded_demo_media.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/export_recorded_demo_media.py",
+   "kind": "modified_tracked",
+   "source_sha256": "658ddd8002320ba2392c4fa5b861385f2c7c15ab4b4b8fb054b13bb4f4bb069e",
+   "branch_sha256": "658ddd8002320ba2392c4fa5b861385f2c7c15ab4b4b8fb054b13bb4f4bb069e"
+  },
+  {
+   "path": "scripts/smoke_core4d_smalltable.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/smoke_core4d_smalltable.py",
+   "kind": "modified_tracked",
+   "source_sha256": "85fcdcc97fdb6427457544bc2e3c4937bdc6151f08f88e348b54e4806dbcee39",
+   "branch_sha256": "85fcdcc97fdb6427457544bc2e3c4937bdc6151f08f88e348b54e4806dbcee39"
+  },
+  {
+   "path": "scripts/train_core4d_smalltable.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/train_core4d_smalltable.py",
+   "kind": "modified_tracked",
+   "source_sha256": "fba1b752a13454cfbe6b9e2e34ea7f1b74d95c49813e37f105199bb4b10c97b1",
+   "branch_sha256": "fba1b752a13454cfbe6b9e2e34ea7f1b74d95c49813e37f105199bb4b10c97b1"
+  },
+  {
+   "path": "scripts/train_plan5_push.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/train_plan5_push.py",
+   "kind": "modified_tracked",
+   "source_sha256": "61f02516114bd6cbf94960623ee2c940ec478e047c4fdb730b7340e0b7e92f7c",
+   "branch_sha256": "61f02516114bd6cbf94960623ee2c940ec478e047c4fdb730b7340e0b7e92f7c"
+  },
+  {
+   "path": "src/holosoma/holosoma/agents/mappo/core4d_smalltable_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/agents/mappo/core4d_smalltable_evaluation.py",
+   "kind": "modified_tracked",
+   "source_sha256": "96972e5440157a22fde984c135101c465b3e98815c8ade47fa3e2242f219ab09",
+   "branch_sha256": "96972e5440157a22fde984c135101c465b3e98815c8ade47fa3e2242f219ab09"
+  },
+  {
+   "path": "src/holosoma/holosoma/agents/mappo/initialization.py",
+   "source": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/agents/mappo/initialization.py",
+   "kind": "modified_tracked",
+   "source_sha256": "b5902fdf43b6d7ca02aeb78e3c81b7416eb39a680cefda6fe77f81a4cab050c8",
+   "branch_sha256": "b5902fdf43b6d7ca02aeb78e3c81b7416eb39a680cefda6fe77f81a4cab050c8"
+  },
+  {
+   "path": "scripts/audit_paper_supplement.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/audit_paper_supplement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "0b1a9a30dea942a54b4600b94f5700dc74198fd9db5cc717abc9dae052056b29",
+   "branch_sha256": "0b1a9a30dea942a54b4600b94f5700dc74198fd9db5cc717abc9dae052056b29"
+  },
+  {
+   "path": "scripts/autodl_chair_pair_20260930.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/autodl_chair_pair_20260930.py",
+   "kind": "untracked_copied",
+   "source_sha256": "5850a48d62a34fee70b1ffa2e65b1470e0420e34783197757dbebd21ed2e380d",
+   "branch_sha256": "5850a48d62a34fee70b1ffa2e65b1470e0420e34783197757dbebd21ed2e380d"
+  },
+  {
+   "path": "scripts/autodl_plan5_batch_20261001.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/autodl_plan5_batch_20261001.py",
+   "kind": "untracked_copied",
+   "source_sha256": "f9b6feb53c8676a0848112fd03679ec631f6c74ee783d3870e4d3e0db89b43fe",
+   "branch_sha256": "f9b6feb53c8676a0848112fd03679ec631f6c74ee783d3870e4d3e0db89b43fe"
+  },
+  {
+   "path": "scripts/autodl_resume_t07_20260930.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/autodl_resume_t07_20260930.py",
+   "kind": "untracked_copied",
+   "source_sha256": "ef874a495ad367c9ce5b300dcd4fe6f8770217816d1f1da90d255d8235806398",
+   "branch_sha256": "ef874a495ad367c9ce5b300dcd4fe6f8770217816d1f1da90d255d8235806398"
+  },
+  {
+   "path": "scripts/autodl_supplement_autorun.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/autodl_supplement_autorun.py",
+   "kind": "untracked_copied",
+   "source_sha256": "6530e6c747bd6544ff7201fb301904a05ffe3313107da4eaae7135db9f8fd9cb",
+   "branch_sha256": "6530e6c747bd6544ff7201fb301904a05ffe3313107da4eaae7135db9f8fd9cb"
+  },
+  {
+   "path": "scripts/backup_autodl_supplement.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/backup_autodl_supplement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "ac756d24e0ee6c8fb5a4bfe8f4093a61fd6e787f0ec11016d826505819d1b318",
+   "branch_sha256": "ac756d24e0ee6c8fb5a4bfe8f4093a61fd6e787f0ec11016d826505819d1b318"
+  },
+  {
+   "path": "scripts/backup_v3_cloud_20261104.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/backup_v3_cloud_20261104.py",
+   "kind": "untracked_copied",
+   "source_sha256": "e452bd940cf7b3ae9e19e0eae2374c72aedaf0bd70407604334fee9010371a6c",
+   "branch_sha256": "e452bd940cf7b3ae9e19e0eae2374c72aedaf0bd70407604334fee9010371a6c"
+  },
+  {
+   "path": "scripts/collect_experiments_r2_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/collect_experiments_r2_evaluation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "b72d998189c2359d131343a8053294af6f2f0710d87827ca742388f76ad0ff09",
+   "branch_sha256": "b72d998189c2359d131343a8053294af6f2f0710d87827ca742388f76ad0ff09"
+  },
+  {
+   "path": "scripts/collect_experiments_r2_geometry.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/collect_experiments_r2_geometry.py",
+   "kind": "untracked_copied",
+   "source_sha256": "0a72da33b2b3c8b28ba68c548d814daae2db08bc291e72fc5d330eeedc2293fd",
+   "branch_sha256": "0a72da33b2b3c8b28ba68c548d814daae2db08bc291e72fc5d330eeedc2293fd"
+  },
+  {
+   "path": "scripts/collect_wrist_bucket_materials.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/collect_wrist_bucket_materials.py",
+   "kind": "untracked_copied",
+   "source_sha256": "72e4eab1957bbf54ffbb5aad647588a51413632d495752f2f06ed55a4bd421c2",
+   "branch_sha256": "72e4eab1957bbf54ffbb5aad647588a51413632d495752f2f06ed55a4bd421c2"
+  },
+  {
+   "path": "scripts/evaluate_paper_supplement.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/evaluate_paper_supplement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "56c6450cb1d71d8fef3d7f114eb10255492581cba19a389d40eed73ac25f1f81",
+   "branch_sha256": "56c6450cb1d71d8fef3d7f114eb10255492581cba19a389d40eed73ac25f1f81"
+  },
+  {
+   "path": "scripts/export_v3_training_curves_20261104.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/export_v3_training_curves_20261104.py",
+   "kind": "untracked_copied",
+   "source_sha256": "e3e1f6464fb44020fafa69a03a10903ccaab40d3ec77d792cb4afcbbf0cf5ad2",
+   "branch_sha256": "e3e1f6464fb44020fafa69a03a10903ccaab40d3ec77d792cb4afcbbf0cf5ad2"
+  },
+  {
+   "path": "scripts/finalize_experiments_r2_handoff.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/finalize_experiments_r2_handoff.py",
+   "kind": "untracked_copied",
+   "source_sha256": "6c977d2a353097b880e4b0915efd10f52af74595a17acf222ebade24309836d6",
+   "branch_sha256": "6c977d2a353097b880e4b0915efd10f52af74595a17acf222ebade24309836d6"
+  },
+  {
+   "path": "scripts/finalize_reference_geometry_pilot.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/finalize_reference_geometry_pilot.py",
+   "kind": "untracked_copied",
+   "source_sha256": "8cdc02065aa9d3b0a2596e1100b66945dc37f868315ac4c24d8060301f97d7c3",
+   "branch_sha256": "8cdc02065aa9d3b0a2596e1100b66945dc37f868315ac4c24d8060301f97d7c3"
+  },
+  {
+   "path": "scripts/finalize_reference_geometry_round2.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/finalize_reference_geometry_round2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "ce31ebf163e67335d286f228b519bbfbaadee40bd0a1de038d2c43f95b4ed176",
+   "branch_sha256": "ce31ebf163e67335d286f228b519bbfbaadee40bd0a1de038d2c43f95b4ed176"
+  },
+  {
+   "path": "scripts/finalize_v3_results_20261104.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/finalize_v3_results_20261104.py",
+   "kind": "untracked_copied",
+   "source_sha256": "87619b49141cab5064934bd57120f0e68af86173b27608c8b283f5e491097e59",
+   "branch_sha256": "87619b49141cab5064934bd57120f0e68af86173b27608c8b283f5e491097e59"
+  },
+  {
+   "path": "scripts/finish_v3_local_20261104.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/finish_v3_local_20261104.py",
+   "kind": "untracked_copied",
+   "source_sha256": "44712c0de4d1c8ea3a92a875da496809d576fa94c17048f2cae3a7da1e856d13",
+   "branch_sha256": "44712c0de4d1c8ea3a92a875da496809d576fa94c17048f2cae3a7da1e856d13"
+  },
+  {
+   "path": "scripts/measure_u2_shared_scene_handdist_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/measure_u2_shared_scene_handdist_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "b684129df19a318ecf83f6e1629589416b5ddc7aa24590e73d4de8a38b09870a",
+   "branch_sha256": "b684129df19a318ecf83f6e1629589416b5ddc7aa24590e73d4de8a38b09870a"
+  },
+  {
+   "path": "scripts/organize_paper_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/organize_paper_evaluation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "1d2cfab20874e19a3f3236e8009600a1923cb74bb781ab3b6f805136fe725e00",
+   "branch_sha256": "1d2cfab20874e19a3f3236e8009600a1923cb74bb781ab3b6f805136fe725e00"
+  },
+  {
+   "path": "scripts/package_experiments_r2_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/package_experiments_r2_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "b07efa552ad641d918ebe1bdc3498a9333da412fbbd5395e5c31508e00ff407c",
+   "branch_sha256": "b07efa552ad641d918ebe1bdc3498a9333da412fbbd5395e5c31508e00ff407c"
+  },
+  {
+   "path": "scripts/package_paper_supplement.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/package_paper_supplement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "d44bb04acddef063d0e2237a682b2fa1ad2fce062e920567c43aaf978b55386f",
+   "branch_sha256": "d44bb04acddef063d0e2237a682b2fa1ad2fce062e920567c43aaf978b55386f"
+  },
+  {
+   "path": "scripts/package_r2_final.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/package_r2_final.py",
+   "kind": "untracked_copied",
+   "source_sha256": "041fb411cc8dde5dbd36d9b357873495cd7ce3138248f8f3998e7e9e450de594",
+   "branch_sha256": "041fb411cc8dde5dbd36d9b357873495cd7ce3138248f8f3998e7e9e450de594"
+  },
+  {
+   "path": "scripts/package_reference_geometry_pilot.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/package_reference_geometry_pilot.py",
+   "kind": "untracked_copied",
+   "source_sha256": "230d1c90be3deea54c9fc5788cb4ab8c544b7432174823db2019337c82b99231",
+   "branch_sha256": "230d1c90be3deea54c9fc5788cb4ab8c544b7432174823db2019337c82b99231"
+  },
+  {
+   "path": "scripts/package_reference_geometry_round2.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/package_reference_geometry_round2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "d8dc152a484414596ecae65379c7ecf125c50bfa598ec7cd5bf064e043103766",
+   "branch_sha256": "d8dc152a484414596ecae65379c7ecf125c50bfa598ec7cd5bf064e043103766"
+  },
+  {
+   "path": "scripts/paper_evaluation_utils.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/paper_evaluation_utils.py",
+   "kind": "untracked_copied",
+   "source_sha256": "051d626c8aee3c3ae182d6ee84c2dcea91f7598fc786928b468220c2439f3fa6",
+   "branch_sha256": "051d626c8aee3c3ae182d6ee84c2dcea91f7598fc786928b468220c2439f3fa6"
+  },
+  {
+   "path": "scripts/plan5_registered_placement.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/plan5_registered_placement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "ef14dbcfd612530626f38d29aa2ab026a928a2cbcb38f6deba64b27859ea4608",
+   "branch_sha256": "ef14dbcfd612530626f38d29aa2ab026a928a2cbcb38f6deba64b27859ea4608"
+  },
+  {
+   "path": "scripts/prepare_experiments_r2_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/prepare_experiments_r2_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "aaa29d75647ff25373e65eee8fbcb8684ea2ce1d36cc1168863ad64146fb5c88",
+   "branch_sha256": "aaa29d75647ff25373e65eee8fbcb8684ea2ce1d36cc1168863ad64146fb5c88"
+  },
+  {
+   "path": "scripts/prepare_v3_chair_one_sided.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/prepare_v3_chair_one_sided.py",
+   "kind": "untracked_copied",
+   "source_sha256": "9bfd1fe9819a219b6fda3523ef72ba741eb79a1f53d0f2d9f45b42dddfb2215c",
+   "branch_sha256": "9bfd1fe9819a219b6fda3523ef72ba741eb79a1f53d0f2d9f45b42dddfb2215c"
+  },
+  {
+   "path": "scripts/prepare_v3_chair_source_size.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/prepare_v3_chair_source_size.py",
+   "kind": "untracked_copied",
+   "source_sha256": "35899f52b046f484d1d7984fc7026d490a4128234e9d36bd0a5fe16ae6fd4cd4",
+   "branch_sha256": "35899f52b046f484d1d7984fc7026d490a4128234e9d36bd0a5fe16ae6fd4cd4"
+  },
+  {
+   "path": "scripts/prepare_v3_no_wrist.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/prepare_v3_no_wrist.py",
+   "kind": "untracked_copied",
+   "source_sha256": "7d8b12fa3f8d5b394b30059ffcf808ec31bb7849073738c4a4448c391fd20be6",
+   "branch_sha256": "7d8b12fa3f8d5b394b30059ffcf808ec31bb7849073738c4a4448c391fd20be6"
+  },
+  {
+   "path": "scripts/push_20261107_entry.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261107_entry.py",
+   "kind": "untracked_copied",
+   "source_sha256": "4affd24b404623cc4c5aa869af9f57ff1e6fa28e9122fe73e18e4d1d0cc60b84",
+   "branch_sha256": "4affd24b404623cc4c5aa869af9f57ff1e6fa28e9122fe73e18e4d1d0cc60b84"
+  },
+  {
+   "path": "scripts/push_20261107_guard.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261107_guard.py",
+   "kind": "untracked_copied",
+   "source_sha256": "ccf77ee919fda00565b07516bb50f5adeef77c60be2648da25f7d8cfdc4af483",
+   "branch_sha256": "ccf77ee919fda00565b07516bb50f5adeef77c60be2648da25f7d8cfdc4af483"
+  },
+  {
+   "path": "scripts/push_20261107_prepare.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261107_prepare.py",
+   "kind": "untracked_copied",
+   "source_sha256": "4241977c5ce2a5111bc604dac34db0572b84eb07c0e2a5e67592c870c73569fd",
+   "branch_sha256": "4241977c5ce2a5111bc604dac34db0572b84eb07c0e2a5e67592c870c73569fd"
+  },
+  {
+   "path": "scripts/push_20261107_queue.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261107_queue.py",
+   "kind": "untracked_copied",
+   "source_sha256": "a1478f9b8a99cbe1d3b38ddb95afd5d702e6cf76fead6806950d372027415bb3",
+   "branch_sha256": "a1478f9b8a99cbe1d3b38ddb95afd5d702e6cf76fead6806950d372027415bb3"
+  },
+  {
+   "path": "scripts/push_20261107_queue_v2.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261107_queue_v2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "5b33c55a741ceec8e2a3b3bd6ed21f69e3d07ce1195d4a44e71fe8c1dbb086a4",
+   "branch_sha256": "5b33c55a741ceec8e2a3b3bd6ed21f69e3d07ce1195d4a44e71fe8c1dbb086a4"
+  },
+  {
+   "path": "scripts/push_20261108_resume.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/push_20261108_resume.py",
+   "kind": "untracked_copied",
+   "source_sha256": "84b94f8212953923da999abfc59c02b85b8a17a7646561f09c72bfa31e403e56",
+   "branch_sha256": "84b94f8212953923da999abfc59c02b85b8a17a7646561f09c72bfa31e403e56"
+  },
+  {
+   "path": "scripts/recompute_r2_wrist_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/recompute_r2_wrist_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "e8b0ad2bf3bc87adf411f3db134f46742fa1a71ea5346a983ccba318acb00983",
+   "branch_sha256": "e8b0ad2bf3bc87adf411f3db134f46742fa1a71ea5346a983ccba318acb00983"
+  },
+  {
+   "path": "scripts/reference_geometry_math.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/reference_geometry_math.py",
+   "kind": "untracked_copied",
+   "source_sha256": "12d3d70cb217adcc80caa35e5204afe300bc93d70a4e038b61ae76ed2abda396",
+   "branch_sha256": "12d3d70cb217adcc80caa35e5204afe300bc93d70a4e038b61ae76ed2abda396"
+  },
+  {
+   "path": "scripts/reference_geometry_pilot.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/reference_geometry_pilot.py",
+   "kind": "untracked_copied",
+   "source_sha256": "e6a2f053e5b605d0b5dbd23de4b4451fb9359da44bf1f433d9dbd801cc9d4be1",
+   "branch_sha256": "e6a2f053e5b605d0b5dbd23de4b4451fb9359da44bf1f433d9dbd801cc9d4be1"
+  },
+  {
+   "path": "scripts/reference_geometry_round2_checks.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/reference_geometry_round2_checks.py",
+   "kind": "untracked_copied",
+   "source_sha256": "87e91549c7da79753aff61e929a6573a8095e7eb53c561881f2b63f07091fa35",
+   "branch_sha256": "87e91549c7da79753aff61e929a6573a8095e7eb53c561881f2b63f07091fa35"
+  },
+  {
+   "path": "scripts/reference_geometry_round2_correspondence.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/reference_geometry_round2_correspondence.py",
+   "kind": "untracked_copied",
+   "source_sha256": "64f02a7b47886fa171d212dde4d5bdce20922cea1c020840a19e1d5b395b01f9",
+   "branch_sha256": "64f02a7b47886fa171d212dde4d5bdce20922cea1c020840a19e1d5b395b01f9"
+  },
+  {
+   "path": "scripts/render_r2_handoff.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_r2_handoff.py",
+   "kind": "untracked_copied",
+   "source_sha256": "22bb2f1dc1bf7f3b748ba864edf7ed812e2ea476a150f4faac48a0f38434271d",
+   "branch_sha256": "22bb2f1dc1bf7f3b748ba864edf7ed812e2ea476a150f4faac48a0f38434271d"
+  },
+  {
+   "path": "scripts/render_r2_shared_chair.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_r2_shared_chair.py",
+   "kind": "untracked_copied",
+   "source_sha256": "afe5b8b3d2bd14782e38b288b2de33d3a3814178679bb016f18044a9a1af6940",
+   "branch_sha256": "afe5b8b3d2bd14782e38b288b2de33d3a3814178679bb016f18044a9a1af6940"
+  },
+  {
+   "path": "scripts/render_reference_geometry_pilot.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_reference_geometry_pilot.py",
+   "kind": "untracked_copied",
+   "source_sha256": "2af918e84b99b11b7ef98b7705a2373748de37426a049bb36d4d6402c800b882",
+   "branch_sha256": "2af918e84b99b11b7ef98b7705a2373748de37426a049bb36d4d6402c800b882"
+  },
+  {
+   "path": "scripts/render_reference_geometry_round2.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_reference_geometry_round2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "49ebb9f52292a713571f3f61c2f8110ab7d0795ff13d9ce54027cb2f6f09b241",
+   "branch_sha256": "49ebb9f52292a713571f3f61c2f8110ab7d0795ff13d9ce54027cb2f6f09b241"
+  },
+  {
+   "path": "scripts/render_v3_chair_f2c.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_v3_chair_f2c.py",
+   "kind": "untracked_copied",
+   "source_sha256": "4d103810487f25d51d1c801e1cc4e9532e669cb76fc8292be6be2b43dd9ef00d",
+   "branch_sha256": "4d103810487f25d51d1c801e1cc4e9532e669cb76fc8292be6be2b43dd9ef00d"
+  },
+  {
+   "path": "scripts/render_v3_f3_execution.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_v3_f3_execution.py",
+   "kind": "untracked_copied",
+   "source_sha256": "0ad6b1486b5306c7416fdd29dc41afc64c6e3b8a230a4a1be9a0acae4000b669",
+   "branch_sha256": "0ad6b1486b5306c7416fdd29dc41afc64c6e3b8a230a4a1be9a0acae4000b669"
+  },
+  {
+   "path": "scripts/render_v3_f3_video.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_v3_f3_video.py",
+   "kind": "untracked_copied",
+   "source_sha256": "fea8f0dbab6a0f484888670a0a8a653b0a543e2f16d23f2864cc9a4a26903d23",
+   "branch_sha256": "fea8f0dbab6a0f484888670a0a8a653b0a543e2f16d23f2864cc9a4a26903d23"
+  },
+  {
+   "path": "scripts/render_wrist_reference_pairs.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/render_wrist_reference_pairs.py",
+   "kind": "untracked_copied",
+   "source_sha256": "8d5ba6809cc2b61f66e96b4eafebcf126832eb3ac70a46a7ffd61d704a41cb6b",
+   "branch_sha256": "8d5ba6809cc2b61f66e96b4eafebcf126832eb3ac70a46a7ffd61d704a41cb6b"
+  },
+  {
+   "path": "scripts/run_experiments_r2_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/run_experiments_r2_evaluation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "07cf018eb85b5ddef027a69d9455f514325076759dc4670292823b79530ce118",
+   "branch_sha256": "07cf018eb85b5ddef027a69d9455f514325076759dc4670292823b79530ce118"
+  },
+  {
+   "path": "scripts/run_paper_evaluation_batch.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/run_paper_evaluation_batch.py",
+   "kind": "untracked_copied",
+   "source_sha256": "fbb6aea54a6d3525bdc6bac9d7d616c665aeebab913914123281b427e3ca6165",
+   "branch_sha256": "fbb6aea54a6d3525bdc6bac9d7d616c665aeebab913914123281b427e3ca6165"
+  },
+  {
+   "path": "scripts/run_reference_geometry_round2.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/run_reference_geometry_round2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "02be193e6a3c7c843798db4d105ee30518e6d88c30ea2060cd98ce0c6926a8bc",
+   "branch_sha256": "02be193e6a3c7c843798db4d105ee30518e6d88c30ea2060cd98ce0c6926a8bc"
+  },
+  {
+   "path": "scripts/run_v3_f3_batch.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/run_v3_f3_batch.py",
+   "kind": "untracked_copied",
+   "source_sha256": "89aff5bbacd611fe74ea5d2e83812fa40bc7a6f591abd093ec79f903a0830bf8",
+   "branch_sha256": "89aff5bbacd611fe74ea5d2e83812fa40bc7a6f591abd093ec79f903a0830bf8"
+  },
+  {
+   "path": "scripts/summarize_paper_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/summarize_paper_evaluation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "9035f08b859386939eabb1cd50b9e47fbfa2136f15484d3b2418ee398e23b7d5",
+   "branch_sha256": "9035f08b859386939eabb1cd50b9e47fbfa2136f15484d3b2418ee398e23b7d5"
+  },
+  {
+   "path": "scripts/v314_compute.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/v314_compute.py",
+   "kind": "untracked_copied",
+   "source_sha256": "f6ae30cd7197d8cf294de366413e9b33581b2b6606e6528ca0eec8adbd9e1720",
+   "branch_sha256": "f6ae30cd7197d8cf294de366413e9b33581b2b6606e6528ca0eec8adbd9e1720"
+  },
+  {
+   "path": "scripts/v314_finalize.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/v314_finalize.py",
+   "kind": "untracked_copied",
+   "source_sha256": "eea80b5a51964f6dbe40093d8d600cb58608bb0279e5b5924ced1fdc5147382a",
+   "branch_sha256": "eea80b5a51964f6dbe40093d8d600cb58608bb0279e5b5924ced1fdc5147382a"
+  },
+  {
+   "path": "scripts/v314_package.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/v314_package.py",
+   "kind": "untracked_copied",
+   "source_sha256": "f54faea296faa8dd22737b0dbfbc482c9d1445eee22a15ad8490661b71bb826d",
+   "branch_sha256": "f54faea296faa8dd22737b0dbfbc482c9d1445eee22a15ad8490661b71bb826d"
+  },
+  {
+   "path": "scripts/v314_render.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/v314_render.py",
+   "kind": "untracked_copied",
+   "source_sha256": "42e2157043a72659326deade8863655caf099554cd318a94c9d5b6aa34bbb79f",
+   "branch_sha256": "42e2157043a72659326deade8863655caf099554cd318a94c9d5b6aa34bbb79f"
+  },
+  {
+   "path": "scripts/verify_v3_pull_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/scripts/verify_v3_pull_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "a1fb679f48880e85e1a0c2dc976203593914b9a2aac3ee8c4e17c6d05c116448",
+   "branch_sha256": "a1fb679f48880e85e1a0c2dc976203593914b9a2aac3ee8c4e17c6d05c116448"
+  },
+  {
+   "path": "src/holosoma/holosoma/agents/mappo/v3_plan5_ablation.py",
+   "source": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/agents/mappo/v3_plan5_ablation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "cf4f482890a76067d99d70bdd70c4c51543e09a063a669f81f721170b9e3f2a7",
+   "branch_sha256": "cf4f482890a76067d99d70bdd70c4c51543e09a063a669f81f721170b9e3f2a7"
+  },
+  {
+   "path": "src/holosoma/holosoma/config_values/marl/g1/v3_reference_variant.py",
+   "source": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/config_values/marl/g1/v3_reference_variant.py",
+   "kind": "untracked_copied",
+   "source_sha256": "f5d319bbb71b484bdf0a4a73107480cc2cd674466089fa49c4815031e9ac965b",
+   "branch_sha256": "f5d319bbb71b484bdf0a4a73107480cc2cd674466089fa49c4815031e9ac965b"
+  },
+  {
+   "path": "src/holosoma/holosoma/utils/v3_episode_telemetry.py",
+   "source": "/home/kevin/holosoma-core4d-base/src/holosoma/holosoma/utils/v3_episode_telemetry.py",
+   "kind": "untracked_copied",
+   "source_sha256": "1365f77de2b9f1b6097ecad72ac26aafe4cbe12ea84c90b7bf072c6b1b4a18b2",
+   "branch_sha256": "1365f77de2b9f1b6097ecad72ac26aafe4cbe12ea84c90b7bf072c6b1b4a18b2"
+  },
+  {
+   "path": "tests/test_autodl_supplement_autorun.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_autodl_supplement_autorun.py",
+   "kind": "untracked_copied",
+   "source_sha256": "7979e1d62d98c6098843d5b1a0cce2cc4299ec4d627dc85b434084fd62538a83",
+   "branch_sha256": "7979e1d62d98c6098843d5b1a0cce2cc4299ec4d627dc85b434084fd62538a83"
+  },
+  {
+   "path": "tests/test_experiments_r2_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_experiments_r2_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "8929abda965e6bfd541bc2e5ed3433b19ef41695cc4fcf9203fd4909519e1aa8",
+   "branch_sha256": "8929abda965e6bfd541bc2e5ed3433b19ef41695cc4fcf9203fd4909519e1aa8"
+  },
+  {
+   "path": "tests/test_paper_evaluation.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_paper_evaluation.py",
+   "kind": "untracked_copied",
+   "source_sha256": "b1531aed972c45479702bc80831988e57b27a67e61489146764e80892a0a4dfd",
+   "branch_sha256": "b1531aed972c45479702bc80831988e57b27a67e61489146764e80892a0a4dfd"
+  },
+  {
+   "path": "tests/test_plan5_registered_placement.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_plan5_registered_placement.py",
+   "kind": "untracked_copied",
+   "source_sha256": "c1caf4705eed45747e26eec4539e6852dbdb5e83a30465dddda542e61a053729",
+   "branch_sha256": "c1caf4705eed45747e26eec4539e6852dbdb5e83a30465dddda542e61a053729"
+  },
+  {
+   "path": "tests/test_reference_geometry_pilot.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_reference_geometry_pilot.py",
+   "kind": "untracked_copied",
+   "source_sha256": "c9991add8a7e2457075d0daad75c239d3c5e15c22d0806233d70a677bcd561d8",
+   "branch_sha256": "c9991add8a7e2457075d0daad75c239d3c5e15c22d0806233d70a677bcd561d8"
+  },
+  {
+   "path": "tests/test_reference_geometry_round2.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_reference_geometry_round2.py",
+   "kind": "untracked_copied",
+   "source_sha256": "a47a5428a269668138b29a517397d66231cdbc382ec2842221545d4f8803336c",
+   "branch_sha256": "a47a5428a269668138b29a517397d66231cdbc382ec2842221545d4f8803336c"
+  },
+  {
+   "path": "tests/test_u2_shared_scene_handdist_cpu.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_u2_shared_scene_handdist_cpu.py",
+   "kind": "untracked_copied",
+   "source_sha256": "c8f18e0822f83a875692671f473eacd1fddc4d34642059bd53170ad4a6c40710",
+   "branch_sha256": "c8f18e0822f83a875692671f473eacd1fddc4d34642059bd53170ad4a6c40710"
+  },
+  {
+   "path": "tests/test_wrist_reference_materials.py",
+   "source": "/home/kevin/holosoma-core4d-base/tests/test_wrist_reference_materials.py",
+   "kind": "untracked_copied",
+   "source_sha256": "f81feeda1eecd77ddfb40907d8e5c2136010c0e0f4af47b16a1f4eb45791244e",
+   "branch_sha256": "f81feeda1eecd77ddfb40907d8e5c2136010c0e0f4af47b16a1f4eb45791244e"
+  }
+ ],
+ "excluded_untracked_counts_by_top_dir": {
+  "\"\\345\\217\\221\\347\\273\\231Ubuntu_\\346\\241\\266\\344\\272\\244\\346\\216\\245B.zip\"": 1,
+  ".local_render_runtime": 9,
+  "CORE4D_UBUNTU_ENV_AUDIT.tar.gz": 1,
+  "CORE4D_UBUNTU_ENV_AUDIT.tar.gz.sha256": 1,
+  "CORE4D_UBUNTU_ENV_AUDIT": 96,
+  "CORE4D_UBUNTU_ENV_AUDIT_20260915T012052Z.tar.gz": 1,
+  "CORE4D_UBUNTU_ENV_AUDIT_20260915T012052Z.tar.gz.sha256": 1,
+  "CORE4D_UBUNTU_ENV_AUDIT_20260915T012052Z": 89,
+  "docs": 5,
+  "paper_handoff_exports": 4382,
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/v3_20261102": 36
+ },
+ "excluded_untracked_total": 4622
+}

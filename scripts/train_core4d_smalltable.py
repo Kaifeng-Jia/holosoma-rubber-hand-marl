@@ -42,6 +42,8 @@ PARSER.add_argument("--object-height-penalty-weight", type=float, default=0.0,
                     help="Nonnegative independent height penalty strength; zero preserves existing runs")
 PARSER.add_argument("--object-height-penalty-scale", type=float, default=0.05,
                     help="World-z error in metres corresponding to unit squared cost")
+PARSER.add_argument("--reference-variant", type=Path, default=None)
+PARSER.add_argument("--episode-telemetry", action="store_true")
 ARGS = PARSER.parse_args()
 IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
 if ARGS.experiment == "smalltable5kg_A" and ARGS.reward_variant not in ("bucket_A", "bucket_A_no_rel_no_height"):
@@ -99,7 +101,8 @@ from holosoma.config_values.marl.g1.core4d_smalltable_reward import (  # noqa: E
 )
 
 
-EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
+EXPERIMENT = with_reference_variant(get_core4d_pair_experiment(ARGS.experiment), ARGS.reference_variant, reward_variant=ARGS.reward_variant)
 if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
     PARSER.error(f"--experiment {ARGS.experiment} does not allow interaction_mesh")
 if not EXPERIMENT.training_ready:
@@ -339,6 +342,7 @@ def _collect_with_raw_reward_diagnostics(learner, env, observations):
 
 def main() -> int:
     env = None
+    episode_telemetry = None
     output_dir = ARGS.output_dir.expanduser().resolve()
     output_created = False
     try:
@@ -509,6 +513,13 @@ def main() -> int:
             learner.training_state_dict(iteration=start_iteration),
         )
 
+        if ARGS.reference_variant is not None:
+            run_config.update(reference_variant=str(ARGS.reference_variant), reference_variant_sha256=_sha256(ARGS.reference_variant))
+        if ARGS.episode_telemetry:
+            from holosoma.utils.v3_episode_telemetry import EpisodeTelemetry, CONTRACT
+            episode_telemetry = EpisodeTelemetry(env, output_dir / "episodes_raw.jsonl.gz")
+            run_config["episode_telemetry_contract"] = CONTRACT
+        _write_json(output_dir / "run_config.json", run_config)
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:
             interaction_term.get_iteration_diagnostics(reset=True)
@@ -519,6 +530,8 @@ def main() -> int:
         final_iteration = start_iteration + ARGS.iterations
         for iteration in range(start_iteration + 1, final_iteration + 1):
             started = time.perf_counter()
+            if episode_telemetry is not None:
+                episode_telemetry.iteration = iteration
             raw_reward_diagnostics = {}
             if height_term is not None or bucket_term is not None:
                 observations, raw_reward_diagnostics = _collect_with_raw_reward_diagnostics(
@@ -577,6 +590,8 @@ def main() -> int:
                 record.update({name: float(value.item()) for name, value in
                                bucket_term.get_iteration_diagnostics(reset=True).items()})
                 record.update({name: float(value.item()) for name, value in raw_reward_diagnostics.items()})
+            if episode_telemetry is not None:
+                record.update(episode_telemetry.summary())
             numeric = [value for value in record.values() if isinstance(value, (int, float))]
             if not all(torch.isfinite(torch.tensor(value)) for value in numeric):
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")
@@ -606,6 +621,8 @@ def main() -> int:
             )
         return 1
     finally:
+        if episode_telemetry is not None:
+            episode_telemetry.close()
         if env is not None and hasattr(env.simulator, "close"):
             env.simulator.close()
         close_simulation_app(SIMULATION_APP)

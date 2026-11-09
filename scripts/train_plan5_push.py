@@ -41,7 +41,17 @@ CHECKPOINT_MODE.add_argument("--fine-tune-from", type=Path, default=None)
 PARSER.add_argument("--joint-acceleration-weight", type=float, default=None)
 PARSER.add_argument("--joint-acceleration-ramp-iterations", type=int, default=500)
 PARSER.add_argument("--save-interval", type=int, default=1000)
+PARSER.add_argument("--push-placement-proof", type=Path, default=None,
+                    help="Opt-in audited registered Push placement; no other config changes")
+PARSER.add_argument("--from-scratch", action="store_true")
+PARSER.add_argument("--zero-teammate-obs", action="store_true")
+PARSER.add_argument("--episode-telemetry", action="store_true")
 ARGS = PARSER.parse_args()
+if ARGS.from_scratch or ARGS.zero_teammate_obs:
+    if ARGS.skill != "pull" or ARGS.fine_tune_from or ARGS.teammate_input_only or ARGS.joint_acceleration_weight is not None:
+        PARSER.error("V3 ablations are single-factor Pull only")
+    if ARGS.from_scratch and ARGS.zero_teammate_obs:
+        PARSER.error("Do not combine the two V3 ablations")
 try:
     RUNTIME_WORLD_SIZE = int(os.environ.get("WORLD_SIZE", "1"))
 except ValueError:
@@ -154,12 +164,18 @@ CONFIG = replace(
         name=TRAINING_NAME,
     ),
 )
+from plan5_registered_placement import configure_push_placement, export_runtime_reference
+CONFIG, PLACEMENT_PROVENANCE = configure_push_placement(
+    CONFIG, ARGS.push_placement_proof, skill=ARGS.skill, root=REPO_ROOT)
+if PLACEMENT_PROVENANCE is not None:
+    EXPECTED_SOURCE_CHECKPOINT_SHA256 = "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
 
 from holosoma.agents.mappo.initialization import initialize_plan5_model_bundle  # noqa: E402
-from holosoma.agents.mappo.ppo import Plan5PPO  # noqa: E402
+from holosoma.agents.mappo.v3_plan5_ablation import V3Plan5PPO as Plan5PPO  # noqa: E402
+from holosoma.utils.v3_episode_telemetry import EpisodeTelemetry, CONTRACT as TELEMETRY_CONTRACT  # noqa: E402
 from holosoma.config_types.env import get_tyro_env_config  # noqa: E402
 from holosoma.config_values.wbt.g1.experiment import g1_29dof_wbt_w_object  # noqa: E402
 from holosoma.utils.helpers import get_class  # noqa: E402
@@ -253,6 +269,8 @@ def _ramped_weight(*, iteration: int, start_iteration: int, target: float, ramp:
 
 def _checkpoint_state(learner, *, iteration: int, smooth_schedule: dict | None) -> dict:
     state = learner.training_state_dict(iteration=iteration)
+    state['plan5_skill'] = ARGS.skill
+    state['placement_provenance'] = PLACEMENT_PROVENANCE
     if smooth_schedule is not None:
         state["joint_acceleration_schedule"] = smooth_schedule
     return state
@@ -319,6 +337,7 @@ def _runtime_object_physics(env, *, skill: str) -> dict[str, dict[str, object]]:
 
 def main() -> None:
     env = None
+    telemetry = None
     failure: BaseException | None = None
     output_dir = ARGS.output_dir.expanduser().resolve()
     owns_output_dir = False
@@ -335,6 +354,8 @@ def main() -> None:
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
         observations = env.reset_all()
+        runtime_reference_check = export_runtime_reference(
+            env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
         runtime_object_physics = _runtime_object_physics(env, skill=ARGS.skill)
         if g1_29dof_wbt_w_object.algo.config.init_at_random_ep_len:
             env.episode_length_buf = torch.randint_like(
@@ -357,7 +378,7 @@ def main() -> None:
         if ARGS.teammate_input_only:
             ppo_overrides["schedule"] = "fixed"
         ppo_config = replace(g1_29dof_wbt_w_object.algo.config, **ppo_overrides)
-        initialization_kwargs = {}
+        initialization_kwargs = {"from_scratch": ARGS.from_scratch}
         if EXPECTED_SOURCE_CHECKPOINT_SHA256 is not None:
             initialization_kwargs["expected_sha256"] = EXPECTED_SOURCE_CHECKPOINT_SHA256
         models = initialize_plan5_model_bundle(
@@ -372,11 +393,17 @@ def main() -> None:
             num_envs=env.num_envs,
             num_steps_per_env=ARGS.steps_per_env,
             device=env.device,
+            from_scratch=ARGS.from_scratch,
+            zero_teammate_obs=ARGS.zero_teammate_obs,
         )
         start_iteration = 0
         smooth_ramp_start_iteration = 0 if SMOOTH_FINETUNE else None
         if ARGS.resume is not None:
             resume_state = torch.load(ARGS.resume.expanduser().resolve(), map_location=env.device)
+            if resume_state.get('placement_provenance') != PLACEMENT_PROVENANCE:
+                raise ValueError('Resume placement differs from requested placement')
+            if resume_state.get('plan5_skill', ARGS.skill) != ARGS.skill:
+                raise ValueError('Resume skill differs from requested skill')
             start_iteration = learner.load_training_state_dict(resume_state)
             if SMOOTH_FINETUNE:
                 saved_schedule = resume_state.get("joint_acceleration_schedule")
@@ -451,6 +478,8 @@ def main() -> None:
             "motion_file": selected_motion_config.motion_file,
             "paired_reference_file": command_params.get("paired_reference_file"),
             "lateral_spacing_m": command_params.get("lateral_spacing_m"),
+            "placement_provenance": PLACEMENT_PROVENANCE,
+            "runtime_reference_check": runtime_reference_check,
             "command_func": command_term.func,
             "robot_urdf": CONFIG.robot.asset.urdf_file,
             "object_urdf": CONFIG.robot.object.object_urdf_path,
@@ -487,8 +516,14 @@ def main() -> None:
                 "world_size": RUNTIME_WORLD_SIZE,
             },
         }
+        if learner.v3_enabled:
+            run_config["v3_ablation"] = learner.v3_contract
+        if ARGS.episode_telemetry:
+            telemetry = EpisodeTelemetry(env, output_dir / "episode_telemetry.jsonl.gz")
+            run_config["episode_telemetry_contract"] = TELEMETRY_CONTRACT
         _write_json(output_dir / "run_config.json", run_config)
-        if ARGS.resume is None:
+        # Telemetry runs preserve the exact loaded state in their new segment.
+        if ARGS.resume is None or ARGS.episode_telemetry:
             torch.save(
                 _checkpoint_state(
                     learner,
@@ -501,6 +536,8 @@ def main() -> None:
         final_iteration = start_iteration + ARGS.iterations
         for iteration in range(start_iteration + 1, final_iteration + 1):
             iteration_started = time.perf_counter()
+            if telemetry is not None:
+                telemetry.iteration = iteration
             current_joint_acceleration_weight = None
             if smooth_schedule is not None:
                 current_joint_acceleration_weight = _ramped_weight(
@@ -573,6 +610,8 @@ def main() -> None:
                 raise RuntimeError(f"Non-finite training metric at iteration {iteration}: {metrics}")
             if not all(torch.isfinite(torch.tensor(value)) for value in reward_terms.values()):
                 raise RuntimeError(f"Non-finite reward term at iteration {iteration}: {reward_terms}")
+            if telemetry is not None:
+                metrics.update(telemetry.summary())
             _append_jsonl(metrics_path, metrics)
             print(json.dumps(metrics, sort_keys=True), flush=True)
 
@@ -611,6 +650,8 @@ def main() -> None:
             _write_json(output_dir / "status.json", failure_report)
         print(json.dumps(failure_report, indent=2, sort_keys=True), flush=True)
     finally:
+        if telemetry is not None:
+            telemetry.close()
         if env is not None and hasattr(env.simulator, "close"):
             env.simulator.close()
         close_simulation_app(SIMULATION_APP)

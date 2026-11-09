@@ -62,6 +62,7 @@ def initialize_plan5_model_bundle(
     *,
     device: str = "cpu",
     expected_sha256: str = PLAN5_ACTOR_CHECKPOINT_SHA256,
+    from_scratch: bool = False,
 ) -> Plan5ModelBundle:
     """Load only the 158-D actor prior and create every critic-side state fresh."""
     checkpoint_path = Path(checkpoint_path).expanduser().resolve()
@@ -104,7 +105,9 @@ def initialize_plan5_model_bundle(
         device=device,
         history_length=history_length,
     )
-    actor.load_state_dict(checkpoint["actor_model_state_dict"], strict=True)
+    # U4c changes only actor initialization; prior normalization remains frozen.
+    if not from_scratch:
+        actor.load_state_dict(checkpoint["actor_model_state_dict"], strict=True)
 
     critic = setup_ppo_critic_module(
         obs_dim_dict=obs_dim_dict,

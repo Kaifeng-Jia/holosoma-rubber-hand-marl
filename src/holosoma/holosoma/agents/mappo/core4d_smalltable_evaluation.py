@@ -104,6 +104,8 @@ def core4d_smalltable_evaluation_reward_metadata(
 def deterministic_core4d_smalltable_actions(
     models: Any,
     observations: Mapping[str, torch.Tensor],
+    *,
+    zero_teammate_obs: bool = False,
 ) -> torch.Tensor:
     """Run the shared Actor twice without reading or evaluating Critic state."""
     first = observations.get("actor_obs")
@@ -122,7 +124,13 @@ def deterministic_core4d_smalltable_actions(
         num_envs * CORE4D_SMALLTABLE_NUM_AGENTS,
         CORE4D_SMALLTABLE_ACTOR_OBS_DIM,
     )
+    if zero_teammate_obs:
+        flat = flat.clone()
+        flat[...,154:] = 0
     normalized = models.actor_obs_normalizer(flat, update=False)
+    if zero_teammate_obs:
+        normalized = normalized.clone()
+        normalized[...,154:] = 0
     flat_actions = models.actor.act_inference({"actor_obs": normalized})
     expected_actions = (
         num_envs * CORE4D_SMALLTABLE_NUM_AGENTS,

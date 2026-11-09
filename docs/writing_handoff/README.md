@@ -1,5 +1,47 @@
 # Mac 写作资料入口
 
+## 2026-11-05 V3 收尾补充（修订 1.14，最新）
+
+按 `6c71577` 补齐六项材料，补充包为 `paper_handoff_exports/V3_20261102/V3_CLOSEOUT_SUPPLEMENT_20261105.tar.gz`，同目录提供 `.sha256` 和 `.verification.json`。先读包内 `README_CN.md`：Push/Pull Palm、T-07参考腕部审计、Fig.2八图及叠加坐标、Fig.3六张人体示范首时刻、Table III参考层CSV、Pull三组各三种子曲线核验均已完成。复制先验因无完成回合，Palm保持missing。
+
+补充包 `results/` 更新旧表的Palm字段，不新增样本；其他回合指标、完成率及hard档选择不变。T-07未做wrist-only A1，本次仅报告未补做。全部为本地离线计算/静态渲染，没有新训练、物理回合、视频或云操作；未改论文和结论。11-04旧包及历史记录保留不覆盖。本次未推送GitHub。
+
+## 2026-11-04 V3 GPU实验收尾（历史冻结包）
+
+本次21个训练最终模型已回传并通过SHA256、CPU加载及参数检查；21项标准、63项扩展、18项困难档评测已完成。结合18项已核验历史Full标准档，汇总为120个评测单元、6000个扰动回合和120个nominal回合。统计不混用nominal与扰动样本。
+
+最新本地交接包为 `paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104.tar.gz`，同目录有 `.tar.gz.sha256`。解压后先读 `README_CN.md` 与 `DATA_DICTIONARY.md`，再看 `results/group_summary.csv`、配对统计、`curves/` 和 `U5_media/`。包含六任务30张原生图、6份投影JSON、6段50Hz视频；模型和原始轨迹不重复放入Mac包。
+
+完整本地备份及校验记录在 `logs/V3_20261102/cloud_backup_20261104/`，最终模型清单和完成状态在 `logs/V3_20261102/closeout_20261104/`。本轮未推送GitHub，也未删除远端数据或关闭云实例。
+
+这不是“全部论文素材已交齐”的声明：Push/Pull的人体掌面目标映射、F2a/F2b/F2d复用核验和F3人体示范素材仍需补齐；F2c已单独保存。具体缺失字段在包内说明，不填零，不编造历史记录。P2不再开展。以下各节是历史交接，读取最新结果时以本节包内身份和协议为准。
+
+## 2026-10-05 图3与桶来源补充（历史）
+
+[补充材料记录](../experiments/wrist_figure3_bucket_source_20261005.md)：Push/Chair腕部前后同帧同相机共24张原生PNG已导出；四份原参考身份及仅腕部变化已实际验证。
+两套旧桶721原源码包和对应启动证据找到，来源核查通过；正式统计恢复为21合格模型、七组配置各三种子，仍是原1050＋21回合。
+新统计位于独立 `paper_handoff_exports/WRIST_FIGURE3_BUCKET_AUDIT_20261005/bucket/updated_results/`。
+新增同名tar.gz和.sha256是10-04包的增量，原包不覆盖。桶721素材继续复用原包，未重选成功例。
+以下10-04的19合格/2pending为历史记录，以本次补充包的资格和CSV为准。
+
+## 2026-10-04 补实验完成与来源复核
+
+以下09-25交接材料是历史冻结包，不覆盖原文件或其校验值。新增14次训练已完成并回传，
+21模型身份的统一闭环评测已经完成，共1050扰动＋21标准初态，实际退出均已验证。
+19身份通过来源资格核查；两版桶的旧721仍缺历史有效源码，不混入正式三种子统计。
+本轮入口为[统一评测记录](../experiments/unified_evaluation_20261003.md)与
+[补实验台账](../experiments/paper_supplement_20260929.md)。
+新统计和规定的标准初态素材输出到Ubuntu的
+`logs/PaperSupplement20260929/unified_evaluation_20261003/`。
+优先阅读[最新结果解读](../experiments/unified_results_review_20261004.md)，再查CSV及逐回合证据。
+新交接包为`PAPER_SUPPLEMENT_EVALUATION_REVIEW_20261004.tar.gz`及`.sha256`，含更新统计、
+来源核查、配置曲线和7组标准初态MP4/切片，不含checkpoint和NPZ。
+首版`PAPER_SUPPLEMENT_EVALUATION.tar.gz`已冻结保留，不回写其哈希。
+Push/Pull视频导出页头仍是当时待审计标签，随包`models.json`和review给出当前复用资格。
+不把旧选例视频或09-25的少量回合统计当作本轮三独立训练种子结果。
+
+## 09-25 历史交接
+
 整理日期：2026-09-25。这里提供已完成实验的源码导航、配置与评测依据、可直接观看的展示素材；论文正文在 Mac 端撰写。本目录不建立新路线，也不授权追加实验。
 
 GitHub同步：本轮经用户授权，将本目录、最新主文档、方法对照报告和独立素材工具提交到个人仓库 `Kaifeng-Jia/holosoma-rubber-hand-marl` 的 `core4d-base`。拉取该分支后可直接阅读、离线播放；不需要另外取得Ubuntu的 `logs/`。交接ZIP及其校验文件仅留在本地，避免重复上传。

@@ -14,6 +14,7 @@ import json
 import os
 from pathlib import Path
 import subprocess
+import sys
 import xml.etree.ElementTree as ET
 
 os.environ.setdefault("MUJOCO_GL", "egl")
@@ -73,6 +74,7 @@ def main():
     p.add_argument("--distance-scale", type=float, default=1.0, help="Only changes camera distance, never replay poses")
     p.add_argument("--frames", help="Comma-separated original recording indices for stills")
     p.add_argument("--stills-only", action="store_true")
+    p.add_argument("--no-overlay", action="store_true", help="Save unlabelled native images for paper composition")
     args = p.parse_args()
     args.output.mkdir(parents=True, exist_ok=True)
     if (args.output / "manifest.json").exists():
@@ -175,6 +177,7 @@ def main():
     font = ImageFont.truetype(font_path, 20) if Path(font_path).exists() else ImageFont.load_default()
     writer = None
     images = {}
+    frame_camera_records = []
     if not args.stills_only:
         command = [str(args.ffmpeg), "-hide_banner", "-loglevel", "error", "-n", "-f", "rawvideo",
                    "-pix_fmt", "rgb24", "-s", f"{args.width}x{args.height}", "-r", str(args.video_fps),
@@ -197,11 +200,16 @@ def main():
                     camera.lookat[:2] = frame_points[frame, :, :2].mean(axis=0)
                 renderer.update_scene(data, camera=camera)
                 image = Image.fromarray(renderer.render())
-                draw = ImageDraw.Draw(image)
-                draw.rectangle((0, 0, args.width, 65), fill=(248, 250, 252))
-                draw.text((16, 7), args.title + " | " + args.checkpoint_label, font=font, fill=(20, 35, 55))
-                draw.text((16, 35), f"Recorded physical rollout | t={frame/fps:.2f}s | frame {frame}/{count-1}", font=font, fill=(45, 65, 80))
+                if not args.no_overlay:
+                    draw = ImageDraw.Draw(image)
+                    draw.rectangle((0, 0, args.width, 65), fill=(248, 250, 252))
+                    draw.text((16, 7), args.title + " | " + args.checkpoint_label, font=font, fill=(20, 35, 55))
+                    draw.text((16, 35), f"Recorded physical rollout | t={frame/fps:.2f}s | frame {frame}/{count-1}", font=font, fill=(45, 65, 80))
                 if frame in stills:
+                    frame_camera_records.append(dict(frame=int(frame), time_s=frame/fps,
+                        episode_step=int(arrays['episode_step'][frame]) if 'episode_step' in arrays else None,
+                        reference_frame=int(arrays['reference_frame'][frame]) if 'reference_frame' in arrays else None,
+                        lookat=camera.lookat.tolist(), distance=float(camera.distance)))
                     image.save(args.output / f"frame_{frame:04d}.png")
                     images[frame] = image.copy()
                 if writer is not None:
@@ -233,6 +241,19 @@ def main():
         "time_origin": "first recorded state; no trimming, smoothing, interpolation or pose edits",
         "camera": {"mode": args.camera_mode, "fixed_lookat": center.tolist(), "follow_xy": "mean(two robot roots, object origin)", "distance": camera.distance, "distance_scale": args.distance_scale, "azimuth": args.azimuth, "elevation": args.elevation},
         "resolution": [args.width, args.height], "script_sha256": sha(Path(__file__)),
+        "command": [sys.executable, *sys.argv], "labels_axes_ui": not args.no_overlay,
+        "camera_frames": frame_camera_records,
+        "projection": "perspective", "fovy_degrees": float(model.vis.global_.fovy),
+        "orthographic": bool(getattr(model.vis.global_, 'orthographic', False)),
+        "lighting": dict(headlight_diffuse=[.5]*3, headlight_ambient=[.3]*3, headlight_specular=[.05]*3,
+            top_light_pos=(center+[0,0,5]).tolist(), top_light_dir=[0,0,-1], top_light_diffuse=[.5]*3,
+            top_light_specular=[0]*3, castshadow=True, shadowsize=2048, offsamples=4),
+        "visual_meshes": [dict(urdf=str(path), filename=node.attrib['filename'],
+            scale=node.attrib.get('scale', '1 1 1'),
+            sha256=sha(Path(node.attrib['filename']) if Path(node.attrib['filename']).is_absolute()
+                else path.parent/node.attrib['filename']))
+            for path in [args.robot_urdf, args.object_urdf]
+            for node in ET.parse(path).findall('.//visual/geometry/mesh')],
         "outputs_sha256": {f.name: sha(f) for f in args.output.iterdir() if f.is_file()},
     }
     (args.output / "manifest.json").write_text(json.dumps(record, ensure_ascii=False, indent=2) + "\n")

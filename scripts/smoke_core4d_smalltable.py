@@ -29,6 +29,7 @@ BUCKET_REWARD_CHOICES = ("bucket_A", "bucket_B", "bucket_A_no_rel", "bucket_A_no
 PARSER.add_argument("--reward-variant", choices=("baseline", "interaction_mesh", *BUCKET_REWARD_CHOICES), default="baseline")
 PARSER.add_argument("--bucket-reference", type=Path, default=None)
 PARSER.add_argument("--interaction-reference", type=Path, default=None)
+PARSER.add_argument("--reference-variant", type=Path, default=None)
 ARGS = PARSER.parse_args()
 IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
 if ARGS.experiment == "smalltable5kg_A" and ARGS.reward_variant not in ("bucket_A", "bucket_A_no_rel_no_height"):
@@ -70,7 +71,8 @@ from holosoma.config_values.marl.g1.core4d_bucket_contract import (  # noqa: E40
 )
 
 
-EXPERIMENT = get_core4d_pair_experiment(ARGS.experiment)
+from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
+EXPERIMENT = with_reference_variant(get_core4d_pair_experiment(ARGS.experiment), ARGS.reference_variant, reward_variant=ARGS.reward_variant)
 if not 0 <= ARGS.reference_frame < EXPERIMENT.reference_frames:
     PARSER.error("--reference-frame must be inside the selected clip")
 if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
