@@ -1,0 +1,82 @@
+{
+ "hostname": "kevin-Legion-R9000P-ADR10",
+ "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU 8151 MiB",
+ "driver": "580.178.04",
+ "isaac_lab_release": "v2.3.0 (/home/kevin/.holosoma_deps/IsaacLab, isaaclab ext 0.47.2)",
+ "paper_backend": "Isaac Sim 5.1.0 / Isaac Lab 0.47.2 (local hssim and V3 cloud dispatch receipt)",
+ "envs": {
+  "hssim_s1": {
+   "python": "3.11.15",
+   "torch": "2.7.0+cu128",
+   "isaacsim": "5.1.0.0",
+   "isaaclab_ext": "0.47.2",
+   "numpy": "1.26.0",
+   "created": "conda create --clone hssim -n hssim_s1",
+   "changes": [
+    "> einx==0.4.3",
+    "> frozendict==2.5.1",
+    "> -e git+https://github.com/NVlabs/GR00T-WholeBodyControl.git@1e1ec4f5f27e6c3e03048f693bd7c60cce04afda#egg=gear_sonic&subdirectory=gear_sonic",
+    "< -e git+https://github.com/amazon-far/holosoma.git@033ad6e783e3031a651c8fb4ca793f055e01c1da#egg=holosoma&subdirectory=src/holosoma",
+    "> -e git+https://github.com/Kaifeng-Jia/holosoma-rubber-hand-marl.git@ce5ad9e94c5453fba93a9dd5728bdc0f521877e0#egg=holosoma&subdirectory=src/holosoma",
+    "> torch-einops-utils==0.2.6",
+    "> vector-quantize-pytorch==1.32.2"
+   ]
+  },
+  "sonic_s1": {
+   "python": "3.11.15",
+   "torch": "2.7.0+cu128",
+   "isaacsim": "5.1.0.0",
+   "isaaclab_ext": "0.47.2",
+   "numpy": "1.26.4",
+   "created": "conda create --clone hssim -n sonic_s1; pip install -e gear_sonic[training]; pip install pyarrow==19.0.1",
+   "changes": [
+    "> accelerate==1.15.0",
+    "> datasets==5.1.0",
+    "> dill==0.4.1",
+    "> einx==0.4.3",
+    "> frozendict==2.5.1",
+    "> -e git+https://github.com/NVlabs/GR00T-WholeBodyControl.git@1e1ec4f5f27e6c3e03048f693bd7c60cce04afda#egg=gear_sonic&subdirectory=gear_sonic",
+    "> glfw==2.11.0",
+    "< hf-xet==1.5.1",
+    "> hf-xet==1.8.0",
+    "< huggingface_hub==1.22.0",
+    "< hydra-core==1.3.3",
+    "< idna==3.10",
+    "> huggingface_hub==1.33.0",
+    "> hydra-core==1.3.2",
+    "> idna==3.20",
+    "> mediapy==1.2.7",
+    "> mujoco==4.0.0",
+    "> mujoco-core==4.0.0",
+    "> mujoco-studio==4.0.0",
+    "> multiprocess==0.70.19",
+    "< numpy==1.26.0",
+    "> numpy==1.26.4",
+    "> pyarrow==26.0.1",
+    "> PyOpenGL==3.1.10",
+    "> smpl_sim @ git+https://github.com/ZhengyiLuo/SMPLSim.git@b5c08720503ad5fff64050c4d289c42d947fcf8d",
+    "> smplx @ git+https://github.com/ZhengyiLuo/smplx.git@a5b8e4ac14f79f3f33fd2cf2a16e6f507146b813",
+    "> torch-einops-utils==0.2.6",
+    "> torchgeometry==0.1.2",
+    "> trl==0.28.0",
+    "> vector-quantize-pytorch==1.32.2",
+    "> vtk==9.7.2",
+    "< websockets==12.0",
+    "> websockets==17.4"
+   ]
+  }
+ },
+ "sonic_repo": {
+  "path": "/home/kevin/third_party/GR00T-WholeBodyControl",
+  "commit": "1e1ec4f5f27e6c3e03048f693bd7c60cce04afda",
+  "lfs_pulled": "gear_sonic/data/assets/**"
+ },
+ "sonic_hf": {
+  "repo": "nvidia/GEAR-SONIC",
+  "revision": "6733128a3d8a523b1418b06bca3cdf61c8b0987f",
+  "gated": false,
+  "license": "nvidia-open-model-license",
+  "checkpoint": "sonic_release/last.pt",
+  "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+ }
+}
