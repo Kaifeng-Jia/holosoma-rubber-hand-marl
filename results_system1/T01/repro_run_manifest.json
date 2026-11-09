@@ -1,0 +1,66 @@
+{
+  "reference_variant": null,
+  "reference_variant_sha256": null,
+  "case": "pull",
+  "model_id": "Pull-baseline_seed721",
+  "checkpoint": "/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_08050.pt",
+  "checkpoint_sha256": "727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43",
+  "v3_ablation": null,
+  "checkpoint_iteration": 8050,
+  "states_sha256": "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572",
+  "reference_frames": 316,
+  "horizon_control_steps": 316,
+  "dt": 0.02,
+  "inference": "actor_mean_only_critic_forbidden",
+  "observation_noise": false,
+  "physics": {
+    "mass": [
+      [
+        20.0
+      ]
+    ],
+    "material": [
+      [
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ]
+      ]
+    ]
+  },
+  "robot_urdf": "g1/main_mesh_collision_rubberhand.urdf",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+  "placement_provenance": null,
+  "runtime_reference_check": null,
+  "endpoint_rule": "Execute each reference frame once; stop at clip end before the next wrapped state",
+  "error_alignment": "Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset",
+  "training_contract": {
+    "version": "plan5_shared_actor_mappo_v1",
+    "num_agents": 2,
+    "actor_obs_dim": 158,
+    "critic_obs_dim": 527,
+    "action_dim": 29,
+    "source_sha256": "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364"
+  }
+}
