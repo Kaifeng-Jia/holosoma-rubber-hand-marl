@@ -46,6 +46,8 @@ PARSER.add_argument("--push-placement-proof", type=Path, default=None,
 PARSER.add_argument("--from-scratch", action="store_true")
 PARSER.add_argument("--zero-teammate-obs", action="store_true")
 PARSER.add_argument("--episode-telemetry", action="store_true")
+PARSER.add_argument("--object-mass-kg", type=float, default=None,
+                    help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 ARGS = PARSER.parse_args()
 if ARGS.from_scratch or ARGS.zero_teammate_obs:
     if ARGS.skill != "pull" or ARGS.fine_tune_from or ARGS.teammate_input_only or ARGS.joint_acceleration_weight is not None:
@@ -169,6 +171,16 @@ CONFIG, PLACEMENT_PROVENANCE = configure_push_placement(
     CONFIG, ARGS.push_placement_proof, skill=ARGS.skill, root=REPO_ROOT)
 if PLACEMENT_PROVENANCE is not None:
     EXPECTED_SOURCE_CHECKPOINT_SHA256 = "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+OBJECT_MASS_VARIANT = None
+if ARGS.object_mass_kg is not None:
+    if ARGS.object_mass_kg <= 0.0:
+        PARSER.error("--object-mass-kg must be positive")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.mass_variants import ensure_mass_variant
+    _variant_urdf, OBJECT_MASS_VARIANT = ensure_mass_variant(
+        CONFIG.robot.object.object_urdf_path, ARGS.object_mass_kg)
+    CONFIG = replace(CONFIG, robot=replace(
+        CONFIG.robot, object=replace(CONFIG.robot.object, object_urdf_path=_variant_urdf)))
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -220,6 +232,14 @@ EXPECTED_OBJECT_INERTIA_KG_M2 = {
     ),
 }
 EXPECTED_OBJECT_MATERIAL = (0.5, 0.5, 0.0)
+if OBJECT_MASS_VARIANT is not None:
+    _ratio = OBJECT_MASS_VARIANT["ratio"]
+    if abs(OBJECT_MASS_VARIANT["source_mass_kg"] - EXPECTED_OBJECT_MASS_KG) > 1e-9:
+        raise RuntimeError("Mass-variant source URDF mass differs from the expected training mass")
+    EXPECTED_OBJECT_MASS_KG = OBJECT_MASS_VARIANT["mass_kg"]
+    EXPECTED_OBJECT_INERTIA_KG_M2 = {
+        k: tuple(float(v) * _ratio for v in values) for k, values in EXPECTED_OBJECT_INERTIA_KG_M2.items()
+    }
 
 
 def _git_commit() -> str:
@@ -521,6 +541,8 @@ def main() -> None:
         if ARGS.episode_telemetry:
             telemetry = EpisodeTelemetry(env, output_dir / "episode_telemetry.jsonl.gz")
             run_config["episode_telemetry_contract"] = TELEMETRY_CONTRACT
+        if OBJECT_MASS_VARIANT is not None:
+            run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
         _write_json(output_dir / "run_config.json", run_config)
         # Telemetry runs preserve the exact loaded state in their new segment.
         if ARGS.resume is None or ARGS.episode_telemetry:

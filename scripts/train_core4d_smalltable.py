@@ -43,6 +43,8 @@ PARSER.add_argument("--object-height-penalty-weight", type=float, default=0.0,
 PARSER.add_argument("--object-height-penalty-scale", type=float, default=0.05,
                     help="World-z error in metres corresponding to unit squared cost")
 PARSER.add_argument("--reference-variant", type=Path, default=None)
+PARSER.add_argument("--object-mass-kg", type=float, default=None,
+                    help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 PARSER.add_argument("--episode-telemetry", action="store_true")
 ARGS = PARSER.parse_args()
 IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
@@ -103,6 +105,13 @@ from holosoma.config_values.marl.g1.core4d_smalltable_reward import (  # noqa: E
 
 from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
 EXPERIMENT = with_reference_variant(get_core4d_pair_experiment(ARGS.experiment), ARGS.reference_variant, reward_variant=ARGS.reward_variant)
+OBJECT_MASS_VARIANT = None
+if ARGS.object_mass_kg is not None:
+    if ARGS.object_mass_kg <= 0.0:
+        PARSER.error("--object-mass-kg must be positive")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.mass_variants import core4d_experiment_with_mass
+    EXPERIMENT, OBJECT_MASS_VARIANT = core4d_experiment_with_mass(EXPERIMENT, ARGS.object_mass_kg)
 if ARGS.reward_variant == "interaction_mesh" and not EXPERIMENT.allow_interaction_mesh:
     PARSER.error(f"--experiment {ARGS.experiment} does not allow interaction_mesh")
 if not EXPERIMENT.training_ready:
@@ -519,6 +528,8 @@ def main() -> int:
             from holosoma.utils.v3_episode_telemetry import EpisodeTelemetry, CONTRACT
             episode_telemetry = EpisodeTelemetry(env, output_dir / "episodes_raw.jsonl.gz")
             run_config["episode_telemetry_contract"] = CONTRACT
+        if OBJECT_MASS_VARIANT is not None:
+            run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
         _write_json(output_dir / "run_config.json", run_config)
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:

@@ -89,7 +89,9 @@ def build_bucket_reward_contract(path: str | Path, variant: str, *, experiment=N
         expected = {
             "runtime_reference_sha256": experiment.runtime_reference_sha256,
             "source_pair_sha256": experiment.source_pair_sha256,
-            "object_urdf_sha256": experiment.object_urdf_sha256,
+            # System1 mass variants change only mass/inertia; compare the frozen artifact
+            # against the source geometry. Attribute is absent for all original experiments.
+            "object_urdf_sha256": getattr(experiment, "source_object_urdf_sha256", experiment.object_urdf_sha256),
         }
         if any(metadata.get(key) != value for key, value in expected.items()):
             raise ValueError("Bucket artifact does not match the selected scene/reference")

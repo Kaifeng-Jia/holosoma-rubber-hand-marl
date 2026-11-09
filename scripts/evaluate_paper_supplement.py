@@ -21,6 +21,7 @@ p.add_argument('--model-id',required=True)
 p.add_argument('--output-dir',type=Path,required=True)
 p.add_argument('--limit',type=int,default=0)
 p.add_argument('--reference-variant',type=Path,default=None)
+p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
 a=p.parse_args()
 if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
 record=json.loads(a.states.read_text());states=record['states'][:a.limit or None]
@@ -33,13 +34,24 @@ from holosoma.config_values.marl.g1.kick_experiment import g1_29dof_plan5_kick_b
 from plan5_registered_placement import configure_push_placement,export_runtime_reference
 from holosoma.utils.eval_utils import init_sim_imports
 experiment=None
+mass_variant=None
 if a.case in ('push','pull','kick'):
     config=dict(push=g1_29dof_plan5_push_baseline,pull=g1_29dof_plan5_pull_baseline,
                 kick=g1_29dof_plan5_kick_baseline)[a.case]
+    if a.object_mass_kg is not None:
+        sys.path.insert(0,str(ROOT))
+        from system1.mass_variants import ensure_mass_variant
+        _urdf,mass_variant=ensure_mass_variant(config.robot.object.object_urdf_path,a.object_mass_kg)
+        config=replace(config,robot=replace(config.robot,object=replace(config.robot.object,object_urdf_path=_urdf)))
 else:
     experiment=get_core4d_pair_experiment(dict(chair='chair021',bucket='bucket003',table='smalltable5kg_A')[a.case])
     from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
     experiment=with_reference_variant(experiment,a.reference_variant)
+    mass_variant=None
+    if a.object_mass_kg is not None:
+        sys.path.insert(0,str(ROOT))
+        from system1.mass_variants import core4d_experiment_with_mass
+        experiment,mass_variant=core4d_experiment_with_mass(experiment,a.object_mass_kg)
     config=with_pair_experiment(g1_29dof_core4d_smalltable_smoke,experiment)
     if a.case in ('bucket','table'):
         config=replace(config,env_class='holosoma.envs.marl.core4d_bucket_manager.Core4DBucketManager',
@@ -129,6 +141,7 @@ def main():
                       endpoint_rule='Execute each reference frame once; stop at clip end before the next wrapped state',
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
+        if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
         write_json(out/'run_manifest.json',manifest)
         results=[]
         for init in states:
