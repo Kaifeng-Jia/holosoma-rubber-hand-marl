@@ -28,7 +28,9 @@ echo "start $(date)"
 if [[ ! -d $S1_ROOT/duet-system1 ]]; then
   git clone --branch $BRANCH "$REPO_URL" "$S1_ROOT/duet-system1"
 fi
-cd "$S1_ROOT/duet-system1" && git pull --ff-only && git rev-parse HEAD
+cd "$S1_ROOT/duet-system1"
+for i in 1 2 3 4 5; do git -c http.version=HTTP/1.1 pull --ff-only && break; echo "git pull attempt $i failed"; sleep 10; done
+git rev-parse HEAD
 
 # 2. simulator env: copy, then re-point editable installs to our own copies
 ENV=$S1_ROOT/deps/hssim_s1
@@ -51,10 +53,21 @@ if grep -rl "r2_deps\|r2_2026" "$ENV"/lib/python3.11/site-packages/__editable__*
 fi
 
 # 3. SONIC code + small runtime deps (no upgrades) + release checkpoint (sha256 checked)
+# GitHub is unreliable from this machine: SONIC code comes as `git archive` of $SONIC_COMMIT (gear_sonic/, LICENSE,
+# config.json; LFS pointers not smudged, as a GIT_LFS_SKIP_SMUDGE clone) made on the Ubuntu box, sha256 checked.
+SONIC_TAR=$S1_ROOT/inputs/sonic_code_1e1ec4f5.tar
+SONIC_TAR_SHA=cd5c39126896bc9cd9edb41718f96b4bc002597fb68a997fc51e30b6b5a80294
 if [[ ! -d $S1_ROOT/third_party/GR00T-WholeBodyControl ]]; then
-  GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/NVlabs/GR00T-WholeBodyControl.git "$S1_ROOT/third_party/GR00T-WholeBodyControl"
+  if [[ -f $SONIC_TAR ]]; then
+    echo "$SONIC_TAR_SHA  $SONIC_TAR" | sha256sum -c -
+    tar -C "$S1_ROOT/third_party" -xf "$SONIC_TAR"
+    printf '{"source": "git archive", "commit": "%s", "tar_sha256": "%s"}\n' $SONIC_COMMIT $SONIC_TAR_SHA > "$S1_ROOT/third_party/GR00T-WholeBodyControl/S1_SOURCE.json"
+  else
+    GIT_LFS_SKIP_SMUDGE=1 git clone https://github.com/NVlabs/GR00T-WholeBodyControl.git "$S1_ROOT/third_party/GR00T-WholeBodyControl"
+  fi
 fi
-cd "$S1_ROOT/third_party/GR00T-WholeBodyControl" && git checkout $SONIC_COMMIT
+cd "$S1_ROOT/third_party/GR00T-WholeBodyControl"
+if [[ -d .git ]]; then git checkout $SONIC_COMMIT; else grep -q $SONIC_COMMIT S1_SOURCE.json; fi
 $PY -m pip install --no-deps einx==0.4.3 frozendict==2.5.1 torch-einops-utils==0.2.6 vector_quantize_pytorch==1.32.2
 $PY -m pip install --no-deps --no-build-isolation -e gear_sonic/
 for f in sonic_release/config.yaml sonic_release/last.pt config.json LICENSE; do
