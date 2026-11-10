@@ -1,0 +1,119 @@
+{
+ "contact_threshold_m": 0.03,
+ "hands": [
+  "left_rubber_hand_link",
+  "right_rubber_hand_link"
+ ],
+ "tasks": {
+  "push": {
+   "file": "logs_system1/T02/contacts/push_contacts.npz",
+   "sha256": "48fe28cb7b27447d457e58162bdbeb4614309a2e084e6d9d362bbe4e80a6d129",
+   "frames": 309,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "reference_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "object_urdf_sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a",
+   "contact_fraction": 0.7200647249190939,
+   "contact_fraction_per_robot_hand": [
+    [
+     0.7281553398058253,
+     0.7119741100323624
+    ],
+    [
+     0.7281553398058253,
+     0.7119741100323624
+    ]
+   ],
+   "inside_fraction": 0.0,
+   "all_parts_watertight": true
+  },
+  "pull": {
+   "file": "logs_system1/T02/contacts/pull_contacts.npz",
+   "sha256": "4c9ba7be7b1cd514bbd1bd77942e2d51f950c605de63b6948e0983bba3321aaa",
+   "frames": 316,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "reference_sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "object_urdf_sha256": "c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2",
+   "contact_fraction": 0.09572784810126582,
+   "contact_fraction_per_robot_hand": [
+    [
+     0.11708860759493671,
+     0.0759493670886076
+    ],
+    [
+     0.07278481012658228,
+     0.11708860759493671
+    ]
+   ],
+   "inside_fraction": 0.0,
+   "all_parts_watertight": true
+  },
+  "chair": {
+   "file": "logs_system1/T02/contacts/chair_contacts.npz",
+   "sha256": "75a1dff91672ffc2d81bce50e891132dd8297ccc0d98ba9315abf6fbdfb59cef",
+   "frames": 391,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+   "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+   "contact_fraction": 0.012148337595907928,
+   "contact_fraction_per_robot_hand": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.04859335038363171
+    ]
+   ],
+   "inside_fraction": 0.0,
+   "all_parts_watertight": true
+  },
+  "bucket": {
+   "file": "logs_system1/T02/contacts/bucket_contacts.npz",
+   "sha256": "259314a69176b720fdd9fde734cfa0c47c2927428f4c2881221a6406b04662c0",
+   "frames": 497,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+   "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+   "contact_fraction": 0.06438631790744467,
+   "contact_fraction_per_robot_hand": [
+    [
+     0.0,
+     0.026156941649899398
+    ],
+    [
+     0.21730382293762576,
+     0.014084507042253521
+    ]
+   ],
+   "inside_fraction": 0.0,
+   "all_parts_watertight": true
+  },
+  "table": {
+   "file": "logs_system1/T02/contacts/table_contacts.npz",
+   "sha256": "a2d49d08b23409b7b46bef9fbc919612eabd810448e91e4bad9d0bc695fadc13",
+   "frames": 687,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+   "contact_fraction": 0.0,
+   "contact_fraction_per_robot_hand": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "inside_fraction": 0.0,
+   "all_parts_watertight": true
+  }
+ }
+}
