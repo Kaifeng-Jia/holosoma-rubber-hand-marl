@@ -31,12 +31,13 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--steps", type=int, default=2000)
     p.add_argument("--device", default="cuda:0")
+    p.add_argument("--tf32", action="store_true")
     a = p.parse_args()
     z = np.load(a.dump)
     dev = a.device
     T = min(a.steps, z["action"].shape[0])
     E = z["action"].shape[1]
-    ctl = sc.SonicController(batch=E, device=dev)
+    ctl = sc.SonicController(batch=E, device=dev, tf32=a.tf32)
     # SONIC's eval env randomizes each env's default joint pos at startup (add_joint_default_pos,
     # U(-0.01, 0.01)); the per-env values equal the action offsets stored in the dump.
     ctl.default_joint_pos = torch.tensor(z["static/action_offset"].reshape(-1, 29)[:E], device=dev)
@@ -49,6 +50,7 @@ def main():
     tsteps = g("time_steps").long() + g("motion_start_time_steps").long()
     stats = {k: 0.0 for k in ("tok_cmd", "tok_ori", "tok_encidx", "actor_obs", "action_from_sonic_obs", "action_from_rebuilt_obs")}
     per_term = {n: 0.0 for n, _ in sc.PROPRIO_TERMS}
+    sums = {"action_from_sonic_obs": 0.0, "action_from_rebuilt_obs": 0.0}
     ctl.reset(torch.arange(E, device=dev))
     ctl_ref = sc.SonicController.__new__(sc.SonicController)  # second policy instance for the sonic-obs path
     ctl_ref.policy = sc.load_sonic_policy(sc.DEFAULT_CHECKPOINT, ctl.spec, dev)
@@ -74,9 +76,12 @@ def main():
         a_ref = ctl_ref.policy.act_inference(obs_dict={"actor_obs": act_obs_dump[t], "tokenizer": tok_dump[t]}, cur_dones=dones, skip_episode_attnmask=True)
         stats["action_from_sonic_obs"] = max(stats["action_from_sonic_obs"], (a_ref - act_dump[t]).abs().max().item())
         stats["action_from_rebuilt_obs"] = max(stats["action_from_rebuilt_obs"], (action - act_dump[t]).abs().max().item())
+        sums["action_from_sonic_obs"] += (a_ref - act_dump[t]).abs().mean().item()
+        sums["action_from_rebuilt_obs"] += (action - act_dump[t]).abs().mean().item()
         # Feed back SONIC's own action so later histories stay aligned even if a tiny difference appears.
         ctl.last_action = act_dump[t].clamp(-ctl.action_clip, ctl.action_clip).clone()
-    report = dict(dump=str(a.dump), steps=T, envs=E, max_abs=stats, actor_obs_per_term=per_term)
+    report = dict(dump=str(a.dump), steps=T, envs=E, tf32=a.tf32, max_abs=stats, actor_obs_per_term=per_term,
+                  mean_abs={k: v / T for k, v in sums.items()})
     a.out.write_text(json.dumps(report, indent=1))
     print(json.dumps(report, indent=1))
 

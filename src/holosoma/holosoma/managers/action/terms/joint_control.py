@@ -184,8 +184,11 @@ class JointPositionActionTerm(ActionTermBase):
 
         if control_type == "P":
             # Position control
+            override = getattr(self, "joint_target_override", None)  # System1: absolute targets (None = original)
+            target = override if override is not None else actions_scaled + self.env.default_dof_pos
+            self.last_pd_target = target
             torques = (
-                self._kp_scale * self.p_gains * (actions_scaled + self.env.default_dof_pos - self.env.simulator.dof_pos)
+                self._kp_scale * self.p_gains * (target - self.env.simulator.dof_pos)
                 - self._kd_scale * self.d_gains * self.env.simulator.dof_vel
             )
         elif control_type == "V":
@@ -335,3 +338,8 @@ class JointPositionActionTerm(ActionTermBase):
                     self.action_scales[i] = control_cfg.action_scale * effort / stiffness
         else:
             self.action_scales[:] = control_cfg.action_scale
+        frozen = getattr(control_cfg, "frozen_action_scales", None)
+        if frozen is not None:  # System1 F2 switch (None = original behaviour)
+            if len(frozen) != len(self.action_scales):
+                raise ValueError("frozen_action_scales must have one entry per DOF")
+            self.action_scales[:] = torch.as_tensor(frozen, dtype=self.action_scales.dtype, device=self.action_scales.device)

@@ -38,6 +38,7 @@ DEFAULT_SPEC = Path(__file__).resolve().parent / "sonic" / "sonic_release_spec.j
 
 PROPRIO_TERMS = (("base_ang_vel", 3), ("joint_pos", 29), ("joint_vel", 29), ("actions", 29), ("gravity_dir", 3))
 HISTORY = 10
+INFER_BLOCK = 128  # fixed inference block (F3 batch invariance)
 
 
 # ----------------------------------------------------------------------------- quaternion math (w, x, y, z)
@@ -210,11 +211,12 @@ class SonicController:
     """Batched SONIC inference for B robots (B = num_envs * num_agents)."""
 
     def __init__(self, batch, device="cuda:0", checkpoint=DEFAULT_CHECKPOINT, spec_path=DEFAULT_SPEC, holosoma_joint_names=None,
-                 tf32=True):
-        # SONIC's eval_agent_trl.py enables TF32 matmuls; keep the same numerics by default.
-        if tf32:
-            torch.backends.cuda.matmul.allow_tf32 = True
-            torch.backends.cudnn.allow_tf32 = True
+                 tf32=False):
+        # F3: formal evaluations run with TF32 off so results do not depend on the batch size.
+        # (SONIC's own eval_agent_trl.py turns TF32 on; training of scheme C may opt in.)
+        self.tf32 = bool(tf32)
+        torch.backends.cuda.matmul.allow_tf32 = self.tf32
+        torch.backends.cudnn.allow_tf32 = self.tf32
         self.spec = json.loads(Path(spec_path).read_text())
         self.batch, self.device = batch, device
         self.joint_names = list(self.spec["joint_names"])
@@ -273,6 +275,27 @@ class SonicController:
         )
 
     @torch.no_grad()
+    def infer(self, obs, dones):
+        """Policy action mean, evaluated in fixed blocks of ``INFER_BLOCK`` rows (zero-padded).
+
+        cuBLAS picks kernels by the number of rows, so plain batched inference is not
+        bit-identical across batch sizes even with TF32 off (F3). A fixed block size makes
+        each row's result independent of the batch size and of its position in the batch.
+        """
+        n = obs["actor_obs"].shape[0]
+        out = []
+        for s in range(0, n, INFER_BLOCK):
+            blk = {k: v[s : s + INFER_BLOCK] for k, v in obs.items()}
+            d = dones[s : s + INFER_BLOCK]
+            k = d.shape[0]
+            if k < INFER_BLOCK:
+                blk = {kk: torch.cat([v, v.new_zeros(INFER_BLOCK - k, v.shape[1])]) for kk, v in blk.items()}
+                d = torch.cat([d, d.new_zeros(INFER_BLOCK - k)])
+            self.policy.init_rollout()  # history length 1: no cross-call state in the Actor
+            out.append(self.policy.act_inference(obs_dict=blk, cur_dones=d, skip_episode_attnmask=True)[:k])
+        return torch.cat(out)
+
+    @torch.no_grad()
     def act(self, root_quat, root_ang_vel_b, joint_pos, joint_vel, ref_dof_pos_f, ref_dof_vel_f, ref_root_quat_f, dones=None):
         """All inputs in SONIC order / wxyz. Returns (raw action [B,29], joint targets [B,29])."""
         now = proprio_now(root_quat, root_ang_vel_b, joint_pos, joint_vel, self.last_action, self.default_joint_pos)
@@ -280,7 +303,7 @@ class SonicController:
         obs = {"actor_obs": self.actor_obs(), "tokenizer": self.tokenizer_obs(ref_dof_pos_f, ref_dof_vel_f, ref_root_quat_f, root_quat)}
         if dones is None:
             dones = torch.zeros(self.batch, device=self.device)
-        action = self.policy.act_inference(obs_dict=obs, cur_dones=dones, skip_episode_attnmask=True)
+        action = self.infer(obs, dones)
         self.last_action = action.clamp(-self.action_clip, self.action_clip).clone()
         target = self.default_joint_pos + self.action_scale * self.last_action
         return action, target, obs

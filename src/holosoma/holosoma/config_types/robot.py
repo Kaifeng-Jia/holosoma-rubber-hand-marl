@@ -39,6 +39,9 @@ class RobotControlConfig:
     clip_actions: bool
     clip_torques: bool
     action_scales_by_effort_limit_over_p_gain: bool = False
+    # System1 F2: when set, per-DOF action scales (in dof_names order) are taken verbatim,
+    # so PD gains / limits can change while the action scales stay frozen.
+    frozen_action_scales: tuple[float, ...] | None = None
 
 
 @dataclass(frozen=True)

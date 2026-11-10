@@ -45,11 +45,7 @@ def build_config(motion_file: str, n_frames: int, sonic_pd: bool, device_headles
                  start_at_timestep_zero_prob=1.0, noise_to_initial_pose=NoiseToInitialPoseConfig())
     cmd = replace(g1_29dof_wbt_command, setup_terms={
         "motion_command": replace(g1_29dof_wbt_command.setup_terms["motion_command"], params={"motion_config": mc})})
-    ctl = g1_29dof_wbt.robot.control
-    if sonic_pd:
-        ctl = replace(ctl, stiffness={**ctl.stiffness, "hip_pitch": SONIC_HIP_PITCH_KP},
-                      damping={**ctl.damping, "hip_pitch": SONIC_HIP_PITCH_KD})
-    robot = replace(g1_29dof_wbt.robot, control=ctl,
+    robot = replace(g1_29dof_wbt.robot,
                     asset=replace(g1_29dof_wbt.robot.asset, urdf_file="g1/main_mesh_collision_rubberhand.urdf"))
     sim = replace(g1_29dof_wbt.simulator, config=replace(g1_29dof_wbt.simulator.config,
                   sim=replace(g1_29dof_wbt.simulator.config.sim, max_episode_length_s=(n_frames + 10) / 50.0)))
@@ -57,9 +53,14 @@ def build_config(motion_file: str, n_frames: int, sonic_pd: bool, device_headles
         func="holosoma.managers.termination.terms.common:timeout_exceeded", is_timeout=True)})
     obs = g1_29dof_wbt.observation
     obs = replace(obs, groups={k: replace(v, enable_noise=False) for k, v in obs.groups.items()})
-    return replace(g1_29dof_wbt, training=replace(g1_29dof_wbt.training, num_envs=1, headless=device_headless, seed=241003),
+    cfg = replace(g1_29dof_wbt, training=replace(g1_29dof_wbt.training, num_envs=1, headless=device_headless, seed=241003),
                    robot=robot, command=cmd, simulator=sim, termination=term, observation=obs,
                    randomization=_no_randomization(), reward=RewardManagerCfg(), curriculum=g1_29dof_wbt.curriculum)
+    if sonic_pd:  # same low-level settings as schemes A-C: hip_pitch PD -> SONIC, scales frozen (F2)
+        from system1.scheme_a import with_sonic_pd
+
+        cfg = with_sonic_pd(cfg)
+    return cfg
 
 
 def _no_randomization():
@@ -81,6 +82,7 @@ def main():
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--no-sonic-pd", action="store_true")
     p.add_argument("--max-steps", type=int, default=0)
+    p.add_argument("--tf32", action="store_true", help="enable TF32 (default off, F3)")
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
     sref = np.load(f"{a.ref_prefix}.sonic.npz")
@@ -102,7 +104,9 @@ def main():
         dev = env.device
         sim = env.simulator
         h_names = list(sim.dof_names)
-        ctl = sc.SonicController(batch=1, device=dev, holosoma_joint_names=h_names)
+        ctl = sc.SonicController(batch=1, device=dev, holosoma_joint_names=h_names, tf32=a.tf32)
+        term = env.action_manager.get_term("joint_control")
+        pd_diff = 0.0
         cmd_bodies = ctl.spec["cmd_body_names"]
         b_idx = [sim._body_list.index(b) for b in cmd_bodies]
         pelvis = cmd_bodies.index("pelvis")
@@ -129,6 +133,13 @@ def main():
             w_b = sc.quat_apply(sc.quat_conj(q), rs[:, 10:13])
             return q, w_b, sim.dof_pos, sim.dof_vel
 
+        # initial alignment (preregistered check (v)): robot vs reference frame 0
+        rs0 = sim.robot_root_states
+        q0 = sc.xyzw_to_wxyz(rs0[:, 3:7])[0]
+        qr0 = R["root_quat_w"][0]
+        yaw = lambda q: torch.atan2(2 * (q[0] * q[3] + q[1] * q[2]), 1 - 2 * (q[2] ** 2 + q[3] ** 2))  # noqa: E731
+        init_xy_err = float(torch.linalg.norm((rs0[0, :2] - origin[:2]) - torch.tensor(sref["root_pos_w"][0, :2], device=dev)).item())
+        init_yaw_err = float(torch.rad2deg(torch.remainder(yaw(q0) - yaw(qr0) + np.pi, 2 * np.pi) - np.pi).abs().item())
         rec = {k: [] for k in ("mpjpe_mm", "pelvis_dz", "pelvis_ori_err2", "ee_dz_max", "root_pos", "root_quat_wxyz", "dof_pos_h", "body_pos14", "action")}
         fall_step = None
         k_last = 0
@@ -140,7 +151,9 @@ def main():
                                             R["dof_pos"][idx], R["dof_vel"][idx], R["root_quat_w"][idx])
             q_target_h = ctl.to_holosoma(q_target_s)
             a_h = (q_target_h - default_h) / scale_h
+            term.joint_target_override = q_target_h  # PD uses q* verbatim (F2)
             env.step({"actions": a_h})
+            pd_diff = max(pd_diff, float((term.last_pd_target - q_target_h).abs().max().item()))
             # post-step state vs reference frame k (SONIC im_eval / holosoma eval alignment)
             body = sim._rigid_body_pos[:, b_idx] - origin
             ref = R["body_pos_w"][k][None]
@@ -170,7 +183,8 @@ def main():
             fall_time_s=None if fall_step is None else fall_step * 0.02,
             mpjpe_g_mm=float(mp.mean()), mpjpe_g_mm_first_200=float(mp[:200].mean()),
             max_pelvis_dz_m=float(np.max(rec["pelvis_dz"])), max_ee_dz_m=float(np.max(rec["ee_dz_max"])),
-            sonic_pd=not a.no_sonic_pd, device=a.device,
+            initial_pelvis_xy_err_m=init_xy_err, initial_yaw_err_deg=init_yaw_err,
+            sonic_pd=not a.no_sonic_pd, device=a.device, tf32=a.tf32, pd_target_minus_qstar_max_abs=pd_diff,
             holosoma_action_scales=scale_h.tolist(), holosoma_p_gains=env.p_gains.reshape(-1).tolist(),
         )
         np.savez_compressed(a.out / "trajectory.npz", **{k: np.asarray(v) for k, v in rec.items()},

@@ -30,6 +30,8 @@ import torch
 DUMP_OUT = os.environ["SONIC_DUMP_OUT"]
 DUMP_ENVS = int(os.environ.get("SONIC_DUMP_ENVS", "2"))
 DUMP_STEPS = int(os.environ.get("SONIC_DUMP_STEPS", "400"))
+# F3: SONIC_TF32=0 turns TF32 off before every policy call (the official script enables it in main()).
+TF32_ENV = os.environ.get("SONIC_TF32")
 
 from gear_sonic.trl.callbacks import im_eval_callback as imcb  # noqa: E402
 
@@ -121,6 +123,10 @@ def _pre(self, actor_state):
     if not _state["static_done"]:
         _dump_static(self.env)
         _state["static_done"] = True
+    if TF32_ENV is not None:
+        torch.backends.cuda.matmul.allow_tf32 = TF32_ENV == "1"
+        torch.backends.cudnn.allow_tf32 = TF32_ENV == "1"
+        _meta["tf32"] = TF32_ENV == "1"
     out = _orig_pre(self, actor_state)
     if _state["steps"] < DUMP_STEPS and "step" in actor_state:
         _flatten_obs("obs", actor_state["obs"])

@@ -24,6 +24,7 @@ p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
 p.add_argument('--controller',choices=('policy','sonic'),default='policy',help='System1: policy (paper actor) or sonic (scheme A)')
 p.add_argument('--device',default='cuda:0')
+p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 a=p.parse_args()
 if a.controller=='policy' and a.checkpoint is None:p.error('--checkpoint is required for --controller policy')
 if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
@@ -65,7 +66,7 @@ config,placement_provenance=configure_push_placement(config,a.push_placement_pro
 if a.controller=='sonic':
     sys.path.insert(0,str(ROOT))
     from system1.scheme_a import with_sonic_pd
-    config=with_sonic_pd(config)
+    config=with_sonic_pd(config,hip_pitch_actuator=a.sonic_hip_pitch_actuator)
 app=init_sim_imports(config)
 import torch
 from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
@@ -166,6 +167,10 @@ def main():
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
         if driver is not None:
             manifest.update(controller='sonic',inference='sonic_release_g1_encoder_action_mean',checkpoint_sha256=sha(checkpoint),
+                            tf32=bool(torch.backends.cuda.matmul.allow_tf32),hip_pitch_actuator=a.sonic_hip_pitch_actuator,
+                            frozen_action_scales=list(config.robot.control.frozen_action_scales),
+                            effort_limits=list(config.robot.dof_effort_limit_list),vel_limits=list(config.robot.dof_vel_limit_list),
+                            armature=list(config.robot.dof_armature_list),pd_target='joint_target_override (q* verbatim)',
                             sonic_spec=str(_sc.DEFAULT_SPEC),sonic_spec_sha256=sha(_sc.DEFAULT_SPEC),
                             sonic_pd=dict(hip_pitch_kp=float(env.p_gains.reshape(-1)[0].item()),p_gains=env.p_gains.reshape(-1).tolist(),
                                           d_gains=env.d_gains.reshape(-1).tolist(),action_scales=env.action_scales.reshape(-1).tolist()),
@@ -182,7 +187,7 @@ def main():
             actual=env.simulator.agent_root_states[0].detach().cpu().numpy()
             if not np.isfinite(actual).all() or not np.allclose(actual,transformed,atol=1e-5):raise ValueError('Perturbation not applied to actual reset state')
             env._compute_observations();env._clip_observations();observations=env.obs_buf_dict
-            start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[]
+            start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[];pd_diff=0.0
             if driver is not None:driver.reset()
             for step in range(1,n+1):
                 if driver is not None:
@@ -192,7 +197,8 @@ def main():
                 observations,rewards,dones,extras=env.step({'actions':actions})
                 if captured is None:raise RuntimeError('Pre-reset state capture missing')
                 frames.append(captured);reward+=float(rewards[0].item())
-                if driver is not None:sonic_frames.append(captured_sonic)
+                if driver is not None:
+                    sonic_frames.append(captured_sonic);pd_diff=max(pd_diff,driver.check_pd_target() or 0.0)
                 terms={k:bool(v[0].item()) for k,v in extras['termination_terms'].items()}
                 if bool(dones[0].item()):break
             channels={k:np.stack([f[k] for f in frames]) for k in start}
@@ -212,6 +218,9 @@ def main():
                 result['sonic_mpjpe_mm_per_robot']=sch['mpjpe_mm'].mean(axis=0).tolist()
                 result['sonic_fall_step_per_robot']=[int(np.argmax(fall[:,r]))+1 if fall[:,r].any() else None for r in range(fall.shape[1])]
                 result['sonic_fell_any']=bool(fall.any())
+                result['sonic_mpjpe_pelvis_rel_mm_per_robot']=sch['mpjpe_pelvis_rel_mm'].mean(axis=0).tolist()
+                result['sonic_pelvis_dxy_final_m_per_robot']=sch['pelvis_dxy_m'][-1].tolist()
+                result['pd_target_minus_qstar_max_abs']=pd_diff
             result['trajectory']=str(out/(init['state_id']+'.trajectory.npz'))
             if init['kind']=='nominal':
                 save_core4d_smalltable_viser(out/'nominal_viser.npz',channels,metadata=dict(manifest,fps=int(command.reference.fps),result=result,

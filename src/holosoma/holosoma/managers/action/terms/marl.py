@@ -56,6 +56,10 @@ class DualJointPositionActionTerm(ActionTermBase):
 
         self.action_queue: torch.Tensor | None = None
         self._substep_idx = 0
+        # System1: optional absolute joint targets [env, agent, dof] that replace
+        # actions * scale + default in the PD (None = original behaviour).
+        self.joint_target_override: torch.Tensor | None = None
+        self.last_pd_target: torch.Tensor | None = None
 
     @property
     def action_dim(self) -> int:
@@ -159,10 +163,15 @@ class DualJointPositionActionTerm(ActionTermBase):
             default_dof_pos = self.env.default_dof_pos
             if default_dof_pos.ndim == 2:
                 default_dof_pos = default_dof_pos.unsqueeze(1)
+            if self.joint_target_override is not None:
+                target = self.joint_target_override
+            else:
+                target = actions_scaled + default_dof_pos
+            self.last_pd_target = target
             torques = (
                 self._kp_scale
                 * self.p_gains
-                * (actions_scaled + default_dof_pos - dof_pos)
+                * (target - dof_pos)
                 - self._kd_scale * self.d_gains * dof_vel
             )
         elif control_type == "V":
@@ -283,3 +292,8 @@ class DualJointPositionActionTerm(ActionTermBase):
                 self.action_scales[i] = 0.0 if stiffness == 0.0 else control_cfg.action_scale * effort / stiffness
         else:
             self.action_scales[:] = control_cfg.action_scale
+        frozen = getattr(control_cfg, "frozen_action_scales", None)
+        if frozen is not None:  # System1 F2 switch (None = original behaviour)
+            if len(frozen) != self._per_agent_action_dim:
+                raise ValueError("frozen_action_scales must have one entry per DOF")
+            self.action_scales[:] = torch.as_tensor(frozen, dtype=self.action_scales.dtype, device=self.action_scales.device)

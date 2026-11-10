@@ -110,17 +110,47 @@ def from_paired(path, k):
     return holo, sonic, prov
 
 
+def from_task(task, k):
+    """Agent k of the task's reference, loaded with the paper env's loader (system1/sonic/task_refs.py)."""
+    import torch
+
+    sys.path.insert(0, str(ROOT))
+    from system1.sonic.task_refs import load_task_reference
+
+    ref, bodies, dofs, meta = load_task_reference(task)
+    smp = ref.sample(torch.arange(ref.num_frames))
+    g = lambda key: smp[key][:, k].double().numpy()  # noqa: E731
+    bp, bq = g("agent_body_pos_w"), xyzw_to_wxyz(g("agent_body_quat_w"))
+    root = bodies.index("pelvis")
+    holo = dict(
+        fps=np.array([int(ref.fps)]), joint_names=np.array(dofs), body_names=np.array(bodies),
+        joint_pos=np.concatenate([bp[:, root], bq[:, root], g("agent_joint_pos")], axis=1),
+        joint_vel=np.concatenate([g("agent_body_lin_vel_w")[:, root], g("agent_body_ang_vel_w")[:, root], g("agent_joint_vel")], axis=1),
+        body_pos_w=bp, body_quat_w=bq, body_lin_vel_w=g("agent_body_lin_vel_w"), body_ang_vel_w=g("agent_body_ang_vel_w"),
+    )
+    s_names = SPEC["joint_names"]
+    perm = [dofs.index(n) for n in s_names]
+    cmd = SPEC["cmd_body_names"]
+    sonic = dict(dof_pos=g("agent_joint_pos")[:, perm], dof_vel=g("agent_joint_vel")[:, perm], root_pos_w=bp[:, root],
+                 root_quat_w=bq[:, root], body_pos_w=bp[:, [bodies.index(b) for b in cmd]], fps=np.array(int(ref.fps)))
+    prov = dict(source="task_reference_loader", agent=k, **meta)
+    return holo, sonic, prov
+
+
 def main():
     p = argparse.ArgumentParser()
     g = p.add_mutually_exclusive_group(required=True)
     g.add_argument("--sonic-dump", type=Path)
     g.add_argument("--paired", type=Path)
+    g.add_argument("--task")
     p.add_argument("--index", type=int, default=0)
     p.add_argument("--agent", type=int, default=0)
     p.add_argument("--out-prefix", type=Path, required=True)
     a = p.parse_args()
     if a.sonic_dump:
         holo, sonic, prov = from_sonic_dump(a.sonic_dump, a.index)
+    elif a.task:
+        holo, sonic, prov = from_task(a.task, a.agent)
     else:
         holo, sonic, prov = from_paired(a.paired, a.agent)
     a.out_prefix.parent.mkdir(parents=True, exist_ok=True)
