@@ -24,6 +24,7 @@ p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
 p.add_argument('--controller',choices=('policy','sonic','sonic_residual'),default='policy',help='System1: policy (paper actor), sonic (scheme A) or sonic_residual (scheme C checkpoint)')
 p.add_argument('--device',default='cuda:0')
+p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='evaluated',help='System1 T04 direct evaluation: with --object-mass-kg, validate the checkpoint contract against the original-mass experiment (checkpoint trained at the original mass) instead of the evaluated mass')
 p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 a=p.parse_args()
@@ -56,6 +57,7 @@ else:
     if a.object_mass_kg is not None:
         sys.path.insert(0,str(ROOT))
         from system1.mass_variants import core4d_experiment_with_mass
+        source_experiment=experiment
         experiment,mass_variant=core4d_experiment_with_mass(experiment,a.object_mass_kg)
     config=with_pair_experiment(g1_29dof_core4d_smalltable_smoke,experiment)
     if a.case in ('bucket','table'):
@@ -105,7 +107,7 @@ def main():
         if a.controller=='policy' and state.get('system1_sonic_residual'):
             raise ValueError('scheme C checkpoint requires --controller sonic_residual')
         if experiment and a.controller!='sonic':
-            validate_core4d_smalltable_checkpoint(state,experiment_contract=experiment.checkpoint_contract)
+            validate_core4d_smalltable_checkpoint(state,experiment_contract=(source_experiment if a.object_mass_kg is not None and a.checkpoint_mass=='original' else experiment).checkpoint_contract)
         if experiment:
             for path,expected in ((experiment.runtime_reference_file,experiment.runtime_reference_sha256),
                                   (experiment.object_urdf_file,experiment.object_urdf_sha256),
@@ -181,6 +183,7 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
         if driver is not None:
             manifest.update(controller=a.controller,inference='sonic_release_g1_encoder_action_mean' if cwrap is None else 'scheme_c_actor_mean_then_sonic',
                             sonic_checkpoint_sha256=sha(_sc.DEFAULT_CHECKPOINT),checkpoint_sha256=sha(checkpoint),
