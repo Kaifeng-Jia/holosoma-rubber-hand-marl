@@ -1,0 +1,115 @@
+{
+ "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+ "new": "logs_system1/T01b/preflight/d_bucket_m8kg_seed721_fresh12000/run_config.json",
+ "scheme": "d",
+ "diffs": [
+  {
+   "key": "bucket_reference",
+   "reference": "/workspace/core4d_bucket_no_rel_no_height_20260919/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/interaction_vectors_v1.npz",
+   "new": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/interaction_vectors_v1.npz",
+   "category": "allowed:directory"
+  },
+  {
+   "key": "experiment_contract.object_urdf_sha256",
+   "reference": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+   "new": "e25d17030b2ed87b251d4f521d001207cf0ec2c10824897e6cede221ae218b6d",
+   "category": "allowed:mass"
+  },
+  {
+   "key": "experiment_contract.physics_contract.object_mass_kg",
+   "reference": 1.0,
+   "new": 8.0,
+   "category": "allowed:mass"
+  },
+  {
+   "key": "git_commit",
+   "reference": "a21858b27da212f02f6dcf2bdb978a54743bcbae",
+   "new": "ae5fa59996d5896363dfd1bdac8854e095d4c470",
+   "category": "metadata"
+  },
+  {
+   "key": "object_physics.inertia_kg_m2_row_major",
+   "reference": {
+    "len": 2048,
+    "unique": [
+     "[0.05640510097146034, 0.0007428647950291634, -9.573530405759811e-06, 0.0007428647368215024, 0.02330535463988781, -1.966467607417144e-05, -9.573646821081638e-06, -1.9664679712150246e-05, 0.05608103424310684]"
+    ],
+    "n_unique": 1
+   },
+   "new": {
+    "len": 2048,
+    "unique": [
+     "[0.45124080777168274, 0.005942918360233307, -7.658824324607849e-05, 0.00594291789457202, 0.18644283711910248, -0.0001573174085933715, -7.65891745686531e-05, -0.00015731743769720197, 0.44864827394485474]"
+    ],
+    "n_unique": 1
+   },
+   "category": "allowed:mass"
+  },
+  {
+   "key": "object_physics.mass_kg",
+   "reference": {
+    "len": 2048,
+    "unique": [
+     "1.0"
+    ],
+    "n_unique": 1
+   },
+   "new": {
+    "len": 2048,
+    "unique": [
+     "8.0"
+    ],
+    "n_unique": 1
+   },
+   "category": "allowed:mass"
+  },
+  {
+   "key": "object_urdf",
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+   "new": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training__system1_mass8kg.urdf",
+   "category": "allowed:mass"
+  },
+  {
+   "key": "object_urdf_sha256",
+   "reference": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+   "new": "e25d17030b2ed87b251d4f521d001207cf0ec2c10824897e6cede221ae218b6d",
+   "category": "allowed:mass"
+  },
+  {
+   "key": "started_unix_time",
+   "reference": 1789839250.9549377,
+   "new": 1794297025.8229618,
+   "category": "metadata"
+  },
+  {
+   "key": "system1_object_mass_variant",
+   "reference": "<absent>",
+   "new": {
+    "inertia": {
+     "ixx": 0.4512408295536,
+     "ixy": 0.005942918933448,
+     "ixz": -7.658818676056e-05,
+     "iyy": 0.1864428504928,
+     "iyz": -0.0001573173515408,
+     "izz": 0.4486483330256
+    },
+    "mass_kg": 8.0,
+    "ratio": 8.0,
+    "source_inertia": {
+     "ixx": 0.0564051036942,
+     "ixy": 0.000742864866681,
+     "ixz": -9.57352334507e-06,
+     "iyy": 0.0233053563116,
+     "iyz": -1.96646689426e-05,
+     "izz": 0.0560810416282
+    },
+    "source_mass_kg": 1.0,
+    "source_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+    "source_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+    "urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training__system1_mass8kg.urdf",
+    "urdf_sha256": "e25d17030b2ed87b251d4f521d001207cf0ec2c10824897e6cede221ae218b6d"
+   },
+   "category": "allowed:mass"
+  }
+ ]
+}

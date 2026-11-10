@@ -44,9 +44,15 @@ def build(case):
             config = replace(config, env_class="holosoma.envs.marl.core4d_bucket_manager.Core4DBucketManager",
                              simulator=replace(config.simulator, config=replace(config.simulator.config, enable_object_hand_contact=True)))
         keep = "reference_horizon"
+    if keep == "timeout":
+        term = TerminationManagerCfg(terms={keep: config.termination.terms[keep]})
+    else:
+        # CORE4D's env requires both terms; disable joint_bad_tracking for this diagnostic only
+        jbt = config.termination.terms["joint_bad_tracking"]
+        off = dict(jbt.params, bad_object_pos_threshold=1e9, bad_object_ori_threshold=1e9, bad_ref_ori_threshold=1e9)
+        term = TerminationManagerCfg(terms={keep: config.termination.terms[keep], "joint_bad_tracking": replace(jbt, params=off)})
     config = replace(config, observation=g1_29dof_core4d_smalltable_evaluation_observation,
-                     training=replace(config.training, num_envs=1, seed=241003, headless=True),
-                     termination=TerminationManagerCfg(terms={keep: config.termination.terms[keep]}))
+                     training=replace(config.training, num_envs=1, seed=241003, headless=True), termination=term)
     proof = ROOT / "system1/evidence/preflight_push_registered.json" if case == "push" else None
     config, _ = configure_push_placement(config, proof, skill=case, root=ROOT)
     return with_sonic_pd(config), keep
@@ -58,7 +64,7 @@ def main():
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--device", default="cuda:0")
     a = p.parse_args()
-    a.out.mkdir(parents=True, exist_ok=False)
+    a.out.mkdir(parents=True, exist_ok=True)
     config, keep = build(a.case)
     from holosoma.utils.eval_utils import init_sim_imports
 
@@ -97,7 +103,7 @@ def main():
             for r in range(2):
                 if fall_step[r] is None and tr["fall"][r]:
                     fall_step[r] = step
-            if int(env.episode_length_buf[0].item()) != step:
+            if step < n - 1 and int(env.episode_length_buf[0].item()) != step:
                 raise RuntimeError(f"episode reset at step {step} (termination {keep})")
         st = {k: np.stack([x[k] for x in rec]) for k in rec[0]}
         obj_pos = command.simulator_object_pos_w[0] - env.simulator.scene.env_origins[0]

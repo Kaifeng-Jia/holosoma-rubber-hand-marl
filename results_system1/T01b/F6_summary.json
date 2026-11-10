@@ -1,0 +1,228 @@
+{
+ "item": "F6 run_config diffs (exact cloud commands, 10-iteration preflights on the Ubuntu box)",
+ "rule": "T04: only mass, seed, directory, run metadata may differ; T03 (C): also fields from actions going through SONIC (system1_scheme_c) and save_interval 1000",
+ "extra_rules": [
+  "bucket_reference: absolute path of the same file inside the checkout; only the checkout root differs (sha256 of the file in the old checkout and in this checkout identical: table d0bd50f2..., bucket 3de13d54...) -> allowed:directory"
+ ],
+ "not_preflighted": [
+  "d_pull_m40kg_seed721_joint8000 and c_pull_m20kg_seed721_joint8000: their parent (critic50 model_00050.pt) does not exist in a 10-iteration preflight. run_train_queue.py diffs every segment at launch on the cloud (references V3-PullFull-rerun-seed721_joint8000 / V3-25_pull_scratch_seed721_joint8000) and stops on any unexpected field."
+ ],
+ "speed": "F6_preflight_speed_laptop.json (RTX 5070 Laptop, one run at a time)",
+ "runs": [
+  {
+   "file": "c_bucket_m1kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+   "reference_sha256": "f07483a6dcd12696e0306c21cae1fe49939f7ddc7ce1dbaa4cb8f70e92bcd97c",
+   "new": "logs_system1/T01b/preflight_c2/c_bucket_m1kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ],
+    "allowed:save_interval(T03)": [
+     "save_interval"
+    ],
+    "allowed:scheme_c": [
+     "system1_scheme_c"
+    ]
+   }
+  },
+  {
+   "file": "c_pull_m20kg_critic50.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_20261103_pull/logs/V3_20261103_pull_retry01/V3-25_pull_scratch_seed721_critic50/run_config.json",
+   "reference_sha256": "11f53807b042ad3014de6d9a2da7cf88fab4b193dc16c80a37bb016691bd573c",
+   "new": "logs_system1/T01b/preflight_c2/c_pull_m20kg_seed721_critic50/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "metadata": [
+     "git_commit",
+     "runtime_process.cuda_visible_devices",
+     "runtime_process.local_rank",
+     "started_unix_time"
+    ],
+    "allowed:directory": [
+     "output_dir"
+    ],
+    "allowed:scheme_c": [
+     "system1_scheme_c"
+    ]
+   }
+  },
+  {
+   "file": "c_table_m5kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json",
+   "reference_sha256": "1b0f4b953327dd1ffb23c3aaa36ea601229b30bae26658902db5d29b0fd6a330",
+   "new": "logs_system1/T01b/preflight_c2/c_table_m5kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ],
+    "allowed:save_interval(T03)": [
+     "save_interval"
+    ],
+    "allowed:scheme_c": [
+     "system1_scheme_c"
+    ]
+   }
+  },
+  {
+   "file": "d_bucket_m2kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+   "reference_sha256": "f07483a6dcd12696e0306c21cae1fe49939f7ddc7ce1dbaa4cb8f70e92bcd97c",
+   "new": "logs_system1/T01b/preflight/d_bucket_m2kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "allowed:mass": [
+     "experiment_contract.object_urdf_sha256",
+     "experiment_contract.physics_contract.object_mass_kg",
+     "object_physics.inertia_kg_m2_row_major",
+     "object_physics.mass_kg",
+     "object_urdf",
+     "object_urdf_sha256",
+     "system1_object_mass_variant"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ]
+   }
+  },
+  {
+   "file": "d_bucket_m4kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+   "reference_sha256": "f07483a6dcd12696e0306c21cae1fe49939f7ddc7ce1dbaa4cb8f70e92bcd97c",
+   "new": "logs_system1/T01b/preflight/d_bucket_m4kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "allowed:mass": [
+     "experiment_contract.object_urdf_sha256",
+     "experiment_contract.physics_contract.object_mass_kg",
+     "object_physics.inertia_kg_m2_row_major",
+     "object_physics.mass_kg",
+     "object_urdf",
+     "object_urdf_sha256",
+     "system1_object_mass_variant"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ]
+   }
+  },
+  {
+   "file": "d_bucket_m8kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+   "reference_sha256": "f07483a6dcd12696e0306c21cae1fe49939f7ddc7ce1dbaa4cb8f70e92bcd97c",
+   "new": "logs_system1/T01b/preflight/d_bucket_m8kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "allowed:mass": [
+     "experiment_contract.object_urdf_sha256",
+     "experiment_contract.physics_contract.object_mass_kg",
+     "object_physics.inertia_kg_m2_row_major",
+     "object_physics.mass_kg",
+     "object_urdf",
+     "object_urdf_sha256",
+     "system1_object_mass_variant"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ]
+   }
+  },
+  {
+   "file": "d_pull_m40kg_critic50.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_20261103_pull/logs/V3_20261103_pull_retry01/V3-PullFull-rerun-seed721_critic50/run_config.json",
+   "reference_sha256": "f4275f607bd56401bbc52697fd8f0b217311709e20c23ddef01f79a082cd6022",
+   "new": "logs_system1/T01b/preflight/d_pull_m40kg_seed721_critic50/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "metadata": [
+     "git_commit",
+     "runtime_process.cuda_visible_devices",
+     "runtime_process.local_rank",
+     "started_unix_time"
+    ],
+    "allowed:mass": [
+     "object_urdf",
+     "runtime_object_physics.inertia_kg_m2_row_major",
+     "runtime_object_physics.mass_kg",
+     "system1_object_mass_variant"
+    ],
+    "allowed:directory": [
+     "output_dir"
+    ]
+   }
+  },
+  {
+   "file": "d_table_m10kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json",
+   "reference_sha256": "1b0f4b953327dd1ffb23c3aaa36ea601229b30bae26658902db5d29b0fd6a330",
+   "new": "logs_system1/T01b/preflight/d_table_m10kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "allowed:mass": [
+     "experiment_contract.object_urdf_sha256",
+     "experiment_contract.physics_contract.object_mass_kg",
+     "object_physics.inertia_kg_m2_row_major",
+     "object_physics.mass_kg",
+     "object_urdf",
+     "object_urdf_sha256",
+     "system1_object_mass_variant"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ]
+   }
+  },
+  {
+   "file": "d_table_m20kg_fresh12000.json",
+   "reference": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json",
+   "reference_sha256": "1b0f4b953327dd1ffb23c3aaa36ea601229b30bae26658902db5d29b0fd6a330",
+   "new": "logs_system1/T01b/preflight/d_table_m20kg_seed721_fresh12000/run_config.json",
+   "n_unexpected": 0,
+   "fields_by_category": {
+    "allowed:directory": [
+     "bucket_reference"
+    ],
+    "allowed:mass": [
+     "experiment_contract.object_urdf_sha256",
+     "experiment_contract.physics_contract.object_mass_kg",
+     "object_physics.inertia_kg_m2_row_major",
+     "object_physics.mass_kg",
+     "object_urdf",
+     "object_urdf_sha256",
+     "system1_object_mass_variant"
+    ],
+    "metadata": [
+     "git_commit",
+     "started_unix_time"
+    ]
+   }
+  }
+ ],
+ "passed": true
+}

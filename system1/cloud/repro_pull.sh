@@ -10,13 +10,20 @@ cd "$S1_ROOT/duet-system1"
 OUT=$S1_ROOT/logs/repro_pull_$(date +%Y%m%dT%H%M%S)
 mkdir -p "$OUT"
 CK=$S1_INPUTS/repro/Pull-baseline_seed721/model_08050.pt
-for lvl in 2 8; do
-  st=$S1_INPUTS/states/pull_states.json; [[ $lvl == 8 ]] && st=$S1_INPUTS/states/pull_pm8.json
-  LOCAL_RANK=71 WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=${GPU:-0} $S1_PY -B scripts/evaluate_paper_supplement.py --case pull \
+echo "$(sha256sum "$CK")" > "$OUT/checkpoint.sha256"
+# the two levels run in parallel on two GPUs (GPU, GPU2) to shorten the time before training starts
+run_level() {
+  local lvl=$1 gpu=$2 rank=$3 st=$S1_INPUTS/states/pull_states.json
+  [[ $lvl == 8 ]] && st=$S1_INPUTS/states/pull_pm8.json
+  LOCAL_RANK=$rank WORLD_SIZE=1 CUDA_VISIBLE_DEVICES=$gpu $S1_PY -B scripts/evaluate_paper_supplement.py --case pull \
      --model-id Pull-baseline_seed721 --checkpoint "$CK" --states "$st" --output-dir "$OUT/pm$lvl" > "$OUT/pm$lvl.log" 2>&1
   $S1_PY -B system1/repro/compare_eval_repro.py --new-dir "$OUT/pm$lvl" --orig-dir "$OUT/pm$lvl" \
      --v3-episodes "$S1_INPUTS/v3/episodes.csv" --case pull --seed 721 --level $lvl \
-     --out-csv "$OUT/compare_pm$lvl.csv" --out-json "$OUT/compare_pm$lvl.json" | tail -20
-done
+     --out-csv "$OUT/compare_pm$lvl.csv" --out-json "$OUT/compare_pm$lvl.json" > "$OUT/compare_pm$lvl.txt" 2>&1
+}
+run_level 2 ${GPU:-0} 71 &
+run_level 8 ${GPU2:-1} 72 &
+wait
+tail -20 "$OUT"/compare_pm2.txt "$OUT"/compare_pm8.txt
 nvidia-smi --query-gpu=name,driver_version --format=csv > "$OUT/gpu.txt"
 echo "results in $OUT"

@@ -26,6 +26,12 @@ if $P -c "import json,sys;sys.exit(0 if json.load(open('results_system1/T01b/dri
   log "STOP: (v) flagged a possible integration problem; scheme A not started"; exit 2
 fi
 
+# gate: scheme A starts only after F1-F6 are all confirmed (file written after checking the results)
+G=results_system1/T01b/F1_F6_gate.json
+log "waiting for $G"
+until [ -f $G ]; do sleep 30; done
+$P -c "import json,sys;sys.exit(0 if json.load(open('$G'))['all_passed'] else 1)" || { log "STOP: F1-F6 gate not passed"; exit 6; }
+
 # 2. scheme A formal (6 tasks x +/-2, +/-8, nominal included)
 log "scheme A main"
 LOCAL_RANK=41 $P -B system1/scheme_a_queue.py --device cuda:0 --cpus 0-15 --out $L/schemeA_main > $L/schemeA_main.queue.log 2>&1 || { log "scheme A main incomplete"; exit 3; }

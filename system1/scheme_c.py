@@ -28,7 +28,9 @@ def zero_init_output_layer(actor):
 
 
 class SonicResidualEnv:
-    _OWN = ("env", "driver", "E", "A", "scale_d", "command", "_prev_t", "_dones", "sonic_resets")
+    # "step" stays on the wrapper: scripts patch env.step with observers (telemetry, raw-reward
+    # diagnostics); those must wrap scheme C's step, which then calls the real env step.
+    _OWN = ("env", "driver", "E", "A", "scale_d", "command", "_prev_t", "_dones", "sonic_resets", "step")
 
     def __setattr__(self, name, value):  # assignments like env.episode_length_buf = ... reach the real env
         if name in self._OWN:

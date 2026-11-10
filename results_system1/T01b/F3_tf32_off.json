@@ -1,0 +1,92 @@
+{
+ "item": "F3 TF32 off",
+ "native_dump": {
+  "file": "logs_system1/T01b/sonic/native_dump_g1only_tf32off.npz",
+  "steps": 2000,
+  "envs": 2,
+  "tf32": false,
+  "action_max_abs_diff": 6.67572021484375e-06,
+  "action_max_abs_diff_rebuilt_obs": 6.67572021484375e-06,
+  "obs_max_abs": {
+   "tok_cmd": 0.0,
+   "tok_ori": 4.76837158203125e-07,
+   "tok_encidx": 0.0,
+   "actor_obs": 1.1920928955078125e-07,
+   "action_from_sonic_obs": 6.67572021484375e-06,
+   "action_from_rebuilt_obs": 6.67572021484375e-06
+  },
+  "expected": "about 1e-5",
+  "passed": true
+ },
+ "batch_invariance": {
+  "batches": [
+   1,
+   2,
+   128
+  ],
+  "plain_batched": {
+   "max_abs": {
+    "b2_vs_b1": 1.430511474609375e-06,
+    "b128_vs_b1": 6.67572021484375e-06
+   },
+   "identical": false
+  },
+  "controller_fixed_128_row_blocks": {
+   "max_abs": {
+    "b2_vs_b1": 0.0,
+    "b128_vs_b1": 0.0
+   },
+   "identical": true
+  },
+  "passed": true
+ },
+ "validation_a_gpu": {
+  "segments": {
+   "sonic_sample_A001": {
+    "mpjpe_g_mm": 52.77411745063428,
+    "fell": false,
+    "steps": 2001,
+    "horizon": 2001,
+    "device": "cuda:0"
+   },
+   "sonic_sample_A001_M": {
+    "mpjpe_g_mm": 63.53864373210101,
+    "fell": false,
+    "steps": 2001,
+    "horizon": 2001,
+    "device": "cuda:0"
+   }
+  },
+  "mean_mpjpe_g_mm": 58.15638059136764,
+  "native_mpjpe_g_mm_tf32_off": 72.65481544941815,
+  "threshold_1p2x_native_tf32_off": 87.18577853930178,
+  "threshold_1p2x_native_tf32_on_T01": 85.32,
+  "passed": true
+ },
+ "validation_b_gpu": {
+  "pull_agent0": {
+   "mpjpe_g_mm": 281.48163660532896,
+   "fell": false,
+   "steps": 315,
+   "horizon": 315,
+   "device": "cuda:0"
+  },
+  "table_agent0": {
+   "mpjpe_g_mm": 714.8515562677577,
+   "fell": false,
+   "steps": 686,
+   "horizon": 686,
+   "device": "cuda:0"
+  }
+ },
+ "note": "validation b has no threshold (recorded); its drift metrics are in drift/drift_segments.csv",
+ "sources": [
+  "logs_system1/T01b/sonic/f3_obs_equivalence_tf32off.json",
+  "logs_system1/T01b/sonic/f3_batch_invariance.json",
+  "logs_system1/T01b/sonic/eval_g1only_tf32off/metrics_eval.json",
+  "logs_system1/T01b/drift/single_sonic_sample_A001/result.json",
+  "logs_system1/T01b/drift/single_sonic_sample_A001_M/result.json",
+  "logs_system1/T01b/drift/single_pull_agent0/result.json",
+  "logs_system1/T01b/drift/single_table_agent0/result.json"
+ ]
+}

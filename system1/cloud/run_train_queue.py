@@ -16,6 +16,11 @@ completed segments; stops the queue at the first failure.
 
 --preflight K: run each segment's exact command until K iterations are logged, then stop it
 (SIGTERM) — used to produce run_config diffs and to measure seconds per iteration.
+
+F6 at launch: as soon as a segment writes run_config.json it is diffed field by field against
+its paper run (system1/t04/diff_run_config.py; references from $S1_INPUTS/run_configs on the
+cloud, the read-only originals on the Ubuntu box). Any "unexpected" field stops the segment
+(SIGTERM, then SIGKILL after 30 s) and the queue. The diff is kept as ops/<label>.run_config_diff.json.
 """
 from __future__ import annotations
 
@@ -33,6 +38,47 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[2]
 NY = ZoneInfo("America/New_York")
 ORIGINAL_MASS = {"pull": 20.0, "table": 5.0, "bucket": 1.0}
+_B = "/home/kevin/holosoma-core4d-base/logs"
+_V3 = f"{_B}/V3_20261102/cloud_backup_20261104/raw/v3_20261103_pull/logs/V3_20261103_pull_retry01"
+REFERENCE_RUN_CONFIGS = {  # name in $S1_INPUTS/run_configs -> original on the Ubuntu box (read-only)
+    "V3-PullFull-rerun-seed721_critic50": f"{_V3}/V3-PullFull-rerun-seed721_critic50/run_config.json",
+    "V3-PullFull-rerun-seed721_joint8000": f"{_V3}/V3-PullFull-rerun-seed721_joint8000/run_config.json",
+    "V3-25_pull_scratch_seed721_critic50": f"{_V3}/V3-25_pull_scratch_seed721_critic50/run_config.json",
+    "V3-25_pull_scratch_seed721_joint8000": f"{_V3}/V3-25_pull_scratch_seed721_joint8000/run_config.json",
+    "T-07_seed721": f"{_B}/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json",
+    "B-RZ0_seed721": f"{_B}/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/run_config.json",
+}
+
+
+def reference_run_config(name):
+    inputs = os.environ.get("S1_INPUTS")
+    p = Path(inputs) / "run_configs" / f"{name}.json" if inputs else Path(REFERENCE_RUN_CONFIGS[name])
+    if not p.exists():
+        raise FileNotFoundError(f"reference run_config missing: {p}")
+    return p
+
+
+def check_run_config(seg, ops, proc, timeout=1800):
+    """Wait for run_config.json, diff it (F6); returns (ok, n_unexpected)."""
+    import sys
+
+    sys.path.insert(0, str(ROOT))
+    from system1.t04.diff_run_config import diff_files
+
+    rc = seg["out"] / "run_config.json"
+    t0 = time.time()
+    while not rc.exists():
+        if proc.poll() is not None or time.time() - t0 > timeout:
+            return None, None
+        time.sleep(5)
+    time.sleep(2)  # let the writer finish
+    ref = reference_run_config(seg["reference"])
+    rows = diff_files(ref, rc, seg["scheme"])
+    bad = [r for r in rows if r["category"] == "unexpected"]
+    (ops / f"{seg['label']}.run_config_diff.json").write_text(json.dumps(dict(
+        reference=str(ref), reference_sha256=sha(ref), new=str(rc), scheme=seg["scheme"], checked=now(),
+        n_unexpected=len(bad), diffs=rows), indent=1, default=str))
+    return not bad, len(bad)
 C_TF32 = True  # T03: TF32 may be on in training (evaluation turns it off)
 
 
@@ -42,6 +88,15 @@ def now():
 
 def sha(p):
     return hashlib.sha256(Path(p).read_bytes()).hexdigest()
+
+
+def stop(proc):
+    proc.send_signal(signal.SIGTERM)
+    try:  # Isaac Sim can hang in shutdown after SIGTERM
+        proc.wait(timeout=30)
+    except subprocess.TimeoutExpired:
+        proc.kill()
+        proc.wait()
 
 
 def segments(run, seed, out):
@@ -58,12 +113,14 @@ def segments(run, seed, out):
         if scheme == "c":
             base.append("--from-scratch")
         c50, j = out / f"{tag}_critic50", out / f"{tag}_joint8000"
-        return [dict(label=c50.name, out=c50, parent=None, argv=base + ["--iterations", "50", "--output-dir", str(c50), "--critic-only"]),
-                dict(label=j.name, out=j, parent=c50 / "model_00050.pt",
+        ref = "V3-PullFull-rerun-seed721" if scheme == "d" else "V3-25_pull_scratch_seed721"
+        return [dict(label=c50.name, out=c50, parent=None, scheme=scheme, reference=f"{ref}_critic50",
+                     argv=base + ["--iterations", "50", "--output-dir", str(c50), "--critic-only"]),
+                dict(label=j.name, out=j, parent=c50 / "model_00050.pt", scheme=scheme, reference=f"{ref}_joint8000",
                      argv=base + ["--iterations", "8000", "--output-dir", str(j), "--resume", str(c50 / "model_00050.pt")])]
     exp = dict(table="smalltable5kg_A", bucket="bucket003")[task]
     o = out / f"{tag}_fresh12000"
-    return [dict(label=o.name, out=o, parent=None, argv=[
+    return [dict(label=o.name, out=o, parent=None, scheme=scheme, reference=dict(table="T-07_seed721", bucket="B-RZ0_seed721")[task], argv=[
         "scripts/train_core4d_smalltable.py", "--experiment", exp, "--reward-variant", "bucket_A_no_rel_no_height",
         "--num-envs", "2048", "--steps-per-env", "24", "--seed", str(seed), "--iterations", "12000", "--save-interval",
         "1000" if scheme == "c" else "2000", "--output-dir", str(o), *mass_flag, *c_flags])]
@@ -112,11 +169,18 @@ def main():
             print(f"{now()} start {seg['label']}", flush=True)
             with (ops / f"{seg['label']}.stdout.log").open("w") as log:
                 proc = subprocess.Popen(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=env)
+                ok, n_bad = check_run_config(seg, ops, proc)
+                print(f"{now()} {seg['label']} run_config diff: ok={ok} unexpected={n_bad}", flush=True)
+                if ok is False:
+                    stop(proc)
+                    ex.write_text(json.dumps(dict(label=seg["label"], returncode=proc.returncode, completed=False,
+                                                  stopped_reason=f"run_config diff: {n_bad} unexpected field(s)", ended=now()), indent=1))
+                    return 4
                 if a.preflight:
                     metrics = seg["out"] / "metrics.jsonl"
                     while proc.poll() is None:
                         if metrics.exists() and sum(1 for _ in metrics.open()) >= a.preflight:
-                            proc.send_signal(signal.SIGTERM)
+                            stop(proc)
                             break
                         time.sleep(5)
                 rc = proc.wait()

@@ -1,0 +1,94 @@
+{
+ "item": "F2 frozen action scales (SONIC schemes replace PD gains only)",
+ "switch": "RobotControlConfig.frozen_action_scales (None = old behaviour); system1/scheme_a.py with_sonic_pd()",
+ "scheme_A_manifest": {
+  "file": "logs_system1/T01b/f2_smoke_schemeA_pull/run_manifest.json",
+  "hip_pitch_kp": 99.09842681884766,
+  "hip_pitch_action_scale": [
+   0.5475465059280396,
+   0.5475465059280396
+  ],
+  "frozen_action_scales_hip_pitch": [
+   0.5475465059280396,
+   0.5475465059280396
+  ],
+  "pd_target": "joint_target_override (q* verbatim)",
+  "tf32": false,
+  "episodes": 3,
+  "pd_target_minus_qstar_max_abs": [
+   0.0,
+   0.0,
+   0.0
+  ]
+ },
+ "scheme_C_run_configs": {
+  "c_pull_m20kg_seed721_critic50": {
+   "hip_pitch_kp": [
+    99.09842681884766,
+    99.09842681884766
+   ],
+   "hip_pitch_kd": [
+    6.308801651000977,
+    6.308801651000977
+   ],
+   "hip_pitch_action_scale": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "frozen_hip_pitch": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "sonic_tf32": true,
+   "pd_target": "q* verbatim (joint_target_override)"
+  },
+  "c_table_m5kg_seed721_fresh12000": {
+   "hip_pitch_kp": [
+    99.09842681884766,
+    99.09842681884766
+   ],
+   "hip_pitch_kd": [
+    6.308801651000977,
+    6.308801651000977
+   ],
+   "hip_pitch_action_scale": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "frozen_hip_pitch": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "sonic_tf32": true,
+   "pd_target": "q* verbatim (joint_target_override)"
+  },
+  "c_bucket_m1kg_seed721_fresh12000": {
+   "hip_pitch_kp": [
+    99.09842681884766,
+    99.09842681884766
+   ],
+   "hip_pitch_kd": [
+    6.308801651000977,
+    6.308801651000977
+   ],
+   "hip_pitch_action_scale": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "frozen_hip_pitch": [
+    0.5475465059280396,
+    0.5475465059280396
+   ],
+   "sonic_tf32": true,
+   "pd_target": "q* verbatim (joint_target_override)"
+  }
+ },
+ "d_default_regression": {
+  "file": "results_system1/T01b/F2_regression_D_pull721_pm2.json",
+  "episodes": 51,
+  "mismatches": 0,
+  "max_abs_traj_diff": 0.0
+ },
+ "joint_order_note": "holosoma URDF order; indices 0 and 6 are left/right hip_pitch",
+ "passed": true
+}

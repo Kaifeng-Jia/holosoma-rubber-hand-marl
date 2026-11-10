@@ -7,12 +7,16 @@ sha256). Contents:
   repro/Pull-baseline_seed721/     paper Table Pulling seed721 checkpoint (cloud repro check)
   states/                          frozen pull states +/-2 and +/-8
   v3/episodes.csv                  V3 closeout episodes table (repro comparison)
+  run_configs/<name>.json          paper run_configs for the launch-time F6 diff (run_train_queue.py)
+
+Usage: make_cloud_inputs.py [out_name]   (default cloud_inputs; never overwrites an existing dir)
 """
 from __future__ import annotations
 
 import hashlib
 import json
 import shutil
+import sys
 import tarfile
 from pathlib import Path
 
@@ -27,6 +31,10 @@ FILES = {
     "states/pull_pm8.json": B / "logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/pull_pm8.json",
     "v3/episodes.csv": B / "paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104/results/episodes.csv",
 }
+sys.path.insert(0, str(ROOT / "system1" / "cloud"))
+from run_train_queue import REFERENCE_RUN_CONFIGS  # noqa: E402
+
+FILES.update({f"run_configs/{k}.json": Path(v) for k, v in REFERENCE_RUN_CONFIGS.items()})
 EXPECT = {
     "priors/marl_compat_pull_v1/model_07999_actor158.pt": "f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2364",
     "repro/Pull-baseline_seed721/model_08050.pt": "727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43",
@@ -40,7 +48,7 @@ def sha(p):
 
 
 def main():
-    out = ROOT / "exports_system1/cloud_inputs"
+    out = ROOT / "exports_system1" / (sys.argv[1] if len(sys.argv) > 1 else "cloud_inputs")
     stage = out / "stage"
     stage.mkdir(parents=True, exist_ok=False)
     manifest, sums = {}, []
@@ -55,6 +63,8 @@ def main():
         sums.append(f"{h}  {rel}")
     (stage / "SHA256SUMS").write_text("\n".join(sums) + "\n")
     (stage / "manifest.json").write_text(json.dumps(manifest, indent=1))
+    if (out / "cloud_inputs.tar").exists():
+        raise FileExistsError(out / "cloud_inputs.tar")
     with tarfile.open(out / "cloud_inputs.tar", "w") as tar:
         for p in sorted(stage.rglob("*")):
             if p.is_file():

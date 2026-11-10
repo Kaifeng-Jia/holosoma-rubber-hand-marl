@@ -48,8 +48,18 @@ def walk(a, b, prefix=""):
     return out
 
 
-def category(key):
+SCHEME_C = ("system1_scheme_c",)  # T03: fields that exist because actions go through SONIC
+
+
+def category(key, ref=None, new=None, scheme=None):
     top = key.split(".")[0]
+    if top == "bucket_reference" and isinstance(ref, str) and isinstance(new, str) and "/src/holosoma/" in ref \
+            and ref.split("/src/holosoma/")[1] == new.split("/src/holosoma/")[1]:
+        return "allowed:directory"  # same file inside the checkout; only the checkout root differs
+    if scheme == "c" and top in SCHEME_C:
+        return "allowed:scheme_c"
+    if scheme == "c" and top == "save_interval":
+        return "allowed:save_interval(T03)"
     if top in ALLOWED_MASS or "object_mass" in key or "object_urdf" in key:
         return "allowed:mass"
     if top in ALLOWED_DIR:
@@ -61,15 +71,20 @@ def category(key):
     return "unexpected"
 
 
+def diff_files(reference, new, scheme="d"):
+    ref, nw = json.loads(Path(reference).read_text()), json.loads(Path(new).read_text())
+    return [dict(key=k, reference=r, new=n, category=category(k, r, n, scheme)) for k, r, n in walk(ref, nw)]
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--reference", type=Path, required=True)
     p.add_argument("--new", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
+    p.add_argument("--scheme", choices=("d", "c"), default="d")
     a = p.parse_args()
-    ref, new = json.loads(a.reference.read_text()), json.loads(a.new.read_text())
-    rows = [dict(key=k, reference=r, new=n, category=category(k)) for k, r, n in walk(ref, new)]
-    a.out.write_text(json.dumps(dict(reference=str(a.reference), new=str(a.new), diffs=rows), indent=1, default=str))
+    rows = diff_files(a.reference, a.new, a.scheme)
+    a.out.write_text(json.dumps(dict(reference=str(a.reference), new=str(a.new), scheme=a.scheme, diffs=rows), indent=1, default=str))
     for r in rows:
         print(f"[{r['category']}] {r['key']}: {json.dumps(r['reference'], default=str)[:120]} -> {json.dumps(r['new'], default=str)[:120]}")
     print(f"{sum(r['category'] == 'unexpected' for r in rows)} unexpected of {len(rows)} differing fields")

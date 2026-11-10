@@ -1,0 +1,41 @@
+{
+ "written": "2026-11-10T03:08:47-05:00",
+ "items": {
+  "F1_offline": {
+   "passed": true,
+   "file": "F1_offline_dual_vs_single.json"
+  },
+  "F1_online": {
+   "passed": null,
+   "note": "record only (no threshold in T01b)",
+   "file": "F1_online_dual_vs_single.csv"
+  },
+  "F2": {
+   "passed": true,
+   "file": "F2_frozen_action_scales.json, F2_regression_D_pull721_pm2.{csv,json}"
+  },
+  "F3": {
+   "passed": true,
+   "file": "F3_tf32_off.json"
+  },
+  "F4": {
+   "passed": true,
+   "file": "F4_body_correspondence.json"
+  },
+  "F5": {
+   "passed": true,
+   "file": "F5_per_env_reset.json"
+  },
+  "F6": {
+   "passed": true,
+   "file": "F6_summary.json, F6_run_config_diffs/",
+   "note": "Pull joint8000 segments are diffed at launch on the cloud"
+  },
+  "T03_iteration0": {
+   "passed": true,
+   "file": "T03_iter0_schemeC_vs_A.json"
+  }
+ },
+ "all_passed": true,
+ "reads_this": "system1/t01b_pipeline.sh waits for this file before scheme A formal evaluation"
+}
