@@ -1,0 +1,216 @@
+{
+ "definition": "v2: min distance between rubber_hand_link collision mesh and object collision geometry < 0.02 m; normal = nearest-point pair direction (hand -> object), object frame",
+ "contact_threshold_m": 0.02,
+ "hands": [
+  "left_rubber_hand_link",
+  "right_rubber_hand_link"
+ ],
+ "hand_meshes": {
+  "left_rubber_hand_link": {
+   "file": "/home/kevin/duet-system1/src/holosoma/holosoma/data/robots/g1/meshes/left_rubber_hand.STL",
+   "sha256": "cff2221a690fa69303f61fce68f2d155c1517b52efb6ca9262dd56e0bc6e70fe"
+  },
+  "right_rubber_hand_link": {
+   "file": "/home/kevin/duet-system1/src/holosoma/holosoma/data/robots/g1/meshes/right_rubber_hand.STL",
+   "sha256": "99533b778bca6246144fa511bb9d4e555e075c641f2a0251e04372869cd99d67"
+  }
+ },
+ "robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "tasks": {
+  "push": {
+   "file": "logs_system1/T02/contacts_v2/push_contacts.npz",
+   "sha256": "4ef3e9f98ffcd52d41531478bf9e129f344ffb99d9e86b656f88fe95cf8d95c3",
+   "frames": 309,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "reference_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "object_urdf_sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a",
+   "contact_fraction": 0.8236245954692557,
+   "contact_fraction_per_robot": [
+    0.8236245954692557,
+    0.8236245954692557
+   ],
+   "contact_fraction_per_robot_hand": [
+    [
+     0.8252427184466019,
+     0.8220064724919094
+    ],
+    [
+     0.8252427184466019,
+     0.8220064724919094
+    ]
+   ],
+   "contact_frames_any_hand_per_robot": [
+    255,
+    255
+   ],
+   "min_dist_m_per_robot_hand": [
+    [
+     -0.05977872975069475,
+     -0.15734062694197581
+    ],
+    [
+     -0.1470877843845546,
+     -0.09064490161446095
+    ]
+   ],
+   "fallback_normal_count": 1006
+  },
+  "pull": {
+   "file": "logs_system1/T02/contacts_v2/pull_contacts.npz",
+   "sha256": "2e526ed9f0204b0f17ed89d1a4b119f19fb6f6ace68cfb27fe442437b849dc6e",
+   "frames": 316,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "reference_sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "object_urdf_sha256": "c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2",
+   "contact_fraction": 0.7215189873417721,
+   "contact_fraction_per_robot": [
+    0.7215189873417721,
+    0.7215189873417721
+   ],
+   "contact_fraction_per_robot_hand": [
+    [
+     0.75,
+     0.6930379746835443
+    ],
+    [
+     0.6930379746835443,
+     0.75
+    ]
+   ],
+   "contact_frames_any_hand_per_robot": [
+    252,
+    252
+   ],
+   "min_dist_m_per_robot_hand": [
+    [
+     -0.0007169985593465933,
+     -0.00017769636594133775
+    ],
+    [
+     -0.00011966184325389133,
+     -0.0006153944539910861
+    ]
+   ],
+   "fallback_normal_count": 55
+  },
+  "chair": {
+   "file": "logs_system1/T02/contacts_v2/chair_contacts.npz",
+   "sha256": "caac49c78c4c8088b261956ed77c58ace7791f18d43f253d053bf7c98c9cdfcf",
+   "frames": 391,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+   "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+   "contact_fraction": 0.24616368286445012,
+   "contact_fraction_per_robot": [
+    0.24680306905370844,
+    0.24552429667519182
+   ],
+   "contact_fraction_per_robot_hand": [
+    [
+     0.12276214833759591,
+     0.37084398976982097
+    ],
+    [
+     0.391304347826087,
+     0.09974424552429667
+    ]
+   ],
+   "contact_frames_any_hand_per_robot": [
+    145,
+    153
+   ],
+   "min_dist_m_per_robot_hand": [
+    [
+     0.0020835246052236674,
+     0.0
+    ],
+    [
+     0.0,
+     0.001757847282866313
+    ]
+   ],
+   "fallback_normal_count": 213
+  },
+  "bucket": {
+   "file": "logs_system1/T02/contacts_v2/bucket_contacts.npz",
+   "sha256": "90a24696117731ac9caf69e42db587be9728cc5080331a60baa0abad35bf2e79",
+   "frames": 497,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+   "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+   "contact_fraction": 0.3687122736418511,
+   "contact_fraction_per_robot": [
+    0.2676056338028169,
+    0.46981891348088534
+   ],
+   "contact_fraction_per_robot_hand": [
+    [
+     0.26156941649899396,
+     0.27364185110663986
+    ],
+    [
+     0.7082494969818913,
+     0.23138832997987926
+    ]
+   ],
+   "contact_frames_any_hand_per_robot": [
+    230,
+    382
+   ],
+   "min_dist_m_per_robot_hand": [
+    [
+     0.0,
+     0.0
+    ],
+    [
+     0.0,
+     0.0
+    ]
+   ],
+   "fallback_normal_count": 457
+  },
+  "table": {
+   "file": "logs_system1/T02/contacts_v2/table_contacts.npz",
+   "sha256": "f6f4c0167ec35f94a55dbdc86138c786fe304ac32aa882218e8bb65c41b6912a",
+   "frames": 687,
+   "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+   "contact_fraction": 0.6804949053857351,
+   "contact_fraction_per_robot": [
+    0.5786026200873362,
+    0.7823871906841339
+   ],
+   "contact_fraction_per_robot_hand": [
+    [
+     0.5705967976710334,
+     0.586608442503639
+    ],
+    [
+     0.7641921397379913,
+     0.8005822416302766
+    ]
+   ],
+   "contact_frames_any_hand_per_robot": [
+    403,
+    550
+   ],
+   "min_dist_m_per_robot_hand": [
+    [
+     -9.652901395523772e-05,
+     -0.0001244092226369009
+    ],
+    [
+     -0.011647379093483179,
+     -0.004921392248549747
+    ]
+   ],
+   "fallback_normal_count": 303
+  }
+ }
+}

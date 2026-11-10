@@ -1,7 +1,8 @@
 """Scheme B (T02 v2) for both robots of the holosoma paired env: SONIC planner (lower body / root path, position
 feedback through the waypoints) + teleop encoder (3-point targets; B1 adds object feedback on the two wrists).
 
-Variants (preregistered, all reported): B0 (wrist targets = reference), B1-0 / B1-2 / B1-4 (wrist targets follow the
+Variants (preregistered, all reported): B-open (official planner behaviour: no position feedback, wrist targets =
+reference; +/-2 only), B0 (wrist targets = reference), B1-0 / B1-2 / B1-4 (wrist targets follow the
 actual object pose; pushed inward by delta = 0 / 2 / 4 cm along the precomputed contact normal at reference contact
 frames). Everything else - PD, action scales, robot, object, SONIC - is as scheme A (subclass of SonicDualDriver).
 Planner rules: system1/scheme_b.py. Preregistration: results_system1/T02/preregistration.md.
@@ -19,8 +20,9 @@ from system1 import sonic_controller as sc
 from system1.scheme_a import SonicDualDriver
 
 ROOT = Path(__file__).resolve().parents[1]
-CONTACTS = ROOT / "logs_system1/T02/contacts"
-DELTA = {"B0": None, "B1-0": 0.0, "B1-2": 0.02, "B1-4": 0.04}
+CONTACTS = ROOT / "logs_system1/T02/contacts_v2"   # contact definition v2 (Kevin 2026-11-10)
+DELTA = {"B0": None, "B1-0": 0.0, "B1-2": 0.02, "B1-4": 0.04, "B-open": None}
+FEEDBACK = {"B0": True, "B1-0": True, "B1-2": True, "B1-4": True, "B-open": False}  # B-open: official behaviour
 
 
 def _xyzw_to_wxyz(q):
@@ -37,7 +39,7 @@ class SonicPlannerDualDriver(SonicDualDriver):
         super().__init__(env, device, tf32)
         if variant not in DELTA:
             raise ValueError(variant)
-        self.variant, self.delta = variant, DELTA[variant]
+        self.variant, self.delta, self.feedback = variant, DELTA[variant], FEEDBACK[variant]
         sim = env.simulator
         bl = list(sim._body_list)
         command = env.command_manager.get_state("paired_motion_command")
@@ -68,7 +70,8 @@ class SonicPlannerDualDriver(SonicDualDriver):
         self.planner.calls, self.planner.seconds = 0, 0.0
 
     def episode_stats(self):
-        return dict(planner_calls=self.planner.calls, planner_seconds=self.planner.seconds, b_variant=self.variant)
+        return dict(planner_calls=self.planner.calls, planner_seconds=self.planner.seconds, b_variant=self.variant,
+                    position_feedback=self.feedback)
 
     @torch.no_grad()
     def actions(self, command, dones=None, delta_q_h=None):
@@ -97,8 +100,8 @@ class SonicPlannerDualDriver(SonicDualDriver):
             pos_r = rs[e, r, :3] - origin[e]
             if self.step % sb.PLANNER_TICK == 0:
                 proot, pqt = tr.root()
-                shift = proot[:2] - pos_r[:2]                                   # position feedback (preregistered)
-                dyaw = sb.wrap(sb.yaw_of(pqt) - sb.yaw_of(q_np[i]))
+                shift = proot[:2] - pos_r[:2] if self.feedback else np.zeros(2)  # position feedback (preregistered)
+                dyaw = sb.wrap(sb.yaw_of(pqt) - sb.yaw_of(q_np[i])) if self.feedback else 0.0
                 wp, wy, _ = sb.waypoints(self.ref_pel_pos[:, r], self.ref_pel_quat[:, r], k, self.N, self.H, shift, dyaw)
                 d = wp[-1, :2] - proot[:2]
                 tr.replan(sb.MODE_WALK, sb.ref_planar_speed(self.ref_pel_pos[:, r], k, self.N),

@@ -23,7 +23,7 @@ p.add_argument('--limit',type=int,default=0)
 p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
 p.add_argument('--controller',choices=('policy','sonic','sonic_residual','sonic_planner'),default='policy',help='System1: policy (paper actor), sonic (scheme A), sonic_residual (scheme C checkpoint) or sonic_planner (scheme B)')
-p.add_argument('--b-variant',choices=('B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
+p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
 p.add_argument('--device',default='cuda:0')
 p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='evaluated',help='System1 T04 direct evaluation: with --object-mass-kg, validate the checkpoint contract against the original-mass experiment (checkpoint trained at the original mass) instead of the evaluated mass')
 p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
@@ -202,7 +202,7 @@ def main():
                             sonic_fall_rule='|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)')
         if a.controller=='sonic_planner':
             from system1 import scheme_b as _sb
-            manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta))
+            manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta,position_feedback=driver.feedback))
         write_json(out/'run_manifest.json',manifest)
         results=[]
         for init in states:
