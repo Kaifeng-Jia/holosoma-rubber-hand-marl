@@ -1,0 +1,178 @@
+{
+ "robot_urdf": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "sonic_checkpoint_sha256": [
+  "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+ ],
+ "sonic_spec_sha256": [
+  "6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a"
+ ],
+ "states_sha256": [
+  [
+   "bucket",
+   2,
+   "631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"
+  ],
+  [
+   "bucket",
+   8,
+   "3bae05a1b1d716d97c7025386dc3d7f832a7203a665d33f4f9979b3adb6e6ff0"
+  ],
+  [
+   "chair",
+   2,
+   "5bb8ff9f1cb7adb72b784c0d8475779cf68099aba551901114a2f78625960bc3"
+  ],
+  [
+   "chair",
+   8,
+   "f9a144ed0738975fef4453047c48382cee383b7daaa680e4cf43b468e8ea5af7"
+  ],
+  [
+   "kick",
+   2,
+   "c1ac57c62345363c85f96f98363d778898a23e1f35a2596fbcd33a68367527c4"
+  ],
+  [
+   "kick",
+   8,
+   "dba247caf71d5a80213f5eb96dd8c7a32ba0ff75d8fe2dd0f18411753c779319"
+  ],
+  [
+   "pull",
+   2,
+   "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"
+  ],
+  [
+   "pull",
+   8,
+   "3c2a60c7982db92b59b1f3343103e711409a6c756faaf83b86016b8163c8d5b2"
+  ],
+  [
+   "push",
+   2,
+   "1799ea1eec1a3ff097d46e08e6492694d6455490ccf9f2de26586e079fef895d"
+  ],
+  [
+   "push",
+   8,
+   "a58b2fae20f488c082f1ac07c7d552cc85053e6d5bc8360a60df2a723d26c266"
+  ],
+  [
+   "table",
+   2,
+   "389e8da5fb818572a48cbba049254585311079439265f5ab4cfc1523a185dac1"
+  ],
+  [
+   "table",
+   8,
+   "6a626f48c14598a646d40d35694e32b5be198ea09491b7f3557ab9c1fe02fcad"
+  ]
+ ],
+ "references": {
+  "push": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+   "lateral_spacing_m": 0.8780471999999999
+  },
+  "pull": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+   "lateral_spacing_m": null
+  },
+  "kick": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz",
+   "sha256": "8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d",
+   "lateral_spacing_m": null
+  },
+  "chair": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+   "lateral_spacing_m": null
+  },
+  "bucket": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+   "lateral_spacing_m": null
+  },
+  "table": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+   "lateral_spacing_m": null
+  }
+ },
+ "hand_fk_test": {
+  "independent_backend": "yourdfpy",
+  "root_link": "pelvis",
+  "joint_order": [
+   "left_hip_pitch_joint",
+   "left_hip_roll_joint",
+   "left_hip_yaw_joint",
+   "left_knee_joint",
+   "left_ankle_pitch_joint",
+   "left_ankle_roll_joint",
+   "right_hip_pitch_joint",
+   "right_hip_roll_joint",
+   "right_hip_yaw_joint",
+   "right_knee_joint",
+   "right_ankle_pitch_joint",
+   "right_ankle_roll_joint",
+   "waist_yaw_joint",
+   "waist_roll_joint",
+   "waist_pitch_joint",
+   "left_shoulder_pitch_joint",
+   "left_shoulder_roll_joint",
+   "left_shoulder_yaw_joint",
+   "left_elbow_joint",
+   "left_wrist_roll_joint",
+   "left_wrist_pitch_joint",
+   "left_wrist_yaw_joint",
+   "right_shoulder_pitch_joint",
+   "right_shoulder_roll_joint",
+   "right_shoulder_yaw_joint",
+   "right_elbow_joint",
+   "right_wrist_roll_joint",
+   "right_wrist_pitch_joint",
+   "right_wrist_yaw_joint"
+  ],
+  "random_states": 9,
+  "max_transform_error": {
+   "max_abs": 8.881784197001252e-16,
+   "rms": 1.2398675366599697e-16
+  },
+  "passed": true
+ },
+ "palm_postprocess_source": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_palm_postprocess.py",
+ "palm_postprocess_source_sha256": "929345c5062c5238b03fb1b281967991e3767e0a68d9a3d0904782a286807c1f",
+ "palm_output_dir": "logs_system1/T01b/schemeA_palm_metrics",
+ "evaluation_code_sha256_by_git_head": {
+  "ae5fa59996d5896363dfd1bdac8854e095d4c470": {
+   "scripts/evaluate_paper_supplement.py": "df4305aff1b91a26447b3fcadf001171e554809909fed70800a1d772417d1012",
+   "system1/scheme_a.py": "c1a0384e1074144e3c891fd7e6ca04940bd3251b3fbae3555968b0301218f5f8",
+   "system1/sonic_controller.py": "bda4ca2651c0fc6879aca33012bb9d7cbbd81cd80340701c46a233fe9a725e96",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "fbb39f69cbb2b761427b6af46dd0a3fda8d1ac0d": {
+   "scripts/evaluate_paper_supplement.py": "df4305aff1b91a26447b3fcadf001171e554809909fed70800a1d772417d1012",
+   "system1/scheme_a.py": "c1a0384e1074144e3c891fd7e6ca04940bd3251b3fbae3555968b0301218f5f8",
+   "system1/sonic_controller.py": "bda4ca2651c0fc6879aca33012bb9d7cbbd81cd80340701c46a233fe9a725e96",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  }
+ },
+ "evaluation_code_now_sha256": "df4305aff1b91a26447b3fcadf001171e554809909fed70800a1d772417d1012",
+ "git_head_now": "fbb39f69cbb2b761427b6af46dd0a3fda8d1ac0d",
+ "units": 36,
+ "episodes": 1836,
+ "hand_status_counts": {
+  "excluded_nominal": 36,
+  "not_completed": 1797,
+  "complete": 3
+ },
+ "palm_status_counts": {
+  "excluded_nominal": 32,
+  "not_completed": 1600,
+  "not_applicable": 204
+ },
+ "v3_episodes": "/home/kevin/holosoma-core4d-base/paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104/results/episodes.csv",
+ "v3_episodes_sha256": "164f0720e0856a90bbf450fdce472cc47bc36722641e060a1ea6faf2fd75b8f4"
+}

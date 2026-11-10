@@ -24,6 +24,7 @@ p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
 p.add_argument('--controller',choices=('policy','sonic','sonic_residual'),default='policy',help='System1: policy (paper actor), sonic (scheme A) or sonic_residual (scheme C checkpoint)')
 p.add_argument('--device',default='cuda:0')
+p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 a=p.parse_args()
 if a.controller!='sonic' and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic')
@@ -162,8 +163,14 @@ def main():
                 fr=min(int(env.episode_length_buf[0].item()),n-1)
                 captured_sonic={k:v[0].detach().cpu().numpy().copy() for k,v in driver.tracking(command,fr).items()}
         env._compute_reward=capturing_reward
-        physics={k:v.detach().cpu().tolist() for k,v in dict(mass=env.simulator._object.root_physx_view.get_masses(),
-                   material=env.simulator._object.root_physx_view.get_material_properties()).items()}
+        _view=env.simulator._object.root_physx_view
+        physics={k:v.detach().cpu().tolist() for k,v in dict(mass=_view.get_masses(),
+                   material=_view.get_material_properties(),inertia_row_major=_view.get_inertias(),com_pose_xyzw=_view.get_coms()).items()}
+        if a.readback_only:
+            out.mkdir(parents=True,exist_ok=True)
+            write_json(out/'object_physics_readback.json',dict(case=a.case,object_mass_kg_arg=a.object_mass_kg,object_urdf=config.robot.object.object_urdf_path,
+                       object_urdf_sha256=sha(ROOT/'src/holosoma'/config.robot.object.object_urdf_path),system1_object_mass_variant=mass_variant,physics=physics))
+            return 0
         manifest=dict(reference_variant=None if a.reference_variant is None else str(a.reference_variant),reference_variant_sha256=None if a.reference_variant is None else sha(a.reference_variant),case=a.case,model_id=a.model_id,checkpoint=str(checkpoint),checkpoint_sha256=sha(checkpoint),
                       v3_ablation=ablation,checkpoint_iteration=state['iter'],states_sha256=sha(a.states),reference_frames=n,
                       horizon_control_steps=n,dt=env.dt,inference='actor_mean_only_critic_forbidden',observation_noise=False,

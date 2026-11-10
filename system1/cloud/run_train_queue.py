@@ -161,7 +161,7 @@ def main():
             smi = subprocess.run(["nvidia-smi", "--query-gpu=index,name,memory.total,memory.free", "--format=csv,noheader"],
                                  capture_output=True, text=True).stdout
             launch = dict(label=seg["label"], argv=argv, started=now(), preflight_iterations=a.preflight or None,
-                          git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"), nvidia_smi=smi,
+                          git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"), git_diff=git("diff", "HEAD"), nvidia_smi=smi,
                           env={k: env[k] for k in ("CUDA_VISIBLE_DEVICES", "LOCAL_RANK", "WORLD_SIZE")},
                           parent_checkpoint=None if seg["parent"] is None else str(seg["parent"]),
                           parent_sha256=None if seg["parent"] is None else sha(seg["parent"]))

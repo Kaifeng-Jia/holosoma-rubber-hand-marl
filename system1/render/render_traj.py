@@ -52,8 +52,9 @@ def build_model(n_robots, object_urdf=None):
         frame = w.add_frame()
         frame.attach_body(body, f"r{r}_", "")
     if object_urdf is not None:
+        object_urdf = Path(object_urdf).resolve()  # absolute, so mesh files resolve independent of cwd
         os_ = mujoco.MjSpec.from_file(str(object_urdf))
-        os_.compiler.meshdir = str(Path(object_urdf).parent)
+        os_.compiler.meshdir = str(object_urdf.parent)
         for g in os_.geoms:
             g.rgba = [0.75, 0.75, 0.7, 0.8]
             g.contype = g.conaffinity = 0

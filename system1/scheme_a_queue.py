@@ -80,7 +80,8 @@ def main():
             launch = dict(label=label, argv=argv, started=datetime.now(NY).isoformat(timespec="seconds"),
                           states=str(states), states_sha256=expect,
                           git_head=subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
-                          git_status=subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain"], capture_output=True, text=True).stdout)
+                          git_status=subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain"], capture_output=True, text=True).stdout,
+                          git_diff=subprocess.run(["git", "-C", str(ROOT), "diff", "HEAD"], capture_output=True, text=True).stdout)
             (out / "ops" / f"{label}.launch.json").write_text(json.dumps(launch, indent=1))
             with (out / "ops" / f"{label}.stdout.log").open("w") as log:
                 rc = subprocess.run(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=env).returncode
