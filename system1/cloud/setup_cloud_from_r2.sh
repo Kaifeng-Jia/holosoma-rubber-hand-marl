@@ -69,6 +69,8 @@ fi
 cd "$S1_ROOT/third_party/GR00T-WholeBodyControl"
 if [[ -d .git ]]; then git checkout $SONIC_COMMIT; else grep -q $SONIC_COMMIT S1_SOURCE.json; fi
 $PY -m pip install --no-deps einx==0.4.3 frozendict==2.5.1 torch-einops-utils==0.2.6 vector_quantize_pytorch==1.32.2
+# hydra-core: imported by gear_sonic (utils/motion_lib/torch_humanoid_batch.py); present in the laptop env, absent in the R2 env
+$PY -m pip install --no-deps hydra-core==1.3.3
 $PY -m pip install --no-deps --no-build-isolation -e gear_sonic/
 for f in sonic_release/config.yaml sonic_release/last.pt config.json LICENSE; do
   mkdir -p "$(dirname "$f")"

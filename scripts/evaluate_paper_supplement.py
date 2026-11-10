@@ -188,6 +188,7 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
         if driver is not None:
             manifest.update(controller=a.controller,inference=('sonic_release_teleop_encoder_action_mean+planner_onnx' if a.controller=='sonic_planner' else 'sonic_release_g1_encoder_action_mean') if cwrap is None else 'scheme_c_actor_mean_then_sonic',
