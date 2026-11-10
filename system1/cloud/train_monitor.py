@@ -3,8 +3,8 @@
 
   status : per run directory under <train>: last iteration, median s/it over the last 50 iterations, non-finite values
   c-mass : wait until the three T03 C runs (c_pull:20 joint8000 segment, c_table:5, c_bucket:1) have all passed
-           iteration 1000 with no non-finite metric, then start the six T04 C runs one by one on GPUs that have fewer
-           than --per-gpu active run queues (Kevin 2026-11-10: "有卡空出来就上"); checks every minute.
+           iteration 1000 with no non-finite metric, then start the six T04 C runs and then the six C extra-seed runs
+           (722, 723) one by one on GPUs that have fewer than --per-gpu active run queues (T04-C first); checks every minute.
 
     source $S1_ROOT/s1_env.sh && $S1_PY system1/cloud/train_monitor.py status
     nohup $S1_PY system1/cloud/train_monitor.py c-mass --gpus 0,1,2,3,4 > logs/train/c_mass_scheduler.log 2>&1 &
@@ -27,6 +27,8 @@ ROOT = Path(__file__).resolve().parents[2]
 NY = ZoneInfo("America/New_York")
 C_MAIN = {"c_pull_m20kg_seed721_joint8000", "c_table_m5kg_seed721_fresh12000", "c_bucket_m1kg_seed721_fresh12000"}
 C_MASS = ["c_pull:40", "c_table:10", "c_table:20", "c_bucket:2", "c_bucket:4", "c_bucket:8"]
+# README_zh / T03 (2026-11-10 17:05): after the gate, T04-C and the C extra seeds may both start; T04-C first.
+C_SEEDS = ["c_pull:20/722", "c_table:5/722", "c_bucket:1/722", "c_pull:20/723", "c_table:5/723", "c_bucket:1/723"]
 
 
 def now():
@@ -83,7 +85,7 @@ def main():
     if a.mode == "status":
         print(json.dumps(dict(time=now(), runs=all_status(a.train), active_per_gpu=active_per_gpu()), indent=1))
         return 0
-    pending = list(C_MASS)
+    pending = list(C_MASS) + list(C_SEEDS)
     started = {}
     gate_passed_at = None
     while pending:
@@ -104,7 +106,8 @@ def main():
             if free:
                 g = min(free, key=lambda g: (act.get(g, 0), a.gpus.split(",").index(g)))
                 run = pending.pop(0)
-                cmd = [sys.executable, "-B", str(ROOT / "system1/cloud/start_queues.py"), "--assign", f"{run}@{g}"]
+                cmd = [sys.executable, "-B", str(ROOT / "system1/cloud/start_queues.py"), "--assign", f"{run}@{g}",
+                       "--local-rank-base", str(300 + len(started)), "--no-cpu-split"]
                 r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
                 started[run] = dict(gpu=g, time=now(), rc=r.returncode, active_before=act)
                 print(now(), "started", run, "on GPU", g, "rc", r.returncode, r.stdout[-300:], r.stderr[-300:], flush=True)
@@ -112,7 +115,7 @@ def main():
                 time.sleep(90)  # let the new queue appear in ps before the next decision
                 continue
         time.sleep(60)
-    print(now(), "all C mass runs started", flush=True)
+    print(now(), "all T04-C and C extra-seed runs started", flush=True)
     return 0
 
 

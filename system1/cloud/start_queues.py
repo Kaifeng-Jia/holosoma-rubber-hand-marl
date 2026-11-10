@@ -35,16 +35,23 @@ def main():
     p.add_argument("--out", type=Path, default=None, help="default $S1_ROOT/logs/train")
     p.add_argument("--python", default=os.environ.get("S1_PY"))
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--local-rank-base", default="200", help="first LOCAL_RANK (conversion cache id); later launches use other bases")
+    p.add_argument("--no-cpu-split", dest="cpus_split", action="store_false", help="no taskset (for runs added later)")
     a = p.parse_args()
     if (a.gpus is None) == (a.assign is None):
         p.error("give exactly one of --gpus / --assign")
     out = a.out or Path(os.environ["S1_ROOT"]) / "logs" / "train"
     ncpu = os.cpu_count() or 1
     if a.assign:
-        pairs = [x.rsplit("@", 1) for x in a.assign.split(",")]
+        pairs = [x.rsplit("@", 1) for x in a.assign.split(",")]   # RUN[/SEED]@GPU, seed default 721
         per = max(1, ncpu // len(pairs))
-        queues = [dict(gpu=g, runs=[r], iterations=ITERS[r.split("_", 1)[1].split(":")[0]], cpus=f"{i * per}-{(i + 1) * per - 1}",
-                       local_rank=str(200 + i), log=f"queue_{r.replace(':', '_')}.log") for i, (r, g) in enumerate(pairs)]
+        base = int(a.local_rank_base)
+        queues = []
+        for i, (r, g) in enumerate(pairs):
+            run, seed = (r.split("/") + ["721"])[:2]
+            queues.append(dict(gpu=g, runs=[run], seed=int(seed), iterations=ITERS[run.split("_", 1)[1].split(":")[0]],
+                               cpus=f"{i * per}-{(i + 1) * per - 1}" if a.cpus_split else None, local_rank=str(base + i),
+                               log=f"queue_{run.replace(':', '_')}_seed{seed}.log"))
     else:
         gpus = a.gpus.split(",")
         runs = a.runs.split(",")
@@ -72,7 +79,9 @@ def main():
     for q in assignment["queues"]:
         log = out / q["log"]
         argv = [a.python, "-B", str(ROOT / "system1/cloud/run_train_queue.py"), *q["runs"], "--out", str(out), "--python", a.python,
-                "--gpu", q["gpu"], "--local-rank", q["local_rank"], "--cpus", q["cpus"]]
+                "--gpu", q["gpu"], "--local-rank", q["local_rank"], "--seed", str(q.get("seed", 721))]
+        if q.get("cpus"):
+            argv += ["--cpus", q["cpus"]]
         with log.open("w") as fh:
             subprocess.Popen(argv, cwd=ROOT, stdout=fh, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL, start_new_session=True)
         print(f"started GPU {q['gpu']}: {' '.join(q['runs'])}")
