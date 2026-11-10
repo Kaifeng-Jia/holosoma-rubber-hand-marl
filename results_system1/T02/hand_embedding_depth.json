@@ -1,0 +1,121 @@
+{
+ "definition": "rubber_hand_link collision mesh vertices (every 2nd) at the reference hand pose; depth of a vertex inside an object collision part = distance to that part's surface; hand-frame depth = max over vertices",
+ "robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "tasks": {
+  "push": {
+   "frames": 309,
+   "per_robot": [
+    {
+     "hand_frames": 618,
+     "embedded_hand_frames": 503,
+     "max_depth_cm": 2.372499069182693,
+     "mean_depth_cm_over_embedded": 2.345319723833048
+    },
+    {
+     "hand_frames": 618,
+     "embedded_hand_frames": 503,
+     "max_depth_cm": 2.3724988457937632,
+     "mean_depth_cm_over_embedded": 2.3453197395505643
+    }
+   ],
+   "embedded_hand_frames": 1006,
+   "hand_frames": 1236,
+   "max_depth_cm": 2.372499069182693,
+   "mean_depth_cm_over_embedded": 2.345319731691806,
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "object_urdf_sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a"
+  },
+  "pull": {
+   "frames": 316,
+   "per_robot": [
+    {
+     "hand_frames": 632,
+     "embedded_hand_frames": 20,
+     "max_depth_cm": 0.20506279641995043,
+     "mean_depth_cm_over_embedded": 0.04550906691303912
+    },
+    {
+     "hand_frames": 632,
+     "embedded_hand_frames": 20,
+     "max_depth_cm": 0.2055976497157587,
+     "mean_depth_cm_over_embedded": 0.04581810328135358
+    }
+   ],
+   "embedded_hand_frames": 40,
+   "hand_frames": 1264,
+   "max_depth_cm": 0.2055976497157587,
+   "mean_depth_cm_over_embedded": 0.045663585097196355,
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "object_urdf_sha256": "c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2"
+  },
+  "chair": {
+   "frames": 391,
+   "per_robot": [
+    {
+     "hand_frames": 782,
+     "embedded_hand_frames": 68,
+     "max_depth_cm": 2.290595748913065,
+     "mean_depth_cm_over_embedded": 1.838262533071375
+    },
+    {
+     "hand_frames": 782,
+     "embedded_hand_frames": 145,
+     "max_depth_cm": 0.9120141328851815,
+     "mean_depth_cm_over_embedded": 0.882653168945728
+    }
+   ],
+   "embedded_hand_frames": 213,
+   "hand_frames": 1564,
+   "max_depth_cm": 2.290595748913065,
+   "mean_depth_cm_over_embedded": 1.187730336835606,
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+   "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee"
+  },
+  "bucket": {
+   "frames": 497,
+   "per_robot": [
+    {
+     "hand_frames": 994,
+     "embedded_hand_frames": 175,
+     "max_depth_cm": 2.7905834841551056,
+     "mean_depth_cm_over_embedded": 1.503885937600933
+    },
+    {
+     "hand_frames": 994,
+     "embedded_hand_frames": 272,
+     "max_depth_cm": 9.979947234651615,
+     "mean_depth_cm_over_embedded": 2.880257713473701
+    }
+   ],
+   "embedded_hand_frames": 447,
+   "hand_frames": 1988,
+   "max_depth_cm": 9.979947234651615,
+   "mean_depth_cm_over_embedded": 2.3414097027852567,
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+   "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde"
+  },
+  "table": {
+   "frames": 687,
+   "per_robot": [
+    {
+     "hand_frames": 1374,
+     "embedded_hand_frames": 2,
+     "max_depth_cm": 0.09919098427662587,
+     "mean_depth_cm_over_embedded": 0.08673291587180769
+    },
+    {
+     "hand_frames": 1374,
+     "embedded_hand_frames": 254,
+     "max_depth_cm": 0.6632011192435582,
+     "mean_depth_cm_over_embedded": 0.3022377023597361
+    }
+   ],
+   "embedded_hand_frames": 256,
+   "hand_frames": 2748,
+   "max_depth_cm": 0.6632011192435582,
+   "mean_depth_cm_over_embedded": 0.3005540712152992,
+   "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d"
+  }
+ }
+}
