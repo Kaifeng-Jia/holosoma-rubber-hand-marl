@@ -103,6 +103,39 @@ def g1_encoder_terms(ref_dof_pos_f, ref_dof_vel_f, ref_root_quat_f, robot_root_q
     return cmd, ori
 
 
+# Teleop encoder (scheme B). Sources: gear_sonic/config/actor_critic/encoders/teleop_mlp.yaml (inputs),
+# envs/manager_env/mdp/observations.py (vr_3point_local_target / _orn_target / motion_anchor_ori_b),
+# mdp/commands.py (command_multi_future_lower_body = cat(pos[F*12], vel[F*12]); 3-point bodies and offsets
+# from config/manager_env/commands/terms/motion.yaml), deploy policy_parameters.hpp (lower-body index list).
+LOWER_BODY_SONIC = (0, 3, 6, 9, 13, 17, 1, 4, 7, 10, 14, 18)  # SONIC (Isaac Lab) joint indices of MuJoCo joints 0..11 (legs)
+VR3_BODIES = ("left_wrist_yaw_link", "right_wrist_yaw_link", "torso_link")
+VR3_OFFSETS = ((0.18, -0.025, 0.0), (0.18, 0.025, 0.0), (0.0, 0.0, 0.35))  # in each body's frame
+TELEOP_ENCODER_INDEX = 1  # column order of encoder_index = encoder_sample_probs order: g1, teleop, smpl
+
+
+def teleop_encoder_terms(lower_pos_f, lower_vel_f, anchor_pos, anchor_quat, pts_pos, pts_quat, robot_root_quat, ori_anchor_quat=None):
+    """Teleop encoder inputs, SONIC conventions (wxyz).
+
+    lower_pos_f / lower_vel_f: [B, F, 29] future reference joint pos / vel (SONIC order); the 12 leg joints are taken.
+    anchor_pos [B,3], anchor_quat [B,4]: reference anchor (pelvis) at the current frame.
+    pts_pos [B,3,3], pts_quat [B,3,4]: reference body origins / orientations of VR3_BODIES at the current frame.
+    robot_root_quat [B,4]: robot pelvis.
+    ori_anchor_quat [B,4]: anchor used for motion_anchor_ori_b; defaults to anchor_quat (training: the same reference
+    pelvis). Scheme B passes the planner root here (as the deployment does) while the 3 points use the reference pelvis.
+    """
+    b = lower_pos_f.shape[0]
+    idx = torch.as_tensor(LOWER_BODY_SONIC, device=lower_pos_f.device)
+    cmd = torch.cat((lower_pos_f[..., idx].reshape(b, -1), lower_vel_f[..., idx].reshape(b, -1)), dim=1)
+    off = torch.tensor(VR3_OFFSETS, dtype=pts_pos.dtype, device=pts_pos.device).expand(b, 3, 3)
+    p = pts_pos + quat_apply(pts_quat, off)
+    aq = anchor_quat[:, None].expand(b, 3, 4)
+    local = quat_apply(quat_conj(aq), p - anchor_pos[:, None])
+    orn = quat_mul(quat_conj(aq), pts_quat)
+    rel = quat_mul(quat_conj(robot_root_quat), anchor_quat if ori_anchor_quat is None else ori_anchor_quat)
+    ori = matrix_from_quat(rel)[..., :2].reshape(b, 6)
+    return cmd, local.reshape(b, 9), orn.reshape(b, 12), ori
+
+
 def proprio_now(root_quat, root_ang_vel_b, joint_pos, joint_vel, last_action, default_joint_pos):
     down = torch.tensor([0.0, 0.0, -1.0], device=root_quat.device).expand(root_quat.shape[0], 3)
     grav = quat_apply(quat_conj(root_quat), down)
@@ -274,6 +307,34 @@ class SonicController:
             {"encoder_index": enc, "command_multi_future_nonflat": cmd, "motion_anchor_ori_b_mf_nonflat": ori},
             self.batch, self.device,
         )
+
+    def tokenizer_obs_teleop(self, lower_pos_f, lower_vel_f, anchor_pos, anchor_quat, pts_pos, pts_quat, root_quat, ori_anchor_quat=None):
+        """Tokenizer with only the teleop encoder active (encoder_index one-hot, as for teleop envs in training)."""
+        cmd, local, orn, ori = teleop_encoder_terms(lower_pos_f, lower_vel_f, anchor_pos, anchor_quat, pts_pos, pts_quat, root_quat,
+                                                    ori_anchor_quat)
+        enc = torch.zeros(self.batch, 3, device=self.device)
+        enc[:, TELEOP_ENCODER_INDEX] = 1.0
+        return self.layout.assemble(
+            {"encoder_index": enc, "command_multi_future_lower_body": cmd, "vr_3point_local_target": local,
+             "vr_3point_local_orn_target": orn, "motion_anchor_ori_b": ori},
+            self.batch, self.device,
+        )
+
+    @torch.no_grad()
+    def act_teleop(self, root_quat, root_ang_vel_b, joint_pos, joint_vel, lower_pos_f, lower_vel_f, anchor_pos, anchor_quat,
+                   pts_pos, pts_quat, dones=None, ori_anchor_quat=None):
+        """Teleop-encoder step (scheme B). Same proprioception / decoder path as :meth:`act`."""
+        now = proprio_now(root_quat, root_ang_vel_b, joint_pos, joint_vel, self.last_action, self.default_joint_pos)
+        self._push_history(now)
+        obs = {"actor_obs": self.actor_obs(),
+               "tokenizer": self.tokenizer_obs_teleop(lower_pos_f, lower_vel_f, anchor_pos, anchor_quat, pts_pos, pts_quat, root_quat,
+                                                     ori_anchor_quat)}
+        if dones is None:
+            dones = torch.zeros(self.batch, device=self.device)
+        action = self.infer(obs, dones)
+        self.last_action = action.clamp(-self.action_clip, self.action_clip).clone()
+        target = self.default_joint_pos + self.action_scale * self.last_action
+        return action, target, obs
 
     @torch.no_grad()
     def infer(self, obs, dones):

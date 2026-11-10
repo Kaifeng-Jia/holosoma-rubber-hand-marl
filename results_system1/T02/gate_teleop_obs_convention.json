@@ -1,0 +1,72 @@
+{
+ "dump": "logs_system1/T01b/sonic/native_dump_g1only_tf32off.npz",
+ "dump_sha256": "d68404d18bb7cd9f9a10a6d5a1040375ffcf97027444cb9f945fa4d01fccf925",
+ "steps": 2000,
+ "envs": 2,
+ "threshold": 1e-05,
+ "max_abs_diff": {
+  "command_multi_future_lower_body": 0.0,
+  "vr_3point_local_target": 7.87308803179565e-06,
+  "vr_3point_local_orn_target": 3.6882573883900704e-07,
+  "motion_anchor_ori_b": 4.119579636169268e-07
+ },
+ "at_step_env": {
+  "command_multi_future_lower_body": null,
+  "vr_3point_local_target": [
+   1306,
+   0
+  ],
+  "vr_3point_local_orn_target": [
+   1637,
+   1
+  ],
+  "motion_anchor_ori_b": [
+   1462,
+   0
+  ]
+ },
+ "max_abs_value_in_sonic_obs": {
+  "command_multi_future_lower_body": 10.19113540649414,
+  "vr_3point_local_target": 0.6991444230079651,
+  "vr_3point_local_orn_target": 0.9999632835388184,
+  "motion_anchor_ori_b": 1.0
+ },
+ "vr3_bodies": [
+  "left_wrist_yaw_link",
+  "right_wrist_yaw_link",
+  "torso_link"
+ ],
+ "vr3_offsets": [
+  [
+   0.18,
+   -0.025,
+   0.0
+  ],
+  [
+   0.18,
+   0.025,
+   0.0
+  ],
+  [
+   0.0,
+   0.0,
+   0.35
+  ]
+ ],
+ "lower_body_sonic_indices": [
+  0,
+  3,
+  6,
+  9,
+  13,
+  17,
+  1,
+  4,
+  7,
+  10,
+  14,
+  18
+ ],
+ "passed": true,
+ "note": "float64 recomputation from float32 dump arrays; SONIC computed in float32"
+}

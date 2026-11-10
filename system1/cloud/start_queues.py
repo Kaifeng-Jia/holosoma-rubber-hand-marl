@@ -2,6 +2,7 @@
 """Start the T04-D + T03 training queues on the cloud: one run_train_queue.py per GPU, detached.
 
   source $S1_ROOT/s1_env.sh && python system1/cloud/start_queues.py --gpus 0,1,2,3,4,5,6,7,8
+  python system1/cloud/start_queues.py --assign d_pull:40@0,c_pull:20@0,d_table:20@1,...   (2 runs on one GPU)
 
 Runs are assigned longest-first to the GPU with the least total iterations (one run per GPU when
 there are at least as many GPUs as runs). CPU cores are split evenly between the queues; each
@@ -26,38 +27,50 @@ ITERS = dict(pull=8050, table=12000, bucket=12000)
 
 def main():
     p = argparse.ArgumentParser()
-    p.add_argument("--gpus", required=True, help="comma-separated GPU indices")
+    p.add_argument("--gpus", default=None, help="comma-separated GPU indices (one sequential queue per GPU)")
+    p.add_argument("--assign", default=None,
+                   help="explicit RUN@GPU list, e.g. d_pull:40@0,c_pull:20@0,...: every run is its own queue, so two runs "
+                        "assigned to the same GPU train concurrently on it")
     p.add_argument("--runs", default=",".join(RUNS))
     p.add_argument("--out", type=Path, default=None, help="default $S1_ROOT/logs/train")
     p.add_argument("--python", default=os.environ.get("S1_PY"))
     p.add_argument("--dry-run", action="store_true")
     a = p.parse_args()
-    gpus = a.gpus.split(",")
-    runs = a.runs.split(",")
+    if (a.gpus is None) == (a.assign is None):
+        p.error("give exactly one of --gpus / --assign")
     out = a.out or Path(os.environ["S1_ROOT"]) / "logs" / "train"
-    load = {g: 0 for g in gpus}
-    plan = {g: [] for g in gpus}
-    for r in sorted(runs, key=lambda r: -ITERS[r.split("_", 1)[1].split(":")[0]]):
-        g = min(gpus, key=lambda g: (load[g], gpus.index(g)))
-        plan[g].append(r)
-        load[g] += ITERS[r.split("_", 1)[1].split(":")[0]]
     ncpu = os.cpu_count() or 1
-    per = max(1, ncpu // len(gpus))
-    cpus = {g: f"{i * per}-{(i + 1) * per - 1}" for i, g in enumerate(gpus)}
+    if a.assign:
+        pairs = [x.rsplit("@", 1) for x in a.assign.split(",")]
+        per = max(1, ncpu // len(pairs))
+        queues = [dict(gpu=g, runs=[r], iterations=ITERS[r.split("_", 1)[1].split(":")[0]], cpus=f"{i * per}-{(i + 1) * per - 1}",
+                       local_rank=str(200 + i), log=f"queue_{r.replace(':', '_')}.log") for i, (r, g) in enumerate(pairs)]
+    else:
+        gpus = a.gpus.split(",")
+        runs = a.runs.split(",")
+        load = {g: 0 for g in gpus}
+        plan = {g: [] for g in gpus}
+        for r in sorted(runs, key=lambda r: -ITERS[r.split("_", 1)[1].split(":")[0]]):
+            g = min(gpus, key=lambda g: (load[g], gpus.index(g)))
+            plan[g].append(r)
+            load[g] += ITERS[r.split("_", 1)[1].split(":")[0]]
+        per = max(1, ncpu // len(gpus))
+        queues = [dict(gpu=g, runs=plan[g], iterations=load[g], cpus=f"{i * per}-{(i + 1) * per - 1}", local_rank=str(200 + i),
+                       log=f"queue_gpu{g}.log") for i, g in enumerate(gpus) if plan[g]]
     assignment = dict(created=datetime.now(ZoneInfo("America/New_York")).isoformat(timespec="seconds"), out=str(out),
-                      cpu_count=ncpu, queues=[dict(gpu=g, runs=plan[g], iterations=load[g], cpus=cpus[g], local_rank=str(200 + i))
-                                              for i, g in enumerate(gpus) if plan[g]])
+                      cpu_count=ncpu, mode="assign" if a.assign else "gpus", queues=queues)
     print(json.dumps(assignment, indent=1))
     if a.dry_run:
         return 0
     out.mkdir(parents=True, exist_ok=True)
     for q in assignment["queues"]:
-        log = out / f"queue_gpu{q['gpu']}.log"
+        log = out / q["log"]
         if log.exists():
-            raise FileExistsError(f"{log} exists; not starting a second queue on GPU {q['gpu']}")
-    (out / "assignment.json").write_text(json.dumps(assignment, indent=1))
+            raise FileExistsError(f"{log} exists; not starting this queue twice")
+    name = "assignment.json" if not (out / "assignment.json").exists() else f"assignment_{datetime.now().strftime('%Y%m%dT%H%M%S')}.json"
+    (out / name).write_text(json.dumps(assignment, indent=1))
     for q in assignment["queues"]:
-        log = out / f"queue_gpu{q['gpu']}.log"
+        log = out / q["log"]
         argv = [a.python, "-B", str(ROOT / "system1/cloud/run_train_queue.py"), *q["runs"], "--out", str(out), "--python", a.python,
                 "--gpu", q["gpu"], "--local-rank", q["local_rank"], "--cpus", q["cpus"]]
         with log.open("w") as fh:
