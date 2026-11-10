@@ -22,11 +22,11 @@ p.add_argument('--output-dir',type=Path,required=True)
 p.add_argument('--limit',type=int,default=0)
 p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
-p.add_argument('--controller',choices=('policy','sonic'),default='policy',help='System1: policy (paper actor) or sonic (scheme A)')
+p.add_argument('--controller',choices=('policy','sonic','sonic_residual'),default='policy',help='System1: policy (paper actor), sonic (scheme A) or sonic_residual (scheme C checkpoint)')
 p.add_argument('--device',default='cuda:0')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 a=p.parse_args()
-if a.controller=='policy' and a.checkpoint is None:p.error('--checkpoint is required for --controller policy')
+if a.controller!='sonic' and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic')
 if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
 record=json.loads(a.states.read_text());states=record['states'][:a.limit or None]
 if record['case']!=a.case:raise ValueError('Initial-state case mismatch')
@@ -63,7 +63,7 @@ else:
 config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observation,
                training=replace(config.training,num_envs=1,seed=241003,headless=True))
 config,placement_provenance=configure_push_placement(config,a.push_placement_proof,skill=a.case,root=ROOT)
-if a.controller=='sonic':
+if a.controller in ('sonic','sonic_residual'):
     sys.path.insert(0,str(ROOT))
     from system1.scheme_a import with_sonic_pd
     config=with_sonic_pd(config,hip_pitch_actuator=a.sonic_hip_pitch_actuator)
@@ -82,6 +82,8 @@ def main():
         if out.exists():raise FileExistsError(out)
         out.mkdir(parents=True)
         dev=a.device
+        if a.controller!='policy':
+            from system1 import sonic_controller as _sc
         if a.controller=='sonic':
             from system1 import sonic_controller as _sc
             checkpoint=_sc.DEFAULT_CHECKPOINT;state={'iter':None,'plan5_skill':a.case,'placement_provenance':placement_provenance}
@@ -97,18 +99,22 @@ def main():
             raise ValueError('Checkpoint and evaluation placement differ')
         if state.get('plan5_skill',a.case) != a.case:
             raise ValueError('Checkpoint skill differs from evaluation case')
-        if experiment and a.controller=='policy':
+        if a.controller=='sonic_residual' and not state.get('system1_sonic_residual'):
+            raise ValueError('--controller sonic_residual needs a scheme C checkpoint')
+        if a.controller=='policy' and state.get('system1_sonic_residual'):
+            raise ValueError('scheme C checkpoint requires --controller sonic_residual')
+        if experiment and a.controller!='sonic':
             validate_core4d_smalltable_checkpoint(state,experiment_contract=experiment.checkpoint_contract)
         if experiment:
             for path,expected in ((experiment.runtime_reference_file,experiment.runtime_reference_sha256),
                                   (experiment.object_urdf_file,experiment.object_urdf_sha256),
                                   (experiment.training_promotion_file,experiment.training_promotion_sha256)):
                 if sha(ROOT/'src/holosoma'/path)!=expected:raise ValueError('Asset hash mismatch: '+path)
-        elif a.controller=='policy':
+        elif a.controller!='sonic':
             c=state['plan5_mappo']
             if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=[2,158,527,29]:raise ValueError('Plan5 shape contract')
         models=None
-        if a.controller=='policy':
+        if a.controller!='sonic':
             models=initialize_core4d_smalltable_model_bundle(config.algo.config,device=dev)
             models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
             models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
@@ -119,10 +125,13 @@ def main():
         torch.manual_seed(241003)
         env=get_class(config.env_class)(get_tyro_env_config(config),device=dev)
         env.set_is_evaluating();command=env.command_manager.get_state('paired_motion_command')
-        driver=None
+        driver=None;cwrap=None
         if a.controller=='sonic':
             from system1.scheme_a import SonicDualDriver
             driver=SonicDualDriver(env,dev)
+        elif a.controller=='sonic_residual':
+            from system1.scheme_c import SonicResidualEnv
+            cwrap=SonicResidualEnv(env,dev,tf32=False);driver=cwrap.driver
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         ids=torch.tensor([0],device=env.device)
         n=int(command.reference.num_frames)
@@ -166,7 +175,8 @@ def main():
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
         if driver is not None:
-            manifest.update(controller='sonic',inference='sonic_release_g1_encoder_action_mean',checkpoint_sha256=sha(checkpoint),
+            manifest.update(controller=a.controller,inference='sonic_release_g1_encoder_action_mean' if cwrap is None else 'scheme_c_actor_mean_then_sonic',
+                            sonic_checkpoint_sha256=sha(_sc.DEFAULT_CHECKPOINT),checkpoint_sha256=sha(checkpoint),
                             tf32=bool(torch.backends.cuda.matmul.allow_tf32),hip_pitch_actuator=a.sonic_hip_pitch_actuator,
                             frozen_action_scales=list(config.robot.control.frozen_action_scales),
                             effort_limits=list(config.robot.dof_effort_limit_list),vel_limits=list(config.robot.dof_vel_limit_list),
@@ -189,12 +199,18 @@ def main():
             env._compute_observations();env._clip_observations();observations=env.obs_buf_dict
             start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[];pd_diff=0.0
             if driver is not None:driver.reset()
+            if cwrap is not None:
+                cwrap._prev_t=command.time_steps.clone();cwrap._dones=torch.zeros_like(cwrap._dones)
             for step in range(1,n+1):
-                if driver is not None:
+                if cwrap is not None:
+                    actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
+                    observations,rewards,dones,extras=cwrap.step({'actions':actions})
+                elif driver is not None:
                     actions,_=driver.actions(command)
+                    observations,rewards,dones,extras=env.step({'actions':actions})
                 else:
                     actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
-                observations,rewards,dones,extras=env.step({'actions':actions})
+                    observations,rewards,dones,extras=env.step({'actions':actions})
                 if captured is None:raise RuntimeError('Pre-reset state capture missing')
                 frames.append(captured);reward+=float(rewards[0].item())
                 if driver is not None:

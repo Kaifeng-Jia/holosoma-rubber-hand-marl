@@ -1,0 +1,124 @@
+{
+ "gate": 1e-06,
+ "tf32": false,
+ "infer_block": 128,
+ "tasks": {
+  "push": {
+   "steps": 120,
+   "reference": {
+    "task": "push",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+    "loader": "PairedA1Reference",
+    "lateral_spacing_m": 0.8780471999999999,
+    "proof_sha256": "f28a5c095bb17901858cf47e01b4b02e5867edbdf8d12423012024ef7eaaf4a1"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  },
+  "pull": {
+   "steps": 120,
+   "reference": {
+    "task": "pull",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+    "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+    "loader": "PairedMotionReference"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  },
+  "kick": {
+   "steps": 120,
+   "reference": {
+    "task": "kick",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz",
+    "sha256": "8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d",
+    "loader": "PairedMotionReference"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  },
+  "chair": {
+   "steps": 120,
+   "reference": {
+    "task": "chair",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+    "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+    "loader": "PairedMotionReference"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  },
+  "bucket": {
+   "steps": 120,
+   "reference": {
+    "task": "bucket",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+    "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+    "loader": "PairedMotionReference"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  },
+  "table": {
+   "steps": 120,
+   "reference": {
+    "task": "table",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+    "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "loader": "PairedMotionReference"
+   },
+   "max_abs": {
+    "tokenizer": 0.0,
+    "actor_obs": 0.0,
+    "action": 0.0,
+    "q_target": 0.0,
+    "ref_joint_vs_npz": 0.0,
+    "ref_joint_vs_raw_file": 0.0,
+    "layout": 0.0
+   },
+   "passed": true
+  }
+ },
+ "passed": true
+}

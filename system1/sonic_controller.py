@@ -26,13 +26,14 @@ from __future__ import annotations
 
 import io
 import json
+import os
 from dataclasses import dataclass
 from pathlib import Path
 
 import numpy as np
 import torch
 
-SONIC_ROOT = Path("/home/kevin/third_party/GR00T-WholeBodyControl")
+SONIC_ROOT = Path(os.environ.get("S1_SONIC_ROOT", "/home/kevin/third_party/GR00T-WholeBodyControl"))
 DEFAULT_CHECKPOINT = SONIC_ROOT / "sonic_release" / "last.pt"
 DEFAULT_SPEC = Path(__file__).resolve().parent / "sonic" / "sonic_release_spec.json"
 
@@ -283,14 +284,18 @@ class SonicController:
         each row's result independent of the batch size and of its position in the batch.
         """
         n = obs["actor_obs"].shape[0]
+        block = getattr(self, "infer_block", INFER_BLOCK)
+        if block is None:  # training (T03 allows TF32 in training): one batched call
+            self.policy.init_rollout()
+            return self.policy.act_inference(obs_dict=obs, cur_dones=dones, skip_episode_attnmask=True)
         out = []
-        for s in range(0, n, INFER_BLOCK):
-            blk = {k: v[s : s + INFER_BLOCK] for k, v in obs.items()}
-            d = dones[s : s + INFER_BLOCK]
+        for s in range(0, n, block):
+            blk = {k: v[s : s + block] for k, v in obs.items()}
+            d = dones[s : s + block]
             k = d.shape[0]
-            if k < INFER_BLOCK:
-                blk = {kk: torch.cat([v, v.new_zeros(INFER_BLOCK - k, v.shape[1])]) for kk, v in blk.items()}
-                d = torch.cat([d, d.new_zeros(INFER_BLOCK - k)])
+            if k < block:
+                blk = {kk: torch.cat([v, v.new_zeros(block - k, v.shape[1])]) for kk, v in blk.items()}
+                d = torch.cat([d, d.new_zeros(block - k)])
             self.policy.init_rollout()  # history length 1: no cross-call state in the Actor
             out.append(self.policy.act_inference(obs_dict=blk, cur_dones=d, skip_episode_attnmask=True)[:k])
         return torch.cat(out)

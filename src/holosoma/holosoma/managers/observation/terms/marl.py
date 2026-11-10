@@ -74,7 +74,9 @@ def paired_dof_vel(env: Any) -> torch.Tensor:
 
 def paired_actions(env: Any) -> torch.Tensor:
     """Return the last action with an explicit agent axis."""
-    return env.action_manager.action.reshape(env.num_envs, env.num_agents, env.num_dof)
+    policy_action = getattr(env.action_manager, "policy_action", None)  # System1 scheme C (None = original)
+    source = env.action_manager.action if policy_action is None else policy_action
+    return source.reshape(env.num_envs, env.num_agents, env.num_dof)
 
 
 def centralized_shared_motion_command(env: Any) -> torch.Tensor:

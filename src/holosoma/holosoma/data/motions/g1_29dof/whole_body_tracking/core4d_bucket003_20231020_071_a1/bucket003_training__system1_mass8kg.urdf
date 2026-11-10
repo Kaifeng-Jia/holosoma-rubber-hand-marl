@@ -1,0 +1,22 @@
+<?xml version='1.0' encoding='utf-8'?>
+<robot name="bucket003">
+  <link name="bucket003_link">
+    <inertial>
+      <origin xyz="-0.00889580251366 0.0350185122591 0.000757320113873" rpy="0 0 0" />
+      <mass value="8.0" />
+      <inertia ixx="0.4512408295536" ixy="0.005942918933448" ixz="-7.658818676056e-05" iyy="0.1864428504928" iyz="-0.0001573173515408" izz="0.4486483330256" />
+    </inertial>
+    <visual name="bucket003_visual">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="bucket003_m.obj" scale="1 1 1" />
+      </geometry>
+    </visual>
+    <collision name="bucket003_mesh_collision">
+      <origin xyz="0 0 0" rpy="0 0 0" />
+      <geometry>
+        <mesh filename="bucket003_m.obj" scale="1 1 1" />
+      </geometry>
+    </collision>
+  </link>
+</robot>

@@ -56,6 +56,9 @@ class ActionManager:
         # Buffers for actions
         self._action = torch.zeros((self.env.num_envs, self._total_action_dim), device=self.device)
         self._prev_action = torch.zeros_like(self._action)
+        # System1 scheme C: the policy's own last output when the env receives a different
+        # (physical) action; read by the last-action observations. None = original behaviour.
+        self.policy_action: torch.Tensor | None = None
 
     def _initialize_terms(self) -> None:
         """Initialize action terms and resolve their classes."""
@@ -204,9 +207,13 @@ class ActionManager:
         if env_ids is None:
             self._prev_action[:] = 0.0
             self._action[:] = 0.0
+            if self.policy_action is not None:
+                self.policy_action[:] = 0.0
         else:
             self._prev_action[env_ids] = 0.0
             self._action[env_ids] = 0.0
+            if self.policy_action is not None:
+                self.policy_action[env_ids] = 0.0
 
         # Reset all action terms
         for term in self._term_instances.values():

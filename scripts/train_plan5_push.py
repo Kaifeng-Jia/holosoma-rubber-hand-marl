@@ -46,6 +46,9 @@ PARSER.add_argument("--push-placement-proof", type=Path, default=None,
 PARSER.add_argument("--from-scratch", action="store_true")
 PARSER.add_argument("--zero-teammate-obs", action="store_true")
 PARSER.add_argument("--episode-telemetry", action="store_true")
+PARSER.add_argument("--sonic-residual", action="store_true",
+                    help="System1 T03 scheme C: policy output is a residual on SONIC's reference input (default off)")
+PARSER.add_argument("--sonic-tf32", action="store_true", help="scheme C training: allow TF32 for SONIC inference")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 ARGS = PARSER.parse_args()
@@ -181,6 +184,10 @@ if ARGS.object_mass_kg is not None:
         CONFIG.robot.object.object_urdf_path, ARGS.object_mass_kg)
     CONFIG = replace(CONFIG, robot=replace(
         CONFIG.robot, object=replace(CONFIG.robot.object, object_urdf_path=_variant_urdf)))
+if ARGS.sonic_residual:
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.scheme_a import with_sonic_pd
+    CONFIG = with_sonic_pd(CONFIG)  # hip_pitch PD -> SONIC, action scales frozen (F2)
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -290,6 +297,8 @@ def _ramped_weight(*, iteration: int, start_iteration: int, target: float, ramp:
 def _checkpoint_state(learner, *, iteration: int, smooth_schedule: dict | None) -> dict:
     state = learner.training_state_dict(iteration=iteration)
     state['plan5_skill'] = ARGS.skill
+    if ARGS.sonic_residual:
+        state['system1_sonic_residual'] = True
     state['placement_provenance'] = PLACEMENT_PROVENANCE
     if smooth_schedule is not None:
         state["joint_acceleration_schedule"] = smooth_schedule
@@ -373,6 +382,9 @@ def main() -> None:
 
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
+        if ARGS.sonic_residual:
+            from system1.scheme_c import SonicResidualEnv
+            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128)
         observations = env.reset_all()
         runtime_reference_check = export_runtime_reference(
             env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
@@ -418,8 +430,13 @@ def main() -> None:
         )
         start_iteration = 0
         smooth_ramp_start_iteration = 0 if SMOOTH_FINETUNE else None
+        if ARGS.sonic_residual and ARGS.resume is None:
+            from system1.scheme_c import zero_init_output_layer
+            zero_init_output_layer(models.actor)  # iteration 0: a = 0, i.e. scheme A
         if ARGS.resume is not None:
             resume_state = torch.load(ARGS.resume.expanduser().resolve(), map_location=env.device)
+            if bool(resume_state.get('system1_sonic_residual', False)) != ARGS.sonic_residual:
+                raise ValueError('Resume checkpoint and --sonic-residual differ')
             if resume_state.get('placement_provenance') != PLACEMENT_PROVENANCE:
                 raise ValueError('Resume placement differs from requested placement')
             if resume_state.get('plan5_skill', ARGS.skill) != ARGS.skill:
@@ -543,6 +560,9 @@ def main() -> None:
             run_config["episode_telemetry_contract"] = TELEMETRY_CONTRACT
         if OBJECT_MASS_VARIANT is not None:
             run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
+        if ARGS.sonic_residual:
+            from system1.scheme_c import scheme_c_run_config
+            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32)
         _write_json(output_dir / "run_config.json", run_config)
         # Telemetry runs preserve the exact loaded state in their new segment.
         if ARGS.resume is None or ARGS.episode_telemetry:

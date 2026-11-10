@@ -53,7 +53,7 @@ def main():
     p.add_argument("--cpus", default=None, help="taskset core list, e.g. 8-31")
     p.add_argument("--cases", default="push,pull,kick,chair,bucket,table")
     p.add_argument("--levels", default="2,8")
-    p.add_argument("--extra", nargs="*", default=[], help="extra evaluator args, e.g. --object-mass-kg 10")
+    p.add_argument("--extra", default="", help='extra evaluator args as one string, e.g. --extra="--object-mass-kg 10"')
     a = p.parse_args()
     out = a.out if a.out.is_absolute() else ROOT / a.out
     (out / "ops").mkdir(parents=True, exist_ok=True)
@@ -72,7 +72,7 @@ def main():
                 continue
             argv = [PY, "-B", "scripts/evaluate_paper_supplement.py", "--case", case, "--controller", "sonic",
                     "--device", a.device, "--states", str(states), "--model-id", f"SchemeA_{label}",
-                    "--output-dir", str(out / label), *a.extra]
+                    "--output-dir", str(out / label), *a.extra.split()]
             if case == "push":
                 argv += ["--push-placement-proof", str(PUSH_PROOF)]
             if a.cpus:

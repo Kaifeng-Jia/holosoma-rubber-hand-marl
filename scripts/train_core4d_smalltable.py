@@ -43,6 +43,9 @@ PARSER.add_argument("--object-height-penalty-weight", type=float, default=0.0,
 PARSER.add_argument("--object-height-penalty-scale", type=float, default=0.05,
                     help="World-z error in metres corresponding to unit squared cost")
 PARSER.add_argument("--reference-variant", type=Path, default=None)
+PARSER.add_argument("--sonic-residual", action="store_true",
+                    help="System1 T03 scheme C: policy output is a residual on SONIC's reference input (default off)")
+PARSER.add_argument("--sonic-tf32", action="store_true", help="scheme C training: allow TF32 for SONIC inference")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 PARSER.add_argument("--episode-telemetry", action="store_true")
@@ -182,6 +185,10 @@ OBJECT_URDF_PATH = (
 TRAINING_PROMOTION_PATH = (
     REPO_ROOT / "src" / "holosoma" / EXPERIMENT.training_promotion_file
 ).resolve()
+if ARGS.sonic_residual:
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.scheme_a import with_sonic_pd
+    CONFIG = with_sonic_pd(CONFIG)  # hip_pitch PD -> SONIC, action scales frozen (F2)
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -232,6 +239,12 @@ def _write_json(path: Path, payload: dict) -> None:
 def _append_jsonl(path: Path, payload: dict) -> None:
     with path.open("a") as stream:
         stream.write(json.dumps(payload, sort_keys=True) + "\n")
+
+
+def _with_system1(state: dict) -> dict:
+    if ARGS.sonic_residual:
+        state["system1_sonic_residual"] = True
+    return state
 
 
 def _save_checkpoint_atomic(path: Path, state: dict) -> None:
@@ -396,6 +409,9 @@ def main() -> int:
 
         env_class = get_class(CONFIG.env_class)
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
+        if ARGS.sonic_residual:
+            from system1.scheme_c import SonicResidualEnv
+            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128)
         observations = env.reset_all()
         physics = _object_physics(env)
         physics_hz, control_hz = _simulation_rates(env)
@@ -438,12 +454,17 @@ def main() -> int:
 
         start_iteration = 0
         resume_checkpoint_sha256 = None
+        if ARGS.sonic_residual and resume_path is None:
+            from system1.scheme_c import zero_init_output_layer
+            zero_init_output_layer(models.actor)  # iteration 0: a = 0, i.e. scheme A
         if resume_path is not None:
             state = torch.load(
                 resume_path,
                 map_location=env.device,
                 weights_only=False,
             )
+            if bool(state.get("system1_sonic_residual", False)) != ARGS.sonic_residual:
+                raise ValueError("Resume checkpoint and --sonic-residual differ")
             start_iteration = learner.load_training_state_dict(state)
             resume_checkpoint_sha256 = _sha256(resume_path)
 
@@ -519,7 +540,7 @@ def main() -> int:
         _write_json(output_dir / "run_config.json", run_config)
         _save_checkpoint_atomic(
             output_dir / f"model_{start_iteration:05d}.pt",
-            learner.training_state_dict(iteration=start_iteration),
+            _with_system1(learner.training_state_dict(iteration=start_iteration)),
         )
 
         if ARGS.reference_variant is not None:
@@ -530,6 +551,9 @@ def main() -> int:
             run_config["episode_telemetry_contract"] = CONTRACT
         if OBJECT_MASS_VARIANT is not None:
             run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
+        if ARGS.sonic_residual:
+            from system1.scheme_c import scheme_c_run_config
+            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32)
         _write_json(output_dir / "run_config.json", run_config)
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:
@@ -612,7 +636,7 @@ def main() -> int:
             if iteration % ARGS.save_interval == 0 or iteration == final_iteration:
                 _save_checkpoint_atomic(
                     output_dir / f"model_{iteration:05d}.pt",
-                    learner.training_state_dict(iteration=iteration),
+                    _with_system1(learner.training_state_dict(iteration=iteration)),
                 )
 
         status = {
