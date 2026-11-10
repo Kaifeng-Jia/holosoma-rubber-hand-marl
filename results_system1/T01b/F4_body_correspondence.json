@@ -1,0 +1,107 @@
+{
+ "names_checked": [
+  {
+   "name": "pelvis",
+   "sim_index": 0,
+   "role": "pelvis"
+  },
+  {
+   "name": "left_hip_roll_link",
+   "sim_index": 2,
+   "role": "tracked"
+  },
+  {
+   "name": "left_knee_link",
+   "sim_index": 4,
+   "role": "tracked"
+  },
+  {
+   "name": "left_ankle_roll_link",
+   "sim_index": 6,
+   "role": "ee"
+  },
+  {
+   "name": "right_hip_roll_link",
+   "sim_index": 9,
+   "role": "tracked"
+  },
+  {
+   "name": "right_knee_link",
+   "sim_index": 11,
+   "role": "tracked"
+  },
+  {
+   "name": "right_ankle_roll_link",
+   "sim_index": 13,
+   "role": "ee"
+  },
+  {
+   "name": "torso_link",
+   "sim_index": 17,
+   "role": "tracked"
+  },
+  {
+   "name": "left_shoulder_roll_link",
+   "sim_index": 19,
+   "role": "tracked"
+  },
+  {
+   "name": "left_elbow_link",
+   "sim_index": 21,
+   "role": "tracked"
+  },
+  {
+   "name": "left_wrist_yaw_link",
+   "sim_index": 24,
+   "role": "ee"
+  },
+  {
+   "name": "right_shoulder_roll_link",
+   "sim_index": 26,
+   "role": "tracked"
+  },
+  {
+   "name": "right_elbow_link",
+   "sim_index": 28,
+   "role": "tracked"
+  },
+  {
+   "name": "right_wrist_yaw_link",
+   "sim_index": 31,
+   "role": "ee"
+  }
+ ],
+ "tasks": {
+  "push": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207"
+  },
+  "pull": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4"
+  },
+  "kick": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz",
+   "sha256": "8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d"
+  },
+  "chair": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5"
+  },
+  "bucket": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8"
+  },
+  "table": {
+   "passed": true,
+   "reference": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153"
+  }
+ },
+ "method": "names exist in simulator _body_list; loaded reference at the simulator index equals the raw file data for the same name (quaternions bit-exact, pelvis-relative positions <=1e-5 m); asserted in SonicDualDriver.__init__"
+}

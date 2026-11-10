@@ -7,6 +7,14 @@ P=/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python
 L=logs_system1/T01b
 log() { echo "$(TZ=America/New_York date '+%F %T %Z') $*"; }
 
+# 0. drift (iii) control group: single-person priors, no SONIC, same single-robot setting
+for t in push pull kick; do for k in 0 1; do
+  d=$L/drift/control_${t}_agent${k}
+  [ -f $d/result.json ] && continue
+  log "control prior $t agent$k"
+  LOCAL_RANK=66 taskset -c 0-15 $P -B system1/sonic/control_prior_single.py --task $t --ref-prefix $L/refs/${t}_agent${k} --out $d > $d.log 2>&1
+done; done
+
 # 1. drift analysis (i)(ii)(iv)(v) on the 14 single-robot runs
 SEGS="sonic_sample_A001=logs_system1/T01/sonic/refs/sonic_sample_A001 sonic_sample_A001_M=logs_system1/T01/sonic/refs/sonic_sample_A001_M"
 for t in push pull kick chair bucket table; do for k in 0 1; do SEGS="$SEGS ${t}_agent${k}=$L/refs/${t}_agent${k}"; done; done
