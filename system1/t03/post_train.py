@@ -286,7 +286,8 @@ def evaluator_count():
     for l in out.splitlines():
         tok = l.split()
         if tok and "python" in os.path.basename(tok[0]) and any(
-                k in t for t in tok[1:4] for k in (EVAL_PATTERN, "validate_single.py", "validate_planner_single.py")):
+                k in t for t in tok[1:4] for k in (EVAL_PATTERN, "validate_single.py", "validate_planner_single.py",
+                                                "train_plan5_push.py", "train_core4d_smalltable.py")):
             n += 1
     return n
 

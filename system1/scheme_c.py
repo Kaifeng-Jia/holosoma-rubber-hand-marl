@@ -12,6 +12,8 @@ verbatim. Everything else is D's code path:
 """
 from __future__ import annotations
 
+import os
+
 import torch
 
 from system1 import sonic_controller as sc
@@ -30,7 +32,7 @@ def zero_init_output_layer(actor):
 class SonicResidualEnv:
     # "step" stays on the wrapper: scripts patch env.step with observers (telemetry, raw-reward
     # diagnostics); those must wrap scheme C's step, which then calls the real env step.
-    _OWN = ("env", "driver", "E", "A", "scale_d", "command", "_prev_t", "_dones", "sonic_resets", "step")
+    _OWN = ("env", "driver", "E", "A", "scale_d", "command", "_prev_t", "_dones", "sonic_resets", "step", "_diag")
 
     def __setattr__(self, name, value):  # assignments like env.episode_length_buf = ... reach the real env
         if name in self._OWN:
@@ -50,6 +52,10 @@ class SonicResidualEnv:
         self._prev_t = None
         self._dones = torch.zeros(self.E, device=device)
         self.sonic_resets = 0
+        self._diag = None
+        if os.environ.get("SYSTEM1_C_DIAG"):  # diagnostics switch (off: behaviour unchanged)
+            from system1.c_diag import CDiag
+            self._diag = CDiag(self, os.environ["SYSTEM1_C_DIAG"])
 
     def __getattr__(self, name):  # everything else is the wrapped env
         return getattr(self.env, name)
@@ -72,7 +78,11 @@ class SonicResidualEnv:
     def step(self, actor_state):
         a = actor_state["actions"].reshape(self.E, self.A, -1)
         dq = a * self.scale_d
+        if self._diag is not None:
+            self._diag.pre(a, dq)
         a_eff, _ = self.driver.actions(self.command, dones=self._dones, delta_q_h=dq)
+        if self._diag is not None:
+            self._diag.mid()
         self.env.action_manager.policy_action[:] = a.reshape(self.E, -1)
         self._prev_t = self.command.time_steps.clone()
         out = self.env.step({**actor_state, "actions": a_eff})
@@ -83,6 +93,8 @@ class SonicResidualEnv:
         self._sync_reference_jumps()  # reference frame jumped without an env reset (Plan5 wrap)
         self._prev_t = self.command.time_steps.clone()
         self._dones = dones.float()
+        if self._diag is not None:
+            self._diag.post(dones)
         return out
 
 
