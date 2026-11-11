@@ -36,7 +36,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from system1.scheme_a_queue import STATES  # noqa: E402  frozen states + sha256 per (case, level)
+from system1.scheme_a_queue import PUSH_PROOF, STATES  # noqa: E402  frozen states + sha256 per (case, level)
 
 NY = ZoneInfo("America/New_York")
 PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
@@ -77,6 +77,14 @@ D_CURVES = {
        for s, p in ((722, "05850d5b"), (723, "f936aa17"))},
 }
 EVAL_PATTERN = "scripts/evaluate_paper_supplement.py"
+# Scheme B formal evaluations (T02 v2 + preregistration section 8), enabled by B_ENABLED.json once the revised planner
+# gate has passed and the chosen LAST_WAYPOINT_FRAC is committed; PAUSE stops new launches (running jobs continue).
+B_ENABLE = OUT / "B_ENABLED.json"
+PAUSE = OUT / "PAUSE"
+B_TASKS = ("push", "pull", "chair", "bucket", "table")    # Kick not applicable (T02 v2)
+B_MAIN = ("B0", "B1-0", "B1-2", "B1-4")
+B_MASS_VARIANTS = ("B0", "B1-2")                           # T02: mass sweep with B0 and B1-2 (fixed in advance)
+B_MASS = {"pull": (5.0, 10.0, 40.0), "table": (2.5, 10.0, 20.0), "bucket": (2.0, 4.0, 8.0)}  # T04 non-original levels
 
 
 def now():
@@ -226,10 +234,34 @@ def d_curve_jobs():
     for label, r in runs.items():
         for i, c in r["checkpoints"].items():
             # seed 721 first (C runs only 721 this round, T03 2026-11-10); 722/723 fill idle time afterwards
-            out.append(dict(priority=2 if r["seed"] == 721 else 3, name=f"d_curve/{label}/it{int(i):05d}_pm2", case=r["case"], scheme="d",
+            out.append(dict(priority=3 if r["seed"] == 721 else 4, name=f"d_curve/{label}/it{int(i):05d}_pm2", case=r["case"], scheme="d",
                             mass=ORIGINAL_MASS[r["case"]], checkpoint=c["path"], checkpoint_sha256=c["sha256"], level=2,
                             task_book="T03", run=label))
     return out
+
+
+def b_jobs():
+    if not B_ENABLE.exists():
+        return []
+    frac = json.loads(B_ENABLE.read_text())["last_waypoint_frac"]
+    spec = [(c, None, v, lvl) for lvl in (2, 8) for v in B_MAIN for c in B_TASKS]
+    spec += [(c, None, "B-open", 2) for c in B_TASKS]                       # section 7.1: +/-2 only
+    spec += [(c, m, v, lvl) for c, ms in B_MASS.items() for m in ms for v in B_MASS_VARIANTS for lvl in (2, 8)]
+    out = []
+    for i, (c, m, v, lvl) in enumerate(spec):
+        tag = f"{c}_{v}" + ("" if m is None else f"_m{m:g}kg".replace(".", "p"))
+        out.append(dict(priority=2, order=i, kind="b", name=f"B/{'main' if m is None else 'mass'}/{tag}_pm{lvl}", case=c,
+                        scheme="b", variant=v, mass=ORIGINAL_MASS.get(c) if m is None else m, mass_override=m, level=lvl,
+                        last_waypoint_frac=frac, task_book="T02" if m is None else "T04", run=f"scheme_b_{v}"))
+    return out
+
+
+def b_frac_committed(frac):
+    """The evaluator imports system1/scheme_b.py at launch: it must hold the enabled value, committed."""
+    src = (ROOT / "system1/scheme_b.py").read_text()
+    m = re.search(r"^LAST_WAYPOINT_FRAC = ([0-9.]+)", src, re.M)
+    dirty = subprocess.run(["git", "diff", "--quiet", "HEAD", "--", "system1/scheme_b.py"], cwd=ROOT).returncode != 0
+    return m is not None and float(m.group(1)) == float(frac) and not dirty
 
 
 def evaluator_count():
@@ -264,16 +296,28 @@ def launch(job, slot):
             p = Path(f"{rec}{s}")
             if p.exists():
                 p.rename(Path(f"{rec}.attempt{k}{s}"))
-    argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_residual" if job["scheme"] == "c" else "policy",
-            "--checkpoint", job["checkpoint"], "--device", "cuda:0", "--states", str(states),
-            "--model-id", job["name"].replace("/", "__"), "--output-dir", str(out_dir)]
-    if job["mass"] != ORIGINAL_MASS[job["case"]]:
-        argv += ["--object-mass-kg", f"{job['mass']:g}"]  # retrained at this mass: contract checked at the evaluated mass
+    if job["scheme"] == "b":
+        if not b_frac_committed(job["last_waypoint_frac"]):
+            raise RuntimeError("scheme_b.LAST_WAYPOINT_FRAC on disk differs from B_ENABLED.json or is uncommitted")
+        argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_planner", "--b-variant", job["variant"],
+                "--device", "cuda:0", "--states", str(states), "--model-id", "SchemeB_" + job["name"].split("/")[-1],
+                "--output-dir", str(out_dir)]
+        if job["case"] == "push":
+            argv += ["--push-placement-proof", str(PUSH_PROOF)]
+        if job["mass_override"] is not None:
+            argv += ["--object-mass-kg", f"{job['mass_override']:g}"]
+    else:
+        argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_residual" if job["scheme"] == "c" else "policy",
+                "--checkpoint", job["checkpoint"], "--device", "cuda:0", "--states", str(states),
+                "--model-id", job["name"].replace("/", "__"), "--output-dir", str(out_dir)]
+        if job["mass"] != ORIGINAL_MASS[job["case"]]:
+            argv += ["--object-mass-kg", f"{job['mass']:g}"]  # retrained at this mass: contract checked at the evaluated mass
     cpus = ("16-23", "24-31")[slot]
     argv = ["taskset", "-c", cpus] + argv
     gpu = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"], capture_output=True, text=True).stdout.strip()
     Path(f"{rec}.launch.json").write_text(json.dumps(dict(
-        job=job, argv=argv, started=now(), checkpoint_sha256=sha(job["checkpoint"]), states=str(states), states_sha256=expect,
+        job=job, argv=argv, started=now(), checkpoint_sha256=sha(job["checkpoint"]) if job.get("checkpoint") else None,
+        states=str(states), states_sha256=expect,
         local_rank=81 + slot, gpu_model=gpu, git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"),
         git_diff=git("diff", "HEAD")), indent=1))
     env = dict(os.environ, LOCAL_RANK=str(81 + slot), WORLD_SIZE="1")
@@ -312,10 +356,10 @@ def run(a):
                         print(now(), "cloud run ended without completion:", label, flush=True)
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
-        pending = [j for js in fetched.values() for j in js] + d_curve_jobs()
+        pending = [j for js in fetched.values() for j in js] + b_jobs() + d_curve_jobs()
         busy = {r[0]["name"] for r in running.values()}
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
-                         key=lambda j: (j["priority"], j["name"]))
+                         key=lambda j: (j["priority"], j.get("order", 0), j["name"]))
         if a.dry_run:
             for j in pending:
                 print(j["priority"], j["name"], j["checkpoint"])
@@ -327,7 +371,7 @@ def run(a):
                     job_failures[job["name"]] = job_failures.get(job["name"], 0) + 1
                 del running[s]
         free = [s for s in range(a.slots) if s not in running]
-        if pending and free and evaluator_count() < a.slots:
+        if pending and free and evaluator_count() < a.slots and not PAUSE.exists():
             job = pending[0]
             proc, log = launch(job, free[0])
             running[free[0]] = (job, proc, log)
