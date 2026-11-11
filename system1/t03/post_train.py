@@ -256,6 +256,9 @@ def early_curve_jobs():
     return out
 
 
+SHARED_PREFIXES = ("d_curve/",)  # Kevin 2026-11-11: the cloud slot filler may take these too
+
+
 def apply_priority_overrides(jobs):
     """priority_overrides.json {job name: priority} (Kevin 2026-11-11: D it04050 of V3-25-27 as soon as the laptop is free).
     Absent file = unchanged order."""
@@ -371,6 +374,7 @@ def run(a):
     fetched = {}
     run_failures, job_failures = {}, {}
     running = {}  # slot -> (job, proc, log)
+    claimed_elsewhere = set()
     last_poll = 0.0
     while True:
         if time.time() - last_poll > a.poll_seconds:
@@ -391,6 +395,7 @@ def run(a):
         pending = [j for js in fetched.values() for j in js] + early_curve_jobs() + b_jobs() + d_curve_jobs()
         pending = apply_priority_overrides(pending)
         busy = {r[0]["name"] for r in running.values()}
+        pending = [j for j in pending if j["name"] not in claimed_elsewhere]
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
                          key=lambda j: (j["priority"], j.get("order", 0), j["name"]))
         if a.dry_run:
@@ -406,6 +411,16 @@ def run(a):
         free = [s for s in range(a.slots) if s not in running]
         if pending and free and evaluator_count() < a.slots and not PAUSE.exists():
             job = pending[0]
+            if job["name"].startswith(SHARED_PREFIXES):  # shared with the cloud slot filler: claim first (system1/cloud/claims.py)
+                from system1.cloud.claims import claim_via_ssh
+                c = claim_via_ssh(SSH, job["name"], "laptop", dict(gpu="NVIDIA GeForce RTX 5070 Laptop GPU"))
+                if c is False:
+                    claimed_elsewhere.add(job["name"])
+                    print(now(), "claimed by the cloud, skip", job["name"], flush=True)
+                    continue
+                if c is None:
+                    time.sleep(60)
+                    continue
             proc, log = launch(job, free[0])
             running[free[0]] = (job, proc, log)
             print(now(), "start", job["name"], "slot", free[0], flush=True)

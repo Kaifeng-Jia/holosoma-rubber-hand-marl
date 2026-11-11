@@ -69,7 +69,8 @@ for f in glob.glob(T + "/ops/cin_*.exit.json") + glob.glob(T + "/ops/cout_*.exit
         pass
 dec = json.load(open(T + "/c2_decisions.json")) if os.path.exists(T + "/c2_decisions.json") else None
 nl, ne = len(glob.glob(E + "/*.launch.json")), len(glob.glob(E + "/*.exit.json"))
-print(json.dumps(dict(runs=runs, exits=exits, decisions=dec, evals=[nl, ne])))
+slots = json.load(open(T + "/c2_slots.json")) if os.path.exists(T + "/c2_slots.json") else None
+print(json.dumps(dict(runs=runs, exits=exits, decisions=dec, evals=[nl, ne], slots=slots)))
 '''
 
 
@@ -113,6 +114,12 @@ def events(st):
     nl, ne = st["evals"]
     if nl and nl == ne:
         ev.add(f"evals_done:{ne}")
+    sl = st.get("slots")
+    if sl:  # Kevin 2026-11-11: report when the queue is empty while a GPU has a free slot (at most once per hour)
+        q = sl["queue"]
+        free = sum(v["free_slots"] for v in sl["gpus"].values() if not v.get("held_by_first_eval_list"))
+        if not q["mass_pending"] and q["evals_pending"] == 0 and free > 0:
+            ev.add(f"queue_empty:{sl['time'][:13]}")
     return ev
 
 
@@ -142,7 +149,7 @@ def main():
             a.seen.write_text(json.dumps(sorted(seen | set(new)), indent=1))
             brief = {n: dict(last=r["last"], sec_it=r["sec_it_median"], rew100=r["rew100"], diag=r["diag"][-1:] if r["diag"] else None)
                      for n, r in st["runs"].items()}
-            print(json.dumps(dict(time=now(), new_events=new, runs=brief, evals=st["evals"]), indent=1), flush=True)
+            print(json.dumps(dict(time=now(), new_events=new, runs=brief, evals=st["evals"], slots=st.get("slots")), indent=1), flush=True)
             return 0
         time.sleep(a.interval)
 
