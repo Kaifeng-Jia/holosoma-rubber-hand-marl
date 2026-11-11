@@ -1,0 +1,24 @@
+{
+ "argv": [
+  "system1/t02/pull_arm_diagnosis.py",
+  "--out",
+  "results_system1/T02/pull_arm_diagnosis"
+ ],
+ "reference": {
+  "task": "pull",
+  "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+  "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+  "loader": "PairedMotionReference"
+ },
+ "fk_check_vs_reference_bodies_max_m": 0.003006598771738145,
+ "pull_direction_table_local_xz": [
+  -1.0,
+  -8.50066968769358e-09
+ ],
+ "t_f": 100,
+ "contact_gap_m": 0.05,
+ "behind_radius_m": 0.12,
+ "behind_ymax_m": 0.06130000000000001,
+ "separation_hold_steps": 10,
+ "n_episodes": 204
+}

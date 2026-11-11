@@ -1,0 +1,30 @@
+{
+ "max_abs_residual": {
+  "C_721": 0.016385679312050344,
+  "D_721": 0.030187787161499738,
+  "D_722": 0.03147106818063185,
+  "D_723": 0.03304646717692957
+ },
+ "median_rel_residual": {
+  "C_721": 0.008052778717281436,
+  "D_721": 0.1605484643512143,
+  "D_722": 0.16059209211268158,
+  "D_723": 0.16004234193959382
+ },
+ "dt": 0.02,
+ "tracking_weights": {
+  "motion_global_ref_position_error_exp": 0.5,
+  "motion_global_ref_orientation_error_exp": 0.5,
+  "motion_relative_body_position_error_exp": 1.0,
+  "motion_relative_body_orientation_error_exp": 1.0,
+  "motion_global_body_lin_vel": 1.0,
+  "motion_global_body_ang_vel": 1.0,
+  "object_global_ref_position_error_exp": 1.0,
+  "object_global_ref_orientation_error_exp": 1.0
+ },
+ "regulariser_weights": {
+  "action_rate_l2": -0.1,
+  "limits_dof_pos": -10.0,
+  "undesired_contacts": -0.1
+ }
+}
