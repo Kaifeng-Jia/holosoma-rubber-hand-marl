@@ -1,0 +1,100 @@
+--- /tmp/claude-1000/-home-kevin-duet-system1/9512023c-c7b2-46a6-83ed-d19230e7618d/scratchpad/evalver/bucket_m8kg_pm2.py	2026-11-10 21:08:54.513439603 -0500
++++ scripts/evaluate_paper_supplement.py	2026-11-10 17:53:47.788059053 -0500
+@@ -22,13 +22,15 @@
+ p.add_argument('--limit',type=int,default=0)
+ p.add_argument('--reference-variant',type=Path,default=None)
+ p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
+-p.add_argument('--controller',choices=('policy','sonic','sonic_residual'),default='policy',help='System1: policy (paper actor), sonic (scheme A) or sonic_residual (scheme C checkpoint)')
++p.add_argument('--controller',choices=('policy','sonic','sonic_residual','sonic_planner'),default='policy',help='System1: policy (paper actor), sonic (scheme A), sonic_residual (scheme C checkpoint) or sonic_planner (scheme B)')
++p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
+ p.add_argument('--device',default='cuda:0')
+ p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='evaluated',help='System1 T04 direct evaluation: with --object-mass-kg, validate the checkpoint contract against the original-mass experiment (checkpoint trained at the original mass) instead of the evaluated mass')
+ p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
+ p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
+ a=p.parse_args()
+-if a.controller!='sonic' and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic')
++if a.controller not in ('sonic','sonic_planner') and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic/sonic_planner')
++if (a.controller=='sonic_planner')!=(a.b_variant is not None):p.error('--b-variant goes with --controller sonic_planner')
+ if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
+ record=json.loads(a.states.read_text());states=record['states'][:a.limit or None]
+ if record['case']!=a.case:raise ValueError('Initial-state case mismatch')
+@@ -66,7 +68,7 @@
+ config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observation,
+                training=replace(config.training,num_envs=1,seed=241003,headless=True))
+ config,placement_provenance=configure_push_placement(config,a.push_placement_proof,skill=a.case,root=ROOT)
+-if a.controller in ('sonic','sonic_residual'):
++if a.controller in ('sonic','sonic_residual','sonic_planner'):
+     sys.path.insert(0,str(ROOT))
+     from system1.scheme_a import with_sonic_pd
+     config=with_sonic_pd(config,hip_pitch_actuator=a.sonic_hip_pitch_actuator)
+@@ -87,7 +89,7 @@
+         dev=a.device
+         if a.controller!='policy':
+             from system1 import sonic_controller as _sc
+-        if a.controller=='sonic':
++        if a.controller in ('sonic','sonic_planner'):
+             from system1 import sonic_controller as _sc
+             checkpoint=_sc.DEFAULT_CHECKPOINT;state={'iter':None,'plan5_skill':a.case,'placement_provenance':placement_provenance}
+         else:
+@@ -106,18 +108,18 @@
+             raise ValueError('--controller sonic_residual needs a scheme C checkpoint')
+         if a.controller=='policy' and state.get('system1_sonic_residual'):
+             raise ValueError('scheme C checkpoint requires --controller sonic_residual')
+-        if experiment and a.controller!='sonic':
++        if experiment and a.controller not in ('sonic','sonic_planner'):
+             validate_core4d_smalltable_checkpoint(state,experiment_contract=(source_experiment if a.object_mass_kg is not None and a.checkpoint_mass=='original' else experiment).checkpoint_contract)
+         if experiment:
+             for path,expected in ((experiment.runtime_reference_file,experiment.runtime_reference_sha256),
+                                   (experiment.object_urdf_file,experiment.object_urdf_sha256),
+                                   (experiment.training_promotion_file,experiment.training_promotion_sha256)):
+                 if sha(ROOT/'src/holosoma'/path)!=expected:raise ValueError('Asset hash mismatch: '+path)
+-        elif a.controller!='sonic':
++        elif a.controller not in ('sonic','sonic_planner'):
+             c=state['plan5_mappo']
+             if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=[2,158,527,29]:raise ValueError('Plan5 shape contract')
+         models=None
+-        if a.controller!='sonic':
++        if a.controller not in ('sonic','sonic_planner'):
+             models=initialize_core4d_smalltable_model_bundle(config.algo.config,device=dev)
+             models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
+             models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
+@@ -132,6 +134,9 @@
+         if a.controller=='sonic':
+             from system1.scheme_a import SonicDualDriver
+             driver=SonicDualDriver(env,dev)
++        elif a.controller=='sonic_planner':
++            from system1.scheme_b_driver import SonicPlannerDualDriver
++            driver=SonicPlannerDualDriver(env,dev,a.b_variant,a.case)
+         elif a.controller=='sonic_residual':
+             from system1.scheme_c import SonicResidualEnv
+             cwrap=SonicResidualEnv(env,dev,tf32=False);driver=cwrap.driver
+@@ -183,9 +188,10 @@
+                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
+                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
+         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
++        manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
+         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
+         if driver is not None:
+-            manifest.update(controller=a.controller,inference='sonic_release_g1_encoder_action_mean' if cwrap is None else 'scheme_c_actor_mean_then_sonic',
++            manifest.update(controller=a.controller,inference=('sonic_release_teleop_encoder_action_mean+planner_onnx' if a.controller=='sonic_planner' else 'sonic_release_g1_encoder_action_mean') if cwrap is None else 'scheme_c_actor_mean_then_sonic',
+                             sonic_checkpoint_sha256=sha(_sc.DEFAULT_CHECKPOINT),checkpoint_sha256=sha(checkpoint),
+                             tf32=bool(torch.backends.cuda.matmul.allow_tf32),hip_pitch_actuator=a.sonic_hip_pitch_actuator,
+                             frozen_action_scales=list(config.robot.control.frozen_action_scales),
+@@ -195,6 +201,9 @@
+                             sonic_pd=dict(hip_pitch_kp=float(env.p_gains.reshape(-1)[0].item()),p_gains=env.p_gains.reshape(-1).tolist(),
+                                           d_gains=env.d_gains.reshape(-1).tolist(),action_scales=env.action_scales.reshape(-1).tolist()),
+                             sonic_fall_rule='|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)')
++        if a.controller=='sonic_planner':
++            from system1 import scheme_b as _sb
++            manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta,position_feedback=driver.feedback))
+         write_json(out/'run_manifest.json',manifest)
+         results=[]
+         for init in states:
+@@ -247,6 +256,7 @@
+                 result['sonic_mpjpe_pelvis_rel_mm_per_robot']=sch['mpjpe_pelvis_rel_mm'].mean(axis=0).tolist()
+                 result['sonic_pelvis_dxy_final_m_per_robot']=sch['pelvis_dxy_m'][-1].tolist()
+                 result['pd_target_minus_qstar_max_abs']=pd_diff
++                if hasattr(driver,'episode_stats'):result.update(driver.episode_stats())
+             result['trajectory']=str(out/(init['state_id']+'.trajectory.npz'))
+             if init['kind']=='nominal':
+                 save_core4d_smalltable_viser(out/'nominal_viser.npz',channels,metadata=dict(manifest,fps=int(command.reference.fps),result=result,

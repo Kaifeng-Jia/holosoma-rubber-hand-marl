@@ -127,12 +127,18 @@ def main():
     keep = ("task", "scheme", "mass_kg", "original_mass_kg", "retrained", "seed", "perturbation_level_cm", "n_episodes", "n_completed",
             "completion_pct", "progress_mean_all50", "object_pos_rmse_cm_mean", "hand_pos_error_cm_mean", "palm_error_deg_mean")
     comb = [{k: x.get(k) for k in keep} for x in a_summ] + [{k: x.get(k) for k in keep} for x in summ]
+    gmap = {}
+    for r in a_rows + rows:  # GPU model per table cell (Kevin 2026-11-10)
+        gmap.setdefault((r["task"], r["scheme"], float(r["mass_kg"]), int(r["perturbation_level_cm"])), set()).add(r["gpu_model"])
+    for x in comb:
+        x["gpu_model"] = "/".join(sorted(gmap[(x["task"], x["scheme"], float(x["mass_kg"]), int(x["perturbation_level_cm"]))]))
     comb.sort(key=lambda x: (x["task"], float(x["mass_kg"]), x["scheme"], int(x["perturbation_level_cm"])))
     csvsave(OUT / "mass_sweep_summary.csv", comb)
     (OUT / "D/provenance.json").write_text(json.dumps(dict(
         rows=len(rows), hand_fk_test=hm.fk_test, references=hm.refinfo, palm_postprocess_sha256=palm_sha,
         v3_episodes=str(V3_EPISODES), v3_episodes_sha256=sha(V3_EPISODES),
-        status_counts=dict(Counter((r["hand_status"], r["palm_status"]) for r in rows))), indent=1, default=str) + "\n")
+        status_counts={f"{h}|{q}": n for (h, q), n in Counter((r["hand_status"], r["palm_status"]) for r in rows).items()}),
+        indent=1, default=str) + "\n")
     print("rows", len(rows))
 
 

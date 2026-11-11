@@ -1,0 +1,28 @@
+--- /tmp/claude-1000/-home-kevin-duet-system1/9512023c-c7b2-46a6-83ed-d19230e7618d/scratchpad/evalver/bucket_m4kg_pm2.py	2026-11-10 21:08:54.509439563 -0500
++++ scripts/evaluate_paper_supplement.py	2026-11-10 17:53:47.788059053 -0500
+@@ -23,7 +23,7 @@
+ p.add_argument('--reference-variant',type=Path,default=None)
+ p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
+ p.add_argument('--controller',choices=('policy','sonic','sonic_residual','sonic_planner'),default='policy',help='System1: policy (paper actor), sonic (scheme A), sonic_residual (scheme C checkpoint) or sonic_planner (scheme B)')
+-p.add_argument('--b-variant',choices=('B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
++p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
+ p.add_argument('--device',default='cuda:0')
+ p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='evaluated',help='System1 T04 direct evaluation: with --object-mass-kg, validate the checkpoint contract against the original-mass experiment (checkpoint trained at the original mass) instead of the evaluated mass')
+ p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
+@@ -188,6 +188,7 @@
+                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
+                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
+         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
++        manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
+         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
+         if driver is not None:
+             manifest.update(controller=a.controller,inference=('sonic_release_teleop_encoder_action_mean+planner_onnx' if a.controller=='sonic_planner' else 'sonic_release_g1_encoder_action_mean') if cwrap is None else 'scheme_c_actor_mean_then_sonic',
+@@ -202,7 +203,7 @@
+                             sonic_fall_rule='|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)')
+         if a.controller=='sonic_planner':
+             from system1 import scheme_b as _sb
+-            manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta))
++            manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta,position_feedback=driver.feedback))
+         write_json(out/'run_manifest.json',manifest)
+         results=[]
+         for init in states:

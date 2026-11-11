@@ -1,0 +1,68 @@
+{
+ "current_evaluator_sha256": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+ "note": "evaluator source at each launch = git show <head> + the uncommitted diff in its launch record",
+ "versions": {
+  "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3": {
+   "labels": [
+    "bucket_m2kg_pm2",
+    "bucket_m2kg_pm8",
+    "pull_m40kg_pm8",
+    "table_m10kg_pm2",
+    "table_m10kg_pm8",
+    "table_m20kg_pm2",
+    "table_m20kg_pm8",
+    "table_m2p5kg_pm2",
+    "table_m2p5kg_pm8"
+   ],
+   "git_heads": [
+    "176d8df",
+    "4d885e3",
+    "5362b6b",
+    "d1bfd1f"
+   ],
+   "uncommitted_evaluator_diff": false,
+   "diff_vs_current": null
+  },
+  "795c234c0a801625c24d5d9b8eaaa35c328a9696c3948e1b3a2d546195ac045b": {
+   "labels": [
+    "bucket_m4kg_pm2",
+    "pull_m10kg_pm2",
+    "pull_m10kg_pm8"
+   ],
+   "git_heads": [
+    "1a5cab5",
+    "94a2679",
+    "b965c00"
+   ],
+   "uncommitted_evaluator_diff": true,
+   "diff_vs_current": "795c234c0a_vs_current.diff"
+  },
+  "8971a0d0149f8ad7163d8f7f551b3072eccc2a5dffd0b0056b7e974abd27f484": {
+   "labels": [
+    "bucket_m4kg_pm8",
+    "pull_m40kg_pm2"
+   ],
+   "git_heads": [
+    "d34ce01"
+   ],
+   "uncommitted_evaluator_diff": false,
+   "diff_vs_current": "8971a0d014_vs_current.diff"
+  },
+  "240156b2d4cd1f60954ffa3a9b32edd5ec742998f647ade6e6e50bfe0f6c5531": {
+   "labels": [
+    "bucket_m8kg_pm2",
+    "bucket_m8kg_pm8",
+    "pull_m5kg_pm2",
+    "pull_m5kg_pm8"
+   ],
+   "git_heads": [
+    "0773885",
+    "1a5cab5",
+    "1fa6c4d",
+    "24b7b48"
+   ],
+   "uncommitted_evaluator_diff": true,
+   "diff_vs_current": "240156b2d4_vs_current.diff"
+  }
+ }
+}

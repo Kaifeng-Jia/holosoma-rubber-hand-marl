@@ -1,0 +1,49 @@
+task,scheme,mass_kg,original_mass_kg,retrained,seed,perturbation_level_cm,n_episodes,n_completed,completion_pct,progress_mean_all50,object_pos_rmse_cm_mean,hand_pos_error_cm_mean,palm_error_deg_mean,gpu_model
+bucket,A,1.0,1.0,not_applicable_no_training,,2,50,0,0,0.4800402414486921,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,1.0,1.0,not_applicable_no_training,,8,50,0,0,0.43553319919517103,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,1.0,1.0,paper result (original mass),721,2,50,50,100,1.0,6.8283742517232895,11.395010578319912,19.726136981493315,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,1.0,1.0,paper result (original mass),721,8,50,38,76,0.8274446680080484,8.2963668300133,12.911516204518326,20.076836012546956,NVIDIA GeForce RTX 4090
+bucket,A,2.0,1.0,not_applicable_no_training,,2,50,0,0,0.4967806841046278,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,2.0,1.0,not_applicable_no_training,,8,50,0,0,0.4811670020120725,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,2.0,1.0,no (original-mass policy),721,2,50,50,100,1.0,7.259097024798393,10.760094621644978,19.147844282265986,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,2.0,1.0,no (original-mass policy),721,8,50,40,80,0.8740442655935613,8.487600311636925,12.103602278628674,19.44315349437689,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,4.0,1.0,not_applicable_no_training,,2,50,0,0,0.5113480885311872,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,4.0,1.0,not_applicable_no_training,,8,50,0,0,0.45790744466800803,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,4.0,1.0,no (original-mass policy),721,2,50,49,98,0.9950905432595573,10.973607566283674,11.466535160732104,18.97325470196177,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,4.0,1.0,no (original-mass policy),721,8,50,25,50,0.7775452716297786,11.557498127222061,12.64248517912325,19.006521364042968,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,8.0,1.0,not_applicable_no_training,,2,50,0,0,0.45633802816901403,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,A,8.0,1.0,not_applicable_no_training,,8,50,0,0,0.453963782696177,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,8.0,1.0,no (original-mass policy),721,2,50,0,0,0.46523138832997984,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+bucket,D,8.0,1.0,no (original-mass policy),721,8,50,0,0,0.4328772635814889,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,5.0,20.0,not_applicable_no_training,,2,50,0,0,0.4623417721518988,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,5.0,20.0,not_applicable_no_training,,8,50,0,0,0.45088607594936714,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,5.0,20.0,no (original-mass policy),721,2,50,49,98,0.9979113924050632,8.574306866040034,8.691623313111084,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,5.0,20.0,no (original-mass policy),721,8,50,37,74,0.8680379746835445,9.721656677287978,10.315646228273339,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,10.0,20.0,not_applicable_no_training,,2,50,0,0,0.4620253164556963,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,10.0,20.0,not_applicable_no_training,,8,50,0,0,0.4672784810126583,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,10.0,20.0,no (original-mass policy),721,2,50,49,98,0.9913291139240507,7.628783750898984,7.5193504497948425,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,10.0,20.0,no (original-mass policy),721,8,50,44,88,0.9358227848101265,8.632063315334646,9.3998988841089,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,20.0,20.0,not_applicable_no_training,,2,50,0,0,0.4601898734177216,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,20.0,20.0,not_applicable_no_training,,8,50,0,0,0.4772784810126582,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,20.0,20.0,paper result (original mass),721,2,50,50,100,1.0,2.0423759911209345,3.779511663173214,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,20.0,20.0,paper result (original mass),721,8,50,43,86,0.9525316455696202,5.2212259104085526,6.944324320041439,,NVIDIA GeForce RTX 4090
+pull,A,40.0,20.0,not_applicable_no_training,,2,50,0,0,0.44031645569620254,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,A,40.0,20.0,not_applicable_no_training,,8,50,0,0,0.46537974683544314,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,40.0,20.0,no (original-mass policy),721,2,50,2,4,0.5614556962025317,14.736894145607948,12.3258645979761,,NVIDIA GeForce RTX 5070 Laptop GPU
+pull,D,40.0,20.0,no (original-mass policy),721,8,50,1,2,0.5333544303797467,16.441933810710907,13.20844344115782,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,2.5,5.0,not_applicable_no_training,,2,50,0,0,0.38643377001455603,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,2.5,5.0,not_applicable_no_training,,8,50,0,0,0.38754002911208146,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,2.5,5.0,no (original-mass policy),721,2,50,0,0,0.5512663755458516,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,2.5,5.0,no (original-mass policy),721,8,50,2,4,0.5249199417758369,7.933083176612854,13.509303734211425,59.80922107794642,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,5.0,5.0,not_applicable_no_training,,2,50,0,0,0.3860553129548763,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,5.0,5.0,not_applicable_no_training,,8,50,0,0,0.38224163027656466,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,5.0,5.0,paper result (original mass),721,2,50,35,70,0.8544104803493451,9.307334806237902,10.490718374019565,59.82510808769994,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,5.0,5.0,paper result (original mass),721,8,50,46,92,0.9519650655021834,9.093701912333136,10.36738389147079,59.6251410122723,NVIDIA GeForce RTX 4090
+table,A,10.0,5.0,not_applicable_no_training,,2,50,0,0,0.3856186317321689,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,10.0,5.0,not_applicable_no_training,,8,50,0,0,0.3865502183406113,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,10.0,5.0,no (original-mass policy),721,2,50,0,0,0.514061135371179,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,10.0,5.0,no (original-mass policy),721,8,50,0,0,0.4999126637554585,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,20.0,5.0,not_applicable_no_training,,2,50,0,0,0.3848617176128093,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,A,20.0,5.0,not_applicable_no_training,,8,50,0,0,0.3855312954876273,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,20.0,5.0,no (original-mass policy),721,2,50,0,0,0.3932751091703058,,,,NVIDIA GeForce RTX 5070 Laptop GPU
+table,D,20.0,5.0,no (original-mass policy),721,8,50,0,0,0.3923435225618632,,,,NVIDIA GeForce RTX 5070 Laptop GPU
