@@ -25,6 +25,7 @@ import torch
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
+from system1 import gpu_provenance  # noqa: E402
 from system1.sonic.task_refs import TASKS, load_task_reference  # noqa: E402
 
 V3 = Path("/home/kevin/holosoma-core4d-base/paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104/results/episodes.csv")
@@ -117,12 +118,15 @@ def main():
                 continue
             s = json.loads(sp.read_text())
             state_sha[(label, task)] = s["states_sha256"]
+            gpu, gsrc = gpu_provenance.ours(sp.parent, root / "ops" / f"{task}_pm2.stdout.log")
+            if not gpu:
+                raise RuntimeError(f"no GPU model for {sp.parent}")
             for e in s["episodes"]:
                 if e["kind"] == "nominal":
                     continue
                 for m in episode_metrics(refs, task, e["trajectory"]):
                     eps.append(dict(scheme=label, seed=None, task=task, state_id=e["state_id"], completed=e["completed_reference"],
-                                    executed_steps=e["steps"], trajectory=e["trajectory"], **m))
+                                    executed_steps=e["steps"], trajectory=e["trajectory"], gpu_model=gpu, **m))
             print(label, task, flush=True)
     if not a.no_d:
         with V3.open() as f:
@@ -135,7 +139,7 @@ def main():
                 for m in episode_metrics(refs, r["task"], r["trajectory_path"]):
                     eps.append(dict(scheme="D", seed=int(r["training_seed"]), task=r["task"], state_id=r["state_id"],
                                     completed=r["completed_reference"] == "True", executed_steps=int(r["executed_steps"]),
-                                    trajectory=r["trajectory_path"], **m))
+                                    trajectory=r["trajectory_path"], gpu_model=gpu_provenance.v3_row(r)[0], **m))
         print("D done", flush=True)
     a.out.mkdir(parents=True, exist_ok=True)
     cols = [k for k in eps[0] if k != "d_series"]
@@ -156,11 +160,13 @@ def main():
                 for sd in seeds:
                     x = summarize(groups[(task, robot, sc, sd)])
                     per_seed.append(x)
-                    summ.append(dict(task=task, robot=robot, scheme=sc, seed=sd, **x))
+                    summ.append(dict(task=task, robot=robot, scheme=sc, seed=sd, **x,
+                                     gpu_model="/".join(sorted({r["gpu_model"] for r in groups[(task, robot, sc, sd)]}))))
                 if sc == "D" and len(per_seed) > 1:
                     mean = {k: float(np.mean([x[k] for x in per_seed if x[k] is not None])) for k in per_seed[0]
                             if isinstance(per_seed[0][k], (int, float)) and all(x[k] is not None for x in per_seed)}
-                    summ.append(dict(task=task, robot=robot, scheme="D", seed="mean_3_seeds", **mean))
+                    summ.append(dict(task=task, robot=robot, scheme="D", seed="mean_3_seeds", **mean,
+                                     gpu_model="/".join(sorted({r["gpu_model"] for sd in seeds for r in groups[(task, robot, sc, sd)]}))))
     with (a.out / "summary.csv").open("w", newline="") as f:
         keys = list(dict.fromkeys(k for r in summ for k in r))
         w = csv.DictWriter(f, fieldnames=keys)
@@ -173,7 +179,7 @@ def main():
         for task in tasks:
             for robot in (0, 1):
                 for sd in (721, 722, 723):
-                    diffs, d_ended_first = [], 0
+                    diffs, d_ended_first, g_o, g_d = [], 0, set(), set()
                     for i in range(50):
                         sid = f"perturbed_{i:03d}"
                         o, dd = idx.get((sc, None, task, sid, robot)), idx.get(("D", sd, task, sid, robot))
@@ -186,11 +192,14 @@ def main():
                             dv = dd["d_final_cm"]
                             d_ended_first += 1
                         diffs.append(dv - o["d_final_cm"])
+                        g_o.add(o["gpu_model"]); g_d.add(dd["gpu_model"])
                     if diffs:
                         sync.append(dict(scheme=sc, task=task, robot=robot, d_seed=sd, n_pairs=len(diffs),
                                          d_ended_before_other=d_ended_first,
                                          median_d_minus_other_cm=float(np.median(diffs)),
-                                         mean_d_minus_other_cm=float(np.mean(diffs))))
+                                         mean_d_minus_other_cm=float(np.mean(diffs)),
+                                         other_gpu_model="/".join(sorted(g_o)), d_gpu_model="/".join(sorted(g_d)),
+                                         gpu_models_differ=g_o != g_d))
     with (a.out / "sync_vs_d.csv").open("w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(sync[0]))
         w.writeheader()

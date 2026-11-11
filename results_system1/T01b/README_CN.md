@@ -457,3 +457,22 @@ D 是 V3 收尾包 `episodes.csv` 的 `Full` 组：论文主结果的三个种�
 - 所有回合都进表，没有剔除。每米漂移一项，没有回合因参考行程 < 0.10 m 被排除。
 - **D 的 Kick 末值：** 不是末帧跳变造成的。以种子 721 机器人 0 为例：最后一行的平均漂移 36.1 cm，倒数第二行 36.0 cm。
 - **D 的 Bin 机器人 0：** 种子 722 的末值均值是 198.1 cm（种子 721 是 22.7 cm，723 是 26.0 cm），各种子的数值见 `summary.csv`。
+
+## 13. GPU 型号列（Kevin 2026-11-10）
+
+- **新增列：**
+  - `schemeA/episodes.csv` 和 `T04/A/mass_sweep_episodes.csv` 新增 `gpu_model`、`gpu_model_source`。
+  - `drift_in_task/episodes.csv` 和 `summary.csv` 新增 `gpu_model`。
+  - `schemeA/schemeA_vs_D_mcnemar.csv` 新增 `a_gpu_model`、`d_gpu_model`、`gpu_models_differ`。
+  - `drift_in_task/sync_vs_d.csv` 新增 `other_gpu_model`、`d_gpu_model`、`gpu_models_differ`。
+- **重新生成的影响：** 新旧文件逐格比较，原有各列 0 处变化。
+- **型号从哪里来：** `system1/gpu_provenance.py`。
+  - 我们的评测：优先取 `run_manifest.json` 的 `gpu_name`；没有这一项的，取 Isaac Sim 日志里的 GPU 表。方案 A 全部是 RTX 5070 Laptop。
+  - V3 收尾包的 D 行，按每行的来源判断：
+    - Full ±2 的 Pull、Table、Bin、Chair，来自本机 `unified_evaluation_20261003`，日志写明是 RTX 5070 Laptop。
+    - Full ±2 的 Push、Kick，来自 AutoDL R2 机器。该机器的 `torch_cuda_check.log`（2026-10-25）记录为 2 × RTX 4090。
+    - 其余行（Full ±4/6/8 和 V3 各组），来自 AutoDL V3 机器。该机器的 `deployment_receipt.json`（2026-11-02）记录为 5 × RTX 4090。
+- **A 对 D 型号不同的格子：**
+  - Push、Kick 的 ±2 档；
+  - 六个任务的 ±8 档。
+  - 在 `gpu_models_differ = True` 中标出。

@@ -27,6 +27,7 @@ from scipy.stats import binomtest
 ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "scripts"))
 sys.path.insert(0, str(ROOT))
+from system1 import gpu_provenance  # noqa: E402
 L = ROOT / "logs_system1"
 OUT_A = ROOT / "results_system1/T01b/schemeA"
 OUT_M = ROOT / "results_system1/T04/A"
@@ -177,6 +178,9 @@ def main():
                                                                capture_output=True).stdout).hexdigest()
                               for p in ("scripts/evaluate_paper_supplement.py", "system1/scheme_a.py",
                                         "system1/sonic_controller.py", "system1/mass_variants.py")}
+    for d in data:  # Kevin 2026-11-10: every evaluation row records the GPU model
+        d["gpu_model"], d["gpu_model_source"] = gpu_provenance.ours(d["dir"], d["ops"] / f"{d['label']}.stdout.log")
+        assert d["gpu_model"], d["dir"]
     rows = []
     for d in data:
         s, case = d["summary"], d["case"]
@@ -230,7 +234,8 @@ def main():
                 sonic_pelvis_dxy_final_m_r1=r0r1(e["sonic_pelvis_dxy_final_m_per_robot"], 1),
                 height_bias_cm=e["height_bias_m"] * 100, pd_target_minus_qstar_max_abs=e["pd_target_minus_qstar_max_abs"],
                 launch_git_head=d["launch"]["git_head"], run_manifest_sha256=d["manifest_sha"],
-                terminal_object_pos_error_m=t_pos, terminal_object_ori_error_rad=t_ori))
+                terminal_object_pos_error_m=t_pos, terminal_object_ori_error_rad=t_ori,
+                gpu_model=d["gpu_model"], gpu_model_source=d["gpu_model_source"]))
         print(d["group"], case, d["mass"], d["level"], sum(r["completed_reference"] for r in rows[-51:] if not r["is_nominal"]), flush=True)
 
     def summarize(rs, d):
@@ -318,6 +323,10 @@ def main():
                 assert set(drows) == set(a_rows), (case, lvl, seed)
                 assert all(drows[k]["state_file_sha256"] == a_rows[k]["state_file_sha256"] for k in a_rows), (case, lvl, seed)
                 pa = [(a_rows[k]["completed_reference"], drows[k]["completed_reference"] == "True") for k in sorted(a_rows)]
+                a_gpu = {a_rows[k]["gpu_model"] for k in a_rows}
+                d_gpu = {gpu_provenance.v3_row(drows[k])[0] for k in drows}
+                assert len(a_gpu) == 1 and len(d_gpu) == 1, (case, lvl, seed, a_gpu, d_gpu)
+                a_gpu, d_gpu = a_gpu.pop(), d_gpu.pop()
                 both = sum(x and y for x, y in pa)
                 a_only = sum(x and not y for x, y in pa)
                 d_only = sum(y and not x for x, y in pa)
@@ -329,6 +338,7 @@ def main():
                                  mcnemar_exact_two_sided_p=float(binomtest(min(a_only, d_only), a_only + d_only, .5).pvalue)
                                  if a_only + d_only else 1.0,
                                  d_checkpoint_sha256=next(iter(drows.values()))["checkpoint_sha256"],
+                                 a_gpu_model=a_gpu, d_gpu_model=d_gpu, gpu_models_differ=a_gpu != d_gpu,
                                  state_file_sha256=next(iter(a_rows.values()))["state_file_sha256"]))
             for x in vs_d[-3:]:
                 x.update(d_completion_pct_mean_3seeds=float(np.mean(d_rates)),
