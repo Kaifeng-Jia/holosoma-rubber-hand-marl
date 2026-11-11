@@ -88,6 +88,13 @@ def main():
     pending = list(C_MASS) + list(C_SEEDS)
     started = {}
     gate_passed_at = None
+    rec = a.train / "c_mass_started.json"
+    if rec.exists():  # restarted scheduler: never start a run twice
+        prev = json.loads(rec.read_text())
+        started, gate_passed_at = prev["started"], prev["gate_passed_at"]
+        pending = [r for r in pending if r not in started]
+    # Kevin 2026-11-10 20:1x: up to 3 runs per GPU; C extra seeds in the order 722 before 723, Pull/Table/Bin per seed
+    print(now(), "scheduler start per_gpu", a.per_gpu, "gpus", a.gpus, "pending", pending, "already started", list(started), flush=True)
     while pending:
         st = {s["run"]: s for s in all_status(a.train)}
         if gate_passed_at is None:
@@ -111,7 +118,7 @@ def main():
                 r = subprocess.run(cmd, cwd=ROOT, capture_output=True, text=True)
                 started[run] = dict(gpu=g, time=now(), rc=r.returncode, active_before=act)
                 print(now(), "started", run, "on GPU", g, "rc", r.returncode, r.stdout[-300:], r.stderr[-300:], flush=True)
-                (a.train / "c_mass_started.json").write_text(json.dumps(dict(gate_passed_at=gate_passed_at, started=started), indent=1))
+                rec.write_text(json.dumps(dict(gate_passed_at=gate_passed_at, started=started), indent=1))
                 time.sleep(90)  # let the new queue appear in ps before the next decision
                 continue
         time.sleep(60)
