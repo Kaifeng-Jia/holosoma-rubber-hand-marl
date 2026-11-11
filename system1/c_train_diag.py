@@ -10,8 +10,9 @@ Accumulated over every env step of every rollout; the trainer calls ``end_iterat
     by this kind's clip (C-in: |a| > 1; C-out: |a| > D's action_clip_value);
   * action std (mean and per joint) read from the actor at summary time;
   * SONIC fall rule per robot-step, pre-reset (same rule and frame convention as system1/c_diag.py), by criterion;
-  * finished episodes split by cause from the termination manager of the same step: timeout, or terminated with
-    object position / object orientation / robot torso term true (a terminated episode can have several);
+  * finished episodes split as the learner does (timeout = env extras time_outs, else terminated), terminated ones by
+    the joint_bad_tracking sub-terms of the same step: object position / object orientation / robot torso (several can
+    be true);
   * checks: C-in max |dq_i| / scale_i (must be <= 1) and max violation of the joint limits by the reference SONIC
     received; C-out max |q* - (SONIC output + c)|.
 """
@@ -51,7 +52,6 @@ class CTrainDiag:
             return out
         env._compute_reward = compute_reward
         self.term = env.termination_manager._term_instances["joint_bad_tracking"]
-        self.tm = env.termination_manager
 
     def _reset_window(self):
         self.win = dict(n_iter=0, corr_mean=[], corr_p95=[], corr_max=0.0, a_gt1=0, clipped=0, a_n=0,
@@ -83,16 +83,20 @@ class CTrainDiag:
             self.checks["c_out_max_qstar_minus_sonic_plus_c"] = max(self.checks["c_out_max_qstar_minus_sonic_plus_c"], float(v))
 
     @torch.no_grad()
-    def post(self, dones):
+    def post(self, dones, extras):
+        """Same split as the learner (timeout = extras time_outs; terminated = done and not timeout). The termination
+        manager's own flags are cleared by the in-step reset, so they are not used; the joint_bad_tracking term keeps
+        this step's sub-term flags in last_diagnostics."""
         done = dones.reshape(-1).bool()
         n = int(done.sum().item())
         if not n:
             return
         w = self.win
-        term = self.tm.terminated & done
+        to = extras["time_outs"].reshape(-1).bool()
+        term = done & ~to
         diag = self.term.last_diagnostics
         w["done"] += n
-        w["timeout"] += int((done & ~self.tm.terminated).sum().item())
+        w["timeout"] += int((done & to).sum().item())
         w["terminated"] += int(term.sum().item())
         w["object_position"] += int((term & diag["bad_object_position"]).sum().item())
         w["object_orientation"] += int((term & diag["bad_object_orientation"]).sum().item())

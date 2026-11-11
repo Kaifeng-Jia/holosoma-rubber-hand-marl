@@ -140,7 +140,7 @@ class SonicResidualEnv:
         if self._diag is not None:
             self._diag.post(dones)
         if self.train_diag is not None:
-            self.train_diag.post(dones)
+            self.train_diag.post(dones, out[3])
         return out
 
 

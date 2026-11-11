@@ -153,3 +153,17 @@ def test_train_diag_window():
     assert abs(out["action_std_mean"] - 0.3) < 1e-6 and len(out["correction_last_iteration_per_joint"]) == J
     assert out["checks"]["c_in_max_dq_over_scale"] <= 0.5 + 1e-6
     assert g.win["n_iter"] == 0  # window reset after summary
+
+
+def test_train_diag_termination_split():
+    from system1.c_train_diag import CTrainDiag
+    g = object.__new__(CTrainDiag)
+    g._reset_window()
+    g.term = SimpleNamespace(last_diagnostics=dict(bad_object_position=torch.tensor([True, False, True, False]),
+                                                   bad_object_orientation=torch.tensor([False, False, True, False]),
+                                                   bad_robot=torch.tensor([False, True, False, False])))
+    dones = torch.tensor([True, True, True, True])
+    g.post(dones, dict(time_outs=torch.tensor([False, False, False, True])))
+    w = g.win
+    assert (w["done"], w["timeout"], w["terminated"]) == (4, 1, 3)
+    assert (w["object_position"], w["object_orientation"], w["robot_torso"]) == (2, 1, 1)

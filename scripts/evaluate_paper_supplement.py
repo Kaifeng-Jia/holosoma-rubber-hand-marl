@@ -27,10 +27,12 @@ p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),defaul
 p.add_argument('--device',default='cuda:0')
 p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='evaluated',help='System1 T04 direct evaluation: with --object-mass-kg, validate the checkpoint contract against the original-mass experiment (checkpoint trained at the original mass) instead of the evaluated mass')
 p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
+p.add_argument('--sonic-const-dq',default=None,help='System1 T03 C v2 diagnostic (scheme A only): constant joint offset added to every frame of SONIC\'s reference window, "joint=rad,joint=rad" (holosoma joint names); default none')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 a=p.parse_args()
 if a.controller not in ('sonic','sonic_planner') and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic/sonic_planner')
 if (a.controller=='sonic_planner')!=(a.b_variant is not None):p.error('--b-variant goes with --controller sonic_planner')
+if a.sonic_const_dq is not None and a.controller!='sonic':p.error('--sonic-const-dq goes with --controller sonic')
 if a.reference_variant is not None and a.case not in ('chair','bucket'):raise ValueError('V3 reference variants only supported for chair/bucket')
 record=json.loads(a.states.read_text());states=record['states'][:a.limit or None]
 if record['case']!=a.case:raise ValueError('Initial-state case mismatch')
@@ -140,6 +142,11 @@ def main():
         elif a.controller=='sonic_residual':
             from system1.scheme_c import SonicResidualEnv
             cwrap=SonicResidualEnv(env,dev,tf32=False,kind=state.get('system1_sonic_residual_kind','v1'));driver=cwrap.driver  # T03 C v2: kind from the checkpoint (v1 if absent)
+        const_dq=None
+        if a.sonic_const_dq is not None:  # T03 C v2 diagnostic: constant dq on SONIC's input reference (scheme A path)
+            const_dq=torch.zeros(env.num_envs,env.num_agents,len(env.dof_names),device=dev)
+            for kv in a.sonic_const_dq.split(','):
+                k,v=kv.split('=');const_dq[:,:,list(env.dof_names).index(k)]=float(v)
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         ids=torch.tensor([0],device=env.device)
         n=int(command.reference.num_frames)
@@ -191,6 +198,7 @@ def main():
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
         if cwrap is not None and cwrap.kind!='v1':manifest['system1_scheme_c_kind']=cwrap.kind  # T03 C v2
+        if const_dq is not None:manifest['system1_sonic_const_dq']=dict(arg=a.sonic_const_dq,per_joint={n:float(v) for n,v in zip(env.dof_names,const_dq[0,0].tolist()) if v!=0.0})
         if driver is not None:
             manifest.update(controller=a.controller,inference=('sonic_release_teleop_encoder_action_mean+planner_onnx' if a.controller=='sonic_planner' else 'sonic_release_g1_encoder_action_mean') if cwrap is None else 'scheme_c_actor_mean_then_sonic',
                             sonic_checkpoint_sha256=sha(_sc.DEFAULT_CHECKPOINT),checkpoint_sha256=sha(checkpoint),
@@ -226,7 +234,7 @@ def main():
                     actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
                     observations,rewards,dones,extras=cwrap.step({'actions':actions})
                 elif driver is not None:
-                    actions,_=driver.actions(command)
+                    actions,_=driver.actions(command) if const_dq is None else driver.actions(command,delta_q_h=const_dq)
                     observations,rewards,dones,extras=env.step({'actions':actions})
                 else:
                     actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
