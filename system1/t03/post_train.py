@@ -240,6 +240,22 @@ def d_curve_jobs():
     return out
 
 
+def early_curve_jobs():
+    """T03 curve points from checkpoints of runs still training (Kevin 2026-11-11: latest C Pull checkpoint, +/-2, before
+    the B mass sweep). early_curve.json lists {label, checkpoint, sha256} fetched to exports_system1/train_partial/; the job
+    name equals the curve job the finished run would get, so it is not re-run after the full fetch."""
+    f = OUT / "early_curve.json"
+    if not f.exists():
+        return []
+    out = []
+    for e in json.loads(f.read_text())["jobs"]:
+        meta = parse(e["label"])
+        out.append(dict(priority=1, name=f"curve/{e['label']}/it{it_of(Path(e['checkpoint'])):05d}_pm2", case=meta["case"], scheme=meta["scheme"],
+                        mass=meta["mass"], checkpoint=e["checkpoint"], checkpoint_sha256=e["sha256"], level=2, task_book="T03",
+                        run=e["label"], early=True))
+    return out
+
+
 def b_jobs():
     if not B_ENABLE.exists():
         return []
@@ -287,6 +303,8 @@ def launch(job, slot):
     states, expect = STATES[(job["case"], job["level"])]
     if sha(states) != expect:
         raise RuntimeError(f"frozen state hash mismatch {states}")
+    if job.get("checkpoint_sha256") and sha(job["checkpoint"]) != job["checkpoint_sha256"]:
+        raise RuntimeError(f"checkpoint hash mismatch {job['checkpoint']}")
     if out_dir.exists():  # earlier attempt without a completed exit record: keep it, renamed
         k = 1
         while out_dir.with_name(f"{out_dir.name}.attempt{k}").exists():
@@ -356,13 +374,13 @@ def run(a):
                         print(now(), "cloud run ended without completion:", label, flush=True)
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
-        pending = [j for js in fetched.values() for j in js] + b_jobs() + d_curve_jobs()
+        pending = [j for js in fetched.values() for j in js] + early_curve_jobs() + b_jobs() + d_curve_jobs()
         busy = {r[0]["name"] for r in running.values()}
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
                          key=lambda j: (j["priority"], j.get("order", 0), j["name"]))
         if a.dry_run:
             for j in pending:
-                print(j["priority"], j["name"], j["checkpoint"])
+                print(j["priority"], j["name"], j.get("checkpoint", ""))
             return 0
         for s, (job, proc, log) in list(running.items()):
             if proc.poll() is not None:
