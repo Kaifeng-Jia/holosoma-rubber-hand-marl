@@ -16,11 +16,12 @@ for spec in cin_pull:20@0 cout_pull:20@0 cin_table:5@0 cout_table:5@1 cin_bucket
   nohup $S1_PY -B system1/cloud/run_train_queue.py $run --out $T --python $S1_PY --gpu $gpu --local-rank $r \
      > $T/queue_${run/:/_}_seed721.log 2>&1 < /dev/null &
   log "started $run on GPU $gpu (LOCAL_RANK $r, pid $!)"
+  python3 -c "import json,os;f='$T/c2_pids.json';d=json.load(open(f)) if os.path.exists(f) else {};d['$run']=dict(pid=$!,gpu=$gpu,by='c2_launch.sh');json.dump(d,open(f,'w'),indent=1)"
   sleep 20
 done
 $S1_PY -B system1/cloud/make_c2_eval_jobs.py --train $T --out $EV --scales-from $S1_ROOT/logs/c2_smoke/cin_table_m5kg_seed721_fresh12000/run_config.json > $EV/jobs.json
 log "eval jobs: $(python3 -c "import json;print(len(json.load(open('$EV/jobs.json'))))")"
 nohup $S1_PY -B system1/cloud/run_eval_jobs.py --jobs $EV/jobs.json --out $EV --gpu-slots 1,3,4 > $EV/run_eval_jobs.log 2>&1 < /dev/null &
-log "eval runner pid $!"
+log "eval runner pid $!"; echo $! > $EV/run_eval_jobs.pid
 nohup $S1_PY -B system1/cloud/c2_scheduler.py --train $T > $T/c2_scheduler.log 2>&1 < /dev/null &
-log "scheduler pid $!"
+log "scheduler pid $!"; echo $! > $T/c2_scheduler.launch.pid

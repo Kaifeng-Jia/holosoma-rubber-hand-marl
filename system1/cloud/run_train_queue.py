@@ -31,6 +31,7 @@ import json
 import os
 import signal
 import subprocess
+import sys
 import time
 from datetime import datetime
 from pathlib import Path
@@ -145,6 +146,9 @@ def main():
     ops = out / "ops"
     ops.mkdir(parents=True, exist_ok=True)
     env = dict(os.environ, CUDA_VISIBLE_DEVICES=a.gpu, LOCAL_RANK=a.local_rank, WORLD_SIZE="1")
+    if not a.preflight:  # recorded PID: the only way stop_runs.py finds this queue (never by name)
+        (ops / f"queue_pid_{'+'.join(r.replace(':', '_') for r in a.runs)}_seed{a.seed}.json").write_text(json.dumps(dict(
+            pid=os.getpid(), runs=a.runs, seed=a.seed, gpu=a.gpu, started=now(), argv=list(sys.argv)), indent=1))
     for run in a.runs:
         for seg in segments(run, a.seed, out):
             ex = ops / f"{seg['label']}.exit.json"

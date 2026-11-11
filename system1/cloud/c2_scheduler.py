@@ -199,7 +199,8 @@ def main():
     running = {}  # name -> (job, proc, log, gpu)
     recent = []  # (time, gpu, pid or None): launches not yet visible in nvidia-smi count against their GPU for 5 min
     n_launch = 0
-    print(now(), "c2 scheduler / slot filler start; state", json.dumps(dec)[:300], flush=True)
+    (a.train / "c2_scheduler.pid.json").write_text(json.dumps(dict(pid=os.getpid(), started=now(), argv=sys.argv), indent=1))
+    print(now(), "c2 scheduler / slot filler start; pid", os.getpid(), "state", json.dumps(dec)[:300], flush=True)
     while True:
         # iteration 1000
         for k in KINDS:
@@ -305,8 +306,12 @@ def main():
             cmd = [a.python, "-B", str(ROOT / "system1/cloud/run_train_queue.py"), rid, "--out", str(a.train), "--python", a.python,
                    "--gpu", str(g), "--local-rank", str(600 + len(dec["mass_started"]))]
             log = a.train / f"queue_{rid.replace(':', '_')}_seed721.log"
-            subprocess.Popen(["nohup", *cmd], stdout=log.open("w"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
-                             cwd=ROOT, start_new_session=True)
+            qp = subprocess.Popen(["nohup", *cmd], stdout=log.open("w"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                  cwd=ROOT, start_new_session=True)
+            pf = a.train / "c2_pids.json"  # recorded PID (nohup execs python in the same process)
+            pids = json.loads(pf.read_text()) if pf.exists() else {}
+            pids[rid] = dict(pid=qp.pid, started=now(), gpu=g, by="c2_scheduler")
+            pf.write_text(json.dumps(pids, indent=1))
             recent.append((time.time(), g, None))  # the training child appears later; counted for 5 min
             dec["mass_started"][rid] = dict(time=now(), gpu=g, gpu_procs_before=[x["what"] for x in gs[g]["procs"]],
                                             expected_seconds=est, sec_per_it_main=spi, iterations=its, cmd=cmd)
@@ -338,10 +343,13 @@ def main():
                 git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
                 (ops / f"{safe(job['name'])}.launch.json").write_text(json.dumps(dict(
                     name=job["name"], argv=argv, gpu=g, started=now(), env={k: env[k] for k in ("CUDA_VISIBLE_DEVICES", "LOCAL_RANK")},
+                    pid=None,
                     git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"),
                     gpu_procs_before=[x["what"] for x in gs[g]["procs"]], meta=job["meta"]), indent=1))
                 log = (ops / f"{safe(job['name'])}.stdout.log").open("w")
                 proc = subprocess.Popen(argv, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+                lj = ops / f"{safe(job['name'])}.launch.json"
+                lj.write_text(json.dumps(dict(json.loads(lj.read_text()), pid=proc.pid), indent=1))
                 running[job["name"]] = (job, proc, log, g)
                 recent.append((time.time(), g, proc.pid))
                 print(now(), "start", job["name"], "gpu", g, flush=True)

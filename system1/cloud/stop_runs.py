@@ -1,12 +1,15 @@
 #!/usr/bin/env python3
 """Stop named cloud training runs (process only; logs and checkpoints are kept, nothing is deleted).
 
-For every queue argument given (e.g. c_table:5), finds the run_train_queue.py process with that run, its training child,
-records the last logged iteration and the newest checkpoint (with sha256) in ops/<label>.stopped.json, sends SIGTERM to the
+For every queue argument given (e.g. cin_table:5), takes the run_train_queue.py PID recorded at launch (never searched
+by name; Kevin 2026-11-11): from --pid-file (JSON {run: pid}, default logs/train/c2_pids.json) or the queue's own
+ops/queue_pid_<run>_seed<seed>.json. It checks /proc/<pid>/cmdline is run_train_queue.py with that run, finds the training
+child by parent PID, records the last logged iteration and the newest checkpoint (with sha256) in ops/<label>.stopped.json, sends SIGTERM to the
 child, waits up to --wait s, then SIGKILL. The queue process then writes its own <label>.exit.json (completed = false) and ends.
 Runs as python3 on the cloud (stdlib only), e.g.  ssh ... python3 - --reason "..." c_table:5 c_bucket:1 < stop_runs.py
 
-T03 C v2 (Kevin 2026-11-11 14:41): stop the C v1 runs; D runs untouched.
+T03 C v2 (Kevin 2026-11-11 14:41): stop the C v1 runs; D runs untouched. (That first stop, 14:43, still located the
+queues by matching their command line; the PID rule applies from 2026-11-11 16:05.)
 """
 from __future__ import annotations
 
@@ -64,15 +67,28 @@ def main():
     p.add_argument("--reason", required=True)
     p.add_argument("--wait", type=int, default=60)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--pid-file", default=os.path.join(T, "c2_pids.json"))
+    p.add_argument("--seed", type=int, default=721)
     a = p.parse_args()
     ps = procs()
+    recorded = json.load(open(a.pid_file)) if os.path.exists(a.pid_file) else {}
     plan = []
     for run in a.runs:
-        q = [r for r in ps if "run_train_queue.py" in r[2] and re.search(r"run_train_queue\.py\s+" + re.escape(run) + r"(\s|$)", r[2])]
-        if len(q) != 1:
-            print(json.dumps(dict(run=run, error=f"{len(q)} queue processes")), flush=True)
+        qpid = recorded.get(run, {}).get("pid") if isinstance(recorded.get(run), dict) else recorded.get(run)
+        own = os.path.join(T, "ops", f"queue_pid_{run.replace(':', '_')}_seed{a.seed}.json")
+        if qpid is None and os.path.exists(own):
+            qpid = json.load(open(own))["pid"]
+        if qpid is None:
+            print(json.dumps(dict(run=run, error="no recorded PID; not stopped")), flush=True)
             continue
-        qpid = q[0][0]
+        try:
+            cmd = open(f"/proc/{qpid}/cmdline", "rb").read().replace(b"\0", b" ").decode(errors="replace")
+        except OSError:
+            print(json.dumps(dict(run=run, pid=qpid, error="recorded PID not running")), flush=True)
+            continue
+        if "run_train_queue.py" not in cmd or not re.search(r"run_train_queue\.py\s+" + re.escape(run) + r"(\s|$)", cmd):
+            print(json.dumps(dict(run=run, pid=qpid, error="recorded PID is not this run's queue", cmdline=cmd[:200])), flush=True)
+            continue
         kids = [r for r in ps if r[1] == qpid and ("train_plan5_push.py" in r[2] or "train_core4d_smalltable.py" in r[2])]
         if len(kids) != 1:
             print(json.dumps(dict(run=run, error=f"{len(kids)} training children")), flush=True)
