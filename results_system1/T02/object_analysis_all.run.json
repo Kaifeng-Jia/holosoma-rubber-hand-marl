@@ -1,0 +1,85 @@
+{
+ "started": "2026-11-11T14:00:23-05:00",
+ "cmd": "all",
+ "argv": [
+  "system1/t02/object_analysis.py",
+  "all",
+  "--out",
+  "results_system1/T02"
+ ],
+ "n_episodes": 7344,
+ "git_head": "92c3a3646161fccd5ea3e4899e67757eb8cc6f0d",
+ "push": {
+  "n_episodes": 7344,
+  "n_matched_rows": 6579
+ },
+ "objcheck": {
+  "n_pairs": 2295,
+  "ref_obj_pos_max_abs_diff_m": 0.0,
+  "initial_obj_pos_diff_max_m": 0.0,
+  "n_termination_checked": 2144,
+  "n_termination_match": 2144,
+  "termination_mismatch": [],
+  "n_failed_reason_checked": 5964,
+  "n_failed_unexplained": 0
+ },
+ "fall": {
+  "n_episodes": 2907,
+  "n_rule_mismatch": 0
+ },
+ "pitch": {
+  "fk": {
+   "push": {
+    "task": "push",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+    "loader": "PairedA1Reference",
+    "lateral_spacing_m": 0.8780471999999999,
+    "proof_sha256": "f28a5c095bb17901858cf47e01b4b02e5867edbdf8d12423012024ef7eaaf4a1",
+    "fk_check_max_angle_rad": 0.0005678157365819726,
+    "fk_check_passed": true
+   },
+   "pull": {
+    "task": "pull",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+    "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+    "loader": "PairedMotionReference",
+    "fk_check_max_angle_rad": 0.0005854845025493932,
+    "fk_check_passed": true
+   },
+   "kick": {
+    "task": "kick",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz",
+    "sha256": "8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d",
+    "loader": "PairedMotionReference",
+    "fk_check_max_angle_rad": 0.0006451962950949719,
+    "fk_check_passed": true
+   },
+   "chair": {
+    "task": "chair",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+    "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+    "loader": "PairedMotionReference",
+    "fk_check_max_angle_rad": 0.000640271424881533,
+    "fk_check_passed": true
+   },
+   "bucket": {
+    "task": "bucket",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+    "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+    "loader": "PairedMotionReference",
+    "fk_check_max_angle_rad": 0.0005234512516644541,
+    "fk_check_passed": true
+   },
+   "table": {
+    "task": "table",
+    "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+    "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "loader": "PairedMotionReference",
+    "fk_check_max_angle_rad": 0.0005923020428353316,
+    "fk_check_passed": true
+   }
+  }
+ },
+ "finished": "2026-11-11T14:00:50-05:00"
+}

@@ -1,0 +1,238 @@
+{
+ "robot_urdf": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "sonic_checkpoint_sha256": [
+  "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909"
+ ],
+ "sonic_spec_sha256": [
+  "6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a"
+ ],
+ "planner_sha256": [
+  "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+ ],
+ "contacts_sha256": [
+  "2e526ed9f0204b0f17ed89d1a4b119f19fb6f6ace68cfb27fe442437b849dc6e",
+  "4ef3e9f98ffcd52d41531478bf9e129f344ffb99d9e86b656f88fe95cf8d95c3",
+  "90a24696117731ac9caf69e42db587be9728cc5080331a60baa0abad35bf2e79",
+  "None",
+  "caac49c78c4c8088b261956ed77c58ace7791f18d43f253d053bf7c98c9cdfcf",
+  "f6f4c0167ec35f94a55dbdc86138c786fe304ac32aa882218e8bb65c41b6912a"
+ ],
+ "states_sha256": [
+  [
+   "bucket",
+   2,
+   "631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"
+  ],
+  [
+   "bucket",
+   8,
+   "3bae05a1b1d716d97c7025386dc3d7f832a7203a665d33f4f9979b3adb6e6ff0"
+  ],
+  [
+   "chair",
+   2,
+   "5bb8ff9f1cb7adb72b784c0d8475779cf68099aba551901114a2f78625960bc3"
+  ],
+  [
+   "chair",
+   8,
+   "f9a144ed0738975fef4453047c48382cee383b7daaa680e4cf43b468e8ea5af7"
+  ],
+  [
+   "pull",
+   2,
+   "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"
+  ],
+  [
+   "pull",
+   8,
+   "3c2a60c7982db92b59b1f3343103e711409a6c756faaf83b86016b8163c8d5b2"
+  ],
+  [
+   "push",
+   2,
+   "1799ea1eec1a3ff097d46e08e6492694d6455490ccf9f2de26586e079fef895d"
+  ],
+  [
+   "push",
+   8,
+   "a58b2fae20f488c082f1ac07c7d552cc85053e6d5bc8360a60df2a723d26c266"
+  ],
+  [
+   "table",
+   2,
+   "389e8da5fb818572a48cbba049254585311079439265f5ab4cfc1523a185dac1"
+  ],
+  [
+   "table",
+   8,
+   "6a626f48c14598a646d40d35694e32b5be198ea09491b7f3557ab9c1fe02fcad"
+  ]
+ ],
+ "references": {
+  "push": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+   "lateral_spacing_m": 0.8780471999999999
+  },
+  "pull": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+   "lateral_spacing_m": null
+  },
+  "chair": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+   "lateral_spacing_m": null
+  },
+  "bucket": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+   "lateral_spacing_m": null
+  },
+  "table": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+   "lateral_spacing_m": null
+  }
+ },
+ "hand_fk_test": {
+  "independent_backend": "yourdfpy",
+  "root_link": "pelvis",
+  "joint_order": [
+   "left_hip_pitch_joint",
+   "left_hip_roll_joint",
+   "left_hip_yaw_joint",
+   "left_knee_joint",
+   "left_ankle_pitch_joint",
+   "left_ankle_roll_joint",
+   "right_hip_pitch_joint",
+   "right_hip_roll_joint",
+   "right_hip_yaw_joint",
+   "right_knee_joint",
+   "right_ankle_pitch_joint",
+   "right_ankle_roll_joint",
+   "waist_yaw_joint",
+   "waist_roll_joint",
+   "waist_pitch_joint",
+   "left_shoulder_pitch_joint",
+   "left_shoulder_roll_joint",
+   "left_shoulder_yaw_joint",
+   "left_elbow_joint",
+   "left_wrist_roll_joint",
+   "left_wrist_pitch_joint",
+   "left_wrist_yaw_joint",
+   "right_shoulder_pitch_joint",
+   "right_shoulder_roll_joint",
+   "right_shoulder_yaw_joint",
+   "right_elbow_joint",
+   "right_wrist_roll_joint",
+   "right_wrist_pitch_joint",
+   "right_wrist_yaw_joint"
+  ],
+  "random_states": 9,
+  "max_transform_error": {
+   "max_abs": 8.881784197001252e-16,
+   "rms": 1.2398675366599697e-16
+  },
+  "passed": true
+ },
+ "palm_postprocess_sha256": "929345c5062c5238b03fb1b281967991e3767e0a68d9a3d0904782a286807c1f",
+ "palm_output_dir": "logs_system1/T01b/schemeA_palm_metrics",
+ "evaluation_code_sha256_by_git_head": {
+  "eecfbfda35182e325cf9f31dfb8d82232d93a571": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "d6efd67b8d7351e6cb37618833f068b1e09ffe1b": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "d7084049a30e98f52c0bd4866bceb8821899cb2f": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "f6f6338a7cd2952fe743881d1d2bb6e2a44f5310": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "28dcff650dcad0856dd78ccb308cb9c540dd2f68": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "0537c473747b6e62232df9b79f63ec7c96251d93": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "8f04b2f3ff309e7defa3af78c1843696a7eb4d53": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  },
+  "bcf6185e999b646a4f78fc6299612a2eca374be8": {
+   "scripts/evaluate_paper_supplement.py": "75968e3fbdf6f5c365db3ebc7bc5f14dcc1a871ff173edd716ada221b7f99cc3",
+   "system1/scheme_b.py": "ba0c4daad64a2635db7ce0280881113d914d4e6c55bf792632625eb405b0f5e1",
+   "system1/scheme_b_driver.py": "6234a19df2529c010fc9fd2b0be5944275a55fdb983a5be968376e7ed0b4e5d7",
+   "system1/sonic_controller.py": "b2fd1f3b7a083f75ef9290356394e80d238fa727f68088198d1834e50f1e5a6b",
+   "system1/scheme_b_contacts_v2.py": "7f6d49bdaf57cd2a1fb28611b5a774eed32a9ee7df76894e127b9be2c2ba2c99",
+   "system1/mass_variants.py": "d24b0e08c0b37569a3e74b3eaedaaac0fc7e59f6a6390e7b0063b01c50b184c3"
+  }
+ },
+ "launch_git_heads": {
+  "eecfbfda35182e325cf9f31dfb8d82232d93a571": 44,
+  "d6efd67b8d7351e6cb37618833f068b1e09ffe1b": 1,
+  "d7084049a30e98f52c0bd4866bceb8821899cb2f": 1,
+  "f6f6338a7cd2952fe743881d1d2bb6e2a44f5310": 1,
+  "28dcff650dcad0856dd78ccb308cb9c540dd2f68": 1,
+  "0537c473747b6e62232df9b79f63ec7c96251d93": 2,
+  "8f04b2f3ff309e7defa3af78c1843696a7eb4d53": 2,
+  "bcf6185e999b646a4f78fc6299612a2eca374be8": 29
+ },
+ "launch_git_status_nonempty": 4,
+ "git_head_now": "92c3a3646161fccd5ea3e4899e67757eb8cc6f0d",
+ "units": 81,
+ "episodes": 4131,
+ "main_rows": 2295,
+ "sweep_rows": 2448,
+ "gpu_models": {
+  "NVIDIA GeForce RTX 5070 Laptop GPU": 81
+ },
+ "hand_status_counts": {
+  "excluded_nominal": 81,
+  "not_completed": 4050
+ },
+ "palm_status_counts": {
+  "excluded_nominal": 81,
+  "not_completed": 4050
+ },
+ "v3_episodes": "/home/kevin/holosoma-core4d-base/paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104/results/episodes.csv",
+ "v3_episodes_sha256": "164f0720e0856a90bbf450fdce472cc47bc36722641e060a1ea6faf2fd75b8f4"
+}

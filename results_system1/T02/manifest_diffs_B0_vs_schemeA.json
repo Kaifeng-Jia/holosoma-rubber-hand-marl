@@ -1,0 +1,1122 @@
+[
+ {
+  "run": "post_train/B/main/push_B0_pm2",
+  "against": "T01b/schemeA_main/push_pm2",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_push_pm2",
+    "B0": "SchemeB_push_B0_pm2"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.015111745335161686,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.6277497410774231,
+      0.0,
+      0.0,
+      0.0,
+      4.360414981842041,
+      0.0,
+      0.0,
+      0.0,
+      3.9504892826080322
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/push_B0_pm8",
+  "against": "T01b/schemeA_main/push_pm8",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_push_pm8",
+    "B0": "SchemeB_push_B0_pm8"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.015111745335161686,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.6277497410774231,
+      0.0,
+      0.0,
+      0.0,
+      4.360414981842041,
+      0.0,
+      0.0,
+      0.0,
+      3.9504892826080322
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/pull_B0_pm2",
+  "against": "T01b/schemeA_main/pull_pm2",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_pull_pm2",
+    "B0": "SchemeB_pull_B0_pm2"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.015111745335161686,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      3.9504892826080322,
+      0.0,
+      0.0,
+      0.0,
+      4.360414981842041,
+      0.0,
+      0.0,
+      0.0,
+      0.6277497410774231
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/pull_B0_pm8",
+  "against": "T01b/schemeA_main/pull_pm8",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_pull_pm8",
+    "B0": "SchemeB_pull_B0_pm8"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.015111745335161686,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      3.9504892826080322,
+      0.0,
+      0.0,
+      0.0,
+      4.360414981842041,
+      0.0,
+      0.0,
+      0.0,
+      0.6277497410774231
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/chair_B0_pm2",
+  "against": "T01b/schemeA_main/chair_pm2",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_chair_pm2",
+    "B0": "SchemeB_chair_B0_pm2"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      -0.015340856276452541,
+      0.07486505806446075,
+      -0.0038091144524514675,
+      -0.017675086855888367,
+      0.023557094857096672,
+      -0.3771211802959442,
+      0.925695538520813
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.1253102421760559,
+      0.031546734273433685,
+      -0.0006530364044010639,
+      0.031546734273433685,
+      0.1267954558134079,
+      -0.0018691750010475516,
+      -0.0006530359387397766,
+      -0.0018691750010475516,
+      0.12221278250217438
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/chair_B0_pm8",
+  "against": "T01b/schemeA_main/chair_pm8",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_chair_pm8",
+    "B0": "SchemeB_chair_B0_pm8"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      -0.015340856276452541,
+      0.07486505806446075,
+      -0.0038091144524514675,
+      -0.017675086855888367,
+      0.023557094857096672,
+      -0.3771211802959442,
+      0.925695538520813
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.1253102421760559,
+      0.031546734273433685,
+      -0.0006530364044010639,
+      0.031546734273433685,
+      0.1267954558134079,
+      -0.0018691750010475516,
+      -0.0006530359387397766,
+      -0.0018691750010475516,
+      0.12221278250217438
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/bucket_B0_pm2",
+  "against": "T01b/schemeA_main/bucket_pm2",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_bucket_pm2",
+    "B0": "SchemeB_bucket_B0_pm2"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      -0.008895802311599255,
+      0.03501851111650467,
+      0.0007573200855404139,
+      0.0001318706345045939,
+      0.01467776857316494,
+      0.011216899380087852,
+      0.9998294115066528
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.05640510097146034,
+      0.0007428647950291634,
+      -9.573530405759811e-06,
+      0.0007428647368215024,
+      0.02330535463988781,
+      -1.966467607417144e-05,
+      -9.573646821081638e-06,
+      -1.9664679712150246e-05,
+      0.05608103424310684
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/bucket_B0_pm8",
+  "against": "T01b/schemeA_main/bucket_pm8",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_bucket_pm8",
+    "B0": "SchemeB_bucket_B0_pm8"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      -0.008895802311599255,
+      0.03501851111650467,
+      0.0007573200855404139,
+      0.0001318706345045939,
+      0.01467776857316494,
+      0.011216899380087852,
+      0.9998294115066528
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.05640510097146034,
+      0.0007428647950291634,
+      -9.573530405759811e-06,
+      0.0007428647368215024,
+      0.02330535463988781,
+      -1.966467607417144e-05,
+      -9.573646821081638e-06,
+      -1.9664679712150246e-05,
+      0.05608103424310684
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/table_B0_pm2",
+  "against": "T01b/schemeA_main/table_pm2",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_table_pm2",
+    "B0": "SchemeB_table_B0_pm2"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.12641499936580658,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.3770883083343506,
+      0.0,
+      0.0,
+      0.0,
+      0.2411184161901474,
+      0.0,
+      0.0,
+      0.0,
+      0.2676142752170563
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ },
+ {
+  "run": "post_train/B/main/table_B0_pm8",
+  "against": "T01b/schemeA_main/table_pm8",
+  "fields": {
+   "b_variant": {
+    "A": null,
+    "B0": "B0"
+   },
+   "controller": {
+    "A": "sonic",
+    "B0": "sonic_planner"
+   },
+   "gpu_name": {
+    "A": null,
+    "B0": "NVIDIA GeForce RTX 5070 Laptop GPU"
+   },
+   "inference": {
+    "A": "sonic_release_g1_encoder_action_mean",
+    "B0": "sonic_release_teleop_encoder_action_mean+planner_onnx"
+   },
+   "model_id": {
+    "A": "SchemeA_table_pm8",
+    "B0": "SchemeB_table_B0_pm8"
+   },
+   "physics/com_pose_xyzw": {
+    "A": null,
+    "B0": [
+     [
+      0.0,
+      0.12641499936580658,
+      0.0,
+      0.0,
+      0.0,
+      0.0,
+      1.0
+     ]
+    ]
+   },
+   "physics/inertia_row_major": {
+    "A": null,
+    "B0": [
+     [
+      0.3770883083343506,
+      0.0,
+      0.0,
+      0.0,
+      0.2411184161901474,
+      0.0,
+      0.0,
+      0.0,
+      0.2676142752170563
+     ]
+    ]
+   },
+   "scheme_b/allowed_tokens": {
+    "A": null,
+    "B0": [
+     1,
+     1,
+     1,
+     1,
+     1,
+     1,
+     0,
+     0,
+     0,
+     0,
+     0
+    ]
+   },
+   "scheme_b/blend_frames": {
+    "A": null,
+    "B0": 8
+   },
+   "scheme_b/last_waypoint_frac": {
+    "A": null,
+    "B0": 0.5
+   },
+   "scheme_b/look_ahead": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/mode_walk": {
+    "A": null,
+    "B0": 2
+   },
+   "scheme_b/planner_onnx": {
+    "A": null,
+    "B0": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx"
+   },
+   "scheme_b/planner_sha256": {
+    "A": null,
+    "B0": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea"
+   },
+   "scheme_b/planner_tick_control_steps": {
+    "A": null,
+    "B0": 5
+   },
+   "scheme_b/position_feedback": {
+    "A": null,
+    "B0": true
+   },
+   "scheme_b/random_seed": {
+    "A": null,
+    "B0": 0
+   },
+   "scheme_b/waypoint_horizon_frames_50hz": {
+    "A": null,
+    "B0": 73.33333333333333
+   }
+  }
+ }
+]
