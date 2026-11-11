@@ -42,7 +42,7 @@ MAX_FRAMES_30 = 44        # 11 tokens x 4 frames: longest horizon the default ma
 MODE_IDLE, MODE_WALK = 0, 2
 # Time of the 4th (last) waypoint as a fraction of H (preregistration section 8). 1.0 = original rule 2; the value
 # that passes the revised gate (tried in the order 0.5, 0.25, 0.125) is written here before any B evaluation.
-LAST_WAYPOINT_FRAC = 1.0
+LAST_WAYPOINT_FRAC = 0.5   # fixed 2026-11-10 21:27 EST: first value passing the revised gate (section 8)
 
 
 def mujoco_joint_names():
