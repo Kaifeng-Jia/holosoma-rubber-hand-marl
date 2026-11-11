@@ -321,16 +321,18 @@ def cmd_objcheck(out, eps):
                          executed_steps=e["steps"], recomputed_first_step_obj_err_gt_0p25=fa, matches=fa == e["steps"],
                          terminal_err_reward_frame_m=float(et[-1])))
     write_csv(out / "object_error_check/termination_recompute.csv", term)
-    failed = [x for x in eps if x["scheme"] in ("A", "B") and x["mass_kg"] == ORIG_MASS[x["task"]]
-              and x["experiment_group"] in ("System1-main", "System1-B-main") and not x["completed"]]
+    # every failed A / B episode, all groups and mass levels (T01b / T04 corrections point here, 2026-11-11)
+    failed = [x for x in eps if x["scheme"] in ("A", "B") and not x["completed"]]
     tr = termination_reasons(failed, TorsoRefs())
+    for x, r in zip(failed, tr):
+        r.update(experiment_group=x["experiment_group"], mass_kg=x["mass_kg"])
     write_csv(out / "object_error_check/termination_reasons.csv", tr)
     g = defaultdict(list)
     for r in tr:
         if not r["is_nominal"]:
-            g[(r["scheme"], r["variant"], r["task"], r["perturbation_level_cm"])].append(r)
+            g[(r["scheme"], r["experiment_group"], r["variant"], r["task"], r["mass_kg"], r["perturbation_level_cm"])].append(r)
     write_csv(out / "object_error_check/termination_reasons_summary.csv",
-              [dict(scheme=k[0], variant=k[1], task=k[2], perturbation_level_cm=k[3], n_failed=len(rs),
+              [dict(scheme=k[0], experiment_group=k[1], variant=k[2], task=k[3], mass_kg=k[4], perturbation_level_cm=k[5], n_failed=len(rs),
                     obj_pos=sum(r["term_obj_pos"] for r in rs), obj_ori=sum(r["term_obj_ori"] for r in rs),
                     robot_torso=sum(r["term_robot_torso"] for r in rs),
                     only_robot_torso=sum(r["term_robot_torso"] and not r["term_obj_pos"] and not r["term_obj_ori"] for r in rs),
