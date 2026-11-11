@@ -1,0 +1,23 @@
+{
+ "run": "c_pull:40",
+ "label": "c_pull_m40kg_seed721_joint8000",
+ "queue_pid": 18733,
+ "child_pid": 23066,
+ "output_dir": "/root/autodl-tmp/system1/logs/train/c_pull_m40kg_seed721_joint8000",
+ "last_logged_iteration": 6864,
+ "newest_checkpoint": "/root/autodl-tmp/system1/logs/train/c_pull_m40kg_seed721_joint8000/model_06050.pt",
+ "newest_checkpoint_sha256": "0f1e9ae63de16a02700065ec803eb59dd773dd90c14ea4b1a433c400457055d9",
+ "n_checkpoints": 7,
+ "child_args": "/root/autodl-tmp/system1/deps/hssim_s1/bin/python -B scripts/train_plan5_push.py --skill pull --num-envs 2048 --steps-per-env 24 --seed 721 --save-interval 1000 --episode-telemetry --actor-learning-rate 0.00001 --critic-learning-rate 0.001 --object-mass-kg 40 --sonic-residual --sonic-tf32 --from-scratch --iterations 8000 --output-dir /root/autodl-tmp/system1/logs/train/c_pull_m40kg_seed721_joint8000 --resume /root/autodl-tmp/system1/logs/train/c_pull_m40kg_seed721_critic50/model_00050.pt",
+ "reason": "T03 C v2 (Kevin 2026-11-11, relayed 14:41 EST): stop C v1 runs; v1 residual unbounded, training diverged",
+ "sigterm_at": "2026-11-11T14:43:35-05:00",
+ "child_alive_after": false,
+ "queue_alive_after": false,
+ "exit_record": {
+  "label": "c_pull_m40kg_seed721_joint8000",
+  "returncode": -6,
+  "completed": false,
+  "preflight": false,
+  "ended": "2026-11-11T14:43:36-05:00"
+ }
+}

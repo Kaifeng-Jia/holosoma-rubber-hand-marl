@@ -1,0 +1,24 @@
+{
+ "run": "c_table:10",
+ "label": "c_table_m10kg_seed721_fresh12000",
+ "queue_pid": 19525,
+ "child_pid": 19537,
+ "output_dir": "/root/autodl-tmp/system1/logs/train/c_table_m10kg_seed721_fresh12000",
+ "last_logged_iteration": 7101,
+ "newest_checkpoint": "/root/autodl-tmp/system1/logs/train/c_table_m10kg_seed721_fresh12000/model_07000.pt",
+ "newest_checkpoint_sha256": "bdcb7c48279afc6f6f95cfc65f2e6d2c73b031b28617f6f640d9f35cdc0c4193",
+ "n_checkpoints": 8,
+ "child_args": "/root/autodl-tmp/system1/deps/hssim_s1/bin/python -B scripts/train_core4d_smalltable.py --experiment smalltable5kg_A --reward-variant bucket_A_no_rel_no_height --num-envs 2048 --steps-per-env 24 --seed 721 --iterations 12000 --save-interval 1000 --output-dir /root/autodl-tmp/system1/logs/train/c_table_m10kg_seed721_fresh12000 --object-mass-kg 10 --sonic-residual --sonic-tf32",
+ "reason": "T03 C v2 (Kevin 2026-11-11, relayed 14:41 EST): stop C v1 runs; v1 residual unbounded, training diverged",
+ "sigterm_at": "2026-11-11T14:43:35-05:00",
+ "sigkill_at": "2026-11-11T14:44:35-05:00",
+ "child_alive_after": false,
+ "queue_alive_after": false,
+ "exit_record": {
+  "label": "c_table_m10kg_seed721_fresh12000",
+  "returncode": -9,
+  "completed": false,
+  "preflight": false,
+  "ended": "2026-11-11T14:44:36-05:00"
+ }
+}

@@ -1,0 +1,172 @@
+{
+ "check": "T03 iteration 0: scheme C (zero output layer) vs scheme A, TF32 off, same frozen states",
+ "root": "/root/autodl-tmp/system1/logs/c2_smoke/iter0/cin",
+ "passed": true,
+ "cases": {
+  "pull": {
+   "episodes": 3,
+   "trajectories": 3,
+   "max_abs_trajectory_diff": 0.0,
+   "episode_field_diffs": [],
+   "per_trajectory": {
+    "nominal.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_000.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_001.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    }
+   },
+   "identical": true,
+   "checkpoint": "/root/autodl-tmp/system1/logs/c2_smoke/cin_pull_m20kg_seed721_critic50/model_00000.pt",
+   "checkpoint_sha256": "adfd93564d6a3ce7ead0d3ed662d1c6a799208c99796477e8dd821f53956ef96"
+  },
+  "table": {
+   "episodes": 3,
+   "trajectories": 3,
+   "max_abs_trajectory_diff": 0.0,
+   "episode_field_diffs": [],
+   "per_trajectory": {
+    "nominal.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_000.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_001.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    }
+   },
+   "identical": true,
+   "checkpoint": "/root/autodl-tmp/system1/logs/c2_smoke/cin_table_m5kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "be85a23b95be5c877bfda2408e34c5fd17501c91feccc7ab55cb367dace16be8"
+  },
+  "bucket": {
+   "episodes": 3,
+   "trajectories": 3,
+   "max_abs_trajectory_diff": 0.0,
+   "episode_field_diffs": [],
+   "per_trajectory": {
+    "nominal.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_000.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_001.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    }
+   },
+   "identical": true,
+   "checkpoint": "/root/autodl-tmp/system1/logs/c2_smoke/cin_bucket_m1kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "4174f74bf84ec99aa893ece4ee1402ba403eefbf558467c332d1299f3a32e936"
+  }
+ }
+}

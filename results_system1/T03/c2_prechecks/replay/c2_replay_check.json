@@ -1,0 +1,84 @@
+{
+ "checked": "2026-11-11T15:20:43-05:00",
+ "passed": true,
+ "runs": {
+  "cin_pull": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cin_pull_joint_smoke/model_00010.pt",
+   "checkpoint_sha256": "e7f3251da041aaff02959a994fbdd40c62c49161533ad89eec3e83eee023f2e2",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": 1.0,
+   "c_in_max_reference_joint_limit_violation_rad": 0.0,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": null,
+   "to_sonic_is_permutation": true
+  },
+  "cin_table": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cin_table_m5kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "be85a23b95be5c877bfda2408e34c5fd17501c91feccc7ab55cb367dace16be8",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": 1.0,
+   "c_in_max_reference_joint_limit_violation_rad": 0.0,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": null,
+   "to_sonic_is_permutation": true
+  },
+  "cin_bucket": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cin_bucket_m1kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "4174f74bf84ec99aa893ece4ee1402ba403eefbf558467c332d1299f3a32e936",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": 1.0,
+   "c_in_max_reference_joint_limit_violation_rad": 0.0,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": null,
+   "to_sonic_is_permutation": true
+  },
+  "cout_pull": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cout_pull_joint_smoke/model_00010.pt",
+   "checkpoint_sha256": "eb14f94d29054d7e80c895ee9f73bc02072af26e4ae27974bb41abecd418829e",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": null,
+   "c_in_max_reference_joint_limit_violation_rad": null,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": 0.0,
+   "to_sonic_is_permutation": true
+  },
+  "cout_table": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cout_table_m5kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "d34ef7ca0825e1c11ac41c42d6663ae623b24c0762e173462ae0c43b5fa497bc",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": null,
+   "c_in_max_reference_joint_limit_violation_rad": null,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": 0.0,
+   "to_sonic_is_permutation": true
+  },
+  "cout_bucket": {
+   "returncode": 0,
+   "passed": true,
+   "checkpoint": "/home/kevin/duet-system1/exports_system1/c2_smoke/cout_bucket_m1kg_seed721_fresh12000/model_00000.pt",
+   "checkpoint_sha256": "f2bf4ab0ded792606c807fa9bc8193b68e80a1440f4c84f2eadd2f7a5ea6df45",
+   "steps": 240,
+   "reference_check_max_abs": 0.0,
+   "pd_target_minus_qstar_max_abs": 0.0,
+   "c_in_max_dq_over_scale": null,
+   "c_in_max_reference_joint_limit_violation_rad": null,
+   "c_out_max_qstar_minus_sonic_output_plus_dq": 0.0,
+   "to_sonic_is_permutation": true
+  }
+ }
+}
