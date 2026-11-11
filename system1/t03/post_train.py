@@ -1,0 +1,348 @@
+#!/usr/bin/env python3
+"""Post-training evaluation pipeline (Kevin 2026-11-10: evaluate every cloud run as soon as it finishes).
+
+Every finished cloud training run (ops/<final segment>.exit.json completed=true) is fetched to
+exports_system1/train/<label>/ (checkpoints, run_config.json, metrics.jsonl, status.json, ops records; sha256 checked
+against the cloud) and gets, on the local RTX 5070 Laptop (same GPU model for C and D, and for A/B/D +/-2):
+  * final : final checkpoint, frozen +/-2 and +/-8 states (T03 / T04 protocol: GPU PhysX, TF32 off)       priority 0
+  * curve : T03 training speed, every saved checkpoint, frozen +/-2 states (C main runs, all seeds)         priority 1
+D same-protocol curves (T03 "D 的同口径曲线", existing checkpoints, no retraining) fill idle slots:
+  seed 721 priority 2, seeds 722/723 priority 3 (C extra seeds deferred, T03 2026-11-10)
+  Pull: V3-25-27 (D from scratch, 1000-iteration spacing) and the paper main result (D prior init);
+  Table (T-07), Bin (B-RZ0): paper main result, 2000-iteration spacing.
+
+At most --slots evaluator processes on the local GPU at a time (8 GB: two Isaac processes), counting evaluator
+processes started by anyone. Launch / exit records per job (argv, git HEAD/status/diff, checkpoint, states and
+GPU); success = complete summary.json (the evaluator exits 0 even after an exception). Never deletes; skips jobs
+whose exit record says completed.
+
+    python system1/t03/post_train.py catalog          # D curve checkpoint list + sha256 -> logs_system1/post_train/d_curve_catalog.json
+    python system1/t03/post_train.py fetch-v3         # copy the V3-25-27 intermediate checkpoints from the cloud (read-only source)
+    python system1/t03/post_train.py run [--dry-run]  # poll / fetch / evaluate loop
+"""
+from __future__ import annotations
+
+import argparse
+import hashlib
+import json
+import os
+import re
+import subprocess
+import sys
+import time
+from datetime import datetime
+from pathlib import Path
+from zoneinfo import ZoneInfo
+
+ROOT = Path(__file__).resolve().parents[2]
+sys.path.insert(0, str(ROOT))
+from system1.scheme_a_queue import STATES  # noqa: E402  frozen states + sha256 per (case, level)
+
+NY = ZoneInfo("America/New_York")
+PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
+SSH = ["ssh", "-o", "ConnectTimeout=20", "-o", "BatchMode=yes", "-p", "32748", "root@connect.nmb1.seetacloud.com"]
+SCP = ["scp", "-q", "-o", "ConnectTimeout=20", "-o", "BatchMode=yes", "-P", "32748"]
+REMOTE_TRAIN = "/root/autodl-tmp/system1/logs/train"
+REMOTE_V3 = "/root/autodl-tmp/v3_20261103_pull/logs/V3_20261103_pull_retry01"
+OUT = ROOT / "logs_system1/post_train"
+EXPORT = ROOT / "exports_system1"
+ORIGINAL_MASS = {"pull": 20.0, "table": 5.0, "bucket": 1.0}
+LABEL = re.compile(r"^(c|d)_(pull|table|bucket)_m([0-9p.]+)kg_seed(\d+)_(joint8000|fresh12000)$")
+# cloud runs, final segment labels: wave 1 (T03 C main 721, T04 D), wave 2 (T04 C, T03 C extra seeds)
+RUNS = ["d_pull_m40kg_seed721_joint8000", "d_table_m10kg_seed721_fresh12000", "d_table_m20kg_seed721_fresh12000",
+        "d_bucket_m2kg_seed721_fresh12000", "d_bucket_m4kg_seed721_fresh12000", "d_bucket_m8kg_seed721_fresh12000",
+        "c_pull_m20kg_seed721_joint8000", "c_table_m5kg_seed721_fresh12000", "c_bucket_m1kg_seed721_fresh12000",
+        "c_pull_m40kg_seed721_joint8000", "c_table_m10kg_seed721_fresh12000", "c_table_m20kg_seed721_fresh12000",
+        "c_bucket_m2kg_seed721_fresh12000", "c_bucket_m4kg_seed721_fresh12000", "c_bucket_m8kg_seed721_fresh12000"]
+# C extra seeds 722/723: deferred until after the RSS stage-1 submission (T03 / README, commit 0712082)
+_B = "/home/kevin/holosoma-core4d-base/logs"
+_R = f"{_B}/PaperSupplement20260929/autodl_received/runs"
+# D same-protocol curves: label -> (case, [(dir, iterations or None = all model_*.pt)], expected final sha256 prefix)
+D_CURVES = {
+    **{f"D_pull_scratch_V3-{25 + i}_seed{s}": ("pull", [(str(EXPORT / f"d_curve/V3-{25 + i}_pull_scratch_seed{s}_joint8000"), None)], None)
+       for i, s in enumerate((721, 722, 723))},
+    "D_pull_paper_seed721": ("pull", [(f"/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_critic50_seed721_env2048", [50]),
+                                      (f"/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048", None)], "727630e9"),
+    **{f"D_pull_paper_seed{s}": ("pull", [(f"{_R}/Pull_seed{s}_stage0_from0_plus50_20261001", [50]),
+                                         (f"{_R}/Pull_seed{s}_stage1_from50_plus8000_20261001", None)], p)
+       for s, p in ((722, "d6e545e5"), (723, "e4e5eaed"))},
+    "D_table_paper_T-07_seed721": ("table", [(f"{_B}/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920", None)], "f163d11a"),
+    # 722/723: 0-10000 from the fresh run, 12000 from the resume run (their model_10000 files hold identical actor and
+    # normalizer weights; checked 2026-11-10)
+    **{f"D_table_paper_T-07_seed{s}": ("table", [(f"{_R}/T07_seed{s}_fresh12000_cache_isolated02", None),
+                                                (f"{_R}/T07_seed{s}_resume10000_to12000_clone20260930", [12000])], p)
+       for s, p in ((722, "007161dc"), (723, "df9bc014"))},
+    "D_bucket_paper_B-RZ0_seed721": ("bucket", [(f"{_B}/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919", None)], "7ba039fb"),
+    **{f"D_bucket_paper_B-RZ0_seed{s}": ("bucket", [(f"{_R}/BRZ0_seed{s}_fresh12000_concurrent_20260930", None)], p)
+       for s, p in ((722, "05850d5b"), (723, "f936aa17"))},
+}
+EVAL_PATTERN = "scripts/evaluate_paper_supplement.py"
+
+
+def now():
+    return datetime.now(NY).isoformat(timespec="seconds")
+
+
+def sha(p):
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def git(*args):
+    return subprocess.run(["git", *args], cwd=ROOT, capture_output=True, text=True).stdout
+
+
+def ssh(cmd, timeout=120):
+    r = subprocess.run(SSH + [cmd], capture_output=True, text=True, timeout=timeout, stdin=subprocess.DEVNULL)
+    return r.returncode, r.stdout
+
+
+def it_of(p):
+    return int(re.search(r"model_(\d+)\.pt$", str(p)).group(1))
+
+
+def parse(label):
+    m = LABEL.match(label)
+    scheme, case, mass, seed, seg = m.groups()
+    return dict(scheme=scheme, case=case, mass=float(mass.replace("p", ".")), seed=int(seed), segment=seg)
+
+
+def catalog():
+    out = {}
+    for label, (case, parts, final_prefix) in D_CURVES.items():
+        ck = {}
+        for d, its in parts:
+            files = sorted(Path(d).glob("model_*.pt")) if its is None else [Path(d) / f"model_{i:05d}.pt" for i in its]
+            for f in files:
+                if not f.exists():
+                    raise FileNotFoundError(f)
+                ck[it_of(f)] = str(f)  # later parts override (resume run supplies the final iterations)
+        its = sorted(ck)
+        final = ck[its[-1]]
+        fs = sha(final)
+        if final_prefix and not fs.startswith(final_prefix):
+            raise RuntimeError(f"{label}: final checkpoint sha {fs[:8]} != paper {final_prefix}")
+        out[label] = dict(case=case, scheme="d", seed=int(label.rsplit("seed", 1)[1]), iterations=its,
+                          spacing=sorted({b - a for a, b in zip(its[1:], its[2:])}) if len(its) > 2 else None,
+                          checkpoints={str(i): dict(path=ck[i], sha256=sha(ck[i])) for i in its},
+                          final_matches_paper_registry=bool(final_prefix), retrained=False)
+        print(label, its, flush=True)
+    OUT.mkdir(parents=True, exist_ok=True)
+    (OUT / "d_curve_catalog.json").write_text(json.dumps(dict(created=now(), runs=out), indent=1) + "\n")
+
+
+def fetch_v3():
+    for i, s in enumerate((721, 722, 723)):
+        name = f"V3-{25 + i}_pull_scratch_seed{s}_joint8000"
+        dst = EXPORT / "d_curve" / name
+        dst.mkdir(parents=True, exist_ok=True)
+        rc, out = ssh(f"cd {REMOTE_V3}/{name} && sha256sum model_*.pt run_config.json")
+        remote = dict(reversed(l.split()) for l in out.strip().splitlines())
+        for f, h in remote.items():
+            if (dst / f).exists() and sha(dst / f) == h:
+                continue
+            subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{REMOTE_V3}/{name}/{f}", str(dst / f)], check=True, timeout=900)
+            if sha(dst / f) != h:
+                raise RuntimeError(f"sha mismatch after copy: {dst / f}")
+        (dst / "SHA256SUMS.remote").write_text("".join(f"{h}  {f}\n" for f, h in sorted(remote.items())))
+        print(name, len(remote), "files", flush=True)
+
+
+def fetch_run(label):
+    """Copy a finished run (all segments of its queue) to exports_system1/train/<label>/; returns local dir."""
+    meta = parse(label)
+    dst = EXPORT / "train" / label
+    dst.mkdir(parents=True, exist_ok=True)
+    rc, out = ssh(f"cd {REMOTE_TRAIN}/{label} && sha256sum model_*.pt run_config.json metrics.jsonl status.json 2>/dev/null; "
+                  f"cd {REMOTE_TRAIN}/ops && ls {label}.* " + (label.replace("joint8000", "critic50") + ".* " if meta["segment"] == "joint8000" else ""))
+    files = {}
+    ops = []
+    for l in out.strip().splitlines():
+        parts = l.split()
+        if len(parts) == 2 and len(parts[0]) == 64:
+            files[parts[1]] = parts[0]
+        elif l.strip():
+            ops.append(l.strip())
+    for f, h in files.items():
+        if (dst / f).exists() and sha(dst / f) == h:
+            continue
+        subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{REMOTE_TRAIN}/{label}/{f}", str(dst / f)], check=True, timeout=1800)
+        if sha(dst / f) != h:
+            raise RuntimeError(f"sha mismatch after copy: {dst / f}")
+    (dst / "ops").mkdir(exist_ok=True)
+    for f in ops:
+        subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{REMOTE_TRAIN}/ops/{f}", str(dst / "ops" / f)], check=True, timeout=300)
+    (dst / "SHA256SUMS.remote").write_text("".join(f"{h}  {f}\n" for f, h in sorted(files.items())))
+    (dst / "fetched.json").write_text(json.dumps(dict(label=label, fetched=now(), files=files, ops=ops), indent=1))
+    return dst
+
+
+def finished_remote():
+    rc, out = ssh(f"cd {REMOTE_TRAIN}/ops && for f in " + " ".join(f"{r}.exit.json" for r in RUNS) +
+                  "; do [ -f $f ] && echo $f $(python3 -c \"import json;print(json.load(open('$f')).get('completed'))\"); done")
+    done, failed = [], []
+    for l in out.strip().splitlines():
+        f, c = l.split()
+        (done if c == "True" else failed).append(f[: -len(".exit.json")])
+    return done, failed
+
+
+def jobs_for_run(label, d):
+    meta = parse(label)
+    cks = sorted(d.glob("model_*.pt"), key=it_of)
+    final = cks[-1]
+    target = 8050 if meta["segment"] == "joint8000" else 12000
+    if it_of(final) != target:
+        raise RuntimeError(f"{label}: final checkpoint {final.name}, expected {target}")
+    kind = "T04" if meta["mass"] != ORIGINAL_MASS[meta["case"]] else "T03"
+    out = []
+    for lvl in (2, 8):
+        out.append(dict(priority=0, name=f"final/{label}_pm{lvl}", case=meta["case"], scheme=meta["scheme"], mass=meta["mass"],
+                        checkpoint=str(final), level=lvl, task_book=kind, run=label))
+    if kind == "T03" and meta["scheme"] == "c":
+        for c in cks:
+            out.append(dict(priority=1, name=f"curve/{label}/it{it_of(c):05d}_pm2", case=meta["case"], scheme="c", mass=meta["mass"],
+                            checkpoint=str(c), level=2, task_book="T03", run=label))
+    return out
+
+
+def d_curve_jobs():
+    f = OUT / "d_curve_catalog.json"
+    if not f.exists():
+        return []
+    out = []
+    for label, r in json.loads(f.read_text())["runs"].items():
+        for i, c in r["checkpoints"].items():
+            # seed 721 first (C runs only 721 this round, T03 2026-11-10); 722/723 fill idle time afterwards
+            out.append(dict(priority=2 if r["seed"] == 721 else 3, name=f"d_curve/{label}/it{int(i):05d}_pm2", case=r["case"], scheme="d",
+                            mass=ORIGINAL_MASS[r["case"]], checkpoint=c["path"], checkpoint_sha256=c["sha256"], level=2,
+                            task_book="T03", run=label))
+    return out
+
+
+def evaluator_count():
+    out = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
+    n = 0
+    for l in out.splitlines():
+        tok = l.split()
+        if tok and "python" in os.path.basename(tok[0]) and any(
+                k in t for t in tok[1:4] for k in (EVAL_PATTERN, "validate_single.py", "validate_planner_single.py")):
+            n += 1
+    return n
+
+
+def done(job):
+    ex = OUT / f"{job['name']}.exit.json"
+    return ex.exists() and json.loads(ex.read_text()).get("completed")
+
+
+def launch(job, slot):
+    out_dir = OUT / job["name"]
+    rec = OUT / job["name"]
+    rec.parent.mkdir(parents=True, exist_ok=True)
+    states, expect = STATES[(job["case"], job["level"])]
+    if sha(states) != expect:
+        raise RuntimeError(f"frozen state hash mismatch {states}")
+    if out_dir.exists():  # earlier attempt without a completed exit record: keep it, renamed
+        k = 1
+        while out_dir.with_name(f"{out_dir.name}.attempt{k}").exists():
+            k += 1
+        out_dir.rename(out_dir.with_name(f"{out_dir.name}.attempt{k}"))
+        for s in (".launch.json", ".stdout.log", ".exit.json"):
+            p = Path(f"{rec}{s}")
+            if p.exists():
+                p.rename(Path(f"{rec}.attempt{k}{s}"))
+    argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_residual" if job["scheme"] == "c" else "policy",
+            "--checkpoint", job["checkpoint"], "--device", "cuda:0", "--states", str(states),
+            "--model-id", job["name"].replace("/", "__"), "--output-dir", str(out_dir)]
+    if job["mass"] != ORIGINAL_MASS[job["case"]]:
+        argv += ["--object-mass-kg", f"{job['mass']:g}"]  # retrained at this mass: contract checked at the evaluated mass
+    cpus = ("16-23", "24-31")[slot]
+    argv = ["taskset", "-c", cpus] + argv
+    gpu = subprocess.run(["nvidia-smi", "--query-gpu=name", "--format=csv,noheader"], capture_output=True, text=True).stdout.strip()
+    Path(f"{rec}.launch.json").write_text(json.dumps(dict(
+        job=job, argv=argv, started=now(), checkpoint_sha256=sha(job["checkpoint"]), states=str(states), states_sha256=expect,
+        local_rank=81 + slot, gpu_model=gpu, git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"),
+        git_diff=git("diff", "HEAD")), indent=1))
+    env = dict(os.environ, LOCAL_RANK=str(81 + slot), WORLD_SIZE="1")
+    log = open(f"{rec}.stdout.log", "w")
+    return subprocess.Popen(argv, cwd=ROOT, stdout=log, stderr=subprocess.STDOUT, env=env), log
+
+
+def finish(job, proc):
+    summ = OUT / job["name"] / "summary.json"
+    completed = proc.returncode == 0 and summ.exists() and bool(json.loads(summ.read_text()).get("complete"))
+    Path(f"{OUT / job['name']}.exit.json").write_text(json.dumps(dict(name=job["name"], returncode=proc.returncode,
+                                                                      completed=completed, ended=now()), indent=1))
+    print(now(), "end", job["name"], "rc", proc.returncode, "completed", completed, flush=True)
+    return completed
+
+
+def run(a):
+    OUT.mkdir(parents=True, exist_ok=True)
+    fetched = {}
+    run_failures, job_failures = {}, {}
+    running = {}  # slot -> (job, proc, log)
+    last_poll = 0.0
+    while True:
+        if time.time() - last_poll > a.poll_seconds:
+            last_poll = time.time()
+            try:
+                dn, bad = finished_remote()
+                for label in dn:
+                    if label not in fetched:
+                        d = fetch_run(label)
+                        fetched[label] = jobs_for_run(label, d)
+                        print(now(), "fetched", label, len(fetched[label]), "jobs", flush=True)
+                for label in bad:
+                    if label not in run_failures:
+                        run_failures[label] = now()
+                        print(now(), "cloud run ended without completion:", label, flush=True)
+            except Exception as e:  # network trouble: retry at the next poll
+                print(now(), "poll error", repr(e)[:300], flush=True)
+        pending = [j for js in fetched.values() for j in js] + d_curve_jobs()
+        busy = {r[0]["name"] for r in running.values()}
+        pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
+                         key=lambda j: (j["priority"], j["name"]))
+        if a.dry_run:
+            for j in pending:
+                print(j["priority"], j["name"], j["checkpoint"])
+            return 0
+        for s, (job, proc, log) in list(running.items()):
+            if proc.poll() is not None:
+                log.close()
+                if not finish(job, proc):
+                    job_failures[job["name"]] = job_failures.get(job["name"], 0) + 1
+                del running[s]
+        free = [s for s in range(a.slots) if s not in running]
+        if pending and free and evaluator_count() < a.slots:
+            job = pending[0]
+            proc, log = launch(job, free[0])
+            running[free[0]] = (job, proc, log)
+            print(now(), "start", job["name"], "slot", free[0], flush=True)
+            time.sleep(20)
+            continue
+        time.sleep(15)
+
+
+def main():
+    p = argparse.ArgumentParser()
+    p.add_argument("mode", choices=("catalog", "fetch-v3", "run"))
+    p.add_argument("--slots", type=int, default=2)
+    p.add_argument("--poll-seconds", type=int, default=600)
+    p.add_argument("--dry-run", action="store_true")
+    a = p.parse_args()
+    if a.mode == "catalog":
+        catalog()
+    elif a.mode == "fetch-v3":
+        fetch_v3()
+    else:
+        return run(a)
+    return 0
+
+
+if __name__ == "__main__":
+    raise SystemExit(main())
