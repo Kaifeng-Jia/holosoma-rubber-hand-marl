@@ -110,10 +110,13 @@ def parse(label):
     return dict(scheme=scheme, case=case, mass=float(mass.replace("p", ".")), seed=int(seed), segment=seg)
 
 
-def catalog():
-    out = {}
+def catalog(skip_missing=False):
+    out, skipped = {}, []
     for label, (case, parts, final_prefix) in D_CURVES.items():
         ck = {}
+        if skip_missing and any(Path(d).name.startswith("V3-") and not (Path(d) / "SHA256SUMS.remote").exists() for d, _ in parts):
+            skipped.append(label)  # V3-25-27 copy from the cloud not finished yet
+            continue
         for d, its in parts:
             files = sorted(Path(d).glob("model_*.pt")) if its is None else [Path(d) / f"model_{i:05d}.pt" for i in its]
             for f in files:
@@ -131,7 +134,9 @@ def catalog():
                           final_matches_paper_registry=bool(final_prefix), retrained=False)
         print(label, its, flush=True)
     OUT.mkdir(parents=True, exist_ok=True)
-    (OUT / "d_curve_catalog.json").write_text(json.dumps(dict(created=now(), runs=out), indent=1) + "\n")
+    tmp = OUT / "d_curve_catalog.json.tmp"
+    tmp.write_text(json.dumps(dict(created=now(), runs=out, skipped_not_yet_copied=skipped), indent=1) + "\n")
+    tmp.replace(OUT / "d_curve_catalog.json")
 
 
 def fetch_v3():
@@ -213,8 +218,12 @@ def d_curve_jobs():
     f = OUT / "d_curve_catalog.json"
     if not f.exists():
         return []
+    try:
+        runs = json.loads(f.read_text())["runs"]
+    except (json.JSONDecodeError, KeyError):  # being rewritten: try again next loop
+        return []
     out = []
-    for label, r in json.loads(f.read_text())["runs"].items():
+    for label, r in runs.items():
         for i, c in r["checkpoints"].items():
             # seed 721 first (C runs only 721 this round, T03 2026-11-10); 722/723 fill idle time afterwards
             out.append(dict(priority=2 if r["seed"] == 721 else 3, name=f"d_curve/{label}/it{int(i):05d}_pm2", case=r["case"], scheme="d",
@@ -334,9 +343,10 @@ def main():
     p.add_argument("--slots", type=int, default=2)
     p.add_argument("--poll-seconds", type=int, default=600)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--skip-missing", action="store_true", help="catalog: leave out V3-25-27 runs whose copy is unfinished")
     a = p.parse_args()
     if a.mode == "catalog":
-        catalog()
+        catalog(a.skip_missing)
     elif a.mode == "fetch-v3":
         fetch_v3()
     else:
