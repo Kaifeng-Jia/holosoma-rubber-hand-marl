@@ -1,0 +1,342 @@
+[
+ {
+  "name": "c1stop_c_pull_m20kg_seed721_joint8000_it08050_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "pull",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_pull_m20kg_seed721_joint8000/model_08050.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/pull_states.json",
+   "--model-id",
+   "c1stop_c_pull_m20kg_seed721_joint8000_it08050_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_pull_m20kg_seed721_joint8000_it08050_pm2"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_pull_m20kg_seed721_joint8000",
+   "case": "pull",
+   "mass_kg": 20.0,
+   "iteration": 8050,
+   "stopped_record": null
+  }
+ },
+ {
+  "name": "c1stop_c_table_m5kg_seed721_fresh12000_it08000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "table",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_table_m5kg_seed721_fresh12000/model_08000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/table_states.json",
+   "--model-id",
+   "c1stop_c_table_m5kg_seed721_fresh12000_it08000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_table_m5kg_seed721_fresh12000_it08000_pm2"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_table_m5kg_seed721_fresh12000",
+   "case": "table",
+   "mass_kg": 5.0,
+   "iteration": 8000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_table_m5kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_bucket_m1kg_seed721_fresh12000_it07000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "bucket",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_bucket_m1kg_seed721_fresh12000/model_07000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/bucket_states.json",
+   "--model-id",
+   "c1stop_c_bucket_m1kg_seed721_fresh12000_it07000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_bucket_m1kg_seed721_fresh12000_it07000_pm2"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_bucket_m1kg_seed721_fresh12000",
+   "case": "bucket",
+   "mass_kg": 1.0,
+   "iteration": 7000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_bucket_m1kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_pull_m40kg_seed721_joint8000_it06050_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "pull",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_pull_m40kg_seed721_joint8000/model_06050.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/pull_states.json",
+   "--model-id",
+   "c1stop_c_pull_m40kg_seed721_joint8000_it06050_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_pull_m40kg_seed721_joint8000_it06050_pm2",
+   "--object-mass-kg",
+   "40"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_pull_m40kg_seed721_joint8000",
+   "case": "pull",
+   "mass_kg": 40.0,
+   "iteration": 6050,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_pull_m40kg_seed721_joint8000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_table_m10kg_seed721_fresh12000_it07000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "table",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_table_m10kg_seed721_fresh12000/model_07000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/table_states.json",
+   "--model-id",
+   "c1stop_c_table_m10kg_seed721_fresh12000_it07000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_table_m10kg_seed721_fresh12000_it07000_pm2",
+   "--object-mass-kg",
+   "10"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_table_m10kg_seed721_fresh12000",
+   "case": "table",
+   "mass_kg": 10.0,
+   "iteration": 7000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_table_m10kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_table_m20kg_seed721_fresh12000_it06000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "table",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_table_m20kg_seed721_fresh12000/model_06000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/table_states.json",
+   "--model-id",
+   "c1stop_c_table_m20kg_seed721_fresh12000_it06000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_table_m20kg_seed721_fresh12000_it06000_pm2",
+   "--object-mass-kg",
+   "20"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_table_m20kg_seed721_fresh12000",
+   "case": "table",
+   "mass_kg": 20.0,
+   "iteration": 6000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_table_m20kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_bucket_m2kg_seed721_fresh12000_it06000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "bucket",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_bucket_m2kg_seed721_fresh12000/model_06000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/bucket_states.json",
+   "--model-id",
+   "c1stop_c_bucket_m2kg_seed721_fresh12000_it06000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_bucket_m2kg_seed721_fresh12000_it06000_pm2",
+   "--object-mass-kg",
+   "2"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_bucket_m2kg_seed721_fresh12000",
+   "case": "bucket",
+   "mass_kg": 2.0,
+   "iteration": 6000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_bucket_m2kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_bucket_m4kg_seed721_fresh12000_it06000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "bucket",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_bucket_m4kg_seed721_fresh12000/model_06000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/bucket_states.json",
+   "--model-id",
+   "c1stop_c_bucket_m4kg_seed721_fresh12000_it06000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_bucket_m4kg_seed721_fresh12000_it06000_pm2",
+   "--object-mass-kg",
+   "4"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_bucket_m4kg_seed721_fresh12000",
+   "case": "bucket",
+   "mass_kg": 4.0,
+   "iteration": 6000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_bucket_m4kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "c1stop_c_bucket_m8kg_seed721_fresh12000_it06000_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "bucket",
+   "--controller",
+   "sonic_residual",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/train/c_bucket_m8kg_seed721_fresh12000/model_06000.pt",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/bucket_states.json",
+   "--model-id",
+   "c1stop_c_bucket_m8kg_seed721_fresh12000_it06000_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/c1_stop/c1stop_c_bucket_m8kg_seed721_fresh12000_it06000_pm2",
+   "--object-mass-kg",
+   "8"
+  ],
+  "meta": {
+   "kind": "c1_stop",
+   "run": "c_bucket_m8kg_seed721_fresh12000",
+   "case": "bucket",
+   "mass_kg": 8.0,
+   "iteration": 6000,
+   "stopped_record": "/root/autodl-tmp/system1/logs/train/ops/c_bucket_m8kg_seed721_fresh12000.stopped.json"
+  }
+ },
+ {
+  "name": "constdq_pull_dq0_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "pull",
+   "--controller",
+   "sonic",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/pull_states.json",
+   "--model-id",
+   "constdq_pull_dq0_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/const_dq/constdq_pull_dq0_pm2"
+  ],
+  "meta": {
+   "kind": "const_dq",
+   "factor": 0.0,
+   "dq_rad": {
+    "left_hip_pitch_joint": -0.0,
+    "right_hip_pitch_joint": -0.0,
+    "waist_pitch_joint": 0.0
+   },
+   "scale_rad": {
+    "left_hip_pitch_joint": 0.5475465059280396,
+    "right_hip_pitch_joint": 0.5475465059280396,
+    "waist_pitch_joint": 0.4385772943496704
+   }
+  }
+ },
+ {
+  "name": "constdq_pull_hipwaist_0p5_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "pull",
+   "--controller",
+   "sonic",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/pull_states.json",
+   "--model-id",
+   "constdq_pull_hipwaist_0p5_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/const_dq/constdq_pull_hipwaist_0p5_pm2",
+   "--sonic-const-dq",
+   "left_hip_pitch_joint=-0.2737732529640198,right_hip_pitch_joint=-0.2737732529640198,waist_pitch_joint=0.2192886471748352"
+  ],
+  "meta": {
+   "kind": "const_dq",
+   "factor": 0.5,
+   "dq_rad": {
+    "left_hip_pitch_joint": -0.2737732529640198,
+    "right_hip_pitch_joint": -0.2737732529640198,
+    "waist_pitch_joint": 0.2192886471748352
+   },
+   "scale_rad": {
+    "left_hip_pitch_joint": 0.5475465059280396,
+    "right_hip_pitch_joint": 0.5475465059280396,
+    "waist_pitch_joint": 0.4385772943496704
+   }
+  }
+ },
+ {
+  "name": "constdq_pull_hipwaist_1p0_pm2",
+  "argv": [
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "pull",
+   "--controller",
+   "sonic",
+   "--states",
+   "/root/autodl-tmp/system1/inputs/states/pull_states.json",
+   "--model-id",
+   "constdq_pull_hipwaist_1p0_pm2",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/evals/const_dq/constdq_pull_hipwaist_1p0_pm2",
+   "--sonic-const-dq",
+   "left_hip_pitch_joint=-0.5475465059280396,right_hip_pitch_joint=-0.5475465059280396,waist_pitch_joint=0.4385772943496704"
+  ],
+  "meta": {
+   "kind": "const_dq",
+   "factor": 1.0,
+   "dq_rad": {
+    "left_hip_pitch_joint": -0.5475465059280396,
+    "right_hip_pitch_joint": -0.5475465059280396,
+    "waist_pitch_joint": 0.4385772943496704
+   },
+   "scale_rad": {
+    "left_hip_pitch_joint": 0.5475465059280396,
+    "right_hip_pitch_joint": 0.5475465059280396,
+    "waist_pitch_joint": 0.4385772943496704
+   }
+  }
+ }
+]
