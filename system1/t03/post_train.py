@@ -256,6 +256,19 @@ def early_curve_jobs():
     return out
 
 
+def apply_priority_overrides(jobs):
+    """priority_overrides.json {job name: priority} (Kevin 2026-11-11: D it04050 of V3-25-27 as soon as the laptop is free).
+    Absent file = unchanged order."""
+    f = OUT / "priority_overrides.json"
+    if not f.exists():
+        return jobs
+    try:
+        ov = json.loads(f.read_text())
+    except json.JSONDecodeError:
+        return jobs
+    return [dict(j, priority=ov[j["name"]], priority_overridden=True) if j["name"] in ov else j for j in jobs]
+
+
 def b_jobs():
     if not B_ENABLE.exists():
         return []
@@ -376,6 +389,7 @@ def run(a):
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
         pending = [j for js in fetched.values() for j in js] + early_curve_jobs() + b_jobs() + d_curve_jobs()
+        pending = apply_priority_overrides(pending)
         busy = {r[0]["name"] for r in running.values()}
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
                          key=lambda j: (j["priority"], j.get("order", 0), j["name"]))
