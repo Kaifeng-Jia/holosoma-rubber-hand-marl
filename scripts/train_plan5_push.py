@@ -49,6 +49,10 @@ PARSER.add_argument("--episode-telemetry", action="store_true")
 PARSER.add_argument("--sonic-residual", action="store_true",
                     help="System1 T03 scheme C: policy output is a residual on SONIC's reference input (default off)")
 PARSER.add_argument("--sonic-tf32", action="store_true", help="scheme C training: allow TF32 for SONIC inference")
+PARSER.add_argument("--sonic-residual-kind", choices=("v1", "in", "out"), default="v1",
+                    help="System1 T03 C v2: v1 (default, unchanged), in (C-in: clipped input residual), out (C-out: output residual)")
+PARSER.add_argument("--c-train-diag", action="store_true",
+                    help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 ARGS = PARSER.parse_args()
@@ -299,6 +303,8 @@ def _checkpoint_state(learner, *, iteration: int, smooth_schedule: dict | None) 
     state['plan5_skill'] = ARGS.skill
     if ARGS.sonic_residual:
         state['system1_sonic_residual'] = True
+        if ARGS.sonic_residual_kind != "v1":
+            state['system1_sonic_residual_kind'] = ARGS.sonic_residual_kind
     state['placement_provenance'] = PLACEMENT_PROVENANCE
     if smooth_schedule is not None:
         state["joint_acceleration_schedule"] = smooth_schedule
@@ -384,7 +390,8 @@ def main() -> None:
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
         if ARGS.sonic_residual:
             from system1.scheme_c import SonicResidualEnv
-            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128)
+            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128,
+                                   kind=ARGS.sonic_residual_kind, train_diag=ARGS.c_train_diag)
         observations = env.reset_all()
         runtime_reference_check = export_runtime_reference(
             env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
@@ -409,6 +416,9 @@ def main() -> None:
             ppo_overrides["critic_learning_rate"] = ARGS.critic_learning_rate
         if ARGS.teammate_input_only:
             ppo_overrides["schedule"] = "fixed"
+        if ARGS.sonic_residual and ARGS.sonic_residual_kind == "in":
+            from system1.scheme_c import C_IN_PPO_OVERRIDES
+            ppo_overrides.update(C_IN_PPO_OVERRIDES)  # T03 C v2: C-in init std 0.3, entropy 0
         ppo_config = replace(g1_29dof_wbt_w_object.algo.config, **ppo_overrides)
         initialization_kwargs = {"from_scratch": ARGS.from_scratch}
         if EXPECTED_SOURCE_CHECKPOINT_SHA256 is not None:
@@ -437,6 +447,8 @@ def main() -> None:
             resume_state = torch.load(ARGS.resume.expanduser().resolve(), map_location=env.device)
             if bool(resume_state.get('system1_sonic_residual', False)) != ARGS.sonic_residual:
                 raise ValueError('Resume checkpoint and --sonic-residual differ')
+            if ARGS.sonic_residual and resume_state.get('system1_sonic_residual_kind', 'v1') != ARGS.sonic_residual_kind:
+                raise ValueError('Resume checkpoint and --sonic-residual-kind differ')
             if resume_state.get('placement_provenance') != PLACEMENT_PROVENANCE:
                 raise ValueError('Resume placement differs from requested placement')
             if resume_state.get('plan5_skill', ARGS.skill) != ARGS.skill:
@@ -562,7 +574,8 @@ def main() -> None:
             run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
         if ARGS.sonic_residual:
             from system1.scheme_c import scheme_c_run_config
-            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32)
+            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32, kind=ARGS.sonic_residual_kind,
+                                                                 ppo_config=ppo_config, train_diag=ARGS.c_train_diag)
         _write_json(output_dir / "run_config.json", run_config)
         # Telemetry runs preserve the exact loaded state in their new segment.
         if ARGS.resume is None or ARGS.episode_telemetry:
@@ -601,6 +614,8 @@ def main() -> None:
                 update_critic_normalizer=False,
             ).actions
             observations = learner.collect_rollout(env, observations)
+            if ARGS.c_train_diag:
+                env.train_diag.end_iteration()
             rewards = learner.storage.team("rewards").clone()
             dones = learner.storage.team("dones").clone()
             timeouts = learner.storage.team("timeouts").clone()
@@ -654,6 +669,8 @@ def main() -> None:
                 raise RuntimeError(f"Non-finite reward term at iteration {iteration}: {reward_terms}")
             if telemetry is not None:
                 metrics.update(telemetry.summary())
+            if ARGS.c_train_diag and iteration % env.train_diag.every == 0:
+                metrics["system1_c_train_diag"] = env.train_diag.summary(models.actor)
             _append_jsonl(metrics_path, metrics)
             print(json.dumps(metrics, sort_keys=True), flush=True)
 

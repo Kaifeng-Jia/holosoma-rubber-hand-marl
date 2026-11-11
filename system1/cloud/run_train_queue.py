@@ -8,6 +8,7 @@ Run ids (seed 721 unless --seed):
   c_pull:<kg>    C, Table Pulling, V3-25 config (from scratch, 50 + 8000) + --sonic-residual
   c_table:<kg>   C, Table Transport, T-07 config + --sonic-residual
   c_bucket:<kg>  C, Bin Transport, B-RZ0 config + --sonic-residual
+  cin_<task>:<kg>, cout_<task>:<kg>  T03 C v2: as c_<task> plus --sonic-residual-kind in|out and --c-train-diag
 A mass equal to the task's original mass adds no --object-mass-kg flag.
 
 Every segment writes <label>.launch.json (argv, time, git HEAD/status, GPU, parent sha256)
@@ -80,6 +81,7 @@ def check_run_config(seg, ops, proc, timeout=1800):
         n_unexpected=len(bad), diffs=rows), indent=1, default=str))
     return not bad, len(bad)
 C_TF32 = True  # T03: TF32 may be on in training (evaluation turns it off)
+C_SCHEMES = ("c", "cin", "cout")
 
 
 def now():
@@ -105,12 +107,14 @@ def segments(run, seed, out):
     mass = float(mass)
     tag = f"{scheme}_{task}_m{mass:g}kg_seed{seed}".replace(".", "p")
     mass_flag = [] if mass == ORIGINAL_MASS[task] else ["--object-mass-kg", f"{mass:g}"]
-    c_flags = ["--sonic-residual"] + (["--sonic-tf32"] if C_TF32 else []) if scheme == "c" else []
+    c_flags = ["--sonic-residual"] + (["--sonic-tf32"] if C_TF32 else []) if scheme in C_SCHEMES else []
+    if scheme in ("cin", "cout"):  # T03 C v2 (2026-11-11)
+        c_flags += ["--sonic-residual-kind", scheme[1:], "--c-train-diag"]
     if task == "pull":
         base = ["scripts/train_plan5_push.py", "--skill", "pull", "--num-envs", "2048", "--steps-per-env", "24",
                 "--seed", str(seed), "--save-interval", "1000", "--episode-telemetry",
                 "--actor-learning-rate", "0.00001", "--critic-learning-rate", "0.001", *mass_flag, *c_flags]
-        if scheme == "c":
+        if scheme in C_SCHEMES:
             base.append("--from-scratch")
         c50, j = out / f"{tag}_critic50", out / f"{tag}_joint8000"
         ref = "V3-PullFull-rerun-seed721" if scheme == "d" else "V3-25_pull_scratch_seed721"
@@ -123,7 +127,7 @@ def segments(run, seed, out):
     return [dict(label=o.name, out=o, parent=None, scheme=scheme, reference=dict(table="T-07_seed721", bucket="B-RZ0_seed721")[task], argv=[
         "scripts/train_core4d_smalltable.py", "--experiment", exp, "--reward-variant", "bucket_A_no_rel_no_height",
         "--num-envs", "2048", "--steps-per-env", "24", "--seed", str(seed), "--iterations", "12000", "--save-interval",
-        "1000" if scheme == "c" else "2000", "--output-dir", str(o), *mass_flag, *c_flags])]
+        "1000" if scheme in C_SCHEMES else "2000", "--output-dir", str(o), *mass_flag, *c_flags])]
 
 
 def main():

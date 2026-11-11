@@ -139,7 +139,7 @@ def main():
             driver=SonicPlannerDualDriver(env,dev,a.b_variant,a.case)
         elif a.controller=='sonic_residual':
             from system1.scheme_c import SonicResidualEnv
-            cwrap=SonicResidualEnv(env,dev,tf32=False);driver=cwrap.driver
+            cwrap=SonicResidualEnv(env,dev,tf32=False,kind=state.get('system1_sonic_residual_kind','v1'));driver=cwrap.driver  # T03 C v2: kind from the checkpoint (v1 if absent)
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         ids=torch.tensor([0],device=env.device)
         n=int(command.reference.num_frames)
@@ -190,6 +190,7 @@ def main():
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
+        if cwrap is not None and cwrap.kind!='v1':manifest['system1_scheme_c_kind']=cwrap.kind  # T03 C v2
         if driver is not None:
             manifest.update(controller=a.controller,inference=('sonic_release_teleop_encoder_action_mean+planner_onnx' if a.controller=='sonic_planner' else 'sonic_release_g1_encoder_action_mean') if cwrap is None else 'scheme_c_actor_mean_then_sonic',
                             sonic_checkpoint_sha256=sha(_sc.DEFAULT_CHECKPOINT),checkpoint_sha256=sha(checkpoint),

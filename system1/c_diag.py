@@ -8,6 +8,9 @@ Installed by SonicResidualEnv when the variable is set; records, for every env s
   * SONIC fall rule per robot, pre-reset (env._compute_reward hook, like the evaluator), against each env's own
     reference frame min(time_steps + 1, N - 1) (the evaluator's frame convention), split by criterion;
   * per finished episode: whether the SONIC fall rule fired at any step of it.
+T03 C v2 kinds (wrap.kind): C-in expects the window clamped to the joint limits after adding dq and records
+max |dq_i| / scale_i and the max joint-limit violation of the window SONIC receives; C-out expects the unmodified window
+(dq goes on SONIC's output) and records max |q* - (SONIC output + dq)|.
 """
 from __future__ import annotations
 
@@ -29,6 +32,9 @@ class CDiag:
         E, A = wrap.E, wrap.A
         self.dq_abs, self.a_abs, self.t_hist = [], [], []
         self.jp_check, self.pd_check = 0.0, 0.0
+        self.kind = getattr(wrap, "kind", "v1")
+        self.c_in_dq_over_scale, self.c_in_limit_violation, self.c_out_qstar = 0.0, 0.0, 0.0
+        self._dq = None
         self.counts = dict(robot_steps=0, fall=0, pelvis_height=0, orientation=0, wrist_ankle_height=0)
         self.ep_fell = torch.zeros(E, A, dtype=torch.bool, device=self.d.device)
         self.ep_any, self.ep_len = [], []
@@ -57,7 +63,15 @@ class CDiag:
     @torch.no_grad()
     def pre(self, a, dq):
         jp_ref, _, _, _ = self.d.reference_window(self.w.command)
-        self._expected = jp_ref + self.d.ctl.to_sonic(self.d._flat(dq))[:, None, :]
+        if self.kind == "out":
+            self._expected = jp_ref
+        else:
+            self._expected = jp_ref + self.d.ctl.to_sonic(self.d._flat(dq))[:, None, :]
+        if self.kind == "in":
+            lo, hi = (self.d.ctl.to_sonic(x) for x in self.w.ref_limits_h)
+            self._expected = torch.maximum(torch.minimum(self._expected, hi), lo)
+            self.c_in_dq_over_scale = max(self.c_in_dq_over_scale, float((dq.abs() / self.w.scale_d).amax().item()))
+        self._dq = dq
         self.dq_abs.append(dq.abs().to(torch.float16).cpu().numpy())
         self.a_abs.append(a.abs().to(torch.float16).cpu().numpy())
         self.t_hist.append(self.w.command.time_steps.detach().cpu().numpy().astype(np.int32))
@@ -65,6 +79,13 @@ class CDiag:
     @torch.no_grad()
     def mid(self):
         self.jp_check = max(self.jp_check, float((self._jp - self._expected).abs().max().item()))
+        if self.kind == "in":
+            lo, hi = (self.d.ctl.to_sonic(x) for x in self.w.ref_limits_h)
+            v = torch.maximum(self._jp - hi, lo - self._jp).clamp(min=0).amax().item()
+            self.c_in_limit_violation = max(self.c_in_limit_violation, float(v))
+        if self.kind == "out":
+            v = (self.d.term.joint_target_override - (self.d.last_sonic_target_h + self._dq)).abs().amax().item()
+            self.c_out_qstar = max(self.c_out_qstar, float(v))
 
     @torch.no_grad()
     def post(self, dones):
@@ -114,4 +135,7 @@ class CDiag:
         self.out.with_suffix(".json").write_text(json.dumps(dict(
             steps=len(self.dq_abs), num_envs=self.w.E, num_agents=self.w.A, reference_check_max_abs=self.jp_check,
             pd_target_minus_qstar_max_abs=self.pd_check, to_sonic_is_permutation=self.to_sonic_is_permutation,
-            sonic_fall_counts=self.counts, finished_episodes=int(len(ep_len))), indent=1) + "\n")
+            sonic_fall_counts=self.counts, finished_episodes=int(len(ep_len)), kind=self.kind,
+            c_in_max_dq_over_scale=self.c_in_dq_over_scale if self.kind == "in" else None,
+            c_in_max_reference_joint_limit_violation_rad=self.c_in_limit_violation if self.kind == "in" else None,
+            c_out_max_qstar_minus_sonic_output_plus_dq=self.c_out_qstar if self.kind == "out" else None), indent=1) + "\n")

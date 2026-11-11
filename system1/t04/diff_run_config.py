@@ -49,6 +49,8 @@ def walk(a, b, prefix=""):
 
 
 SCHEME_C = ("system1_scheme_c",)  # T03: fields that exist because actions go through SONIC
+C_SCHEMES = ("c", "cin", "cout")
+C_IN_PPO = ("entropy_coef", "init_noise_std")  # T03 C v2: C-in uses init std 0.3 and entropy 0 (preregistered)
 
 
 def category(key, ref=None, new=None, scheme=None):
@@ -56,10 +58,12 @@ def category(key, ref=None, new=None, scheme=None):
     if top == "bucket_reference" and isinstance(ref, str) and isinstance(new, str) and "/src/holosoma/" in ref \
             and ref.split("/src/holosoma/")[1] == new.split("/src/holosoma/")[1]:
         return "allowed:directory"  # same file inside the checkout; only the checkout root differs
-    if scheme == "c" and top in SCHEME_C:
+    if scheme in C_SCHEMES and top in SCHEME_C:
         return "allowed:scheme_c"
-    if scheme == "c" and top == "save_interval":
+    if scheme in C_SCHEMES and top == "save_interval":
         return "allowed:save_interval(T03)"
+    if scheme == "cin" and top in C_IN_PPO:
+        return "allowed:c_in_ppo(T03 C v2)"
     if top in ALLOWED_MASS or "object_mass" in key or "object_urdf" in key:
         return "allowed:mass"
     if top in ALLOWED_DIR:
@@ -81,7 +85,7 @@ def main():
     p.add_argument("--reference", type=Path, required=True)
     p.add_argument("--new", type=Path, required=True)
     p.add_argument("--out", type=Path, required=True)
-    p.add_argument("--scheme", choices=("d", "c"), default="d")
+    p.add_argument("--scheme", choices=("d", "c", "cin", "cout"), default="d")
     a = p.parse_args()
     rows = diff_files(a.reference, a.new, a.scheme)
     a.out.write_text(json.dumps(dict(reference=str(a.reference), new=str(a.new), scheme=a.scheme, diffs=rows), indent=1, default=str))

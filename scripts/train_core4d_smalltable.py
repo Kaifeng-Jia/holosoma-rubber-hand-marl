@@ -46,6 +46,10 @@ PARSER.add_argument("--reference-variant", type=Path, default=None)
 PARSER.add_argument("--sonic-residual", action="store_true",
                     help="System1 T03 scheme C: policy output is a residual on SONIC's reference input (default off)")
 PARSER.add_argument("--sonic-tf32", action="store_true", help="scheme C training: allow TF32 for SONIC inference")
+PARSER.add_argument("--sonic-residual-kind", choices=("v1", "in", "out"), default="v1",
+                    help="System1 T03 C v2: v1 (default, unchanged), in (C-in: clipped input residual), out (C-out: output residual)")
+PARSER.add_argument("--c-train-diag", action="store_true",
+                    help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 PARSER.add_argument("--episode-telemetry", action="store_true")
@@ -244,6 +248,8 @@ def _append_jsonl(path: Path, payload: dict) -> None:
 def _with_system1(state: dict) -> dict:
     if ARGS.sonic_residual:
         state["system1_sonic_residual"] = True
+        if ARGS.sonic_residual_kind != "v1":
+            state["system1_sonic_residual_kind"] = ARGS.sonic_residual_kind
     return state
 
 
@@ -411,7 +417,8 @@ def main() -> int:
         env = env_class(get_tyro_env_config(CONFIG), device="cuda:0")
         if ARGS.sonic_residual:
             from system1.scheme_c import SonicResidualEnv
-            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128)
+            env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128,
+                                   kind=ARGS.sonic_residual_kind, train_diag=ARGS.c_train_diag)
         observations = env.reset_all()
         physics = _object_physics(env)
         physics_hz, control_hz = _simulation_rates(env)
@@ -421,6 +428,9 @@ def main() -> int:
             num_steps_per_env=ARGS.steps_per_env,
             save_interval=ARGS.save_interval,
         )
+        if ARGS.sonic_residual and ARGS.sonic_residual_kind == "in":
+            from system1.scheme_c import C_IN_PPO_OVERRIDES
+            ppo_config = replace(ppo_config, **C_IN_PPO_OVERRIDES)  # T03 C v2: C-in init std 0.3, entropy 0
         models = initialize_core4d_smalltable_model_bundle(
             ppo_config,
             device=env.device,
@@ -465,6 +475,8 @@ def main() -> int:
             )
             if bool(state.get("system1_sonic_residual", False)) != ARGS.sonic_residual:
                 raise ValueError("Resume checkpoint and --sonic-residual differ")
+            if ARGS.sonic_residual and state.get("system1_sonic_residual_kind", "v1") != ARGS.sonic_residual_kind:
+                raise ValueError("Resume checkpoint and --sonic-residual-kind differ")
             start_iteration = learner.load_training_state_dict(state)
             resume_checkpoint_sha256 = _sha256(resume_path)
 
@@ -553,7 +565,8 @@ def main() -> int:
             run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
         if ARGS.sonic_residual:
             from system1.scheme_c import scheme_c_run_config
-            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32)
+            run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32, kind=ARGS.sonic_residual_kind,
+                                                                 ppo_config=ppo_config, train_diag=ARGS.c_train_diag)
         _write_json(output_dir / "run_config.json", run_config)
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:
@@ -574,6 +587,8 @@ def main() -> int:
                 )
             else:
                 observations = learner.collect_rollout(env, observations)
+            if ARGS.c_train_diag:
+                env.train_diag.end_iteration()
             rewards = learner.storage.team("rewards").clone()
             dones = learner.storage.team("dones").clone()
             timeouts = learner.storage.team("timeouts").clone()
@@ -630,6 +645,8 @@ def main() -> int:
             numeric = [value for value in record.values() if isinstance(value, (int, float))]
             if not all(torch.isfinite(torch.tensor(value)) for value in numeric):
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")
+            if ARGS.c_train_diag and iteration % env.train_diag.every == 0:
+                record["system1_c_train_diag"] = env.train_diag.summary(models.actor)
             _append_jsonl(metrics_path, record)
             print(json.dumps(record, sort_keys=True), flush=True)
 

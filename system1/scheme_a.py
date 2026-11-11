@@ -129,6 +129,7 @@ class SonicDualDriver:
         self.device = device
         assert_reference_bodies(env.command_manager.get_state("paired_motion_command"), sim, ["pelvis", *cmd, *EE_BODIES])
         self.last_q_target_h = None
+        self.last_sonic_target_h = None  # SONIC's own output target (before any C-out residual)
         self.max_pd_target_diff = 0.0
 
     def reset(self, ids=None):
@@ -160,19 +161,29 @@ class SonicDualDriver:
         return q, w_b, self.ctl.to_sonic(self._flat(self.sim.agent_dof_pos)), self.ctl.to_sonic(self._flat(self.sim.agent_dof_vel))
 
     @torch.no_grad()
-    def actions(self, command, dones=None, delta_q_h=None):
+    def actions(self, command, dones=None, delta_q_h=None, ref_limits_h=None, target_residual_h=None):
         """Returns holosoma actions [E, A*29] and SONIC raw actions [E, A, 29].
 
         ``delta_q_h`` [E, A, 29] (holosoma order) is added to every reference frame of the
         window before SONIC (scheme C); None for scheme A.
+        ``ref_limits_h`` (lower [29], upper [29], holosoma order): the joint reference SONIC receives is clamped to
+        these limits after adding ``delta_q_h`` (scheme C-in, T03 v2); None = no clamp (v1 behaviour).
+        ``target_residual_h`` [E, A, 29]: added to SONIC's output joint target before the PD (scheme C-out, T03 v2);
+        SONIC's own observations are unchanged (its last action stays its own output). None = q* is SONIC's output.
         """
         jp, jv, rq, _ = self.reference_window(command)
         if delta_q_h is not None:
             jp = jp + self.ctl.to_sonic(self._flat(delta_q_h))[:, None, :]
+        if ref_limits_h is not None:
+            lo, hi = self.ctl.to_sonic(ref_limits_h[0]), self.ctl.to_sonic(ref_limits_h[1])
+            jp = torch.maximum(torch.minimum(jp, hi), lo)
         q, w_b, jq, jqd = self.robot_state()
         d = None if dones is None else dones.repeat_interleave(self.A).float()
         action, target_s, _ = self.ctl.act(q, w_b, jq, jqd, jp, jv, rq, d)
         q_target_h = self.ctl.to_holosoma(target_s).reshape(self.E, self.A, -1)
+        self.last_sonic_target_h = q_target_h
+        if target_residual_h is not None:
+            q_target_h = q_target_h + target_residual_h
         self.term.joint_target_override = q_target_h  # PD uses q* verbatim (F2)
         self.last_q_target_h = q_target_h
         a_h = (q_target_h - self.default_h) / self.scale_h
