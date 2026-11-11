@@ -1,0 +1,42 @@
+{
+ "ref_prefix": "logs_system1/T01/sonic/refs/sonic_sample_A001",
+ "feedback": "shift",
+ "steps_executed": 1087,
+ "horizon_steps": 2001,
+ "fell": true,
+ "fall_step": 1087,
+ "final_pelvis_xy_err_m": 0.08951204549350592,
+ "max_pelvis_xy_err_m": 0.13173131508147823,
+ "mean_pelvis_xy_err_m": 0.04615387091449437,
+ "mpjpe_g_mm": 55.068226858010476,
+ "planner_calls": 219,
+ "planner_seconds": 14.977407780956128,
+ "wall_seconds": 91.8461748809932,
+ "gate_threshold_m": 0.3,
+ "gate_passed": false,
+ "constants": {
+  "planner_onnx": "/home/kevin/third_party/GR00T-WholeBodyControl/sonic_hf_extra/planner_sonic.onnx",
+  "planner_sha256": "39b553e197f62f077975ba38512bc04781a3fc37c2af7c6756e04629f760edea",
+  "planner_tick_control_steps": 5,
+  "look_ahead": 2,
+  "blend_frames": 8,
+  "allowed_tokens": [
+   1,
+   1,
+   1,
+   1,
+   1,
+   1,
+   0,
+   0,
+   0,
+   0,
+   0
+  ],
+  "waypoint_horizon_frames_50hz": 73.33333333333333,
+  "mode_walk": 2,
+  "random_seed": 0
+ },
+ "tf32": false,
+ "device": "cuda:0"
+}

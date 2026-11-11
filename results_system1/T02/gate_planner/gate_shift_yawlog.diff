@@ -1,0 +1,33 @@
+diff --git a/system1/sonic/validate_planner_single.py b/system1/sonic/validate_planner_single.py
+index a321b10..b7bbdd9 100644
+--- a/system1/sonic/validate_planner_single.py
++++ b/system1/sonic/validate_planner_single.py
+@@ -94,7 +94,9 @@ def main():
+ 
+         T = lambda x: torch.tensor(np.asarray(x), dtype=torch.float32, device=dev)  # noqa: E731
+         rec = {k: [] for k in ("mpjpe_mm", "pelvis_dz", "pelvis_ori_err2", "ee_dz_max", "root_pos", "planner_root_pos",
+-                               "ref_pelvis_pos", "d_xy", "waypoint_last", "action")}
++                               "ref_pelvis_pos", "d_xy", "waypoint_last", "action",
++                               # logging only (added after the 2026-11-10 gate failure; behaviour unchanged)
++                               "robot_yaw", "planner_yaw", "ref_root_yaw", "waypoint_last_yaw")}
+         fall_step = None
+         k_last = 0
+         t_start = time.perf_counter()
+@@ -115,6 +117,7 @@ def main():
+                 track.replan(sb.MODE_WALK, sb.ref_planar_speed(ref_pel_pos, s, Nref), mdir, facing,
+                              float(ref_pel_pos[s, 2]), 1, wp, wy)
+                 rec["waypoint_last"].append(np.r_[s, wp[-1]])
++                rec["waypoint_last_yaw"].append(np.r_[s, wy[-1]])
+             lp, lv = track.future_window(ctl.n_future, ctl.skip)
+             proot, pquat = track.root()
+             action, q_target_s, _ = ctl.act_teleop(
+@@ -143,6 +146,9 @@ def main():
+             rec["ref_pelvis_pos"].append(ref_pel_pos[min(k, Nref - 1)])
+             rec["d_xy"].append(float(np.linalg.norm(rp[:2] - ref_pel_pos[min(k, Nref - 1), :2])))
+             rec["action"].append(action[0].cpu().numpy())
++            rec["robot_yaw"].append(float(sb.yaw_of(rq[0].cpu().numpy().astype(np.float64))))
++            rec["planner_yaw"].append(float(sb.yaw_of(track.root()[1])))
++            rec["ref_root_yaw"].append(float(sb.yaw_of(R["root_quat_w"][k].cpu().numpy().astype(np.float64))))
+             k_last = k
+             if pel_dz.item() > 0.25 or ang.item() ** 2 > 1.0 or ee_dz.item() > 0.25:
+                 fall_step = k

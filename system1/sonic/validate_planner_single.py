@@ -35,6 +35,8 @@ def main():
     p.add_argument("--feedback", choices=("shift", "none"), required=True)
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--max-steps", type=int, default=0)
+    p.add_argument("--diag-fall-rule", choices=("sonic", "height_only"), default="sonic",
+                   help="diagnostic only: height_only drops the orientation term of the fall rule (never the gate)")
     a = p.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
     sref = np.load(f"{a.ref_prefix}.sonic.npz")
@@ -94,7 +96,9 @@ def main():
 
         T = lambda x: torch.tensor(np.asarray(x), dtype=torch.float32, device=dev)  # noqa: E731
         rec = {k: [] for k in ("mpjpe_mm", "pelvis_dz", "pelvis_ori_err2", "ee_dz_max", "root_pos", "planner_root_pos",
-                               "ref_pelvis_pos", "d_xy", "waypoint_last", "action")}
+                               "ref_pelvis_pos", "d_xy", "waypoint_last", "action",
+                               # logging only (added after the 2026-11-10 gate failure; behaviour unchanged)
+                               "robot_yaw", "planner_yaw", "ref_root_yaw", "waypoint_last_yaw")}
         fall_step = None
         k_last = 0
         t_start = time.perf_counter()
@@ -115,6 +119,7 @@ def main():
                 track.replan(sb.MODE_WALK, sb.ref_planar_speed(ref_pel_pos, s, Nref), mdir, facing,
                              float(ref_pel_pos[s, 2]), 1, wp, wy)
                 rec["waypoint_last"].append(np.r_[s, wp[-1]])
+                rec["waypoint_last_yaw"].append(np.r_[s, wy[-1]])
             lp, lv = track.future_window(ctl.n_future, ctl.skip)
             proot, pquat = track.root()
             action, q_target_s, _ = ctl.act_teleop(
@@ -143,20 +148,25 @@ def main():
             rec["ref_pelvis_pos"].append(ref_pel_pos[min(k, Nref - 1)])
             rec["d_xy"].append(float(np.linalg.norm(rp[:2] - ref_pel_pos[min(k, Nref - 1), :2])))
             rec["action"].append(action[0].cpu().numpy())
+            rec["robot_yaw"].append(float(sb.yaw_of(rq[0].cpu().numpy().astype(np.float64))))
+            rec["planner_yaw"].append(float(sb.yaw_of(track.root()[1])))
+            rec["ref_root_yaw"].append(float(sb.yaw_of(R["root_quat_w"][k].cpu().numpy().astype(np.float64))))
             k_last = k
-            if pel_dz.item() > 0.25 or ang.item() ** 2 > 1.0 or ee_dz.item() > 0.25:
+            ori_fail = ang.item() ** 2 > 1.0 and a.diag_fall_rule == "sonic"
+            if pel_dz.item() > 0.25 or ori_fail or ee_dz.item() > 0.25:
                 fall_step = k
                 break
         wall = time.perf_counter() - t_start
         d = np.array(rec["d_xy"])
         final_err = float(d[-1])
-        passed = fall_step is None and k_last == N - 1 and final_err <= 0.30
+        passed = fall_step is None and k_last == N - 1 and final_err <= 0.30 and a.diag_fall_rule == "sonic"
         result = dict(ref_prefix=str(a.ref_prefix), feedback=a.feedback, steps_executed=k_last, horizon_steps=N - 1,
                       fell=fall_step is not None, fall_step=fall_step, final_pelvis_xy_err_m=final_err,
                       max_pelvis_xy_err_m=float(d.max()), mean_pelvis_xy_err_m=float(d.mean()),
                       mpjpe_g_mm=float(np.mean(rec["mpjpe_mm"])), planner_calls=planner.calls,
                       planner_seconds=planner.seconds, wall_seconds=wall, gate_threshold_m=0.30, gate_passed=passed,
-                      constants=sb.preregistered_constants(), tf32=False, device=a.device)
+                      constants=sb.preregistered_constants(), tf32=False, device=a.device, diag_fall_rule=a.diag_fall_rule,
+                      max_ori_err_rad=float(np.sqrt(np.max(rec["pelvis_ori_err2"]))))
         np.savez_compressed(a.out / "trajectory.npz", **{k: np.asarray(v) for k, v in rec.items()})
         (a.out / "result.json").write_text(json.dumps(result, indent=1))
         print(json.dumps(result, indent=1))
