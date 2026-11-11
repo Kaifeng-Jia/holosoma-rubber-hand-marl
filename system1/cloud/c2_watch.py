@@ -5,8 +5,10 @@
   * c2_decisions.json changes (iteration-1000 early-stop decisions, iteration-2000 choice, mass runs started);
   * a C v2 segment writes an exit record; a non-finite value appears in a C v2 metrics file;
   * divergence sign (report only, never stops anything): action std rose in each of the last 5 diagnostic windows and
-    the last window's mean reward_mean is below the window 500 iterations earlier;
+    the last window's mean reward_mean is below the window 500 iterations earlier; at most once per run per 1000-iteration block;
   * the cloud evaluation job list has finished (logs/evals/ops: one exit record per launch record, at least one);
+  * numeric spike (report only): an iteration with reward_min < -1e3 or value_loss > 1e3 (cin_table iteration 295 had
+    reward_min -3.6e12; C v1 Pull / Table 20 kg had them too); at most one event per run per 1000-iteration block;
   * the cloud is unreachable for --max-failures polls.
 Already-seen events are listed in --seen and ignored, so it can be restarted.
 
@@ -40,7 +42,7 @@ for d in sorted(glob.glob(T + "/cin_*") + glob.glob(T + "/cout_*")):
     with open(f, "rb") as fh:
         fh.seek(max(0, os.path.getsize(f) - 3000000))
         lines = fh.read().decode(errors="replace").splitlines()[1:]
-    its, diag, bad = [], [], False
+    its, diag, bad, spikes = [], [], False, []
     for l in lines:
         if re.search(r"\b(NaN|Infinity|-Infinity)\b", l):
             bad = True
@@ -49,6 +51,9 @@ for d in sorted(glob.glob(T + "/cin_*") + glob.glob(T + "/cout_*")):
         except Exception:
             continue
         its.append((j["iteration"], j.get("reward_mean"), j.get("elapsed_seconds")))
+        rmin, vl = j.get("reward_min"), j.get("value_loss")
+        if (isinstance(rmin, (int, float)) and rmin < -1e3) or (isinstance(vl, (int, float)) and vl > 1e3):
+            spikes.append([j["iteration"], rmin, j.get("reward_mean"), vl])
         if "system1_c_train_diag" in j:
             x = j["system1_c_train_diag"]
             diag.append(dict(it=j["iteration"], std=x["action_std_mean"], corr_mean=x["correction_abs_mean_rad"],
@@ -59,7 +64,7 @@ for d in sorted(glob.glob(T + "/cin_*") + glob.glob(T + "/cout_*")):
     last = its[-1][0] if its else 0
     w = [r for i, r, s in its if i > last - 100 and isinstance(r, (int, float))]
     sp = sorted(s for i, r, s in its[-200:] if isinstance(s, (int, float)))
-    runs[os.path.basename(d)] = dict(last=last, nonfinite=bad, diag=diag[-8:], rew100=sum(w) / len(w) if w else None,
+    runs[os.path.basename(d)] = dict(last=last, nonfinite=bad, diag=diag[-8:], spikes=spikes[-50:], rew100=sum(w) / len(w) if w else None,
                                      rew_by_it={i: r for i, r, s in its[-700:]}, sec_it_median=sp[len(sp) // 2] if sp else None)
 exits = {}
 for f in glob.glob(T + "/ops/cin_*.exit.json") + glob.glob(T + "/ops/cout_*.exit.json"):
@@ -94,6 +99,8 @@ def events(st):
             ev.add(f"it{k}:{name}")
         if r["nonfinite"]:
             ev.add(f"nonfinite:{name}")
+        for it, *_ in r.get("spikes") or []:
+            ev.add(f"spike:{name}:block{it // 1000}")
         d = r["diag"]
         if len(d) >= 6 and all(d[i]["std"] > d[i - 1]["std"] for i in range(len(d) - 5, len(d))):
             rb = {int(k): v for k, v in r["rew_by_it"].items() if isinstance(v, (int, float))}
@@ -101,7 +108,7 @@ def events(st):
             now_w = [rb[i] for i in range(lt - 99, lt + 1) if i in rb]
             old_w = [rb[i] for i in range(lt - 599, lt - 499) if i in rb]
             if now_w and old_w and sum(now_w) / len(now_w) < sum(old_w) / len(old_w):
-                ev.add(f"divergence_sign:{name}:{lt}")
+                ev.add(f"divergence_sign:{name}:block{lt // 1000}")  # at most once per run per 1000-iteration block
     for label, ok in st["exits"].items():
         ev.add(f"exit:{label}:{'completed' if ok else 'not_completed'}")
     dec = st["decisions"] or {}
@@ -147,7 +154,8 @@ def main():
         if new:
             a.seen.parent.mkdir(parents=True, exist_ok=True)
             a.seen.write_text(json.dumps(sorted(seen | set(new)), indent=1))
-            brief = {n: dict(last=r["last"], sec_it=r["sec_it_median"], rew100=r["rew100"], diag=r["diag"][-1:] if r["diag"] else None)
+            brief = {n: dict(last=r["last"], sec_it=r["sec_it_median"], rew100=r["rew100"], diag=r["diag"][-1:] if r["diag"] else None,
+                             spikes=r.get("spikes"))
                      for n, r in st["runs"].items()}
             print(json.dumps(dict(time=now(), new_events=new, runs=brief, evals=st["evals"], slots=st.get("slots")), indent=1), flush=True)
             return 0
