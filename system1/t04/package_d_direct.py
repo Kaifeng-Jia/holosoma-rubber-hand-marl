@@ -24,6 +24,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
+from system1 import gpu_provenance  # noqa: E402
 from system1.package_scheme_a import PALM_OUT, V3_EPISODES, HandMetrics, csvsave, palm_module, read, sha  # noqa: E402
 
 L = ROOT / "logs_system1/T04/D_direct"
@@ -63,6 +64,8 @@ def main():
                 assert abs(mass - m) < 1e-6 and s.get("system1_checkpoint_mass") == "original"
                 assert s["checkpoint_sha256"] == la["checkpoint_sha256"] and s["states_sha256"] == la["states_sha256"]
                 ssha = sha(d / "summary.json")
+                gpu, gsrc = gpu_provenance.ours(d, L / "ops" / f"{label}.stdout.log")
+                assert gpu, d
                 palm_rows = {}
                 if case in ("bucket", "table"):
                     palm.process(d / "summary.json")
@@ -95,8 +98,8 @@ def main():
                         object_urdf_sha256=sha(obj_urdf), evaluation_code_sha256=sha(ROOT / "scripts/evaluate_paper_supplement.py"),
                         exit_record_path=str(L / "ops" / f"{label}.exit.json"), summary_sha256=ssha, progress=e["progress"],
                         raw_reward_sum_common=e["reward_sum_common"], scheme="D", mass_kg=mass, original_mass_kg=ORIG[case],
-                        mass_ratio=mass / ORIG[case], retrained="no (original-mass policy)", seed=721, delta_cm=lvl,
-                        launch_git_head=la["git_head"]))
+                        mass_ratio=mass / ORIG[case], retrained="no (original-mass policy)", seed=721, delta_cm=None,
+                        launch_git_head=la["git_head"], gpu_model=gpu, gpu_model_source=gsrc))
                 print(label, sum(r["completed_reference"] for r in rows[-51:] if not r["is_nominal"]), flush=True)
     # original-mass D point = paper result (V3 rows, Full, seed 721)
     with V3_EPISODES.open() as f:
@@ -105,7 +108,7 @@ def main():
                     and r["perturbation_level_cm"] in ("2", "8")):
                 rows.append(dict(r, experiment_group="V3-closeout (paper D)", scheme="D", mass_kg=ORIG[r["task"]],
                                  original_mass_kg=ORIG[r["task"]], mass_ratio=1.0, retrained="paper result (original mass)",
-                                 seed=721, delta_cm=int(r["perturbation_level_cm"])))
+                                 seed=721, delta_cm=None, gpu_model=gpu_provenance.v3_row(r)[0]))
     OUT.joinpath("D").mkdir(parents=True, exist_ok=True)
     csvsave(OUT / "D/mass_sweep_episodes_D.csv", rows)
     groups = {}

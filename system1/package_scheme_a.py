@@ -372,7 +372,9 @@ def main():
     csvsave(OUT_A / "schemeA_vs_D_mcnemar.csv", vs_d)
     sweep = [r for r in rows if r["task"] in SWEEP and r["variant"] == "schemeA"]
     for r in sweep:
-        r.update(delta_cm=r["perturbation_level_cm"], seed=None)
+        # T04 column delta = scheme B1 contact offset (T02); not applicable to A (corrected 2026-11-10: was the
+        # perturbation level, which is already in perturbation_level_cm)
+        r.update(delta_cm=None, seed=None)
     csvsave(OUT_M / "mass_sweep_episodes.csv", sweep)
     csvsave(OUT_M / "mass_sweep_summary.csv",
             sorted([x for x in summaries if x["task"] in SWEEP and x["variant"] == "schemeA"],

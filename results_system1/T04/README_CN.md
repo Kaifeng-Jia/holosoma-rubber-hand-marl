@@ -55,7 +55,7 @@
 
 | 文件 | 内容 |
 |---|---|
-| `A/mass_sweep_episodes.csv` | 12 档 × 2 档扰动 × 51 回合 = 1224 行。列与 `results_system1/T01b/schemeA/episodes.csv` 相同，另加 `delta_cm`（= 扰动档 cm）和 `seed`（A 不训练，为空）。`retrained` 列填 `not_applicable_no_training` |
+| `A/mass_sweep_episodes.csv` | 12 档 × 2 档扰动 × 51 回合 = 1224 行。列与 `results_system1/T01b/schemeA/episodes.csv` 相同，另加 `delta_cm` 和 `seed`。`delta_cm` 是 T02 方案 B1 的接触偏移 δ，A 不适用，为空；2026-11-10 更正：之前填的是扰动档，与 `perturbation_level_cm` 重复。`seed`：A 不训练，为空。`retrained` 列填 `not_applicable_no_training` |
 | `A/mass_sweep_summary.csv` | 每组 50 个扰动回合的汇总和 nominal |
 | `A/object_physics_readback.csv` | 12 档 PhysX 读回值与 URDF 值 |
 
