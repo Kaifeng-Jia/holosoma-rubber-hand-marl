@@ -1,0 +1,203 @@
+{
+ "note": "existing episodes only; A = T01b scheme A main +/-2 (nominal + all 50); D = V3 Full seed 721 +/-2 (nominal + all 50); kinematic MuJoCo replay of recorded states; keyframe = first saved row whose reference_frame >= target frame, else the terminal row (marked)",
+ "tasks": {
+  "push": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/push_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/ExperimentsR2_evaluation_20261026_retry01/U5_push_registered/results/Push-registered_seed721/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    77,
+    154,
+    231,
+    308
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     77,
+     87,
+     87,
+     87
+    ],
+    [
+     0,
+     77,
+     87,
+     87,
+     87
+    ]
+   ],
+   "files": [
+    "keyframes_push.png",
+    "topdown_push.png"
+   ]
+  },
+  "pull": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/pull_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/results/Pull-baseline_seed721/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    79,
+    158,
+    236,
+    315
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     79,
+     156,
+     156,
+     156
+    ],
+    [
+     0,
+     79,
+     158,
+     236,
+     315
+    ]
+   ],
+   "files": [
+    "keyframes_pull.png",
+    "topdown_pull.png"
+   ]
+  },
+  "kick": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/kick_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/ExperimentsR2_evaluation_20261026_retry01/U6_kick/results/Kick-baseline_seed721/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    74,
+    148,
+    223,
+    297
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     74,
+     148,
+     214,
+     214
+    ],
+    [
+     0,
+     74,
+     148,
+     223,
+     297
+    ]
+   ],
+   "files": [
+    "keyframes_kick.png",
+    "topdown_kick.png"
+   ]
+  },
+  "chair": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/chair_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/results/C-01_seed721/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    98,
+    195,
+    292,
+    390
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     98,
+     195,
+     253,
+     253
+    ],
+    [
+     0,
+     98,
+     195,
+     292,
+     390
+    ]
+   ],
+   "files": [
+    "keyframes_chair.png",
+    "topdown_chair.png"
+   ]
+  },
+  "bucket": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/bucket_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/results/B-RZ0_seed721/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    124,
+    248,
+    372,
+    496
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     124,
+     218,
+     218,
+     218
+    ],
+    [
+     0,
+     124,
+     248,
+     372,
+     496
+    ]
+   ],
+   "files": [
+    "keyframes_bucket.png",
+    "topdown_bucket.png"
+   ]
+  },
+  "table": {
+   "a_nominal": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/table_pm2/nominal.trajectory.npz",
+   "d_nominal": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/results/T-07_seed721_retry_shutdown_20261004/nominal.trajectory.npz",
+   "a_episodes": 50,
+   "d_episodes": 50,
+   "keyframe_reference_frames": [
+    0,
+    172,
+    343,
+    514,
+    686
+   ],
+   "keyframe_rows": [
+    [
+     0,
+     172,
+     265,
+     265,
+     265
+    ],
+    [
+     0,
+     172,
+     343,
+     514,
+     686
+    ]
+   ],
+   "files": [
+    "keyframes_table.png",
+    "topdown_table.png"
+   ]
+  }
+ }
+}

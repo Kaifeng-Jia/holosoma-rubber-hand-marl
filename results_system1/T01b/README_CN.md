@@ -476,3 +476,23 @@ D 是 V3 收尾包 `episodes.csv` 的 `Full` 组：论文主结果的三个种�
   - Push、Kick 的 ±2 档；
   - 六个任务的 ±8 档。
   - 在 `gpu_models_differ = True` 中标出。
+
+## 14. 关键帧拼图和俯视路线图（Kevin 2026-11-10 第二项）
+
+- **文件：** `figures/keyframes_<task>.png`、`figures/topdown_<task>.png`，六个任务各一张，另有 `figures/figures_provenance.json`。
+- **生成：** 脚本 `system1/render/figures_t01b.py all`，环境 `sonic_s1`，MuJoCo EGL。2026-11-10 21:10:23–21:10:30，git `be563a3`。
+- **数据：** 只用已有回合，没有重跑，也没有挑选。
+  - A：T01b 方案 A 主设置 ±2，nominal 加全部 50 个扰动回合。
+  - D：V3 收尾包 Full、种子 721、±2，nominal 加全部 50 个回合。
+  - 画面是对记录下来的状态做运动学回放。
+- **(a) 关键帧拼图：**
+  - 上排 A nominal，下排 D nominal，取参考时长的 0/25/50/75/100%。
+  - 回合已经终止的格子显示终止时的状态，并标"已终止（第 N 步）"。每格实际用的行号记在 provenance 里。
+- **(b) 俯视路线图：**
+  - 参考里两台机器人的骨盆路线和物体中心路线；
+  - A、D 的 nominal 路线用粗线，各自 50 个 ±2 回合用细线；
+  - 标出 A nominal 的终止点和 A 各回合的终止点。
+- **Push 的 D 行也写着"已终止（第 87 步）"：** 这是 V3 原始数据，不是画图的问题。
+  - V3 收尾包里，D Push 三个种子的 nominal 回合都没有完成，分别在第 87、89、93 步终止（`joint_bad_tracking`）。
+  - D Push ±2 没完成的回合，多数在第 86–93 步终止。
+  - A Push nominal 也在第 87 步终止，终止时物体位置误差 0.259 m（阈值 0.25 m）。
