@@ -1,0 +1,107 @@
+{
+ "created": "2026-11-10T17:47:34-05:00",
+ "out": "/root/autodl-tmp/system1/logs/train",
+ "cpu_count": 128,
+ "mode": "assign",
+ "queues": [
+  {
+   "gpu": "0",
+   "runs": [
+    "d_pull:40"
+   ],
+   "seed": 721,
+   "iterations": 8050,
+   "cpus": "0-13",
+   "local_rank": "200",
+   "log": "queue_d_pull_40_seed721.log"
+  },
+  {
+   "gpu": "0",
+   "runs": [
+    "c_pull:20"
+   ],
+   "seed": 721,
+   "iterations": 8050,
+   "cpus": "14-27",
+   "local_rank": "201",
+   "log": "queue_c_pull_20_seed721.log"
+  },
+  {
+   "gpu": "1",
+   "runs": [
+    "d_table:20"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "28-41",
+   "local_rank": "202",
+   "log": "queue_d_table_20_seed721.log"
+  },
+  {
+   "gpu": "1",
+   "runs": [
+    "c_table:5"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "42-55",
+   "local_rank": "203",
+   "log": "queue_c_table_5_seed721.log"
+  },
+  {
+   "gpu": "2",
+   "runs": [
+    "d_bucket:2"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "56-69",
+   "local_rank": "204",
+   "log": "queue_d_bucket_2_seed721.log"
+  },
+  {
+   "gpu": "2",
+   "runs": [
+    "d_bucket:4"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "70-83",
+   "local_rank": "205",
+   "log": "queue_d_bucket_4_seed721.log"
+  },
+  {
+   "gpu": "3",
+   "runs": [
+    "d_bucket:8"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "84-97",
+   "local_rank": "206",
+   "log": "queue_d_bucket_8_seed721.log"
+  },
+  {
+   "gpu": "3",
+   "runs": [
+    "c_bucket:1"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "98-111",
+   "local_rank": "207",
+   "log": "queue_c_bucket_1_seed721.log"
+  },
+  {
+   "gpu": "4",
+   "runs": [
+    "d_table:10"
+   ],
+   "seed": 721,
+   "iterations": 12000,
+   "cpus": "112-125",
+   "local_rank": "208",
+   "log": "queue_d_table_10_seed721.log"
+  }
+ ]
+}
