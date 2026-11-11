@@ -35,6 +35,8 @@ def main():
     p.add_argument("--feedback", choices=("shift", "none"), required=True)
     p.add_argument("--device", default="cuda:0")
     p.add_argument("--max-steps", type=int, default=0)
+    p.add_argument("--last-waypoint-frac", type=float, default=None,
+                   help="rule revision (preregistration section 8): last waypoint at gen + frac*H; default scheme_b.LAST_WAYPOINT_FRAC")
     p.add_argument("--diag-fall-rule", choices=("sonic", "height_only"), default="sonic",
                    help="diagnostic only: height_only drops the orientation term of the fall rule (never the gate)")
     a = p.parse_args()
@@ -112,7 +114,7 @@ def main():
                 proot, pquat = track.root()
                 shift = (proot[:2] - pos_r[:2]) if a.feedback == "shift" else np.zeros(2)
                 dyaw = sb.wrap(sb.yaw_of(pquat) - sb.yaw_of(q_np)) if a.feedback == "shift" else 0.0
-                wp, wy, _ = sb.waypoints(ref_pel_pos, ref_pel_quat, s, Nref, H, shift, dyaw)
+                wp, wy, _ = sb.waypoints(ref_pel_pos, ref_pel_quat, s, Nref, H, shift, dyaw, last_frac=a.last_waypoint_frac)
                 d = wp[-1, :2] - proot[:2]
                 mdir = np.r_[d / max(np.linalg.norm(d), 1e-9), 0.0]
                 facing = (np.cos(wy[-1]), np.sin(wy[-1]), 0.0)
@@ -166,6 +168,7 @@ def main():
                       mpjpe_g_mm=float(np.mean(rec["mpjpe_mm"])), planner_calls=planner.calls,
                       planner_seconds=planner.seconds, wall_seconds=wall, gate_threshold_m=0.30, gate_passed=passed,
                       constants=sb.preregistered_constants(), tf32=False, device=a.device, diag_fall_rule=a.diag_fall_rule,
+                      last_waypoint_frac=sb.LAST_WAYPOINT_FRAC if a.last_waypoint_frac is None else a.last_waypoint_frac,
                       max_ori_err_rad=float(np.sqrt(np.max(rec["pelvis_ori_err2"]))))
         np.savez_compressed(a.out / "trajectory.npz", **{k: np.asarray(v) for k, v in rec.items()})
         (a.out / "result.json").write_text(json.dumps(result, indent=1))

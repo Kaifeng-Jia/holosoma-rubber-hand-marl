@@ -40,6 +40,9 @@ BLEND = 8                 # blend_num_frames
 ALLOWED_TOKENS = (1, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0)
 MAX_FRAMES_30 = 44        # 11 tokens x 4 frames: longest horizon the default mask allows
 MODE_IDLE, MODE_WALK = 0, 2
+# Time of the 4th (last) waypoint as a fraction of H (preregistration section 8). 1.0 = original rule 2; the value
+# that passes the revised gate (tried in the order 0.5, 0.25, 0.125) is written here before any B evaluation.
+LAST_WAYPOINT_FRAC = 1.0
 
 
 def mujoco_joint_names():
@@ -185,12 +188,17 @@ class PlannerTrack:
         return self.motion["pos"][f], self.motion["quat"][f]
 
 
-def waypoints(ref_pos, ref_quat, k, n_ref, horizon_frames_50, shift_xy=np.zeros(2), shift_yaw=0.0):
+def waypoints(ref_pos, ref_quat, k, n_ref, horizon_frames_50, shift_xy=np.zeros(2), shift_yaw=0.0, last_frac=None):
     """Preregistered rule 2: 4 waypoints at the reference pelvis after the current time, evenly spaced over the
     horizon (gen frame + i*H/4, i = 1..4, clamped to the last reference frame); optional feedback shift.
+    Rule revision (preregistration section 8): the 4th (last) waypoint sits at gen frame + last_frac*H instead of
+    gen frame + H; waypoints 1-3 unchanged (the planner output depends on the last waypoint only, section 0).
+    last_frac None -> LAST_WAYPOINT_FRAC (1.0 = original rule 2).
     ref_pos [N,3] world, ref_quat [N,4] wxyz; k = current reference frame. Returns (pos [4,3], yaw [4], frames)."""
+    lf = LAST_WAYPOINT_FRAC if last_frac is None else float(last_frac)
     g = k + LOOK_AHEAD
-    fr = np.array([min(g + int(round(i * horizon_frames_50 / 4.0)), n_ref - 1) for i in range(1, 5)])
+    offs = [int(round(i * horizon_frames_50 / 4.0)) for i in range(1, 4)] + [int(round(lf * horizon_frames_50))]
+    fr = np.array([min(g + o, n_ref - 1) for o in offs])
     pos = ref_pos[fr].copy()
     pos[:, :2] += shift_xy
     yaw = yaw_of(ref_quat[fr]) + shift_yaw
@@ -209,7 +217,8 @@ def wrap(a):
 def preregistered_constants():
     return dict(planner_onnx=str(PLANNER_ONNX), planner_sha256=PLANNER_SHA256, planner_tick_control_steps=PLANNER_TICK,
                 look_ahead=LOOK_AHEAD, blend_frames=BLEND, allowed_tokens=list(ALLOWED_TOKENS),
-                waypoint_horizon_frames_50hz=MAX_FRAMES_30 / 30.0 * 50.0, mode_walk=MODE_WALK, random_seed=0)
+                waypoint_horizon_frames_50hz=MAX_FRAMES_30 / 30.0 * 50.0, mode_walk=MODE_WALK, random_seed=0,
+                last_waypoint_frac=LAST_WAYPOINT_FRAC)
 
 
 if __name__ == "__main__":
