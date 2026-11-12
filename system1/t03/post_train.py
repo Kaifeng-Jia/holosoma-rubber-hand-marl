@@ -61,6 +61,9 @@ RUNS += [f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull_m20
                                                                      ("bucket_m1kg", "fresh12000"))]
 RUNS += ["cin_table_m10kg_seed721_fresh12000", "cin_table_m20kg_seed721_fresh12000", "cin_bucket_m2kg_seed721_fresh12000",
          "cin_bucket_m4kg_seed721_fresh12000", "cin_bucket_m8kg_seed721_fresh12000", "cin_pull_m40kg_seed721_joint8000"]
+# C-in extra seeds 722 / 723 (Kevin 2026-11-12): finals on the laptop as well (claims owned by "laptop")
+RUNS += [f"cin_{t}_seed{sd}_{s}" for sd in (722, 723) for t, s in (("pull_m20kg", "joint8000"), ("table_m5kg", "fresh12000"),
+                                                                   ("bucket_m1kg", "fresh12000"))]
 C_SCHEMES = ("c", "cin", "cout")  # all evaluated with --controller sonic_residual (kind read from the checkpoint)
 # C extra seeds 722/723: deferred until after the RSS stage-1 submission (T03 / README, commit 0712082)
 _B = "/home/kevin/holosoma-core4d-base/logs"
@@ -264,6 +267,30 @@ def early_curve_jobs():
     return out
 
 
+def d_paper_pm8_jobs():
+    """Kevin 2026-11-12 item 2: the D paper main result, Pull / Table / Bin x seeds 721-723, final checkpoint, +/-8 on this
+    laptop (the earlier +/-8 ran on 4090s); the scheme comparison table uses laptop 5070 numbers only. The +/-2 of the
+    722 / 723 finals are the d_curve jobs of the same checkpoints, claimed for the laptop and raised to priority 0
+    (priority_overrides.json)."""
+    f = OUT / "d_curve_catalog.json"
+    if not f.exists():
+        return []
+    runs = json.loads(f.read_text())["runs"]
+    out = []
+    for label, r in runs.items():
+        if "_paper_" not in label:
+            continue
+        it = max(int(i) for i in r["checkpoints"])
+        c = r["checkpoints"][str(it)]
+        prefix = D_CURVES[label][2]
+        if prefix and not c["sha256"].startswith(prefix):
+            raise RuntimeError(f"{label}: final checkpoint sha {c['sha256'][:8]} != paper {prefix}")
+        out.append(dict(priority=0, name=f"d_paper_final/{label}/it{it:05d}_pm8", case=r["case"], scheme="d",
+                        mass=ORIGINAL_MASS[r["case"]], checkpoint=c["path"], checkpoint_sha256=c["sha256"], level=8,
+                        task_book="T03", run=label))
+    return out
+
+
 def recheck_jobs():
     """T03 C v2 same-GPU recheck (Kevin 2026-11-12, item 3a): recheck.json {"jobs": [{name, label, checkpoint, sha256, priority}]}
     lists cloud-evaluated C v2 checkpoints, fetched to exports_system1/train_partial/ with sha256 checked, re-evaluated here with
@@ -415,7 +442,8 @@ def run(a):
                         print(now(), "cloud run ended without completion:", label, flush=True)
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
-        pending = [j for js in fetched.values() for j in js] + recheck_jobs() + early_curve_jobs() + b_jobs() + d_curve_jobs()
+        pending = ([j for js in fetched.values() for j in js] + recheck_jobs() + d_paper_pm8_jobs() + early_curve_jobs() + b_jobs()
+                   + d_curve_jobs())
         pending = apply_priority_overrides(pending)
         busy = {r[0]["name"] for r in running.values()}
         pending = [j for j in pending if j["name"] not in claimed_elsewhere]

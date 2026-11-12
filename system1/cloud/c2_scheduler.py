@@ -14,6 +14,13 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
 * Slot filling: every --poll seconds, a GPU with fewer than --per-gpu compute processes (nvidia-smi) and at least
   --min-free-mib free memory gets one job, in this order:
     1. C mass sweep runs (once chosen; longest expected first); while any is pending no evaluation is started;
+    1b. C-in extra seeds 722 / 723 for Pull / Table / Bin (Kevin 2026-11-12: same configuration as seed 721, only the seed;
+       after the mass sweep, before every evaluation, longest expected first; an evaluation this scheduler started (PID
+       recorded) is stopped to free its slot when a seed run waits and no GPU has room: <evals>/ops2/<name>.preempted.json,
+       its output directory renamed <dir>.preempted<k>, re-run later, not counted as a failure); a training needs
+       --train-min-free-mib free memory;
+    1c. cross-GPU control (Kevin 2026-11-12): D paper seed 721 Pull it1050 and Bin it12000, +/-2 on the 4090 (xgpu/...),
+       first among the evaluations;
     2. evaluations of C v2 checkpoints (every cin_/cout_ run, main and mass, every saved checkpoint, +/-2; the final
        checkpoint of a completed run also +/-8), oldest checkpoint first;
     3. D "completion vs iteration" curve evaluations from $S1_INPUTS/d_curve/catalog.json (V3-25-27 it04050 first,
@@ -56,6 +63,9 @@ S1 = Path("/root/autodl-tmp/system1")
 EVALS = S1 / "logs/evals"
 STATES = {(c, 2): S1 / f"inputs/states/{c}_states.json" for c in ORIG} | {(c, 8): S1 / f"inputs/states/{c}_pm8.json" for c in ORIG}
 D_CAT = S1 / "inputs/d_curve/catalog.json"
+SEEDS = [(task, run, its, seed) for task, run, its in (("table", "table:5", 12000), ("bucket", "bucket:1", 12000), ("pull", "pull:20", 8050))
+         for seed in (722, 723)]
+XGPU = [("D_pull_paper_seed721", "1050"), ("D_bucket_paper_B-RZ0_seed721", "12000")]
 
 
 def now():
@@ -181,16 +191,53 @@ def d_curve_jobs():
     return jobs
 
 
+def xgpu_jobs():
+    """Kevin 2026-11-12: cross-GPU control, D paper seed 721 checkpoints already evaluated on the laptop 5070."""
+    if not D_CAT.exists():
+        return []
+    cat = json.loads(D_CAT.read_text())["runs"]
+    jobs = []
+    for k, (label, it) in enumerate(XGPU):
+        x, case = cat[label]["checkpoints"][it], cat[label]["case"]
+        name = f"xgpu/{label}/it{int(it):05d}_pm2"
+        argv = ["scripts/evaluate_paper_supplement.py", "--case", case, "--controller", "policy", "--checkpoint", x["path"],
+                "--states", str(STATES[(case, 2)]), "--model-id", safe(name), "--output-dir", str(EVALS / name)]
+        jobs.append(dict(prio=(0, k), name=name, argv=argv, sha256=x["sha256"], meta=dict(kind="xgpu", run=label, iteration=int(it))))
+    return jobs
+
+
+def stop_pid(pid, wait=60):
+    import signal
+    try:
+        os.kill(pid, signal.SIGTERM)
+    except ProcessLookupError:
+        return "gone"
+    t0 = time.time()
+    while time.time() - t0 < wait:
+        try:
+            os.kill(pid, 0)
+        except ProcessLookupError:
+            return "sigterm"
+        time.sleep(2)
+    try:
+        os.kill(pid, signal.SIGKILL)
+    except ProcessLookupError:
+        return "sigterm"
+    return "sigkill"
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--train", type=Path, required=True)
     p.add_argument("--per-gpu", type=int, default=3)
     p.add_argument("--min-free-mib", type=int, default=5000)
+    p.add_argument("--train-min-free-mib", type=int, default=7500, help="free memory a GPU needs to take a training run")
     p.add_argument("--python", default=os.environ.get("S1_PY"))
     p.add_argument("--poll", type=int, default=60)
     a = p.parse_args()
     dec_path = a.train / "c2_decisions.json"
     dec = json.loads(dec_path.read_text()) if dec_path.exists() else dict(early_stop={}, choice=None, mass_started={})
+    dec.setdefault("seed_started", {})
     save = lambda: dec_path.write_text(json.dumps(dec, indent=1))  # noqa: E731
     ops = EVALS / "ops2"
     ops.mkdir(parents=True, exist_ok=True)
@@ -274,8 +321,18 @@ def main():
                 spi = statistics.median([r[i]["elapsed_seconds"] for i in last if "elapsed_seconds" in r[i]]) if last else 0.0
                 mass_todo.append((its * spi, rid, its, spi))
             mass_todo.sort(reverse=True)
+        seed_todo = []
+        for task, run, its, seed in SEEDS:
+            rid = f"cin_{run}@seed{seed}"
+            if rid in dec["seed_started"]:
+                continue
+            r = metrics(a.train, "cin", task)
+            last = sorted(r)[-200:]
+            spi = statistics.median([r[i]["elapsed_seconds"] for i in last if "elapsed_seconds" in r[i]]) if last else 0.0
+            seed_todo.append((its * spi, rid, f"cin_{run}", seed, its, spi))
+        seed_todo.sort(reverse=True)
         busy = busy_eval_names() | set(running)
-        evals = [j for j in c2_eval_jobs(a.train) + d_curve_jobs()
+        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train) + d_curve_jobs()
                  if j["name"] not in busy and fails.get(j["name"], 0) < 2 and not summary_complete(EVALS / j["name"])]
         claimed = {x.name for x in (EVALS / "claims").iterdir()} if (EVALS / "claims").exists() else set()
         mine = {x for x in claimed if (EVALS / "claims" / x / "owner.json").exists() and
@@ -295,8 +352,8 @@ def main():
         (a.train / "c2_slots.json").write_text(json.dumps(dict(
             time=now(), gpus={g: dict(procs=[x["what"] for x in v["procs"]], free_slots=max(0, a.per_gpu - len(v["procs"])),
                                       free_mib=v["free_mib"], held_by_first_eval_list=g in excl) for g, v in gs.items()},
-            queue=dict(mass_pending=[x[1] for x in mass_todo], evals_pending=len(evals),
-                       evals_pending_by_kind={k: sum(1 for j in evals if j["meta"]["kind"] == k) for k in ("c2", "d_curve")},
+            queue=dict(mass_pending=[x[1] for x in mass_todo], seeds_pending=[x[1] for x in seed_todo], evals_pending=len(evals),
+                       evals_pending_by_kind={k: sum(1 for j in evals if j["meta"]["kind"] == k) for k in ("xgpu", "c2", "d_curve")},
                        next=[j["name"] for j in evals[:5]]),
             running_evals=sorted(running)), indent=1))
         launched = False
@@ -318,6 +375,49 @@ def main():
             save()
             print(now(), "started mass run", rid, "on GPU", g, flush=True)
             launched = True
+        elif seed_todo and not mass_todo:
+            tfree = [(n, g) for n, g in free if gs[g]["free_mib"] >= a.train_min_free_mib]
+            if tfree:
+                est, rid, run, seed, its, spi = seed_todo[0]
+                g = tfree[0][1]
+                cmd = [a.python, "-B", str(ROOT / "system1/cloud/run_train_queue.py"), run, "--seed", str(seed), "--out", str(a.train),
+                       "--python", a.python, "--gpu", str(g), "--local-rank", str(650 + len(dec["seed_started"]))]
+                log = a.train / f"queue_{run.replace(':', '_')}_seed{seed}.log"
+                qp = subprocess.Popen(["nohup", *cmd], stdout=log.open("w"), stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+                                      cwd=ROOT, start_new_session=True)
+                pf = a.train / "c2_pids.json"
+                pids = json.loads(pf.read_text()) if pf.exists() else {}
+                pids[rid] = dict(pid=qp.pid, started=now(), gpu=g, by="c2_scheduler", seed=seed)
+                pf.write_text(json.dumps(pids, indent=1))
+                recent.append((time.time(), g, None))
+                dec["seed_started"][rid] = dict(time=now(), gpu=g, gpu_procs_before=[x["what"] for x in gs[g]["procs"]],
+                                                expected_seconds=est, sec_per_it_seed721=spi, iterations=its, cmd=cmd, pid=qp.pid)
+                save()
+                print(now(), "started seed run", rid, "on GPU", g, "pid", qp.pid, flush=True)
+                launched = True
+            else:
+                # free a slot: stop one evaluation this scheduler started (recorded PID) on a GPU with room for a training once it ends
+                cand = sorted(((sum(1 for x in gs[g]["procs"] if x["what"].startswith("eval ")), g, name)
+                               for name, (job, proc, log, g) in running.items()
+                               if g not in excl and gs[g]["free_mib"] + 2000 >= a.train_min_free_mib), reverse=True)
+                for _, g, name in cand:
+                    job, proc, log, _g = running[name]
+                    how = stop_pid(proc.pid)
+                    proc.poll()
+                    log.close()
+                    out = EVALS / name
+                    k = 1
+                    while out.with_name(f"{out.name}.preempted{k}").exists():
+                        k += 1
+                    if out.exists():
+                        out.rename(out.with_name(f"{out.name}.preempted{k}"))
+                    (ops / f"{safe(name)}.preempted.json").write_text(json.dumps(dict(
+                        name=name, pid=proc.pid, gpu=g, stopped=now(), how=how, reason="Kevin 2026-11-12: C-in extra seeds before every evaluation",
+                        output_dir_renamed_to=str(out.with_name(f"{out.name}.preempted{k}"))), indent=1))
+                    del running[name]
+                    print(now(), "preempted", name, "on GPU", g, "pid", proc.pid, how, flush=True)
+                    launched = True
+                    break
         elif free and not mass_todo:
             for job in evals:
                 if not claim_local_fs(job["name"], "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):

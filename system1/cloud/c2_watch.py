@@ -127,6 +127,8 @@ def events(st):
         ev.add(f"choice:{dec['choice'].get('kind')}")
     for rid in (dec.get("mass_started") or {}):
         ev.add(f"mass_started:{rid}")
+    for rid in (dec.get("seed_started") or {}):
+        ev.add(f"seed_started:{rid}")
     nl, ne = st["evals"]
     if nl and nl == ne:
         ev.add(f"evals_done:{ne}")
@@ -146,7 +148,7 @@ MAIN_RUNS = {f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull
 
 
 def quiet(e):
-    return (e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and not e.endswith(":all_main"))
+    return (e.startswith(("mass_started:", "seed_started:")) or (re.match(r"it\d+:", e) is not None and not e.endswith(":all_main"))
             or (e.startswith("exit:") and e.endswith("_critic50:completed")))  # Pull critic-only segment ending as planned
 
 
