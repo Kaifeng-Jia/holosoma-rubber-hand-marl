@@ -43,6 +43,13 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
       not owned by the laptop is written to <evals>/ops2/transfer_to_laptop.json (checkpoint and states paths with
       sha256, argv), a handover.json is added to the cloud's claim directories, and nothing more is launched.
     Off (default) = old behaviour.
+  Kevin 2026-11-12 (later): every point of the training-speed curves, C and D, from the cloud 4090; the paper comparison
+  table stays on the laptop 5070. --curves-on-4090:
+    * D curve checkpoints (d_curve/...) are evaluated here even when the laptop has claimed (and evaluated) them, before
+      every other curve evaluation (priority (0.5, ...)); the claim stays the laptop's, a cloud_rerun.json is added to it;
+    * the +/-2 of each finished C v2 run's final checkpoint (c2_curve/<run>/it<final>_pm2, laptop-claimed for the paper
+      table) is evaluated here too, as a curve point, at its normal curve priority.
+    Off (default) = old behaviour.
   Checkpoints younger than 120 s are not used (the Pull trainer does not write them atomically).
 * Status for the laptop watcher every loop: <train>/c2_slots.json (per GPU: processes, free slots; queue lengths).
 
@@ -268,7 +275,7 @@ def summary_complete(out_dir):
         return False
 
 
-def c2_eval_jobs(train, pm8_last=False):
+def c2_eval_jobs(train, pm8_last=False, final_pm2=False):
     jobs = []
     exits = {}
     for f in (train / "ops").glob("c*.exit.json"):
@@ -293,11 +300,14 @@ def c2_eval_jobs(train, pm8_last=False):
                 if mass != ORIG[case]:
                     argv += ["--object-mass-kg", f"{mass:g}"]
                 prio = (5, it) if (pm8_last and lvl == 8) else (1, it)
-                jobs.append(dict(prio=prio, name=name, argv=argv, meta=dict(kind="c2", run=label, iteration=it, level=lvl)))
+                meta = dict(kind="c2", run=label, iteration=it, level=lvl)
+                if final_pm2 and lvl == 2 and exits.get(label) and ck == cks[-1]:
+                    meta["ignore_claims"] = True  # curve point on the 4090; the laptop's own +/-2 is for the paper table
+                jobs.append(dict(prio=prio, name=name, argv=argv, meta=meta))
     return jobs
 
 
-def d_curve_jobs():
+def d_curve_jobs(all_4090=False):
     if not D_CAT.exists():
         return []
     cat = json.loads(D_CAT.read_text())["runs"]
@@ -306,9 +316,14 @@ def d_curve_jobs():
         for it, x in r["checkpoints"].items():
             v3_4050 = "_scratch_V3-" in label and int(it) == 4050
             prio = (2, 0) if v3_4050 else (3, int(it)) if r["seed"] == 721 else (4, int(it))
+            if all_4090:
+                prio = (0.5, *prio)  # before every other curve evaluation
             argv = ["scripts/evaluate_paper_supplement.py", "--case", r["case"], "--controller", "policy", "--checkpoint", x["path"],
                     "--states", str(STATES[(r["case"], 2)]), "--model-id", safe(x["name"]), "--output-dir", str(EVALS / x["name"])]
-            jobs.append(dict(prio=prio, name=x["name"], argv=argv, sha256=x["sha256"], meta=dict(kind="d_curve", run=label, iteration=int(it))))
+            meta = dict(kind="d_curve", run=label, iteration=int(it))
+            if all_4090:
+                meta["ignore_claims"] = True
+            jobs.append(dict(prio=prio, name=x["name"], argv=argv, sha256=x["sha256"], meta=meta))
     return jobs
 
 
@@ -353,6 +368,8 @@ def main():
     p.add_argument("--per-gpu", type=int, default=3)
     p.add_argument("--per-gpu-idle", type=int, default=None, help="cap of a GPU with no training process (default: --per-gpu)")
     p.add_argument("--pm8-last", action="store_true", help="cloud +/-8 of final checkpoints after every curve evaluation")
+    p.add_argument("--curves-on-4090", action="store_true",
+                   help="D curve checkpoints and final C +/-2 curve points evaluated here even if the laptop claimed them")
     p.add_argument("--post-train-hours", type=float, default=None,
                    help="evaluations end this many hours after the last training; the rest is handed to the laptop")
     p.add_argument("--min-free-mib", type=int, default=5000)
@@ -457,12 +474,12 @@ def main():
             seed_todo.append((its * spi, rid, f"cin_{run}", seed, its, spi))
         seed_todo.sort(reverse=True)
         busy = busy_eval_names() | set(running)
-        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last) + d_curve_jobs()
+        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090) + d_curve_jobs(a.curves_on_4090)
                  if j["name"] not in busy and fails.get(j["name"], 0) < 2 and not summary_complete(EVALS / j["name"])]
         claimed = {x.name for x in (EVALS / "claims").iterdir()} if (EVALS / "claims").exists() else set()
         mine = {x for x in claimed if (EVALS / "claims" / x / "owner.json").exists() and
                 '"owner": "cloud"' in (EVALS / "claims" / x / "owner.json").read_text()}
-        evals = [j for j in evals if safe(j["name"]) not in claimed or safe(j["name"]) in mine]
+        evals = [j for j in evals if safe(j["name"]) not in claimed or safe(j["name"]) in mine or j["meta"].get("ignore_claims")]
         evals.sort(key=lambda j: (j["prio"], j["name"]))
         gs = gpu_state()
         excl = excluded_gpus()
@@ -513,7 +530,7 @@ def main():
                         stopped.append(dict(name=name, pid=pid, how=stop_for_deadline(name, pid, rec.get("gpu"), ops, "ops2 launch record")))
                     else:
                         stopped.append(dict(name=name, pid=pid, how="not stopped: no matching recorded PID"))
-                tl = transfer_list(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last) + d_curve_jobs(), fails)
+                tl = transfer_list(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090) + d_curve_jobs(a.curves_on_4090), fails)
                 for r in tl:
                     if r["cloud_owner"] == "cloud":
                         (EVALS / "claims" / safe(r["name"]) / "handover.json").write_text(json.dumps(dict(to="laptop", time=now()), indent=1))
@@ -596,7 +613,12 @@ def main():
                 if deadline and est_minutes(job, measured) > (deadline - time.time()) / 60:
                     continue  # would not finish before the deadline: left for the laptop
                 if not claim_local_fs(job["name"], "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):
-                    continue
+                    if not job["meta"].get("ignore_claims"):
+                        continue
+                    rr = EVALS / "claims" / safe(job["name"]) / "cloud_rerun.json"  # claim stays the laptop's
+                    if not rr.exists():
+                        rr.write_text(json.dumps(dict(time=now(), gpu="NVIDIA GeForce RTX 4090",
+                                                      reason="Kevin 2026-11-12: curve points on the cloud 4090"), indent=1))
                 g = free[0][1]
                 if job.get("sha256"):
                     import hashlib

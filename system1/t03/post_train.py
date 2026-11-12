@@ -27,6 +27,10 @@ exports_system1/cloud_transfer/<run>/ (sha256 checked) and evaluated here with t
 (states sha256 must equal the cloud's), priority 2, after every final evaluation; output names as on the cloud
 (c2_curve/...). D curve jobs listed there were handed over by the cloud (claims/<name>/handover.json) and are run here
 without a new claim. Off (default) = old behaviour.
+
+--no-d-curve (Kevin 2026-11-12: every training-speed curve point, C and D, from the cloud 4090; the paper table stays on
+this laptop): D curve jobs (d_curve/...) are no longer started here, except those raised to priority 0 (paper finals).
+Off (default) = old behaviour.
 """
 from __future__ import annotations
 
@@ -511,6 +515,8 @@ def run(a):
         pending = ([j for js in fetched.values() for j in js] + recheck_jobs() + d_paper_pm8_jobs() + early_curve_jobs() + b_jobs()
                    + d_curve_jobs() + (transfer_jobs() if a.cloud_transfer else []))
         pending = apply_priority_overrides(pending)
+        if a.no_d_curve:
+            pending = [j for j in pending if not (j["name"].startswith("d_curve/") and j["priority"] > 0)]
         busy = {r[0]["name"] for r in running.values()}
         pending = [j for j in pending if j["name"] not in claimed_elsewhere or j["name"] in handed]
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
@@ -557,6 +563,7 @@ def main():
     p.add_argument("--slots", type=int, default=2)
     p.add_argument("--poll-seconds", type=int, default=600)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--no-d-curve", action="store_true", help="do not start D curve jobs here (curve points on the cloud 4090)")
     p.add_argument("--cloud-transfer", action="store_true", help="take over the cloud's unfinished evaluations (transfer_to_laptop.json)")
     p.add_argument("--skip-missing", action="store_true", help="catalog: leave out V3-25-27 runs whose copy is unfinished")
     a = p.parse_args()
