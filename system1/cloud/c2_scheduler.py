@@ -43,6 +43,15 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
       not owned by the laptop is written to <evals>/ops2/transfer_to_laptop.json (checkpoint and states paths with
       sha256, argv), a handover.json is added to the cloud's claim directories, and nothing more is launched.
     Off (default) = old behaviour.
+  Kevin 2026-11-12 (final rule for the end of the cloud): order D curves -> C main (cin / cout seed 721) and C-in extra
+  seed curves (each curve by iteration) -> C mass-sweep curves (last; not evaluated if there is no time, they are not in
+  the preregistered training-speed metric). --mass-curves-last: mass-sweep curve jobs get priority (1.5, it) instead of
+  (1, it). --extend-hours E (with --post-train-hours H), replacing the hand-over: nothing goes to the laptop and no 5070
+  point enters a curve. Mass-sweep evaluations start only if they fit before H; at H the ones still running are stopped.
+  If at H a D, C main or C extra-seed curve evaluation is still pending or running, the cloud continues for at most E more
+  hours with those only; it ends at H (nothing required left), as soon as they are done, or at H + E. At the end, running
+  evaluations are stopped by recorded PID and <evals>/ops2/curves_end.json lists every curve point not evaluated (left
+  empty in the curves, named in the README). Off (default) = the hand-over above.
   Kevin 2026-11-12 (later): every point of the training-speed curves, C and D, from the cloud 4090; the paper comparison
   table stays on the laptop 5070. --curves-on-4090:
     * D curve checkpoints (d_curve/...) are evaluated here even when the laptop has claimed (and evaluated) them, before
@@ -256,6 +265,53 @@ def transfer_list(jobs, fails):
     return out
 
 
+def group_of(name):
+    """Curve group of an evaluation name: d (D curves), main (C main / extra seeds), mass (C mass sweep), other."""
+    if name.startswith("d_curve/"):
+        return "d"
+    m = re.match(r"c2_(?:curve|final)/(c\w+?)_(pull|table|bucket)_m([\d.p]+)kg_", name)
+    if not m:
+        return "other"
+    return "mass" if float(m.group(3).replace("p", ".")) != ORIG[m.group(2)] else "main"
+
+
+def stop_all_for_deadline(running, ops):
+    """Stop every evaluation of this machine by its recorded PID (Popen of this instance, else the ops2 launch record)."""
+    stopped = []
+    for name, (job, proc, log, g) in list(running.items()):
+        how = stop_for_deadline(name, proc.pid, g, ops, "scheduler Popen")
+        proc.poll()
+        log.close()
+        del running[name]
+        stopped.append(dict(name=name, pid=proc.pid, how=how))
+    for name in sorted(busy_eval_names() - {x["name"] for x in stopped}):  # started by an earlier scheduler instance
+        lj = ops / f"{safe(name)}.launch.json"
+        rec = json.loads(lj.read_text()) if lj.exists() else {}
+        pid = rec.get("pid")
+        try:
+            cmd = Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace") if pid else ""
+        except OSError:
+            cmd = ""
+        if pid and str(EVALS / name) in cmd:
+            stopped.append(dict(name=name, pid=pid, how=stop_for_deadline(name, pid, rec.get("gpu"), ops, "ops2 launch record")))
+        else:
+            stopped.append(dict(name=name, pid=pid, how="not stopped: no matching recorded PID"))
+    return stopped
+
+
+def not_evaluated(jobs):
+    """Curve points this cloud should have evaluated and did not (laptop-owned jobs without ignore_claims excluded)."""
+    out = []
+    for j in jobs:
+        if summary_complete(EVALS / j["name"]):
+            continue
+        if claim_owner(j["name"]) not in (None, "cloud") and not j["meta"].get("ignore_claims"):
+            continue
+        out.append(dict(name=j["name"], group=j["meta"].get("group", group_of(j["name"])), run=j["meta"]["run"],
+                        iteration=j["meta"]["iteration"]))
+    return out
+
+
 def busy_eval_names():
     """Evaluations already running on this machine (also those started before a scheduler restart)."""
     ps = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
@@ -275,7 +331,7 @@ def summary_complete(out_dir):
         return False
 
 
-def c2_eval_jobs(train, pm8_last=False, final_pm2=False):
+def c2_eval_jobs(train, pm8_last=False, final_pm2=False, mass_last=False):
     jobs = []
     exits = {}
     for f in (train / "ops").glob("c*.exit.json"):
@@ -300,7 +356,9 @@ def c2_eval_jobs(train, pm8_last=False, final_pm2=False):
                 if mass != ORIG[case]:
                     argv += ["--object-mass-kg", f"{mass:g}"]
                 prio = (5, it) if (pm8_last and lvl == 8) else (1, it)
-                meta = dict(kind="c2", run=label, iteration=it, level=lvl)
+                meta = dict(kind="c2", run=label, iteration=it, level=lvl, group="mass" if mass != ORIG[case] else "main")
+                if mass_last and meta["group"] == "mass":
+                    prio = (5, it) if (pm8_last and lvl == 8) else (1.5, it)
                 if final_pm2 and lvl == 2 and exits.get(label) and ck == cks[-1]:
                     meta["ignore_claims"] = True  # curve point on the 4090; the laptop's own +/-2 is for the paper table
                 jobs.append(dict(prio=prio, name=name, argv=argv, meta=meta))
@@ -320,7 +378,7 @@ def d_curve_jobs(all_4090=False):
                 prio = (0.5, *prio)  # before every other curve evaluation
             argv = ["scripts/evaluate_paper_supplement.py", "--case", r["case"], "--controller", "policy", "--checkpoint", x["path"],
                     "--states", str(STATES[(r["case"], 2)]), "--model-id", safe(x["name"]), "--output-dir", str(EVALS / x["name"])]
-            meta = dict(kind="d_curve", run=label, iteration=int(it))
+            meta = dict(kind="d_curve", run=label, iteration=int(it), group="d")
             if all_4090:
                 meta["ignore_claims"] = True
             jobs.append(dict(prio=prio, name=x["name"], argv=argv, sha256=x["sha256"], meta=meta))
@@ -370,6 +428,9 @@ def main():
     p.add_argument("--pm8-last", action="store_true", help="cloud +/-8 of final checkpoints after every curve evaluation")
     p.add_argument("--curves-on-4090", action="store_true",
                    help="D curve checkpoints and final C +/-2 curve points evaluated here even if the laptop claimed them")
+    p.add_argument("--mass-curves-last", action="store_true", help="C mass-sweep curve jobs after D and C main / extra-seed curves")
+    p.add_argument("--extend-hours", type=float, default=None,
+                   help="with --post-train-hours: no hand-over; up to this many more hours for D / C main / extra-seed curves")
     p.add_argument("--post-train-hours", type=float, default=None,
                    help="evaluations end this many hours after the last training; the rest is handed to the laptop")
     p.add_argument("--min-free-mib", type=int, default=5000)
@@ -474,7 +535,7 @@ def main():
             seed_todo.append((its * spi, rid, f"cin_{run}", seed, its, spi))
         seed_todo.sort(reverse=True)
         busy = busy_eval_names() | set(running)
-        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090) + d_curve_jobs(a.curves_on_4090)
+        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090, a.mass_curves_last) + d_curve_jobs(a.curves_on_4090)
                  if j["name"] not in busy and fails.get(j["name"], 0) < 2 and not summary_complete(EVALS / j["name"])]
         claimed = {x.name for x in (EVALS / "claims").iterdir()} if (EVALS / "claims").exists() else set()
         mine = {x for x in claimed if (EVALS / "claims" / x / "owner.json").exists() and
@@ -500,7 +561,8 @@ def main():
                        evals_pending_by_kind={k: sum(1 for j in evals if j["meta"]["kind"] == k) for k in ("xgpu", "c2", "d_curve")},
                        next=[j["name"] for j in evals[:5]]),
             running_evals=sorted(running), all_training_done=dec.get("all_training_done"),
-            handover=dec.get("handover")), indent=1))
+            handover=dec.get("handover"), curves_extension=dec.get("curves_extension"), curves_end=dec.get("curves_end")), indent=1))
+        limit = {}  # group -> unix time an evaluation of that group must finish by
         deadline = None
         if a.post_train_hours is not None:
             if "all_training_done" not in dec and not mass_todo and not seed_todo and not tlaunch and not training_alive():
@@ -510,6 +572,44 @@ def main():
                 save()
                 print(now(), "all training done; evaluation deadline", dec["all_training_done"]["deadline"], flush=True)
             deadline = (dec.get("all_training_done") or {}).get("deadline_unix")
+            if deadline and a.extend_hours is not None:  # Kevin 2026-11-12 final rule: no hand-over, extension for required curves
+                soft, hard = deadline, deadline + a.extend_hours * 3600
+                limit = dict(mass=soft, d=hard, main=hard, other=hard)
+                t = time.time()
+                if "curves_end" not in dec and t >= soft:
+                    for name, (job, proc, log, g) in list(running.items()):  # mass sweep: not evaluated if no time
+                        if job["meta"].get("group") == "mass":
+                            how = stop_for_deadline(name, proc.pid, g, ops, "scheduler Popen")
+                            proc.poll()
+                            log.close()
+                            del running[name]
+                            dec.setdefault("mass_stopped_at_deadline", []).append(dict(name=name, pid=proc.pid, how=how, time=now()))
+                            save()
+                            print(now(), "stopped mass-sweep evaluation at the deadline", name, flush=True)
+                    m_now = eval_minutes(ops)  # a pending job that cannot finish before the extension ends does not hold the cloud
+                    req = [j["name"] for j in evals if j["meta"].get("group") != "mass" and est_minutes(j, m_now) <= (hard - t) / 60] + \
+                          [n for n in (busy_eval_names() | set(running)) if group_of(n) != "mass"]
+                    if req and "curves_extension" not in dec:
+                        dec["curves_extension"] = dict(time=now(), until=datetime.fromtimestamp(hard, NY).isoformat(timespec="seconds"),
+                                                       required_left=len(set(req)))
+                        save()
+                        print(now(), "deadline: extending for", len(set(req)), "required curve evaluations until", dec["curves_extension"]["until"], flush=True)
+                    if not req or t >= hard:
+                        stopped = stop_all_for_deadline(running, ops)
+                        ne = not_evaluated(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090, a.mass_curves_last)
+                                           + d_curve_jobs(a.curves_on_4090))
+                        cf = ops / "curves_end.json"
+                        cf.write_text(json.dumps(dict(time=now(), soft_deadline=dec["all_training_done"]["deadline"],
+                                                      extension=dec.get("curves_extension"), stopped=stopped, not_evaluated=ne), indent=1))
+                        dec["curves_end"] = dict(time=now(), extended="curves_extension" in dec, stopped=stopped,
+                                                 n_not_evaluated=len(ne), by_group={g: sum(1 for x in ne if x["group"] == g) for g in ("d", "main", "mass", "other")},
+                                                 file=str(cf))
+                        save()
+                        print(now(), "cloud curve evaluations ended:", json.dumps(dec["curves_end"])[:400], flush=True)
+                if "curves_end" in dec:
+                    time.sleep(a.poll)
+                    continue
+                deadline = None  # the hand-over below is not used in this mode
             if deadline and time.time() >= deadline and "handover" not in dec:
                 stopped = []
                 for name, (job, proc, log, g) in list(running.items()):
@@ -530,7 +630,7 @@ def main():
                         stopped.append(dict(name=name, pid=pid, how=stop_for_deadline(name, pid, rec.get("gpu"), ops, "ops2 launch record")))
                     else:
                         stopped.append(dict(name=name, pid=pid, how="not stopped: no matching recorded PID"))
-                tl = transfer_list(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090) + d_curve_jobs(a.curves_on_4090), fails)
+                tl = transfer_list(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last, a.curves_on_4090, a.mass_curves_last) + d_curve_jobs(a.curves_on_4090), fails)
                 for r in tl:
                     if r["cloud_owner"] == "cloud":
                         (EVALS / "claims" / safe(r["name"]) / "handover.json").write_text(json.dumps(dict(to="laptop", time=now()), indent=1))
@@ -542,7 +642,7 @@ def main():
             if "handover" in dec:
                 time.sleep(a.poll)
                 continue
-        measured = eval_minutes(ops) if deadline else {}
+        measured = eval_minutes(ops) if (deadline or limit) else {}
         launched = False
         xg_running = any(n.startswith("xgpu/") for n in busy)
         xg_pending = [j for j in evals if j["meta"]["kind"] == "xgpu"]
@@ -612,6 +712,9 @@ def main():
             for job in (xg_pending if seed_todo else evals):
                 if deadline and est_minutes(job, measured) > (deadline - time.time()) / 60:
                     continue  # would not finish before the deadline: left for the laptop
+                lim = limit.get(job["meta"].get("group", "other"))
+                if lim and est_minutes(job, measured) > (lim - time.time()) / 60:
+                    continue  # would not finish in time (mass sweep: before the deadline; others: before the extension ends)
                 if not claim_local_fs(job["name"], "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):
                     if not job["meta"].get("ignore_claims"):
                         continue

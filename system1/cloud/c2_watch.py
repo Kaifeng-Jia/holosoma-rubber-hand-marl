@@ -135,6 +135,10 @@ def events(st):
     sl = st.get("slots")
     if sl and st["runs"] and not any(x.startswith("train ") for v in sl["gpus"].values() for x in v["procs"]):
         ev.add("all_cloud_training_done")  # Kevin 2026-11-12: report when the last cloud training run ends (shutdown)
+    if sl and sl.get("curves_extension"):  # Kevin 2026-11-12: extension of up to 4 h for D / C main / extra-seed curves
+        ev.add("cloud_curves_extended")
+    if sl and sl.get("curves_end"):  # all cloud evaluations stopped: sync the data, then report for shutdown
+        ev.add("cloud_curves_end")
     if sl:  # Kevin 2026-11-11: report when the queue is empty while a GPU has a free slot (at most once per hour)
         q = sl["queue"]
         free = sum(v["free_slots"] for v in sl["gpus"].values() if not v.get("held_by_first_eval_list"))

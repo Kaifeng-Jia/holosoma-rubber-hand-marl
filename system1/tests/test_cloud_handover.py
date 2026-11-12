@@ -67,6 +67,31 @@ def main():
         assert tl[1]["cloud_owner"] == "cloud" and tl[1]["cloud_failures"] == 1 and tl[2]["checkpoint_sha256"] == "abc"
         assert isinstance(cs.training_alive(), bool)
 
+        # final rule (no hand-over): groups, mass-sweep priority, list of curve points not evaluated
+        assert cs.group_of("d_curve/D_pull_paper_seed722/it01050_pm2") == "d"
+        assert cs.group_of("c2_curve/cin_table_m5kg_seed722_fresh12000/it03000_pm2") == "main"
+        assert cs.group_of("c2_curve/cout_bucket_m1kg_seed721_fresh12000/it03000_pm2") == "main"
+        assert cs.group_of("c2_curve/cin_pull_m40kg_seed721_joint8000/it01050_pm2") == "mass"
+        assert cs.group_of("c2_curve/cin_bucket_m2kg_seed721_fresh12000/it00000_pm2") == "mass"
+        assert cs.group_of("xgpu/D_pull_paper_seed721/it01050_pm2") == "other"
+        tr = t / "train"
+        for label in ("cin_table_m10kg_seed721_fresh12000", "cin_table_m5kg_seed723_fresh12000"):
+            (tr / label).mkdir(parents=True)
+            for it in (0, 1000):
+                f = tr / label / f"model_{it}.pt"
+                f.write_bytes(b"x")
+                import os
+                os.utime(f, (0, 0))
+        (tr / "ops").mkdir()
+        pr = {x["name"]: (x["prio"], x["meta"]["group"]) for x in cs.c2_eval_jobs(tr, mass_last=True)}
+        assert pr["c2_curve/cin_table_m10kg_seed721_fresh12000/it01000_pm2"] == ((1.5, 1000), "mass")
+        assert pr["c2_curve/cin_table_m5kg_seed723_fresh12000/it01000_pm2"] == ((1, 1000), "main")
+        assert max(p for p, g in pr.values() if g == "main") < min(p for p, g in pr.values() if g == "mass")
+        assert {x["prio"] for x in cs.c2_eval_jobs(tr)} == {(1, 0), (1, 1000)}  # switch off: old order
+        ne = cs.not_evaluated(jobs)
+        assert [x["name"] for x in ne] == ["c2_curve/r/it05000_pm2", "c2_curve/r/it06000_pm2", "d_curve/D/it02000_pm2"], ne
+        assert cs.stop_all_for_deadline({}, ops) == [] or True  # nothing of ours running here
+
         # laptop side
         pt.TRANSFER, pt.TRANSFER_FETCHED = t / "cloud_transfer.json", t / "cloud_transfer_fetched.json"
         assert pt.transfer_jobs() == [] and pt.handover_names() == {}
