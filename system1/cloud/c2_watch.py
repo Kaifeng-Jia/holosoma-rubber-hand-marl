@@ -11,7 +11,8 @@
     reward_min -3.6e12; C v1 Pull / Table 20 kg had them too); at most one event per run per 1000-iteration block;
   * the cloud is unreachable for --max-failures polls.
 Already-seen events are listed in --seen and ignored, so it can be restarted.
-Quiet events (C mass sweep launches and the iteration-100 / every-1000 events of mass-sweep runs) do not end the watcher: they are
+Quiet events (C mass sweep launches, per-run iteration milestones, a completed Pull critic-only segment) do not end the watcher;
+the every-1000 report fires once all six main runs have passed the multiple (it<k>:all_main): they are
 kept in --quiet-pending and printed with the next event that does (2026-11-11: batch the six mass launches).
 
     python system1/cloud/c2_watch.py --seen logs_system1/post_train/c2_seen.json
@@ -112,6 +113,10 @@ def events(st):
             old_w = [rb[i] for i in range(lt - 599, lt - 499) if i in rb]
             if now_w and old_w and sum(now_w) / len(now_w) < sum(old_w) / len(old_w):
                 ev.add(f"divergence_sign:{name}:block{lt // 1000}")  # at most once per run per 1000-iteration block
+    main = [r["last"] for n, r in st["runs"].items() if n in MAIN_RUNS and not n.endswith("_critic50")]
+    if len(main) == 6:  # one report per 1000 iterations, when all six main runs have passed it
+        for k in range(1000, min(main) + 1, 1000):
+            ev.add(f"it{k}:all_main")
     for label, ok in st["exits"].items():
         ev.add(f"exit:{label}:{'completed' if ok else 'not_completed'}")
     dec = st["decisions"] or {}
@@ -138,7 +143,7 @@ MAIN_RUNS = {f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull
 
 
 def quiet(e):
-    return (e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and e.split(":", 1)[1] not in MAIN_RUNS)
+    return (e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and not e.endswith(":all_main"))
             or (e.startswith("exit:") and e.endswith("_critic50:completed")))  # Pull critic-only segment ending as planned
 
 
