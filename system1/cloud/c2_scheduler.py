@@ -27,6 +27,11 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
     3. D "completion vs iteration" curve evaluations from $S1_INPUTS/d_curve/catalog.json (V3-25-27 it04050 first,
        then seed 721, then 722 / 723), shared with the laptop pipeline through claims (system1/cloud/claims.py).
   GPUs used by a running run_eval_jobs.py (the first 12 evaluations) are left to it until it exits.
+  Kevin 2026-11-12 (cloud slots freed by finished trainings all go to the curve backlog, cleared before shutdown):
+    --per-gpu-idle N: a GPU with no training process (and no training launched in the last 5 min) takes up to N processes
+       instead of --per-gpu (each evaluation is one environment; --min-free-mib still applies); default = --per-gpu;
+    --pm8-last: the cloud +/-8 of a final checkpoint (c2_final/..., also run on the laptop 5070, where the paper table
+       comes from) goes after every curve evaluation (C +/-2 and D); off = old order.
   Checkpoints younger than 120 s are not used (the Pull trainer does not write them atomically).
 * Status for the laptop watcher every loop: <train>/c2_slots.json (per GPU: processes, free slots; queue lengths).
 
@@ -131,6 +136,12 @@ def excluded_gpus():
     return out
 
 
+def gpu_cap(procs, recent_train_launch, per_gpu, per_gpu_idle):
+    """Process cap of one GPU: per_gpu_idle when no training runs on it (nor was launched on it in the last 5 min)."""
+    training = recent_train_launch or any(x["what"].startswith("train ") for x in procs)
+    return per_gpu if (training or per_gpu_idle is None) else max(per_gpu, per_gpu_idle)
+
+
 def busy_eval_names():
     """Evaluations already running on this machine (also those started before a scheduler restart)."""
     ps = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
@@ -150,7 +161,7 @@ def summary_complete(out_dir):
         return False
 
 
-def c2_eval_jobs(train):
+def c2_eval_jobs(train, pm8_last=False):
     jobs = []
     exits = {}
     for f in (train / "ops").glob("c*.exit.json"):
@@ -174,7 +185,8 @@ def c2_eval_jobs(train):
                         "--states", str(STATES[(case, lvl)]), "--model-id", safe(name), "--output-dir", str(EVALS / name)]
                 if mass != ORIG[case]:
                     argv += ["--object-mass-kg", f"{mass:g}"]
-                jobs.append(dict(prio=(1, it), name=name, argv=argv, meta=dict(kind="c2", run=label, iteration=it, level=lvl)))
+                prio = (5, it) if (pm8_last and lvl == 8) else (1, it)
+                jobs.append(dict(prio=prio, name=name, argv=argv, meta=dict(kind="c2", run=label, iteration=it, level=lvl)))
     return jobs
 
 
@@ -232,6 +244,8 @@ def main():
     p = argparse.ArgumentParser()
     p.add_argument("--train", type=Path, required=True)
     p.add_argument("--per-gpu", type=int, default=3)
+    p.add_argument("--per-gpu-idle", type=int, default=None, help="cap of a GPU with no training process (default: --per-gpu)")
+    p.add_argument("--pm8-last", action="store_true", help="cloud +/-8 of final checkpoints after every curve evaluation")
     p.add_argument("--min-free-mib", type=int, default=5000)
     p.add_argument("--train-min-free-mib", type=int, default=7500, help="free memory a GPU needs to take a training run")
     p.add_argument("--python", default=os.environ.get("S1_PY"))
@@ -334,7 +348,7 @@ def main():
             seed_todo.append((its * spi, rid, f"cin_{run}", seed, its, spi))
         seed_todo.sort(reverse=True)
         busy = busy_eval_names() | set(running)
-        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train) + d_curve_jobs()
+        evals = [j for j in xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last) + d_curve_jobs()
                  if j["name"] not in busy and fails.get(j["name"], 0) < 2 and not summary_complete(EVALS / j["name"])]
         claimed = {x.name for x in (EVALS / "claims").iterdir()} if (EVALS / "claims").exists() else set()
         mine = {x for x in claimed if (EVALS / "claims" / x / "owner.json").exists() and
@@ -349,10 +363,12 @@ def main():
         for t0, g, pid in recent:  # launched but not yet holding a CUDA context
             if pid is None or pid not in seen_pids:
                 extra[g] = extra.get(g, 0) + 1
+        tlaunch = {g for t0, g, pid in recent if pid is None}  # training queues (their child appears later)
+        cap = {g: gpu_cap(v["procs"], g in tlaunch, a.per_gpu, a.per_gpu_idle) for g, v in gs.items()}
         free = sorted(((len(v["procs"]) + extra.get(g, 0), g) for g, v in gs.items()
-                       if len(v["procs"]) + extra.get(g, 0) < a.per_gpu and v["free_mib"] >= a.min_free_mib and g not in excl))
+                       if len(v["procs"]) + extra.get(g, 0) < cap[g] and v["free_mib"] >= a.min_free_mib and g not in excl))
         (a.train / "c2_slots.json").write_text(json.dumps(dict(
-            time=now(), gpus={g: dict(procs=[x["what"] for x in v["procs"]], free_slots=max(0, a.per_gpu - len(v["procs"])),
+            time=now(), gpus={g: dict(procs=[x["what"] for x in v["procs"]], free_slots=max(0, cap[g] - len(v["procs"])), cap=cap[g],
                                       free_mib=v["free_mib"], held_by_first_eval_list=g in excl) for g, v in gs.items()},
             queue=dict(mass_pending=[x[1] for x in mass_todo], seeds_pending=[x[1] for x in seed_todo], evals_pending=len(evals),
                        evals_pending_by_kind={k: sum(1 for j in evals if j["meta"]["kind"] == k) for k in ("xgpu", "c2", "d_curve")},
