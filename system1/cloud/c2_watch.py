@@ -11,6 +11,8 @@
     reward_min -3.6e12; C v1 Pull / Table 20 kg had them too); at most one event per run per 1000-iteration block;
   * the cloud is unreachable for --max-failures polls.
 Already-seen events are listed in --seen and ignored, so it can be restarted.
+Quiet events (C mass sweep launches and the iteration-100 / every-1000 events of mass-sweep runs) do not end the watcher: they are
+kept in --quiet-pending and printed with the next event that does (2026-11-11: batch the six mass launches).
 
     python system1/cloud/c2_watch.py --seen logs_system1/post_train/c2_seen.json
 """
@@ -18,6 +20,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import re
 import subprocess
 import sys
 import time
@@ -130,9 +133,18 @@ def events(st):
     return ev
 
 
+MAIN_RUNS = {f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull_m20kg", "joint8000"), ("pull_m20kg", "critic50"),
+                                                                           ("table_m5kg", "fresh12000"), ("bucket_m1kg", "fresh12000"))}
+
+
+def quiet(e):
+    return e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and e.split(":", 1)[1] not in MAIN_RUNS)
+
+
 def main():
     p = argparse.ArgumentParser()
     p.add_argument("--seen", type=Path, required=True)
+    p.add_argument("--quiet-pending", type=Path, default=None, help="default: <seen dir>/c2_quiet_pending.json")
     p.add_argument("--interval", type=int, default=300)
     p.add_argument("--max-failures", type=int, default=6)
     a = p.parse_args()
@@ -151,9 +163,19 @@ def main():
             time.sleep(a.interval)
             continue
         new = sorted(events(st) - seen)
-        if new:
+        qp = a.quiet_pending or a.seen.parent / "c2_quiet_pending.json"
+        pend = json.loads(qp.read_text()) if qp.exists() else []
+        loud = [e for e in new if not quiet(e)]
+        if new and not loud:
+            seen |= set(new)
+            a.seen.write_text(json.dumps(sorted(seen), indent=1))
+            qp.write_text(json.dumps(pend + [dict(time=now(), event=e) for e in new], indent=1))
+            print(now(), "quiet", new, flush=True)
+        elif new:
+            new = [x["time"] + " " + x["event"] for x in pend] + new
+            qp.write_text("[]")
             a.seen.parent.mkdir(parents=True, exist_ok=True)
-            a.seen.write_text(json.dumps(sorted(seen | set(new)), indent=1))
+            a.seen.write_text(json.dumps(sorted(seen | {e.split(" ")[-1] for e in new}), indent=1))
             brief = {n: dict(last=r["last"], sec_it=r["sec_it_median"], rew100=r["rew100"], diag=r["diag"][-1:] if r["diag"] else None,
                              spikes=r.get("spikes"))
                      for n, r in st["runs"].items()}
