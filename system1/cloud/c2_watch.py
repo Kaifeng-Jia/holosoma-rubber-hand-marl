@@ -9,6 +9,7 @@
   * the cloud evaluation job list has finished (logs/evals/ops: one exit record per launch record, at least one);
   * numeric spike (report only): an iteration with reward_min < -1e3 or value_loss > 1e3 (cin_table iteration 295 had
     reward_min -3.6e12; C v1 Pull / Table 20 kg had them too); at most one event per run per 1000-iteration block;
+  * no training process is left on any cloud GPU (Kevin 2026-11-12: report then, the cloud is to be shut down);
   * the cloud is unreachable for --max-failures polls.
 Already-seen events are listed in --seen and ignored, so it can be restarted.
 Quiet events (C mass sweep launches, per-run iteration milestones, a completed Pull critic-only segment) do not end the watcher;
@@ -130,6 +131,8 @@ def events(st):
     if nl and nl == ne:
         ev.add(f"evals_done:{ne}")
     sl = st.get("slots")
+    if sl and st["runs"] and not any(x.startswith("train ") for v in sl["gpus"].values() for x in v["procs"]):
+        ev.add("all_cloud_training_done")  # Kevin 2026-11-12: report when the last cloud training run ends (shutdown)
     if sl:  # Kevin 2026-11-11: report when the queue is empty while a GPU has a free slot (at most once per hour)
         q = sl["queue"]
         free = sum(v["free_slots"] for v in sl["gpus"].values() if not v.get("held_by_first_eval_list"))
