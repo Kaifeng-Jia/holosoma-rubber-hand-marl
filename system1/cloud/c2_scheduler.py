@@ -20,7 +20,8 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
        its output directory renamed <dir>.preempted<k>, re-run later, not counted as a failure); a training needs
        --train-min-free-mib free memory;
     1c. cross-GPU control (Kevin 2026-11-12): D paper seed 721 Pull it1050 and Bin it12000, +/-2 on the 4090 (xgpu/...),
-       first among the evaluations;
+       first among the evaluations; Kevin's choice (2026-11-12 02:5x): once 2 extra-seed runs have started, the next free
+       slot runs these two evaluations one after the other before the 3rd seed run; they are never preempted;
     2. evaluations of C v2 checkpoints (every cin_/cout_ run, main and mass, every saved checkpoint, +/-2; the final
        checkpoint of a completed run also +/-8), oldest checkpoint first;
     3. D "completion vs iteration" curve evaluations from $S1_INPUTS/d_curve/catalog.json (V3-25-27 it04050 first,
@@ -66,6 +67,7 @@ D_CAT = S1 / "inputs/d_curve/catalog.json"
 SEEDS = [(task, run, its, seed) for task, run, its in (("table", "table:5", 12000), ("bucket", "bucket:1", 12000), ("pull", "pull:20", 8050))
          for seed in (722, 723)]
 XGPU = [("D_pull_paper_seed721", "1050"), ("D_bucket_paper_B-RZ0_seed721", "12000")]
+XGPU_AFTER_SEEDS = 2
 
 
 def now():
@@ -357,6 +359,9 @@ def main():
                        next=[j["name"] for j in evals[:5]]),
             running_evals=sorted(running)), indent=1))
         launched = False
+        xg_running = any(n.startswith("xgpu/") for n in busy)
+        xg_pending = [j for j in evals if j["meta"]["kind"] == "xgpu"]
+        xgpu_turn = bool(seed_todo) and bool(xg_pending) and not xg_running and len(dec["seed_started"]) >= XGPU_AFTER_SEEDS
         if free and mass_todo:
             est, rid, its, spi = mass_todo[0]
             g = free[0][1]
@@ -375,7 +380,7 @@ def main():
             save()
             print(now(), "started mass run", rid, "on GPU", g, flush=True)
             launched = True
-        elif seed_todo and not mass_todo:
+        elif seed_todo and not mass_todo and not xgpu_turn:
             tfree = [(n, g) for n, g in free if gs[g]["free_mib"] >= a.train_min_free_mib]
             if tfree:
                 est, rid, run, seed, its, spi = seed_todo[0]
@@ -399,7 +404,7 @@ def main():
                 # free a slot: stop one evaluation this scheduler started (recorded PID) on a GPU with room for a training once it ends
                 cand = sorted(((sum(1 for x in gs[g]["procs"] if x["what"].startswith("eval ")), g, name)
                                for name, (job, proc, log, g) in running.items()
-                               if g not in excl and gs[g]["free_mib"] + 2000 >= a.train_min_free_mib), reverse=True)
+                               if not name.startswith("xgpu/") and g not in excl and gs[g]["free_mib"] + 2000 >= a.train_min_free_mib), reverse=True)
                 for _, g, name in cand:
                     job, proc, log, _g = running[name]
                     how = stop_pid(proc.pid)
@@ -418,8 +423,8 @@ def main():
                     print(now(), "preempted", name, "on GPU", g, "pid", proc.pid, how, flush=True)
                     launched = True
                     break
-        elif free and not mass_todo:
-            for job in evals:
+        elif free and not mass_todo and (not seed_todo or xgpu_turn):
+            for job in (xg_pending if seed_todo else evals):
                 if not claim_local_fs(job["name"], "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):
                     continue
                 g = free[0][1]
