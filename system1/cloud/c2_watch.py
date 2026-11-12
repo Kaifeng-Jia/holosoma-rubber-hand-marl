@@ -114,8 +114,9 @@ def events(st):
             old_w = [rb[i] for i in range(lt - 599, lt - 499) if i in rb]
             if now_w and old_w and sum(now_w) / len(now_w) < sum(old_w) / len(old_w):
                 ev.add(f"divergence_sign:{name}:block{lt // 1000}")  # at most once per run per 1000-iteration block
-    main = [r["last"] for n, r in st["runs"].items() if n in MAIN_RUNS and not n.endswith("_critic50")]
-    if len(main) == 6:  # one report per 1000 iterations, when all six main runs have passed it
+    done = {lb for lb, ok in st["exits"].items() if ok}  # a finished main run (Pull ends at 8050) counts as past every k
+    main = [12000 if n in done else r["last"] for n, r in st["runs"].items() if n in MAIN_RUNS and not n.endswith("_critic50")]
+    if len(main) == 6:  # one report per 1000 iterations, when all six main runs have passed it (or finished)
         for k in range(1000, min(main) + 1, 1000):
             ev.add(f"it{k}:all_main")
     for label, ok in st["exits"].items():
