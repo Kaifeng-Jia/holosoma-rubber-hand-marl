@@ -19,6 +19,14 @@ whose exit record says completed.
     python system1/t03/post_train.py catalog          # D curve checkpoint list + sha256 -> logs_system1/post_train/d_curve_catalog.json
     python system1/t03/post_train.py fetch-v3         # copy the V3-25-27 intermediate checkpoints from the cloud (read-only source)
     python system1/t03/post_train.py run [--dry-run]  # poll / fetch / evaluate loop
+
+--cloud-transfer (Kevin 2026-11-12: the cloud evaluates for at most 2 h after its last training; unfinished evaluations
+go to the laptop): at each poll, once the cloud scheduler has written logs/evals/ops2/transfer_to_laptop.json, it is copied
+to logs_system1/post_train/cloud_transfer.json; C v2 curve checkpoints listed there are copied to
+exports_system1/cloud_transfer/<run>/ (sha256 checked) and evaluated here with the same evaluator and frozen states
+(states sha256 must equal the cloud's), priority 2, after every final evaluation; output names as on the cloud
+(c2_curve/...). D curve jobs listed there were handed over by the cloud (claims/<name>/handover.json) and are run here
+without a new claim. Off (default) = old behaviour.
 """
 from __future__ import annotations
 
@@ -43,6 +51,7 @@ PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
 SSH = ["ssh", "-o", "ConnectTimeout=20", "-o", "BatchMode=yes", "-p", "32748", "root@connect.nmb1.seetacloud.com"]
 SCP = ["scp", "-q", "-o", "ConnectTimeout=20", "-o", "BatchMode=yes", "-P", "32748"]
 REMOTE_TRAIN = "/root/autodl-tmp/system1/logs/train"
+REMOTE_EVALS = "/root/autodl-tmp/system1/logs/evals"
 REMOTE_V3 = "/root/autodl-tmp/v3_20261103_pull/logs/V3_20261103_pull_retry01"
 OUT = ROOT / "logs_system1/post_train"
 EXPORT = ROOT / "exports_system1"
@@ -307,6 +316,55 @@ def recheck_jobs():
 
 
 SHARED_PREFIXES = ("d_curve/",)  # Kevin 2026-11-11: the cloud slot filler may take these too
+TRANSFER = OUT / "cloud_transfer.json"
+TRANSFER_FETCHED = OUT / "cloud_transfer_fetched.json"
+
+
+def fetch_transfer():
+    """Copy the cloud's hand-over list once it exists, then the C v2 checkpoints it names (sha256 checked)."""
+    if not TRANSFER.exists():
+        rc, out = ssh(f"test -f {REMOTE_EVALS}/ops2/transfer_to_laptop.json && cat {REMOTE_EVALS}/ops2/transfer_to_laptop.json", timeout=300)
+        if rc != 0 or not out.strip():
+            return
+        json.loads(out)  # complete JSON only
+        TRANSFER.write_text(out)
+        print(now(), "cloud hand-over list copied:", len(json.loads(out)["jobs"]), "jobs", flush=True)
+    got = json.loads(TRANSFER_FETCHED.read_text()) if TRANSFER_FETCHED.exists() else {}
+    for r in json.loads(TRANSFER.read_text())["jobs"]:
+        if r["kind"] != "c2" or r["name"] in got:
+            continue
+        dst = EXPORT / "cloud_transfer" / r["run"] / Path(r["checkpoint"]).name
+        dst.parent.mkdir(parents=True, exist_ok=True)
+        if not (dst.exists() and sha(dst) == r["checkpoint_sha256"]):
+            subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{r['checkpoint']}", str(dst)], check=True, timeout=1800)
+        if sha(dst) != r["checkpoint_sha256"]:
+            raise RuntimeError(f"sha mismatch after copy: {dst}")
+        got[r["name"]] = dict(checkpoint=str(dst), sha256=r["checkpoint_sha256"], fetched=now())
+        TRANSFER_FETCHED.write_text(json.dumps(got, indent=1))
+
+
+def transfer_jobs():
+    """C v2 curve evaluations handed over by the cloud (fetched checkpoints only)."""
+    if not (TRANSFER.exists() and TRANSFER_FETCHED.exists()):
+        return []
+    got = json.loads(TRANSFER_FETCHED.read_text())
+    out = []
+    for i, r in enumerate(json.loads(TRANSFER.read_text())["jobs"]):
+        if r["kind"] != "c2" or r["name"] not in got:
+            continue
+        scheme = r["run"].split("_")[0]
+        out.append(dict(priority=2, order=i, name=r["name"], case=r["case"], scheme=scheme,
+                        mass=r["object_mass_kg"] if r["object_mass_kg"] is not None else ORIGINAL_MASS[r["case"]],
+                        checkpoint=got[r["name"]]["checkpoint"], checkpoint_sha256=r["checkpoint_sha256"], level=r["level"],
+                        states_sha256_required=r["states_sha256"], task_book="T03", run=r["run"], cloud_transfer=True))
+    return out
+
+
+def handover_names():
+    """D curve jobs the cloud handed over: {name: checkpoint sha256 on the cloud}."""
+    if not TRANSFER.exists():
+        return {}
+    return {r["name"]: r["checkpoint_sha256"] for r in json.loads(TRANSFER.read_text())["jobs"] if r["kind"] == "d_curve"}
 
 
 def apply_priority_overrides(jobs):
@@ -370,6 +428,8 @@ def launch(job, slot):
     states, expect = STATES[(job["case"], job["level"])]
     if sha(states) != expect:
         raise RuntimeError(f"frozen state hash mismatch {states}")
+    if job.get("states_sha256_required") and job["states_sha256_required"] != expect:
+        raise RuntimeError(f"frozen states differ from the cloud's: {states}")
     if job.get("checkpoint_sha256") and sha(job["checkpoint"]) != job["checkpoint_sha256"]:
         raise RuntimeError(f"checkpoint hash mismatch {job['checkpoint']}")
     if out_dir.exists():  # earlier attempt without a completed exit record: keep it, renamed
@@ -442,11 +502,17 @@ def run(a):
                         print(now(), "cloud run ended without completion:", label, flush=True)
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
+            if a.cloud_transfer:
+                try:
+                    fetch_transfer()
+                except Exception as e:  # retry at the next poll
+                    print(now(), "hand-over fetch error", repr(e)[:300], flush=True)
+        handed = handover_names() if a.cloud_transfer else {}
         pending = ([j for js in fetched.values() for j in js] + recheck_jobs() + d_paper_pm8_jobs() + early_curve_jobs() + b_jobs()
-                   + d_curve_jobs())
+                   + d_curve_jobs() + (transfer_jobs() if a.cloud_transfer else []))
         pending = apply_priority_overrides(pending)
         busy = {r[0]["name"] for r in running.values()}
-        pending = [j for j in pending if j["name"] not in claimed_elsewhere]
+        pending = [j for j in pending if j["name"] not in claimed_elsewhere or j["name"] in handed]
         pending = sorted((j for j in pending if not done(j) and j["name"] not in busy and job_failures.get(j["name"], 0) < 2),
                          key=lambda j: (j["priority"], j.get("order", 0), j["name"]))
         if a.dry_run:
@@ -462,7 +528,12 @@ def run(a):
         free = [s for s in range(a.slots) if s not in running]
         if pending and free and evaluator_count() < a.slots and not PAUSE.exists():
             job = pending[0]
-            if job["name"].startswith(SHARED_PREFIXES):  # shared with the cloud slot filler: claim first (system1/cloud/claims.py)
+            if job["name"] in handed:  # handed over by the cloud: no new claim; same checkpoint required
+                if job.get("checkpoint_sha256") != handed[job["name"]]:
+                    job_failures[job["name"]] = 99
+                    print(now(), "hand-over checkpoint sha256 differs, skip", job["name"], flush=True)
+                    continue
+            elif job["name"].startswith(SHARED_PREFIXES):  # shared with the cloud slot filler: claim first (system1/cloud/claims.py)
                 from system1.cloud.claims import claim_via_ssh
                 c = claim_via_ssh(SSH, job["name"], "laptop", dict(gpu="NVIDIA GeForce RTX 5070 Laptop GPU"))
                 if c is False:
@@ -486,6 +557,7 @@ def main():
     p.add_argument("--slots", type=int, default=2)
     p.add_argument("--poll-seconds", type=int, default=600)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--cloud-transfer", action="store_true", help="take over the cloud's unfinished evaluations (transfer_to_laptop.json)")
     p.add_argument("--skip-missing", action="store_true", help="catalog: leave out V3-25-27 runs whose copy is unfinished")
     a = p.parse_args()
     if a.mode == "catalog":

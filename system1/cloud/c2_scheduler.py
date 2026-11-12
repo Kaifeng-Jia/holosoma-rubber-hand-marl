@@ -32,6 +32,17 @@ Rules (T03 "提前停止、质量扫描（事先定）"; Kevin 2026-11-11: act w
        instead of --per-gpu (each evaluation is one environment; --min-free-mib still applies); default = --per-gpu;
     --pm8-last: the cloud +/-8 of a final checkpoint (c2_final/..., also run on the laptop 5070, where the paper table
        comes from) goes after every curve evaluation (C +/-2 and D); off = old order.
+  Kevin 2026-11-12 (later): after the last training ends the cloud runs evaluations for at most 2 more hours; what is not
+  done by then goes to the laptop, then the cloud is shut down. --post-train-hours H:
+    * when no training process or training queue is left and no mass / seed run is pending, the time is recorded
+      (c2_decisions.json all_training_done) and the deadline is set H hours later;
+    * before the deadline an evaluation is started only if its expected duration (median of the last 5 completed cloud
+      evaluations of the same case on a GPU without training, else a fixed default) fits before the deadline;
+    * at the deadline: evaluations still running are stopped by their recorded PID (output renamed
+      <dir>.stopped_deadline<k>, record <evals>/ops2/<name>.stopped_deadline.json), every evaluation not completed and
+      not owned by the laptop is written to <evals>/ops2/transfer_to_laptop.json (checkpoint and states paths with
+      sha256, argv), a handover.json is added to the cloud's claim directories, and nothing more is launched.
+    Off (default) = old behaviour.
   Checkpoints younger than 120 s are not used (the Pull trainer does not write them atomically).
 * Status for the laptop watcher every loop: <train>/c2_slots.json (per GPU: processes, free slots; queue lengths).
 
@@ -142,6 +153,102 @@ def gpu_cap(procs, recent_train_launch, per_gpu, per_gpu_idle):
     return per_gpu if (training or per_gpu_idle is None) else max(per_gpu, per_gpu_idle)
 
 
+DEFAULT_EVAL_MIN = {"table": 130.0, "bucket": 95.0, "pull": 60.0}  # +/-2 next to trainings, later checkpoints (11/11-12)
+
+
+def sha256_file(p):
+    import hashlib
+    h = hashlib.sha256()
+    with open(p, "rb") as f:
+        for b in iter(lambda: f.read(1 << 20), b""):
+            h.update(b)
+    return h.hexdigest()
+
+
+def job_case(job):
+    return job["argv"][job["argv"].index("--case") + 1]
+
+
+def training_alive():
+    """Any training process or training queue on this machine (ps; detection only, nothing is signalled)."""
+    ps = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
+    for l in ps.splitlines():
+        tok = l.split()
+        if tok and "python" in os.path.basename(tok[0]) and any(
+                k in t for t in tok[1:4] for k in ("run_train_queue.py", "train_plan5", "train_core4d")):
+            return True
+    return False
+
+
+def eval_minutes(ops):
+    """Median duration (minutes) of the last 5 completed cloud evaluations per case, launched on a GPU without training."""
+    per = {}
+    for lj in ops.glob("*.launch.json"):
+        ej = lj.with_name(lj.name[: -len(".launch.json")] + ".exit.json")
+        if not ej.exists():
+            continue
+        try:
+            L, E = json.loads(lj.read_text()), json.loads(ej.read_text())
+        except (OSError, json.JSONDecodeError):
+            continue
+        argv = L.get("argv") or []
+        if not E.get("completed") or "--case" not in argv or any(str(x).startswith("train ") for x in L.get("gpu_procs_before") or []):
+            continue
+        m = (datetime.fromisoformat(E["ended"]) - datetime.fromisoformat(L["started"])).total_seconds() / 60
+        per.setdefault(argv[argv.index("--case") + 1], []).append((L["started"], m))
+    return {c: statistics.median(m for _, m in sorted(v)[-5:]) for c, v in per.items()}
+
+
+def est_minutes(job, measured):
+    c = job_case(job)
+    return measured.get(c, DEFAULT_EVAL_MIN.get(c, 130.0))
+
+
+def claim_owner(name):
+    f = EVALS / "claims" / safe(name) / "owner.json"
+    if not f.exists():
+        return None
+    try:
+        return json.loads(f.read_text()).get("owner")
+    except (OSError, json.JSONDecodeError):
+        return "?"
+
+
+def stop_for_deadline(name, pid, gpu, ops, how_found):
+    """Stop one evaluation by its recorded PID; keep its output renamed."""
+    out = EVALS / name
+    how = stop_pid(pid)
+    k = 1
+    while out.with_name(f"{out.name}.stopped_deadline{k}").exists():
+        k += 1
+    if out.exists():
+        out.rename(out.with_name(f"{out.name}.stopped_deadline{k}"))
+    (ops / f"{safe(name)}.stopped_deadline.json").write_text(json.dumps(dict(
+        name=name, pid=pid, gpu=gpu, stopped=now(), how=how, pid_from=how_found,
+        reason="Kevin 2026-11-12: cloud evaluations end 2 h after the last training; unfinished ones go to the laptop",
+        output_dir_renamed_to=str(out.with_name(f"{out.name}.stopped_deadline{k}"))), indent=1))
+    return how
+
+
+def transfer_list(jobs, fails):
+    """Evaluations not completed on the cloud and not owned by the laptop, with what the laptop needs to run them."""
+    out = []
+    for j in jobs:
+        if summary_complete(EVALS / j["name"]):
+            continue
+        owner = claim_owner(j["name"])
+        if owner not in (None, "cloud"):
+            continue
+        argv = j["argv"]
+        ck, st = argv[argv.index("--checkpoint") + 1], argv[argv.index("--states") + 1]
+        out.append(dict(name=j["name"], kind=j["meta"]["kind"], run=j["meta"]["run"], iteration=j["meta"]["iteration"],
+                        level=j["meta"].get("level", 2), case=job_case(j), controller=argv[argv.index("--controller") + 1],
+                        object_mass_kg=float(argv[argv.index("--object-mass-kg") + 1]) if "--object-mass-kg" in argv else None,
+                        checkpoint=ck, checkpoint_sha256=j.get("sha256") or sha256_file(ck), states=st, states_sha256=sha256_file(st),
+                        cloud_owner=owner, cloud_failures=fails.get(j["name"], 0), cloud_argv=argv))
+    return out
+
+
 def busy_eval_names():
     """Evaluations already running on this machine (also those started before a scheduler restart)."""
     ps = subprocess.run(["ps", "-eo", "args"], capture_output=True, text=True).stdout
@@ -246,6 +353,8 @@ def main():
     p.add_argument("--per-gpu", type=int, default=3)
     p.add_argument("--per-gpu-idle", type=int, default=None, help="cap of a GPU with no training process (default: --per-gpu)")
     p.add_argument("--pm8-last", action="store_true", help="cloud +/-8 of final checkpoints after every curve evaluation")
+    p.add_argument("--post-train-hours", type=float, default=None,
+                   help="evaluations end this many hours after the last training; the rest is handed to the laptop")
     p.add_argument("--min-free-mib", type=int, default=5000)
     p.add_argument("--train-min-free-mib", type=int, default=7500, help="free memory a GPU needs to take a training run")
     p.add_argument("--python", default=os.environ.get("S1_PY"))
@@ -373,7 +482,50 @@ def main():
             queue=dict(mass_pending=[x[1] for x in mass_todo], seeds_pending=[x[1] for x in seed_todo], evals_pending=len(evals),
                        evals_pending_by_kind={k: sum(1 for j in evals if j["meta"]["kind"] == k) for k in ("xgpu", "c2", "d_curve")},
                        next=[j["name"] for j in evals[:5]]),
-            running_evals=sorted(running)), indent=1))
+            running_evals=sorted(running), all_training_done=dec.get("all_training_done"),
+            handover=dec.get("handover")), indent=1))
+        deadline = None
+        if a.post_train_hours is not None:
+            if "all_training_done" not in dec and not mass_todo and not seed_todo and not tlaunch and not training_alive():
+                t = time.time()
+                dec["all_training_done"] = dict(time=now(), hours=a.post_train_hours, deadline_unix=t + a.post_train_hours * 3600,
+                                                deadline=datetime.fromtimestamp(t + a.post_train_hours * 3600, NY).isoformat(timespec="seconds"))
+                save()
+                print(now(), "all training done; evaluation deadline", dec["all_training_done"]["deadline"], flush=True)
+            deadline = (dec.get("all_training_done") or {}).get("deadline_unix")
+            if deadline and time.time() >= deadline and "handover" not in dec:
+                stopped = []
+                for name, (job, proc, log, g) in list(running.items()):
+                    how = stop_for_deadline(name, proc.pid, g, ops, "scheduler Popen")
+                    proc.poll()
+                    log.close()
+                    del running[name]
+                    stopped.append(dict(name=name, pid=proc.pid, how=how))
+                for name in sorted(busy_eval_names() - {x["name"] for x in stopped}):  # started by an earlier scheduler instance
+                    lj = ops / f"{safe(name)}.launch.json"
+                    rec = json.loads(lj.read_text()) if lj.exists() else {}
+                    pid = rec.get("pid")
+                    try:
+                        cmd = Path(f"/proc/{pid}/cmdline").read_bytes().replace(b"\0", b" ").decode(errors="replace") if pid else ""
+                    except OSError:
+                        cmd = ""
+                    if pid and str(EVALS / name) in cmd:
+                        stopped.append(dict(name=name, pid=pid, how=stop_for_deadline(name, pid, rec.get("gpu"), ops, "ops2 launch record")))
+                    else:
+                        stopped.append(dict(name=name, pid=pid, how="not stopped: no matching recorded PID"))
+                tl = transfer_list(xgpu_jobs() + c2_eval_jobs(a.train, a.pm8_last) + d_curve_jobs(), fails)
+                for r in tl:
+                    if r["cloud_owner"] == "cloud":
+                        (EVALS / "claims" / safe(r["name"]) / "handover.json").write_text(json.dumps(dict(to="laptop", time=now()), indent=1))
+                tf = ops / "transfer_to_laptop.json"
+                tf.write_text(json.dumps(dict(time=now(), deadline=dec["all_training_done"]["deadline"], stopped=stopped, jobs=tl), indent=1))
+                dec["handover"] = dict(time=now(), n_jobs=len(tl), stopped=stopped, file=str(tf))
+                save()
+                print(now(), "deadline reached: stopped", len(stopped), "evaluations; handed", len(tl), "to the laptop:", tf, flush=True)
+            if "handover" in dec:
+                time.sleep(a.poll)
+                continue
+        measured = eval_minutes(ops) if deadline else {}
         launched = False
         xg_running = any(n.startswith("xgpu/") for n in busy)
         xg_pending = [j for j in evals if j["meta"]["kind"] == "xgpu"]
@@ -441,6 +593,8 @@ def main():
                     break
         elif free and not mass_todo and (not seed_todo or xgpu_turn):
             for job in (xg_pending if seed_todo else evals):
+                if deadline and est_minutes(job, measured) > (deadline - time.time()) / 60:
+                    continue  # would not finish before the deadline: left for the laptop
                 if not claim_local_fs(job["name"], "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):
                     continue
                 g = free[0][1]
