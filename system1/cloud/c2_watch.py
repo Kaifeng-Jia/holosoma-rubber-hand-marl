@@ -138,7 +138,8 @@ MAIN_RUNS = {f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull
 
 
 def quiet(e):
-    return e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and e.split(":", 1)[1] not in MAIN_RUNS)
+    return (e.startswith("mass_started:") or (re.match(r"it\d+:", e) is not None and e.split(":", 1)[1] not in MAIN_RUNS)
+            or (e.startswith("exit:") and e.endswith("_critic50:completed")))  # Pull critic-only segment ending as planned
 
 
 def main():
