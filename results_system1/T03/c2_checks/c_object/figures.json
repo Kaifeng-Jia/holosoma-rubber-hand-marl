@@ -1,0 +1,38 @@
+[
+ {
+  "task": "pull",
+  "file": "topview_nominal_pull.png",
+  "sets": [
+   "C-in it1050",
+   "D paper it8050 (final)"
+  ],
+  "trajectories": [
+   "logs_system1/cloud_evals/c2_curve/cin_pull_m20kg_seed721_joint8000/it01050_pm2/nominal.trajectory.npz",
+   "logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2/nominal.trajectory.npz"
+  ]
+ },
+ {
+  "task": "table",
+  "file": "topview_nominal_table.png",
+  "sets": [
+   "C-in it1000",
+   "D paper it12000 (final)"
+  ],
+  "trajectories": [
+   "logs_system1/cloud_evals/c2_curve/cin_table_m5kg_seed721_fresh12000/it01000_pm2/nominal.trajectory.npz",
+   "logs_system1/post_train/d_curve/D_table_paper_T-07_seed721/it12000_pm2/nominal.trajectory.npz"
+  ]
+ },
+ {
+  "task": "bucket",
+  "file": "topview_nominal_bucket.png",
+  "sets": [
+   "C-in it1000",
+   "D paper it12000 (final)"
+  ],
+  "trajectories": [
+   "logs_system1/cloud_evals/c2_curve/cin_bucket_m1kg_seed721_fresh12000/it01000_pm2/nominal.trajectory.npz",
+   "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed721/it12000_pm2/nominal.trajectory.npz"
+  ]
+ }
+]

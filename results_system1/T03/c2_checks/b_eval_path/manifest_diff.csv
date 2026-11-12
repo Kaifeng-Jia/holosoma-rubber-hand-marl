@@ -1,0 +1,482 @@
+pair,key,equal,expected_to_differ,c_value,d_value
+pull: C-in cloud vs D_pull_paper it1050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,case,True,False,"""pull""","""pull"""
+pull: C-in cloud vs D_pull_paper it1050,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_01050.pt"""
+pull: C-in cloud vs D_pull_paper it1050,checkpoint_iteration,True,True,1050,1050
+pull: C-in cloud vs D_pull_paper it1050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""a2cd51b0e94d4cd0bbfd616d1c9e05511039d3f5bd52219da7b02ac986d0a1db"""
+pull: C-in cloud vs D_pull_paper it1050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,dt,True,False,0.02,0.02
+pull: C-in cloud vs D_pull_paper it1050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in cloud vs D_pull_paper it1050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in cloud vs D_pull_paper it1050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in cloud vs D_pull_paper it1050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,horizon_control_steps,True,False,316,316
+pull: C-in cloud vs D_pull_paper it1050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in cloud vs D_pull_paper it1050,model_id,False,True,"""c2_curve__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_paper_seed721__it01050_pm2"""
+pull: C-in cloud vs D_pull_paper it1050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in cloud vs D_pull_paper it1050,observation_noise,True,False,false,false
+pull: C-in cloud vs D_pull_paper it1050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in cloud vs D_pull_paper it1050,placement_provenance,True,False,null,null
+pull: C-in cloud vs D_pull_paper it1050,reference_frames,True,False,316,316
+pull: C-in cloud vs D_pull_paper it1050,reference_variant,True,False,null,null
+pull: C-in cloud vs D_pull_paper it1050,reference_variant_sha256,True,False,null,null
+pull: C-in cloud vs D_pull_paper it1050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in cloud vs D_pull_paper it1050,runtime_reference_check,True,False,null,null
+pull: C-in cloud vs D_pull_paper it1050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in cloud vs D_pull_paper it1050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,tf32,False,True,false,"""<absent>"""
+pull: C-in cloud vs D_pull_paper it1050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in cloud vs D_pull_paper it1050,v3_ablation,False,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)",null
+pull: C-in cloud vs D_pull_paper it1050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,case,True,False,"""pull""","""pull"""
+pull: C-in cloud vs D_pull_paper it8050,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_08050.pt"""
+pull: C-in cloud vs D_pull_paper it8050,checkpoint_iteration,False,True,1050,8050
+pull: C-in cloud vs D_pull_paper it8050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43"""
+pull: C-in cloud vs D_pull_paper it8050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,dt,True,False,0.02,0.02
+pull: C-in cloud vs D_pull_paper it8050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in cloud vs D_pull_paper it8050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in cloud vs D_pull_paper it8050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in cloud vs D_pull_paper it8050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,horizon_control_steps,True,False,316,316
+pull: C-in cloud vs D_pull_paper it8050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in cloud vs D_pull_paper it8050,model_id,False,True,"""c2_curve__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_paper_seed721__it08050_pm2"""
+pull: C-in cloud vs D_pull_paper it8050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in cloud vs D_pull_paper it8050,observation_noise,True,False,false,false
+pull: C-in cloud vs D_pull_paper it8050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in cloud vs D_pull_paper it8050,placement_provenance,True,False,null,null
+pull: C-in cloud vs D_pull_paper it8050,reference_frames,True,False,316,316
+pull: C-in cloud vs D_pull_paper it8050,reference_variant,True,False,null,null
+pull: C-in cloud vs D_pull_paper it8050,reference_variant_sha256,True,False,null,null
+pull: C-in cloud vs D_pull_paper it8050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in cloud vs D_pull_paper it8050,runtime_reference_check,True,False,null,null
+pull: C-in cloud vs D_pull_paper it8050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in cloud vs D_pull_paper it8050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,tf32,False,True,false,"""<absent>"""
+pull: C-in cloud vs D_pull_paper it8050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in cloud vs D_pull_paper it8050,v3_ablation,False,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)",null
+pull: C-in cloud vs D_pull_paper it8050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,case,True,False,"""pull""","""pull"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/duet-system1/exports_system1/d_curve/V3-25_pull_scratch_seed721_joint8000/model_01050.pt"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,checkpoint_iteration,True,True,1050,1050
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""e63eb539a78d38c25ac153b92b6f75be4c066c146248f32afdfee0dea2942741"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,dt,True,False,0.02,0.02
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,horizon_control_steps,True,False,316,316
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,model_id,False,True,"""c2_curve__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_scratch_V3-25_seed721__it01050_pm2"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,observation_noise,True,False,false,false
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,placement_provenance,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,reference_frames,True,False,316,316
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,reference_variant,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,reference_variant_sha256,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,runtime_reference_check,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,tf32,False,True,false,"""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,v3_ablation,True,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)","{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it1050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,case,True,False,"""pull""","""pull"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/duet-system1/exports_system1/d_curve/V3-25_pull_scratch_seed721_joint8000/model_08050.pt"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,checkpoint_iteration,False,True,1050,8050
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""d13ddf21f16a593f35fbedba43c0473554be493ecf31886fbf1bb306c6edf287"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,dt,True,False,0.02,0.02
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,horizon_control_steps,True,False,316,316
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,model_id,False,True,"""c2_curve__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_scratch_V3-25_seed721__it08050_pm2"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,observation_noise,True,False,false,false
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,placement_provenance,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,reference_frames,True,False,316,316
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,reference_variant,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,reference_variant_sha256,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,runtime_reference_check,True,False,null,null
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,tf32,False,True,false,"""<absent>"""
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,v3_ablation,True,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)","{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)"
+pull: C-in cloud vs D_pull_scratch_V3-25 it8050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,case,True,False,"""pull""","""pull"""
+pull: C-in laptop recheck vs D_pull_paper it1050,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_01050.pt"""
+pull: C-in laptop recheck vs D_pull_paper it1050,checkpoint_iteration,True,True,1050,1050
+pull: C-in laptop recheck vs D_pull_paper it1050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""a2cd51b0e94d4cd0bbfd616d1c9e05511039d3f5bd52219da7b02ac986d0a1db"""
+pull: C-in laptop recheck vs D_pull_paper it1050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,dt,True,False,0.02,0.02
+pull: C-in laptop recheck vs D_pull_paper it1050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in laptop recheck vs D_pull_paper it1050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in laptop recheck vs D_pull_paper it1050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in laptop recheck vs D_pull_paper it1050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,horizon_control_steps,True,False,316,316
+pull: C-in laptop recheck vs D_pull_paper it1050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in laptop recheck vs D_pull_paper it1050,model_id,False,True,"""recheck__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_paper_seed721__it01050_pm2"""
+pull: C-in laptop recheck vs D_pull_paper it1050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in laptop recheck vs D_pull_paper it1050,observation_noise,True,False,false,false
+pull: C-in laptop recheck vs D_pull_paper it1050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in laptop recheck vs D_pull_paper it1050,placement_provenance,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it1050,reference_frames,True,False,316,316
+pull: C-in laptop recheck vs D_pull_paper it1050,reference_variant,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it1050,reference_variant_sha256,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it1050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in laptop recheck vs D_pull_paper it1050,runtime_reference_check,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it1050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in laptop recheck vs D_pull_paper it1050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,tf32,False,True,false,"""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it1050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in laptop recheck vs D_pull_paper it1050,v3_ablation,False,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)",null
+pull: C-in laptop recheck vs D_pull_paper it1050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,case,True,False,"""pull""","""pull"""
+pull: C-in laptop recheck vs D_pull_paper it8050,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/holosoma-rubber-hand-marl/logs/Plan5Pull/pull_20kg_full8000_from_critic50_seed721_env2048/model_08050.pt"""
+pull: C-in laptop recheck vs D_pull_paper it8050,checkpoint_iteration,False,True,1050,8050
+pull: C-in laptop recheck vs D_pull_paper it8050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43"""
+pull: C-in laptop recheck vs D_pull_paper it8050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,dt,True,False,0.02,0.02
+pull: C-in laptop recheck vs D_pull_paper it8050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in laptop recheck vs D_pull_paper it8050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in laptop recheck vs D_pull_paper it8050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in laptop recheck vs D_pull_paper it8050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,horizon_control_steps,True,False,316,316
+pull: C-in laptop recheck vs D_pull_paper it8050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in laptop recheck vs D_pull_paper it8050,model_id,False,True,"""recheck__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_paper_seed721__it08050_pm2"""
+pull: C-in laptop recheck vs D_pull_paper it8050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in laptop recheck vs D_pull_paper it8050,observation_noise,True,False,false,false
+pull: C-in laptop recheck vs D_pull_paper it8050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in laptop recheck vs D_pull_paper it8050,placement_provenance,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it8050,reference_frames,True,False,316,316
+pull: C-in laptop recheck vs D_pull_paper it8050,reference_variant,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it8050,reference_variant_sha256,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it8050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in laptop recheck vs D_pull_paper it8050,runtime_reference_check,True,False,null,null
+pull: C-in laptop recheck vs D_pull_paper it8050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in laptop recheck vs D_pull_paper it8050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,tf32,False,True,false,"""<absent>"""
+pull: C-in laptop recheck vs D_pull_paper it8050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in laptop recheck vs D_pull_paper it8050,v3_ablation,False,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)",null
+pull: C-in laptop recheck vs D_pull_paper it8050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,case,True,False,"""pull""","""pull"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/duet-system1/exports_system1/d_curve/V3-25_pull_scratch_seed721_joint8000/model_01050.pt"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,checkpoint_iteration,True,True,1050,1050
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""e63eb539a78d38c25ac153b92b6f75be4c066c146248f32afdfee0dea2942741"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,dt,True,False,0.02,0.02
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,horizon_control_steps,True,False,316,316
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,model_id,False,True,"""recheck__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_scratch_V3-25_seed721__it01050_pm2"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,observation_noise,True,False,false,false
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,placement_provenance,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,reference_frames,True,False,316,316
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,reference_variant,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,reference_variant_sha256,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,runtime_reference_check,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,tf32,False,True,false,"""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,v3_ablation,True,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)","{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it1050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,case,True,False,"""pull""","""pull"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_pull_m20kg_seed721_joint8000/model_01050.pt""","""/home/kevin/duet-system1/exports_system1/d_curve/V3-25_pull_scratch_seed721_joint8000/model_08050.pt"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,checkpoint_iteration,False,True,1050,8050
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,checkpoint_sha256,False,True,"""dd9a1e1ae5f02571b8effa9b1c1c39c21144967685b5fd2444b248c067cd387c""","""d13ddf21f16a593f35fbedba43c0473554be493ecf31886fbf1bb306c6edf287"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,controller,False,True,"""sonic_residual""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,dt,True,False,0.02,0.02
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,horizon_control_steps,True,False,316,316
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,model_id,False,True,"""recheck__cin_pull_m20kg_seed721_joint8000__it01050_pm2""","""d_curve__D_pull_scratch_V3-25_seed721__it08050_pm2"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,observation_noise,True,False,false,false
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)","{""com_pose_xyzw"": [[0.0, 0.015111745335161686, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[3.9504892826080322, 0.0, 0.0, 0.0, 4.360414981842041, 0.0, 0.0,...(len 306)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,placement_provenance,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,reference_frames,True,False,316,316
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,reference_variant,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,reference_variant_sha256,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,runtime_reference_check,True,False,null,null
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,states_sha256,True,False,"""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572""","""473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,tf32,False,True,false,"""<absent>"""
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""critic_obs_dim"": 527, ""num_agents"": 2, ""source_sha256"": ""f63a697a9e3d5d316ef88e7c5c8a94e04a4f340b563abe67e7be27ae411f2...(len 207)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,v3_ablation,True,False,"{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)","{""actor_normalizer"": ""original prior, frozen, unchanged"", ""critic"": ""original centralized527"", ""from_scratch"": true, ""mask"": ""none"", ""version"": ""v3_pull_single_...(len 199)"
+pull: C-in laptop recheck vs D_pull_scratch_V3-25 it8050,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,case,True,False,"""bucket""","""bucket"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_bucket_m1kg_seed721_fresh12000/model_01000.pt""","""/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_02000.pt"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,checkpoint_iteration,False,True,1000,2000
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,checkpoint_sha256,False,True,"""e0dc722cc924c6f00add2bc32579b23559298da9d46aedaf1aa3c38d1fabb53f""","""f0ccde85ba76321487c9f1cd4ec3a365afa9b7e3a84ec45098894dd0ebaa6d7b"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,controller,False,True,"""sonic_residual""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,dt,True,False,0.02,0.02
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,horizon_control_steps,True,False,497,497
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,model_id,False,True,"""c2_curve__cin_bucket_m1kg_seed721_fresh12000__it01000_pm2""","""d_curve__D_bucket_paper_B-RZ0_seed721__it02000_pm2"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,observation_noise,True,False,false,false
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,physics,True,False,"{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)","{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)"
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,placement_provenance,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,reference_frames,True,False,497,497
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,reference_variant,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,reference_variant_sha256,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,runtime_reference_check,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,states_sha256,True,False,"""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f""","""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,tf32,False,True,false,"""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)"
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,v3_ablation,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it2000,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,case,True,False,"""bucket""","""bucket"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_bucket_m1kg_seed721_fresh12000/model_01000.pt""","""/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,checkpoint_iteration,False,True,1000,12000
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,checkpoint_sha256,False,True,"""e0dc722cc924c6f00add2bc32579b23559298da9d46aedaf1aa3c38d1fabb53f""","""7ba039fbb608211f8b2866b4f80810c082313bca6232a028c07743391656a225"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,controller,False,True,"""sonic_residual""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,dt,True,False,0.02,0.02
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,horizon_control_steps,True,False,497,497
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,model_id,False,True,"""c2_curve__cin_bucket_m1kg_seed721_fresh12000__it01000_pm2""","""d_curve__D_bucket_paper_B-RZ0_seed721__it12000_pm2"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,observation_noise,True,False,false,false
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,physics,True,False,"{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)","{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)"
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,placement_provenance,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,reference_frames,True,False,497,497
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,reference_variant,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,reference_variant_sha256,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,runtime_reference_check,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,states_sha256,True,False,"""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f""","""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,tf32,False,True,false,"""<absent>"""
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)"
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,v3_ablation,True,False,null,null
+bucket: C-in cloud vs D_bucket_paper_B-RZ0 it12000,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,case,True,False,"""bucket""","""bucket"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_bucket_m1kg_seed721_fresh12000/model_01000.pt""","""/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_02000.pt"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,checkpoint_iteration,False,True,1000,2000
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,checkpoint_sha256,False,True,"""e0dc722cc924c6f00add2bc32579b23559298da9d46aedaf1aa3c38d1fabb53f""","""f0ccde85ba76321487c9f1cd4ec3a365afa9b7e3a84ec45098894dd0ebaa6d7b"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,controller,False,True,"""sonic_residual""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,dt,True,False,0.02,0.02
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,horizon_control_steps,True,False,497,497
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,model_id,False,True,"""recheck__cin_bucket_m1kg_seed721_fresh12000__it01000_pm2""","""d_curve__D_bucket_paper_B-RZ0_seed721__it02000_pm2"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,observation_noise,True,False,false,false
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,physics,True,False,"{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)","{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)"
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,placement_provenance,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,reference_frames,True,False,497,497
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,reference_variant,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,reference_variant_sha256,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,runtime_reference_check,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,states_sha256,True,False,"""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f""","""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,tf32,False,True,false,"""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)"
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,v3_ablation,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it2000,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,case,True,False,"""bucket""","""bucket"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,checkpoint,False,True,"""/home/kevin/duet-system1/exports_system1/train_partial/cin_bucket_m1kg_seed721_fresh12000/model_01000.pt""","""/home/kevin/holosoma-core4d-base/logs/Core4DBucket/A_no_rel_no_height_fresh12000_env2048_seed721_cloud_20260919/model_12000.pt"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,checkpoint_iteration,False,True,1000,12000
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,checkpoint_sha256,False,True,"""e0dc722cc924c6f00add2bc32579b23559298da9d46aedaf1aa3c38d1fabb53f""","""7ba039fbb608211f8b2866b4f80810c082313bca6232a028c07743391656a225"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,controller,False,True,"""sonic_residual""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,dt,True,False,0.02,0.02
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,gpu_name,True,True,"""NVIDIA GeForce RTX 5070 Laptop GPU""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,horizon_control_steps,True,False,497,497
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,model_id,False,True,"""recheck__cin_bucket_m1kg_seed721_fresh12000__it01000_pm2""","""d_curve__D_bucket_paper_B-RZ0_seed721__it12000_pm2"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,observation_noise,True,False,false,false
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,physics,True,False,"{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)","{""com_pose_xyzw"": [[-0.008895802311599255, 0.03501851111650467, 0.0007573200855404139, 0.0001318706345045939, 0.01467776857316494, 0.011216899380087852, 0.99982...(len 710)"
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,placement_provenance,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,reference_frames,True,False,497,497
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,reference_variant,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,reference_variant_sha256,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,runtime_reference_check,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,sonic_spec,False,True,"""/home/kevin/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,states_sha256,True,False,"""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f""","""631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,tf32,False,True,false,"""<absent>"""
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"", ""block_weights...(len 2493)"
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,v3_ablation,True,False,null,null
+bucket: C-in laptop recheck vs D_bucket_paper_B-RZ0 it12000,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,armature,False,True,"[0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752, 0.025101925, 0.01017752, 0.025101925, 0.00721945, 0.00721945, 0.01017752,...(len 350)","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,case,True,False,"""table""","""table"""
+table: C-in cloud vs D_table_paper_T-07 it12000,checkpoint,False,True,"""/root/autodl-tmp/system1/logs/train/cin_table_m5kg_seed721_fresh12000/model_01000.pt""","""/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/model_12000.pt"""
+table: C-in cloud vs D_table_paper_T-07 it12000,checkpoint_iteration,False,True,1000,12000
+table: C-in cloud vs D_table_paper_T-07 it12000,checkpoint_sha256,False,True,"""cf3f0af5cbc6ccb1cad03f99a5cd1a38efd3febdf3d46e6733efc0837c82e1f1""","""f163d11a9629edae5dd72732c4ddec08a43024533a47b349a099a3275a8d1c50"""
+table: C-in cloud vs D_table_paper_T-07 it12000,controller,False,True,"""sonic_residual""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,dt,True,False,0.02,0.02
+table: C-in cloud vs D_table_paper_T-07 it12000,effort_limits,False,True,"[88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 139.0, 88.0, 139.0, 50.0, 50.0, 88.0, 50.0, 50.0, 25.0, 25.0, 25.0, 25.0, 25.0, 5.0, 5.0, 25.0, 25.0, 25.0, 25.0, 2...(len 174)","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,endpoint_rule,True,False,"""Execute each reference frame once; stop at clip end before the next wrapped state""","""Execute each reference frame once; stop at clip end before the next wrapped state"""
+table: C-in cloud vs D_table_paper_T-07 it12000,error_alignment,True,False,"""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset""","""Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset"""
+table: C-in cloud vs D_table_paper_T-07 it12000,frozen_action_scales,False,True,"[0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0.3506614863872528,...(len 584)","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,gpu_name,False,True,"""NVIDIA GeForce RTX 4090""","""NVIDIA GeForce RTX 5070 Laptop GPU"""
+table: C-in cloud vs D_table_paper_T-07 it12000,hip_pitch_actuator,False,True,"""ours""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,horizon_control_steps,True,False,687,687
+table: C-in cloud vs D_table_paper_T-07 it12000,inference,False,True,"""scheme_c_actor_mean_then_sonic""","""actor_mean_only_critic_forbidden"""
+table: C-in cloud vs D_table_paper_T-07 it12000,model_id,False,True,"""c2_curve__cin_table_m5kg_seed721_fresh12000__it01000_pm2""","""d_curve__D_table_paper_T-07_seed721__it12000_pm2"""
+table: C-in cloud vs D_table_paper_T-07 it12000,object_urdf,True,False,"""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf""","""holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf"""
+table: C-in cloud vs D_table_paper_T-07 it12000,observation_noise,True,False,false,false
+table: C-in cloud vs D_table_paper_T-07 it12000,pd_target,False,True,"""joint_target_override (q* verbatim)""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,physics,True,False,"{""com_pose_xyzw"": [[0.0, 0.12641499936580658, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[0.3770883083343506, 0.0, 0.0, 0.0, 0.2411184161901474, 0.0, 0.0,...(len 305)","{""com_pose_xyzw"": [[0.0, 0.12641499936580658, 0.0, 0.0, 0.0, 0.0, 1.0]], ""inertia_row_major"": [[0.3770883083343506, 0.0, 0.0, 0.0, 0.2411184161901474, 0.0, 0.0,...(len 305)"
+table: C-in cloud vs D_table_paper_T-07 it12000,placement_provenance,True,False,null,null
+table: C-in cloud vs D_table_paper_T-07 it12000,reference_frames,True,False,687,687
+table: C-in cloud vs D_table_paper_T-07 it12000,reference_variant,True,False,null,null
+table: C-in cloud vs D_table_paper_T-07 it12000,reference_variant_sha256,True,False,null,null
+table: C-in cloud vs D_table_paper_T-07 it12000,robot_urdf,True,False,"""g1/main_mesh_collision_rubberhand.urdf""","""g1/main_mesh_collision_rubberhand.urdf"""
+table: C-in cloud vs D_table_paper_T-07 it12000,runtime_reference_check,True,False,null,null
+table: C-in cloud vs D_table_paper_T-07 it12000,sonic_checkpoint_sha256,False,True,"""e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,sonic_fall_rule,False,True,"""|dz pelvis|>0.25 or quat_err(pelvis)^2>1.0 or any ankle_roll/wrist_yaw |dz|>0.25 (SONIC eval terminations)""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,sonic_pd,False,True,"{""action_scales"": [0.5475465059280396, 0.3506614863872528, 0.5475465059280396, 0.3506614863872528, 0.4385772943496704, 0.4385772943496704, 0.5475465059280396, 0...(len 1805)","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,sonic_spec,False,True,"""/root/autodl-tmp/system1/duet-system1/system1/sonic/sonic_release_spec.json""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,sonic_spec_sha256,False,True,"""6c7d13e3148ff85e97861e03cfd100d71343ffb5482b2fb98b5e90928c20640a""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,states_sha256,True,False,"""389e8da5fb818572a48cbba049254585311079439265f5ab4cfc1523a185dac1""","""389e8da5fb818572a48cbba049254585311079439265f5ab4cfc1523a185dac1"""
+table: C-in cloud vs D_table_paper_T-07 it12000,system1_scheme_c_kind,False,True,"""in""","""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,tf32,False,True,false,"""<absent>"""
+table: C-in cloud vs D_table_paper_T-07 it12000,training_contract,True,True,"{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""d0bd50f224e1ee44c3813c778a82f135ebcd11db6f3d35c2609606101bba9856"", ""block_weights...(len 2449)","{""action_dim"": 29, ""actor_obs_dim"": 158, ""bucket_reward"": {""artifact_sha256"": ""d0bd50f224e1ee44c3813c778a82f135ebcd11db6f3d35c2609606101bba9856"", ""block_weights...(len 2449)"
+table: C-in cloud vs D_table_paper_T-07 it12000,v3_ablation,True,False,null,null
+table: C-in cloud vs D_table_paper_T-07 it12000,vel_limits,False,True,"[32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 20.0, 32.0, 20.0, 37.0, 37.0, 32.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 37.0, 22.0, 22.0, 37.0, 37.0, 37.0, 37.0, 37....(len 174)","""<absent>"""
