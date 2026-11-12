@@ -576,6 +576,11 @@ def main():
                 soft, hard = deadline, deadline + a.extend_hours * 3600
                 limit = dict(mass=soft, d=hard, main=hard, other=hard)
                 t = time.time()
+                m_now = eval_minutes(ops)
+                left_any = [j for j in evals if est_minutes(j, m_now) <= (limit[j["meta"].get("group", "other")] - t) / 60]
+                settled = t > deadline - a.post_train_hours * 3600 + 600  # last checkpoints old enough to be listed (120 s rule)
+                if "curves_end" not in dec and settled and t < soft and not left_any and not (busy_eval_names() | set(running)):
+                    soft = t  # everything evaluable is done before the deadline: end now rather than idle until it
                 if "curves_end" not in dec and t >= soft:
                     for name, (job, proc, log, g) in list(running.items()):  # mass sweep: not evaluated if no time
                         if job["meta"].get("group") == "mass":
@@ -586,7 +591,7 @@ def main():
                             dec.setdefault("mass_stopped_at_deadline", []).append(dict(name=name, pid=proc.pid, how=how, time=now()))
                             save()
                             print(now(), "stopped mass-sweep evaluation at the deadline", name, flush=True)
-                    m_now = eval_minutes(ops)  # a pending job that cannot finish before the extension ends does not hold the cloud
+                    # a pending job that cannot finish before the extension ends does not hold the cloud
                     req = [j["name"] for j in evals if j["meta"].get("group") != "mass" and est_minutes(j, m_now) <= (hard - t) / 60] + \
                           [n for n in (busy_eval_names() | set(running)) if group_of(n) != "mass"]
                     if req and "curves_extension" not in dec:
