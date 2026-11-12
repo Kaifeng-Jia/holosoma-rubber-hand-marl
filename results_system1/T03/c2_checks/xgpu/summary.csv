@@ -1,0 +1,5 @@
+scheme,task,run,iteration,status,reason,n,laptop_gpu,cloud_gpu,laptop_completed,cloud_completed,both_completed,laptop_only,cloud_only,neither,flips,mcnemar_exact_p,same_executed_steps,laptop_progress_mean,cloud_progress_mean,nominal_laptop_completed,nominal_cloud_completed,nominal_laptop_steps,nominal_cloud_steps
+C-in,pull,cin_pull_m20kg_seed721_joint8000,1050,完成,,50,NVIDIA GeForce RTX 5070 Laptop GPU,NVIDIA GeForce RTX 4090,43,41,34,9,7,0,16,0.803619384765625,34,0.9371518987341773,0.9277848101265823,True,True,316,316
+C-in,bucket,cin_bucket_m1kg_seed721_fresh12000,1000,完成,,50,NVIDIA GeForce RTX 5070 Laptop GPU,NVIDIA GeForce RTX 4090,34,39,26,8,13,3,21,0.38331031799316406,26,0.8824547283702215,0.9172635814889335,False,True,393,497
+D,pull,D_pull_paper_seed721,1050,完成,,50,NVIDIA GeForce RTX 5070 Laptop GPU,NVIDIA GeForce RTX 4090,35,44,32,3,12,3,15,0.03515625,32,0.8618987341772152,0.9360759493670886,True,True,316,316
+D,bucket,D_bucket_paper_B-RZ0_seed721,12000,完成,,50,NVIDIA GeForce RTX 5070 Laptop GPU,NVIDIA GeForce RTX 4090,50,50,50,0,0,0,0,1.0,50,1.0,1.0,True,True,497,497
