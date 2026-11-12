@@ -47,13 +47,21 @@ REMOTE_V3 = "/root/autodl-tmp/v3_20261103_pull/logs/V3_20261103_pull_retry01"
 OUT = ROOT / "logs_system1/post_train"
 EXPORT = ROOT / "exports_system1"
 ORIGINAL_MASS = {"pull": 20.0, "table": 5.0, "bucket": 1.0}
-LABEL = re.compile(r"^(c|d)_(pull|table|bucket)_m([0-9p.]+)kg_seed(\d+)_(joint8000|fresh12000)$")
+LABEL = re.compile(r"^(c|d|cin|cout)_(pull|table|bucket)_m([0-9p.]+)kg_seed(\d+)_(joint8000|fresh12000)$")
 # cloud runs, final segment labels: wave 1 (T03 C main 721, T04 D), wave 2 (T04 C, T03 C extra seeds)
 RUNS = ["d_pull_m40kg_seed721_joint8000", "d_table_m10kg_seed721_fresh12000", "d_table_m20kg_seed721_fresh12000",
         "d_bucket_m2kg_seed721_fresh12000", "d_bucket_m4kg_seed721_fresh12000", "d_bucket_m8kg_seed721_fresh12000",
         "c_pull_m20kg_seed721_joint8000", "c_table_m5kg_seed721_fresh12000", "c_bucket_m1kg_seed721_fresh12000",
         "c_pull_m40kg_seed721_joint8000", "c_table_m10kg_seed721_fresh12000", "c_table_m20kg_seed721_fresh12000",
         "c_bucket_m2kg_seed721_fresh12000", "c_bucket_m4kg_seed721_fresh12000", "c_bucket_m8kg_seed721_fresh12000"]
+# T03 C v2 (Kevin 2026-11-12): final-checkpoint +/-2 and +/-8 of the C v2 main runs and the C v2 mass sweep on this laptop
+# (RTX 5070, the GPU of schemes A and B); the cloud skips these job names (claims owned by "laptop", made 2026-11-12 00:0x).
+# Intermediate C v2 checkpoints are evaluated on the cloud (c2_curve), so no curve jobs here.
+RUNS += [f"{k}_{t}_seed721_{s}" for k in ("cin", "cout") for t, s in (("pull_m20kg", "joint8000"), ("table_m5kg", "fresh12000"),
+                                                                     ("bucket_m1kg", "fresh12000"))]
+RUNS += ["cin_table_m10kg_seed721_fresh12000", "cin_table_m20kg_seed721_fresh12000", "cin_bucket_m2kg_seed721_fresh12000",
+         "cin_bucket_m4kg_seed721_fresh12000", "cin_bucket_m8kg_seed721_fresh12000", "cin_pull_m40kg_seed721_joint8000"]
+C_SCHEMES = ("c", "cin", "cout")  # all evaluated with --controller sonic_residual (kind read from the checkpoint)
 # C extra seeds 722/723: deferred until after the RSS stage-1 submission (T03 / README, commit 0712082)
 _B = "/home/kevin/holosoma-core4d-base/logs"
 _R = f"{_B}/PaperSupplement20260929/autodl_received/runs"
@@ -256,6 +264,21 @@ def early_curve_jobs():
     return out
 
 
+def recheck_jobs():
+    """T03 C v2 same-GPU recheck (Kevin 2026-11-12, item 3a): recheck.json {"jobs": [{name, label, checkpoint, sha256, priority}]}
+    lists cloud-evaluated C v2 checkpoints, fetched to exports_system1/train_partial/ with sha256 checked, re-evaluated here with
+    the same evaluator and states (+/-2)."""
+    f = OUT / "recheck.json"
+    if not f.exists():
+        return []
+    out = []
+    for e in json.loads(f.read_text())["jobs"]:
+        meta = parse(e["label"])
+        out.append(dict(priority=e.get("priority", -1), name=e["name"], case=meta["case"], scheme=meta["scheme"], mass=meta["mass"],
+                        checkpoint=e["checkpoint"], checkpoint_sha256=e["sha256"], level=2, task_book="T03", run=e["label"], recheck=True))
+    return out
+
+
 SHARED_PREFIXES = ("d_curve/",)  # Kevin 2026-11-11: the cloud slot filler may take these too
 
 
@@ -342,7 +365,7 @@ def launch(job, slot):
         if job["mass_override"] is not None:
             argv += ["--object-mass-kg", f"{job['mass_override']:g}"]
     else:
-        argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_residual" if job["scheme"] == "c" else "policy",
+        argv = [PY, "-B", EVAL_PATTERN, "--case", job["case"], "--controller", "sonic_residual" if job["scheme"] in C_SCHEMES else "policy",
                 "--checkpoint", job["checkpoint"], "--device", "cuda:0", "--states", str(states),
                 "--model-id", job["name"].replace("/", "__"), "--output-dir", str(out_dir)]
         if job["mass"] != ORIGINAL_MASS[job["case"]]:
@@ -392,7 +415,7 @@ def run(a):
                         print(now(), "cloud run ended without completion:", label, flush=True)
             except Exception as e:  # network trouble: retry at the next poll
                 print(now(), "poll error", repr(e)[:300], flush=True)
-        pending = [j for js in fetched.values() for j in js] + early_curve_jobs() + b_jobs() + d_curve_jobs()
+        pending = [j for js in fetched.values() for j in js] + recheck_jobs() + early_curve_jobs() + b_jobs() + d_curve_jobs()
         pending = apply_priority_overrides(pending)
         busy = {r[0]["name"] for r in running.values()}
         pending = [j for j in pending if j["name"] not in claimed_elsewhere]
