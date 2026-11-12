@@ -48,6 +48,54 @@
   | D Pull | 0.862 | 0.936 |
   | D Bin | 1.000 | 1.000 |
 
+## 补充：D 论文主结果最终 checkpoint，V3 对本机（任务书之外，不新增计算）
+
+**来源**
+- **对象**：D 论文主结果的最终 checkpoint，3 个任务 × 3 个种子，共 9 个：Pull 第 8050 轮，Table、Bin 第 12000 轮。
+- **V3 侧**：V3 收尾包表 `V3_GPU_CLOSEOUT_20261104/results/episodes.csv` 的逐状态 completed_reference 和 executed_steps。
+- **本机侧**：
+  - ±2 用流水线 d_curve 的最终评测；
+  - ±8 用 d_paper_final，即你 2026-11-12 第 2 项要求的本机重评。
+- **一致性检查**：每对的 checkpoint sha256、初始状态文件 sha256、checkpoint 轮次都和本机 summary 比对过，全部相同。
+- **脚本**：`system1/t03/v3_vs_laptop_compare.py`。
+
+两块的条件：
+
+| | V3 侧 | 本机侧 | 性质 |
+|---|---|---|---|
+| ±2 | 2026-10-04 统一评测（`PaperSupplement20260929/unified_evaluation_20261003`）；就在这台笔记本的 RTX 5070 Laptop 上跑（日志设备表），环境 hssim，评测器 `/home/kevin/holosoma-core4d-base/scripts/evaluate_paper_supplement.py`（V3 表没记它的 sha256，该文件现在的 sha256 是 `56c6450c…`） | RTX 5070 Laptop，环境 hssim_s1，本分支评测器 `7c4e2714…`，System1 开关全关 | **同卡，不同代码和环境** |
+| ±8 | 2026-11-04 云端扩展评测；评测器 sha256 `56c6450c…`。评测日志没记 GPU 型号，同一份云端备份里 U5 渲染输出记的是 `NVIDIA GeForce RTX 4090` | RTX 5070 Laptop，本分支评测器 `7c4e2714…` | **跨卡，且不同代码** |
+
+**结果（每对 50 个扰动状态）**
+
+| 档位 | 任务 | 种子 | V3 完成 | 本机完成 | 只 V3 | 只本机 | 翻转数 | McNemar p | 相同执行步数 |
+|---|---|---|---|---|---|---|---|---|---|
+| ±2 | Pull | 721 / 722 / 723 | 50 / 50 / 49 | 50 / 50 / 49 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 1 / 1 / 1 | 50 / 50 / 50 |
+| ±2 | Table | 721 / 722 / 723 | 35 / 49 / 46 | 35 / 49 / 46 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 1 / 1 / 1 | 50 / 50 / 50 |
+| ±2 | Bin | 721 / 722 / 723 | 50 / 32 / 45 | 50 / 32 / 45 | 0 / 0 / 0 | 0 / 0 / 0 | 0 / 0 / 0 | 1 / 1 / 1 | 50 / 50 / 50 |
+| ±8 | Pull | 721 / 722 / 723 | 43 / 32 / 39 | 43 / 28 / 41 | 5 / 8 / 0 | 5 / 4 / 2 | 10 / 12 / 2 | 1.00 / 0.39 / 0.50 | 38 / 26 / 41 |
+| ±8 | Table | 721 / 722 / 723 | 46 / 40 / 40 | 45 / 37 / 40 | 3 / 6 / 5 | 2 / 3 / 5 | 5 / 9 / 10 | 1.00 / 0.51 / 1.00 | 43 / 34 / 35 |
+| ±8 | Bin | 721 / 722 / 723 | 38 / 26 / 28 | 39 / 23 / 31 | 3 / 10 / 5 | 4 / 7 / 8 | 7 / 17 / 13 | 1.00 / 0.63 / 0.58 | 35 / 16 / 23 |
+
+**要点**
+- **±2 同卡块**：9 对 450 个扰动状态，完成与否和执行步数全部相同；9 个 nominal 也全部相同。
+- **±8 跨卡块合计**：
+
+  | | 完成 | 只在这一边完成 |
+  |---|---|---|
+  | V3（4090） | 332/400 | 45 |
+  | 本机（5070） | 327/400 | 40 |
+
+  翻转共 85 个，合并 McNemar p = 0.66。
+- **nominal 回合**：
+  - ±8 块里，Bin 种子 722、723 的 nominal 在 V3（4090）上完成（497 步）；在本机分别在第 313、324 步终止。
+  - 同一个 nominal 在 ±2 块里，两边（都是 5070）也都在第 313、324 步终止。
+  - 其余 7 对的 nominal 两边相同。
+
+**文件**
+- `v3_vs_laptop_summary.csv`：上表，含 sha256。
+- `v3_vs_laptop_per_state.csv`：逐状态。
+
 ## 配置核对（`manifest_diff.csv`）
 
 - 两边 `run_manifest.json` 逐项 diff 后，不同的只有：
@@ -63,7 +111,8 @@
 
 ## 和任务书的偏离
 
-- 没有偏离。
+- 四行主表没有偏离。
+- "补充"一节是任务书之外加的，只读已有结果，没有新增计算。
 - 本机的 D 结果用的是已有结果，没有为这张表重跑。
 
 ## 文件
@@ -74,8 +123,10 @@
 | `per_state.csv` | 每个状态在两边的完成情况、执行步数、进度、物体 RMSE、终止时物体位置误差 |
 | `provenance.csv` | checkpoint 和初始状态文件的 sha256、两边 GPU、git HEAD、评测器 sha256、完整命令、summary.json 的 sha256、目录 |
 | `manifest_diff.csv` | 两边 run_manifest 的逐项差异 |
+| `v3_vs_laptop_summary.csv`、`v3_vs_laptop_per_state.csv` | 补充一节的汇总和逐状态 |
 | `SHA256SUMS` | 本目录各文件的 sha256 |
 
 命令：
 
     hssim_s1/bin/python -B system1/t03/xgpu_compare.py --out results_system1/T03/c2_checks/xgpu
+    hssim_s1/bin/python -B system1/t03/v3_vs_laptop_compare.py --out results_system1/T03/c2_checks/xgpu
