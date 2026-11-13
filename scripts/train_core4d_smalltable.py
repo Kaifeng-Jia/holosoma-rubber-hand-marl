@@ -530,7 +530,7 @@ def main() -> int:
             "steps_per_env": ARGS.steps_per_env,
             "save_interval": ARGS.save_interval,
             "actor_observation_groups": {
-                "actor_obs": 154,
+                "actor_obs": 154 if HAND is None else 154 + 88,
                 "teammate_obs": 4,
             },
             "actor_input_dim": 158 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTOR_OBS_DIM"],

@@ -30,12 +30,41 @@ def patch_core4d_dims(finger_mode: str) -> dict:
     vals = dict(CORE4D_SMALLTABLE_ACTOR_OBS_DIM=HAND_ACTOR_OBS + HAND_TEAMMATE_OBS,
                 CORE4D_SMALLTABLE_CRITIC_OBS_DIM=HAND_CRITIC_OBS,
                 CORE4D_SMALLTABLE_ACTION_DIM=policy_action_dim(finger_mode))
+    groups = (("actor_obs", HAND_ACTOR_OBS), ("teammate_obs", HAND_TEAMMATE_OBS))
     for name in _MODULES:
         m = importlib.import_module(name)
         for k, v in vals.items():
             if hasattr(m, k):
                 setattr(m, k, v)
+        if hasattr(m, "CORE4D_SMALLTABLE_ACTOR_GROUPS"):
+            m.CORE4D_SMALLTABLE_ACTOR_GROUPS = groups
+    patch_ppo_storage()
     return vals
+
+
+def patch_ppo_storage() -> None:
+    """holosoma.agents.mappo.ppo registers the team critic_obs buffer with a literal (527,); with hands it is 703.
+    Every other buffer is registered as before."""
+    import holosoma.agents.mappo.ppo as ppo_mod
+    cls = next(c for c in vars(ppo_mod).values() if isinstance(c, type) and "_register_storage" in vars(c))
+    if getattr(cls._register_storage, "_system1_hand", False):
+        return
+    base = cls._register_storage
+
+    def _register_storage(self):
+        orig = self.storage.register_team
+
+        def reg(name, shape, *args, **kwargs):
+            if name == "critic_obs":
+                shape = (HAND_CRITIC_OBS,)
+            return orig(name, shape, *args, **kwargs)
+        self.storage.register_team = reg
+        try:
+            base(self)
+        finally:
+            self.storage.register_team = orig
+    _register_storage._system1_hand = True
+    cls._register_storage = _register_storage
 
 
 def zero_finger_rows(actor) -> int:

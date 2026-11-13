@@ -29,8 +29,13 @@ p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='eva
 p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
 p.add_argument('--sonic-const-dq',default=None,help='System1 T03 C v2 diagnostic (scheme A only): constant joint offset added to every frame of SONIC\'s reference window, "joint=rad,joint=rad" (holosoma joint names); default none')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
+p.add_argument('--finger-mode',choices=('locked','track','learn'),default=None,help='System1 T06/T07: G1 + Sharpa hands (bucket/table); policy checkpoints must be hand checkpoints of the same mode; off = rubber hands, unchanged')
+p.add_argument('--hand-reference',type=Path,default=None,help='System1 T06/T07: 73-joint runtime reference (system1/hand/sharpa_reference.py); required with --finger-mode')
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 a=p.parse_args()
+if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
+if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
+if a.finger_mode=='learn' and a.controller in ('sonic','sonic_planner'):p.error('A/B with hands: --finger-mode track (geometric grip) or locked')
 if a.controller not in ('sonic','sonic_planner') and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic/sonic_planner')
 if (a.controller=='sonic_planner')!=(a.b_variant is not None):p.error('--b-variant goes with --controller sonic_planner')
 if a.sonic_const_dq is not None and a.controller!='sonic':p.error('--sonic-const-dq goes with --controller sonic')
@@ -70,6 +75,12 @@ else:
                        simulator=replace(config.simulator,config=replace(config.simulator.config,enable_object_hand_contact=True)))
 config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observation,
                training=replace(config.training,num_envs=1,seed=241003,headless=True))
+hand=None
+if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
+    sys.path.insert(0,str(ROOT))
+    from system1.hand.hand_config import with_sharpa_pair
+    hand=dict(finger_mode=a.finger_mode,reference=str(a.hand_reference.resolve()),reference_sha256=sha(a.hand_reference))
+    config=with_sharpa_pair(config,a.finger_mode,a.hand_reference)
 config,placement_provenance=configure_push_placement(config,a.push_placement_proof,skill=a.case,root=ROOT)
 if a.controller in ('sonic','sonic_residual','sonic_planner'):
     sys.path.insert(0,str(ROOT))
@@ -98,6 +109,9 @@ def main():
         else:
             checkpoint=a.checkpoint.resolve();state=torch.load(checkpoint,map_location=dev,weights_only=False)
         ablation=state.get('v3_ablation')
+        if hand is not None and a.controller=='policy':  # hand MAPPO sizes before any checkpoint contract check
+            from system1.hand.hand_mappo import patch_core4d_dims
+            hand['mappo_dims']=patch_core4d_dims(a.finger_mode)
         if ablation is not None:
             from holosoma.agents.mappo.v3_plan5_ablation import ablation_contract
             if a.case!='pull' or ablation!=ablation_contract(from_scratch=ablation.get('from_scratch',False),zero_teammate_obs=ablation.get('zero_teammate_obs',False)):
@@ -122,7 +136,17 @@ def main():
             c=state['plan5_mappo']
             if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=[2,158,527,29]:raise ValueError('Plan5 shape contract')
         models=None
-        if a.controller not in ('sonic','sonic_planner'):
+        if hand is not None and a.controller=='policy':
+            if state.get('system1_finger_mode')!=a.finger_mode:raise ValueError('checkpoint finger mode differs from --finger-mode')
+        if a.controller not in ('sonic','sonic_planner') and hand is not None:
+            from system1.hand.hand_mappo import initialize_hand_model_bundle
+            models=initialize_hand_model_bundle(config.algo.config,finger_mode=a.finger_mode,device=dev)
+            models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
+            models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
+            models.actor.eval();models.actor_obs_normalizer.eval()
+            def forbidden(*args,**kwargs):raise RuntimeError('Critic invoked during actor-only evaluation')
+            models.critic.evaluate=forbidden
+        elif a.controller not in ('sonic','sonic_planner'):
             models=initialize_core4d_smalltable_model_bundle(config.algo.config,device=dev)
             models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
             models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
@@ -196,6 +220,7 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies))
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
         if cwrap is not None and cwrap.kind!='v1':manifest['system1_scheme_c_kind']=cwrap.kind  # T03 C v2

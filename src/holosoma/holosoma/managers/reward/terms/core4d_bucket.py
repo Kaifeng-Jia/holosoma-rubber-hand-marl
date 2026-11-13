@@ -190,8 +190,18 @@ class BucketInteractionReward(RewardTermBase):
         if not math.isclose(float(env.dt) * self.fps, 1.0, rel_tol=1e-6, abs_tol=1e-6):
             raise ValueError("Bucket artifact fps must equal the control rate")
         paths = reference.motion_files
-        if len(paths) != 1 or _sha256(Path(resolve_data_file_path(str(paths[0])))) != self.metadata["runtime_reference_sha256"]:
-            raise ValueError("Bucket artifact runtime reference SHA256 mismatch")
+        ref_sha = _sha256(Path(resolve_data_file_path(str(paths[0])))) if len(paths) == 1 else None
+        if ref_sha != self.metadata["runtime_reference_sha256"]:
+            # System1 T06/T07: a 73-joint G1+Sharpa reference built from the artifact's reference
+            # (system1/hand/sharpa_reference.py) is accepted when its provenance names that base reference.
+            base = None
+            if ref_sha is not None and getattr(env.simulator.simulator_config, "object_hand_contact_bodies", None):
+                import json as _json
+                import numpy as _np
+                with _np.load(resolve_data_file_path(str(paths[0])), allow_pickle=False) as _z:
+                    base = _json.loads(str(_z["provenance"])).get("system1_t06", {}).get("base_reference_sha256")
+            if base != self.metadata["runtime_reference_sha256"]:
+                raise ValueError("Bucket artifact runtime reference SHA256 mismatch")
         if _sha256(self.reference_file) != self.reference_sha256:
             raise ValueError("Bucket artifact changed before binding")
         names = list(env.simulator._body_list)

@@ -113,7 +113,11 @@ class SonicDualDriver:
         sim = env.simulator
         self.env, self.sim = env, sim
         self.E, self.A = env.num_envs, env.num_agents
-        self.ctl = sc.SonicController(batch=self.E * self.A, device=device, holosoma_joint_names=list(sim.dof_names), tf32=tf32)
+        # T06/T07 hands: SONIC drives the 29 body DOFs; the finger PD targets come from the action term's finger mode
+        # (track: the geometric grip of the reference; locked: open). 29-DOF robot: hand = False, unchanged.
+        self.hand = len(sim.dof_names) > 29
+        self.nb = 29 if self.hand else len(sim.dof_names)
+        self.ctl = sc.SonicController(batch=self.E * self.A, device=device, holosoma_joint_names=list(sim.dof_names)[: self.nb], tf32=tf32)
         if list(sim.dof_names) != list(env.dof_names):
             raise AssertionError("simulator and env DOF order differ")
         self.default_h = env.default_dof_pos.reshape(-1)[: len(sim.dof_names)]
@@ -149,8 +153,8 @@ class SonicDualDriver:
         t = command.time_steps.long() if time_steps is None else time_steps
         idx = sc.future_indices(t, ref.num_frames, F, self.ctl.skip)  # [E, F]
         s = ref.sample(idx.reshape(-1))
-        jp = s["agent_joint_pos"].reshape(E, F, A, -1).permute(0, 2, 1, 3).reshape(E * A, F, -1)
-        jv = s["agent_joint_vel"].reshape(E, F, A, -1).permute(0, 2, 1, 3).reshape(E * A, F, -1)
+        jp = s["agent_joint_pos"][..., : self.nb].reshape(E, F, A, -1).permute(0, 2, 1, 3).reshape(E * A, F, -1)
+        jv = s["agent_joint_vel"][..., : self.nb].reshape(E, F, A, -1).permute(0, 2, 1, 3).reshape(E * A, F, -1)
         rq = s["agent_body_quat_w"][:, :, self.pelvis].reshape(E, F, A, 4).permute(0, 2, 1, 3).reshape(E * A, F, 4)
         return self.ctl.to_sonic(jp), self.ctl.to_sonic(jv), sc.xyzw_to_wxyz(rq), idx
 
@@ -158,7 +162,8 @@ class SonicDualDriver:
         rs = self._flat(self.sim.agent_root_states)  # xyzw
         q = sc.xyzw_to_wxyz(rs[:, 3:7])
         w_b = sc.quat_apply(sc.quat_conj(q), rs[:, 10:13])
-        return q, w_b, self.ctl.to_sonic(self._flat(self.sim.agent_dof_pos)), self.ctl.to_sonic(self._flat(self.sim.agent_dof_vel))
+        nb = self.nb
+        return q, w_b, self.ctl.to_sonic(self._flat(self.sim.agent_dof_pos[..., :nb])), self.ctl.to_sonic(self._flat(self.sim.agent_dof_vel[..., :nb]))
 
     @torch.no_grad()
     def actions(self, command, dones=None, delta_q_h=None, ref_limits_h=None, target_residual_h=None):
@@ -184,10 +189,24 @@ class SonicDualDriver:
         self.last_sonic_target_h = q_target_h
         if target_residual_h is not None:
             q_target_h = q_target_h + target_residual_h
+        if self.hand:
+            q_target_h = torch.cat([q_target_h, self.finger_targets(command)], dim=-1)
         self.term.joint_target_override = q_target_h  # PD uses q* verbatim (F2)
         self.last_q_target_h = q_target_h
-        a_h = (q_target_h - self.default_h) / self.scale_h
+        a_h = ((q_target_h - self.default_h) / self.scale_h)[..., : self.nb]
         return a_h.reshape(self.E, -1), action.reshape(self.E, self.A, -1)
+
+    def finger_targets(self, command, finger_actions=None):
+        """[E, A, 44] finger PD targets: locked 0; track q_ref_f(t); with finger_actions (C-in, learn): q_ref_f + scale * a."""
+        mode = getattr(self.term, "finger_mode", "track")
+        lim = self.sim.hard_dof_pos_limits[self.nb:]
+        if mode == "locked":
+            q = torch.zeros(self.E, self.A, lim.shape[0], device=self.device)
+        else:
+            q = command.agent_joint_pos[..., self.nb:]
+            if finger_actions is not None:
+                q = q + finger_actions * self.scale_h[self.nb:]
+        return torch.maximum(torch.minimum(q, lim[:, 1]), lim[:, 0])
 
     def check_pd_target(self):
         """Max |PD target - q*| over the last control step (F2 acceptance: exactly 0)."""

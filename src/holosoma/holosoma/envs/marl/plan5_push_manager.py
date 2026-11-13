@@ -12,9 +12,15 @@ class Plan5PushManager(WholeBodyTrackingManager):
 
     num_agents = 2
 
+    def _policy_dim(self) -> int:
+        """Per-robot policy action width: num_dof, or the action term's policy_dim (System1 T06/T07 hands)."""
+        term = self.action_manager.get_term("joint_control") if "joint_control" in getattr(self.action_manager, "active_terms", ()) else None
+        return int(getattr(term, "policy_dim", self.num_dof))
+
     def _pre_physics_step(self, actions: torch.Tensor) -> None:
-        expected_agent_shape = (self.num_envs, self.num_agents, self.num_dof)
-        expected_flat_shape = (self.num_envs, self.num_agents * self.num_dof)
+        width = self._policy_dim()
+        expected_agent_shape = (self.num_envs, self.num_agents, width)
+        expected_flat_shape = (self.num_envs, self.num_agents * width)
         if actions.shape == expected_agent_shape:
             flat_actions = actions.reshape(expected_flat_shape)
         elif actions.shape == expected_flat_shape:
@@ -37,7 +43,7 @@ class Plan5PushManager(WholeBodyTrackingManager):
         actions = torch.zeros(
             self.num_envs,
             self.num_agents,
-            self.num_dof,
+            self._policy_dim(),
             device=self.device,
         )
         actor_state = {"actions": actions}
