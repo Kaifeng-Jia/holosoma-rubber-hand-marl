@@ -1,0 +1,143 @@
+{
+ "output": "system1/hand/assets/g1_29dof_sharpa.urdf",
+ "output_sha256": "9e38dbef216d6901d44f7bfb8e3a730a9bf5f0610725045fc713cd75eef076bf",
+ "g1_source": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "g1_source_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "mass_rubber_hand_robot_kg": 33.343142022,
+ "mass_sharpa_robot_kg": 35.62467202199997,
+ "mass_difference_kg": 2.281529999999968,
+ "movable_joints": 73,
+ "body_joints": [
+  "left_hip_pitch_joint",
+  "left_hip_roll_joint",
+  "left_hip_yaw_joint",
+  "left_knee_joint",
+  "left_ankle_pitch_joint",
+  "left_ankle_roll_joint",
+  "right_hip_pitch_joint",
+  "right_hip_roll_joint",
+  "right_hip_yaw_joint",
+  "right_knee_joint",
+  "right_ankle_pitch_joint",
+  "right_ankle_roll_joint",
+  "waist_yaw_joint",
+  "waist_roll_joint",
+  "waist_pitch_joint",
+  "left_shoulder_pitch_joint",
+  "left_shoulder_roll_joint",
+  "left_shoulder_yaw_joint",
+  "left_elbow_joint",
+  "left_wrist_roll_joint",
+  "left_wrist_pitch_joint",
+  "left_wrist_yaw_joint",
+  "right_shoulder_pitch_joint",
+  "right_shoulder_roll_joint",
+  "right_shoulder_yaw_joint",
+  "right_elbow_joint",
+  "right_wrist_roll_joint",
+  "right_wrist_pitch_joint",
+  "right_wrist_yaw_joint"
+ ],
+ "hands": {
+  "left": {
+   "mount": {
+    "roll_about_wrist_x_deg": 275.30112777346403,
+    "flange_origin_in_wrist_yaw": [
+     0.0415,
+     0.003,
+     0.0
+    ],
+    "palm_normal_angle_to_rubber_deg": 4.161554636947825,
+    "palm_forward_angle_to_rubber_deg": 6.103137107909729,
+    "palm_basis_rotation_to_rubber_deg": 6.105295943863063
+   },
+   "mount_xyz": [
+    0.0415,
+    0.003,
+    0.0
+   ],
+   "mount_rpy": [
+    -1.5707963267948966,
+    0.09252213371586371,
+    -1.5707963267948966
+   ],
+   "sharpa_mass_kg": 1.311765,
+   "rubber_hand_mass_kg": 0.17,
+   "finger_joints": [
+    "left_thumb_CMC_FE",
+    "left_index_MCP_FE",
+    "left_middle_MCP_FE",
+    "left_ring_MCP_FE",
+    "left_pinky_CMC",
+    "left_thumb_CMC_AA",
+    "left_index_MCP_AA",
+    "left_middle_MCP_AA",
+    "left_ring_MCP_AA",
+    "left_pinky_MCP_FE",
+    "left_thumb_MCP_FE",
+    "left_index_PIP",
+    "left_middle_PIP",
+    "left_ring_PIP",
+    "left_pinky_MCP_AA",
+    "left_thumb_MCP_AA",
+    "left_index_DIP",
+    "left_middle_DIP",
+    "left_ring_DIP",
+    "left_pinky_PIP",
+    "left_thumb_IP",
+    "left_pinky_DIP"
+   ],
+   "sharpa_urdf_sha256": "6ea8d2c563c6d4ba56f5f4b04aa7d339f5b703ac8e5ec02404ca5f632d7c28a2"
+  },
+  "right": {
+   "mount": {
+    "roll_about_wrist_x_deg": 84.70465637300448,
+    "flange_origin_in_wrist_yaw": [
+     0.0415,
+     -0.003,
+     0.0
+    ],
+    "palm_normal_angle_to_rubber_deg": 4.162270837959236,
+    "palm_forward_angle_to_rubber_deg": 6.103624332276027,
+    "palm_basis_rotation_to_rubber_deg": 6.10578376122447
+   },
+   "mount_xyz": [
+    0.0415,
+    -0.003,
+    0.0
+   ],
+   "mount_rpy": [
+    1.5707963267948966,
+    0.0924211813155702,
+    1.5707963267948966
+   ],
+   "sharpa_mass_kg": 1.309765,
+   "rubber_hand_mass_kg": 0.17,
+   "finger_joints": [
+    "right_thumb_CMC_FE",
+    "right_index_MCP_FE",
+    "right_middle_MCP_FE",
+    "right_ring_MCP_FE",
+    "right_pinky_CMC",
+    "right_thumb_CMC_AA",
+    "right_index_MCP_AA",
+    "right_middle_MCP_AA",
+    "right_ring_MCP_AA",
+    "right_pinky_MCP_FE",
+    "right_thumb_MCP_FE",
+    "right_index_PIP",
+    "right_middle_PIP",
+    "right_ring_PIP",
+    "right_pinky_MCP_AA",
+    "right_thumb_MCP_AA",
+    "right_index_DIP",
+    "right_middle_DIP",
+    "right_ring_DIP",
+    "right_pinky_PIP",
+    "right_thumb_IP",
+    "right_pinky_DIP"
+   ],
+   "sharpa_urdf_sha256": "261c1a5284e04bc9690e0f5ac39d7a7cace0a16d335d663a1d3c7fcf4e4daf31"
+  }
+ }
+}
