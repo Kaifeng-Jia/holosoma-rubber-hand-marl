@@ -1,0 +1,37 @@
+{
+ "urdf": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "robot_mass_kg": 33.343142022,
+ "mu_foot_ground": 1.0,
+ "mu_object_ground": 0.5,
+ "mu_hand_object": 0.75,
+ "g": 9.81,
+ "arm_torque_limits_Nm": {
+  "left_shoulder_pitch_joint": 25.0,
+  "left_shoulder_roll_joint": 25.0,
+  "left_shoulder_yaw_joint": 25.0,
+  "left_elbow_joint": 25.0,
+  "left_wrist_roll_joint": 25.0,
+  "left_wrist_pitch_joint": 5.0,
+  "left_wrist_yaw_joint": 5.0
+ },
+ "references": {
+  "pull": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4"
+  },
+  "table": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153"
+  },
+  "bucket": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8"
+  }
+ },
+ "bucket_contact": {
+  "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/interaction_vectors_v1.npz",
+  "sha256": "3de13d54c9aca213e3a41aac67e4d4d01d2f53b3d77e458faceb1fc461fb358f"
+ },
+ "stride": 2
+}
