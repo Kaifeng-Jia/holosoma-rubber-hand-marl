@@ -69,3 +69,40 @@ class GridSDF:
                     wz = f[..., 2] if dz else 1 - f[..., 2]
                     out = out + wx * wy * wz * g[i0[..., 0] + dx, i0[..., 1] + dy, i0[..., 2] + dz]
         return out + outside
+
+
+class BoxUnionSDF:
+    """Exact signed distance (negative inside) to the union of the <box> collision geometries of a URDF link, in the
+    link frame (min over boxes of the analytic box SDF; overlapping boxes stay exact, unlike a concatenated mesh)."""
+
+    def __init__(self, urdf_path: Path):
+        import xml.etree.ElementTree as ET
+        from scipy.spatial.transform import Rotation
+        root = ET.parse(urdf_path).getroot()
+        links = root.findall("link")
+        if len(links) != 1:
+            raise ValueError(f"expected a single-link object URDF, got {len(links)} links")
+        centers, rots, halves = [], [], []
+        for col in links[0].findall("collision"):
+            box = col.find("geometry/box")
+            if box is None:
+                raise ValueError("BoxUnionSDF: non-box collision geometry")
+            o = col.find("origin")
+            xyz = [float(v) for v in (o.get("xyz", "0 0 0") if o is not None else "0 0 0").split()]
+            rpy = [float(v) for v in (o.get("rpy", "0 0 0") if o is not None else "0 0 0").split()]
+            centers.append(xyz)
+            rots.append(Rotation.from_euler("xyz", rpy).as_matrix())
+            halves.append([float(v) / 2 for v in box.get("size").split()])
+        self.c = torch.as_tensor(np.array(centers), dtype=torch.float64)
+        self.R = torch.as_tensor(np.array(rots), dtype=torch.float64)
+        self.h = torch.as_tensor(np.array(halves), dtype=torch.float64)
+        self.path = Path(urdf_path)
+        self.boxes = len(centers)
+
+    def __call__(self, p: torch.Tensor) -> torch.Tensor:
+        p = p.to(torch.float64)
+        local = torch.einsum("bji,...bj->...bi", self.R, p[..., None, :] - self.c)  # R^T (p - c), per box
+        q = local.abs() - self.h
+        outside = torch.linalg.norm(torch.clamp(q, min=0.0), dim=-1)
+        inside = torch.clamp(q.max(dim=-1).values, max=0.0)
+        return (outside + inside).min(dim=-1).values

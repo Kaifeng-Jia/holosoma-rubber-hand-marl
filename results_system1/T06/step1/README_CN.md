@@ -28,7 +28,11 @@
 
 - 第 1 个人的其他较深接触对：左手掌（left_hand_C_MC）对左髋 roll 连杆 1.06 cm，左手食指近节对左髋 yaw 连杆 1.01 cm。
 - 安装面（flange 对 wrist_yaw_link）：所有姿态下穿插都是 0。
-- 现在 D 的配置关闭了机器人自碰撞（`enable_self_collisions=False`），所以仿真里这些重叠不会产生力。
+- **更正（2026-11-13 下午）**：早先这里写"D 的配置关闭了机器人自碰撞，这些重叠不会产生力"，写错了。
+  - `robot.py` 的基础配置是关闭的；
+  - 但 D Bin 训练用的 `g1_29dof_core4d_smalltable_baseline`（`core4d_smalltable_experiment.py` 第 83–87 行）把 `enable_self_collisions` 设成了 True。
+  - 所以这些重叠在仿真里会产生接触力。
+  - 训练每个回合从参考的随机帧开始（`wbt.py` 的 reset，相位均匀采样），所以要看全部帧，不只是第 0 帧。全帧核查见 `allframes_*`。
 - 任务书门槛是"初始无穿插"：零姿态满足；参考初始姿态下手和大腿重叠超过 1 cm，这一项按事实报告，不算通过。
 
 ## 更正

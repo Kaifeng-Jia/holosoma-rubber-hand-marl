@@ -73,6 +73,25 @@ def main():
         v = s(torch.tensor([[0.0, 0.0, 0.0], [0.11, 0.0, 0.0], [0.09, 0.0, 0.0], [0.5, 0.0, 0.0]], dtype=torch.float64)).numpy()
         assert abs(v[0] + 0.1) < 0.005 and abs(v[1] - 0.01) < 0.002 and abs(v[2] + 0.01) < 0.002 and v[3] > 0.35, v
 
+    # T07: box-union SDF of a table URDF (exact box distances) and the four task references load with wxyz quaternions
+    from system1.hand.sdf import BoxUnionSDF
+    sb = BoxUnionSDF(fr.CASES["table"]["object"][1])
+    v = sb(torch.tensor([[0, 0.253129493689, 0.0], [0, 0.253129493689 + 0.0174188670620 + 0.01, 0.0]], dtype=torch.float64)).numpy()
+    assert abs(v[0] + 0.0174188670620) < 1e-9 and abs(v[1] - 0.01) < 1e-9, v
+    for c in fr.CASES:
+        rr = fr.load_reference(c)
+        qn = np.linalg.norm(rr["agent_body_quat_w"], axis=-1)
+        assert np.allclose(qn, 1, atol=1e-4) and rr["agent_joint_pos"].shape[1:] == (2, 29), c
+        assert "pelvis" in [str(x) for x in rr["body_names"]] and f"left_rubber_hand_link" in [str(x) for x in rr["body_names"]], c
+    # robot config for the holosoma simulator: 29 + 44 DOFs, finger gains under their full names
+    sys.path.insert(0, str(ROOT / "src/holosoma"))
+    from holosoma.config_values import robot as _robot
+    from system1.hand.robot_config import with_sharpa_hands
+    rc = with_sharpa_hands(_robot.g1_29dof_w_object)
+    assert len(rc.dof_names) == 73 and rc.dof_names[:29] == list(_robot.g1_29dof_w_object.dof_names)
+    assert all(len(x) == 73 for x in (rc.dof_effort_limit_list, rc.dof_armature_list, rc.dof_joint_friction_list, rc.dof_pos_lower_limit_list))
+    assert rc.control.stiffness["left_index_MCP_FE"] > 0 and (ROOT / "src/holosoma/holosoma/data/robots" / rc.asset.urdf_file).resolve().exists()
+
     # closed-form wrist solve on the real Bin reference: self-consistent, exact palm, within limits
     ref = dict(np.load(fr.REFERENCE, allow_pickle=True))
     h = SharpaHand("right")

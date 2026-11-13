@@ -8,6 +8,10 @@ CollisionManager): pairs in contact and the deepest penetration. The flange face
 that pair is reported separately. Same-hand pairs are not tested (they are filtered in the official USD).
 
     taskset -c 0-15 hssim_s1/bin/python -B system1/hand/self_collision_check.py --out results_system1/T06/step1/self_collision.json
+
+--all-frames <finger_reference.npz>: every frame of a finger reference (both agents) instead of the three poses, and the
+same check for the original D reference with the rubber-hand G1 (D Bin training enables robot self-collisions,
+core4d_smalltable_experiment.py, and resets at uniformly random reference frames, wbt.py reset), written as per-frame CSV.
 """
 from __future__ import annotations
 
@@ -23,8 +27,9 @@ sys.path.insert(0, str(ROOT))
 URDF = ROOT / "system1/hand/assets/g1_29dof_sharpa.urdf"
 
 
-def collision_meshes(u):
+def collision_meshes(u, urdf=None):
     import trimesh
+    urdf = URDF if urdf is None else Path(urdf)
     out = {}
     for name, link in u.link_map.items():
         ms = []
@@ -33,7 +38,7 @@ def collision_meshes(u):
             if g.mesh is None:
                 continue
             fn = Path(g.mesh.filename)
-            fn = fn if fn.is_absolute() else (URDF.parent / fn).resolve()
+            fn = fn if fn.is_absolute() else (urdf.parent / fn).resolve()
             m = trimesh.load(fn, force="mesh")
             if g.mesh.scale is not None:
                 m.apply_scale(g.mesh.scale)
@@ -45,7 +50,7 @@ def collision_meshes(u):
     return out
 
 
-def check(u, meshes, cfg: dict, hand_links: set[str]):
+def check(u, meshes, cfg: dict, hand_links: set[str]):  # noqa: D103
     import trimesh
     u.update_cfg(cfg)
     mh, mb = trimesh.collision.CollisionManager(), trimesh.collision.CollisionManager()
@@ -60,10 +65,54 @@ def check(u, meshes, cfg: dict, hand_links: set[str]):
     return pairs
 
 
+def all_frames(a):
+    import csv
+    import yourdfpy
+    ref0 = np.load(ROOT / "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz", allow_pickle=True)
+    fr = np.load(a.all_frames, allow_pickle=True)
+    jn = [str(x) for x in fr["joint_names"]]
+    fn = [str(x) for x in fr["finger_joint_names"]]
+    rub_urdf = ROOT / "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf"
+    rows, summ = [], {}
+    for name, path in (("sharpa", URDF), ("rubber", rub_urdf)):
+        u = yourdfpy.URDF.load(str(path), build_scene_graph=True, load_meshes=False, build_collision_scene_graph=False)
+        meshes = collision_meshes(u, path)
+        hand = {n for n in meshes if any(n.startswith(f"{s}_{p}") for s in ("left", "right")
+                                         for p in ("hand_", "thumb_", "index_", "middle_", "ring_", "pinky_", "rubber_hand"))}
+        names = u.actuated_joint_names
+        for agent in range(2):
+            for t in range(fr["agent_joint_pos"].shape[0]):
+                cfg = {n: 0.0 for n in names}
+                if name == "sharpa":
+                    cfg.update({n: float(fr["agent_joint_pos"][t, agent, i]) for i, n in enumerate(jn)})
+                    cfg.update({n: float(fr["agent_finger_joint_pos"][t, agent, i]) for i, n in enumerate(fn)})
+                else:
+                    cfg.update({n: float(ref0["agent_joint_pos"][t, agent, i]) for i, n in enumerate(jn)})
+                pairs = check(u, meshes, cfg, hand)
+                other = {k: d for k, d in pairs.items() if not (k[0].endswith("wrist_yaw_link") or k[1].endswith("wrist_yaw_link"))}
+                deep = max(other.items(), key=lambda kv: kv[1]) if other else (("", ""), 0.0)
+                rows.append(dict(model=name, agent=agent + 1, frame=t, pairs=len(other), max_depth_m=float(deep[1]), deepest_pair="|".join(deep[0])))
+            r = [x for x in rows if x["model"] == name and x["agent"] == agent + 1]
+            summ[f"{name}_agent{agent + 1}"] = dict(frames=len(r), frames_with_contact=sum(x["pairs"] > 0 for x in r),
+                                                    frames_over_1cm=sum(x["max_depth_m"] > 0.01 for x in r),
+                                                    max_depth_m=max(x["max_depth_m"] for x in r))
+            print(name, agent + 1, json.dumps(summ[f"{name}_agent{agent + 1}"]), flush=True)
+    a.out.parent.mkdir(parents=True, exist_ok=True)
+    with a.out.with_suffix(".csv").open("w", newline="") as fh:
+        w = csv.DictWriter(fh, fieldnames=list(rows[0]))
+        w.writeheader()
+        w.writerows(rows)
+    a.out.write_text(json.dumps(dict(finger_reference=str(a.all_frames), finger_reference_sha256=__import__("hashlib").sha256(Path(a.all_frames).read_bytes()).hexdigest(),
+                                     sharpa_urdf=str(URDF.relative_to(ROOT)), rubber_urdf=str(rub_urdf.relative_to(ROOT)), summary=summ), indent=1))
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--all-frames", type=Path, default=None, help="finger_reference.npz: check every frame (see module doc)")
     a = ap.parse_args()
+    if a.all_frames is not None:
+        return all_frames(a)
     import yourdfpy
     u = yourdfpy.URDF.load(str(URDF), build_scene_graph=True, load_meshes=False, build_collision_scene_graph=False)
     meshes = collision_meshes(u)

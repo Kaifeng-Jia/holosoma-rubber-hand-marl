@@ -29,6 +29,7 @@ p.add_argument('--checkpoint-mass',choices=('evaluated','original'),default='eva
 p.add_argument('--readback-only',action='store_true',help='System1 T04: build the env, write <output-dir>/object_physics_readback.json (mass, inertia, COM, material read back from PhysX) and exit without evaluating')
 p.add_argument('--sonic-const-dq',default=None,help='System1 T03 C v2 diagnostic (scheme A only): constant joint offset added to every frame of SONIC\'s reference window, "joint=rad,joint=rad" (holosoma joint names); default none')
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
+p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 a=p.parse_args()
 if a.controller not in ('sonic','sonic_planner') and a.checkpoint is None:p.error('--checkpoint is required unless --controller sonic/sonic_planner')
 if (a.controller=='sonic_planner')!=(a.b_variant is not None):p.error('--b-variant goes with --controller sonic_planner')
@@ -213,6 +214,11 @@ def main():
         if a.controller=='sonic_planner':
             from system1 import scheme_b as _sb
             manifest.update(b_variant=a.b_variant,scheme_b=dict(_sb.preregistered_constants(),contacts_sha256=getattr(driver,'contacts_sha256',None),delta_m=driver.delta,position_feedback=driver.feedback))
+        if a.record_torques:
+            _tterm=env.action_manager.get_term('joint_control')
+            _tlim=env.torque_limits.reshape(-1)[:env.num_dof].detach().cpu().numpy() if env.torque_limits.ndim<=2 else env.torque_limits[0,0].detach().cpu().numpy()
+            manifest['system1_record_torques']=dict(source='joint_control.torques_substep (after clip_torques), every physics substep',
+                                                    saturation_rule='|tau| >= 0.95 * torque limit',torque_limits=dict(zip(env.dof_names,_tlim.tolist())))
         write_json(out/'run_manifest.json',manifest)
         results=[]
         for init in states:
@@ -225,7 +231,7 @@ def main():
             actual=env.simulator.agent_root_states[0].detach().cpu().numpy()
             if not np.isfinite(actual).all() or not np.allclose(actual,transformed,atol=1e-5):raise ValueError('Perturbation not applied to actual reset state')
             env._compute_observations();env._clip_observations();observations=env.obs_buf_dict
-            start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[];pd_diff=0.0
+            start=snapshot();frames=[start];terms={};reward=0.;captured=None;sonic_frames=[];pd_diff=0.0;tq=[]
             if driver is not None:driver.reset()
             if cwrap is not None:
                 cwrap._prev_t=command.time_steps.clone();cwrap._dones=torch.zeros_like(cwrap._dones)
@@ -241,6 +247,7 @@ def main():
                     observations,rewards,dones,extras=env.step({'actions':actions})
                 if captured is None:raise RuntimeError('Pre-reset state capture missing')
                 frames.append(captured);reward+=float(rewards[0].item())
+                if a.record_torques:tq.append(_tterm.torques_substep[0].detach().cpu().numpy().copy())
                 if driver is not None:
                     sonic_frames.append(captured_sonic);pd_diff=max(pd_diff,driver.check_pd_target() or 0.0)
                 terms={k:bool(v[0].item()) for k,v in extras['termination_terms'].items()}
@@ -267,6 +274,13 @@ def main():
                 result['pd_target_minus_qstar_max_abs']=pd_diff
                 if hasattr(driver,'episode_stats'):result.update(driver.episode_stats())
             result['trajectory']=str(out/(init['state_id']+'.trajectory.npz'))
+            if a.record_torques:
+                T_=np.stack(tq)  # [control step, substep, agent, dof]
+                np.savez_compressed(out/(init['state_id']+'.torques.npz'),torques=T_.astype(np.float32),torque_limits=_tlim,dof_names=np.array(env.dof_names))
+                sat=np.abs(T_)>=0.95*_tlim[None,None,None,:]
+                result['torque_saturation_fraction_per_agent_joint']=sat.mean(axis=(0,1)).tolist()
+                result['torque_substeps']=int(T_.shape[0]*T_.shape[1])
+                result['torques']=str(out/(init['state_id']+'.torques.npz'))
             if init['kind']=='nominal':
                 save_core4d_smalltable_viser(out/'nominal_viser.npz',channels,metadata=dict(manifest,fps=int(command.reference.fps),result=result,
                                               experiment_contract=experiment.checkpoint_contract if experiment else {}))

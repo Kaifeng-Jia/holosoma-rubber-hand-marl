@@ -66,6 +66,41 @@ REFERENCE = BIN_DIR / "core4d_pair_runtime_fps50.npz"
 CONTACT = BIN_DIR / "source_contact_diagnostics.npz"
 MESH = BIN_DIR / "bucket003_m.obj"
 G1_URDF = ROOT / "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf"
+WBT = ROOT / "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking"
+# T07: the four paper tasks. reference: two-agent runtime reference (Push: the frozen registered pair the evaluator checks
+# its runtime reference against, quaternions xyzw); object: collision geometry the simulator uses.
+CASES = dict(
+    bucket=dict(reference=REFERENCE, quat="wxyz", object=("mesh", MESH), contact=CONTACT,
+                object_urdf=BIN_DIR / "bucket003_training.urdf"),
+    table=dict(reference=WBT / "core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz", quat="wxyz",
+               object=("boxes", WBT / "core4d_smalltable5kg_A/desk001_5kg_training.urdf"), contact=None,
+               object_urdf=WBT / "core4d_smalltable5kg_A/desk001_5kg_training.urdf"),
+    pull=dict(reference=WBT / "rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz", quat="wxyz",
+              object=("boxes", WBT / "objects_widetable_plan5_pull_training.urdf"), contact=None,
+              object_urdf=WBT / "objects_widetable_plan5_pull_training.urdf"),
+    push=dict(reference=ROOT / "system1/evidence/checks/push_registered_loader_channels.npz", quat="xyzw",
+              object=("boxes", WBT / "objects_widetable_plan5_training.urdf"), contact=None,
+              object_urdf=WBT / "objects_widetable_plan5_training.urdf"),
+)
+
+
+def load_reference(case: str) -> dict:
+    """Two-agent reference with quaternions converted to wxyz (the convention of the rest of this module)."""
+    c = CASES[case]
+    ref = dict(np.load(c["reference"], allow_pickle=True))
+    if c["quat"] == "xyzw":
+        for k in ("agent_body_quat_w", "object_quat_w"):
+            ref[k] = np.asarray(ref[k])[..., [3, 0, 1, 2]]
+    ref["fps"] = np.asarray(float(np.asarray(ref["fps"]).reshape(-1)[0]))
+    return ref
+
+
+def object_sdf(case: str):
+    kind, path = CASES[case]["object"]
+    if kind == "mesh":
+        return GridSDF(path, resolution=0.003, cache_dir=ROOT / "logs_system1/t06/cache")
+    from system1.hand.sdf import BoxUnionSDF
+    return BoxUnionSDF(path)
 CONTACT_OUTER_M = 0.04          # existing soft band outer edge (source_contact_diagnostics.json)
 RAMP_S = 0.2                    # T06: ~0.2 s transitions
 CONTACT_TOL_M = 0.005           # a palm / finger group "touches" if its closest sample is within 5 mm
@@ -74,6 +109,8 @@ DEFAULT_W = dict(attach=1e4, pen=1e6, smooth=10.0, open=0.01, human=0.0)
 RIGID = ("hand_wrist", "hand_C_MC")  # links fixed to the flange (variant A: reported separately)
 PALM_GROUP_A = ("hand_C_MC", "thumb_MC", "hand_wrist")  # task book 2026-11-13: palm + thumb_MC (+ wrist housing, see finger_groups)
 GATE_CONTACT_FRAC = 0.8
+GATE_EXCESS_M = 0.01      # second revision (2026-11-13 15:30): palm group may be at most 1 cm deeper than the rubber hand
+GATE_STEP_RAD = 0.1       # second revision, gate 5: every finger joint changes by at most 0.1 rad per frame
 
 
 def sha256(p):
@@ -263,7 +300,8 @@ def rubber_hand_penetration(ref: dict, agent: int, side: str, sdf: GridSDF, chun
 
 
 def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames: np.ndarray, w: dict, q_human=None,
-                  iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None, variant: str = "v1"):
+                  iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None, variant: str = "v1", max_step=None,
+                  rate_weight: float = 0.0, rate_limit: float = 0.1):
     """q* (len(frames), 22) for the hand base poses base_obj (T, 4, 4) in the object frame.
     attach_frame_w: optional per-frame weight of the attach term (len(frames)); None = 1 on every frame (v1)."""
     T = len(frames)
@@ -283,12 +321,17 @@ def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames
         smooth = ((q[1:] - q[:-1]) ** 2).sum() if T > 1 else q.sum() * 0
         reg = ((q - q_open) ** 2).sum()
         loss = w["attach"] * attach + w["pen"] * pen + w["smooth"] * smooth + w["open"] * reg
+        if rate_weight and T > 1:  # hinge on the per-frame change above rate_limit (gate 5), lets the optimiser anticipate
+            loss = loss + rate_weight * (torch.relu((q[1:] - q[:-1]).abs() - rate_limit) ** 2).sum()
         if w.get("human", 0) and q_human is not None:
             loss = loss + w["human"] * ((q - q_human[frames]) ** 2).sum()
         loss.backward()
         opt.step()
         with torch.no_grad():
             q.copy_(torch.maximum(torch.minimum(q, hand.upper), hand.lower))
+            if max_step is not None:  # hard per-frame rate limit (forward pass; consecutive frames of `frames`)
+                for t in range(1, T):
+                    q[t] = torch.maximum(torch.minimum(q[t], q[t - 1] + max_step), q[t - 1] - max_step)
         if log is not None and (it % 100 == 0 or it == iters - 1):
             log(f"    it {it:4d} loss {loss.item():.4f} attach {attach.item():.5f} pen {pen.item():.3e} smooth {smooth.item():.4f}")
     return q.detach()
@@ -323,13 +366,31 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--iters", type=int, default=400)
     ap.add_argument("--human-weight", type=float, default=0.0, help="w of |q - q_human|^2 (0: no human finger data)")
+    ap.add_argument("--human-ref", type=Path, default=None,
+                    help="npz with q_human (T, 2, 44) in finger_joint_names order (system1/hand/human_fingers.py); needed for w > 0")
+    ap.add_argument("--smooth-weight", type=float, default=None, help=f"smoothness weight (default {DEFAULT_W['smooth']})")
+    ap.add_argument("--rate-weight", type=float, default=0.0,
+                    help="variant A: weight of sum relu(|q_t - q_t-1| - 0.1 rad)^2 (default 0 = off)")
+    ap.add_argument("--max-step-rad", type=float, default=None,
+                    help="variant A: hard limit on every finger joint's change per frame, applied after each optimiser step (default off)")
     ap.add_argument("--frames", type=str, default=None, help="optional 'start:stop' subset (smoke tests)")
+    ap.add_argument("--case", choices=tuple(CASES), default="bucket", help="T07 task (default bucket = T06)")
     ap.add_argument("--variant", choices=("v1", "A"), default="v1",
                     help="v1: human-palm contact frames, contact frames optimised (default, unchanged); "
                          "A: robot-palm contact frames, all frames optimised, rigid hand part reported separately")
     a = ap.parse_args()
+    if a.human_weight and a.human_ref is None:
+        raise NotImplementedError("w > 0 needs q_human from CORE4D finger keypoints (--human-ref, system1/hand/human_fingers.py)")
+    if a.human_weight and a.variant != "A":
+        raise NotImplementedError("w > 0 is implemented for --variant A only")
+    W = dict(DEFAULT_W)
+    if a.smooth_weight is not None:
+        W["smooth"] = a.smooth_weight
+    W["human"] = a.human_weight
+    q_hum_all = None
     if a.human_weight:
-        raise NotImplementedError("w > 0 needs q_human from CORE4D finger keypoints (separate demonstration reference)")
+        hz = np.load(a.human_ref, allow_pickle=True)
+        q_hum_all = np.asarray(hz["q_human"], float)
     a.out.mkdir(parents=True, exist_ok=True)
     logf = (a.out / "log.txt").open("w")
     def log(*x):
@@ -337,13 +398,20 @@ def main():
         print(s, flush=True)
         logf.write(s + "\n")
     t0 = time.time()
-    ref = dict(np.load(REFERENCE, allow_pickle=True))
-    con = np.load(CONTACT, allow_pickle=True)
-    dist = np.asarray(con["runtime_hand_surface_distances_m"], float)  # (T, agent, hand[left, right])
+    case = CASES[a.case]
+    ref = load_reference(a.case)
+    T0 = ref["agent_joint_pos"].shape[0]
+    if case["contact"] is not None:
+        con = np.load(case["contact"], allow_pickle=True)
+        dist = np.asarray(con["runtime_hand_surface_distances_m"], float)  # (T, agent, hand[left, right])
+    else:
+        if a.variant == "v1":
+            raise ValueError("v1 needs the human contact diagnostics, which exist only for bucket")
+        dist = np.full((T0, 2, 2), np.nan)
     fps = float(ref["fps"])
     T = ref["agent_joint_pos"].shape[0]
     sel = np.arange(T) if a.frames is None else np.arange(T)[slice(*[int(x) for x in a.frames.split(":")])]
-    sdf = GridSDF(MESH, resolution=0.003, cache_dir=ROOT / "logs_system1/t06/cache")
+    sdf = object_sdf(a.case)
     Robj = quat_wxyz_to_matrix(ref["object_quat_w"])
     pobj = np.asarray(ref["object_pos_w"], float)
     hands = {s: SharpaHand(s) for s in SIDES}
@@ -352,14 +420,19 @@ def main():
     new_joint = np.asarray(ref["agent_joint_pos"], float).copy()
     finger = np.zeros((T, 2, 44))
     blend = np.zeros((T, 2, 2))
-    summary = dict(mode=a.mode, variant=a.variant, frames=int(T), evaluated_frames=[int(sel[0]), int(sel[-1])], fps=fps, weights=DEFAULT_W,
+    summary = dict(mode=a.mode, variant=a.variant, frames=int(T), evaluated_frames=[int(sel[0]), int(sel[-1])], fps=fps, weights=W,
+                   human_ref=None if a.human_ref is None else dict(path=str(a.human_ref), sha256=sha256(a.human_ref)),
+                   max_step_rad=a.max_step_rad, rate_weight=a.rate_weight, iters=a.iters,
                    contact_definition=(f"source human palm distance < {CONTACT_OUTER_M} m (source_contact_diagnostics.npz)" if a.variant == "v1"
                                        else f"robot palm point (mean of Sharpa wrist, index/middle/pinky MCP) signed distance < {CONTACT_OUTER_M} m"),
                    rigid_links=list(RIGID) if a.variant == "A" else None,
                    contact_tolerance_m=CONTACT_TOL_M, ramp_s=RAMP_S, gate_max_penetration_m=GATE_PEN_M,
-                   inputs=dict(reference=str(REFERENCE.relative_to(ROOT)), reference_sha256=sha256(REFERENCE),
-                               contact=str(CONTACT.relative_to(ROOT)), contact_sha256=sha256(CONTACT),
-                               mesh=str(MESH.relative_to(ROOT)), mesh_sha256=sha256(MESH),
+                   case=a.case,
+                   inputs=dict(reference=str(case["reference"].relative_to(ROOT)), reference_sha256=sha256(case["reference"]),
+                               contact=None if case["contact"] is None else str(case["contact"].relative_to(ROOT)),
+                               contact_sha256=None if case["contact"] is None else sha256(case["contact"]),
+                               object=str(case["object"][1].relative_to(ROOT)), object_kind=case["object"][0],
+                               object_sha256=sha256(case["object"][1]),
                                g1_urdf_sha256=sha256(G1_URDF),
                                sharpa_urdf_sha256={s: sha256(hands[s].path) for s in SIDES}),
                    mount={s: mounts[s][1] for s in SIDES}, hands={})
@@ -388,10 +461,12 @@ def main():
             cf = np.flatnonzero(contact)
             log(f"agent {agent} {side}: wrist {json.dumps({k: (round(v, 6) if isinstance(v, float) else v) for k, v in wdiag.items()})}; contact frames {len(cf)}")
             if a.mode == "track" and a.variant == "A":
-                qs = optimise_hand(hand, base_t, sdf, sel, DEFAULT_W, iters=a.iters, log=log, attach_frame_w=s[sel], variant="A")
+                qh = None if q_hum_all is None else torch.as_tensor(q_hum_all[:, agent, hi * 22:(hi + 1) * 22])
+                qs = optimise_hand(hand, base_t, sdf, sel, W, q_human=qh, iters=a.iters, log=log, attach_frame_w=s[sel], variant="A",
+                                   max_step=a.max_step_rad, rate_weight=a.rate_weight)
                 qfull[sel] = qs
             elif a.mode == "track" and len(cf):
-                qc = optimise_hand(hand, base_t, sdf, cf, DEFAULT_W, iters=a.iters, log=log)
+                qc = optimise_hand(hand, base_t, sdf, cf, W, iters=a.iters, log=log)
                 qstar = q_open.expand(T, 22).clone()
                 qstar[cf] = qc
                 ramp = np.flatnonzero((s > 0) & ~contact)
@@ -405,7 +480,8 @@ def main():
             lim_ok = bool(((qfull >= hand.lower - 1e-9) & (qfull <= hand.upper + 1e-9)).all())
             ok_contact = ev["palm_touch"][cf] & (ev["fingers_touching"][cf] >= 2) if len(cf) else np.array([], bool)
             evm = np.isin(np.arange(T), sel)
-            dq = np.abs(np.diff(qfull[sel].numpy(), axis=0)).max(1) if len(sel) > 1 else np.zeros(1)
+            dqj = np.abs(np.diff(qfull[sel].numpy(), axis=0)) if len(sel) > 1 else np.zeros((1, 22))
+            dq = dqj.max(1)
             summary["hands"][f"agent{agent + 1}_{side}"] = dict(
                 wrist=wdiag, contact_frames=int(len(cf)), ramp_frames=int(((s > 0) & ~contact).sum()),
                 max_penetration_m=float(ev["max_pen"][evm].max()), frames_penetration_over_1cm=int((ev["max_pen"][evm] > GATE_PEN_M).sum()),
@@ -425,7 +501,8 @@ def main():
                 contact_frames_2_fingers=int((ev["fingers_touching"][cf] >= 2).sum()) if len(cf) else 0,
                 robot_palm_point_sd_m=dict(min=float(palm_sd[evm].min()), p50=float(np.median(palm_sd[evm]))),
                 finger_step_max_rad=float(dq.max()), finger_speed_max_rad_s=float(dq.max() * fps),
-                finger_steps_over_0p1_rad=int((dq > 0.1).sum()), finger_steps_over_0p5_rad=int((dq > 0.5).sum()))
+                finger_steps_over_0p1_rad=int((dq > 0.1).sum()), finger_steps_over_0p5_rad=int((dq > 0.5).sum()),
+                finger_step_max_rad_per_joint={n: float(v) for n, v in zip(hand.dof_names, dqj.max(0))})
             gA = None
             if a.variant == "A":  # revised gate (task book 2026-11-13), dense 3 mm samples
                 gA = evaluate_gate_A(hand, qfull, base_t, sdf)
@@ -439,6 +516,18 @@ def main():
                                    frames_deeper_than_rubber_by_1mm=int((exc > 0.001).sum()), max_excess_over_rubber_m=float(exc.max()),
                                    contact_frames_palm_and_2_fingers=int(okc.sum()),
                                    contact_fraction_palm_and_2_fingers=float(okc.mean()) if len(cf) else None)
+                inh = rub > GATE_PEN_M                          # frames where the original rubber hand is > 1 cm inside
+                fin = gA["finger_pen"]
+                summary["hands"][f"agent{agent + 1}_{side}"]["gate_revised2"] = dict(
+                    palm_group_max_excess_over_rubber_m=rev["palm_group"]["max_excess_over_rubber_m"],
+                    palm_group_frames_excess_over_1cm=int(((gA["palm_group_pen"] - rub)[evm] > GATE_EXCESS_M).sum()),
+                    finger_max_penetration_where_rubber_within_1cm_m=float(fin[evm & ~inh].max()) if (evm & ~inh).any() else 0.0,
+                    frames_finger_over_1cm_where_rubber_within_1cm=int((fin[evm & ~inh] > GATE_PEN_M).sum()),
+                    frames_rubber_over_1cm=int((evm & inh).sum()),
+                    inherited_frames_finger_over_1cm=int((fin[evm & inh] > GATE_PEN_M).sum()),
+                    inherited_finger_max_penetration_m=float(fin[evm & inh].max()) if (evm & inh).any() else 0.0,
+                    contact_fraction_palm_and_2_fingers=rev["palm_group"]["contact_fraction_palm_and_2_fingers"],
+                    finger_step_max_rad=float(dq.max()), frames_step_over_0p1_rad=int((dq > GATE_STEP_RAD + 1e-12).sum()))
                 summary["hands"][f"agent{agent + 1}_{side}"]["gate_revised"] = dict(
                     dense_samples_per_hand=gA["samples"], rubber_max_penetration_m=float(rub[evm].max()),
                     rubber_frames_over_1cm=int((rub[evm] > GATE_PEN_M).sum()),
@@ -480,11 +569,26 @@ def main():
             c3_palm_core_at_least_80pct=all(x["palm_core"]["contact_fraction_palm_and_2_fingers"] is None
                                             or x["palm_core"]["contact_fraction_palm_and_2_fingers"] >= GATE_CONTACT_FRAC for x in g),
             joint_limits_ok=summary["gate"]["joint_limits_ok"])
+        g2 = [h["gate_revised2"] for h in hs]
+        summary["gate_revised2"] = dict(  # task book second revision (2026-11-13 15:30)
+            c1_palm_group_excess_within_1cm=all(x["palm_group_max_excess_over_rubber_m"] <= GATE_EXCESS_M for x in g2),
+            c1_max_excess_m=max(x["palm_group_max_excess_over_rubber_m"] for x in g2),
+            c2_fingers_within_1cm_where_rubber_within_1cm=all(x["frames_finger_over_1cm_where_rubber_within_1cm"] == 0 for x in g2),
+            c2_finger_max_where_rubber_within_1cm_m=max(x["finger_max_penetration_where_rubber_within_1cm_m"] for x in g2),
+            c2_inherited_frames_finger_over_1cm=[x["inherited_frames_finger_over_1cm"] for x in g2],
+            c3_at_least_80pct=summary["gate_revised"]["c3_at_least_80pct"],
+            c3_contact_fraction_palm_and_2_fingers=summary["gate_revised"]["c3_contact_fraction_palm_and_2_fingers"],
+            c5_finger_step_within_0p1_rad=all(x["finger_step_max_rad"] <= GATE_STEP_RAD + 1e-12 for x in g2),
+            c5_finger_step_max_rad=max(x["finger_step_max_rad"] for x in g2),
+            joint_limits_ok=summary["gate"]["joint_limits_ok"])
     summary["seconds"] = time.time() - t0
     finger_names = [n for s in SIDES for n in hands[s].dof_names]
     np.savez_compressed(a.out / "finger_reference.npz", agent_joint_pos=new_joint, agent_finger_joint_pos=finger,
                         finger_joint_names=np.array(finger_names), joint_names=ref["joint_names"], contact_blend=blend,
-                        fps=ref["fps"], mode=np.array(a.mode), variant=np.array(a.variant))
+                        fps=ref["fps"], mode=np.array(a.mode), variant=np.array(a.variant), case=np.array(a.case),
+                        pelvis_pos_w=np.asarray(ref["agent_body_pos_w"])[:, :, [str(x) for x in ref["body_names"]].index("pelvis")],
+                        pelvis_quat_w=np.asarray(ref["agent_body_quat_w"])[:, :, [str(x) for x in ref["body_names"]].index("pelvis")],
+                        object_pos_w=np.asarray(ref["object_pos_w"]), object_quat_w=np.asarray(ref["object_quat_w"]))
     import csv
     with (a.out / "per_frame.csv").open("w", newline="") as fh:
         wtr = csv.DictWriter(fh, fieldnames=list(per_frame[0]))
@@ -492,6 +596,8 @@ def main():
         wtr.writerows(per_frame)
     (a.out / "summary.json").write_text(json.dumps(summary, indent=1, default=float))
     log("gate", json.dumps(summary["gate"]), "seconds %.0f" % summary["seconds"])
+    if "gate_revised2" in summary:
+        log("gate_revised2", json.dumps(summary["gate_revised2"]))
     return 0
 
 
