@@ -28,6 +28,13 @@ exports_system1/cloud_transfer/<run>/ (sha256 checked) and evaluated here with t
 (c2_curve/...). D curve jobs listed there were handed over by the cloud (claims/<name>/handover.json) and are run here
 without a new claim. Off (default) = old behaviour.
 
+--finals-first (Kevin 2026-11-13: after the laptop restart no evaluation started for 48 min because every finished run was
+fetched again, all checkpoints, metrics and ops logs, over a slow link): a run already fetched completely
+(exports_system1/train/<run>/fetched.json, written only after every file's sha256 matched) is not fetched again; a newly
+finished run gets only its final checkpoint and run_config.json (sha256 checked against the cloud, fetched_final.json),
+one run per loop pass, so evaluations start in between. The rest of the run is copied in the final cloud sync.
+Off (default) = old behaviour.
+
 --no-d-curve (Kevin 2026-11-12: every training-speed curve point, C and D, from the cloud 4090; the paper table stays on
 this laptop): D curve jobs (d_curve/...) are no longer started here, except those raised to priority 0 (paper finals).
 Off (default) = old behaviour.
@@ -214,6 +221,26 @@ def fetch_run(label):
         subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{REMOTE_TRAIN}/ops/{f}", str(dst / "ops" / f)], check=True, timeout=300)
     (dst / "SHA256SUMS.remote").write_text("".join(f"{h}  {f}\n" for f, h in sorted(files.items())))
     (dst / "fetched.json").write_text(json.dumps(dict(label=label, fetched=now(), files=files, ops=ops), indent=1))
+    return dst
+
+
+def fetch_final(label):
+    """Final checkpoint + run_config.json of a finished run (sha256 checked); returns local dir."""
+    meta = parse(label)
+    target = 8050 if meta["segment"] == "joint8000" else 12000
+    dst = EXPORT / "train" / label
+    dst.mkdir(parents=True, exist_ok=True)
+    names = [f"model_{target}.pt", "run_config.json"]
+    rc, out = ssh(f"cd {REMOTE_TRAIN}/{label} && sha256sum " + " ".join(names), timeout=300)
+    files = {l.split()[1]: l.split()[0] for l in out.strip().splitlines() if len(l.split()) == 2 and len(l.split()[0]) == 64}
+    if set(files) != set(names):
+        raise RuntimeError(f"{label}: remote final files {sorted(files)}")
+    for f, h in files.items():
+        if not ((dst / f).exists() and sha(dst / f) == h):
+            subprocess.run(SCP + [f"root@connect.nmb1.seetacloud.com:{REMOTE_TRAIN}/{label}/{f}", str(dst / f)], check=True, timeout=1800)
+        if sha(dst / f) != h:
+            raise RuntimeError(f"sha mismatch after copy: {dst / f}")
+    (dst / "fetched_final.json").write_text(json.dumps(dict(label=label, fetched=now(), files=files), indent=1))
     return dst
 
 
@@ -490,16 +517,24 @@ def run(a):
     running = {}  # slot -> (job, proc, log)
     claimed_elsewhere = set()
     last_poll = 0.0
+    to_fetch = []
     while True:
         if time.time() - last_poll > a.poll_seconds:
             last_poll = time.time()
             try:
                 dn, bad = finished_remote()
-                for label in dn:
-                    if label not in fetched:
-                        d = fetch_run(label)
-                        fetched[label] = jobs_for_run(label, d)
-                        print(now(), "fetched", label, len(fetched[label]), "jobs", flush=True)
+                if a.finals_first:
+                    for label in dn:
+                        d = EXPORT / "train" / label
+                        if label not in fetched and ((d / "fetched.json").exists() or (d / "fetched_final.json").exists()):
+                            fetched[label] = jobs_for_run(label, d)  # fetched (sha-checked) before: not again
+                    to_fetch = [l for l in dn if l not in fetched]
+                else:
+                    for label in dn:
+                        if label not in fetched:
+                            d = fetch_run(label)
+                            fetched[label] = jobs_for_run(label, d)
+                            print(now(), "fetched", label, len(fetched[label]), "jobs", flush=True)
                 for label in bad:
                     if label not in run_failures:
                         run_failures[label] = now()
@@ -511,6 +546,13 @@ def run(a):
                     fetch_transfer()
                 except Exception as e:  # retry at the next poll
                     print(now(), "hand-over fetch error", repr(e)[:300], flush=True)
+        if a.finals_first and to_fetch:  # one newly finished run per pass: final checkpoint only
+            label = to_fetch.pop(0)
+            try:
+                fetched[label] = jobs_for_run(label, fetch_final(label))
+                print(now(), "fetched final checkpoint", label, len(fetched[label]), "jobs", flush=True)
+            except Exception as e:  # retry at the next poll
+                print(now(), "final fetch error", label, repr(e)[:300], flush=True)
         handed = handover_names() if a.cloud_transfer else {}
         pending = ([j for js in fetched.values() for j in js] + recheck_jobs() + d_paper_pm8_jobs() + early_curve_jobs() + b_jobs()
                    + d_curve_jobs() + (transfer_jobs() if a.cloud_transfer else []))
@@ -563,6 +605,7 @@ def main():
     p.add_argument("--slots", type=int, default=2)
     p.add_argument("--poll-seconds", type=int, default=600)
     p.add_argument("--dry-run", action="store_true")
+    p.add_argument("--finals-first", action="store_true", help="fetch only final checkpoints of new runs, one per pass; no re-fetch")
     p.add_argument("--no-d-curve", action="store_true", help="do not start D curve jobs here (curve points on the cloud 4090)")
     p.add_argument("--cloud-transfer", action="store_true", help="take over the cloud's unfinished evaluations (transfer_to_laptop.json)")
     p.add_argument("--skip-missing", action="store_true", help="catalog: leave out V3-25-27 runs whose copy is unfinished")
