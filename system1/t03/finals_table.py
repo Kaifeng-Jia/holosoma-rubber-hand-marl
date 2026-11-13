@@ -22,6 +22,11 @@ C_RUNS = {"pull": [f"{k}_pull_m20kg_seed{s}_joint8000" for k, s in (("cin", 721)
           "table": [f"{k}_table_m5kg_seed{s}_fresh12000" for k, s in (("cin", 721), ("cout", 721), ("cin", 722), ("cin", 723))],
           "bucket": [f"{k}_bucket_m1kg_seed{s}_fresh12000" for k, s in (("cin", 721), ("cout", 721), ("cin", 722), ("cin", 723))]}
 D_RUNS = {"pull": ("D_pull_paper_seed{s}", 8050), "table": ("D_table_paper_T-07_seed{s}", 12000), "bucket": ("D_bucket_paper_B-RZ0_seed{s}", 12000)}
+ORIG_MASS = dict(pull=20.0, table=5.0, bucket=1.0)
+# T04 per-mass retrained runs (seed 721; Kevin 2026-11-13: finals.csv carries them too, with mass_kg)
+MASS_RUNS = {"pull": [f"{k}_pull_m40kg_seed721_joint8000" for k in ("d", "cin")],
+             "table": [f"{k}_table_m{m}kg_seed721_fresh12000" for k in ("d", "cin") for m in (10, 20)],
+             "bucket": [f"{k}_bucket_m{m}kg_seed721_fresh12000" for k in ("d", "cin") for m in (2, 4, 8)]}
 
 
 def sha(p):
@@ -61,13 +66,21 @@ def main():
             for lvl in (2, 8):
                 r, why = summ(PT / "final" / f"{run}_pm{lvl}")
                 rows.append(dict(task=task, scheme=run.split("_")[0], run=run, seed=int(run.split("seed")[1][:3]), level=lvl,
+                                 mass_kg=ORIG_MASS[task], retrained="original mass",
                                  status="完成" if r else "未完成", reason=why, **(r or {})))
         lab, it = D_RUNS[task]
         for s in (721, 722, 723):
             for lvl, sub in ((2, "d_curve"), (8, "d_paper_final")):
                 run = lab.format(s=s)
                 r, why = summ(PT / sub / run / f"it{it:05d}_pm{lvl}")
-                rows.append(dict(task=task, scheme="D", run=run, seed=s, level=lvl, status="完成" if r else "未完成", reason=why, **(r or {})))
+                rows.append(dict(task=task, scheme="D", run=run, seed=s, level=lvl, mass_kg=ORIG_MASS[task], retrained="original mass",
+                                 status="完成" if r else "未完成", reason=why, **(r or {})))
+        for run in MASS_RUNS[task]:
+            for lvl in (2, 8):
+                r, why = summ(PT / "final" / f"{run}_pm{lvl}")
+                rows.append(dict(task=task, scheme={"d": "D", "cin": "cin"}[run.split("_")[0]], run=run, seed=721, level=lvl,
+                                 mass_kg=float(run.split("_m")[1].split("kg")[0]), retrained="T04 retrained at this mass",
+                                 status="完成" if r else "未完成", reason=why, **(r or {})))
     keys = []
     for r in rows:
         keys += [k for k in r if k not in keys]
