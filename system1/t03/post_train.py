@@ -230,7 +230,7 @@ def fetch_final(label):
     target = 8050 if meta["segment"] == "joint8000" else 12000
     dst = EXPORT / "train" / label
     dst.mkdir(parents=True, exist_ok=True)
-    names = [f"model_{target}.pt", "run_config.json"]
+    names = [f"model_{target:05d}.pt", "run_config.json"]  # cloud names are zero-padded (model_08050.pt)
     rc, out = ssh(f"cd {REMOTE_TRAIN}/{label} && sha256sum " + " ".join(names), timeout=300)
     files = {l.split()[1]: l.split()[0] for l in out.strip().splitlines() if len(l.split()) == 2 and len(l.split()[0]) == 64}
     if set(files) != set(names):
