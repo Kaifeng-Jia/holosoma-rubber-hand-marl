@@ -53,7 +53,15 @@ PARSER.add_argument("--c-train-diag", action="store_true",
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 PARSER.add_argument("--episode-telemetry", action="store_true")
+PARSER.add_argument("--finger-mode", choices=("locked", "track", "learn"), default=None,
+                    help="System1 T06/T07: G1 + Sharpa hands (system1/hand); default off = the rubber-hand robot, unchanged")
+PARSER.add_argument("--hand-reference", type=Path, default=None,
+                    help="System1 T06/T07: 73-joint runtime reference (system1/hand/sharpa_reference.py); required with --finger-mode")
 ARGS = PARSER.parse_args()
+if (ARGS.finger_mode is None) != (ARGS.hand_reference is None):
+    PARSER.error("--finger-mode and --hand-reference go together")
+if ARGS.finger_mode is not None and (ARGS.sonic_residual or ARGS.experiment not in ("bucket003", "smalltable5kg_A")):
+    PARSER.error("--finger-mode: CORE4D pair experiments (bucket003, smalltable5kg_A) with the D policy only (C with hands: separate switch)")
 IS_BUCKET = ARGS.reward_variant in BUCKET_REWARD_CHOICES
 if ARGS.experiment == "smalltable5kg_A" and ARGS.reward_variant not in ("bucket_A", "bucket_A_no_rel_no_height"):
     PARSER.error("smalltable5kg_A requires bucket_A or bucket_A_no_rel_no_height")
@@ -193,6 +201,12 @@ if ARGS.sonic_residual:
     sys.path.insert(0, str(REPO_ROOT))
     from system1.scheme_a import with_sonic_pd
     CONFIG = with_sonic_pd(CONFIG)  # hip_pitch PD -> SONIC, action scales frozen (F2)
+HAND = None
+if ARGS.finger_mode is not None:  # System1 T06/T07: G1 + Sharpa (off = unchanged)
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.hand.hand_config import with_sharpa_pair
+    HAND = dict(finger_mode=ARGS.finger_mode, reference=ARGS.hand_reference.expanduser().resolve())
+    CONFIG = with_sharpa_pair(CONFIG, ARGS.finger_mode, HAND["reference"])
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -246,6 +260,9 @@ def _append_jsonl(path: Path, payload: dict) -> None:
 
 
 def _with_system1(state: dict) -> dict:
+    if ARGS.finger_mode is not None:
+        state["system1_finger_mode"] = ARGS.finger_mode
+        state["system1_hand_reference_sha256"] = _sha256(ARGS.hand_reference.expanduser().resolve())
     if ARGS.sonic_residual:
         state["system1_sonic_residual"] = True
         if ARGS.sonic_residual_kind != "v1":
@@ -396,9 +413,15 @@ def main() -> int:
             if asset_root.startswith("@holosoma/"):
                 asset_root = asset_root.replace("@holosoma", get_holosoma_root())
             robot_path = (Path(asset_root) / CONFIG.robot.asset.urdf_file).resolve()
-            training_robot_urdf_sha256 = _require_sha256(
-                robot_path, geometry_contract["training_robot_urdf_sha256"], "interaction robot URDF"
-            )
+            if HAND is None:
+                training_robot_urdf_sha256 = _require_sha256(
+                    robot_path, geometry_contract["training_robot_urdf_sha256"], "interaction robot URDF"
+                )
+            else:  # the bucket contract names the rubber-hand URDF; its landmarks are G1 bodies the hand robot also has
+                training_robot_urdf_sha256 = _sha256(robot_path)
+                HAND["robot_urdf"] = str(robot_path)
+                HAND["robot_urdf_sha256"] = training_robot_urdf_sha256
+                HAND["contract_robot_urdf_sha256"] = geometry_contract["training_robot_urdf_sha256"]
         if output_dir.exists() and any(output_dir.iterdir()):
             raise FileExistsError(
                 "Output directory is not empty: "
@@ -431,10 +454,16 @@ def main() -> int:
         if ARGS.sonic_residual and ARGS.sonic_residual_kind == "in":
             from system1.scheme_c import C_IN_PPO_OVERRIDES
             ppo_config = replace(ppo_config, **C_IN_PPO_OVERRIDES)  # T03 C v2: C-in init std 0.3, entropy 0
-        models = initialize_core4d_smalltable_model_bundle(
-            ppo_config,
-            device=env.device,
-        )
+        if HAND is None:
+            models = initialize_core4d_smalltable_model_bundle(
+                ppo_config,
+                device=env.device,
+            )
+        else:
+            from system1.hand.hand_mappo import HandTrainDiag, initialize_hand_model_bundle, patch_core4d_dims
+            HAND["mappo_dims"] = patch_core4d_dims(ARGS.finger_mode)
+            models = initialize_hand_model_bundle(ppo_config, finger_mode=ARGS.finger_mode, device=env.device)
+            hand_diag = HandTrainDiag(env)
         learner = Core4DSmallTablePPO(
             models,
             ppo_config,
@@ -504,9 +533,9 @@ def main() -> int:
                 "actor_obs": 154,
                 "teammate_obs": 4,
             },
-            "actor_input_dim": 158,
-            "action_dim_per_agent": 29,
-            "critic_input_dim": 527,
+            "actor_input_dim": 158 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTOR_OBS_DIM"],
+            "action_dim_per_agent": 29 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTION_DIM"],
+            "critic_input_dim": 527 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_CRITIC_OBS_DIM"],
             "shared_actor": True,
             "runtime_reference": str(RUNTIME_REFERENCE_PATH.relative_to(REPO_ROOT)),
             "runtime_reference_sha256": runtime_reference_sha256,
@@ -563,6 +592,11 @@ def main() -> int:
             run_config["episode_telemetry_contract"] = CONTRACT
         if OBJECT_MASS_VARIANT is not None:
             run_config["system1_object_mass_variant"] = OBJECT_MASS_VARIANT
+        if HAND is not None:
+            run_config["system1_hand"] = dict(HAND, reference=str(HAND["reference"]), reference_sha256=_sha256(HAND["reference"]),
+                                              num_dof=int(env.num_dof), dof_names=list(env.dof_names),
+                                              object_hand_contact_bodies=list(CONFIG.simulator.config.object_hand_contact_bodies),
+                                              action_dim_per_agent=int(env.action_manager.get_term("joint_control").policy_dim))
         if ARGS.sonic_residual:
             from system1.scheme_c import scheme_c_run_config
             run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32, kind=ARGS.sonic_residual_kind,
@@ -647,6 +681,8 @@ def main() -> int:
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")
             if ARGS.c_train_diag and iteration % env.train_diag.every == 0:
                 record["system1_c_train_diag"] = env.train_diag.summary(models.actor)
+            if HAND is not None and iteration % hand_diag.every == 0:
+                record["system1_hand_train_diag"] = hand_diag.summary(models.actor)
             _append_jsonl(metrics_path, record)
             print(json.dumps(record, sort_keys=True), flush=True)
 

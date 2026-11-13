@@ -513,8 +513,8 @@ class IsaacSim(BaseSimulator):
                             f"{robot_prim_path}/{body_name}"
                             for robot_prim_path in self._robot_prim_path_expressions()
                             for body_name in (
-                                "left_rubber_hand_link",
-                                "right_rubber_hand_link",
+                                self.simulator_config.object_hand_contact_bodies
+                                or ("left_rubber_hand_link", "right_rubber_hand_link")
                             )
                         ],
                     )

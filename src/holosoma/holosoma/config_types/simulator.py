@@ -526,6 +526,10 @@ class SimulatorInitConfig:
     or enable the heavier full-body contact-position diagnostic sensors.
     """
 
+    object_hand_contact_bodies: list[str] | None = None
+    """System1 T06/T07: robot rigid bodies counted as "hand" by the object/hand contact sensor, left hand bodies first,
+    then right (the Sharpa links). None = the rubber hands (left_rubber_hand_link, right_rubber_hand_link), unchanged."""
+
     robot_mjcf_filter: MujocoXMLFilterCfg = field(default_factory=MujocoXMLFilterCfg)
     """MuJoCo-specific XML filtering configuration for robot MJCF files."""
 

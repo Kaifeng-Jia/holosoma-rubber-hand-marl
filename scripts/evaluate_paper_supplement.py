@@ -167,7 +167,7 @@ def main():
                         reference_frame=np.asarray(frame),reward_reference_frame=np.asarray(int(command.time_steps[0].item())),
                         episode_step=np.asarray(step))
             sensor=getattr(env.simulator,'object_hand_contact_sensor',None)
-            if sensor is not None:result['hand_object_normal_force_w']=array(sensor.data.force_matrix_w[:,0].reshape(-1,2,2,3))
+            if sensor is not None:result['hand_object_normal_force_w']=array(sensor.data.force_matrix_w[:,0].reshape(-1,2,sensor.data.force_matrix_w.shape[2]//2,3))  # rubber hands: [-1,2,2,3] as before
             return result
         captured=None;captured_sonic=None
         original_reward=env._compute_reward

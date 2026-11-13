@@ -214,11 +214,15 @@ class BucketInteractionReward(RewardTermBase):
         sensor = getattr(env.simulator, "object_hand_contact_sensor", None)
         if sensor is None:
             raise ValueError("All bucket variants require the same object_hand_contact_sensor")
-        if tuple(sensor.cfg.filter_prim_paths_expr) != HAND_FILTER_PATHS:
-            raise ValueError("Bucket hand filters must be Robot L/R then Robot_1 L/R, explicit rigid-body paths")
+        hand_bodies = getattr(env.simulator.simulator_config, "object_hand_contact_bodies", None)  # System1 T06/T07
+        expected = HAND_FILTER_PATHS if not hand_bodies else tuple(
+            f"/World/envs/env_.*/{robot}/{body}" for robot in ("Robot", "Robot_1") for body in hand_bodies)
+        if tuple(sensor.cfg.filter_prim_paths_expr) != expected:
+            raise ValueError("Bucket hand filters must be Robot hand bodies then Robot_1 hand bodies, explicit rigid-body paths")
+        self._hand_filters = len(expected)
         forces = sensor.data.force_matrix_w
-        if forces is None or forces.shape != (env.num_envs, 1, 4, 3):
-            raise ValueError("Bucket filtered normal force matrix must have shape [N, 1, 4, 3]")
+        if forces is None or forces.shape != (env.num_envs, 1, self._hand_filters, 3):
+            raise ValueError(f"Bucket filtered normal force matrix must have shape [N, 1, {self._hand_filters}, 3]")
         self._body_indexes = torch.tensor([names.index(name) for name in self.point_body_names], device=env.device)
         self._sensor = sensor
         self._command = command
@@ -252,11 +256,11 @@ class BucketInteractionReward(RewardTermBase):
         height = torch.exp(-squared[:, 2] / HEIGHT_SIGMA_M**2)
         relative = torch.exp(-error.mean(dim=1) / VECTOR_SIGMA_M**2)
         forces = self._sensor.data.force_matrix_w
-        if forces is None or forces.shape != (env.num_envs, 1, 4, 3):
-            raise ValueError("Bucket filtered normal force matrix must retain shape [N, 1, 4, 3]")
-        # Norm each hand independently before any agent aggregation, avoiding
-        # cancellation of opposing left/right clamping forces.
-        contacts = torch.linalg.vector_norm(forces[:, 0].reshape(env.num_envs, 2, 2, 3), dim=-1).gt(CONTACT_THRESHOLD_N).any(dim=-1)
+        if forces is None or forces.shape != (env.num_envs, 1, self._hand_filters, 3):
+            raise ValueError("Bucket filtered normal force matrix must retain its [N, 1, hand filters, 3] shape")
+        # Norm each hand body independently before any agent aggregation, avoiding
+        # cancellation of opposing left/right clamping forces (rubber hands: 2 bodies per robot, as before).
+        contacts = torch.linalg.vector_norm(forces[:, 0].reshape(env.num_envs, 2, self._hand_filters // 2, 3), dim=-1).gt(CONTACT_THRESHOLD_N).any(dim=-1)
         episode_steps = getattr(env, "episode_length_buf", None)
         if episode_steps is not None:
             if episode_steps.shape != (env.num_envs,):
