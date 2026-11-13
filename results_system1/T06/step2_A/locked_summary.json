@@ -104,7 +104,34 @@
     "p50": 0.4789396076041377
    },
    "finger_step_max_rad": 0.0,
-   "finger_speed_max_rad_s": 0.0
+   "finger_speed_max_rad_s": 0.0,
+   "finger_steps_over_0p1_rad": 0,
+   "finger_steps_over_0p5_rad": 0,
+   "gate_revised": {
+    "dense_samples_per_hand": 39779,
+    "rubber_max_penetration_m": 0.027906680681766913,
+    "rubber_frames_over_1cm": 120,
+    "finger_max_penetration_m": 0.08000023230026392,
+    "frames_finger_over_1cm": 132,
+    "contact_frames_finger_over_1cm": 27,
+    "contact_frames_2_fingers": 27,
+    "palm_group": {
+     "max_penetration_m": 0.04164702138486335,
+     "frames_deeper_than_rubber": 72,
+     "frames_deeper_than_rubber_by_1mm": 69,
+     "max_excess_over_rubber_m": 0.013982019469551292,
+     "contact_frames_palm_and_2_fingers": 27,
+     "contact_fraction_palm_and_2_fingers": 1.0
+    },
+    "palm_core": {
+     "max_penetration_m": 0.04164702138486335,
+     "frames_deeper_than_rubber": 72,
+     "frames_deeper_than_rubber_by_1mm": 69,
+     "max_excess_over_rubber_m": 0.013982019469551292,
+     "contact_frames_palm_and_2_fingers": 27,
+     "contact_fraction_palm_and_2_fingers": 1.0
+    }
+   }
   },
   "agent1_right": {
    "wrist": {
@@ -150,7 +177,34 @@
     "p50": 0.10182451646375326
    },
    "finger_step_max_rad": 0.0,
-   "finger_speed_max_rad_s": 0.0
+   "finger_speed_max_rad_s": 0.0,
+   "finger_steps_over_0p1_rad": 0,
+   "finger_steps_over_0p5_rad": 0,
+   "gate_revised": {
+    "dense_samples_per_hand": 39552,
+    "rubber_max_penetration_m": 0.003682733949861583,
+    "rubber_frames_over_1cm": 0,
+    "finger_max_penetration_m": 0.03144566548380677,
+    "frames_finger_over_1cm": 50,
+    "contact_frames_finger_over_1cm": 0,
+    "contact_frames_2_fingers": 0,
+    "palm_group": {
+     "max_penetration_m": 0.0,
+     "frames_deeper_than_rubber": 0,
+     "frames_deeper_than_rubber_by_1mm": 0,
+     "max_excess_over_rubber_m": 0.0,
+     "contact_frames_palm_and_2_fingers": 0,
+     "contact_fraction_palm_and_2_fingers": null
+    },
+    "palm_core": {
+     "max_penetration_m": 0.0,
+     "frames_deeper_than_rubber": 0,
+     "frames_deeper_than_rubber_by_1mm": 0,
+     "max_excess_over_rubber_m": 0.0,
+     "contact_frames_palm_and_2_fingers": 0,
+     "contact_fraction_palm_and_2_fingers": null
+    }
+   }
   },
   "agent2_left": {
    "wrist": {
@@ -196,7 +250,34 @@
     "p50": 0.08023962356149278
    },
    "finger_step_max_rad": 0.0,
-   "finger_speed_max_rad_s": 0.0
+   "finger_speed_max_rad_s": 0.0,
+   "finger_steps_over_0p1_rad": 0,
+   "finger_steps_over_0p5_rad": 0,
+   "gate_revised": {
+    "dense_samples_per_hand": 39779,
+    "rubber_max_penetration_m": 0.036578011288845816,
+    "rubber_frames_over_1cm": 116,
+    "finger_max_penetration_m": 0.07379965230843931,
+    "frames_finger_over_1cm": 343,
+    "contact_frames_finger_over_1cm": 107,
+    "contact_frames_2_fingers": 70,
+    "palm_group": {
+     "max_penetration_m": 0.048855337475419175,
+     "frames_deeper_than_rubber": 156,
+     "frames_deeper_than_rubber_by_1mm": 154,
+     "max_excess_over_rubber_m": 0.01485260538489696,
+     "contact_frames_palm_and_2_fingers": 70,
+     "contact_fraction_palm_and_2_fingers": 0.6542056074766355
+    },
+    "palm_core": {
+     "max_penetration_m": 0.048855337475419175,
+     "frames_deeper_than_rubber": 156,
+     "frames_deeper_than_rubber_by_1mm": 154,
+     "max_excess_over_rubber_m": 0.01485260538489696,
+     "contact_frames_palm_and_2_fingers": 70,
+     "contact_fraction_palm_and_2_fingers": 0.6542056074766355
+    }
+   }
   },
   "agent2_right": {
    "wrist": {
@@ -242,18 +323,71 @@
     "p50": 0.120012577673239
    },
    "finger_step_max_rad": 0.0,
-   "finger_speed_max_rad_s": 0.0
+   "finger_speed_max_rad_s": 0.0,
+   "finger_steps_over_0p1_rad": 0,
+   "finger_steps_over_0p5_rad": 0,
+   "gate_revised": {
+    "dense_samples_per_hand": 39552,
+    "rubber_max_penetration_m": 0.09901692428421828,
+    "rubber_frames_over_1cm": 98,
+    "finger_max_penetration_m": 0.16181440665461252,
+    "frames_finger_over_1cm": 120,
+    "contact_frames_finger_over_1cm": 106,
+    "contact_frames_2_fingers": 98,
+    "palm_group": {
+     "max_penetration_m": 0.08517593796217755,
+     "frames_deeper_than_rubber": 16,
+     "frames_deeper_than_rubber_by_1mm": 15,
+     "max_excess_over_rubber_m": 0.009379490681042005,
+     "contact_frames_palm_and_2_fingers": 98,
+     "contact_fraction_palm_and_2_fingers": 0.9245283018867925
+    },
+    "palm_core": {
+     "max_penetration_m": 0.08517593796217755,
+     "frames_deeper_than_rubber": 16,
+     "frames_deeper_than_rubber_by_1mm": 15,
+     "max_excess_over_rubber_m": 0.009379490681042005,
+     "contact_frames_palm_and_2_fingers": 98,
+     "contact_fraction_palm_and_2_fingers": 0.9245283018867925
+    }
+   }
   }
  },
  "gate": {
   "max_penetration_m": 0.16181440665461252,
   "penetration_ok": false,
   "contact_ok": false,
-  "joint_limits_ok": true,
-  "finger_max_penetration_m": 0.16181440665461252,
-  "finger_penetration_ok": false,
-  "rigid_max_penetration_m": 0.08428303537713407,
-  "fingers_2_ok": false
+  "joint_limits_ok": true
  },
- "seconds": 2.3341500759124756
+ "gate_revised": {
+  "palm_group_links": [
+   "hand_C_MC",
+   "thumb_MC",
+   "hand_wrist"
+  ],
+  "palm_core_links": [
+   "hand_C_MC",
+   "thumb_MC"
+  ],
+  "c1_palm_group_not_deeper_than_rubber": false,
+  "c1_frames_deeper": [
+   72,
+   0,
+   156,
+   16
+  ],
+  "c1_palm_core_not_deeper_than_rubber": false,
+  "c2_fingers_within_1cm": false,
+  "c2_finger_max_penetration_m": 0.16181440665461252,
+  "c3_contact_fraction_palm_and_2_fingers": [
+   1.0,
+   null,
+   0.6542056074766355,
+   0.9245283018867925
+  ],
+  "c3_at_least_80pct": false,
+  "c3_palm_core_at_least_80pct": false,
+  "joint_limits_ok": true
+ },
+ "seconds": 15.368776321411133
 }

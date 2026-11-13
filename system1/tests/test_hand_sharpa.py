@@ -111,9 +111,14 @@ def main():
                             "--out", f"{d}/A", "--frames", "230:236", "--iters", "5"], capture_output=True, text=True)
         assert r.returncode == 0, r.stderr[-3000:]
         summ = json.loads(Path(f"{d}/A/summary.json").read_text())
-        assert summ["variant"] == "A" and {"finger_penetration_ok", "rigid_max_penetration_m", "fingers_2_ok"} <= set(summ["gate"])
+        assert summ["variant"] == "A" and {"c1_palm_group_not_deeper_than_rubber", "c2_fingers_within_1cm", "c3_at_least_80pct"} <= set(summ["gate_revised"])
         for h in summ["hands"].values():  # rigid + finger links cover every sample: max of the two is the overall max
             assert abs(max(h["finger_max_penetration_m"], h["rigid_max_penetration_m"]) - h["max_penetration_m"]) < 1e-12
+        gr = summ["gate_revised"]
+        assert gr["palm_group_links"] == ["hand_C_MC", "thumb_MC", "hand_wrist"] and len(gr["c3_contact_fraction_palm_and_2_fingers"]) == 4
+        for h in summ["hands"].values():  # rubber hand of the original D reference is evaluated on the same frames
+            g = h["gate_revised"]
+            assert g["rubber_max_penetration_m"] >= 0 and g["palm_group"]["max_penetration_m"] >= g["palm_core"]["max_penetration_m"]
         zA = np.load(f"{d}/A/finger_reference.npz", allow_pickle=True)
         assert np.array_equal(zA["agent_joint_pos"], z["agent_joint_pos"])  # same wrist solve as v1
     print("ok")

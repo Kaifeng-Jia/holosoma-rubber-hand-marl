@@ -1,7 +1,7 @@
 {
  "reference_dir": "logs_system1/t06/finger_ref/A_track",
- "finger_reference_sha256": "f520f80a3ebd1574c5bb24b6c44ba953956e9382c93afc057f24766ce8f5bfb8",
- "per_frame_sha256": "d82f290613ea6d87af059df4d908f1a8ae74878269de309399fa1abd1226de3a",
+ "finger_reference_sha256": "69e404bd6c1c8ce1c2ac3f1efa1e7830270687844e521ac1bf01e0a6ed01010c",
+ "per_frame_sha256": "484e4eb299bc38ddbc8e121fe00bbb558f0ad0c6aafa6f2975215883a430f0a9",
  "body_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
  "body_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
  "robot_urdf": "system1/hand/assets/g1_29dof_sharpa.urdf",
@@ -9,7 +9,7 @@
  "object_urdf": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
  "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
  "helper_executed_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
- "code_sha256": "431ee4fb08fc6439032bd872bfc5595b7b867444f09d8fbf022bcbb24ebf5e0b",
+ "code_sha256": "b84d07ba6d47798f2d79f4e92a9575e76e5507e049c6a797165e3fbbc4f49a8e",
  "gl_vendor": "Mesa",
  "gl_renderer": "llvmpipe (LLVM 15.0.7, 256 bits)",
  "width": 960,
@@ -67,7 +67,7 @@
   },
   {
    "frame": 298,
-   "pixel_std": 52.6400307421939,
+   "pixel_std": 52.63994289485525,
    "camera": {
     "lookat": [
      -0.9812081484428629,
@@ -81,7 +81,7 @@
   },
   {
    "frame": 397,
-   "pixel_std": 52.94854299408854,
+   "pixel_std": 52.948204367040496,
    "camera": {
     "lookat": [
      0.06753580176115064,
@@ -95,7 +95,7 @@
   },
   {
    "frame": 496,
-   "pixel_std": 52.78115933986342,
+   "pixel_std": 52.781280999700144,
    "camera": {
     "lookat": [
      0.15626792008153145,
@@ -131,6 +131,9 @@
    "finger_penetration_m": 0.02527133298898164,
    "rigid_penetration_m": 0.005261468161985557,
    "robot_palm_point_sd_m": 0.03759130656923083,
+   "rev_finger_penetration_m": 0.02538495011208179,
+   "rev_palm_group_penetration_m": 0.022132479425131378,
+   "rubber_hand_penetration_m": 0.02606521105816291,
    "fingers_touching": 4,
    "palm_touching": true,
    "pixel_std": 59.55849370242632,
@@ -158,6 +161,9 @@
    "finger_penetration_m": 0.008509335133303418,
    "rigid_penetration_m": 0.0009813271648143776,
    "robot_palm_point_sd_m": 0.03859732711943987,
+   "rev_finger_penetration_m": 0.008524775648830809,
+   "rev_palm_group_penetration_m": 0.002455663309323222,
+   "rubber_hand_penetration_m": 0.022738819229794746,
    "fingers_touching": 5,
    "palm_touching": true,
    "pixel_std": 59.234460317888995,
@@ -185,6 +191,9 @@
    "finger_penetration_m": 0.009544679634621165,
    "rigid_penetration_m": 0.0029377429029283594,
    "robot_palm_point_sd_m": 0.03537176095510721,
+   "rev_finger_penetration_m": 0.009562356724718148,
+   "rev_palm_group_penetration_m": 0.005245750315975672,
+   "rubber_hand_penetration_m": 0.024907768584435334,
    "fingers_touching": 5,
    "palm_touching": true,
    "pixel_std": 73.73190003715982,
@@ -212,6 +221,9 @@
    "finger_penetration_m": 0.0,
    "rigid_penetration_m": 0.0,
    "robot_palm_point_sd_m": 0.04812876180292523,
+   "rev_finger_penetration_m": 0.0,
+   "rev_palm_group_penetration_m": 0.0,
+   "rubber_hand_penetration_m": 0.0,
    "fingers_touching": 0,
    "palm_touching": false,
    "pixel_std": 61.41762496419747,
@@ -239,10 +251,13 @@
    "finger_penetration_m": 0.021780615165683907,
    "rigid_penetration_m": 0.003965393641753514,
    "robot_palm_point_sd_m": 0.03216362989511711,
+   "rev_finger_penetration_m": 0.0153902591987735,
+   "rev_palm_group_penetration_m": 0.02222127512396891,
+   "rubber_hand_penetration_m": 0.02277045240775611,
    "fingers_touching": 3,
    "palm_touching": true,
-   "pixel_std": 53.13905160501363,
-   "pixel_std_xray": 45.405560959172156
+   "pixel_std": 53.13951258368705,
+   "pixel_std_xray": 45.40665041143086
   },
   {
    "agent": 2,
@@ -266,10 +281,13 @@
    "finger_penetration_m": 0.015207603646426721,
    "rigid_penetration_m": 0.0,
    "robot_palm_point_sd_m": 0.03936507589942679,
+   "rev_finger_penetration_m": 0.010527747362547827,
+   "rev_palm_group_penetration_m": 0.015423351394913413,
+   "rubber_hand_penetration_m": 0.015756748709508356,
    "fingers_touching": 3,
    "palm_touching": true,
-   "pixel_std": 58.095337414914084,
-   "pixel_std_xray": 49.914092864516775
+   "pixel_std": 58.113738092448195,
+   "pixel_std_xray": 49.92966621055486
   },
   {
    "agent": 2,
@@ -293,10 +311,13 @@
    "finger_penetration_m": 0.028029226003745605,
    "rigid_penetration_m": 0.01228150922665473,
    "robot_palm_point_sd_m": 0.024795726577375783,
+   "rev_finger_penetration_m": 0.023898326618941264,
+   "rev_palm_group_penetration_m": 0.02917297543315295,
+   "rubber_hand_penetration_m": 0.029402747972596448,
    "fingers_touching": 3,
    "palm_touching": true,
    "pixel_std": 74.3560841737601,
-   "pixel_std_xray": 59.701346124009675
+   "pixel_std_xray": 59.70235973178765
   },
   {
    "agent": 2,
@@ -320,6 +341,9 @@
    "finger_penetration_m": 0.05719195780247921,
    "rigid_penetration_m": 0.03766481643969767,
    "robot_palm_point_sd_m": 0.004566425579592466,
+   "rev_finger_penetration_m": 0.05731940130675049,
+   "rev_palm_group_penetration_m": 0.048835132709684245,
+   "rubber_hand_penetration_m": 0.05896245951591452,
    "fingers_touching": 5,
    "palm_touching": true,
    "pixel_std": 56.95980899546659,
@@ -347,6 +371,9 @@
    "finger_penetration_m": 0.05188779072735817,
    "rigid_penetration_m": 0.03292329584894453,
    "robot_palm_point_sd_m": 0.00015244040672982866,
+   "rev_finger_penetration_m": 0.0520202910073997,
+   "rev_palm_group_penetration_m": 0.03462128498310547,
+   "rubber_hand_penetration_m": 0.05464654491573281,
    "fingers_touching": 5,
    "palm_touching": true,
    "pixel_std": 56.796949412466105,
@@ -374,13 +401,16 @@
    "finger_penetration_m": 0.021488253329388543,
    "rigid_penetration_m": 0.015849183595780813,
    "robot_palm_point_sd_m": 0.01575045957413243,
+   "rev_finger_penetration_m": 0.021493223829478957,
+   "rev_palm_group_penetration_m": 0.018564605211739953,
+   "rubber_hand_penetration_m": 0.035825529092318925,
    "fingers_touching": 5,
    "palm_touching": true,
    "pixel_std": 63.38077861110803,
    "pixel_std_xray": 49.74865796303195
   }
  ],
- "closeups_xray_sha256": "d5393c46b71a36f223b03882bd6005f8486ca3f4b7a1d60d57f06b0f274d96fe",
- "overview_sha256": "91631e181ca70efdd54d9814c12bf52ebcd1480b6fbfdaeb5ca3d08b3c8183ce",
- "closeups_sha256": "e8450e1d427e0ec8ad8294bc490e16d7b0cbe23e38226453badad99a74c2b1e4"
+ "closeups_xray_sha256": "379e062004a268dadefb2dcaca9afb7668a2fcbcabc2c3ffbf67c2aed3e1ab1b",
+ "overview_sha256": "3bf778afded30f7d6c8f62e5ebe0c0afce3a612e071bd8ae63c71748a5aabf62",
+ "closeups_sha256": "edcaa6d25ca0bbac97dd065683dd6d4ac3b4f2e919f5216e62ecf861edd2195c"
 }

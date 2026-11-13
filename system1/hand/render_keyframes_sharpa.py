@@ -239,9 +239,13 @@ def main():
                 score, az, el, ob, bb = pick_camera(t, ag, side, palm)
                 cam = camera_at(mujoco, palm, 0.55, az, el)
                 r = per[(ag + 1, side, t)]
-                lines = [f"agent {ag + 1} {side} hand, frame {t} ({t / 50:.2f} s)" + ("" if frac is not None else ", no contact frame: closest approach"),
-                         f"finger pen {1000 * float(r['finger_penetration_m']):.1f} mm, palm/wrist pen {1000 * float(r['rigid_penetration_m']):.1f} mm, "
-                         f"palm point sd {1000 * float(r['robot_palm_point_sd_m']):.0f} mm, fingers touching {r['fingers_touching']}"]
+                head = f"agent {ag + 1} {side} hand, frame {t} ({t / 50:.2f} s)" + ("" if frac is not None else ", no contact frame: closest approach")
+                if "rev_finger_penetration_m" in r:  # revised gate columns (finger_ref.py --variant A)
+                    lines = [head, f"fingers pen {1000 * float(r['rev_finger_penetration_m']):.1f} mm, palm group pen {1000 * float(r['rev_palm_group_penetration_m']):.1f} mm "
+                                   f"(rubber hand {1000 * float(r['rubber_hand_penetration_m']):.1f} mm), fingers touching {r['rev_fingers_touching']}"]
+                else:
+                    lines = [head, f"finger pen {1000 * float(r['finger_penetration_m']):.1f} mm, palm/wrist pen {1000 * float(r['rigid_penetration_m']):.1f} mm, "
+                                   f"palm point sd {1000 * float(r['robot_palm_point_sd_m']):.0f} mm, fingers touching {r['fingers_touching']}"]
                 ims.append(label(shot(t, cam), lines))
                 std_opaque = stds[-1]
                 for g in obj_ids:
@@ -254,6 +258,7 @@ def main():
                                                         line_of_sight_crosses_object=ob, line_of_sight_near_body=bb),
                                             finger_penetration_m=float(r["finger_penetration_m"]), rigid_penetration_m=float(r["rigid_penetration_m"]),
                                             robot_palm_point_sd_m=float(r["robot_palm_point_sd_m"]),
+                                            **({k: float(r[k]) for k in ("rev_finger_penetration_m", "rev_palm_group_penetration_m", "rubber_hand_penetration_m")} if "rev_finger_penetration_m" in r else {}),
                                             fingers_touching=int(r["fingers_touching"]), palm_touching=r["palm_touching"] == "True",
                                             pixel_std=std_opaque, pixel_std_xray=stds[-1]))
     tile(ims, 3).save(a.out_dir / "closeups.png")

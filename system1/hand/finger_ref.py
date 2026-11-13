@@ -72,6 +72,8 @@ CONTACT_TOL_M = 0.005           # a palm / finger group "touches" if its closest
 GATE_PEN_M = 0.01
 DEFAULT_W = dict(attach=1e4, pen=1e6, smooth=10.0, open=0.01, human=0.0)
 RIGID = ("hand_wrist", "hand_C_MC")  # links fixed to the flange (variant A: reported separately)
+PALM_GROUP_A = ("hand_C_MC", "thumb_MC", "hand_wrist")  # task book 2026-11-13: palm + thumb_MC (+ wrist housing, see finger_groups)
+GATE_CONTACT_FRAC = 0.8
 
 
 def sha256(p):
@@ -176,16 +178,92 @@ def ramp_weights(contact: np.ndarray, fps: float) -> np.ndarray:
     return s
 
 
-def finger_groups(hand: SharpaHand, links: list[str]) -> list[tuple[str, np.ndarray]]:
+def finger_groups(hand: SharpaHand, links: list[str], variant: str = "v1") -> list[tuple[str, np.ndarray]]:
+    """v1: palm = hand_C_MC, each finger = all its links. A (task book 2026-11-13 revision): palm group = hand_C_MC +
+    thumb_MC + hand_wrist (the wrist housing, rigid with the palm, is added here; the task book names palm + thumb_MC),
+    thumb = the thumb links without thumb_MC."""
     s = hand.side
-    groups = [("palm", np.array([i for i, l in enumerate(links) if l == f"{s}_hand_C_MC"]))]
+    palm = {f"{s}_hand_C_MC"} if variant == "v1" else {f"{s}_{x}" for x in PALM_GROUP_A}
+    groups = [("palm", np.array([i for i, l in enumerate(links) if l in palm]))]
     for f in FINGERS:
-        groups.append((f, np.array([i for i, l in enumerate(links) if l.startswith(f"{s}_{f}_")])))
+        groups.append((f, np.array([i for i, l in enumerate(links) if l.startswith(f"{s}_{f}_") and l not in palm])))
     return groups
 
 
+def dense_samples(items, spacing: float = 0.003):
+    """items: [(link, mesh path, 4x4 origin)] -> (link per point, (N, 3) local points): every vertex plus area / spacing^2
+    uniform surface samples per mesh (same density for the Sharpa and the rubber hand)."""
+    import trimesh
+    links, pts = [], []
+    for k, (link, path, origin) in enumerate(items):
+        m = trimesh.load(path, force="mesh")
+        n = max(64, int(math.ceil(m.area / spacing ** 2)))
+        sp, _ = trimesh.sample.sample_surface(m, n, seed=k)
+        p = np.vstack([sp, m.vertices])
+        p = (origin[:3, :3] @ p.T).T + origin[:3, 3]
+        links += [link] * len(p)
+        pts.append(p)
+    return links, np.vstack(pts)
+
+
+def evaluate_gate_A(hand: SharpaHand, q: torch.Tensor, base_obj: torch.Tensor, sdf: GridSDF, chunk: int = 25):
+    """Dense (3 mm) per-frame penetration and contact for the revised gate: palm group (C_MC + thumb_MC + wrist),
+    palm core (C_MC + thumb_MC, the task book's palm group), other fingers; touching = closest point within 5 mm."""
+    links, local = dense_samples([(c.link, c.mesh, c.origin) for c in hand.collisions])
+    s = hand.side
+    L = np.array(links)
+    core = np.isin(L, [f"{s}_hand_C_MC", f"{s}_thumb_MC"])
+    pg = core | (L == f"{s}_hand_wrist")
+    groups = [("palm", np.flatnonzero(pg))] + [(f, np.flatnonzero(np.char.startswith(L, f"{s}_{f}_") & ~pg)) for f in FINGERS]
+    fing = np.concatenate([g for _, g in groups[1:]])
+    loc = torch.as_tensor(local)
+    out = {k: [] for k in ("palm_group_pen", "palm_core_pen", "finger_pen", "gmin", "core_min")}
+    with torch.no_grad():
+        for a in range(0, len(q), chunk):
+            T = hand.fk(q[a:a + chunk], base_obj[a:a + chunk])
+            P = torch.empty(len(q[a:a + chunk]), len(L), 3, dtype=torch.float64)
+            for l in set(links):
+                ii = torch.as_tensor(np.flatnonzero(L == l))
+                P[:, ii] = (T[l][:, None, :3, :3] @ loc[ii][..., None]).squeeze(-1) + T[l][:, None, :3, 3]
+            sd = sdf(P)
+            out["palm_group_pen"].append(torch.relu(-sd[:, pg]).max(1).values)
+            out["palm_core_pen"].append(torch.relu(-sd[:, core]).max(1).values)
+            out["finger_pen"].append(torch.relu(-sd[:, fing]).max(1).values)
+            out["gmin"].append(torch.stack([sd[:, g].min(1).values for _, g in groups], 1))
+            out["core_min"].append(sd[:, core].min(1).values)
+    o = {k: torch.cat(v).numpy() for k, v in out.items()}
+    touch = o["gmin"] <= CONTACT_TOL_M
+    return dict(palm_group_pen=o["palm_group_pen"], palm_core_pen=o["palm_core_pen"], finger_pen=o["finger_pen"],
+                palm_group_touch=touch[:, 0], palm_core_touch=o["core_min"] <= CONTACT_TOL_M, fingers_touching=touch[:, 1:].sum(1),
+                group_min_sd=o["gmin"], samples=int(len(L)))
+
+
+def rubber_hand_penetration(ref: dict, agent: int, side: str, sdf: GridSDF, chunk: int = 50) -> np.ndarray:
+    """Per-frame max penetration of the original D reference's rubber hand (collision mesh of <side>_rubber_hand_link,
+    the reference pose of that body), dense 3 mm samples like evaluate_gate_A."""
+    r = ET.parse(G1_URDF).getroot()
+    col = r.find(f"link[@name='{side}_rubber_hand_link']/collision")
+    o = col.find("origin")
+    origin = np.eye(4)
+    origin[:3, :3] = rpy_matrix(*[float(x) for x in o.get("rpy").split()]) if o is not None else np.eye(3)
+    origin[:3, 3] = [float(x) for x in o.get("xyz").split()] if o is not None else 0
+    _, local = dense_samples([("rubber", G1_URDF.parent / col.find("geometry/mesh").get("filename"), origin)])
+    names = [str(n) for n in ref["body_names"]]
+    ib = names.index(f"{side}_rubber_hand_link")
+    Rh = quat_wxyz_to_matrix(ref["agent_body_quat_w"][:, agent, ib])
+    ph = np.asarray(ref["agent_body_pos_w"][:, agent, ib], float)
+    Ro = quat_wxyz_to_matrix(ref["object_quat_w"])
+    po = np.asarray(ref["object_pos_w"], float)
+    out = []
+    for a in range(0, len(ph), chunk):
+        w = np.einsum("tij,nj->tni", Rh[a:a + chunk], local) + ph[a:a + chunk, None]
+        ob = np.einsum("tji,tnj->tni", Ro[a:a + chunk], w - po[a:a + chunk, None])  # R^T (w - p)
+        out.append(torch.relu(-sdf(torch.as_tensor(ob))).max(1).values.numpy())
+    return np.concatenate(out)
+
+
 def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames: np.ndarray, w: dict, q_human=None,
-                  iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None):
+                  iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None, variant: str = "v1"):
     """q* (len(frames), 22) for the hand base poses base_obj (T, 4, 4) in the object frame.
     attach_frame_w: optional per-frame weight of the attach term (len(frames)); None = 1 on every frame (v1)."""
     T = len(frames)
@@ -195,7 +273,7 @@ def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames
     opt = torch.optim.Adam([q], lr=lr)
     B = base_obj[frames]
     _, links = hand.points_world(q_open[None], torch.eye(4, dtype=torch.float64)[None])
-    groups = finger_groups(hand, links)
+    groups = finger_groups(hand, links, variant)
     for it in range(iters):
         opt.zero_grad()
         P, _ = hand.points_world(q, B)
@@ -310,7 +388,7 @@ def main():
             cf = np.flatnonzero(contact)
             log(f"agent {agent} {side}: wrist {json.dumps({k: (round(v, 6) if isinstance(v, float) else v) for k, v in wdiag.items()})}; contact frames {len(cf)}")
             if a.mode == "track" and a.variant == "A":
-                qs = optimise_hand(hand, base_t, sdf, sel, DEFAULT_W, iters=a.iters, log=log, attach_frame_w=s[sel])
+                qs = optimise_hand(hand, base_t, sdf, sel, DEFAULT_W, iters=a.iters, log=log, attach_frame_w=s[sel], variant="A")
                 qfull[sel] = qs
             elif a.mode == "track" and len(cf):
                 qc = optimise_hand(hand, base_t, sdf, cf, DEFAULT_W, iters=a.iters, log=log)
@@ -346,25 +424,62 @@ def main():
                 frames_rigid_penetration_over_1cm=int((ev["rigid_pen"][evm] > GATE_PEN_M).sum()),
                 contact_frames_2_fingers=int((ev["fingers_touching"][cf] >= 2).sum()) if len(cf) else 0,
                 robot_palm_point_sd_m=dict(min=float(palm_sd[evm].min()), p50=float(np.median(palm_sd[evm]))),
-                finger_step_max_rad=float(dq.max()), finger_speed_max_rad_s=float(dq.max() * fps))
+                finger_step_max_rad=float(dq.max()), finger_speed_max_rad_s=float(dq.max() * fps),
+                finger_steps_over_0p1_rad=int((dq > 0.1).sum()), finger_steps_over_0p5_rad=int((dq > 0.5).sum()))
+            gA = None
+            if a.variant == "A":  # revised gate (task book 2026-11-13), dense 3 mm samples
+                gA = evaluate_gate_A(hand, qfull, base_t, sdf)
+                rub = rubber_hand_penetration(ref, agent, side, sdf)
+                rev = {}
+                for nm, pen_key, touch_key in (("palm_group", "palm_group_pen", "palm_group_touch"),
+                                               ("palm_core", "palm_core_pen", "palm_core_touch")):
+                    exc = (gA[pen_key] - rub)[evm]
+                    okc = gA[touch_key][cf] & (gA["fingers_touching"][cf] >= 2) if len(cf) else np.array([], bool)
+                    rev[nm] = dict(max_penetration_m=float(gA[pen_key][evm].max()), frames_deeper_than_rubber=int((exc > 0).sum()),
+                                   frames_deeper_than_rubber_by_1mm=int((exc > 0.001).sum()), max_excess_over_rubber_m=float(exc.max()),
+                                   contact_frames_palm_and_2_fingers=int(okc.sum()),
+                                   contact_fraction_palm_and_2_fingers=float(okc.mean()) if len(cf) else None)
+                summary["hands"][f"agent{agent + 1}_{side}"]["gate_revised"] = dict(
+                    dense_samples_per_hand=gA["samples"], rubber_max_penetration_m=float(rub[evm].max()),
+                    rubber_frames_over_1cm=int((rub[evm] > GATE_PEN_M).sum()),
+                    finger_max_penetration_m=float(gA["finger_pen"][evm].max()), frames_finger_over_1cm=int((gA["finger_pen"][evm] > GATE_PEN_M).sum()),
+                    contact_frames_finger_over_1cm=int((gA["finger_pen"][cf] > GATE_PEN_M).sum()) if len(cf) else 0,
+                    contact_frames_2_fingers=int((gA["fingers_touching"][cf] >= 2).sum()) if len(cf) else 0, **rev)
             for t in sel:
                 per_frame.append(dict(agent=agent + 1, side=side, frame=int(t), contact=bool(contact[t]), blend=float(s[t]),
                                       max_penetration_m=float(ev["max_pen"][t]), palm_penetration_m=float(ev["palm_pen"][t]),
                                       finger_penetration_m=float(ev["finger_pen"][t]), rigid_penetration_m=float(ev["rigid_pen"][t]),
                                       robot_palm_point_sd_m=float(palm_sd[t]), human_palm_distance_m=float(dist[t, agent, hi]),
                                       palm_touching=bool(ev["palm_touch"][t]), fingers_touching=int(ev["fingers_touching"][t]),
-                                      **{f"min_sd_{g}": float(ev["group_min_sd"][t, k]) for k, g in enumerate(("palm",) + FINGERS)}))
+                                      **{f"min_sd_{g}": float(ev["group_min_sd"][t, k]) for k, g in enumerate(("palm",) + FINGERS)},
+                                      **({} if gA is None else dict(
+                                          rev_palm_group_penetration_m=float(gA["palm_group_pen"][t]), rev_palm_core_penetration_m=float(gA["palm_core_pen"][t]),
+                                          rev_finger_penetration_m=float(gA["finger_pen"][t]), rubber_hand_penetration_m=float(rub[t]),
+                                          rev_palm_group_touching=bool(gA["palm_group_touch"][t]), rev_palm_core_touching=bool(gA["palm_core_touch"][t]),
+                                          rev_fingers_touching=int(gA["fingers_touching"][t]),
+                                          **{f"rev_min_sd_{g}": float(gA["group_min_sd"][t, k]) for k, g in enumerate(("palm_group",) + FINGERS)}))))
             log(f"agent {agent} {side}: " + json.dumps(summary["hands"][f"agent{agent + 1}_{side}"], default=float)[:600])
     hs = summary["hands"].values()
     summary["gate"] = dict(max_penetration_m=max(h["max_penetration_m"] for h in hs),
                            penetration_ok=all(h["max_penetration_m"] <= GATE_PEN_M for h in hs),
                            contact_ok=all(h["contact_frames_palm_and_2_fingers"] == h["contact_frames"] for h in hs),
                            joint_limits_ok=all(h["joint_limits_ok"] for h in hs))
-    if a.variant == "A":  # 1 cm gate on the finger links; the rigid part (placed by the body reference) reported separately
-        summary["gate"].update(finger_max_penetration_m=max(h["finger_max_penetration_m"] for h in hs),
-                               finger_penetration_ok=all(h["finger_max_penetration_m"] <= GATE_PEN_M for h in hs),
-                               rigid_max_penetration_m=max(h["rigid_max_penetration_m"] for h in hs),
-                               fingers_2_ok=all(h["contact_frames_2_fingers"] == h["contact_frames"] for h in hs))
+    if a.variant == "A":  # revised gate (task book 2026-11-13): 1. palm group per frame <= rubber hand; 2. other fingers
+        # <= 1 cm; 3. >= 80 % of robot-defined contact frames with palm + 2 fingers (hands without contact frames: n/a)
+        g = [h["gate_revised"] for h in hs]
+        cfr = [x["palm_group"]["contact_fraction_palm_and_2_fingers"] for x in g]
+        summary["gate_revised"] = dict(
+            palm_group_links=list(PALM_GROUP_A), palm_core_links=["hand_C_MC", "thumb_MC"],
+            c1_palm_group_not_deeper_than_rubber=all(x["palm_group"]["frames_deeper_than_rubber"] == 0 for x in g),
+            c1_frames_deeper=[x["palm_group"]["frames_deeper_than_rubber"] for x in g],
+            c1_palm_core_not_deeper_than_rubber=all(x["palm_core"]["frames_deeper_than_rubber"] == 0 for x in g),
+            c2_fingers_within_1cm=all(x["finger_max_penetration_m"] <= GATE_PEN_M for x in g),
+            c2_finger_max_penetration_m=max(x["finger_max_penetration_m"] for x in g),
+            c3_contact_fraction_palm_and_2_fingers=cfr,
+            c3_at_least_80pct=all(c is None or c >= GATE_CONTACT_FRAC for c in cfr),
+            c3_palm_core_at_least_80pct=all(x["palm_core"]["contact_fraction_palm_and_2_fingers"] is None
+                                            or x["palm_core"]["contact_fraction_palm_and_2_fingers"] >= GATE_CONTACT_FRAC for x in g),
+            joint_limits_ok=summary["gate"]["joint_limits_ok"])
     summary["seconds"] = time.time() - t0
     finger_names = [n for s in SIDES for n in hands[s].dof_names]
     np.savez_compressed(a.out / "finger_reference.npz", agent_joint_pos=new_joint, agent_finger_joint_pos=finger,
