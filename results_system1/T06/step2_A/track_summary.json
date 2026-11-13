@@ -1,0 +1,259 @@
+{
+ "mode": "track",
+ "variant": "A",
+ "frames": 497,
+ "evaluated_frames": [
+  0,
+  496
+ ],
+ "fps": 50.0,
+ "weights": {
+  "attach": 10000.0,
+  "pen": 1000000.0,
+  "smooth": 10.0,
+  "open": 0.01,
+  "human": 0.0
+ },
+ "contact_definition": "robot palm point (mean of Sharpa wrist, index/middle/pinky MCP) signed distance < 0.04 m",
+ "rigid_links": [
+  "hand_wrist",
+  "hand_C_MC"
+ ],
+ "contact_tolerance_m": 0.005,
+ "ramp_s": 0.2,
+ "gate_max_penetration_m": 0.01,
+ "inputs": {
+  "reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+  "reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+  "contact": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/source_contact_diagnostics.npz",
+  "contact_sha256": "0a961b4aceccd84ea33876cfb44dc3d746d7802a49dcbedce314bee6ee90e41c",
+  "mesh": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_m.obj",
+  "mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+  "g1_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+  "sharpa_urdf_sha256": {
+   "left": "6ea8d2c563c6d4ba56f5f4b04aa7d339f5b703ac8e5ec02404ca5f632d7c28a2",
+   "right": "261c1a5284e04bc9690e0f5ac39d7a7cace0a16d335d663a1d3c7fcf4e4daf31"
+  }
+ },
+ "mount": {
+  "left": {
+   "roll_about_wrist_x_deg": 275.30112777346403,
+   "flange_origin_in_wrist_yaw": [
+    0.0415,
+    0.003,
+    0.0
+   ],
+   "palm_normal_angle_to_rubber_deg": 4.161554636947825,
+   "palm_forward_angle_to_rubber_deg": 6.103137107909729,
+   "palm_basis_rotation_to_rubber_deg": 6.105295943863063
+  },
+  "right": {
+   "roll_about_wrist_x_deg": 84.70465637300448,
+   "flange_origin_in_wrist_yaw": [
+    0.0415,
+    -0.003,
+    0.0
+   ],
+   "palm_normal_angle_to_rubber_deg": 4.162270837959236,
+   "palm_forward_angle_to_rubber_deg": 6.103624332276027,
+   "palm_basis_rotation_to_rubber_deg": 6.10578376122447
+  }
+ },
+ "hands": {
+  "agent1_left": {
+   "wrist": {
+    "fk_consistency_rot_deg_max": 3.077961710670211e-14,
+    "fk_consistency_pos_m_max": 6.753223014464259e-16,
+    "palm_orientation_error_deg_max": 5.821219458049333e-14,
+    "wrist_change_deg_max": [
+     1.6803960093290422,
+     4.707877908730743,
+     4.4009978812733275
+    ],
+    "wrist_change_deg_mean": [
+     0.594205822084481,
+     4.650634497865098,
+     3.9378011571095963
+    ],
+    "within_limits_frames": 497,
+    "frames": 497,
+    "wrist_yaw_position_shift_m_max": 0.003778663426815736
+   },
+   "contact_frames": 27,
+   "ramp_frames": 58,
+   "max_penetration_m": 0.04340038451948612,
+   "frames_penetration_over_1cm": 97,
+   "palm_only_max_penetration_m": 0.00549213085693413,
+   "open_pose_max_penetration_m": 0.07984337601972374,
+   "contact_frames_palm_and_2_fingers": 27,
+   "contact_frames_palm_touching": 27,
+   "contact_frames_fingers_touching_mean": 4.555555555555555,
+   "palm_min_distance_in_contact_frames_m": {
+    "p50": -0.0029220105277760313,
+    "max": 0.0008173142806212554
+   },
+   "joint_limits_ok": true,
+   "finger_max_penetration_m": 0.04340038451948612,
+   "frames_finger_penetration_over_1cm": 97,
+   "contact_frames_finger_penetration_over_1cm": 11,
+   "rigid_max_penetration_m": 0.00549213085693413,
+   "frames_rigid_penetration_over_1cm": 0,
+   "contact_frames_2_fingers": 27,
+   "robot_palm_point_sd_m": {
+    "min": 0.03537176095510721,
+    "p50": 0.4789396076041377
+   },
+   "finger_step_max_rad": 1.9199000000000002,
+   "finger_speed_max_rad_s": 95.995
+  },
+  "agent1_right": {
+   "wrist": {
+    "fk_consistency_rot_deg_max": 2.9101517394744844e-14,
+    "fk_consistency_pos_m_max": 5.438959822042073e-16,
+    "palm_orientation_error_deg_max": 7.041067537230806e-14,
+    "wrist_change_deg_max": [
+     1.6453625184987182,
+     4.707506899504159,
+     4.557481461567255
+    ],
+    "wrist_change_deg_mean": [
+     0.60299630736465,
+     4.645863594718183,
+     3.957536107799239
+    ],
+    "within_limits_frames": 497,
+    "frames": 497,
+    "wrist_yaw_position_shift_m_max": 0.0037783669479504443
+   },
+   "contact_frames": 0,
+   "ramp_frames": 0,
+   "max_penetration_m": 0.0,
+   "frames_penetration_over_1cm": 0,
+   "palm_only_max_penetration_m": 0.0,
+   "open_pose_max_penetration_m": 0.031188784291653934,
+   "contact_frames_palm_and_2_fingers": 0,
+   "contact_frames_palm_touching": 0,
+   "contact_frames_fingers_touching_mean": null,
+   "palm_min_distance_in_contact_frames_m": {
+    "p50": null,
+    "max": null
+   },
+   "joint_limits_ok": true,
+   "finger_max_penetration_m": 0.0,
+   "frames_finger_penetration_over_1cm": 0,
+   "contact_frames_finger_penetration_over_1cm": 0,
+   "rigid_max_penetration_m": 0.0,
+   "frames_rigid_penetration_over_1cm": 0,
+   "contact_frames_2_fingers": 0,
+   "robot_palm_point_sd_m": {
+    "min": 0.04812876180292523,
+    "p50": 0.10182451646375326
+   },
+   "finger_step_max_rad": 0.6246067891978063,
+   "finger_speed_max_rad_s": 31.230339459890317
+  },
+  "agent2_left": {
+   "wrist": {
+    "fk_consistency_rot_deg_max": 3.4715940106403693e-14,
+    "fk_consistency_pos_m_max": 6.843874359417885e-16,
+    "palm_orientation_error_deg_max": 5.2940235852345574e-14,
+    "wrist_change_deg_max": [
+     4.0966022956686485,
+     4.707855107531493,
+     4.641002682348653
+    ],
+    "wrist_change_deg_mean": [
+     1.3609800572674862,
+     4.423981012687533,
+     3.829935156335987
+    ],
+    "within_limits_frames": 497,
+    "frames": 497,
+    "wrist_yaw_position_shift_m_max": 0.003778648211902489
+   },
+   "contact_frames": 107,
+   "ramp_frames": 35,
+   "max_penetration_m": 0.035054464321103124,
+   "frames_penetration_over_1cm": 113,
+   "palm_only_max_penetration_m": 0.018121534439659543,
+   "open_pose_max_penetration_m": 0.07352919667980974,
+   "contact_frames_palm_and_2_fingers": 102,
+   "contact_frames_palm_touching": 102,
+   "contact_frames_fingers_touching_mean": 3.1682242990654204,
+   "palm_min_distance_in_contact_frames_m": {
+    "p50": -0.0026298780029899833,
+    "max": 0.008139057656583678
+   },
+   "joint_limits_ok": true,
+   "finger_max_penetration_m": 0.035054464321103124,
+   "frames_finger_penetration_over_1cm": 113,
+   "contact_frames_finger_penetration_over_1cm": 105,
+   "rigid_max_penetration_m": 0.018121534439659543,
+   "frames_rigid_penetration_over_1cm": 20,
+   "contact_frames_2_fingers": 107,
+   "robot_palm_point_sd_m": {
+    "min": 0.017653636751079296,
+    "p50": 0.08023962356149278
+   },
+   "finger_step_max_rad": 1.9199000000000002,
+   "finger_speed_max_rad_s": 95.995
+  },
+  "agent2_right": {
+   "wrist": {
+    "fk_consistency_rot_deg_max": 2.8193391298340116e-14,
+    "fk_consistency_pos_m_max": 6.661338147750939e-16,
+    "palm_orientation_error_deg_max": 6.597033424117131e-14,
+    "wrist_change_deg_max": [
+     4.653701978817367,
+     4.7075236951188275,
+     5.9872702855447955
+    ],
+    "wrist_change_deg_mean": [
+     1.5290879067761203,
+     4.2137980234351025,
+     3.9003923842577883
+    ],
+    "within_limits_frames": 497,
+    "frames": 497,
+    "wrist_yaw_position_shift_m_max": 0.003778379285866541
+   },
+   "contact_frames": 106,
+   "ramp_frames": 20,
+   "max_penetration_m": 0.1417243587636468,
+   "frames_penetration_over_1cm": 90,
+   "palm_only_max_penetration_m": 0.08428303537713407,
+   "open_pose_max_penetration_m": 0.16181440665461252,
+   "contact_frames_palm_and_2_fingers": 96,
+   "contact_frames_palm_touching": 96,
+   "contact_frames_fingers_touching_mean": 4.783018867924528,
+   "palm_min_distance_in_contact_frames_m": {
+    "p50": -0.030812564314515917,
+    "max": 0.012244548978418887
+   },
+   "joint_limits_ok": true,
+   "finger_max_penetration_m": 0.1417243587636468,
+   "frames_finger_penetration_over_1cm": 90,
+   "contact_frames_finger_penetration_over_1cm": 90,
+   "rigid_max_penetration_m": 0.08428303537713407,
+   "frames_rigid_penetration_over_1cm": 86,
+   "contact_frames_2_fingers": 106,
+   "robot_palm_point_sd_m": {
+    "min": -0.059484326393492014,
+    "p50": 0.120012577673239
+   },
+   "finger_step_max_rad": 1.8741392771406837,
+   "finger_speed_max_rad_s": 93.70696385703418
+  }
+ },
+ "gate": {
+  "max_penetration_m": 0.1417243587636468,
+  "penetration_ok": false,
+  "contact_ok": false,
+  "joint_limits_ok": true,
+  "finger_max_penetration_m": 0.1417243587636468,
+  "finger_penetration_ok": false,
+  "rigid_max_penetration_m": 0.08428303537713407,
+  "fingers_2_ok": true
+ },
+ "seconds": 972.7530217170715
+}

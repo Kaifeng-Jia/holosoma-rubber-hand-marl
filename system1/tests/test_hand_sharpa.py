@@ -106,6 +106,16 @@ def main():
             # body joints other than the six wrists are unchanged
             keep = [i for i, n in enumerate(jn) if "wrist" not in n]
             assert np.array_equal(z["agent_joint_pos"][:, :, keep], ref["agent_joint_pos"][:, :, keep])
+        # variant A (robot-palm contact frames, all frames optimised, rigid part reported separately)
+        r = subprocess.run([sys.executable, "-B", str(ROOT / "system1/hand/finger_ref.py"), "--mode", "track", "--variant", "A",
+                            "--out", f"{d}/A", "--frames", "230:236", "--iters", "5"], capture_output=True, text=True)
+        assert r.returncode == 0, r.stderr[-3000:]
+        summ = json.loads(Path(f"{d}/A/summary.json").read_text())
+        assert summ["variant"] == "A" and {"finger_penetration_ok", "rigid_max_penetration_m", "fingers_2_ok"} <= set(summ["gate"])
+        for h in summ["hands"].values():  # rigid + finger links cover every sample: max of the two is the overall max
+            assert abs(max(h["finger_max_penetration_m"], h["rigid_max_penetration_m"]) - h["max_penetration_m"]) < 1e-12
+        zA = np.load(f"{d}/A/finger_reference.npz", allow_pickle=True)
+        assert np.array_equal(zA["agent_joint_pos"], z["agent_joint_pos"])  # same wrist solve as v1
     print("ok")
 
 

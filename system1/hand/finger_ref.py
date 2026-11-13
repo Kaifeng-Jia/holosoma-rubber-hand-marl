@@ -26,6 +26,18 @@ Diagnostics per hand and frame: max penetration (all collision samples), palm-on
 palm within the contact tolerance 5 mm, joint limits. Gate (T06): max penetration <= 1 cm; in contact frames palm and
 at least two fingers in contact.
 
+--variant A (Kevin 2026-11-13, after the v1 gate failed; default v1 = the behaviour above, unchanged):
+  * contact frames from the robot hand: the robot palm point (mean of the Sharpa wrist and index / middle / pinky MCP
+    joint origins, the human palm-point construction) has signed distance to the bucket surface < 0.04 m (same outer
+    band as the existing pipeline);
+  * one optimisation over all frames of a hand: the attach term is weighted per frame by the 0.2 s smoothstep ramp
+    weight s(t) (1 on contact frames, 0 away from them), the penetration, smoothness and open terms act on every
+    frame, so fingers bend away from the object wherever the open pose would penetrate; the optimised q is used
+    directly (no post-hoc blend toward the open pose);
+  * the rigid part of the hand (hand_wrist and hand_C_MC: fixed to the flange, placed by the body reference) is
+    reported separately; the 1 cm gate is on the finger links (every link of the five finger chains, including the
+    thumb and pinky metacarpals). Palm + 2 fingers in contact frames is reported as in v1, plus fingers-only counts.
+
     hssim_s1/bin/python -B system1/hand/finger_ref.py --mode track --out logs_system1/t06/finger_ref/track
     hssim_s1/bin/python -B system1/hand/finger_ref.py --mode locked --out logs_system1/t06/finger_ref/locked
 """
@@ -59,6 +71,7 @@ RAMP_S = 0.2                    # T06: ~0.2 s transitions
 CONTACT_TOL_M = 0.005           # a palm / finger group "touches" if its closest sample is within 5 mm
 GATE_PEN_M = 0.01
 DEFAULT_W = dict(attach=1e4, pen=1e6, smooth=10.0, open=0.01, human=0.0)
+RIGID = ("hand_wrist", "hand_C_MC")  # links fixed to the flange (variant A: reported separately)
 
 
 def sha256(p):
@@ -172,9 +185,11 @@ def finger_groups(hand: SharpaHand, links: list[str]) -> list[tuple[str, np.ndar
 
 
 def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames: np.ndarray, w: dict, q_human=None,
-                  iters: int = 400, lr: float = 0.03, log=None):
-    """q* (len(frames), 22) for the hand base poses base_obj (T, 4, 4) in the object frame."""
+                  iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None):
+    """q* (len(frames), 22) for the hand base poses base_obj (T, 4, 4) in the object frame.
+    attach_frame_w: optional per-frame weight of the attach term (len(frames)); None = 1 on every frame (v1)."""
     T = len(frames)
+    aw = torch.ones(T, dtype=torch.float64) if attach_frame_w is None else torch.as_tensor(np.asarray(attach_frame_w, float))
     q_open = hand.open_pose()
     q = q_open.expand(T, 22).clone().requires_grad_(True)
     opt = torch.optim.Adam([q], lr=lr)
@@ -185,7 +200,7 @@ def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames
         opt.zero_grad()
         P, _ = hand.points_world(q, B)
         sd = sdf(P)                                   # (T, N)
-        attach = sum((torch.relu(sd[:, g].amin(dim=1)) ** 2).sum() for _, g in groups)  # closest sample of each group
+        attach = sum((aw * torch.relu(sd[:, g].amin(dim=1)) ** 2).sum() for _, g in groups)  # closest sample of each group
         pen = (torch.relu(-sd) ** 2).sum()
         smooth = ((q[1:] - q[:-1]) ** 2).sum() if T > 1 else q.sum() * 0
         reg = ((q - q_open) ** 2).sum()
@@ -209,8 +224,19 @@ def evaluate_hand(hand: SharpaHand, q: torch.Tensor, base_obj: torch.Tensor, sdf
     gmin = torch.stack([sd[:, g].min(1).values for _, g in groups], 1).numpy()  # (T, 6)
     pen = torch.relu(-sd).max(1).values.numpy()
     pen_palm = torch.relu(-sd[:, groups[0][1]]).max(1).values.numpy()
+    fing = np.concatenate([g for _, g in groups[1:]])
+    rigid = np.array([i for i, l in enumerate(links) if l in {f"{hand.side}_{r}" for r in RIGID}])
+    pen_f = torch.relu(-sd[:, fing]).max(1).values.numpy()
+    pen_r = torch.relu(-sd[:, rigid]).max(1).values.numpy()
     touching = gmin <= CONTACT_TOL_M
-    return dict(max_pen=pen, palm_pen=pen_palm, palm_touch=touching[:, 0], fingers_touching=touching[:, 1:].sum(1), group_min_sd=gmin)
+    return dict(max_pen=pen, palm_pen=pen_palm, finger_pen=pen_f, rigid_pen=pen_r, palm_touch=touching[:, 0],
+                fingers_touching=touching[:, 1:].sum(1), group_min_sd=gmin)
+
+
+def palm_point_flange(hand: SharpaHand) -> np.ndarray:
+    """Robot palm point in the flange frame: mean of wrist and index / middle / pinky MCP (human palm-point construction)."""
+    lm = hand.palm_landmarks()
+    return np.mean([lm["wrist"], lm["index"], lm["middle"], lm["pinky"]], axis=0)
 
 
 def main():
@@ -220,6 +246,9 @@ def main():
     ap.add_argument("--iters", type=int, default=400)
     ap.add_argument("--human-weight", type=float, default=0.0, help="w of |q - q_human|^2 (0: no human finger data)")
     ap.add_argument("--frames", type=str, default=None, help="optional 'start:stop' subset (smoke tests)")
+    ap.add_argument("--variant", choices=("v1", "A"), default="v1",
+                    help="v1: human-palm contact frames, contact frames optimised (default, unchanged); "
+                         "A: robot-palm contact frames, all frames optimised, rigid hand part reported separately")
     a = ap.parse_args()
     if a.human_weight:
         raise NotImplementedError("w > 0 needs q_human from CORE4D finger keypoints (separate demonstration reference)")
@@ -245,8 +274,10 @@ def main():
     new_joint = np.asarray(ref["agent_joint_pos"], float).copy()
     finger = np.zeros((T, 2, 44))
     blend = np.zeros((T, 2, 2))
-    summary = dict(mode=a.mode, frames=int(T), evaluated_frames=[int(sel[0]), int(sel[-1])], fps=fps, weights=DEFAULT_W,
-                   contact_definition=f"source human palm distance < {CONTACT_OUTER_M} m (source_contact_diagnostics.npz)",
+    summary = dict(mode=a.mode, variant=a.variant, frames=int(T), evaluated_frames=[int(sel[0]), int(sel[-1])], fps=fps, weights=DEFAULT_W,
+                   contact_definition=(f"source human palm distance < {CONTACT_OUTER_M} m (source_contact_diagnostics.npz)" if a.variant == "v1"
+                                       else f"robot palm point (mean of Sharpa wrist, index/middle/pinky MCP) signed distance < {CONTACT_OUTER_M} m"),
+                   rigid_links=list(RIGID) if a.variant == "A" else None,
                    contact_tolerance_m=CONTACT_TOL_M, ramp_s=RAMP_S, gate_max_penetration_m=GATE_PEN_M,
                    inputs=dict(reference=str(REFERENCE.relative_to(ROOT)), reference_sha256=sha256(REFERENCE),
                                contact=str(CONTACT.relative_to(ROOT)), contact_sha256=sha256(CONTACT),
@@ -269,13 +300,19 @@ def main():
                 Tob = np.eye(4); Tob[:3, :3], Tob[:3, 3] = Robj[t], pobj[t]
                 base[t] = np.linalg.inv(Tob) @ Twy @ M          # hand flange in the object frame
             base_t = torch.as_tensor(base)
-            contact = (dist[:, agent, hi] < CONTACT_OUTER_M) & np.isin(np.arange(T), sel)
+            pp = palm_point_flange(hand)
+            palm_sd = sdf(torch.as_tensor(base[:, :3, :3] @ pp + base[:, :3, 3])).numpy()  # robot palm point, object frame
+            d_contact = dist[:, agent, hi] if a.variant == "v1" else palm_sd
+            contact = (d_contact < CONTACT_OUTER_M) & np.isin(np.arange(T), sel)
             s = ramp_weights(contact, fps) * np.isin(np.arange(T), sel)
             q_open = hand.open_pose()
             qfull = q_open.expand(T, 22).clone()
             cf = np.flatnonzero(contact)
             log(f"agent {agent} {side}: wrist {json.dumps({k: (round(v, 6) if isinstance(v, float) else v) for k, v in wdiag.items()})}; contact frames {len(cf)}")
-            if a.mode == "track" and len(cf):
+            if a.mode == "track" and a.variant == "A":
+                qs = optimise_hand(hand, base_t, sdf, sel, DEFAULT_W, iters=a.iters, log=log, attach_frame_w=s[sel])
+                qfull[sel] = qs
+            elif a.mode == "track" and len(cf):
                 qc = optimise_hand(hand, base_t, sdf, cf, DEFAULT_W, iters=a.iters, log=log)
                 qstar = q_open.expand(T, 22).clone()
                 qstar[cf] = qc
@@ -290,6 +327,7 @@ def main():
             lim_ok = bool(((qfull >= hand.lower - 1e-9) & (qfull <= hand.upper + 1e-9)).all())
             ok_contact = ev["palm_touch"][cf] & (ev["fingers_touching"][cf] >= 2) if len(cf) else np.array([], bool)
             evm = np.isin(np.arange(T), sel)
+            dq = np.abs(np.diff(qfull[sel].numpy(), axis=0)).max(1) if len(sel) > 1 else np.zeros(1)
             summary["hands"][f"agent{agent + 1}_{side}"] = dict(
                 wrist=wdiag, contact_frames=int(len(cf)), ramp_frames=int(((s > 0) & ~contact).sum()),
                 max_penetration_m=float(ev["max_pen"][evm].max()), frames_penetration_over_1cm=int((ev["max_pen"][evm] > GATE_PEN_M).sum()),
@@ -300,10 +338,20 @@ def main():
                 contact_frames_fingers_touching_mean=float(ev["fingers_touching"][cf].mean()) if len(cf) else None,
                 palm_min_distance_in_contact_frames_m=dict(p50=float(np.median(ev["group_min_sd"][cf, 0])) if len(cf) else None,
                                                            max=float(ev["group_min_sd"][cf, 0].max()) if len(cf) else None),
-                joint_limits_ok=lim_ok)
+                joint_limits_ok=lim_ok,
+                finger_max_penetration_m=float(ev["finger_pen"][evm].max()),
+                frames_finger_penetration_over_1cm=int((ev["finger_pen"][evm] > GATE_PEN_M).sum()),
+                contact_frames_finger_penetration_over_1cm=int((ev["finger_pen"][cf] > GATE_PEN_M).sum()) if len(cf) else 0,
+                rigid_max_penetration_m=float(ev["rigid_pen"][evm].max()),
+                frames_rigid_penetration_over_1cm=int((ev["rigid_pen"][evm] > GATE_PEN_M).sum()),
+                contact_frames_2_fingers=int((ev["fingers_touching"][cf] >= 2).sum()) if len(cf) else 0,
+                robot_palm_point_sd_m=dict(min=float(palm_sd[evm].min()), p50=float(np.median(palm_sd[evm]))),
+                finger_step_max_rad=float(dq.max()), finger_speed_max_rad_s=float(dq.max() * fps))
             for t in sel:
                 per_frame.append(dict(agent=agent + 1, side=side, frame=int(t), contact=bool(contact[t]), blend=float(s[t]),
                                       max_penetration_m=float(ev["max_pen"][t]), palm_penetration_m=float(ev["palm_pen"][t]),
+                                      finger_penetration_m=float(ev["finger_pen"][t]), rigid_penetration_m=float(ev["rigid_pen"][t]),
+                                      robot_palm_point_sd_m=float(palm_sd[t]), human_palm_distance_m=float(dist[t, agent, hi]),
                                       palm_touching=bool(ev["palm_touch"][t]), fingers_touching=int(ev["fingers_touching"][t]),
                                       **{f"min_sd_{g}": float(ev["group_min_sd"][t, k]) for k, g in enumerate(("palm",) + FINGERS)}))
             log(f"agent {agent} {side}: " + json.dumps(summary["hands"][f"agent{agent + 1}_{side}"], default=float)[:600])
@@ -312,11 +360,16 @@ def main():
                            penetration_ok=all(h["max_penetration_m"] <= GATE_PEN_M for h in hs),
                            contact_ok=all(h["contact_frames_palm_and_2_fingers"] == h["contact_frames"] for h in hs),
                            joint_limits_ok=all(h["joint_limits_ok"] for h in hs))
+    if a.variant == "A":  # 1 cm gate on the finger links; the rigid part (placed by the body reference) reported separately
+        summary["gate"].update(finger_max_penetration_m=max(h["finger_max_penetration_m"] for h in hs),
+                               finger_penetration_ok=all(h["finger_max_penetration_m"] <= GATE_PEN_M for h in hs),
+                               rigid_max_penetration_m=max(h["rigid_max_penetration_m"] for h in hs),
+                               fingers_2_ok=all(h["contact_frames_2_fingers"] == h["contact_frames"] for h in hs))
     summary["seconds"] = time.time() - t0
     finger_names = [n for s in SIDES for n in hands[s].dof_names]
     np.savez_compressed(a.out / "finger_reference.npz", agent_joint_pos=new_joint, agent_finger_joint_pos=finger,
                         finger_joint_names=np.array(finger_names), joint_names=ref["joint_names"], contact_blend=blend,
-                        fps=ref["fps"], mode=np.array(a.mode))
+                        fps=ref["fps"], mode=np.array(a.mode), variant=np.array(a.variant))
     import csv
     with (a.out / "per_frame.csv").open("w", newline="") as fh:
         wtr = csv.DictWriter(fh, fieldnames=list(per_frame[0]))

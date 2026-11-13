@@ -1,0 +1,386 @@
+{
+ "reference_dir": "logs_system1/t06/finger_ref/A_track",
+ "finger_reference_sha256": "f520f80a3ebd1574c5bb24b6c44ba953956e9382c93afc057f24766ce8f5bfb8",
+ "per_frame_sha256": "d82f290613ea6d87af059df4d908f1a8ae74878269de309399fa1abd1226de3a",
+ "body_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+ "body_reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+ "robot_urdf": "system1/hand/assets/g1_29dof_sharpa.urdf",
+ "robot_urdf_sha256": "9e38dbef216d6901d44f7bfb8e3a730a9bf5f0610725045fc713cd75eef076bf",
+ "object_urdf": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+ "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+ "helper_executed_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "code_sha256": "431ee4fb08fc6439032bd872bfc5595b7b867444f09d8fbf022bcbb24ebf5e0b",
+ "gl_vendor": "Mesa",
+ "gl_renderer": "llvmpipe (LLVM 15.0.7, 256 bits)",
+ "width": 960,
+ "height": 540,
+ "colours": {
+  "g1": "Unitree mesh colours (unchanged)",
+  "sharpa": "G1 grey (0.7, 0.7, 0.7); fingertip elastomer G1 dark grey (0.2, 0.2, 0.2)",
+  "sharpa_geoms_recoloured": 120,
+  "object": "U5 object colour (unchanged)"
+ },
+ "no_physics_steps": true,
+ "kinematic_reference_replay": true,
+ "overview": [
+  {
+   "frame": 0,
+   "pixel_std": 53.4553098350139,
+   "camera": {
+    "lookat": [
+     -1.1691641758203528,
+     -1.8010504348257672,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  },
+  {
+   "frame": 99,
+   "pixel_std": 53.482011473790884,
+   "camera": {
+    "lookat": [
+     -1.1627657030479444,
+     -1.7948982095094543,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  },
+  {
+   "frame": 198,
+   "pixel_std": 53.57629219159487,
+   "camera": {
+    "lookat": [
+     -1.1872584462272198,
+     -1.7918867811574,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  },
+  {
+   "frame": 298,
+   "pixel_std": 52.6400307421939,
+   "camera": {
+    "lookat": [
+     -0.9812081484428629,
+     -1.7390031579114742,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  },
+  {
+   "frame": 397,
+   "pixel_std": 52.94854299408854,
+   "camera": {
+    "lookat": [
+     0.06753580176115064,
+     -1.1860369606436396,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  },
+  {
+   "frame": 496,
+   "pixel_std": 52.78115933986342,
+   "camera": {
+    "lookat": [
+     0.15626792008153145,
+     -1.121880526561763,
+     0.6476983536358984
+    ],
+    "distance": 2.977377198387838,
+    "azimuth": 135,
+    "elevation": -22
+   }
+  }
+ ],
+ "closeups": [
+  {
+   "agent": 1,
+   "side": "left",
+   "frame": 231,
+   "contact_fraction": 0.25,
+   "contact_frames": 27,
+   "camera": {
+    "lookat": [
+     -1.2914695889849523,
+     -1.75708278158334,
+     0.7540223495014385
+    ],
+    "distance": 0.55,
+    "azimuth": 0,
+    "elevation": -20.0,
+    "score": 0.6668519236594208,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": false
+   },
+   "finger_penetration_m": 0.02527133298898164,
+   "rigid_penetration_m": 0.005261468161985557,
+   "robot_palm_point_sd_m": 0.03759130656923083,
+   "fingers_touching": 4,
+   "palm_touching": true,
+   "pixel_std": 59.55849370242632,
+   "pixel_std_xray": 57.571935547190996
+  },
+  {
+   "agent": 1,
+   "side": "left",
+   "frame": 256,
+   "contact_fraction": 0.5,
+   "contact_frames": 27,
+   "camera": {
+    "lookat": [
+     -1.2924513955438142,
+     -1.7517093818276241,
+     0.7368025593641927
+    ],
+    "distance": 0.55,
+    "azimuth": 20,
+    "elevation": -20.0,
+    "score": 0.6048679871137517,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": false
+   },
+   "finger_penetration_m": 0.008509335133303418,
+   "rigid_penetration_m": 0.0009813271648143776,
+   "robot_palm_point_sd_m": 0.03859732711943987,
+   "fingers_touching": 5,
+   "palm_touching": true,
+   "pixel_std": 59.234460317888995,
+   "pixel_std_xray": 57.97031068552745
+  },
+  {
+   "agent": 1,
+   "side": "left",
+   "frame": 263,
+   "contact_fraction": 0.75,
+   "contact_frames": 27,
+   "camera": {
+    "lookat": [
+     -1.2758503449002516,
+     -1.7451680535638723,
+     0.7447176493220526
+    ],
+    "distance": 0.55,
+    "azimuth": 0,
+    "elevation": -40.0,
+    "score": -4.2238949259996055,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": true
+   },
+   "finger_penetration_m": 0.009544679634621165,
+   "rigid_penetration_m": 0.0029377429029283594,
+   "robot_palm_point_sd_m": 0.03537176095510721,
+   "fingers_touching": 5,
+   "palm_touching": true,
+   "pixel_std": 73.73190003715982,
+   "pixel_std_xray": 68.56971618680222
+  },
+  {
+   "agent": 1,
+   "side": "right",
+   "frame": 270,
+   "contact_fraction": null,
+   "contact_frames": 0,
+   "camera": {
+    "lookat": [
+     -1.0133386109032316,
+     -2.090861181594903,
+     0.7968444020742914
+    ],
+    "distance": 0.55,
+    "azimuth": 20,
+    "elevation": -20.0,
+    "score": -0.27289697317512956,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": false
+   },
+   "finger_penetration_m": 0.0,
+   "rigid_penetration_m": 0.0,
+   "robot_palm_point_sd_m": 0.04812876180292523,
+   "fingers_touching": 0,
+   "palm_touching": false,
+   "pixel_std": 61.41762496419747,
+   "pixel_std_xray": 51.62386204614433
+  },
+  {
+   "agent": 2,
+   "side": "left",
+   "frame": 288,
+   "contact_fraction": 0.25,
+   "contact_frames": 107,
+   "camera": {
+    "lookat": [
+     -0.6928826984240903,
+     -1.5468704061241567,
+     0.7689855523500095
+    ],
+    "distance": 0.55,
+    "azimuth": 240,
+    "elevation": -20.0,
+    "score": 0.5195233409411057,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": false
+   },
+   "finger_penetration_m": 0.021780615165683907,
+   "rigid_penetration_m": 0.003965393641753514,
+   "robot_palm_point_sd_m": 0.03216362989511711,
+   "fingers_touching": 3,
+   "palm_touching": true,
+   "pixel_std": 53.13905160501363,
+   "pixel_std_xray": 45.405560959172156
+  },
+  {
+   "agent": 2,
+   "side": "left",
+   "frame": 323,
+   "contact_fraction": 0.5,
+   "contact_frames": 107,
+   "camera": {
+    "lookat": [
+     -0.20043351200219278,
+     -1.577081435627858,
+     0.768579284779703
+    ],
+    "distance": 0.55,
+    "azimuth": 280,
+    "elevation": -20.0,
+    "score": 0.42375409513672363,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": false
+   },
+   "finger_penetration_m": 0.015207603646426721,
+   "rigid_penetration_m": 0.0,
+   "robot_palm_point_sd_m": 0.03936507589942679,
+   "fingers_touching": 3,
+   "palm_touching": true,
+   "pixel_std": 58.095337414914084,
+   "pixel_std_xray": 49.914092864516775
+  },
+  {
+   "agent": 2,
+   "side": "left",
+   "frame": 350,
+   "contact_fraction": 0.75,
+   "contact_frames": 107,
+   "camera": {
+    "lookat": [
+     0.2543758237408049,
+     -1.3916945800222449,
+     0.7497968671505066
+    ],
+    "distance": 0.55,
+    "azimuth": 280,
+    "elevation": -40.0,
+    "score": -4.454874063835936,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": true
+   },
+   "finger_penetration_m": 0.028029226003745605,
+   "rigid_penetration_m": 0.01228150922665473,
+   "robot_palm_point_sd_m": 0.024795726577375783,
+   "fingers_touching": 3,
+   "palm_touching": true,
+   "pixel_std": 74.3560841737601,
+   "pixel_std_xray": 59.701346124009675
+  },
+  {
+   "agent": 2,
+   "side": "right",
+   "frame": 237,
+   "contact_fraction": 0.25,
+   "contact_frames": 106,
+   "camera": {
+    "lookat": [
+     -1.2523720533787448,
+     -1.8225150125441727,
+     0.8135066868750812
+    ],
+    "distance": 0.55,
+    "azimuth": 0,
+    "elevation": -40.0,
+    "score": -4.223193033207932,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": true
+   },
+   "finger_penetration_m": 0.05719195780247921,
+   "rigid_penetration_m": 0.03766481643969767,
+   "robot_palm_point_sd_m": 0.004566425579592466,
+   "fingers_touching": 5,
+   "palm_touching": true,
+   "pixel_std": 56.95980899546659,
+   "pixel_std_xray": 53.896326587854695
+  },
+  {
+   "agent": 2,
+   "side": "right",
+   "frame": 263,
+   "contact_fraction": 0.5,
+   "contact_frames": 106,
+   "camera": {
+    "lookat": [
+     -1.235802624495349,
+     -1.7787845822296733,
+     0.8039822465069298
+    ],
+    "distance": 0.55,
+    "azimuth": 20,
+    "elevation": -40.0,
+    "score": -4.216634965327491,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": true
+   },
+   "finger_penetration_m": 0.05188779072735817,
+   "rigid_penetration_m": 0.03292329584894453,
+   "robot_palm_point_sd_m": 0.00015244040672982866,
+   "fingers_touching": 5,
+   "palm_touching": true,
+   "pixel_std": 56.796949412466105,
+   "pixel_std_xray": 56.747474616555486
+  },
+  {
+   "agent": 2,
+   "side": "right",
+   "frame": 290,
+   "contact_fraction": 0.75,
+   "contact_frames": 106,
+   "camera": {
+    "lookat": [
+     -0.9699826971848807,
+     -1.8519964330654288,
+     0.8167645001607615
+    ],
+    "distance": 0.55,
+    "azimuth": 40,
+    "elevation": -40.0,
+    "score": -4.215184633428587,
+    "line_of_sight_crosses_object": false,
+    "line_of_sight_near_body": true
+   },
+   "finger_penetration_m": 0.021488253329388543,
+   "rigid_penetration_m": 0.015849183595780813,
+   "robot_palm_point_sd_m": 0.01575045957413243,
+   "fingers_touching": 5,
+   "palm_touching": true,
+   "pixel_std": 63.38077861110803,
+   "pixel_std_xray": 49.74865796303195
+  }
+ ],
+ "closeups_xray_sha256": "d5393c46b71a36f223b03882bd6005f8486ca3f4b7a1d60d57f06b0f274d96fe",
+ "overview_sha256": "91631e181ca70efdd54d9814c12bf52ebcd1480b6fbfdaeb5ca3d08b3c8183ce",
+ "closeups_sha256": "e8450e1d427e0ec8ad8294bc490e16d7b0cbe23e38226453badad99a74c2b1e4"
+}
