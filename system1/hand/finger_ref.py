@@ -15,7 +15,7 @@ Fingers, per hand and frame:
   * transitions: 0.2 s (10 frames) smoothstep ramp before each contact interval and after it,
     q(t) = q_open + s(t) (q*(t) - q_open) with q* the optimised pose (held from the nearest contact frame in a ramp);
   * objective on contact frames (all frames of a hand jointly):
-      attach  w_a * sum_groups relu(softmin_points sd)^2     groups = palm (C_MC) and each finger's links
+      attach  w_a * sum_groups relu(min_points sd)^2         groups = palm (C_MC) and each finger's links
       pen     w_p * sum_points relu(-sd)^2                   sd < 0 inside the object
       smooth  w_s * sum_t |q_t - q_{t-1}|^2
       open    w_o * |q - q_open|^2
@@ -181,12 +181,11 @@ def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames
     B = base_obj[frames]
     _, links = hand.points_world(q_open[None], torch.eye(4, dtype=torch.float64)[None])
     groups = finger_groups(hand, links)
-    tau = 0.002
     for it in range(iters):
         opt.zero_grad()
         P, _ = hand.points_world(q, B)
         sd = sdf(P)                                   # (T, N)
-        attach = sum((torch.relu(-tau * torch.logsumexp(-sd[:, g] / tau, dim=1)) ** 2).sum() for _, g in groups)
+        attach = sum((torch.relu(sd[:, g].amin(dim=1)) ** 2).sum() for _, g in groups)  # closest sample of each group
         pen = (torch.relu(-sd) ** 2).sum()
         smooth = ((q[1:] - q[:-1]) ** 2).sum() if T > 1 else q.sum() * 0
         reg = ((q - q_open) ** 2).sum()
