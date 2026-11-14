@@ -30,7 +30,10 @@ from claims import claim_local_fs, safe  # noqa: E402
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--curves-end", type=Path, required=True)
+    ap.add_argument("--curves-end", type=Path, default=None)
+    ap.add_argument("--names", default=None, help="comma-separated job names (c2_curve/... or d_curve/...) instead of --curves-end "
+                    "(Kevin 2026-11-13: the 6 D Bin seed-721 points that were never in the cloud D catalog)")
+    ap.add_argument("--rank-base", type=int, default=900, help="LOCAL_RANK = rank-base + k (a second launch uses another base)")
     ap.add_argument("--train", type=Path, default=Path("/root/autodl-tmp/system1/logs/train"))
     ap.add_argument("--gpus", default="0,1,2,3,4")
     ap.add_argument("--per-gpu", type=int, default=6)
@@ -41,9 +44,12 @@ def main():
     a = ap.parse_args()
     if not a.python or not Path(a.python).exists():
         raise SystemExit(f"--python / S1_PY not set or missing: {a.python!r} (source s1_env.sh)")
-    ce = json.loads(a.curves_end.read_text())
-    want = [x["name"] for x in ce["not_evaluated"] if x["group"] == a.group]
-    jobs = {j["name"]: j for j in s.c2_eval_jobs(a.train, True, True, True)}
+    if a.names:
+        want = [n for n in a.names.split(",") if n]
+    else:
+        ce = json.loads(a.curves_end.read_text())
+        want = [x["name"] for x in ce["not_evaluated"] if x["group"] == a.group]
+    jobs = {j["name"]: j for j in s.c2_eval_jobs(a.train, True, True, True) + s.d_curve_jobs(True)}
     missing = [n for n in want if n not in jobs]
     if missing:
         raise SystemExit(f"not in the scheduler's job list: {missing}")
@@ -63,6 +69,12 @@ def main():
     for k, job in enumerate(todo):
         g = gpus[k % len(gpus)]
         name = job["name"]
+        if job.get("sha256"):  # D checkpoints carry the catalog sha256 (as the scheduler checks)
+            import hashlib
+            ck = job["argv"][job["argv"].index("--checkpoint") + 1]
+            if hashlib.sha256(Path(ck).read_bytes()).hexdigest() != job["sha256"]:
+                print(s.now(), "checkpoint sha256 mismatch, skip", name, flush=True)
+                continue
         if not claim_local_fs(name, "cloud", dict(gpu="NVIDIA GeForce RTX 4090")):
             if not job["meta"].get("ignore_claims"):
                 print(s.now(), "claimed by another owner, skip", name, flush=True)
@@ -77,7 +89,7 @@ def main():
             while out.with_name(f"{out.name}.attempt{n}").exists():
                 n += 1
             out.rename(out.with_name(f"{out.name}.attempt{n}"))
-        env = dict(os.environ, CUDA_VISIBLE_DEVICES=str(g), LOCAL_RANK=str(900 + k), WORLD_SIZE="1")
+        env = dict(os.environ, CUDA_VISIBLE_DEVICES=str(g), LOCAL_RANK=str(a.rank_base + k), WORLD_SIZE="1")
         argv = [a.python, "-B", *job["argv"]]
         lj = ops / f"{safe(name)}.launch.json"
         if lj.exists():  # the crashed scheduler's record (pid None) is kept, renamed
@@ -88,7 +100,7 @@ def main():
         lj.write_text(json.dumps(dict(
             name=name, argv=argv, gpu=g, started=s.now(), env={x: env[x] for x in ("CUDA_VISIBLE_DEVICES", "LOCAL_RANK")}, pid=None,
             git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"), meta=job["meta"],
-            launcher="system1/cloud/run_curve_points.py (Kevin 2026-11-13: the 28 main-curve points of curves_end.json)"), indent=1))
+            launcher="system1/cloud/run_curve_points.py (Kevin 2026-11-13: " + ("--names" if a.names else "the main-curve points of curves_end.json") + ")"), indent=1))
         log = (ops / f"{safe(name)}.stdout.log").open("w")
         proc = subprocess.Popen(argv, cwd=s.ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
         lj.write_text(json.dumps(dict(json.loads(lj.read_text()), pid=proc.pid), indent=1))
