@@ -220,7 +220,7 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
-        if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies))
+        if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies),nominal_viser_export='skipped (29-DOF format)')
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass
         if cwrap is not None and cwrap.kind!='v1':manifest['system1_scheme_c_kind']=cwrap.kind  # T03 C v2
@@ -306,7 +306,7 @@ def main():
                 result['torque_saturation_fraction_per_agent_joint']=sat.mean(axis=(0,1)).tolist()
                 result['torque_substeps']=int(T_.shape[0]*T_.shape[1])
                 result['torques']=str(out/(init['state_id']+'.torques.npz'))
-            if init['kind']=='nominal':
+            if init['kind']=='nominal' and hand is None:  # System1 hands: the viser export takes 29 DOFs; skipped (manifest system1_hand)
                 save_core4d_smalltable_viser(out/'nominal_viser.npz',channels,metadata=dict(manifest,fps=int(command.reference.fps),result=result,
                                               experiment_contract=experiment.checkpoint_contract if experiment else {}))
             results.append(result);write_json(out/'episodes.json',results);print(json.dumps(result),flush=True)
