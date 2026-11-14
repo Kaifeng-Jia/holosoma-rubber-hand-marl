@@ -301,11 +301,12 @@ def rubber_hand_penetration(ref: dict, agent: int, side: str, sdf: GridSDF, chun
 
 def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames: np.ndarray, w: dict, q_human=None,
                   iters: int = 400, lr: float = 0.03, log=None, attach_frame_w=None, variant: str = "v1", max_step=None,
-                  rate_weight: float = 0.0, rate_limit: float = 0.1):
+                  rate_weight: float = 0.0, rate_limit: float = 0.1, human_frame_w=None):
     """q* (len(frames), 22) for the hand base poses base_obj (T, 4, 4) in the object frame.
     attach_frame_w: optional per-frame weight of the attach term (len(frames)); None = 1 on every frame (v1)."""
     T = len(frames)
     aw = torch.ones(T, dtype=torch.float64) if attach_frame_w is None else torch.as_tensor(np.asarray(attach_frame_w, float))
+    hfw = None if human_frame_w is None else torch.as_tensor(np.asarray(human_frame_w, float))
     q_open = hand.open_pose()
     q = q_open.expand(T, 22).clone().requires_grad_(True)
     opt = torch.optim.Adam([q], lr=lr)
@@ -323,7 +324,9 @@ def optimise_hand(hand: SharpaHand, base_obj: torch.Tensor, sdf: GridSDF, frames
         loss = w["attach"] * attach + w["pen"] * pen + w["smooth"] * smooth + w["open"] * reg
         if rate_weight and T > 1:  # hinge on the per-frame change above rate_limit (gate 5), lets the optimiser anticipate
             loss = loss + rate_weight * (torch.relu((q[1:] - q[:-1]).abs() - rate_limit) ** 2).sum()
-        if w.get("human", 0) and q_human is not None:
+        if human_frame_w is not None:  # T07: per-frame human prior w_t = w_max * w_attach * r_t
+            loss = loss + (hfw[:, None] * (q - q_human[frames]) ** 2).sum()
+        elif w.get("human", 0) and q_human is not None:
             loss = loss + w["human"] * ((q - q_human[frames]) ** 2).sum()
         loss.backward()
         opt.step()
@@ -369,6 +372,8 @@ def main():
     ap.add_argument("--human-ref", type=Path, default=None,
                     help="npz with q_human (T, 2, 44) in finger_joint_names order (system1/hand/human_fingers.py); needed for w > 0")
     ap.add_argument("--smooth-weight", type=float, default=None, help=f"smoothness weight (default {DEFAULT_W['smooth']})")
+    ap.add_argument("--human-prior", type=Path, default=None, help="T07: per-frame human prior (system1/hand/human_prior.py npz: q_human, r)")
+    ap.add_argument("--human-wmax", type=float, default=0.0, help="T07: w_max relative to the attach weight; w_t = w_max * w_attach * r_t")
     ap.add_argument("--rate-weight", type=float, default=0.0,
                     help="variant A: weight of sum relu(|q_t - q_t-1| - 0.1 rad)^2 (default 0 = off)")
     ap.add_argument("--max-step-rad", type=float, default=None,
@@ -388,6 +393,15 @@ def main():
         W["smooth"] = a.smooth_weight
     W["human"] = a.human_weight
     q_hum_all = None
+    r_all = None
+    if a.human_prior is not None and a.human_wmax > 0:
+        if a.variant != "A" or a.human_weight:
+            raise ValueError("--human-prior goes with --variant A and without --human-weight")
+        hp = np.load(a.human_prior, allow_pickle=True)
+        if str(hp["case"]) != a.case:
+            raise ValueError(f"human prior is for {hp['case']}, not {a.case}")
+        q_hum_all = np.asarray(hp["q_human"], float)
+        r_all = np.asarray(hp["r"], float)
     if a.human_weight:
         hz = np.load(a.human_ref, allow_pickle=True)
         q_hum_all = np.asarray(hz["q_human"], float)
@@ -423,6 +437,8 @@ def main():
     summary = dict(mode=a.mode, variant=a.variant, frames=int(T), evaluated_frames=[int(sel[0]), int(sel[-1])], fps=fps, weights=W,
                    human_ref=None if a.human_ref is None else dict(path=str(a.human_ref), sha256=sha256(a.human_ref)),
                    max_step_rad=a.max_step_rad, rate_weight=a.rate_weight, iters=a.iters,
+                   human_prior=None if a.human_prior is None else dict(path=str(a.human_prior), sha256=sha256(a.human_prior), w_max=a.human_wmax,
+                                                                     w_attach=DEFAULT_W["attach"]),
                    contact_definition=(f"source human palm distance < {CONTACT_OUTER_M} m (source_contact_diagnostics.npz)" if a.variant == "v1"
                                        else f"robot palm point (mean of Sharpa wrist, index/middle/pinky MCP) signed distance < {CONTACT_OUTER_M} m"),
                    rigid_links=list(RIGID) if a.variant == "A" else None,
@@ -462,8 +478,9 @@ def main():
             log(f"agent {agent} {side}: wrist {json.dumps({k: (round(v, 6) if isinstance(v, float) else v) for k, v in wdiag.items()})}; contact frames {len(cf)}")
             if a.mode == "track" and a.variant == "A":
                 qh = None if q_hum_all is None else torch.as_tensor(q_hum_all[:, agent, hi * 22:(hi + 1) * 22])
+                hfw = None if r_all is None else a.human_wmax * W["attach"] * r_all[sel, agent, hi]
                 qs = optimise_hand(hand, base_t, sdf, sel, W, q_human=qh, iters=a.iters, log=log, attach_frame_w=s[sel], variant="A",
-                                   max_step=a.max_step_rad, rate_weight=a.rate_weight)
+                                   max_step=a.max_step_rad, rate_weight=a.rate_weight, human_frame_w=hfw)
                 qfull[sel] = qs
             elif a.mode == "track" and len(cf):
                 qc = optimise_hand(hand, base_t, sdf, cf, W, iters=a.iters, log=log)
@@ -502,7 +519,13 @@ def main():
                 robot_palm_point_sd_m=dict(min=float(palm_sd[evm].min()), p50=float(np.median(palm_sd[evm]))),
                 finger_step_max_rad=float(dq.max()), finger_speed_max_rad_s=float(dq.max() * fps),
                 finger_steps_over_0p1_rad=int((dq > 0.1).sum()), finger_steps_over_0p5_rad=int((dq > 0.5).sum()),
-                finger_step_max_rad_per_joint={n: float(v) for n, v in zip(hand.dof_names, dqj.max(0))})
+                finger_step_max_rad_per_joint={n: float(v) for n, v in zip(hand.dof_names, dqj.max(0))},
+                human_prior=None if r_all is None else dict(
+                    frames_r_gt_0=int((r_all[sel, agent, hi] > 0).sum()),
+                    dev_rad_mean_where_r_gt_0=float(np.abs(qfull[sel].numpy() - q_hum_all[sel, agent, hi * 22:(hi + 1) * 22])[r_all[sel, agent, hi] > 0].mean())
+                    if (r_all[sel, agent, hi] > 0).any() else None,
+                    open_pose_dev_rad_mean_where_r_gt_0=float(np.abs(q_hum_all[sel, agent, hi * 22:(hi + 1) * 22])[r_all[sel, agent, hi] > 0].mean())
+                    if (r_all[sel, agent, hi] > 0).any() else None))
             gA = None
             if a.variant == "A":  # revised gate (task book 2026-11-13), dense 3 mm samples
                 gA = evaluate_gate_A(hand, qfull, base_t, sdf)
