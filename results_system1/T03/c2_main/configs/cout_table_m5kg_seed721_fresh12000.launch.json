@@ -1,0 +1,42 @@
+{
+ "label": "cout_table_m5kg_seed721_fresh12000",
+ "argv": [
+  "/root/autodl-tmp/system1/deps/hssim_s1/bin/python",
+  "-B",
+  "scripts/train_core4d_smalltable.py",
+  "--experiment",
+  "smalltable5kg_A",
+  "--reward-variant",
+  "bucket_A_no_rel_no_height",
+  "--num-envs",
+  "2048",
+  "--steps-per-env",
+  "24",
+  "--seed",
+  "721",
+  "--iterations",
+  "12000",
+  "--save-interval",
+  "1000",
+  "--output-dir",
+  "/root/autodl-tmp/system1/logs/train/cout_table_m5kg_seed721_fresh12000",
+  "--sonic-residual",
+  "--sonic-tf32",
+  "--sonic-residual-kind",
+  "out",
+  "--c-train-diag"
+ ],
+ "started": "2026-11-11T15:22:05-05:00",
+ "preflight_iterations": null,
+ "git_head": "0e0f164a7652e3a00a645590ec4ac8b4dc2609bd",
+ "git_status": "",
+ "git_diff": "",
+ "nvidia_smi": "0, NVIDIA GeForce RTX 4090, 24564 MiB, 14589 MiB\n1, NVIDIA GeForce RTX 4090, 24564 MiB, 17972 MiB\n2, NVIDIA GeForce RTX 4090, 24564 MiB, 11247 MiB\n3, NVIDIA GeForce RTX 4090, 24564 MiB, 17636 MiB\n4, NVIDIA GeForce RTX 4090, 24564 MiB, 17976 MiB\n",
+ "env": {
+  "CUDA_VISIBLE_DEVICES": "1",
+  "LOCAL_RANK": "704",
+  "WORLD_SIZE": "1"
+ },
+ "parent_checkpoint": null,
+ "parent_sha256": null
+}

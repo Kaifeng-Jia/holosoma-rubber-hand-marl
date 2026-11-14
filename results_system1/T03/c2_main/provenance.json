@@ -1,0 +1,401 @@
+{
+ "rows": 2142,
+ "missing": [],
+ "hand_fk_test": {
+  "independent_backend": "yourdfpy",
+  "root_link": "pelvis",
+  "joint_order": [
+   "left_hip_pitch_joint",
+   "left_hip_roll_joint",
+   "left_hip_yaw_joint",
+   "left_knee_joint",
+   "left_ankle_pitch_joint",
+   "left_ankle_roll_joint",
+   "right_hip_pitch_joint",
+   "right_hip_roll_joint",
+   "right_hip_yaw_joint",
+   "right_knee_joint",
+   "right_ankle_pitch_joint",
+   "right_ankle_roll_joint",
+   "waist_yaw_joint",
+   "waist_roll_joint",
+   "waist_pitch_joint",
+   "left_shoulder_pitch_joint",
+   "left_shoulder_roll_joint",
+   "left_shoulder_yaw_joint",
+   "left_elbow_joint",
+   "left_wrist_roll_joint",
+   "left_wrist_pitch_joint",
+   "left_wrist_yaw_joint",
+   "right_shoulder_pitch_joint",
+   "right_shoulder_roll_joint",
+   "right_shoulder_yaw_joint",
+   "right_elbow_joint",
+   "right_wrist_roll_joint",
+   "right_wrist_pitch_joint",
+   "right_wrist_yaw_joint"
+  ],
+  "random_states": 9,
+  "max_transform_error": {
+   "max_abs": 8.881784197001252e-16,
+   "rms": 1.2398675366599697e-16
+  },
+  "passed": true
+ },
+ "references": {
+  "pull": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+   "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+   "lateral_spacing_m": null
+  },
+  "table": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+   "lateral_spacing_m": null
+  },
+  "bucket": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+   "lateral_spacing_m": null
+  }
+ },
+ "palm_postprocess_sha256": "929345c5062c5238b03fb1b281967991e3767e0a68d9a3d0904782a286807c1f",
+ "sources": [
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed721_joint8000_pm2",
+   "run": "cin_pull_m20kg_seed721_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed722_joint8000_pm2",
+   "run": "cin_pull_m20kg_seed722_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed723_joint8000_pm2",
+   "run": "cin_pull_m20kg_seed723_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cout_pull_m20kg_seed721_joint8000_pm2",
+   "run": "cout_pull_m20kg_seed721_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2",
+   "run": "D_pull_paper_seed721"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_pull_paper_seed722/it08050_pm2",
+   "run": "D_pull_paper_seed722"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_pull_paper_seed723/it08050_pm2",
+   "run": "D_pull_paper_seed723"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed721_joint8000_pm8",
+   "run": "cin_pull_m20kg_seed721_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed722_joint8000_pm8",
+   "run": "cin_pull_m20kg_seed722_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_pull_m20kg_seed723_joint8000_pm8",
+   "run": "cin_pull_m20kg_seed723_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cout_pull_m20kg_seed721_joint8000_pm8",
+   "run": "cout_pull_m20kg_seed721_joint8000"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_pull_paper_seed721/it08050_pm8",
+   "run": "D_pull_paper_seed721"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_pull_paper_seed722/it08050_pm8",
+   "run": "D_pull_paper_seed722"
+  },
+  {
+   "task": "pull",
+   "scheme": "D",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_pull_paper_seed723/it08050_pm8",
+   "run": "D_pull_paper_seed723"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed721_fresh12000_pm2",
+   "run": "cin_table_m5kg_seed721_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed722_fresh12000_pm2",
+   "run": "cin_table_m5kg_seed722_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed723_fresh12000_pm2",
+   "run": "cin_table_m5kg_seed723_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cout_table_m5kg_seed721_fresh12000_pm2",
+   "run": "cout_table_m5kg_seed721_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed721/it12000_pm2",
+   "run": "D_table_paper_T-07_seed721"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed722/it12000_pm2",
+   "run": "D_table_paper_T-07_seed722"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed723/it12000_pm2",
+   "run": "D_table_paper_T-07_seed723"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed721_fresh12000_pm8",
+   "run": "cin_table_m5kg_seed721_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed722_fresh12000_pm8",
+   "run": "cin_table_m5kg_seed722_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed723_fresh12000_pm8",
+   "run": "cin_table_m5kg_seed723_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cout_table_m5kg_seed721_fresh12000_pm8",
+   "run": "cout_table_m5kg_seed721_fresh12000"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed721/it12000_pm8",
+   "run": "D_table_paper_T-07_seed721"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed722/it12000_pm8",
+   "run": "D_table_paper_T-07_seed722"
+  },
+  {
+   "task": "table",
+   "scheme": "D",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed723/it12000_pm8",
+   "run": "D_table_paper_T-07_seed723"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed721_fresh12000_pm2",
+   "run": "cin_bucket_m1kg_seed721_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed722_fresh12000_pm2",
+   "run": "cin_bucket_m1kg_seed722_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed723_fresh12000_pm2",
+   "run": "cin_bucket_m1kg_seed723_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/final/cout_bucket_m1kg_seed721_fresh12000_pm2",
+   "run": "cout_bucket_m1kg_seed721_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed721/it12000_pm2",
+   "run": "D_bucket_paper_B-RZ0_seed721"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed722/it12000_pm2",
+   "run": "D_bucket_paper_B-RZ0_seed722"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed723/it12000_pm2",
+   "run": "D_bucket_paper_B-RZ0_seed723"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed721_fresh12000_pm8",
+   "run": "cin_bucket_m1kg_seed721_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed722_fresh12000_pm8",
+   "run": "cin_bucket_m1kg_seed722_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-in",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed723_fresh12000_pm8",
+   "run": "cin_bucket_m1kg_seed723_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "C-out",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/final/cout_bucket_m1kg_seed721_fresh12000_pm8",
+   "run": "cout_bucket_m1kg_seed721_fresh12000"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed721/it12000_pm8",
+   "run": "D_bucket_paper_B-RZ0_seed721"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed722/it12000_pm8",
+   "run": "D_bucket_paper_B-RZ0_seed722"
+  },
+  {
+   "task": "bucket",
+   "scheme": "D",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed723/it12000_pm8",
+   "run": "D_bucket_paper_B-RZ0_seed723"
+  }
+ ]
+}
