@@ -1,0 +1,61 @@
+task,section,scheme,level,completion_pct_mean,completion_pct_sd,n_seeds,completion_per_seed,object_rmse_cm_completed_mean,gpu,note
+Push,main,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Push,main,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Push,main,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Push,main,B,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Push,main,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Push,main,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Push,main,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Push,main,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Push,main,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Push,main,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Pull,main,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,B,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,C-in,+/-2,78.66666666666667,36.95041722813605,3,100;100;36,6.121954743232992,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,C-in,+/-8,49.333333333333336,24.440403706431148,3,44;76;28,7.2812768791314815,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,C-out,+/-2,100.0,,1,100,2.1478983368724585,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Pull,main,C-out,+/-8,76.0,,1,76,4.918836694406836,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Pull,main,D,+/-2,99.33333333333333,1.1547005383792515,3,100;100;98,2.6524748289640865,NVIDIA GeForce RTX 5070 Laptop GPU,
+Pull,main,D,+/-8,74.66666666666667,16.289055630494154,3,86;56;82,5.337359032043296,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,B,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,C-in,+/-2,74.66666666666667,18.58314648635514,3,62;96;66,6.944899203977403,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,C-in,+/-8,68.66666666666667,18.14754345175493,3,48;82;76,7.740890810213268,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,C-out,+/-2,82.0,,1,82,10.363508315711487,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Table,main,C-out,+/-8,54.0,,1,54,9.646690636873245,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Table,main,D,+/-2,86.66666666666667,14.742229591663987,3,70;98;92,8.82573158470035,NVIDIA GeForce RTX 5070 Laptop GPU,
+Table,main,D,+/-8,81.33333333333333,8.082903768654761,3,90;74;80,8.754515525203448,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,B,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,C-in,+/-2,90.0,6.928203230275509,3,98;86;86,7.950825555542662,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,C-in,+/-8,58.0,2.0,3,60;56;58,9.014221851738933,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,C-out,+/-2,2.0,,1,2,10.179200023412704,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Bin,main,C-out,+/-8,4.0,,1,4,9.801174327731133,NVIDIA GeForce RTX 5070 Laptop GPU,single seed (preliminary)
+Bin,main,D,+/-2,84.66666666666667,18.58314648635514,3,100;64;90,7.199059077659277,NVIDIA GeForce RTX 5070 Laptop GPU,
+Bin,main,D,+/-8,62.0,16.0,3,78;46;62,8.462268170464338,NVIDIA GeForce RTX 5070 Laptop GPU,
+Kick,appendix,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Kick,appendix,A,+/-8,2,,deterministic,2,13.272275030612946,NVIDIA GeForce RTX 5070 Laptop GPU,
+Kick,appendix,B,+/-2,,,,,,,"B not applicable (the planner drops the kick motion, T02)"
+Kick,appendix,B,+/-8,,,,,,,"B not applicable (the planner drops the kick motion, T02)"
+Kick,appendix,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Kick,appendix,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Kick,appendix,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Kick,appendix,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Kick,appendix,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Kick,appendix,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Chair,appendix,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Chair,appendix,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Chair,appendix,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Chair,appendix,B,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
+Chair,appendix,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Chair,appendix,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Chair,appendix,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Chair,appendix,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
+Chair,appendix,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Chair,appendix,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
