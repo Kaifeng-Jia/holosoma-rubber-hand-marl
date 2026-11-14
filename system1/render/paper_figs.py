@@ -7,6 +7,7 @@ Inputs:
   * A: results_system1/T01b/schemeA/episodes.csv (variant schemeA; laptop 5070);
   * B: results_system1/T02/episodes.csv (B0 shown; every B variant listed in table1_b_variants.csv);
   * C-in, C-out, D (Pull / Table / Bin): results_system1/T03/c2_main/per_seed_summary.csv (laptop 5070);
+  * D (Push, Kick, Chair): results_system1/T03/d_final_5070/per_seed_summary.csv (laptop 5070);
   * training curves: results_system1/T03/train_efficiency/curve_points.csv, per_run.csv (cloud 4090);
   * load capacity: results_system1/T04/mass_sweep_summary.csv, T04/physics_check/physics_check.csv.
 Outputs: results_system1/figures/ (table1_main.csv / .md, table1_b_variants.csv, fig2_training_efficiency.png / .csv,
@@ -93,10 +94,18 @@ def table1():
     for (t, l), c in b_all["B0"].items():
         cells[("B", t, l)] = c
     ps = rd(R / "T03/c2_main/per_seed_summary.csv")
+    d5070 = R / "T03/d_final_5070/per_seed_summary.csv"  # D Push (main), Kick / Chair (appendix) on the 5070 (Kevin 2026-11-13)
+    ps_d = rd(d5070) if d5070.exists() else []
+    partial = {}
     for sch in ("C-in", "C-out", "D"):
-        for t in C_TASKS:
+        for t in C_TASKS + (("push", "kick", "chair") if sch == "D" else ()):
+            src = ps if t in C_TASKS else ps_d
             for l in (2, 8):
-                rr = [x for x in ps if x["variant"] == sch and x["task"] == t and int(x["perturbation_level_cm"]) == l and x["n_completed"]]
+                allr = [x for x in src if x["variant"] == sch and x["task"] == t and int(x["perturbation_level_cm"]) == l]
+                rr = [x for x in allr if x["n_completed"]]
+                if rr and len(rr) < len(allr):  # a seed missing: no mean over fewer seeds, the cell stays empty
+                    partial[(sch, t, l)] = f"{len(allr) - len(rr)} of {len(allr)} seeds not evaluated yet ({';'.join(x['training_seed'] for x in rr)} done)"
+                    continue
                 if rr:
                     obj = [float(x["object_pos_rmse_cm_mean"]) for x in rr if x["object_pos_rmse_cm_mean"]]
                     cells[(sch, t, l)] = dict(scheme=sch, n=50, completion=[float(x["completion_pct"]) for x in rr],
@@ -109,7 +118,8 @@ def table1():
                 c = cells.get((sch, t, l))
                 note = ""
                 if c is None:
-                    note = ("C not trained on this task (plan: C only Pull / Table / Bin)" if sch.startswith("C") else
+                    note = (partial[(sch, t, l)] if (sch, t, l) in partial else
+                            "C not trained on this task (plan: C only Pull / Table / Bin)" if sch.startswith("C") else
                             "D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)" if sch == "D" else
                             "B not applicable (the planner drops the kick motion, T02)" if (sch == "B" and t == "kick") else "missing")
                     rows.append(dict(task=TASK_NAME[t], section="main" if t in TASKS_MAIN else "appendix", scheme=sch, level=f"+/-{l}",

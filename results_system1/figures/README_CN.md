@@ -13,7 +13,7 @@
 
 | 文件 | 内容 | 数据来源 | 状态 |
 |---|---|---|---|
-| `table1_main.csv` / `.md` | 表 1：方案 × 任务，±2 / ±8 完成率（多种子的给均值 ± 样本标准差，另列每个种子）、完成回合的物体误差、评测 GPU | A：T01b `schemeA/episodes.csv`；B：T02 `episodes.csv`（B0）；C-in、C-out、D：T03 `c2_main/per_seed_summary.csv` | 草图，有缺格，见下 |
+| `table1_main.csv` / `.md` | 表 1：方案 × 任务，±2 / ±8 完成率（多种子的给均值 ± 样本标准差，另列每个种子）、完成回合的物体误差、评测 GPU | A：T01b `schemeA/episodes.csv`；B：T02 `episodes.csv`（B0）；C-in、C-out、D（Pull、Table、Bin）：T03 `c2_main/per_seed_summary.csv`；D（Push、Kick、Chair）：T03 `d_final_5070/per_seed_summary.csv` | 草图，全部在本机 5070 上评；空格都是不适用，见下 |
 | `table1_b_variants.csv` | B 的全部变体（B0、B1-0、B1-2、B1-4、B-open） | T02 | 完整：所有变体、所有任务都是 0 |
 | `fig2_training_efficiency.png` / `.csv` | 图 2：完成率（±2）对环境步数，Pull、Table、Bin 三栏 | T03 `train_efficiency/curve_points.csv`（236 个点，全部是云端 4090 的点） | 草图，点已齐 |
 | `fig3_load_capacity.png` / `.csv` | 图 3：完成率（±2）对质量倍数，D 和 C-in（每档重训，种子 721）；标出物理上限和触发了规则但没训练的档位 | T04 `mass_sweep_summary.csv`、`physics_check/physics_check.csv` | 完整（单种子） |
@@ -25,7 +25,8 @@
 ## 缺的数据
 
 - **表 1：**
-  - D 在 Push 上没有本机 5070 的评测，Kick、Chair（附录）也没有，那几格留空。V3 收尾时在云端 4090 上评过，按"主对比全部在 5070 上评"的规定，不混进来。
+  - D 的 Push、Kick、Chair：2026-11-14 在本机 5070 上评完（3 个种子 × ±2 / ±8），见 `results_system1/T03/d_final_5070/`。V3 收尾包里同一批 checkpoint 的云端结果不混进来。
+  - 某一格只要缺一个种子，整格就留空，并在 `note` 里写明，不用较少的种子算均值。现在没有这种格。
   - C 只做了 Pull、Table、Bin（方案规定）。
   - B 不适用于 Kick：规划器会去掉踢腿动作（T02）。
 - **图 2：** 已不缺点。2026-11-14 补齐：C 的 28 个点和 D Bin 种子 721 的 6 个点，经 Kevin 同意在云端 4090 上补评，见 `results_system1/T03/curves_end/`。如果以后再有缺点，脚本会在对应 checkpoint 处画竖向细虚线，均值和范围只在种子齐全的点上画。

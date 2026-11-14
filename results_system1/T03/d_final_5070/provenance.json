@@ -1,0 +1,195 @@
+{
+ "rows": 918,
+ "missing": [],
+ "hand_fk_test": {
+  "independent_backend": "yourdfpy",
+  "root_link": "pelvis",
+  "joint_order": [
+   "left_hip_pitch_joint",
+   "left_hip_roll_joint",
+   "left_hip_yaw_joint",
+   "left_knee_joint",
+   "left_ankle_pitch_joint",
+   "left_ankle_roll_joint",
+   "right_hip_pitch_joint",
+   "right_hip_roll_joint",
+   "right_hip_yaw_joint",
+   "right_knee_joint",
+   "right_ankle_pitch_joint",
+   "right_ankle_roll_joint",
+   "waist_yaw_joint",
+   "waist_roll_joint",
+   "waist_pitch_joint",
+   "left_shoulder_pitch_joint",
+   "left_shoulder_roll_joint",
+   "left_shoulder_yaw_joint",
+   "left_elbow_joint",
+   "left_wrist_roll_joint",
+   "left_wrist_pitch_joint",
+   "left_wrist_yaw_joint",
+   "right_shoulder_pitch_joint",
+   "right_shoulder_roll_joint",
+   "right_shoulder_yaw_joint",
+   "right_elbow_joint",
+   "right_wrist_roll_joint",
+   "right_wrist_pitch_joint",
+   "right_wrist_yaw_joint"
+  ],
+  "random_states": 9,
+  "max_transform_error": {
+   "max_abs": 8.881784197001252e-16,
+   "rms": 1.2398675366599697e-16
+  },
+  "passed": true
+ },
+ "references": {
+  "push": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+   "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+   "lateral_spacing_m": 0.8780471999999999
+  },
+  "kick": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/kick/plan5_attempt09_dual_kick_mirrored_runtime.npz",
+   "sha256": "8eba6106bf009b3561d61a4916d7cd4db7ed06d089cb5da14104ff9d15ddd87d",
+   "lateral_spacing_m": null
+  },
+  "chair": {
+   "path": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+   "sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+   "lateral_spacing_m": null
+  }
+ },
+ "palm_postprocess_sha256": "929345c5062c5238b03fb1b281967991e3767e0a68d9a3d0904782a286807c1f",
+ "v3_episodes": "/home/kevin/holosoma-core4d-base/paper_handoff_exports/V3_20261102/V3_GPU_CLOSEOUT_20261104/results/episodes.csv",
+ "v3_episodes_sha256": "164f0720e0856a90bbf450fdce472cc47bc36722641e060a1ea6faf2fd75b8f4",
+ "runner": "system1/t03/run_d_finals_local.py",
+ "runner_log_sha256": "de3d2886738c8aeebfb425ce5b066c22cf7d1b02e18bae6e5e8beada5cd803dd",
+ "sources": [
+  {
+   "task": "push",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed721/it13050_pm2",
+   "run": "D_push_paper_seed721"
+  },
+  {
+   "task": "push",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed721/it13050_pm8",
+   "run": "D_push_paper_seed721"
+  },
+  {
+   "task": "push",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed722/it13050_pm2",
+   "run": "D_push_paper_seed722"
+  },
+  {
+   "task": "push",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed722/it13050_pm8",
+   "run": "D_push_paper_seed722"
+  },
+  {
+   "task": "push",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed723/it13050_pm2",
+   "run": "D_push_paper_seed723"
+  },
+  {
+   "task": "push",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed723/it13050_pm8",
+   "run": "D_push_paper_seed723"
+  },
+  {
+   "task": "kick",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed721/it08000_pm2",
+   "run": "D_kick_paper_seed721"
+  },
+  {
+   "task": "kick",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed721/it08000_pm8",
+   "run": "D_kick_paper_seed721"
+  },
+  {
+   "task": "kick",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed722/it08000_pm2",
+   "run": "D_kick_paper_seed722"
+  },
+  {
+   "task": "kick",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed722/it08000_pm8",
+   "run": "D_kick_paper_seed722"
+  },
+  {
+   "task": "kick",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed723/it08000_pm2",
+   "run": "D_kick_paper_seed723"
+  },
+  {
+   "task": "kick",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed723/it08000_pm8",
+   "run": "D_kick_paper_seed723"
+  },
+  {
+   "task": "chair",
+   "seed": 721,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm2",
+   "run": "D_chair_paper_seed721"
+  },
+  {
+   "task": "chair",
+   "seed": 721,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm8",
+   "run": "D_chair_paper_seed721"
+  },
+  {
+   "task": "chair",
+   "seed": 722,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed722/it12000_pm2",
+   "run": "D_chair_paper_seed722"
+  },
+  {
+   "task": "chair",
+   "seed": 722,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed722/it12000_pm8",
+   "run": "D_chair_paper_seed722"
+  },
+  {
+   "task": "chair",
+   "seed": 723,
+   "level": 2,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed723/it12000_pm2",
+   "run": "D_chair_paper_seed723"
+  },
+  {
+   "task": "chair",
+   "seed": 723,
+   "level": 8,
+   "eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed723/it12000_pm8",
+   "run": "D_chair_paper_seed723"
+  }
+ ]
+}

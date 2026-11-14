@@ -7,8 +7,8 @@ Push,main,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table 
 Push,main,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Push,main,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Push,main,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
-Push,main,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
-Push,main,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Push,main,D,+/-2,84.0,14.0,3,78;100;74,7.147658937431478,NVIDIA GeForce RTX 5070 Laptop GPU,
+Push,main,D,+/-8,78.66666666666667,18.14754345175493,3,62;98;76,7.005890119780088,NVIDIA GeForce RTX 5070 Laptop GPU,
 Pull,main,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
 Pull,main,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
 Pull,main,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
@@ -47,8 +47,8 @@ Kick,appendix,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Ta
 Kick,appendix,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Kick,appendix,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Kick,appendix,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
-Kick,appendix,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
-Kick,appendix,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Kick,appendix,D,+/-2,100.0,0.0,3,100;100;100,2.483605774740378,NVIDIA GeForce RTX 5070 Laptop GPU,
+Kick,appendix,D,+/-8,94.66666666666667,3.0550504633038935,3,94;98;92,3.9310129085222534,NVIDIA GeForce RTX 5070 Laptop GPU,
 Chair,appendix,A,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
 Chair,appendix,A,+/-8,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
 Chair,appendix,B,+/-2,0,,deterministic,0,,NVIDIA GeForce RTX 5070 Laptop GPU,
@@ -57,5 +57,5 @@ Chair,appendix,C-in,+/-2,,,,,,,C not trained on this task (plan: C only Pull / T
 Chair,appendix,C-in,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Chair,appendix,C-out,+/-2,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
 Chair,appendix,C-out,+/-8,,,,,,,C not trained on this task (plan: C only Pull / Table / Bin)
-Chair,appendix,D,+/-2,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
-Chair,appendix,D,+/-8,,,,,,,"D not evaluated on the laptop 5070 for this task (V3 numbers are from the cloud 4090, not mixed in)"
+Chair,appendix,D,+/-2,95.33333333333333,6.429100507328637,3,88;98;100,3.128903253646723,NVIDIA GeForce RTX 5070 Laptop GPU,
+Chair,appendix,D,+/-8,86.0,17.776388834631177,3,66;92;100,3.9540044887234336,NVIDIA GeForce RTX 5070 Laptop GPU,
