@@ -56,6 +56,20 @@ def read(p):
     return json.loads(Path(p).read_text())
 
 
+EVALUATOR = "scripts/evaluate_paper_supplement.py"
+
+
+def eval_code_sha256(launch: dict) -> str | None:
+    """sha256 of the evaluator as it was when an evaluation started, from its launch record (git HEAD then); None if the
+    evaluator had uncommitted changes at that time (git_status names it; the launch record keeps git_diff) or the commit is
+    not in this clone. Replaces sha256 of the current file, which changes whenever the evaluator is edited later."""
+    if EVALUATOR in (launch.get("git_status") or "") or not launch.get("git_head"):
+        return None
+    r = subprocess.run(["git", "-C", str(Path(__file__).resolve().parents[1]), "show", f"{launch['git_head']}:{EVALUATOR}"],
+                       capture_output=True)
+    return hashlib.sha256(r.stdout).hexdigest() if r.returncode == 0 else None
+
+
 def csvsave(path, rows):
     path.parent.mkdir(parents=True, exist_ok=True)
     keys = list(dict.fromkeys(k for r in rows for k in r))

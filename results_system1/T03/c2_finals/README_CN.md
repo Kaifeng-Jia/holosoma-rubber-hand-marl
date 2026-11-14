@@ -12,24 +12,60 @@
   - ±2 来自流水线 d_curve 对最终 checkpoint 的评测，±8 来自 d_paper_final。
 - 两边的冻结状态文件 sha256 相同，每行都记了 sha256。
 
-## 当前结果（2026-11-12 19:4x）
+## 当前结果（2026-11-13 21:2x，C 全部 run 的最终评测已完成）
 
-**Pull**（50 个扰动状态）
+原质量的 C 和 D，每格是 50 个扰动状态里的完成数。各重训质量档的行也在 `finals.csv` 里（`mass_kg`、`retrained` 两列），汇总见 `results_system1/T04/retrained/`。
 
-| 方案 | 种子 | ±2 完成 | ±8 完成 | ±8 未完成的终止原因 |
+**Pull（20 kg，第 8050 轮）**
+
+| 方案 | 种子 | ±2 完成 | ±8 完成 | ±8 未完成的终止项 |
 |---|---|---|---|---|
-| C-in | 721 | 50 | 22 | joint_bad_tracking 28 个，第 150–172 步 |
-| C-out | 721 | 50 | 38 | joint_bad_tracking 12 个，第 156–197 步 |
-| D | 721 | 50 | 43 | joint_bad_tracking 7 个 |
-| D | 722 | 50 | 28 | joint_bad_tracking 22 个 |
-| D | 723 | 49 | 41 | joint_bad_tracking 9 个 |
+| C-in | 721 | 50 | 22 | joint_bad_tracking 28 |
+| C-in | 722 | 50 | 38 | joint_bad_tracking 12 |
+| C-in | 723 | 18 | 14 | joint_bad_tracking 36 |
+| C-out | 721 | 50 | 38 | joint_bad_tracking 12 |
+| D | 721 | 50 | 43 | joint_bad_tracking 7 |
+| D | 722 | 50 | 28 | joint_bad_tracking 22 |
+| D | 723 | 49 | 41 | joint_bad_tracking 9 |
 
-- 所有 nominal 回合都完成，各 316 步。
-- C 两行未完成的回合里，SONIC 都没有摔倒。
+**Table（5 kg，第 12000 轮）**
 
-**Table、Bin**
-- C 的这两个任务还在训练，表里记为"未完成，没有 summary.json"。
-- D 的数已在表里。
+| 方案 | 种子 | ±2 完成 | ±8 完成 | ±8 未完成的终止项 |
+|---|---|---|---|---|
+| C-in | 721 | 31 | 24 | joint_bad_tracking 26 |
+| C-in | 722 | 48 | 41 | joint_bad_tracking 9 |
+| C-in | 723 | 33 | 38 | joint_bad_tracking 12 |
+| C-out | 721 | 41 | 27 | joint_bad_tracking 23 |
+| D | 721 | 35 | 45 | joint_bad_tracking 5 |
+| D | 722 | 49 | 37 | joint_bad_tracking 13 |
+| D | 723 | 46 | 40 | joint_bad_tracking 10 |
+
+**Bin（1 kg，第 12000 轮）**
+
+| 方案 | 种子 | ±2 完成 | ±8 完成 | ±8 未完成的终止项 |
+|---|---|---|---|---|
+| C-in | 721 | 49 | 30 | joint_bad_tracking 20 |
+| C-in | 722 | 43 | 28 | joint_bad_tracking 22 |
+| C-in | 723 | 43 | 29 | joint_bad_tracking 21 |
+| C-out | 721 | 1 | 2 | joint_bad_tracking 48 |
+| D | 721 | 50 | 39 | joint_bad_tracking 11 |
+| D | 722 | 32 | 23 | joint_bad_tracking 27 |
+| D | 723 | 45 | 31 | joint_bad_tracking 19 |
+
+**没有完成的 nominal 回合**（同一 run 的 ±2、±8 用同一个 nominal 状态，两次结果相同）：
+
+| run | nominal 步数 |
+|---|---|
+| C-in Pull 723 | 161 / 316 |
+| C-in Table 722 | 336 / 687 |
+| C-in Table 723 | 398 / 687 |
+| C-out Bin 721 | 399 / 497 |
+| D Bin 722 | 313 / 497 |
+| D Bin 723 | 324 / 497 |
+
+其余 run 的 nominal 都完成。
+
+C-in Table 722 的最终 checkpoint（`model_12000.pt`，sha256 b1fad2fa…ed5d）2026-11-13 17:29 从云端取回，和云端训练目录里的文件 sha256 一致；本机 ±2、±8 在 17:29–18:45 评完。
 
 ## 文件
 
@@ -44,4 +80,4 @@
 
 ## 和任务书的偏离
 
-没有。C 其余 run 训完、本机评完后，重跑上面的命令更新本表。
+没有。

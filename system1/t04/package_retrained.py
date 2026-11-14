@@ -28,7 +28,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
-from system1.package_scheme_a import PALM_OUT, HandMetrics, csvsave, palm_module, read, sha  # noqa: E402
+from system1.package_scheme_a import PALM_OUT, HandMetrics, csvsave, eval_code_sha256, palm_module, read, sha  # noqa: E402
 
 PT = ROOT / "logs_system1/post_train"
 OUT = ROOT / "results_system1/T04"
@@ -106,7 +106,7 @@ def main():
                 if task in ("bucket", "table") else ("excluded_nominal" if nom else "missing"),
                 n_metric_frames=e["steps"] + 1, palm_valid_hand_frames=ph["count"] if ph else 0, trajectory_path=str(traj),
                 trajectory_sha256=sha(traj), config_sha256=sha(man) if man.exists() else None, reference_sha256=hm.refinfo[task]["sha256"],
-                object_urdf_sha256=sha(obj_urdf), evaluation_code_sha256=sha(ROOT / "scripts/evaluate_paper_supplement.py"),
+                object_urdf_sha256=sha(obj_urdf), evaluation_code_sha256=eval_code_sha256(read(d.with_name(d.name + ".launch.json"))),
                 summary_path=str(d.relative_to(ROOT)), summary_sha256=ssha, progress=e["progress"], raw_reward_sum_common=e["reward_sum_common"],
                 scheme=scheme, mass_kg=mass, original_mass_kg=ORIG[task], mass_ratio=mass / ORIG[task], retrained=retr, seed=721,
                 gpu_model=gpu))

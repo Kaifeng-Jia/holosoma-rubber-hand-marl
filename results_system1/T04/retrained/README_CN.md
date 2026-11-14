@@ -51,6 +51,13 @@
 - 按 Kevin 的指示，只检查、回报，没有开训。
 - 物理上限核算见 `../physics_check/`。若某档物理上做不到，按规则标"超出物理上限"，不用于比较架构。
 
+## 更正（2026-11-13 21:2x）
+
+- `mass_sweep_episodes_retrained.csv` 的 `evaluation_code_sha256` 列，原来记的是打包时评测脚本当前文件的 sha256。评测脚本后来改过（T06/T07 的手部开关），重新打包时整列都会跟着变，不能代表评测当时的代码。
+- 现在改为按每次评测启动记录（`<评测目录>.launch.json`）里的 git HEAD，取当时那个提交里的 `scripts/evaluate_paper_supplement.py` 算 sha256。如果启动时这个文件有未提交改动，就留空。修改在 `system1/package_scheme_a.py:eval_code_sha256`，`system1/t04/package_d_direct.py` 同样改了。
+- 结果：34 个评测是 7c4e2714…；D Pull 40 kg 的 ±2、±8 是 75968e3f…（11-11 14:11、14:38 启动，早于 3e41687）。两版之间评测脚本只多了一个默认关闭的诊断选项 `--sonic-const-dq`。
+- 其他列和数字都没有变。
+
 ## 文件
 
 | 文件 | 内容 |

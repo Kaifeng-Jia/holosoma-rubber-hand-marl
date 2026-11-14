@@ -25,7 +25,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 sys.path.insert(0, str(ROOT / "scripts"))
 from system1 import gpu_provenance  # noqa: E402
-from system1.package_scheme_a import PALM_OUT, V3_EPISODES, HandMetrics, csvsave, palm_module, read, sha  # noqa: E402
+from system1.package_scheme_a import PALM_OUT, V3_EPISODES, HandMetrics, csvsave, eval_code_sha256, palm_module, read, sha  # noqa: E402
 
 L = ROOT / "logs_system1/T04/D_direct"
 OUT = ROOT / "results_system1/T04"
@@ -95,7 +95,7 @@ def main():
                         if case in ("bucket", "table") else ("excluded_nominal" if nom else "missing"),
                         n_metric_frames=e["steps"] + 1, palm_valid_hand_frames=ph["count"] if ph else 0, trajectory_path=str(traj),
                         trajectory_sha256=sha(traj), config_sha256=sha(d / "run_manifest.json"), reference_sha256=hm.refinfo[case]["sha256"],
-                        object_urdf_sha256=sha(obj_urdf), evaluation_code_sha256=sha(ROOT / "scripts/evaluate_paper_supplement.py"),
+                        object_urdf_sha256=sha(obj_urdf), evaluation_code_sha256=eval_code_sha256(la),
                         exit_record_path=str(L / "ops" / f"{label}.exit.json"), summary_sha256=ssha, progress=e["progress"],
                         raw_reward_sum_common=e["reward_sum_common"], scheme="D", mass_kg=mass, original_mass_kg=ORIG[case],
                         mass_ratio=mass / ORIG[case], retrained="no (original-mass policy)", seed=721, delta_cm=None,
