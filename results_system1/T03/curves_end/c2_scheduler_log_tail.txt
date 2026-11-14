@@ -1,0 +1,15 @@
+2026-11-13T17:02:00-05:00 c2 scheduler / slot filler start; pid 373927 state {"early_stop": {"cin": {"decided": "2026-11-11T18:02:56-05:00", "runs": {"pull": {"len_1_100": 120.57679999999995, "len_901_1000": 374.4398000000001, "reward_1_100": 0.0961354872584343, "reward_901_1000": 0.1264632423967123, "n": [100, 100, 100, 100], "length_key": "Episode/mean_length_last100_steps
+Traceback (most recent call last):
+  File "/root/autodl-tmp/system1/duet-system1/system1/cloud/c2_scheduler.py", line 770, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/root/autodl-tmp/system1/duet-system1/system1/cloud/c2_scheduler.py", line 755, in main
+    proc = subprocess.Popen(argv, cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/root/autodl-tmp/system1/deps/hssim_s1/lib/python3.11/subprocess.py", line 1026, in __init__
+    self._execute_child(args, executable, preexec_fn, close_fds,
+  File "/root/autodl-tmp/system1/deps/hssim_s1/lib/python3.11/subprocess.py", line 1826, in _execute_child
+    and os.path.dirname(executable)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "<frozen posixpath>", line 152, in dirname
+TypeError: expected str, bytes or os.PathLike object, not NoneType

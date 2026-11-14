@@ -1,0 +1,771 @@
+{
+ "time": "2026-11-13T21:08:00-05:00",
+ "written_by": "Claude (laptop session) with c2_scheduler.not_evaluated / est_minutes, not by the scheduler",
+ "reason": "the scheduler restarted at 2026-11-13T17:02:00-05:00 (pid 373927, --extend-hours 0) was started from a shell without /root/autodl-tmp/system1/s1_env.sh, so S1_PY was unset and --python (default $S1_PY) was None; its first launch (c2_curve/cin_table_m5kg_seed722_fresh12000/it09000_pm2, 17:15:06, pid None) raised TypeError in subprocess.Popen and the scheduler exited (c2_scheduler.log). No evaluation was launched after 17:15:06; the evaluations already running then all completed. all_training_done / deadline / curves_end were never recorded in c2_decisions.json. Last training (cin_table_m5kg_seed722) ended about 17:29, so the 2 h rule deadline would have been about 19:29; at writing time the deadline has passed and, per Kevin's rule, the points below are not evaluated.",
+ "scheduler_log_mtime": "2026-11-14 06:15:06 +0800 (= 2026-11-13 17:15:06 EST)",
+ "soft_deadline_rule": "last training end + 2 h, extension 0 h",
+ "stopped": [],
+ "n_jobs": 324,
+ "n_not_evaluated": 94,
+ "by_group": {
+  "d": 0,
+  "main": 28,
+  "mass": 66,
+  "other": 0
+ },
+ "not_evaluated": [
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed721_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed721_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed721_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed722_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed722_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed722_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed722_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed722_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed722_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed723_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed723_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed723_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed723_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m1kg_seed723_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_bucket_m1kg_seed723_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it02000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 2000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it03000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 3000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it04000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 4000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it05000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 5000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it06000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 6000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it07000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 7000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it08000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 8000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it09000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it10000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it11000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m2kg_seed721_fresh12000/it12000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m2kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it02000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 2000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it03000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 3000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it04000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 4000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it05000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 5000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it06000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 6000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it07000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 7000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it08000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 8000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it09000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it10000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it11000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m4kg_seed721_fresh12000/it12000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m4kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it01000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 1000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it02000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 2000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it03000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 3000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it04000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 4000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it05000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 5000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it06000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 6000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it07000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 7000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it08000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 8000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it09000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it10000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it11000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_bucket_m8kg_seed721_fresh12000/it12000_pm2",
+   "group": "mass",
+   "run": "cin_bucket_m8kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it01050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 1050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it02050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 2050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it03050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 3050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it04050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 4050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it05050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 5050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it06050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 6050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it07050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 7050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_pull_m40kg_seed721_joint8000/it08050_pm2",
+   "group": "mass",
+   "run": "cin_pull_m40kg_seed721_joint8000",
+   "iteration": 8050,
+   "est_minutes_cloud": 83.6,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it01000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 1000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it02000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 2000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it03000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 3000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it04000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 4000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it05000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 5000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it06000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 6000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it07000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 7000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it08000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 8000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it09000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it10000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it11000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m10kg_seed721_fresh12000/it12000_pm2",
+   "group": "mass",
+   "run": "cin_table_m10kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it01000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 1000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it02000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 2000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it03000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 3000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it04000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 4000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it05000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 5000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it06000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 6000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it07000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 7000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it08000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 8000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it09000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it10000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it11000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m20kg_seed721_fresh12000/it12000_pm2",
+   "group": "mass",
+   "run": "cin_table_m20kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed721_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed721_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed721_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed722_fresh12000/it09000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed722_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "cloud"
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed722_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed722_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed722_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed722_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed722_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed722_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed723_fresh12000/it09000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed723_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed723_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed723_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed723_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed723_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cin_table_m5kg_seed723_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cin_table_m5kg_seed723_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cout_bucket_m1kg_seed721_fresh12000/it09000_pm2",
+   "group": "main",
+   "run": "cout_bucket_m1kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_bucket_m1kg_seed721_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cout_bucket_m1kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_bucket_m1kg_seed721_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cout_bucket_m1kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_bucket_m1kg_seed721_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cout_bucket_m1kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 132.0,
+   "claim_owner": "laptop"
+  },
+  {
+   "name": "c2_curve/cout_table_m5kg_seed721_fresh12000/it09000_pm2",
+   "group": "main",
+   "run": "cout_table_m5kg_seed721_fresh12000",
+   "iteration": 9000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_table_m5kg_seed721_fresh12000/it10000_pm2",
+   "group": "main",
+   "run": "cout_table_m5kg_seed721_fresh12000",
+   "iteration": 10000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_table_m5kg_seed721_fresh12000/it11000_pm2",
+   "group": "main",
+   "run": "cout_table_m5kg_seed721_fresh12000",
+   "iteration": 11000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": null
+  },
+  {
+   "name": "c2_curve/cout_table_m5kg_seed721_fresh12000/it12000_pm2",
+   "group": "main",
+   "run": "cout_table_m5kg_seed721_fresh12000",
+   "iteration": 12000,
+   "est_minutes_cloud": 184.3,
+   "claim_owner": "laptop"
+  }
+ ],
+ "reason_corrected": "2026-11-13 21:3x: cause made precise (S1_PY unset); nothing else changed"
+}
