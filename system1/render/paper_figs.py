@@ -198,7 +198,9 @@ def fig2():
                 h.append(hh)
                 l.append(ll)
     fig.legend(h, l, loc="lower center", ncol=2, fontsize=7.5, frameon=False, bbox_to_anchor=(0.5, -0.02))
-    fig.text(0.99, 0.99, "DRAFT - thin dotted verticals: checkpoints with a missing curve point (not drawn)", ha="right", va="top", fontsize=6.5, color=MUTED)
+    any_miss = any(x["missing"] for x in out)
+    fig.text(0.99, 0.99, "DRAFT" + (" - thin dotted verticals: checkpoints with a missing curve point (not drawn)" if any_miss else
+                                    " - every curve point present (all on the cloud RTX 4090)"), ha="right", va="top", fontsize=6.5, color=MUTED)
     fig.tight_layout(rect=(0, 0.2, 1, 0.97))
     fig.savefig(OUT / "fig2_training_efficiency.png", dpi=200)
     plt.close(fig)
@@ -282,6 +284,7 @@ def fig5(t1):
     ax = fig.add_subplot(111, polar=True)
     ax.set_xticks(ang)
     ax.set_xticklabels(dims, fontsize=7.5, color=INK)
+    ax.tick_params(axis="x", pad=14)  # keep the axis names clear of markers at 1.0
     ax.set_ylim(0, 1)
     ax.set_yticks([0.25, 0.5, 0.75, 1.0])
     ax.set_yticklabels(["0.25", "0.5", "0.75", "1"], fontsize=6, color=MUTED)
@@ -297,10 +300,10 @@ def fig5(t1):
         vv = np.concatenate([v, v[:1]])
         aa = np.concatenate([ang, ang[:1]])
         ax.plot(aa, vv, color=PAPER_COLOR[s], linestyle=PAPER_LINESTYLE[s], linewidth=2, marker="o", markersize=3.5, label=PAPER_NAME[s])
-    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.08), fontsize=7, frameon=False, ncol=1)
-    fig.text(0.02, 0.98, "DRAFT - a scheme without a value on an axis has a gap there\n(missing or not applicable, see fig5_summary_raw.csv)",
-             fontsize=6.5, color=MUTED, va="top")
-    fig.tight_layout()
+    ax.legend(loc="upper center", bbox_to_anchor=(0.5, -0.16), fontsize=7, frameon=False, ncol=1)
+    fig.text(0.02, 0.01, "DRAFT - a scheme without a value on an axis has a gap there\n(missing or not applicable, see fig5_summary_raw.csv)",
+             fontsize=6.5, color=MUTED, va="bottom")
+    fig.tight_layout(rect=(0, 0.04, 1, 1))
     fig.savefig(OUT / "fig5_summary_radar.png", dpi=200)
     plt.close(fig)
     return raw

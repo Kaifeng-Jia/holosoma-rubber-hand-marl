@@ -1,0 +1,25 @@
+task,scheme,seed,run,n_points_expected,n_points_missing,missing_iterations,first_iteration_ge_50,env_steps_ge_50,first_iteration_ge_80,env_steps_ge_80,auc_mean_completion_pct,first_point,last_point,last_point_completion_pct,eval_gpus,all_points_on_4090
+pull,C-in,721,cin_pull_m20kg_seed721_joint8000,9,0,,1050,51609600,1050,51609600,75.25,50,8050,100,NVIDIA GeForce RTX 4090,True
+pull,C-in,722,cin_pull_m20kg_seed722_joint8000,9,0,,2050,100761600,4050,199065600,68.375,50,8050,98,NVIDIA GeForce RTX 4090,True
+pull,C-in,723,cin_pull_m20kg_seed723_joint8000,9,0,,1050,51609600,1050,51609600,70.75,50,8050,36,NVIDIA GeForce RTX 4090,True
+pull,C-out,721,cout_pull_m20kg_seed721_joint8000,9,0,,1050,51609600,1050,51609600,76.75,50,8050,100,NVIDIA GeForce RTX 4090,True
+pull,"D (from scratch, V3-25-27)",721,D_pull_scratch_V3-25_seed721,9,0,,6050,297369600,7050,346521600,34.5,50,8050,92,NVIDIA GeForce RTX 4090,True
+pull,"D (from scratch, V3-25-27)",722,D_pull_scratch_V3-26_seed722,9,0,,8050,395673600,not reached,not reached,10.875,50,8050,50,NVIDIA GeForce RTX 4090,True
+pull,"D (from scratch, V3-25-27)",723,D_pull_scratch_V3-27_seed723,9,0,,8050,395673600,not reached,not reached,10.625,50,8050,78,NVIDIA GeForce RTX 4090,True
+pull,"D (paper, single-person prior)",721,D_pull_paper_seed721,9,0,,1050,51609600,1050,51609600,82.5,50,8050,100,NVIDIA GeForce RTX 4090,True
+pull,"D (paper, single-person prior)",722,D_pull_paper_seed722,9,0,,2050,100761600,4050,199065600,57.0,50,8050,100,NVIDIA GeForce RTX 4090,True
+pull,"D (paper, single-person prior)",723,D_pull_paper_seed723,9,0,,2050,100761600,3050,149913600,76.125,50,8050,98,NVIDIA GeForce RTX 4090,True
+table,C-in,721,cin_table_m5kg_seed721_fresh12000,13,0,,1000,49152000,1000,49152000,77.25,0,12000,62,NVIDIA GeForce RTX 4090,True
+table,C-in,722,cin_table_m5kg_seed722_fresh12000,13,0,,1000,49152000,1000,49152000,82.33333333333333,0,12000,96,NVIDIA GeForce RTX 4090,True
+table,C-in,723,cin_table_m5kg_seed723_fresh12000,13,0,,1000,49152000,1000,49152000,85.33333333333333,0,12000,56,NVIDIA GeForce RTX 4090,True
+table,C-out,721,cout_table_m5kg_seed721_fresh12000,13,0,,1000,49152000,9000,442368000,52.25,0,12000,74,NVIDIA GeForce RTX 4090,True
+table,D (paper),721,D_table_paper_T-07_seed721,7,0,,4000,196608000,6000,294912000,73.5,0,12000,70,NVIDIA GeForce RTX 4090,True
+table,D (paper),722,D_table_paper_T-07_seed722,7,0,,6000,294912000,8000,393216000,60.666666666666664,0,12000,96,NVIDIA GeForce RTX 4090,True
+table,D (paper),723,D_table_paper_T-07_seed723,7,0,,6000,294912000,10000,491520000,50.333333333333336,0,12000,100,NVIDIA GeForce RTX 4090,True
+bucket,C-in,721,cin_bucket_m1kg_seed721_fresh12000,13,0,,1000,49152000,2000,98304000,89.58333333333333,0,12000,98,NVIDIA GeForce RTX 4090,True
+bucket,C-in,722,cin_bucket_m1kg_seed722_fresh12000,13,0,,2000,98304000,3000,147456000,78.83333333333333,0,12000,88,NVIDIA GeForce RTX 4090,True
+bucket,C-in,723,cin_bucket_m1kg_seed723_fresh12000,13,0,,1000,49152000,4000,196608000,74.08333333333333,0,12000,90,NVIDIA GeForce RTX 4090,True
+bucket,C-out,721,cout_bucket_m1kg_seed721_fresh12000,13,0,,not reached,not reached,not reached,not reached,0.75,0,12000,10,NVIDIA GeForce RTX 4090,True
+bucket,D (paper),721,D_bucket_paper_B-RZ0_seed721,7,0,,2000,98304000,4000,196608000,83.0,0,12000,100,NVIDIA GeForce RTX 4090,True
+bucket,D (paper),722,D_bucket_paper_B-RZ0_seed722,7,0,,10000,491520000,not reached,not reached,16.166666666666668,0,12000,78,NVIDIA GeForce RTX 4090,True
+bucket,D (paper),723,D_bucket_paper_B-RZ0_seed723,7,0,,2000,98304000,12000,589824000,47.666666666666664,0,12000,84,NVIDIA GeForce RTX 4090,True

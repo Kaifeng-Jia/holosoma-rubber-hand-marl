@@ -191,8 +191,28 @@ def main():
                              first_iteration_ge_80_per_seed=a80["per_seed"], first_iteration_ge_80_mean=a80["mean"], n_reached_80=a80["n_reached"],
                              auc_per_seed=";".join(f"{r['auc_mean_completion_pct']:.1f}" if r["auc_mean_completion_pct"] is not None else "" for r in rr),
                              auc_mean=au["mean"], points_missing=sum(r["n_points_missing"] for r in rr)))
+    # last curve point (cloud 4090) next to the final evaluation of the same checkpoint on the same +/-2 states on the 5070
+    # (results_system1/T03/c2_main/per_seed_summary.csv), matched by checkpoint and states sha256; two separate evaluations
+    fin = {}
+    with (ROOT / "results_system1/T03/c2_main/per_seed_summary.csv").open() as f:
+        for r in csv.DictReader(f):
+            if r["perturbation_level_cm"] == "2":
+                fin[(r["checkpoint_sha256"], r["states_sha256"])] = r
+    cmp_rows = []
+    for r in run_rows:
+        p = [x for x in pts_rows if x["run"] == r["run"] and x["status"] == "complete" and x["iteration"] == r["last_point"]]
+        if not p:
+            continue
+        p = p[0]
+        f5 = fin.get((p["checkpoint_sha256"], p["states_sha256"]))
+        cmp_rows.append(dict(task=r["task"], scheme=r["scheme"], seed=r["seed"], run=r["run"], iteration=p["iteration"],
+                             checkpoint_sha256=p["checkpoint_sha256"], states_sha256=p["states_sha256"],
+                             cloud_4090_n_completed=p["n_completed"], cloud_4090_gpu=p["gpu"],
+                             final_5070_n_completed=int(f5["n_completed"]) if f5 else "no 5070 final of this checkpoint",
+                             final_5070_gpu=f5["gpu_model"] if f5 else None, final_5070_eval_dir=f5["eval_dir"] if f5 else None,
+                             difference_5070_minus_4090=int(f5["n_completed"]) - p["n_completed"] if f5 else None))
     for fn, rows in (("curve_points.csv", pts_rows), ("per_run.csv", run_rows), ("scheme_summary.csv", summ), ("wallclock.csv", wall_rows),
-                     ("reward_curves.csv", rew_rows)):
+                     ("reward_curves.csv", rew_rows), ("last_point_vs_5070_final.csv", cmp_rows)):
         keys = []
         for r in rows:
             keys += [k for k in r if k not in keys]

@@ -43,3 +43,26 @@
 
 - 截止前约 2 小时 14 分钟（17:15 到 19:29）没有启动评测。按规则，这段时间本来会继续评上表里的点。这是调度器出错退出造成的，不是因为时间不够。
 - 截止后我没有补评；要不要在租卡训练时顺便补上，由 Kevin 决定。
+
+## 之后：Kevin 同意补评（2026-11-13 至 2026-11-14）
+
+- **更正：** 上面写的"D 曲线 0 个"不对。D Bin 种子 721 第 0、2000、4000、6000、8000、10000 轮这 6 个点，从来没进过云端 D 曲线清单（`inputs/d_curve/catalog.json` 里这个 run 只有第 12000 轮），所以调度器的 `not_evaluated` 也没有列出它们。
+- **Kevin 2026-11-13 22:1x：** 主曲线的 28 个点补评；质量扫描的 66 个点不评。
+  - 用 `system1/cloud/run_curve_points.py` 在云端 5 张 4090 上评。它沿用调度器自己的评测命令、环境、记录和认领处理，见脚本说明。
+  - 22:15:03 开始，2026-11-14 01:17:04 全部结束。28 个都是 rc 0、51 回合、complete。
+  - 日志：`run_curve_points_20261113.log`。
+- **Kevin 2026-11-13 23:0x：** D Bin 种子 721 的 6 个点也补评，和 28 个点并行。
+  - 6 个 checkpoint 从本机只读目录上传到云端 `inputs/d_curve/D_bucket_paper_B-RZ0_seed721/`，sha256 核对一致。
+  - 云端清单加了这 6 条：`cloud_d_curve_catalog.json`，改之前的备份是 `cloud_d_curve_catalog.before_dbin721_20261113.json`，差异见 `cloud_d_curve_catalog.diff`。
+  - 用 `run_curve_points.py --names ... --rank-base 950` 评，启动时按清单核对 checkpoint 的 sha256。
+  - 23:10:22 开始，2026-11-14 01:16:22 全部结束。6 个都是 rc 0、51 回合、complete。
+  - 日志：`run_curve_points_dbin721_20261113.log`。
+- 8 个第 12000 轮 ±2 的 C 点原先由本机认领。这次云端重评，认领仍归本机，另写了 `cloud_rerun.json`。曲线用云端的数，表 1 用本机的数。
+- 补评后，主曲线和 D 曲线都没有缺点。曲线结果见 `results_system1/T03/train_efficiency/`。质量扫描的 66 个点仍然没评。
+- **同步和关机：**
+  - 2026-11-14 01:25 把云端 `logs/`、duet-hand 的 `logs_system1/`、`_to_delete/`、D 曲线清单和备份同步回本机 `exports_system1/cloud_sync/`。
+  - 又补拉了两个云端仓库里的 `logs/`（各 2.3 MB），以及 duet-hand 仓库根目录下放错位置的 `.launch.json`（66 字节）。
+  - 01:33:21 用 `rsync -anc --delete` 逐个文件核对，全部 0 处差异。
+  - 云端两个仓库里改过、未提交的文件：92 个里 91 个和本机文件或本机提交一致，剩下 1 个就是上面那个 `.launch.json`。
+  - 01:33:34 Kevin 指示后在云端执行 `shutdown`，只关机，没有释放实例。01:33:47 ssh 连接被拒绝。
+  - 第一次核对时本机多出 1 个文件：21:31 中断的 rsync 留下的半截临时文件，1.5 MB，云端没有。已移到本机 `_to_delete/cloud_sync_partial_rsync_tmp_20261114/`，之后再核对为 0。
