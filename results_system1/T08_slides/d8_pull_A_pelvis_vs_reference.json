@@ -1,0 +1,108 @@
+{
+ "csv": "d8_pull_A_pelvis_vs_reference.csv",
+ "csv_sha256": "f40c6f3d5f3525d0c4484acc8a228f4514e9666707d17bea2238a9cf58ddb1c8",
+ "rows": 820,
+ "inputs": [
+  {
+   "scheme": "A",
+   "summary": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/pull_pm2/summary.json",
+   "summary_sha256": "ae75593b312a6bfd54068cfd083426cb4683b972c5bf6663970e23e51c59cd8c",
+   "trajectory": "/home/kevin/duet-system1/logs_system1/T01b/schemeA_main/pull_pm2/perturbed_000.trajectory.npz",
+   "trajectory_sha256": "3c6df415491d29500aa0a215378bc1348e7366a78e7c93db5a6b2cf015b3fab3",
+   "checkpoint_sha256": "e6bdab3f64a39336b3d41877d4f497d05f58af275f288ec0e6746c283ded8909",
+   "states_sha256": "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572",
+   "gpu_name": null,
+   "completed": false,
+   "executed_steps": 92,
+   "terminal_terms": {
+    "timeout": false,
+    "joint_bad_tracking": true
+   },
+   "saved_rows": 93,
+   "per_robot": [
+    {
+     "robot": 0,
+     "d_final_m": 0.2170776793079984,
+     "d_max_m": 0.2170776793079984,
+     "d_final_cm_episodes_csv_definition": 21.70776793079984,
+     "d_max_cm": 21.70776793079984
+    },
+    {
+     "robot": 1,
+     "d_final_m": 0.10694651784737662,
+     "d_max_m": 0.10694651784737662,
+     "d_final_cm_episodes_csv_definition": 10.694651784737662,
+     "d_max_cm": 10.694651784737662
+    }
+   ]
+  },
+  {
+   "scheme": "D",
+   "summary": "/home/kevin/duet-system1/logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2/summary.json",
+   "summary_sha256": "c629f3c98b830d2cc636f09213ff04b51f5be1d7882ec00611c7816ddbf26db3",
+   "trajectory": "/home/kevin/duet-system1/logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2/perturbed_000.trajectory.npz",
+   "trajectory_sha256": "c869855d00d5db3a92df3896ce0d4f4655e54415cbe62f3588785c32641d2214",
+   "checkpoint_sha256": "727630e9cec654d88bfb454d5eaabd70d7db629478598a2039140653a57cbf43",
+   "states_sha256": "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572",
+   "gpu_name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+   "completed": true,
+   "executed_steps": 316,
+   "terminal_terms": {
+    "timeout": false,
+    "joint_bad_tracking": false
+   },
+   "saved_rows": 317,
+   "per_robot": [
+    {
+     "robot": 0,
+     "d_final_m": 0.021456805140229452,
+     "d_max_m": 0.05859230809558202,
+     "d_final_cm_episodes_csv_definition": 2.145680514022945,
+     "d_max_cm": 5.859230809558202
+    },
+    {
+     "robot": 1,
+     "d_final_m": 0.016175368784644182,
+     "d_max_m": 0.07322671665690754,
+     "d_final_cm_episodes_csv_definition": 1.6175368784644182,
+     "d_max_cm": 7.322671665690754
+    }
+   ]
+  }
+ ],
+ "drift_table": "/home/kevin/duet-system1/results_system1/T01b/drift_in_task/episodes.csv",
+ "drift_table_sha256": "f2599792e417ac032b58d6769207d4c383a2548d0081ca14451682cc68146625",
+ "check": [
+  {
+   "robot": 0,
+   "csv_d_final_cm": 21.70776793079984,
+   "drift_table_d_final_cm": 21.70776793079984,
+   "csv_d_max_cm": 21.70776793079984,
+   "drift_table_d_max_cm": 21.70776793079984,
+   "match": true
+  },
+  {
+   "robot": 1,
+   "csv_d_final_cm": 10.694651784737662,
+   "drift_table_d_final_cm": 10.694651784737662,
+   "csv_d_max_cm": 10.694651784737662,
+   "drift_table_d_max_cm": 10.694651784737662,
+   "match": true
+  }
+ ],
+ "definition": "results_system1/T01b/preregistration_drift_in_task.md (alignment, d); code system1/sonic/drift_in_task.episode_metrics(series=True)",
+ "reference_loader_meta": {
+  "task": "pull",
+  "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+  "sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4",
+  "loader": "PairedMotionReference"
+ },
+ "code_sha256": "d61bf2d96033b8906d6f99dfc98e393c653c5afa5d2f7a91a0886a87186e0f2b",
+ "drift_code_sha256": "04a889524c8570e4183b922a4486603751e77f5487be96ab0c0c863465f7a300",
+ "command": [
+  "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+  "system1/t08/d8_pull_csv.py",
+  "--out",
+  "results_system1/T08_slides"
+ ]
+}

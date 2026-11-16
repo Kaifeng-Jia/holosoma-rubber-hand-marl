@@ -1,0 +1,147 @@
+{
+ "check": "Stage 1B-1 single-robot A1 retention on the 1.4 m table, 2026-08-15 (report: blob 'report' below, section 5.2 / 6)",
+ "checkpoint": {
+  "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/marl_compat_a1_v1/model_07999_actor158.pt",
+  "sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224",
+  "bytes": 2315499
+ },
+ "checkpoint_conversion_manifest": {
+  "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/marl_compat_a1_v1/conversion_manifest.json",
+  "sha256": "57621fea6bee0e9283371530fc8ab9c30d2ef43f0ef6473f084e2b9bd170e011",
+  "bytes": 1060
+ },
+ "checkpoint_source": {
+  "path": "/home/kevin/holosoma-rubber-hand-largetable/logs/WholeBodyTracking/20260728_051638-rubberhand_a1_8000_seed42-locomotion/model_07999.pt",
+  "sha256": "54fbfa4b38ee69ac1be33da8b5d3f6849e587b6bd02da3f407b0b27844be3c25",
+  "note": "actor 154 -> 158 inputs, the 4 new teammate columns zero; deterministic output error 0.0 (conversion manifest)"
+ },
+ "checkpoint_identification": "report names model_07999_actor158.pt; commit ad8a80cf (2026-08-17) names marl_compat_a1_v1/model_07999_actor158.pt as the exact frozen comparison; sha256 equals the conversion manifest output_sha256",
+ "table_urdf_git": {
+  "repo": "/home/kevin/holosoma-rubber-hand-marl",
+  "commit": "d04b312ab4cf47f4cd830ab1d8630ed5f023d534",
+  "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_a1_retention.urdf",
+  "sha256": "3eba786116f72f9504b3e3f5dd86cd0a23a98f855fff4ed2be1049f603770e50",
+  "bytes": 3172
+ },
+ "table_urdf_in_this_branch": "system1/t08/assets/objects_widetable_a1_retention.urdf",
+ "table_note": "1.4 m five-box table, 0.1 kg (the frozen A1 table's mass and contact parameters); renamed objects_widetable_plan5_preflight.urdf in ae7ea70b with only the robot name and comments changed",
+ "robot_urdf_git": {
+  "repo": "/home/kevin/holosoma-rubber-hand-marl",
+  "commit": "d04b312ab4cf47f4cd830ab1d8630ed5f023d534",
+  "path": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+  "sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+  "bytes": 42863
+ },
+ "robot_urdf_now": {
+  "path": "/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+  "sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+  "bytes": 42863
+ },
+ "placement": "robot references = the A1 reference translated by -0.4 e_x(t) (left end) / +0.4 e_x(t) (right end), e_x = table-local X in world from the table quaternion of each frame; joint angles, orientations and all object channels unchanged; ghost teammate (no body) follows the other shifted reference; 0.8 m spacing (report section 3, recording metadata)",
+ "shift_script_git": {
+  "repo": "/home/kevin/holosoma-rubber-hand-marl",
+  "commit": "d04b312ab4cf47f4cd830ab1d8630ed5f023d534",
+  "path": "scripts/prepare_stage1b_a1_retention.py",
+  "sha256": "65e4e8a84898d02337896777deb5d2dee0d77a41efb5e8adf6d257b84b99e4cf",
+  "bytes": 5877
+ },
+ "a1_source_motion": {
+  "path": "/home/kevin/holosoma-rubber-hand-marl/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+  "sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+  "bytes": 1891526
+ },
+ "run": "seed 42, one environment, Isaac Sim CUDA, 6500 policy steps per end, first 20 closed attempts analysed, no training, no ghost randomisation (report section 5.2); the exact command line is not recorded",
+ "report_git": {
+  "repo": "/home/kevin/holosoma-rubber-hand-marl",
+  "commit": "d04b312ab4cf47f4cd830ab1d8630ed5f023d534",
+  "path": "STAGE1B_A1_RETENTION_REPORT_CN.md",
+  "sha256": "53a2da15f5a81c7b5a5932b8c255ca2c7093eb9efa22942cb6b13c937016a8b4",
+  "bytes": 9096
+ },
+ "ends": {
+  "right": {
+   "recording": {
+    "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/plan5_preflight_v1/formal_wide_right_trajectory.npz",
+    "sha256": "8a35f1b2e47da4947c0db483a7e975e1ce4acc29919690bb0cb6a0985d12784a",
+    "bytes": 26831157
+   },
+   "metrics_json": {
+    "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/plan5_preflight_v1/formal_wide_right_trajectory.json",
+    "sha256": "11fc26e452eb77977f77ed65095dc70b436a4b0edbd3b81b49fdc75ec8a3bddd",
+    "bytes": 18348
+   },
+   "attempts_summary": {
+    "closed": 20,
+    "completed": 17,
+    "completion_rate": 0.85,
+    "detected_closed_total": 23,
+    "early_terminated": 3,
+    "early_termination_rate": 0.15,
+    "mean_length_steps": 290.95,
+    "timed_out": 0
+   },
+   "recording_meta": {
+    "env_id": 0,
+    "dt": 0.02,
+    "sim_dt": 0.005,
+    "control_decimation": 4,
+    "urdf_path": "@holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+    "teammate_provider_class": "RightTrajectoryGhostTeammateWholeBodyTrackingManager",
+    "teammate_observer_side": 1,
+    "teammate_lateral_spacing_m": 0.8,
+    "motion_names": [
+     "a1_stage1b_right"
+    ],
+    "motion_files": [
+     "/tmp/holosoma_stage1b_a1_test/a1_stage1b_right.npz"
+    ],
+    "motion_time_step_total": 309
+   },
+   "fall_proxy_rate_per_attempt": 0.1
+  },
+  "left": {
+   "recording": {
+    "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/plan5_preflight_v1/formal_wide_left_trajectory.npz",
+    "sha256": "6d14703e1f0e3f19d658b2233b74657a1ca4669e3410770143393293053303f9",
+    "bytes": 25799858
+   },
+   "metrics_json": {
+    "path": "/home/kevin/holosoma-rubber-hand-marl/logs/WholeBodyTracking/plan5_preflight_v1/formal_wide_left_trajectory.json",
+    "sha256": "893c63db2fbb08ff964512909ef3533519c3b03d643cb599c8b012a3adf00a4a",
+    "bytes": 18337
+   },
+   "attempts_summary": {
+    "closed": 20,
+    "completed": 1,
+    "completion_rate": 0.05,
+    "detected_closed_total": 34,
+    "early_terminated": 19,
+    "early_termination_rate": 0.95,
+    "mean_length_steps": 189.7,
+    "timed_out": 0
+   },
+   "recording_meta": {
+    "env_id": 0,
+    "dt": 0.02,
+    "sim_dt": 0.005,
+    "control_decimation": 4,
+    "urdf_path": "@holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+    "teammate_provider_class": "LeftTrajectoryGhostTeammateWholeBodyTrackingManager",
+    "teammate_observer_side": -1,
+    "teammate_lateral_spacing_m": 0.8,
+    "motion_names": [
+     "a1_stage1b_left"
+    ],
+    "motion_files": [
+     "/tmp/holosoma_stage1b_a1_test/a1_stage1b_left.npz"
+    ],
+    "motion_time_step_total": 309
+   },
+   "fall_proxy_rate_per_attempt": 0.05
+  }
+ },
+ "initial_states": "d7_initial_states.json (first saved row of each attempt, extracted from the recordings); attempt 0 = first reset at seed 42",
+ "per_attempt_results": "d7_attempts.csv",
+ "note_fall_proxy": "report table section 6 lists fall proxy 0 % for both ends; the recordings' metric JSONs give fall_proxy_rate_per_attempt 0.05 (left, attempt 4) and 0.10 (right, attempts 5 and 10). The rendered attempts (0 of each end) have fall_proxy False.",
+ "code_sha256": "57d069d8a3ceca31da685cd3523cbb16a46e960a5183306a9ed664a978c8b4a0"
+}
