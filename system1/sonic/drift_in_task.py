@@ -55,7 +55,9 @@ class Refs:
         return self.cache[task]
 
 
-def episode_metrics(refs, task, traj):
+def episode_metrics(refs, task, traj, series=False):
+    """series=True (T08 D8) also returns per row the aligned reference pelvis xy, the robot pelvis xy and the reference
+    frames; off (default) the output is unchanged."""
     pel, obj = refs(task)
     with np.load(traj, allow_pickle=False) as z:
         f = z["reference_frame"].astype(int)
@@ -81,6 +83,8 @@ def episode_metrics(refs, task, traj):
         out.append(dict(robot=r, rows=len(f), d_final_cm=100 * float(d[-1, r]), d_max_cm=100 * float(d[:, r].max()),
                         ref_path_m=lref, drift_per_m_ref_cm=100 * float(d[-1, r]) / lref if lref >= MIN_LREF else None,
                         lag_seconds=lag, eligible_seconds=elig, d_series=d[:, r]))
+        if series:
+            out[-1].update(ref_pelvis_xy=pref[:, r, :2], pelvis_xy=prob[:, r, :2], reference_frame=f)
     return out
 
 
