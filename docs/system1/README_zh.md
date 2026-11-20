@@ -80,6 +80,7 @@
 | T08 | 申请用幻灯片的备用素材 D7、D8 | — | 已完成（2026-11-15） |
 | T09 | 第四稿的消融和奖励变体在本机 5070 上重评，补算表 1 的身体误差 | — | 本机 5070 |
 | T10 | MuJoCo sim2sim：C-in（官方 SONIC 部署设置和训练设置两种）和 D，Table、Bin；为上真机准备接口说明 | T09 优先用 GPU | 本机（MuJoCo 用 CPU） |
+| T10 补充 | MuJoCo sim2sim 其余任务：D 的 Push、Pull、Kick、Chair，C-in 的 Pull；设置沿用 T10 | T10 | 本机（MuJoCo 用 CPU） |
 
 - **训练 run 总数：** 第一轮 15 个（C 主实验 3、T04-D 6、T04-C 6）。
   - 之后另定：较轻档位重训 6 个。
