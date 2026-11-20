@@ -1,0 +1,70 @@
+{
+ "d_table": {
+  "steps": 687,
+  "obs_max_abs_diff": 8.570369849393578e-07,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_1",
+   "base_ang_vel_2",
+   "motion_ref_ori_b_5",
+   "motion_ref_ori_b_4"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 7.83783950186745e-07,
+  "fk_body_ori_max_rad": 0.0013566380166898913,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 3.337860107421875e-06
+ },
+ "cin_table": {
+  "steps": 687,
+  "obs_max_abs_diff": 1.0738301671336936e-06,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_5",
+   "motion_ref_ori_b_4",
+   "base_ang_vel_2"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 6.54236476993475e-07,
+  "fk_body_ori_max_rad": 0.001361323454682752,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.430511474609375e-06,
+  "sonic_actor_obs_max_abs_diff": 4.76837158203125e-07,
+  "sonic_tokenizer_max_abs_diff": 2.2351741790771484e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 6.67572021484375e-06
+ },
+ "d_bucket": {
+  "steps": 497,
+  "obs_max_abs_diff": 1.0807930941394983e-06,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_1",
+   "base_ang_vel_0",
+   "motion_ref_ori_b_2",
+   "base_ang_vel_1",
+   "motion_ref_ori_b_4"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 9.221606118714476e-07,
+  "fk_body_ori_max_rad": 0.0015268833258939144,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.71661376953125e-05
+ },
+ "cin_bucket": {
+  "steps": 497,
+  "obs_max_abs_diff": 1.3485526086931543e-06,
+  "obs_worst_dims": [
+   "base_ang_vel_1",
+   "teammate_relative_position_b_x",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_2",
+   "base_ang_vel_0"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 8.259626476103676e-07,
+  "fk_body_ori_max_rad": 0.0013342096314889447,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.6689300537109375e-06,
+  "sonic_actor_obs_max_abs_diff": 7.152557373046875e-07,
+  "sonic_tokenizer_max_abs_diff": 2.682209014892578e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 9.5367431640625e-06
+ }
+}

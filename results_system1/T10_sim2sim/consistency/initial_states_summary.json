@@ -1,0 +1,48 @@
+{
+ "n_states": 204,
+ "all_passed": true,
+ "max": {
+  "joint_pos_max_abs_rad": 0.0,
+  "joint_vel_max_abs": 0.0,
+  "root_pos_max_abs_m": 1.1767390528660826e-07,
+  "root_ori_max_angle_rad": 7.884953353001448e-08,
+  "root_lin_vel_max_abs": 1.4869544873175045e-08,
+  "root_ang_vel_max_abs": 5.9461308987707184e-08,
+  "object_pos_max_abs_m": 0.0,
+  "object_ori_angle_rad": 0.0
+ },
+ "thresholds": {
+  "joint_rad": 0.0001,
+  "position_m": 0.0001
+ },
+ "state_files": [
+  {
+   "task": "table",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/table_states.json",
+   "states_sha256": "389e8da5fb818572a48cbba049254585311079439265f5ab4cfc1523a185dac1",
+   "isaac_eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed721_fresh12000_pm2"
+  },
+  {
+   "task": "table",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/table_pm8.json",
+   "states_sha256": "6a626f48c14598a646d40d35694e32b5be198ea09491b7f3557ab9c1fe02fcad",
+   "isaac_eval_dir": "logs_system1/post_train/final/cin_table_m5kg_seed721_fresh12000_pm8"
+  },
+  {
+   "task": "bucket",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/bucket_states.json",
+   "states_sha256": "631026d39f436ceca4008e2f5e684fff16102fba8895fafd23ae3639b575d71f",
+   "isaac_eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed721_fresh12000_pm2"
+  },
+  {
+   "task": "bucket",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/bucket_pm8.json",
+   "states_sha256": "3bae05a1b1d716d97c7025386dc3d7f832a7203a665d33f4f9979b3adb6e6ff0",
+   "isaac_eval_dir": "logs_system1/post_train/final/cin_bucket_m1kg_seed721_fresh12000_pm8"
+  }
+ ]
+}
