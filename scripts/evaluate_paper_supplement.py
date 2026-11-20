@@ -31,6 +31,7 @@ p.add_argument('--sonic-const-dq',default=None,help='System1 T03 C v2 diagnostic
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 p.add_argument('--finger-mode',choices=('locked','track','learn'),default=None,help='System1 T06/T07: G1 + Sharpa hands (bucket/table); policy checkpoints must be hand checkpoints of the same mode; off = rubber hands, unchanged')
 p.add_argument('--hand-reference',type=Path,default=None,help='System1 T06/T07: 73-joint runtime reference (system1/hand/sharpa_reference.py); required with --finger-mode')
+p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim: write the PhysX scene (collision convexes, masses, joints, materials, solver, PD constants) to this directory and record per step observations / actions / PD targets / substep torques / body poses (and SONIC inputs) per episode; off = unchanged')
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 a=p.parse_args()
 if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
@@ -173,6 +174,10 @@ def main():
             for kv in a.sonic_const_dq.split(','):
                 k,v=kv.split('=');const_dq[:,:,list(env.dof_names).index(k)]=float(v)
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
+        if a.sim2sim_dump is not None:  # System1 T10 (off = unchanged)
+            sys.path.insert(0,str(ROOT))
+            from system1.sim2sim.isaac_dump import dump_scene,EpisodeRecorder
+            dump_scene(env,a.sim2sim_dump,extra=dict(case=a.case,controller=a.controller,checkpoint=str(a.checkpoint),states=str(a.states)))
         ids=torch.tensor([0],device=env.device)
         n=int(command.reference.num_frames)
         if not np.isclose(env.dt,1/command.reference.fps):raise ValueError('Reference/control rate mismatch')
@@ -260,7 +265,9 @@ def main():
             if driver is not None:driver.reset()
             if cwrap is not None:
                 cwrap._prev_t=command.time_steps.clone();cwrap._dones=torch.zeros_like(cwrap._dones)
+            rec=EpisodeRecorder(env,driver) if a.sim2sim_dump is not None else None  # System1 T10
             for step in range(1,n+1):
+                if rec is not None:rec.pre(observations)
                 if cwrap is not None:
                     actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
                     observations,rewards,dones,extras=cwrap.step({'actions':actions})
@@ -270,6 +277,7 @@ def main():
                 else:
                     actions=deterministic_core4d_smalltable_actions(models,observations,zero_teammate_obs=zero_teammate_obs)
                     observations,rewards,dones,extras=env.step({'actions':actions})
+                if rec is not None:rec.post(actions)
                 if captured is None:raise RuntimeError('Pre-reset state capture missing')
                 frames.append(captured);reward+=float(rewards[0].item())
                 if a.record_torques:tq.append(_tterm.torques_substep[0].detach().cpu().numpy().copy())
@@ -287,6 +295,7 @@ def main():
                        actual_roots=actual.tolist(),actual_initial_state={k:v.tolist() for k,v in start.items()},
                        valid=True,validity_rule='finite states; requested XY/yaw applied; root heights and joint pose unchanged; no outcome filtering'))
             np.savez_compressed(out/(init['state_id']+'.trajectory.npz'),**channels)
+            if rec is not None:rec.save(Path(a.sim2sim_dump)/(init['state_id']+'.sim2sim.npz'));rec.close()
             if driver is not None:
                 sch={k:np.stack([f[k] for f in sonic_frames]) for k in sonic_frames[0]}
                 np.savez_compressed(out/(init['state_id']+'.sonic.npz'),**sch)
