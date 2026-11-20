@@ -88,6 +88,17 @@ if [[ -f $S1_ROOT/inputs/cloud_inputs.tar ]]; then
   (cd "$S1_ROOT/inputs" && sha256sum -c SHA256SUMS)
 fi
 
+# 4b. pin every pip package to the laptop hssim_s1 version (first run 2026-11-20: holosoma's `pip install -e .[unitree,booster]`
+#     inside setup_isaacsim.sh upgraded torch 2.7.0+cu128 -> 2.15.0 and triton 3.3.0 -> 3.9.0; 149 packages differed). --no-deps,
+#     so nothing else is resolved; then the torch / triton / numpy versions are asserted.
+$PY -m pip install --no-deps --extra-index-url https://download.pytorch.org/whl/cu128 -r "$S1_ROOT/duet-system1/system1/cloud/hssim_s1_laptop_pins.txt"
+$PY - <<'EOF'
+import numpy, torch, triton
+v = (torch.__version__, triton.__version__, numpy.__version__)
+print("torch / triton / numpy", v, "cuda available", torch.cuda.is_available())
+assert v == ("2.7.0+cu128", "3.3.0", "1.26.0"), v
+EOF
+
 # 5. record versions
 $PY - <<'EOF' | tee "$S1_ROOT/logs/versions.json"
 import json, platform, sys, torch, importlib.metadata as m
