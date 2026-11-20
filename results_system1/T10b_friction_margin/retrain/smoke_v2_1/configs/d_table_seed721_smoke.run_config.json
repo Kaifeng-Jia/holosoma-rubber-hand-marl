@@ -1,0 +1,631 @@
+{
+  "action_dim_per_agent": 29,
+  "actor_input_dim": 158,
+  "actor_learning_rate": 0.001,
+  "actor_observation_groups": {
+    "actor_obs": 154,
+    "teammate_obs": 4
+  },
+  "bucket_reference": "/root/autodl-tmp/system1/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/interaction_vectors_v1.npz",
+  "bucket_reward_contract": {
+    "artifact_sha256": "d0bd50f224e1ee44c3813c778a82f135ebcd11db6f3d35c2609606101bba9856",
+    "block_weights_position_rotation_height_relation": [
+      1.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "contact_detection": "current_physics_sample_any_hand_per_agent_normal_force",
+    "contact_error_normalization": "sum(alpha*(1-contact))/max(1,sum(alpha))",
+    "contact_gate_floor": 0.5,
+    "contact_gate_scale": 2.0,
+    "contact_target": "not_used_for_smalltable_A",
+    "contact_threshold_n": 1.0,
+    "height_sigma_m": 0.1,
+    "position_error_weights_xyz": [
+      1.0,
+      1.0,
+      2.0
+    ],
+    "position_sigma_m": 0.3,
+    "relation_distance_floor_m": 0.1,
+    "relation_sigma_m": 0.04,
+    "reward_composition": "unchanged_body_and_regularizers_plus_gated_interaction_block",
+    "rotation_sigma_rad": 0.4,
+    "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+    "variant": "A_no_rel_no_height",
+    "version": "core4d_bucket_vectors_soft_contact_v1"
+  },
+  "clip_param": 0.2,
+  "control_hz": 50.0,
+  "critic_input_dim": 527,
+  "critic_learning_rate": 0.001,
+  "entropy_coef": 0.005,
+  "experiment": "smalltable5kg_A",
+  "experiment_contract": {
+    "experiment_id": "smalltable5kg_A",
+    "object_name": "desk001",
+    "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+    "physics_contract": {
+      "control_hz": 50,
+      "material_static_dynamic_restitution": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "object_collider_type": "convex_hull",
+      "object_mass_kg": 5.0,
+      "physics_hz": 200
+    },
+    "reference_fps": 50,
+    "reference_frames": 687,
+    "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "source_pair_sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05",
+    "training_promotion_sha256": "a204b6929c33e1105e80a870f3134ccbfce4a617eff28bc0971d06da6c656717"
+  },
+  "gamma": 0.99,
+  "git_commit": "dc3ceae83e0b61efdabf9e1b82e04642431baebd",
+  "initialization": "fresh",
+  "interaction_contract": null,
+  "interaction_reference": null,
+  "iterations_requested": 50,
+  "lambda": 0.95,
+  "num_agents": 2,
+  "num_envs": 512,
+  "object_collider_type": "convex_hull",
+  "object_physics": {
+    "com_pose_body_xyzw_first_envs": [
+      [
+        0.017415925860404968,
+        0.09878861904144287,
+        0.0795440673828125,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.02492593601346016,
+        0.1106603741645813,
+        0.0005052462220191956,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.02647097408771515,
+        0.1119028776884079,
+        0.017149046063423157,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.008613429963588715,
+        0.10812978446483612,
+        0.011899024248123169,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.01745959371328354,
+        0.11430104076862335,
+        -0.07146303355693817,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.05614161491394043,
+        0.07496023178100586,
+        0.03883911669254303,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.05882038176059723,
+        0.05458541214466095,
+        0.03597579896450043,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.043878570199012756,
+        0.09091244637966156,
+        0.03271213173866272,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dynamic_friction_range": [
+      0.1,
+      0.6
+    ],
+    "inertia_first_envs": [
+      [
+        0.19965483248233795,
+        0.0,
+        0.0,
+        0.0,
+        0.12766361236572266,
+        0.0,
+        0.0,
+        0.0,
+        0.14169223606586456
+      ],
+      [
+        0.1798429638147354,
+        0.0,
+        0.0,
+        0.0,
+        0.11499547213315964,
+        0.0,
+        0.0,
+        0.0,
+        0.1276320219039917
+      ],
+      [
+        0.21328651905059814,
+        0.0,
+        0.0,
+        0.0,
+        0.13638000190258026,
+        0.0,
+        0.0,
+        0.0,
+        0.1513664424419403
+      ],
+      [
+        0.4933207035064697,
+        0.0,
+        0.0,
+        0.0,
+        0.31543993949890137,
+        0.0,
+        0.0,
+        0.0,
+        0.35010281205177307
+      ],
+      [
+        0.21560443937778473,
+        0.0,
+        0.0,
+        0.0,
+        0.13786214590072632,
+        0.0,
+        0.0,
+        0.0,
+        0.15301145613193512
+      ],
+      [
+        0.3408252000808716,
+        0.0,
+        0.0,
+        0.0,
+        0.21793100237846375,
+        0.0,
+        0.0,
+        0.0,
+        0.24187886714935303
+      ],
+      [
+        0.35399124026298523,
+        0.0,
+        0.0,
+        0.0,
+        0.22634965181350708,
+        0.0,
+        0.0,
+        0.0,
+        0.2512226104736328
+      ],
+      [
+        0.44492241740226746,
+        0.0,
+        0.0,
+        0.0,
+        0.28449299931526184,
+        0.0,
+        0.0,
+        0.0,
+        0.3157552182674408
+      ]
+    ],
+    "mass_kg_first_envs": [
+      5.108976364135742,
+      4.513594627380371,
+      4.623188495635986,
+      5.802602291107178,
+      4.20029354095459,
+      4.935030937194824,
+      5.995344638824463,
+      5.584783554077148
+    ],
+    "mass_kg_range": [
+      4.0,
+      6.0
+    ],
+    "material_first_envs": [
+      [
+        [
+          0.48567646741867065,
+          0.5474016070365906,
+          0.0
+        ],
+        [
+          0.48924800753593445,
+          0.5301510095596313,
+          0.0
+        ],
+        [
+          0.35400861501693726,
+          0.4318143129348755,
+          0.0
+        ],
+        [
+          0.3500579595565796,
+          0.5666919946670532,
+          0.0
+        ],
+        [
+          0.5853381156921387,
+          0.46760326623916626,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.23405060172080994,
+          0.2974744737148285,
+          0.0
+        ],
+        [
+          0.32341572642326355,
+          0.39944490790367126,
+          0.0
+        ],
+        [
+          0.48986437916755676,
+          0.35043466091156006,
+          0.0
+        ],
+        [
+          0.3443702757358551,
+          0.2726908326148987,
+          0.0
+        ],
+        [
+          0.15742722153663635,
+          0.22184297442436218,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.5609273910522461,
+          0.11936197429895401,
+          0.0
+        ],
+        [
+          0.40886762738227844,
+          0.17571544647216797,
+          0.0
+        ],
+        [
+          0.3102707266807556,
+          0.5524089932441711,
+          0.0
+        ],
+        [
+          0.19022119045257568,
+          0.20152631402015686,
+          0.0
+        ],
+        [
+          0.4567840099334717,
+          0.18612489104270935,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.14317357540130615,
+          0.2745059132575989,
+          0.0
+        ],
+        [
+          0.4327881634235382,
+          0.13673558831214905,
+          0.0
+        ],
+        [
+          0.22391358017921448,
+          0.25603750348091125,
+          0.0
+        ],
+        [
+          0.1374053657054901,
+          0.5702219009399414,
+          0.0
+        ],
+        [
+          0.1187281385064125,
+          0.21547383069992065,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.4214722514152527,
+          0.41412588953971863,
+          0.0
+        ],
+        [
+          0.1187281385064125,
+          0.21547383069992065,
+          0.0
+        ],
+        [
+          0.32341572642326355,
+          0.39944490790367126,
+          0.0
+        ],
+        [
+          0.32341572642326355,
+          0.39944490790367126,
+          0.0
+        ],
+        [
+          0.17444053292274475,
+          0.22771432995796204,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.23537904024124146,
+          0.4697400629520416,
+          0.0
+        ],
+        [
+          0.4068305790424347,
+          0.5142621994018555,
+          0.0
+        ],
+        [
+          0.1374053657054901,
+          0.5702219009399414,
+          0.0
+        ],
+        [
+          0.4619998037815094,
+          0.29752588272094727,
+          0.0
+        ],
+        [
+          0.40559661388397217,
+          0.4770635962486267,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.24244466423988342,
+          0.31198200583457947,
+          0.0
+        ],
+        [
+          0.40886762738227844,
+          0.17571544647216797,
+          0.0
+        ],
+        [
+          0.435455858707428,
+          0.3244759142398834,
+          0.0
+        ],
+        [
+          0.4068305790424347,
+          0.5142621994018555,
+          0.0
+        ],
+        [
+          0.40886762738227844,
+          0.17571544647216797,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.4327881634235382,
+          0.13673558831214905,
+          0.0
+        ],
+        [
+          0.5732966661453247,
+          0.5504989624023438,
+          0.0
+        ],
+        [
+          0.5658963322639465,
+          0.2455880343914032,
+          0.0
+        ],
+        [
+          0.19022119045257568,
+          0.20152631402015686,
+          0.0
+        ],
+        [
+          0.4444236755371094,
+          0.12253949791193008,
+          0.0
+        ]
+      ]
+    ],
+    "nominal_mass_kg": 5.0,
+    "randomized": true,
+    "restitution_range": [
+      0.0,
+      0.0
+    ],
+    "static_friction_range": [
+      0.1,
+      0.6
+    ]
+  },
+  "object_position_tracking_contract": null,
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+  "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+  "object_z_error_weight": 1.0,
+  "physics_hz": 200.0,
+  "project": "Core4DSmallTableA",
+  "reference_fps": 50,
+  "reference_frames": 687,
+  "reference_policy": "non_looping_position_and_orientation_tracking",
+  "resume_checkpoint": null,
+  "resume_checkpoint_sha256": null,
+  "reward_terms": [
+    "motion_global_ref_position_error_exp",
+    "motion_global_ref_orientation_error_exp",
+    "motion_relative_body_position_error_exp",
+    "motion_relative_body_orientation_error_exp",
+    "motion_global_body_lin_vel",
+    "motion_global_body_ang_vel",
+    "action_rate_l2",
+    "limits_dof_pos",
+    "undesired_contacts",
+    "bucket_interaction"
+  ],
+  "reward_variant": "bucket_A_no_rel_no_height",
+  "runtime_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+  "runtime_reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+  "save_interval": 50,
+  "scenario": "core4d_smalltable5kg_bucket_A_transfer",
+  "seed": 721,
+  "shared_actor": true,
+  "start_iteration": 0,
+  "started_unix_time": 1795207309.443766,
+  "steps_per_env": 24,
+  "system1_randomization": {
+    "module_sha256": "250f587474087fc778e8558f98210a594c0bee515226990b9ac6816b08fc169a",
+    "ranges": {
+      "dof_pos_bias_rad": [
+        -0.01,
+        0.01
+      ],
+      "kd_scale": [
+        0.9,
+        1.1
+      ],
+      "kp_scale": [
+        0.9,
+        1.1
+      ],
+      "material_buckets": 64,
+      "object_com_offset_m": [
+        -0.08,
+        0.08
+      ],
+      "object_dynamic_friction": [
+        0.1,
+        0.6
+      ],
+      "object_inertia_scale": [
+        0.5,
+        1.5
+      ],
+      "object_mass_scale": [
+        0.8,
+        1.2
+      ],
+      "object_restitution": [
+        0.0,
+        0.0
+      ],
+      "object_static_friction": [
+        0.1,
+        0.6
+      ],
+      "push_interval_s": [
+        1.0,
+        3.0
+      ],
+      "push_max_vel": [
+        0.5,
+        0.5,
+        0.2,
+        0.52,
+        0.52,
+        0.78
+      ],
+      "recipe": "docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20; pushes revised f4ed7a6)",
+      "robot_dynamic_friction": [
+        0.3,
+        1.2
+      ],
+      "robot_restitution": [
+        0.0,
+        0.5
+      ],
+      "robot_static_friction": [
+        0.3,
+        1.6
+      ],
+      "torso_com_offset_m": {
+        "x": [
+          -0.025,
+          0.025
+        ],
+        "y": [
+          -0.05,
+          0.05
+        ],
+        "z": [
+          -0.075,
+          0.075
+        ]
+      }
+    },
+    "reset_terms": [
+      "push_randomizer_state",
+      "randomize_push_schedule",
+      "s1_pd_gain_reset"
+    ],
+    "setup_terms": [
+      "set_object_rigid_body_material_startup",
+      "push_randomizer_state",
+      "s1_robot_material_startup",
+      "s1_robot_torso_com_startup",
+      "s1_dof_pos_bias_startup",
+      "s1_object_material_startup",
+      "s1_object_mass_startup",
+      "s1_object_inertia_startup",
+      "s1_object_com_startup",
+      "s1_readback_check"
+    ],
+    "step_terms": [
+      "push_randomizer_state",
+      "s1_apply_pushes"
+    ]
+  },
+  "termination_terms": [
+    "reference_horizon",
+    "joint_bad_tracking"
+  ],
+  "training_promotion": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/training_asset_manifest.json",
+  "training_promotion_sha256": "a204b6929c33e1105e80a870f3134ccbfce4a617eff28bc0971d06da6c656717",
+  "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+}

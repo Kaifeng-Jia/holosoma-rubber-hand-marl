@@ -4,7 +4,17 @@
 - `docs/system1/T10b_friction_margin_zh.md` B 部分；
 - `docs/system1/T10b_dr_ranges_zh.md`（2026-11-20 第一版，Kevin 已确认），sha256 `4addabbb4444c1b3cb23461fca5f0390b07e235bdf5e03087ef8136be7a5a9a1`。
 
-本返包只写事实。试点训练**还没开始**：冒烟测试通过后先回报，云端 4090 由 Kevin 开。
+本返包只写事实。
+
+> **2026-11-20 更新，第 2.1 版：**
+> - **推扰：** 任务书 `f4ed7a6` 把推扰改成 SONIC Table 4 的逐分量值，即线速度 x、y ±0.5，z ±0.2 m/s；角速度 roll、pitch ±0.52，yaw ±0.78 rad/s。代码在 `fd96719`。下面第 1 节表格里的推扰一行，第 3 条"与同类工作的预设不同的地方"，以及第 2 节 D 的推扰读回，都是第 2 版的值，已被第 2.1 版取代。
+> - **D 冒烟：** 在云端 GPU 0 上重跑并通过，见 `smoke_v2_1/README_CN.md`。C-in Bin 没有重跑，第 2 节里 C-in 的冒烟用的还是第 2 版推扰。
+> - **云端环境：** 见 `cloud_env_20261120/README_CN.md`。这台实例的数据盘是空的，环境从头安装后，按本机 `hssim_s1` 逐包固定了版本。
+> - **试点：** 15:48 在两张 4090 上启动，代码 `dc3ceae`。命令和本节第 4 条的 dry-run 相同：
+>   - D Table 721 在 GPU 0，训练 PID 6812；
+>   - C-in Bin 721 在 GPU 1，训练 PID 7452；
+>   - 调度器 `pilot_cloud.py` 的 PID 是 6809。
+>   - 两个 run 正式训练时，启动读回检查都通过了。
 
 - 第 1 版的冒烟记录在 `v1_superseded/`，已作废，试点不用。
 - **冒烟测试时间**（America/New_York，2026-11-20）：

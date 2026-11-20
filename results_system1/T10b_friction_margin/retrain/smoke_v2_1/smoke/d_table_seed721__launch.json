@@ -1,0 +1,32 @@
+{
+ "name": "d_table_seed721",
+ "argv": [
+  "/root/autodl-tmp/system1/deps/miniconda3/envs/hssim_s1/bin/python",
+  "-B",
+  "scripts/train_core4d_smalltable.py",
+  "--experiment",
+  "smalltable5kg_A",
+  "--reward-variant",
+  "bucket_A_no_rel_no_height",
+  "--steps-per-env",
+  "24",
+  "--seed",
+  "721",
+  "--save-interval",
+  "50",
+  "--system1-randomization",
+  "--num-envs",
+  "512",
+  "--iterations",
+  "50",
+  "--output-dir",
+  "/root/autodl-tmp/system1/logs/t10b_smoke_v2_1/d_table_seed721"
+ ],
+ "started": "2026-11-20T15:41:09-05:00",
+ "env": {
+  "LOCAL_RANK": "310"
+ },
+ "git_head": "dc3ceae83e0b61efdabf9e1b82e04642431baebd",
+ "git_status": "",
+ "git_diff": ""
+}
