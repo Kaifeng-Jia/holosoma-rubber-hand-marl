@@ -31,6 +31,7 @@ p.add_argument('--sonic-const-dq',default=None,help='System1 T03 C v2 diagnostic
 p.add_argument('--sonic-hip-pitch-actuator',choices=('ours','sonic'),default='ours',help='System1 sensitivity: SONIC hip_pitch effort/vel/armature')
 p.add_argument('--finger-mode',choices=('locked','track','learn'),default=None,help='System1 T06/T07: G1 + Sharpa hands (bucket/table); policy checkpoints must be hand checkpoints of the same mode; off = rubber hands, unchanged')
 p.add_argument('--hand-reference',type=Path,default=None,help='System1 T06/T07: 73-joint runtime reference (system1/hand/sharpa_reference.py); required with --finger-mode')
+p.add_argument('--hand-friction',type=float,default=None,help='System1 T10b friction margin: static = dynamic friction of the rubber-hand collision shapes of both robots (restitution 0), set with the PhysX tensor API after the environment is built; off = unchanged')
 p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim: write the PhysX scene (collision convexes, masses, joints, materials, solver, PD constants) to this directory and record per step observations / actions / PD targets / substep torques / body poses (and SONIC inputs) per episode; off = unchanged')
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 a=p.parse_args()
@@ -173,6 +174,12 @@ def main():
             const_dq=torch.zeros(env.num_envs,env.num_agents,len(env.dof_names),device=dev)
             for kv in a.sonic_const_dq.split(','):
                 k,v=kv.split('=');const_dq[:,:,list(env.dof_names).index(k)]=float(v)
+        hand_material=None
+        if a.hand_friction is not None:  # System1 T10b (off = unchanged)
+            sys.path.insert(0,str(ROOT))
+            from system1.t10b.hand_material import set_hand_material
+            hand_material=set_hand_material(env,a.hand_friction,a.hand_friction,0.0)
+            write_json(out/'hand_material.json',hand_material)
         runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         if a.sim2sim_dump is not None:  # System1 T10 (off = unchanged)
             sys.path.insert(0,str(ROOT))
@@ -225,6 +232,7 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        if hand_material is not None:manifest['system1_hand_material']=dict(static_friction=hand_material['static_friction'],dynamic_friction=hand_material['dynamic_friction'],restitution=hand_material['restitution'],record='hand_material.json')
         if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies),nominal_viser_export='skipped (29-DOF format)')
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation
         if a.object_mass_kg is not None:manifest['system1_checkpoint_mass']=a.checkpoint_mass

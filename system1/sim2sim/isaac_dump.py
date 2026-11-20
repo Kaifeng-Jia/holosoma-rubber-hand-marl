@@ -244,7 +244,22 @@ def dump_scene(env, out_dir, extra=None):
                    joint_friction=list(rc.dof_joint_friction_list), kp_scale=_np(getattr(term, "_kp_scale", 1.0)).reshape(-1)[:3].tolist(),
                    kd_scale=_np(getattr(term, "_kd_scale", 1.0)).reshape(-1)[:3].tolist(), rfi=bool(getattr(term, "_randomize_torque_rfi", False)),
                    ctrl_delay=bool(getattr(env, "_randomize_ctrl_delay", False)), body_list=list(sim._body_list), env_origin=_np(sim.scene.env_origins)[0].tolist())
-    rec = dict(shapes=shapes, bodies=bodies, joints=joints, object=obj, solver=solver, physx_scene=scene, control=control, extra=extra or {})
+    materials = []  # every physics material on the stage (friction, combine modes) and the scene's default-material binding
+    from pxr import UsdShade
+    for q in stage.Traverse():
+        if q.HasAPI(UsdPhysics.MaterialAPI):
+            m = UsdPhysics.MaterialAPI(q)
+            px = PhysxSchema.PhysxMaterialAPI(q) if q.HasAPI(PhysxSchema.PhysxMaterialAPI) else None
+            materials.append(dict(path=str(q.GetPath()), static_friction=m.GetStaticFrictionAttr().Get(), dynamic_friction=m.GetDynamicFrictionAttr().Get(),
+                                  restitution=m.GetRestitutionAttr().Get(),
+                                  friction_combine_mode=px.GetFrictionCombineModeAttr().Get() if px else None,
+                                  restitution_combine_mode=px.GetRestitutionCombineModeAttr().Get() if px else None))
+    default_binding = None
+    if scene.get("path"):
+        bm, _ = UsdShade.MaterialBindingAPI(stage.GetPrimAtPath(scene["path"])).ComputeBoundMaterial("physics")
+        default_binding = str(bm.GetPrim().GetPath()) if bm else None
+    rec = dict(shapes=shapes, bodies=bodies, joints=joints, object=obj, solver=solver, physx_scene=scene, control=control, extra=extra or {},
+               physics_materials=materials, scene_default_material=default_binding)
     (out_dir / "scene.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
     return rec
 

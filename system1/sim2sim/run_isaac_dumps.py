@@ -24,6 +24,12 @@ LAUNCH = dict(
     cin_table=ROOT / "logs_system1/post_train/final/cin_table_m5kg_seed721_fresh12000_pm2.launch.json",
     d_bucket=ROOT / "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed721/it12000_pm2.launch.json",
     cin_bucket=ROOT / "logs_system1/post_train/final/cin_bucket_m1kg_seed721_fresh12000_pm2.launch.json",
+    # T10s (other tasks): D Push / Kick / Chair from the laptop-5070 D finals, D Pull and C-in Pull from the T03 finals
+    d_push=ROOT / "logs_system1/post_train/d_final_5070/D_push_paper_seed721/it13050_pm2.launch.json",
+    d_pull=ROOT / "logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2.launch.json",
+    d_kick=ROOT / "logs_system1/post_train/d_final_5070/D_kick_paper_seed721/it08000_pm2.launch.json",
+    d_chair=ROOT / "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm2.launch.json",
+    cin_pull=ROOT / "logs_system1/post_train/final/cin_pull_m20kg_seed721_joint8000_pm2.launch.json",
 )
 SLOTS = ("16-23", "24-31")
 NY = ZoneInfo("America/New_York")
