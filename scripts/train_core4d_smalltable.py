@@ -53,6 +53,8 @@ PARSER.add_argument("--c-train-diag", action="store_true",
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 PARSER.add_argument("--episode-telemetry", action="store_true")
+PARSER.add_argument("--system1-randomization", action="store_true",
+                    help="System1 T10b: domain randomisation (hand / object friction, object mass, PD gains, 0-1 step target delay; system1/t10b/randomization.py); off = unchanged")
 PARSER.add_argument("--finger-mode", choices=("locked", "track", "learn"), default=None,
                     help="System1 T06/T07: G1 + Sharpa hands (system1/hand); default off = the rubber-hand robot, unchanged")
 PARSER.add_argument("--hand-reference", type=Path, default=None,
@@ -207,6 +209,12 @@ if ARGS.finger_mode is not None:  # System1 T06/T07: G1 + Sharpa (off = unchange
     from system1.hand.hand_config import with_sharpa_pair
     HAND = dict(finger_mode=ARGS.finger_mode, reference=ARGS.hand_reference.expanduser().resolve())
     CONFIG = with_sharpa_pair(CONFIG, ARGS.finger_mode, HAND["reference"])
+RANDOMIZATION = None
+if ARGS.system1_randomization:  # System1 T10b (off = unchanged)
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t10b.randomization import randomization_config
+    _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
+    CONFIG = replace(CONFIG, randomization=_rand_cfg)
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -601,6 +609,11 @@ def main() -> int:
             from system1.scheme_c import scheme_c_run_config
             run_config["system1_scheme_c"] = scheme_c_run_config(env, CONFIG, tf32=ARGS.sonic_tf32, kind=ARGS.sonic_residual_kind,
                                                                  ppo_config=ppo_config, train_diag=ARGS.c_train_diag)
+        if RANDOMIZATION is not None:  # System1 T10b
+            run_config["system1_randomization"] = dict(ranges=RANDOMIZATION, setup_terms=list(CONFIG.randomization.setup_terms),
+                                                       reset_terms=list(CONFIG.randomization.reset_terms),
+                                                       module_sha256=_sha256(REPO_ROOT / "system1/t10b/randomization.py"))
+            _write_json(output_dir / "randomization_samples.json", getattr(env, "_s1_rand_log", {}))
         _write_json(output_dir / "run_config.json", run_config)
         metrics_path = output_dir / "metrics.jsonl"
         if interaction_term is not None:
@@ -692,6 +705,8 @@ def main() -> int:
                     _with_system1(learner.training_state_dict(iteration=iteration)),
                 )
 
+        if RANDOMIZATION is not None:  # System1 T10b: samples incl. the PD / delay draws of the first resets
+            _write_json(output_dir / "randomization_samples.json", getattr(env, "_s1_rand_log", {}))
         status = {
             "passed": True,
             "final_iteration": final_iteration,
