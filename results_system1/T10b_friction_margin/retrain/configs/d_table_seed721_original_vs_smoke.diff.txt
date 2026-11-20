@@ -1,28 +1,46 @@
 # d_table_seed721: original final training run_config (/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json, sha256 1b0f4b953327dd1ffb23c3aaa36ea601229b30bae26658902db5d29b0fd6a330)
-#   vs smoke run_config (logs_system1/t10b/smoke/d_table_seed721/run_config.json, sha256 b19f16bf03fe6164f2808f63419ee5c717e00b313b84328e4b0c234a48dd4ee3)
+#   vs smoke run_config (logs_system1/t10b/smoke_v2/d_table_seed721/run_config.json, sha256 06d66bc2bbea2c151869ba18a0506262ece742476b3b668f2c7f7fab5bb2ab1b)
 # key | original | smoke   (every key whose value differs; nested keys joined with '.')
 bucket_reference | "/workspace/core4d_smalltable5kg_no_rel_no_height_20260920/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/interaction_vectors_v1.npz" | "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/interaction_vectors_v1.npz"
-git_commit | "a21858b27da212f02f6dcf2bdb978a54743bcbae" | "2bf2c9a30fd9ab188a484b5402dbb81e50bcb136"
+git_commit | "a21858b27da212f02f6dcf2bdb978a54743bcbae" | "c744e69be36ba9693fbf3e3dc6122e0ed6a883db"
 iterations_requested | 12000 | 50
 num_envs | 2048 | 512
 object_physics.com_pose_body_xyzw | [[0.0, 0.12641499936580658, 0.0, 0.0, 0.0, 0.0, 1.0], [0.0, 0.12641499936580658, 0.0, 0.0, 0.0, 0.0, 1.0], [0.0, 0.12641499936580658, 0.0, 0.0, 0.0, 0.0, 1.0], [0.0, 0.12641499936580658, 0.0, 0.0, 0.0... (108544 chars) | "<missing>"
-object_physics.friction_range | "<missing>" | [0.25, 0.625]
+object_physics.com_pose_body_xyzw_first_envs | "<missing>" | [[0.017415925860404968, 0.09878861904144287, 0.0795440673828125, 0.0, 0.0, 0.0, 1.0], [-0.02492593601346016, 0.1106603741645813, 0.0005052462220191956, 0.0, 0.0, 0.0, 1.0], [0.02647097408771515, 0.111... (688 chars)
+object_physics.dynamic_friction_range | "<missing>" | [0.1, 0.6]
+object_physics.inertia_first_envs | "<missing>" | [[0.19965483248233795, 0.0, 0.0, 0.0, 0.12766361236572266, 0.0, 0.0, 0.0, 0.14169223606586456], [0.1798429638147354, 0.0, 0.0, 0.0, 0.11499547213315964, 0.0, 0.0, 0.0, 0.1276320219039917], [0.21328651... (753 chars)
 object_physics.inertia_kg_m2_row_major | [[0.3770883083343506, 0.0, 0.0, 0.0, 0.2411184161901474, 0.0, 0.0, 0.0, 0.2676142752170563], [0.3770883083343506, 0.0, 0.0, 0.0, 0.2411184161901474, 0.0, 0.0, 0.0, 0.2676142752170563], [0.377088308334... (188416 chars) | "<missing>"
 object_physics.mass_kg | [5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0, 5.0,... (10240 chars) | "<missing>"
-object_physics.mass_kg_first_envs | "<missing>" | [4.52461576461792, 4.101828098297119, 4.733196258544922, 5.299500465393066, 5.592390060424805, 5.496833324432373, 5.953370094299316, 5.368764877319336]
+object_physics.mass_kg_first_envs | "<missing>" | [5.108976364135742, 4.513594627380371, 4.623188495635986, 5.802602291107178, 4.20029354095459, 4.935030937194824, 5.995344638824463, 5.584783554077148]
 object_physics.mass_kg_range | "<missing>" | [4.0, 6.0]
-object_physics.material_first_envs | "<missing>" | [[[0.5261729955673218, 0.5261729955673218, 0.0], [0.5261729955673218, 0.5261729955673218, 0.0], [0.5261729955673218, 0.5261729955673218, 0.0], [0.5261729955673218, 0.5261729955673218, 0.0], [0.5261729... (1916 chars)
+object_physics.material_first_envs | "<missing>" | [[[0.48567646741867065, 0.5474016070365906, 0.0], [0.48924800753593445, 0.5301510095596313, 0.0], [0.35400861501693726, 0.4318143129348755, 0.0], [0.3500579595565796, 0.5666919946670532, 0.0], [0.5853... (1938 chars)
 object_physics.material_static_dynamic_restitution | [[[0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0]], [[0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0], [0.5, 0.5, 0.0]], [[0.5, 0.5, 0.0], [0.5, 0... (178176 chars) | "<missing>"
+object_physics.nominal_mass_kg | "<missing>" | 5.0
 object_physics.randomized | "<missing>" | true
+object_physics.restitution_range | "<missing>" | [0.0, 0.0]
+object_physics.static_friction_range | "<missing>" | [0.1, 0.6]
 save_interval | 2000 | 50
-started_unix_time | 1789896047.069722 | 1795165743.849684
-system1_randomization.module_sha256 | "<missing>" | "ae53e03e981cc4538a3819f81727b2d42ece0b268860416d10e3deab599e18af"
-system1_randomization.ranges.friction_scale | "<missing>" | [0.5, 1.25]
-system1_randomization.ranges.hand_friction_base | "<missing>" | 1.0
+started_unix_time | 1789896047.069722 | 1795196600.8490734
+system1_randomization.module_sha256 | "<missing>" | "d92c1f030dd47d3d70839663071cd41c7cc8eb3618de52a4c34a664e78242957"
+system1_randomization.ranges.dof_pos_bias_rad | "<missing>" | [-0.01, 0.01]
 system1_randomization.ranges.kd_scale | "<missing>" | [0.9, 1.1]
 system1_randomization.ranges.kp_scale | "<missing>" | [0.9, 1.1]
-system1_randomization.ranges.object_friction_base | "<missing>" | 0.5
+system1_randomization.ranges.material_buckets | "<missing>" | 64
+system1_randomization.ranges.object_com_offset_m | "<missing>" | [-0.08, 0.08]
+system1_randomization.ranges.object_dynamic_friction | "<missing>" | [0.1, 0.6]
+system1_randomization.ranges.object_inertia_scale | "<missing>" | [0.5, 1.5]
 system1_randomization.ranges.object_mass_scale | "<missing>" | [0.8, 1.2]
-system1_randomization.ranges.target_delay_steps | "<missing>" | [0, 1]
-system1_randomization.reset_terms | "<missing>" | ["s1_pd_gain_reset", "s1_target_delay_reset"]
-system1_randomization.setup_terms | "<missing>" | ["set_object_rigid_body_material_startup", "s1_object_material_startup", "s1_hand_material_startup", "s1_object_mass_startup", "s1_target_delay_setup"]
+system1_randomization.ranges.object_restitution | "<missing>" | [0.0, 0.0]
+system1_randomization.ranges.object_static_friction | "<missing>" | [0.1, 0.6]
+system1_randomization.ranges.push_interval_s | "<missing>" | [1.0, 3.0]
+system1_randomization.ranges.push_max_vel | "<missing>" | [0.3, 0.3, 0.3, 0.78, 0.78, 0.78]
+system1_randomization.ranges.recipe | "<missing>" | "docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20)"
+system1_randomization.ranges.robot_dynamic_friction | "<missing>" | [0.3, 1.2]
+system1_randomization.ranges.robot_restitution | "<missing>" | [0.0, 0.5]
+system1_randomization.ranges.robot_static_friction | "<missing>" | [0.3, 1.6]
+system1_randomization.ranges.torso_com_offset_m.x | "<missing>" | [-0.025, 0.025]
+system1_randomization.ranges.torso_com_offset_m.y | "<missing>" | [-0.05, 0.05]
+system1_randomization.ranges.torso_com_offset_m.z | "<missing>" | [-0.075, 0.075]
+system1_randomization.reset_terms | "<missing>" | ["push_randomizer_state", "randomize_push_schedule", "s1_pd_gain_reset"]
+system1_randomization.setup_terms | "<missing>" | ["set_object_rigid_body_material_startup", "push_randomizer_state", "s1_robot_material_startup", "s1_robot_torso_com_startup", "s1_dof_pos_bias_startup", "s1_object_material_startup", "s1_object_mass_... (284 chars)
+system1_randomization.step_terms | "<missing>" | ["push_randomizer_state", "s1_apply_pushes"]

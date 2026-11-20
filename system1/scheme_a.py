@@ -120,7 +120,11 @@ class SonicDualDriver:
         self.ctl = sc.SonicController(batch=self.E * self.A, device=device, holosoma_joint_names=list(sim.dof_names)[: self.nb], tf32=tf32)
         if list(sim.dof_names) != list(env.dof_names):
             raise AssertionError("simulator and env DOF order differ")
-        self.default_h = env.default_dof_pos.reshape(-1)[: len(sim.dof_names)]
+        # System1 T10b joint-offset randomisation (env._s1_dof_bias [E, A, 29], None = off, unchanged): SONIC reads q - b and its
+        # target is sent as q* + b, the same encoder offset as D's default + b; default_h stays the nominal default pose.
+        self.dof_bias = getattr(env, "_s1_dof_bias", None)
+        dd = env.default_dof_pos_base if self.dof_bias is not None else env.default_dof_pos
+        self.default_h = dd.reshape(-1)[: len(sim.dof_names)]
         self.scale_h = env.action_scales.reshape(-1)
         self.term = env.action_manager.get_term("joint_control")
         bl = list(sim._body_list)
@@ -163,7 +167,10 @@ class SonicDualDriver:
         q = sc.xyzw_to_wxyz(rs[:, 3:7])
         w_b = sc.quat_apply(sc.quat_conj(q), rs[:, 10:13])
         nb = self.nb
-        return q, w_b, self.ctl.to_sonic(self._flat(self.sim.agent_dof_pos[..., :nb])), self.ctl.to_sonic(self._flat(self.sim.agent_dof_vel[..., :nb]))
+        dof = self.sim.agent_dof_pos[..., :nb]
+        if self.dof_bias is not None:  # System1 T10b (off = unchanged)
+            dof = dof - self.dof_bias[..., :nb]
+        return q, w_b, self.ctl.to_sonic(self._flat(dof)), self.ctl.to_sonic(self._flat(self.sim.agent_dof_vel[..., :nb]))
 
     @torch.no_grad()
     def actions(self, command, dones=None, delta_q_h=None, ref_limits_h=None, target_residual_h=None):
@@ -189,6 +196,8 @@ class SonicDualDriver:
         self.last_sonic_target_h = q_target_h
         if target_residual_h is not None:
             q_target_h = q_target_h + target_residual_h
+        if self.dof_bias is not None:  # System1 T10b: the encoder offset on the commanded target (off = unchanged)
+            q_target_h = q_target_h + self.dof_bias[..., : self.nb]
         if self.hand:
             q_target_h = torch.cat([q_target_h, self.finger_targets(command)], dim=-1)
         self.term.joint_target_override = q_target_h  # PD uses q* verbatim (F2)

@@ -305,20 +305,23 @@ def _object_physics(env) -> dict[str, object]:
         device=material.device,
         dtype=material.dtype,
     ).expand_as(material)
-    if RANDOMIZATION is not None:  # System1 T10b: per-env mass / object friction drawn inside the configured ranges
+    if RANDOMIZATION is not None:  # System1 T10b: per-env object physics drawn inside the configured ranges (recipe v2)
         lo, hi = RANDOMIZATION["object_mass_scale"]
-        flo, fhi = RANDOMIZATION["friction_scale"]
-        base = RANDOMIZATION["object_friction_base"]
+        r = RANDOMIZATION
         ok_mass = bool(((mass >= EXPECTED_OBJECT_MASS_KG * lo * (1 - 1e-5)) & (mass <= EXPECTED_OBJECT_MASS_KG * hi * (1 + 1e-5))).all())
-        ok_mat = bool(((material[..., 0] >= base * flo * (1 - 1e-5)) & (material[..., 0] <= base * fhi * (1 + 1e-5))).all()
-                      and torch.equal(material[..., 0], material[..., 1]) and bool((material[..., 2] == 0).all()))
+        ok_mat = all(bool(((material[..., j] >= r[k][0] - 1e-5) & (material[..., j] <= r[k][1] + 1e-5)).all())
+                     for j, k in enumerate(("object_static_friction", "object_dynamic_friction", "object_restitution")))
         if not (ok_mass and ok_mat):
             raise RuntimeError("CORE4D randomised object physics outside the configured ranges")
         return {
-            "randomized": True, "mass_kg_range": [EXPECTED_OBJECT_MASS_KG * lo, EXPECTED_OBJECT_MASS_KG * hi],
-            "friction_range": [base * flo, base * fhi],
+            "randomized": True, "nominal_mass_kg": EXPECTED_OBJECT_MASS_KG,
+            "mass_kg_range": [EXPECTED_OBJECT_MASS_KG * lo, EXPECTED_OBJECT_MASS_KG * hi],
+            "static_friction_range": list(r["object_static_friction"]), "dynamic_friction_range": list(r["object_dynamic_friction"]),
+            "restitution_range": list(r["object_restitution"]),
             "mass_kg_first_envs": mass[:8].detach().cpu().tolist(),
             "material_first_envs": material[:8].detach().cpu().tolist(),
+            "inertia_first_envs": view.get_inertias()[:8].detach().cpu().tolist(),
+            "com_pose_body_xyzw_first_envs": view.get_coms()[:8].detach().cpu().tolist(),
         }
     if not torch.allclose(mass, expected_mass, rtol=1.0e-5, atol=1.0e-6):
         raise RuntimeError(f"CORE4D table mass mismatch: {mass.detach().cpu().tolist()}")
@@ -627,6 +630,7 @@ def main() -> int:
         if RANDOMIZATION is not None:  # System1 T10b
             run_config["system1_randomization"] = dict(ranges=RANDOMIZATION, setup_terms=list(CONFIG.randomization.setup_terms),
                                                        reset_terms=list(CONFIG.randomization.reset_terms),
+                                                       step_terms=list(CONFIG.randomization.step_terms),
                                                        module_sha256=_sha256(REPO_ROOT / "system1/t10b/randomization.py"))
             _write_json(output_dir / "randomization_samples.json", getattr(env, "_s1_rand_log", {}))
         _write_json(output_dir / "run_config.json", run_config)
@@ -720,7 +724,9 @@ def main() -> int:
                     _with_system1(learner.training_state_dict(iteration=iteration)),
                 )
 
-        if RANDOMIZATION is not None:  # System1 T10b: samples incl. the PD / delay draws of the first resets
+        if RANDOMIZATION is not None:  # System1 T10b: samples incl. the first reset's PD draws, end-of-run PD / push readback
+            from system1.t10b.randomization import final_readback
+            final_readback(env, RANDOMIZATION)
             _write_json(output_dir / "randomization_samples.json", getattr(env, "_s1_rand_log", {}))
         status = {
             "passed": True,

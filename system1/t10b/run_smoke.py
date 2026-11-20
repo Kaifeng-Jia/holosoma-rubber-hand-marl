@@ -64,7 +64,13 @@ def main():
         rows = [json.loads(x) for x in (out / "metrics.jsonl").read_text().splitlines() if x.strip()] if (out / "metrics.jsonl").exists() else []
         samples = json.loads((out / "randomization_samples.json").read_text()) if (out / "randomization_samples.json").exists() else {}
         chk = dict(name=name, returncode=rc, iterations_logged=len(rows), all_finite=all(finite(r) for r in rows), ended=now(),
-                   sample_keys=sorted(samples), passed=rc == 0 and len(rows) == a.iterations and all(finite(r) for r in rows) and bool(samples))
+                   sample_keys=sorted(samples))
+        # recipe v2 (docs/system1/T10b_dr_ranges_zh.md): every randomised quantity read back and inside its range
+        rc_ok = samples.get("startup_range_check", {}).get("all_ok", False)
+        fr = samples.get("final_readback", {})
+        chk.update(startup_range_check_all_ok=rc_ok, final_pd_ok=fr.get("pd_ok", False), final_push_ok=fr.get("push_ok", False),
+                   passed=rc == 0 and len(rows) == a.iterations and chk["all_finite"] and bool(samples) and rc_ok
+                   and fr.get("pd_ok", False) and fr.get("push_ok", False))
         (a.out / f"{name}.exit.json").write_text(json.dumps(chk, indent=1))
         print(json.dumps(chk), flush=True)
 

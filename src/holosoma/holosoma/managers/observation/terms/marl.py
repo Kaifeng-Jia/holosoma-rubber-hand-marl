@@ -63,8 +63,13 @@ def paired_base_ang_vel(env: Any) -> torch.Tensor:
 
 
 def paired_dof_pos(env: Any) -> torch.Tensor:
-    """Return per-agent joint positions relative to the shared default pose."""
-    return env.simulator.agent_dof_pos - env.default_dof_pos[:, None, :]
+    """Return per-agent joint positions relative to the shared default pose.
+
+    System1 T10b: a per-agent default pose [env, agent, dof] (joint-offset randomisation) is used as is; the usual [env, dof]
+    default is broadcast over the agents as before.
+    """
+    default = env.default_dof_pos
+    return env.simulator.agent_dof_pos - (default if default.ndim == 3 else default[:, None, :])
 
 
 def paired_dof_vel(env: Any) -> torch.Tensor:

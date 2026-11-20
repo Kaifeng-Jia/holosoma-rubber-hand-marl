@@ -4,7 +4,7 @@ C-in Bin, seed 721) the smoke run_config, the original final training run_config
 launch / exit records, randomization_samples.json and the 50-iteration metrics (gzip); validation-state sha256; the pilot
 commands (system1/t10b/pilot_cloud.py --dry-run). SHA256SUMS written separately. Read only on the inputs.
 
-    python3 system1/t10b/package_retrain_smoke.py --out results_system1/T10b_friction_margin/retrain
+    python3 system1/t10b/package_retrain_smoke.py --out results_system1/T10b_friction_margin/retrain [--smoke logs_system1/t10b/smoke_v2]
 """
 from __future__ import annotations
 
@@ -17,7 +17,7 @@ import shutil
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-SMOKE = ROOT / "logs_system1/t10b/smoke"
+SMOKE = ROOT / "logs_system1/t10b/smoke_v2"  # recipe v2 (docs/system1/T10b_dr_ranges_zh.md); v1 smoke: logs_system1/t10b/smoke
 ORIG = dict(
     d_table_seed721=dict(run_config="/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/run_config.json",
                          checkpoint="/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/model_12000.pt"),
@@ -48,14 +48,16 @@ def short(v, n=200):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--smoke", type=Path, default=SMOKE)
     a = ap.parse_args()
     out = a.out.resolve()
+    smoke = a.smoke.resolve()
     (out / "configs").mkdir(parents=True, exist_ok=True)
     (out / "smoke").mkdir(parents=True, exist_ok=True)
     summary = {}
     for name, o in ORIG.items():
-        d = SMOKE / name
-        ex = json.loads((SMOKE / f"{name}.exit.json").read_text())
+        d = smoke / name
+        ex = json.loads((smoke / f"{name}.exit.json").read_text())
         A = flat(json.loads(Path(o["run_config"]).read_text()))
         B = flat(json.loads((d / "run_config.json").read_text()))
         lines = [f"# {name}: original final training run_config ({o['run_config']}, sha256 {sha(o['run_config'])})",
@@ -68,7 +70,7 @@ def main():
         (out / "configs" / f"{name}_original_vs_smoke.diff.txt").write_text("\n".join(lines) + "\n")
         shutil.copyfile(d / "run_config.json", out / "configs" / f"{name}_smoke.run_config.json")
         (out / "configs" / f"{name}_original.run_config.json.gz").write_bytes(gzip.compress(Path(o["run_config"]).read_bytes(), mtime=0))
-        for f in (SMOKE / f"{name}.launch.json", SMOKE / f"{name}.exit.json", d / "randomization_samples.json"):
+        for f in (smoke / f"{name}.launch.json", smoke / f"{name}.exit.json", d / "randomization_samples.json"):
             shutil.copyfile(f, out / "smoke" / f"{name}__{f.name.replace(name + '.', '')}")
         (out / "smoke" / f"{name}__metrics.jsonl.gz").write_bytes(gzip.compress((d / "metrics.jsonl").read_bytes(), mtime=0))
         m = [json.loads(x) for x in (d / "metrics.jsonl").read_text().splitlines() if x.strip()]

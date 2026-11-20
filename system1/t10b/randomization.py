@@ -1,22 +1,41 @@
-"""T10b B: domain randomisation for the paired CORE4D training (two robots + one object), on top of holosoma's own terms.
+"""T10b B: domain randomisation for the paired CORE4D training (two robots + one object), recipe v2 of
+docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20): peer whole-body-tracking values as-is, the same terms for D
+and C-in, PhysX / scene friction combine modes unchanged.
 
-Used only with scripts/train_core4d_smalltable.py --system1-randomization (off: the training is unchanged). Inventory of holosoma's
-existing terms and why each is or is not reused: results_system1/T10b_friction_margin/retrain/README_CN.md.
+Used only with scripts/train_core4d_smalltable.py --system1-randomization (off: the training is unchanged). Every robot term is
+drawn independently per environment and robot.
 
-Setup terms (once per environment, at startup):
-  s1_object_material_startup  object material static = dynamic = 0.5 x U(0.5, 1.25) per env (object-ground friction follows it:
-                              the ground's combine mode is multiply x 1.0); replaces the fixed 0.5 term's value after it ran.
-  s1_hand_material_startup    rubber-hand material static = dynamic = 1.0 x U(0.5, 1.25) per env and robot (both hands of a robot
-                              share it; shapes found as in system1/t10b/hand_material.py); hand-object friction = average.
-  s1_object_mass_startup      object mass x U(0.8, 1.2) per env, inertia scaled by the same factor (COM unchanged).
-  s1_target_delay_setup       installs a 0-1 control-step delay on the PD target (the actual joint target, so it covers D's
-                              default + scale * a and C-in's SONIC q*): target(t) = target(t-1) for envs with delay 1.
-Reset terms (each episode reset):
-  s1_pd_gain_reset            kp and kd scales U(0.9, 1.1) per env, robot and joint (holosoma's own scale tensors of the
-                              paired joint_control term, [env, agent, dof]).
-  s1_target_delay_reset       delay in {0, 1} control steps per env; the first step after a reset is never delayed.
-Observation noise is holosoma's existing training observation noise (unchanged; the evaluation configuration disables it).
-Every sampled value of the first ``log_envs`` environments is kept in env._s1_rand_log (written to randomization_samples.json).
+Robot (SONIC / BeyondMimic, OmniRetarget, holosoma locomotion):
+  s1_robot_material_startup   material of every collision shape of both robots (feet and rubber hands included): static U[0.3, 1.6],
+                              dynamic U[0.3, 1.2], restitution U[0, 0.5]; holosoma's _isaacsim_randomize_rigid_body_material
+                              (Isaac Lab randomize_rigid_body_material, 64 buckets, a bucket per shape, as the holosoma WBT
+                              preset), called once per robot.
+  s1_robot_torso_com_startup  torso_link COM + U(x +/-0.025, y +/-0.05, z +/-0.075) m; holosoma's randomize_body_com (the WBT
+                              preset's randomize_base_com_startup on Isaac Sim), called once per robot.
+  s1_dof_pos_bias_startup     default joint position + U(+/-0.01) rad per env, robot and joint (holosoma's setup_dof_pos_bias,
+                              per robot: env.default_dof_pos becomes [env, agent, dof]; the paired observation and action terms
+                              read it). It acts as a joint-encoder offset b: D's observation q - default - b and PD target
+                              default + b + scale * a; for C-in the frozen SONIC driver reads q - b and its target q* is sent as
+                              q* + b (system1/scheme_a.py), so both schemes see the same offset.
+  push_randomizer_state + randomize_push_schedule (holosoma)  per-env push interval U[1, 3] s;
+  s1_apply_pushes             at each due step, both robots' root velocity += U(+/-0.3, +/-0.3, +/-0.3 m/s, +/-0.78, +/-0.78,
+                              +/-0.78 rad/s), drawn per robot (holosoma's apply_pushes pushes robot 0 only).
+  s1_pd_gain_reset            kp, kd scale U[0.9, 1.1] per env, robot and joint at every reset (the paired action term's own
+                              [env, agent, dof] scale tensors; holosoma's ActuatorRandomizerState is [env, dof] and shared).
+Object (holosoma object preset, OmniRetarget):
+  s1_object_material_startup  static U[0.1, 0.6], dynamic U[0.1, 0.6], restitution 0, the body of holosoma's
+                              randomize_object_rigid_body_material_startup (same helper and buckets; the function itself rejects
+                              the paired simulator class); object-ground and object-hand friction follow from it with the scene's
+                              combine modes.
+  s1_object_mass_startup      mass x U[0.8, 1.2] with the inertia scaled by the same ratio (holosoma's mass helper, Isaac Lab
+                              operation 'scale', recompute_inertia).
+  s1_object_inertia_startup   inertia x U[0.5, 1.5] on top (one factor per env for the whole tensor, so it stays a physical
+                              inertia; holosoma's per-element inertia term can break the triangle inequality).
+  s1_object_com_startup       COM + U(+/-0.08 m) per axis.
+Dropped: action delay. Unchanged: holosoma's training observation noise (the evaluation configuration disables it).
+s1_readback_check (last setup term) reads every randomised quantity back from PhysX / the env for all environments, checks the
+ranges and raises otherwise; final_readback() adds the PD scales and pushes at the end of training. Values of the first
+``log_envs`` environments and min / max over all environments are kept in env._s1_rand_log (randomization_samples.json).
 """
 from __future__ import annotations
 
@@ -24,72 +43,109 @@ from typing import Any
 
 import torch
 
-from system1.t10b.hand_material import HAND_BODIES, shapes_per_body
+DEFAULTS = dict(
+    recipe="docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20)",
+    robot_static_friction=(0.3, 1.6), robot_dynamic_friction=(0.3, 1.2), robot_restitution=(0.0, 0.5), material_buckets=64,
+    torso_com_offset_m=dict(x=(-0.025, 0.025), y=(-0.05, 0.05), z=(-0.075, 0.075)),
+    dof_pos_bias_rad=(-0.01, 0.01),
+    push_interval_s=(1.0, 3.0), push_max_vel=(0.3, 0.3, 0.3, 0.78, 0.78, 0.78),
+    kp_scale=(0.9, 1.1), kd_scale=(0.9, 1.1),
+    object_static_friction=(0.1, 0.6), object_dynamic_friction=(0.1, 0.6), object_restitution=(0.0, 0.0),
+    object_mass_scale=(0.8, 1.2), object_inertia_scale=(0.5, 1.5), object_com_offset_m=(-0.08, 0.08),
+)
+ROBOTS = ("robot", "robot_1")
+TORSO = "torso_link"
+EPS = 1e-5
 
-DEFAULTS = dict(object_friction_base=0.5, hand_friction_base=1.0, friction_scale=(0.5, 1.25), object_mass_scale=(0.8, 1.2),
-                kp_scale=(0.9, 1.1), kd_scale=(0.9, 1.1), target_delay_steps=(0, 1))
 
-
-def _log(env, key, value, n):
+def _log(env, key, value, n=None):
     log = getattr(env, "_s1_rand_log", None)
     if log is None:
         log = env._s1_rand_log = {}
-    log.setdefault(key, []).append(value[:n].tolist() if hasattr(value, "tolist") else value)
+    v = value.detach().cpu() if isinstance(value, torch.Tensor) else value
+    if n is not None and hasattr(v, "__getitem__"):
+        v = v[:n]
+    log[key] = v.tolist() if hasattr(v, "tolist") else v
 
 
-def _u(lo, hi, shape, device="cpu", gen=None):
-    return lo + (hi - lo) * torch.rand(shape, device=device, generator=gen)
+def _u(lo, hi, shape, device="cpu"):
+    return lo + (hi - lo) * torch.rand(shape, device=device)
 
 
-def s1_object_material_startup(env: Any, *, base: float, scale_range, log_envs: int = 5, **_):
-    view = env.simulator._object.root_physx_view
-    mats = view.get_material_properties().clone()
-    s = _u(scale_range[0], scale_range[1], (env.num_envs,)) * base
-    mats[..., 0] = s[:, None]
-    mats[..., 1] = s[:, None]
-    mats[..., 2] = 0.0
-    view.set_material_properties(mats, torch.arange(env.num_envs, dtype=torch.long))
-    if not torch.equal(view.get_material_properties(), mats):
-        raise RuntimeError("PhysX did not retain the randomised object material")
-    _log(env, "object_friction", s, log_envs)
+def _all(env):
+    return torch.arange(env.num_envs, dtype=torch.long, device="cpu")
 
 
-def s1_hand_material_startup(env: Any, *, base: float, scale_range, log_envs: int = 5, **_):
+def _cfg(sim, name, bodies=".*"):
+    from isaaclab.managers import SceneEntityCfg
+
+    c = SceneEntityCfg(name, body_names=bodies)
+    c.resolve(sim.scene)
+    return c
+
+
+# ---------------------------------------------------------------- robot
+def s1_robot_material_startup(env: Any, *, static_range, dynamic_range, restitution_range, num_buckets: int, **_):
+    from holosoma.managers.randomization.terms.locomotion import _isaacsim_randomize_rigid_body_material
+
     sim = env.simulator
-    out = []
-    for art in (sim._robot, getattr(sim, "_robot_1", None)):
-        if art is None:
-            continue
-        mapping, _, _ = shapes_per_body(art)
-        idx = [i for b in HAND_BODIES for i in mapping[b]]
-        view = art.root_physx_view
-        before = view.get_material_properties().clone()
-        mats = before.clone()
-        s = _u(scale_range[0], scale_range[1], (env.num_envs,)) * base
-        for i in idx:
-            mats[:, i, 0] = s
-            mats[:, i, 1] = s
-            mats[:, i, 2] = 0.0
-        view.set_material_properties(mats, torch.arange(env.num_envs, dtype=torch.long))
-        after = view.get_material_properties()
-        if not torch.equal(after, mats):
-            raise RuntimeError("PhysX did not retain the randomised hand material")
-        other = [i for i in range(after.shape[1]) if i not in idx]
-        if not torch.equal(after[:, other], before[:, other]):
-            raise RuntimeError("hand material randomisation changed a non-hand shape")
-        out.append(s)
-    _log(env, "hand_friction_per_robot", torch.stack(out, dim=1), log_envs)
+    obj_before = sim._object.root_physx_view.get_material_properties().clone()
+    for name in ROBOTS:
+        _isaacsim_randomize_rigid_body_material(sim, _all(env), _cfg(sim, name), static_friction_range=tuple(static_range),
+                                                dynamic_friction_range=tuple(dynamic_range), restitution_range=tuple(restitution_range),
+                                                num_buckets=int(num_buckets))
+    if not torch.equal(sim._object.root_physx_view.get_material_properties(), obj_before):
+        raise RuntimeError("robot material randomisation changed the object material")
 
 
-def s1_object_mass_startup(env: Any, *, scale_range, log_envs: int = 5, **_):
-    view = env.simulator._object.root_physx_view
-    ids = torch.arange(env.num_envs, dtype=torch.long)
-    m = view.get_masses().clone()
-    inertia = view.get_inertias().clone()
-    s = _u(scale_range[0], scale_range[1], (env.num_envs,))
-    view.set_masses(m * s.reshape(-1, *([1] * (m.ndim - 1))), ids)
-    view.set_inertias(inertia * s.reshape(-1, *([1] * (inertia.ndim - 1))), ids)
-    _log(env, "object_mass_kg", (m.reshape(env.num_envs, -1)[:, 0] * s), log_envs)
+def s1_robot_torso_com_startup(env: Any, *, com_range, **_):
+    from holosoma.simulator.isaacsim.events import randomize_body_com
+
+    sim = env.simulator
+    lo = torch.tensor([com_range[k][0] for k in "xyz"], dtype=torch.float)
+    hi = torch.tensor([com_range[k][1] for k in "xyz"], dtype=torch.float)
+    for name in ROBOTS:
+        art = sim.scene[name]
+        # holosoma's function resets to sim.default_coms (read from robot 0 at startup); robot_1 is the same model
+        if not torch.allclose(art.root_physx_view.get_coms(), sim.default_coms):
+            raise RuntimeError(f"{name}: startup COMs differ from robot 0's default_coms")
+        randomize_body_com(sim, _all(env), _cfg(sim, name, [TORSO]), (lo, hi), operation="add", distribution="uniform",
+                           num_envs=env.num_envs)
+
+
+def s1_dof_pos_bias_startup(env: Any, *, bias_range, **_):
+    base = env.default_dof_pos_base  # [1, dof]
+    b = _u(bias_range[0], bias_range[1], (env.num_envs, env.num_agents, base.shape[-1]), device=base.device)
+    env._s1_dof_bias = b
+    env.default_dof_pos = base[:, None, :] + b  # [env, agent, dof]
+
+
+def s1_apply_pushes(env: Any, **_):
+    state = env.randomization_manager.get_state("push_randomizer_state")
+    if state is None:
+        raise AttributeError("push_randomizer_state is not registered")
+    if env.is_evaluating or not state.enabled:
+        return
+    ids = state.due_envs(env.dt)
+    if ids.numel() == 0:
+        return
+    state.zero_counters(ids)
+    state.resample(ids)
+    sim = env.simulator
+    m = state.max_push_vel.to(env.device)
+    dv = (torch.rand(ids.numel(), env.num_agents, 6, device=env.device) * 2 - 1) * m
+    rs = sim.agent_root_states[ids].clone()  # [n, agent, 13] xyzw: pos, quat, lin vel w, ang vel w
+    rs[..., 7:13] += dv
+    sim.set_agent_root_states(ids, rs)
+    st = getattr(env, "_s1_push_stats", None)
+    if st is None:
+        st = env._s1_push_stats = dict(events=0, pushes=0, max_abs=torch.zeros(6, device=env.device), first=[])
+    st["events"] += 1
+    st["pushes"] += int(ids.numel()) * env.num_agents
+    st["max_abs"] = torch.maximum(st["max_abs"], dv.abs().amax(dim=(0, 1)))
+    if len(st["first"]) < 3:
+        st["first"].append(dict(step=int(env.common_step_counter) if hasattr(env, "common_step_counter") else None,
+                                env_ids=ids[:5].cpu().tolist(), dv_first_env_per_robot=dv[0].cpu().tolist()))
 
 
 def s1_pd_gain_reset(env: Any, env_ids, *, kp_range, kd_range, log_envs: int = 5, **_):
@@ -101,88 +157,188 @@ def s1_pd_gain_reset(env: Any, env_ids, *, kp_range, kd_range, log_envs: int = 5
     kp = _u(kp_range[0], kp_range[1], shape, device=env.device)
     kd = _u(kd_range[0], kd_range[1], shape, device=env.device)
     term.update_pd_scales(idx, kp, kd)
-    if getattr(env, "_s1_pd_logged", 0) < 2:  # first two reset calls only
-        env._s1_pd_logged = getattr(env, "_s1_pd_logged", 0) + 1
-        _log(env, "pd_reset_env_ids", idx[:log_envs].cpu(), log_envs)
-        _log(env, "kp_scale_first_envs_robot0_joints0to3", kp[:log_envs, 0, :4].cpu(), log_envs)
+    if not getattr(env, "_s1_pd_logged", False):  # first reset: values of the first envs
+        env._s1_pd_logged = True
+        _log(env, "pd_first_reset_env_ids", idx, log_envs)
+        _log(env, "kp_scale_first_envs_robot0_joints0to3", kp[:, 0, :4], log_envs)
+        _log(env, "kp_scale_first_envs_robot1_joints0to3", kp[:, 1, :4], log_envs)
+        state = env.randomization_manager.get_state("push_randomizer_state")
+        if state is not None and state.push_interval_s is not None:
+            _log(env, "push_interval_s_first_envs", state.push_interval_s, log_envs)
 
 
-class _TargetDelay:
-    def __init__(self, env, lo, hi):
-        self.env = env
-        self.term = env.action_manager.get_term("joint_control")
-        self.lo, self.hi = int(lo), int(hi)
-        self.delay = torch.zeros(env.num_envs, dtype=torch.long, device=env.device)
-        self.fresh = torch.ones(env.num_envs, dtype=torch.bool, device=env.device)
-        self.prev = None
-        self.written = None
-        orig = self.term.process_actions
+# ---------------------------------------------------------------- object
+def s1_object_material_startup(env: Any, *, static_range, dynamic_range, restitution_range, num_buckets: int, **_):
+    """holosoma's randomize_object_rigid_body_material_startup body (same helper, same 64 buckets, SceneEntityCfg('object'));
+    the holosoma function itself refuses the paired simulator (class-name check for 'IsaacSim', ours is DualRobotIsaacSim)."""
+    from holosoma.managers.randomization.terms.locomotion import _isaacsim_randomize_rigid_body_material
 
-        def process_actions(actions):
-            orig(actions)
-            t = self.term
-            ov = t.joint_target_override
-            if ov is not None and ov is not self.written:  # C-in: SONIC's q* written by the driver this step
-                cur = ov.clone()
-            else:  # D: holosoma's P target default + scale * clipped action
-                d = env.default_dof_pos
-                d = d.unsqueeze(1) if d.ndim == 2 else d
-                cur = t._actions_after_delay * t.action_scales + d
-            if self.prev is None:
-                self.prev = cur.clone()
-            use_prev = (self.delay == 1) & ~self.fresh
-            eff = torch.where(use_prev[:, None, None], self.prev, cur)
-            self.prev = cur.clone()
-            self.fresh[:] = False
-            t.joint_target_override = eff
-            self.written = eff
-        self.term.process_actions = process_actions
-
-    def reset(self, env_ids):
-        idx = torch.arange(self.env.num_envs, device=self.env.device) if env_ids is None else torch.as_tensor(env_ids, device=self.env.device).long()
-        if idx.numel() == 0:
-            return
-        self.delay[idx] = torch.randint(self.lo, self.hi + 1, (idx.numel(),), device=self.env.device)
-        self.fresh[idx] = True
+    sim = env.simulator
+    robots_before = [sim.scene[n].root_physx_view.get_material_properties().clone() for n in ROBOTS]
+    _isaacsim_randomize_rigid_body_material(sim, _all(env), _cfg(sim, "object"), static_friction_range=tuple(static_range),
+                                            dynamic_friction_range=tuple(dynamic_range), restitution_range=tuple(restitution_range),
+                                            num_buckets=int(num_buckets))
+    if not all(torch.equal(sim.scene[n].root_physx_view.get_material_properties(), b) for n, b in zip(ROBOTS, robots_before)):
+        raise RuntimeError("object material randomisation changed a robot material")
 
 
-def s1_target_delay_setup(env: Any, *, steps_range, log_envs: int = 5, **_):
-    """Randomisation setup runs before the action manager is set up: keep the range; the delay is installed at the first reset."""
-    env._s1_target_delay_range = list(steps_range)
-    env._s1_target_delay = None
+def s1_object_mass_startup(env: Any, *, scale_range, **_):
+    from holosoma.managers.randomization.terms.locomotion import _isaacsim_randomize_rigid_body_mass
+
+    sim = env.simulator
+    _isaacsim_randomize_rigid_body_mass(sim, _all(env), _cfg(sim, "object"), tuple(scale_range), operation="scale")
 
 
-def s1_target_delay_reset(env: Any, env_ids, *, log_envs: int = 5, **_):
-    if getattr(env, "_s1_target_delay_range", None) is None:
-        return
-    td = getattr(env, "_s1_target_delay", None)
-    if td is None:
-        td = env._s1_target_delay = _TargetDelay(env, *env._s1_target_delay_range)
-    td.reset(env_ids)
-    if getattr(env, "_s1_delay_logged", 0) < 2:
-        env._s1_delay_logged = getattr(env, "_s1_delay_logged", 0) + 1
-        _log(env, "target_delay_steps_first_envs", td.delay[:log_envs].cpu(), log_envs)
-        _log(env, "target_delay_fraction_delayed_all_envs", [float(td.delay.float().mean().item())], 1)
+def s1_object_inertia_startup(env: Any, *, scale_range, **_):
+    view = env.simulator._object.root_physx_view
+    inertia = view.get_inertias().clone()
+    s = _u(scale_range[0], scale_range[1], (env.num_envs,))
+    env._s1_object_inertia_scale = s
+    view.set_inertias(inertia * s.reshape(-1, *([1] * (inertia.ndim - 1))), _all(env))
+
+
+def s1_object_com_startup(env: Any, *, offset_range, **_):
+    view = env.simulator._object.root_physx_view
+    coms = view.get_coms().clone()  # [env, 7] (pos, quat) in the body frame
+    env._s1_object_com_nominal = coms.clone()
+    off = _u(offset_range[0], offset_range[1], (env.num_envs, 3))
+    coms[..., :3] += off
+    view.set_coms(coms, _all(env))
+
+
+# ---------------------------------------------------------------- read back and check
+def _mm(x):
+    return [float(x.min()), float(x.max())]
+
+
+def _within(x, lo, hi):
+    return bool((x >= lo - EPS).all() and (x <= hi + EPS).all())
+
+
+def s1_readback_check(env: Any, *, ranges, log_envs: int = 5, **_):
+    from system1.t10b.hand_material import HAND_BODIES, shapes_per_body
+
+    r = ranges
+    sim = env.simulator
+    chk = {}
+    for k, name in enumerate(ROBOTS):
+        art = sim.scene[name]
+        mat = art.root_physx_view.get_material_properties()
+        chk[f"{name}_static_friction_minmax"] = _mm(mat[..., 0])
+        chk[f"{name}_dynamic_friction_minmax"] = _mm(mat[..., 1])
+        chk[f"{name}_restitution_minmax"] = _mm(mat[..., 2])
+        chk[f"{name}_material_ok"] = (_within(mat[..., 0], *r["robot_static_friction"]) and _within(mat[..., 1], *r["robot_dynamic_friction"])
+                                      and _within(mat[..., 2], *r["robot_restitution"]))
+        chk[f"{name}_distinct_materials_shape_level"] = int(torch.unique(mat.reshape(-1, 3), dim=0).shape[0])
+        mapping, _, _ = shapes_per_body(art)
+        hands = [i for b in HAND_BODIES for i in mapping[b]]
+        _log(env, f"{name}_hand_material_first_envs", mat[:, hands], log_envs)
+        feet = [i for b, ii in mapping.items() if "ankle_roll" in b for i in ii]
+        _log(env, f"{name}_foot_material_first_envs", mat[:, feet], log_envs)
+        coms = art.root_physx_view.get_coms()
+        t = art.find_bodies(TORSO)[0][0]
+        off = coms[:, t, :3] - sim.default_coms[:, t, :3]
+        others = torch.ones(coms.shape[1], dtype=torch.bool)
+        others[t] = False
+        chk[f"{name}_torso_com_offset_minmax_xyz"] = [_mm(off[:, j]) for j in range(3)]
+        # other bodies and the torso COM orientation: unchanged up to the PhysX write / read round trip (float32)
+        chk[f"{name}_other_bodies_com_max_change"] = float((coms[:, others] - sim.default_coms[:, others]).abs().max())
+        chk[f"{name}_torso_com_ok"] = (all(_within(off[:, j], *r["torso_com_offset_m"][a]) for j, a in enumerate("xyz"))
+                                       and torch.allclose(coms[:, others], sim.default_coms[:, others], rtol=0.0, atol=1e-6)
+                                       and torch.allclose(coms[:, t, 3:], sim.default_coms[:, t, 3:], rtol=0.0, atol=1e-6))
+        _log(env, f"{name}_torso_com_offset_first_envs", off, log_envs)
+        b = env._s1_dof_bias[:, k]
+        chk[f"{name}_dof_pos_bias_minmax"] = _mm(b)
+        # (default + b) - default differs from b by float32 round-off (~3e-8)
+        chk[f"{name}_dof_pos_bias_ok"] = _within(b, *r["dof_pos_bias_rad"]) and torch.allclose(
+            env.default_dof_pos[:, k] - env.default_dof_pos_base, b, rtol=0.0, atol=1e-6)
+        _log(env, f"{name}_dof_pos_bias_first_envs_joints0to3", b[:, :4], log_envs)
+    obj = sim._object
+    view = obj.root_physx_view
+    mat = view.get_material_properties()
+    chk["object_static_friction_minmax"] = _mm(mat[..., 0])
+    chk["object_dynamic_friction_minmax"] = _mm(mat[..., 1])
+    chk["object_restitution_minmax"] = _mm(mat[..., 2])
+    chk["object_material_ok"] = (_within(mat[..., 0], *r["object_static_friction"]) and _within(mat[..., 1], *r["object_dynamic_friction"])
+                                 and _within(mat[..., 2], *r["object_restitution"]))
+    chk["object_shapes"] = int(mat.shape[1])
+    _log(env, "object_material_first_envs", mat, log_envs)
+    m = view.get_masses().reshape(env.num_envs, -1)[:, 0]
+    m0 = obj.data.default_mass.reshape(env.num_envs, -1)[:, 0].cpu()
+    ratio = m / m0
+    chk["object_nominal_mass_kg"] = _mm(m0)
+    chk["object_mass_kg_minmax"] = _mm(m)
+    chk["object_mass_ok"] = _within(ratio, *r["object_mass_scale"])
+    _log(env, "object_mass_kg_first_envs", m, log_envs)
+    inertia = view.get_inertias().reshape(env.num_envs, -1)
+    i0 = obj.data.default_inertia.reshape(env.num_envs, -1).cpu()
+    s = env._s1_object_inertia_scale
+    expect = i0 * (ratio * s)[:, None]
+    chk["object_inertia_scale_minmax"] = _mm(s)
+    chk["object_total_inertia_factor_minmax"] = _mm(ratio * s)
+    chk["object_inertia_ok"] = _within(s, *r["object_inertia_scale"]) and torch.allclose(inertia, expect, rtol=1e-4, atol=1e-7)
+    _log(env, "object_inertia_scale_first_envs", s, log_envs)
+    coms = view.get_coms()
+    off = coms[:, :3] - env._s1_object_com_nominal[:, :3]
+    chk["object_com_offset_minmax_xyz"] = [_mm(off[:, j]) for j in range(3)]
+    chk["object_com_ok"] = all(_within(off[:, j], *r["object_com_offset_m"]) for j in range(3)) and torch.allclose(
+        coms[:, 3:], env._s1_object_com_nominal[:, 3:], rtol=0.0, atol=1e-6)
+    _log(env, "object_com_offset_first_envs", off, log_envs)
+    chk["all_ok"] = all(v for k, v in chk.items() if k.endswith("_ok"))
+    _log(env, "startup_range_check", chk)
+    if not chk["all_ok"]:
+        raise RuntimeError(f"T10b randomisation outside the configured ranges: {chk}")
+
+
+def final_readback(env: Any, ranges) -> dict:
+    """PD scales (all envs, robots, joints, at the end of training) and pushes applied so far, checked against the ranges."""
+    term = env.action_manager.get_term("joint_control")
+    kp, kd = term.get_pd_scale_tensors()
+    st = getattr(env, "_s1_push_stats", None) or dict(events=0, pushes=0, max_abs=torch.zeros(6), first=[])
+    mx = torch.as_tensor(ranges["push_max_vel"], dtype=torch.float)
+    out = dict(kp_scale_minmax=_mm(kp), kd_scale_minmax=_mm(kd), pd_ok=_within(kp, *ranges["kp_scale"]) and _within(kd, *ranges["kd_scale"]),
+               kp_scale_distinct_robots=bool((kp[:, 0] != kp[:, 1]).any()), push_events=st["events"], robot_pushes=st["pushes"],
+               push_max_abs_dv=st["max_abs"].cpu().tolist(), push_ok=bool((st["max_abs"].cpu() <= mx + EPS).all()) and st["events"] > 0,
+               first_pushes=st["first"])
+    _log(env, "final_readback", out)
+    return out
 
 
 def randomization_config(base_cfg, ranges=None):
-    """holosoma RandomizationManagerCfg = the training's own config + the terms above (setup order: holosoma's fixed object
-    material first, then the randomised values)."""
+    """holosoma RandomizationManagerCfg = the training's own config (its fixed object material first) + the terms above."""
     from dataclasses import replace
 
     from holosoma.config_types.randomization import RandomizationTermCfg as T
+
     r = dict(DEFAULTS, **(ranges or {}))
     f = "system1.t10b.randomization:"
+    loco = "holosoma.managers.randomization.terms.locomotion:"
+    push_state = T(func=loco + "PushRandomizerState", params=dict(push_interval_s=list(r["push_interval_s"]), max_push_vel=list(r["push_max_vel"]), enabled=True))
     setup = dict(base_cfg.setup_terms)
     setup.update(
-        s1_object_material_startup=T(func=f + "s1_object_material_startup", params=dict(base=r["object_friction_base"], scale_range=list(r["friction_scale"]))),
-        s1_hand_material_startup=T(func=f + "s1_hand_material_startup", params=dict(base=r["hand_friction_base"], scale_range=list(r["friction_scale"]))),
+        push_randomizer_state=push_state,
+        s1_robot_material_startup=T(func=f + "s1_robot_material_startup", params=dict(
+            static_range=list(r["robot_static_friction"]), dynamic_range=list(r["robot_dynamic_friction"]),
+            restitution_range=list(r["robot_restitution"]), num_buckets=r["material_buckets"])),
+        s1_robot_torso_com_startup=T(func=f + "s1_robot_torso_com_startup", params=dict(com_range={k: list(v) for k, v in r["torso_com_offset_m"].items()})),
+        s1_dof_pos_bias_startup=T(func=f + "s1_dof_pos_bias_startup", params=dict(bias_range=list(r["dof_pos_bias_rad"]))),
+        s1_object_material_startup=T(func=f + "s1_object_material_startup", params=dict(
+            static_range=list(r["object_static_friction"]), dynamic_range=list(r["object_dynamic_friction"]),
+            restitution_range=list(r["object_restitution"]), num_buckets=r["material_buckets"])),
         s1_object_mass_startup=T(func=f + "s1_object_mass_startup", params=dict(scale_range=list(r["object_mass_scale"]))),
-        s1_target_delay_setup=T(func=f + "s1_target_delay_setup", params=dict(steps_range=list(r["target_delay_steps"]))),
+        s1_object_inertia_startup=T(func=f + "s1_object_inertia_startup", params=dict(scale_range=list(r["object_inertia_scale"]))),
+        s1_object_com_startup=T(func=f + "s1_object_com_startup", params=dict(offset_range=list(r["object_com_offset_m"]))),
+        s1_readback_check=T(func=f + "s1_readback_check", params=dict(ranges=r)),
     )
     reset = dict(base_cfg.reset_terms)
     reset.update(
+        push_randomizer_state=T(func=loco + "PushRandomizerState"),
+        randomize_push_schedule=T(func=loco + "randomize_push_schedule"),
         s1_pd_gain_reset=T(func=f + "s1_pd_gain_reset", params=dict(kp_range=list(r["kp_scale"]), kd_range=list(r["kd_scale"]))),
-        s1_target_delay_reset=T(func=f + "s1_target_delay_reset", params={}),
     )
-    return replace(base_cfg, setup_terms=setup, reset_terms=reset), r
+    step = dict(base_cfg.step_terms)
+    step.update(
+        push_randomizer_state=T(func=loco + "PushRandomizerState"),
+        s1_apply_pushes=T(func=f + "s1_apply_pushes"),
+    )
+    return replace(base_cfg, setup_terms=setup, reset_terms=reset, step_terms=step), r
