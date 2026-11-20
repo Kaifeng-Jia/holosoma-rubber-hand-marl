@@ -40,7 +40,7 @@ T10b 冒烟测试用的随机化，是按通用的足式运动经验设的：
 | 恢复系数 | U[0, 0.5] | 同上 |
 | 躯干质心偏移 | x ±2.5，y ±5，z ±7.5 cm | OmniRetarget（G1 带物体）原值。SONIC 的范围更宽，但它不带物体 |
 | 默认关节角偏移 | ±0.01 rad | 三篇相同 |
-| 推扰 | 每 1–3 s，线速度 0.3 m/s，角速度 0.78 rad/s | OmniRetarget 原值。比 SONIC 温和，因为两台机器人通过物体连在一起 |
+| 推扰 | 每 1–3 s；线速度 x、y ±0.5，z ±0.2 m/s；角速度 roll、pitch ±0.52，yaw ±0.78 rad/s | SONIC Table 4 的逐分量值，也就是 holosoma 带物体 WBT 预设的默认值。OmniRetarget 只写了"0.3 m/s、0.78 rad/s"，没给逐分量的值；按它字面逐分量取，roll、pitch 会比所有有记录的做法强 50%，所以改用有完整记录的这一套（2026-11-20 修订） |
 | PD 增益 | ±10%（kp、kd） | holosoma locomotion 预设、decMHT。理由：T10 的设置对照表显示，MuJoCo 和 PhysX 的关节电枢、阻尼、摩擦本来就不同，PD 随机化覆盖执行器层面的差别 |
 
 ### 2. 物体：沿用 OmniRetarget 和 holosoma 带物体的预设
