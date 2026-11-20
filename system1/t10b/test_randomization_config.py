@@ -21,7 +21,7 @@ from system1.t10b.randomization import randomization_config  # noqa: E402
 
 TASK_BOOK = dict(robot_static_friction=(0.3, 1.6), robot_dynamic_friction=(0.3, 1.2), robot_restitution=(0.0, 0.5),
                  torso_com_offset_m=dict(x=(-0.025, 0.025), y=(-0.05, 0.05), z=(-0.075, 0.075)), dof_pos_bias_rad=(-0.01, 0.01),
-                 push_interval_s=(1.0, 3.0), push_max_vel=(0.3, 0.3, 0.3, 0.78, 0.78, 0.78), kp_scale=(0.9, 1.1), kd_scale=(0.9, 1.1),
+                 push_interval_s=(1.0, 3.0), push_max_vel=(0.5, 0.5, 0.2, 0.52, 0.52, 0.78), kp_scale=(0.9, 1.1), kd_scale=(0.9, 1.1),
                  object_static_friction=(0.1, 0.6), object_dynamic_friction=(0.1, 0.6), object_restitution=(0.0, 0.0),
                  object_mass_scale=(0.8, 1.2), object_inertia_scale=(0.5, 1.5), object_com_offset_m=(-0.08, 0.08))
 

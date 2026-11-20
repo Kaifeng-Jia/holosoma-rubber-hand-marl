@@ -48,12 +48,14 @@ def main():
     ap.add_argument("--num-envs", type=int, default=512)
     ap.add_argument("--iterations", type=int, default=50)
     ap.add_argument("--only", default=",".join(RUNS))
+    ap.add_argument("--python", default=PY, help="interpreter (cloud: $S1_PY); default the laptop hssim_s1")
+    ap.add_argument("--taskset", default="24-31", help="CPU list for taskset; '' runs without taskset (cloud)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
     for k, (name, extra) in enumerate((n, RUNS[n]) for n in a.only.split(",")):
         out = a.out / name
-        argv = ["taskset", "-c", "24-31", PY, "-B", "scripts/train_core4d_smalltable.py", *extra, *COMMON, "--num-envs", str(a.num_envs),
+        argv = [*(["taskset", "-c", a.taskset] if a.taskset else []), a.python, "-B", "scripts/train_core4d_smalltable.py", *extra, *COMMON, "--num-envs", str(a.num_envs),
                 "--iterations", str(a.iterations), "--output-dir", str(out)]
         env = dict(os.environ, LOCAL_RANK=str(310 + k), WORLD_SIZE="1")
         rec = dict(name=name, argv=argv, started=now(), env=dict(LOCAL_RANK=env["LOCAL_RANK"]), git_head=git("rev-parse", "HEAD").strip(),

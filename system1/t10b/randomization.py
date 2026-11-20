@@ -18,8 +18,10 @@ Robot (SONIC / BeyondMimic, OmniRetarget, holosoma locomotion):
                               default + b + scale * a; for C-in the frozen SONIC driver reads q - b and its target q* is sent as
                               q* + b (system1/scheme_a.py), so both schemes see the same offset.
   push_randomizer_state + randomize_push_schedule (holosoma)  per-env push interval U[1, 3] s;
-  s1_apply_pushes             at each due step, both robots' root velocity += U(+/-0.3, +/-0.3, +/-0.3 m/s, +/-0.78, +/-0.78,
-                              +/-0.78 rad/s), drawn per robot (holosoma's apply_pushes pushes robot 0 only).
+  s1_apply_pushes             at each due step, both robots' root velocity (world frame) += U(x +/-0.5, y +/-0.5, z +/-0.2 m/s,
+                              roll +/-0.52, pitch +/-0.52, yaw +/-0.78 rad/s), SONIC Table 4 per component (= holosoma WBT
+                              preset max_push_vel; task book revision 2026-11-20, f4ed7a6), drawn per robot (holosoma's
+                              apply_pushes pushes robot 0 only).
   s1_pd_gain_reset            kp, kd scale U[0.9, 1.1] per env, robot and joint at every reset (the paired action term's own
                               [env, agent, dof] scale tensors; holosoma's ActuatorRandomizerState is [env, dof] and shared).
 Object (holosoma object preset, OmniRetarget):
@@ -44,11 +46,11 @@ from typing import Any
 import torch
 
 DEFAULTS = dict(
-    recipe="docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20)",
+    recipe="docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20; pushes revised f4ed7a6)",
     robot_static_friction=(0.3, 1.6), robot_dynamic_friction=(0.3, 1.2), robot_restitution=(0.0, 0.5), material_buckets=64,
     torso_com_offset_m=dict(x=(-0.025, 0.025), y=(-0.05, 0.05), z=(-0.075, 0.075)),
     dof_pos_bias_rad=(-0.01, 0.01),
-    push_interval_s=(1.0, 3.0), push_max_vel=(0.3, 0.3, 0.3, 0.78, 0.78, 0.78),
+    push_interval_s=(1.0, 3.0), push_max_vel=(0.5, 0.5, 0.2, 0.52, 0.52, 0.78),
     kp_scale=(0.9, 1.1), kd_scale=(0.9, 1.1),
     object_static_friction=(0.1, 0.6), object_dynamic_friction=(0.1, 0.6), object_restitution=(0.0, 0.0),
     object_mass_scale=(0.8, 1.2), object_inertia_scale=(0.5, 1.5), object_com_offset_m=(-0.08, 0.08),
