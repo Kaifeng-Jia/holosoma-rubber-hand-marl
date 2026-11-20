@@ -26,6 +26,11 @@ export PIP_CACHE_DIR=$S1_ROOT/cache/pip TMPDIR=$S1_ROOT/tmp
 LOG="$S1_ROOT/logs/setup_$(date +%Y%m%dT%H%M%S).log"
 exec > >(tee -a "$LOG") 2>&1
 [[ -f /etc/network_turbo ]] && source /etc/network_turbo || true
+# The turbo proxy re-signs TLS with its own CA (issuer "autodl"); curl / git trust it via the system bundle but libmamba does not
+# (first run 2026-11-20 15:0x: "self-signed certificate in certificate chain" on conda.anaconda.org). These hosts are fast
+# without the proxy (measured 4-8 MB/s), so the proxy is used only for GitHub and HuggingFace.
+export no_proxy="${no_proxy:-},anaconda.org,anaconda.com,pytorch.org,nvidia.com"
+export NO_PROXY="$no_proxy"
 echo "start $(date)"
 
 # 0. installer workspace -> data disk

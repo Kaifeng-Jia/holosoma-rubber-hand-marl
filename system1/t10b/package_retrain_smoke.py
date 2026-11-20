@@ -4,7 +4,7 @@ C-in Bin, seed 721) the smoke run_config, the original final training run_config
 launch / exit records, randomization_samples.json and the 50-iteration metrics (gzip); validation-state sha256; the pilot
 commands (system1/t10b/pilot_cloud.py --dry-run). SHA256SUMS written separately. Read only on the inputs.
 
-    python3 system1/t10b/package_retrain_smoke.py --out results_system1/T10b_friction_margin/retrain [--smoke logs_system1/t10b/smoke_v2]
+    python3 system1/t10b/package_retrain_smoke.py --out results_system1/T10b_friction_margin/retrain [--smoke logs_system1/t10b/smoke_v2] [--only d_table_seed721]
 """
 from __future__ import annotations
 
@@ -49,13 +49,14 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--smoke", type=Path, default=SMOKE)
+    ap.add_argument("--only", default=",".join(ORIG), help="configurations to package (default both)")
     a = ap.parse_args()
     out = a.out.resolve()
     smoke = a.smoke.resolve()
     (out / "configs").mkdir(parents=True, exist_ok=True)
     (out / "smoke").mkdir(parents=True, exist_ok=True)
     summary = {}
-    for name, o in ORIG.items():
+    for name, o in ((n, ORIG[n]) for n in a.only.split(",")):
         d = smoke / name
         ex = json.loads((smoke / f"{name}.exit.json").read_text())
         A = flat(json.loads(Path(o["run_config"]).read_text()))
