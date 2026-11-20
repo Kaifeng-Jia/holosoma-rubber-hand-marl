@@ -1,0 +1,76 @@
+{
+ "n_states": 408,
+ "all_passed": true,
+ "max": {
+  "joint_pos_max_abs_rad": 0.0,
+  "joint_vel_max_abs": 0.0,
+  "root_pos_max_abs_m": 5.9508457939116965e-08,
+  "root_ori_max_angle_rad": 7.884953353001448e-08,
+  "root_lin_vel_max_abs": 1.4868342168572468e-08,
+  "root_ang_vel_max_abs": 1.1912514796819096e-07,
+  "object_pos_max_abs_m": 0.0,
+  "object_ori_angle_rad": 2.9802322387695312e-08
+ },
+ "thresholds": {
+  "joint_rad": 0.0001,
+  "position_m": 0.0001
+ },
+ "state_files": [
+  {
+   "task": "push",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/ExperimentsR2_evaluation_20261026_retry01/U5_push_registered/push_states.json",
+   "states_sha256": "1799ea1eec1a3ff097d46e08e6492694d6455490ccf9f2de26586e079fef895d",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed721/it13050_pm2"
+  },
+  {
+   "task": "push",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/push_pm8.json",
+   "states_sha256": "a58b2fae20f488c082f1ac07c7d552cc85053e6d5bc8360a60df2a723d26c266",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_push_paper_seed721/it13050_pm8"
+  },
+  {
+   "task": "pull",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/pull_states.json",
+   "states_sha256": "473c1fc0563228a770393c2ccd78f3b051df258a408e6481d44c12fa2450c572",
+   "isaac_eval_dir": "logs_system1/post_train/d_curve/D_pull_paper_seed721/it08050_pm2"
+  },
+  {
+   "task": "pull",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/pull_pm8.json",
+   "states_sha256": "3c2a60c7982db92b59b1f3343103e711409a6c756faaf83b86016b8163c8d5b2",
+   "isaac_eval_dir": "logs_system1/post_train/d_paper_final/D_pull_paper_seed721/it08050_pm8"
+  },
+  {
+   "task": "kick",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/ExperimentsR2_evaluation_20261026_retry01/U6_kick/kick_states.json",
+   "states_sha256": "c1ac57c62345363c85f96f98363d778898a23e1f35a2596fbcd33a68367527c4",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed721/it08000_pm2"
+  },
+  {
+   "task": "kick",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/kick_pm8.json",
+   "states_sha256": "dba247caf71d5a80213f5eb96dd8c7a32ba0ff75d8fe2dd0f18411753c779319",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_kick_paper_seed721/it08000_pm8"
+  },
+  {
+   "task": "chair",
+   "level": 2,
+   "states": "/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/chair_states.json",
+   "states_sha256": "5bb8ff9f1cb7adb72b784c0d8475779cf68099aba551901114a2f78625960bc3",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm2"
+  },
+  {
+   "task": "chair",
+   "level": 8,
+   "states": "/home/kevin/holosoma-core4d-base/logs/V3_20261102/cloud_backup_20261104/raw/v3_extended_eval_20261104_ops/states/chair_pm8.json",
+   "states_sha256": "f9a144ed0738975fef4453047c48382cee383b7daaa680e4cf43b468e8ea5af7",
+   "isaac_eval_dir": "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm8"
+  }
+ ]
+}

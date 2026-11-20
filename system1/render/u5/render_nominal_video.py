@@ -59,6 +59,7 @@ def main():
     p.add_argument("--trajectory", type=Path, required=True)
     p.add_argument("--summary", type=Path, required=True, help="evaluator summary.json (object URDF, completion)")
     p.add_argument("--task", required=True)
+    p.add_argument("--camera-task", default=None, help="T10s: take the paper F3 camera of this task (Kick has none: push, same table scene); default = --task, unchanged")
     p.add_argument("--out", type=Path, required=True)
     p.add_argument("--max-frames", type=int, default=None, help="smoke test only")
     a = p.parse_args()
@@ -72,7 +73,8 @@ def main():
     ep = next(e for e in s["episodes"] if Path(e["trajectory"]).resolve() == a.trajectory.resolve())
     robot_urdf = ROOT / "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf"
     object_urdf = ROOT / "src/holosoma" / s["object_urdf"]
-    f3 = json.loads((SNAP / f"f3_manifest_{a.task}.json").read_text())
+    cam_task = a.camera_task or a.task
+    f3 = json.loads((SNAP / f"f3_manifest_{cam_task}.json").read_text())
     cam_rec = f3["records"][0]["camera"]
     settings = cam_rec["settings"]
     with np.load(a.trajectory, allow_pickle=False) as z:
@@ -118,7 +120,7 @@ def main():
     rec = dict(task=a.task, trajectory=str(a.trajectory), trajectory_sha256=sha(a.trajectory), summary=str(a.summary),
                summary_sha256=sha(a.summary), model_id=s["model_id"], state_id=ep["state_id"], completed_reference=ep["completed_reference"],
                executed_steps=ep["steps"], saved_rows=rows, frames=n, fps=50, terminal_extra_state_excluded=n == rows - 1,
-               camera_source=f"paper F3 camera, U5_F3_EXEC_20261104/outputs/{a.task}/manifest.json records[0]",
+               camera_source=f"paper F3 camera, U5_F3_EXEC_20261104/outputs/{cam_task}/manifest.json records[0]",
                camera=cam_rec, robot_urdf_sha256=sha(robot_urdf), object_urdf=str(object_urdf), object_urdf_sha256=sha(object_urdf),
                gl_vendor=vendor, helper_executed_sha256=helper_sha, code_sha256=sha(__file__),
                sources_snapshot_sha256=sha(SNAP / "SOURCES.sha256"), encoding_command=cmd, width=1920, height=1080,

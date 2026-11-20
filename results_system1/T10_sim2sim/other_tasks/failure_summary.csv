@@ -1,0 +1,37 @@
+run,task,scheme,pd_setting,training_seed,perturbation_level_cm,n_episodes_incl_nominal,n_failed,cause_robot0_tilt,cause_robot1_tilt,cause_object_position,cause_object_orientation,termination_step_median,termination_step_min,termination_step_max,n_failed_with_object_divergence,object_divergence_step_median,phase_at_divergence_counts,phase_at_termination_counts
+cin_pull_seed721_pm2_pdisaac,pull,C-in,isaac,721,2,51,51,0,0,51,0,152,151,155,51,123,"{""lift"": 36, ""push"": 15}","{""push"": 51}"
+cin_pull_seed721_pm2_pdofficial,pull,C-in,official,721,2,51,51,0,0,51,0,152,151,155,51,123,"{""lift"": 36, ""push"": 15}","{""push"": 51}"
+cin_pull_seed721_pm8_pdisaac,pull,C-in,isaac,721,8,51,51,0,0,51,0,153,145,156,51,124,"{""lift"": 33, ""push"": 17, ""lower"": 1}","{""push"": 51}"
+cin_pull_seed721_pm8_pdofficial,pull,C-in,official,721,8,51,51,0,0,51,0,153,145,156,51,124,"{""lift"": 33, ""push"": 17, ""lower"": 1}","{""push"": 51}"
+cin_pull_seed722_pm2_pdisaac,pull,C-in,isaac,722,2,51,51,0,0,51,0,155,153,156,51,125,"{""lift"": 51}","{""push"": 51}"
+cin_pull_seed722_pm2_pdofficial,pull,C-in,official,722,2,51,51,0,0,51,0,155,153,156,51,125,"{""lift"": 51}","{""push"": 51}"
+cin_pull_seed722_pm8_pdisaac,pull,C-in,isaac,722,8,51,51,0,0,51,0,154,149,156,51,124,"{""lift"": 34, ""push"": 17}","{""push"": 51}"
+cin_pull_seed722_pm8_pdofficial,pull,C-in,official,722,8,51,51,0,0,51,0,154,149,156,51,124,"{""lift"": 34, ""push"": 17}","{""push"": 51}"
+cin_pull_seed723_pm2_pdisaac,pull,C-in,isaac,723,2,51,51,0,0,51,0,155,155,156,51,125,"{""lift"": 49, ""push"": 2}","{""push"": 51}"
+cin_pull_seed723_pm2_pdofficial,pull,C-in,official,723,2,51,51,0,0,51,0,155,154,156,51,125,"{""lift"": 50, ""push"": 1}","{""push"": 51}"
+cin_pull_seed723_pm8_pdisaac,pull,C-in,isaac,723,8,51,51,0,0,51,0,155,151,156,51,125,"{""lift"": 34, ""push"": 17}","{""push"": 51}"
+cin_pull_seed723_pm8_pdofficial,pull,C-in,official,723,8,51,51,0,0,51,0,155,150,156,51,125,"{""lift"": 36, ""push"": 15}","{""push"": 51}"
+d_chair_seed721_pm2,chair,D,isaac,721,2,51,0,0,0,0,0,,,,0,,{},{}
+d_chair_seed721_pm8,chair,D,isaac,721,8,51,2,0,0,0,2,306.5,254,359,2,232.0,"{""rotate"": 2}","{""carry"": 1, ""rotate"": 1}"
+d_chair_seed722_pm2,chair,D,isaac,722,2,51,0,0,0,0,0,,,,0,,{},{}
+d_chair_seed722_pm8,chair,D,isaac,722,8,51,0,0,0,0,0,,,,0,,{},{}
+d_chair_seed723_pm2,chair,D,isaac,723,2,51,0,0,0,0,0,,,,0,,{},{}
+d_chair_seed723_pm8,chair,D,isaac,723,8,51,1,0,0,0,1,253,253,253,1,251,"{""rotate"": 1}","{""rotate"": 1}"
+d_kick_seed721_pm2,kick,D,isaac,721,2,51,51,0,51,0,0,60,57,67,0,,{},"{""still"": 31, ""push"": 20}"
+d_kick_seed721_pm8,kick,D,isaac,721,8,51,51,0,50,1,0,59,57,216,2,99.0,"{""push"": 1, ""still"": 1}","{""still"": 26, ""push"": 25}"
+d_kick_seed722_pm2,kick,D,isaac,722,2,51,51,8,44,0,0,115,104,133,32,110.0,"{""still"": 32}","{""still"": 51}"
+d_kick_seed722_pm8,kick,D,isaac,722,8,51,51,12,39,1,0,118,76,198,26,114.5,"{""still"": 26}","{""still"": 51}"
+d_kick_seed723_pm2,kick,D,isaac,723,2,51,51,0,51,0,0,56,55,139,0,,{},"{""push"": 51}"
+d_kick_seed723_pm8,kick,D,isaac,723,8,51,51,7,45,0,0,56,55,171,7,58,"{""push"": 7}","{""push"": 51}"
+d_pull_seed721_pm2,pull,D,isaac,721,2,51,0,0,0,0,0,,,,0,,{},{}
+d_pull_seed721_pm8,pull,D,isaac,721,8,51,11,1,0,10,0,196,151,296,11,138,"{""push"": 10, ""lower"": 1}","{""push"": 11}"
+d_pull_seed722_pm2,pull,D,isaac,722,2,51,0,0,0,0,0,,,,0,,{},{}
+d_pull_seed722_pm8,pull,D,isaac,722,8,51,21,0,0,21,0,190,134,216,21,136,"{""push"": 19, ""lift"": 2}","{""push"": 20, ""lift"": 1}"
+d_pull_seed723_pm2,pull,D,isaac,723,2,51,0,0,0,0,0,,,,0,,{},{}
+d_pull_seed723_pm8,pull,D,isaac,723,8,51,17,0,0,17,0,191,157,199,17,136,"{""push"": 16, ""lift"": 1}","{""push"": 15, ""lift"": 2}"
+d_push_seed721_pm2,push,D,isaac,721,2,51,0,0,0,0,0,,,,0,,{},{}
+d_push_seed721_pm8,push,D,isaac,721,8,51,0,0,0,0,0,,,,0,,{},{}
+d_push_seed722_pm2,push,D,isaac,722,2,51,0,0,0,0,0,,,,0,,{},{}
+d_push_seed722_pm8,push,D,isaac,722,8,51,0,0,0,0,0,,,,0,,{},{}
+d_push_seed723_pm2,push,D,isaac,723,2,51,0,0,0,0,0,,,,0,,{},{}
+d_push_seed723_pm8,push,D,isaac,723,8,51,0,0,0,0,0,,,,0,,{},{}

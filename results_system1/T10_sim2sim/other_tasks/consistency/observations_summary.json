@@ -1,0 +1,81 @@
+{
+ "d_push": {
+  "steps": 87,
+  "obs_max_abs_diff": 2.25028597622412e-06,
+  "obs_worst_dims": [
+   "base_ang_vel_2",
+   "base_ang_vel_1",
+   "base_ang_vel_0",
+   "motion_ref_ori_b_3",
+   "motion_ref_ori_b_0"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 7.777368229433534e-07,
+  "fk_body_ori_max_rad": 0.0013331403562906081,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 8.58306884765625e-06
+ },
+ "d_pull": {
+  "steps": 316,
+  "obs_max_abs_diff": 9.895615432631288e-07,
+  "obs_worst_dims": [
+   "teammate_relative_position_b_x",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_4",
+   "motion_ref_ori_b_5"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 5.608242138466224e-07,
+  "fk_body_ori_max_rad": 0.0013472365937770296,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 5.7220458984375e-06
+ },
+ "d_kick": {
+  "steps": 298,
+  "obs_max_abs_diff": 1.5597185401006186e-06,
+  "obs_worst_dims": [
+   "base_ang_vel_2",
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_4",
+   "base_ang_vel_1"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 7.321635790979997e-07,
+  "fk_body_ori_max_rad": 0.0013217893662896434,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 2.6226043701171875e-06
+ },
+ "d_chair": {
+  "steps": 391,
+  "obs_max_abs_diff": 2.4329307397596978e-06,
+  "obs_worst_dims": [
+   "teammate_relative_position_b_y",
+   "teammate_relative_position_b_x",
+   "teammate_relative_velocity_b_y",
+   "base_ang_vel_0",
+   "motion_ref_ori_b_4"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 6.758182009014568e-07,
+  "fk_body_ori_max_rad": 0.0013152480062733835,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 8.58306884765625e-06
+ },
+ "cin_pull": {
+  "steps": 316,
+  "obs_max_abs_diff": 8.976936911597733e-07,
+  "obs_worst_dims": [
+   "base_ang_vel_2",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_2",
+   "teammate_relative_position_b_x",
+   "motion_ref_ori_b_5"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 6.027496153304668e-07,
+  "fk_body_ori_max_rad": 0.001317667942836999,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.430511474609375e-06,
+  "sonic_actor_obs_max_abs_diff": 4.172325134277344e-07,
+  "sonic_tokenizer_max_abs_diff": 2.384185791015625e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 8.106231689453125e-06
+ }
+}

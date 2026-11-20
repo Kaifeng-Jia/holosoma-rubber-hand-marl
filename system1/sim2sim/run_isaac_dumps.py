@@ -58,12 +58,13 @@ def argv_for(name):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--only", default=",".join(LAUNCH))
+    ap.add_argument("--slots", default=",".join(SLOTS), help="taskset core ranges used, one dump per range at a time (default both)")
     a = ap.parse_args()
     todo = [n for n in a.only.split(",") if n]
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
     running = {}
     while todo or running:
-        for slot in SLOTS:
+        for slot in a.slots.split(","):
             if slot in running or not todo:
                 continue
             name = todo.pop(0)
