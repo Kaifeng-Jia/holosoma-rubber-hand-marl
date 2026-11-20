@@ -162,6 +162,7 @@ def s1_target_delay_reset(env: Any, env_ids, *, log_envs: int = 5, **_):
     if getattr(env, "_s1_delay_logged", 0) < 2:
         env._s1_delay_logged = getattr(env, "_s1_delay_logged", 0) + 1
         _log(env, "target_delay_steps_first_envs", td.delay[:log_envs].cpu(), log_envs)
+        _log(env, "target_delay_fraction_delayed_all_envs", [float(td.delay.float().mean().item())], 1)
 
 
 def randomization_config(base_cfg, ranges=None):
