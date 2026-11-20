@@ -305,6 +305,21 @@ def _object_physics(env) -> dict[str, object]:
         device=material.device,
         dtype=material.dtype,
     ).expand_as(material)
+    if RANDOMIZATION is not None:  # System1 T10b: per-env mass / object friction drawn inside the configured ranges
+        lo, hi = RANDOMIZATION["object_mass_scale"]
+        flo, fhi = RANDOMIZATION["friction_scale"]
+        base = RANDOMIZATION["object_friction_base"]
+        ok_mass = bool(((mass >= EXPECTED_OBJECT_MASS_KG * lo * (1 - 1e-5)) & (mass <= EXPECTED_OBJECT_MASS_KG * hi * (1 + 1e-5))).all())
+        ok_mat = bool(((material[..., 0] >= base * flo * (1 - 1e-5)) & (material[..., 0] <= base * fhi * (1 + 1e-5))).all()
+                      and torch.equal(material[..., 0], material[..., 1]) and bool((material[..., 2] == 0).all()))
+        if not (ok_mass and ok_mat):
+            raise RuntimeError("CORE4D randomised object physics outside the configured ranges")
+        return {
+            "randomized": True, "mass_kg_range": [EXPECTED_OBJECT_MASS_KG * lo, EXPECTED_OBJECT_MASS_KG * hi],
+            "friction_range": [base * flo, base * fhi],
+            "mass_kg_first_envs": mass[:8].detach().cpu().tolist(),
+            "material_first_envs": material[:8].detach().cpu().tolist(),
+        }
     if not torch.allclose(mass, expected_mass, rtol=1.0e-5, atol=1.0e-6):
         raise RuntimeError(f"CORE4D table mass mismatch: {mass.detach().cpu().tolist()}")
     if not torch.allclose(material, expected_material, rtol=1.0e-5, atol=1.0e-6):

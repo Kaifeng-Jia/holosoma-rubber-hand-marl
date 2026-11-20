@@ -260,6 +260,16 @@ def dump_scene(env, out_dir, extra=None):
         default_binding = str(bm.GetPrim().GetPath()) if bm else None
     rec = dict(shapes=shapes, bodies=bodies, joints=joints, object=obj, solver=solver, physx_scene=scene, control=control, extra=extra or {},
                physics_materials=materials, scene_default_material=default_binding)
+    # the paired reference exactly as the command samples it (every frame; T10s: Push / Pull / Kick use a generated A1 pair)
+    import torch
+    command = env.command_manager.get_state("paired_motion_command")
+    n = int(command.reference.num_frames)
+    smp = command.reference.sample(torch.arange(n, device=env.device))
+    np.savez_compressed(out_dir / "runtime_reference.npz", **{k: _np(v) for k, v in smp.items()}, body_names=np.array(sim._body_list),
+                        joint_names=np.array(env.dof_names), fps=np.array(command.reference.fps), ref_body_name=np.array(command.motion_cfg.body_name_ref[0]),
+                        reference_class=np.array(type(command.reference).__name__), command_class=np.array(type(command).__name__))
+    rec["runtime_reference"] = dict(file="runtime_reference.npz", frames=n, reference_class=type(command.reference).__name__,
+                                    ref_body_name=command.motion_cfg.body_name_ref[0])
     (out_dir / "scene.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
     return rec
 
