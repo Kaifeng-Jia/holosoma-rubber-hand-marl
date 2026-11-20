@@ -21,17 +21,21 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from system1.sim2sim.mj_env import PairEnv  # noqa: E402
 
-RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"))
+RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
+            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
+T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
 STEPS = 50
 
 
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--runs", default=T10_RUNS)
     a = ap.parse_args()
+    runs = {k: RUNS[k] for k in a.runs.split(",")}
     a.out.mkdir(parents=True, exist_ok=True)
     rows, summ = [], {}
-    for run, (task, scheme) in RUNS.items():
+    for run, (task, scheme) in runs.items():
         base = ROOT / "logs_system1/t10/isaac" / run
         rec = np.load(base / "dump/nominal.sim2sim.npz")
         traj = np.load(base / "eval/nominal.trajectory.npz")
@@ -62,8 +66,9 @@ def main():
     matplotlib.use("Agg")
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.4))
-    colors = dict(d_table="#eb6834", cin_table="#1baf7a", d_bucket="#b5461a", cin_bucket="#0e6e4c")
-    for run in RUNS:
+    colors = dict(d_table="#eb6834", cin_table="#1baf7a", d_bucket="#b5461a", cin_bucket="#0e6e4c",
+                  d_push="#eb6834", d_pull="#b5461a", d_kick="#f2a37a", d_chair="#7a2e0f", cin_pull="#1baf7a")
+    for run in runs:
         rr = [x for x in rows if x["run"] == run]
         t = [x["time_s"] for x in rr]
         axes[0].plot(t, [max(x["root_pos_err_m_r0"], x["root_pos_err_m_r1"]) * 100 for x in rr], color=colors[run], label=run)

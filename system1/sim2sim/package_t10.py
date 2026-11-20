@@ -43,7 +43,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--evals", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--isaac-runs", default="d_table:table,cin_table:table,d_bucket:bucket,cin_bucket:bucket")
     a = ap.parse_args()
+    isaac_runs = [tuple(x.split(":")) for x in a.isaac_runs.split(",")]
     out = a.out.resolve()
     a.evals = a.evals.resolve()
     (out / "configs").mkdir(parents=True, exist_ok=True)
@@ -82,8 +84,11 @@ def main():
     save_csv(out / "episodes.csv", eps)
     save_csv(out / "per_seed_summary.csv", per_seed)
     # Isaac (laptop 5070) next to MuJoCo
-    isa = {(r["task"], r["variant"], int(r["training_seed"]), int(r["perturbation_level_cm"])): r
-           for r in csv.DictReader((ROOT / "results_system1/T03/c2_main/per_seed_summary.csv").open()) if r["variant"] in ("D", "C-in")}
+    isa = {}
+    for f in ("c2_main", "d_final_5070"):  # D Push / Kick / Chair finals are in d_final_5070
+        for r in csv.DictReader((ROOT / f"results_system1/T03/{f}/per_seed_summary.csv").open()):
+            if r["variant"] in ("D", "C-in"):
+                isa[(r["task"], r["variant"], int(r["training_seed"]), int(r["perturbation_level_cm"]))] = r
     cmp = []
     for r in per_seed:
         i = isa.get((r["task"], r["scheme"], r["training_seed"], r["perturbation_level_cm"]))
@@ -97,13 +102,14 @@ def main():
     save_csv(out / "isaac_vs_mujoco.csv", cmp)
     # Isaac export records and scene.json; compiled MJCF scenes
     from system1.sim2sim.mj_env import SceneSpec, build_model
-    for run in ("d_table", "cin_table", "d_bucket", "cin_bucket"):
+    for run, _ in isaac_runs:
         base = ROOT / "logs_system1/t10/isaac" / run
         for f in (base / "launch.json", base / "exit.json", base / "dump/scene.json"):
             (out / "configs" / f"isaac__{run}__{f.name}.gz").write_bytes(gzip.compress(f.read_bytes(), mtime=0))
         prov[f"isaac_{run}"] = dict(scene_json_sha256=sha(base / "dump/scene.json"), convexes_sha256=sha(base / "dump/collision_convexes.npz"),
-                                    record_sha256=sha(base / "dump/nominal.sim2sim.npz"), eval_summary_sha256=sha(base / "eval/summary.json"))
-    for task, run in (("table", "d_table"), ("bucket", "d_bucket"), ("table", "cin_table"), ("bucket", "cin_bucket")):
+                                    record_sha256=sha(base / "dump/nominal.sim2sim.npz"), eval_summary_sha256=sha(base / "eval/summary.json"),
+                                    runtime_reference_sha256=sha(base / "dump/runtime_reference.npz") if (base / "dump/runtime_reference.npz").exists() else None)
+    for run, task in isaac_runs:
         _, spec, _ = build_model(SceneSpec(ROOT / "logs_system1/t10/isaac" / run / "dump"), task)
         p = out / "configs" / f"mjcf_{run}.xml"
         p.write_text(spec.to_xml())

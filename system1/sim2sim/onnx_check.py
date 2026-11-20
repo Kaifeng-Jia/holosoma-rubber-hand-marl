@@ -39,11 +39,12 @@ def sha(p):
     return h.hexdigest()
 
 
-def checkpoints():
+def checkpoints(tasks=("table", "bucket")):
     rows = list(csv.DictReader((ROOT / "results_system1/T03/c2_main/per_seed_summary.csv").open()))
+    rows += [r for r in csv.DictReader((ROOT / "results_system1/T03/d_final_5070/per_seed_summary.csv").open())]  # D Push / Kick / Chair
     out = []
     for r in rows:
-        if r["perturbation_level_cm"] != "2" or r["variant"] not in ("D", "C-in") or r["task"] not in ("table", "bucket"):
+        if r["perturbation_level_cm"] != "2" or r["variant"] not in ("D", "C-in") or r["task"] not in tasks:
             continue
         s = json.loads((ROOT / r["eval_dir"] / "summary.json").read_text())
         assert sha(s["checkpoint"]) == r["checkpoint_sha256"] == s["checkpoint_sha256"]
@@ -62,12 +63,23 @@ class ActorOnnx(torch.nn.Module):
         return self.net((obs - self.mean) / self.den)
 
 
-def actors(onnx_dir, rows_out):
+def algo_config(task):
+    """The algo config the evaluator builds the actor from (scripts/evaluate_paper_supplement.py)."""
+    if task in ("push", "pull"):
+        from holosoma.config_values.marl.g1.experiment import g1_29dof_plan5_pull_baseline, g1_29dof_plan5_push_baseline
+        return (g1_29dof_plan5_push_baseline if task == "push" else g1_29dof_plan5_pull_baseline).algo.config
+    if task == "kick":
+        from holosoma.config_values.marl.g1.kick_experiment import g1_29dof_plan5_kick_baseline
+        return g1_29dof_plan5_kick_baseline.algo.config
+    from holosoma.config_values.marl.g1.core4d_smalltable_experiment import g1_29dof_core4d_smalltable_smoke
+    return g1_29dof_core4d_smalltable_smoke.algo.config
+
+
+def actors(onnx_dir, rows_out, tasks=("table", "bucket")):
     import onnxruntime as ort
     from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
-    from holosoma.config_values.marl.g1.core4d_smalltable_experiment import g1_29dof_core4d_smalltable_smoke
-    for c in checkpoints():
-        m = initialize_core4d_smalltable_model_bundle(g1_29dof_core4d_smalltable_smoke.algo.config, device="cpu")
+    for c in checkpoints(tasks):
+        m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
         ck = torch.load(c["checkpoint"], map_location="cpu", weights_only=False)
         m.actor.load_state_dict(ck["actor_model_state_dict"], strict=True)
         m.actor_obs_normalizer.load_state_dict(ck["actor_obs_normalizer_state_dict"], strict=True)
@@ -143,13 +155,14 @@ def main():
     ap.add_argument("--onnx-dir", type=Path, required=True)
     ap.add_argument("--sonic-ref", default="logs_system1/t10/onnx/sonic_torch_ref_random.npz")
     ap.add_argument("--skip-actors", action="store_true")
+    ap.add_argument("--tasks", default="table,bucket")
     a = ap.parse_args()
     torch.set_num_threads(4)
     rows = []
     for p in [x for x in a.sonic_ref.split(",") if x]:
         sonic(ROOT / p, rows, Path(p).stem)
     if not a.skip_actors:
-        actors(a.onnx_dir, rows)
+        actors(a.onnx_dir, rows, tuple(a.tasks.split(",")))
     a.out.mkdir(parents=True, exist_ok=True)
     keys = list(dict.fromkeys(k for r in rows for k in r))
     with (a.out / "onnx_check.csv").open("w", newline="") as f:
@@ -157,6 +170,9 @@ def main():
         w.writeheader()
         w.writerows(rows)
     print("all passed" if all(r["passed"] for r in rows) else "FAILED: " + ", ".join(r["name"] + "/" + r["item"] for r in rows if not r["passed"]))
+    f64 = [r["float64_onnx_vs_torch"] for r in rows if r["item"] == "actor"]
+    if f64:  # T10s pass rule: float64 graph vs PyTorch <= 1e-10 (float32 differences are reported only)
+        print("float64 graph max", max(f64), "pass" if max(f64) <= 1e-10 else "FAIL")
 
 
 if __name__ == "__main__":

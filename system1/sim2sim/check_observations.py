@@ -24,7 +24,9 @@ sys.path.insert(0, str(ROOT))
 from system1.sim2sim.mj_env import PairEnv  # noqa: E402
 from system1.sim2sim.sonic_mj import SonicOnnx  # noqa: E402
 
-RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"))
+RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
+            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
+T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
 NAMES = ([f"actions_{i}" for i in range(29)] + [f"base_ang_vel_{i}" for i in range(3)] + [f"dof_pos_{i}" for i in range(29)] + [f"dof_vel_{i}" for i in range(29)]
          + [f"motion_command_jpos_{i}" for i in range(29)] + [f"motion_command_jvel_{i}" for i in range(29)] + [f"motion_ref_ori_b_{i}" for i in range(6)]
          + ["teammate_relative_position_b_x", "teammate_relative_position_b_y", "teammate_relative_velocity_b_x", "teammate_relative_velocity_b_y"])
@@ -34,10 +36,12 @@ TOL = 1e-4
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--runs", default=T10_RUNS)
     a = ap.parse_args()
+    runs = {k: RUNS[k] for k in a.runs.split(",")}
     a.out.mkdir(parents=True, exist_ok=True)
     per_dim, summary = [], {}
-    for run, (task, scheme) in RUNS.items():
+    for run, (task, scheme) in runs.items():
         base = ROOT / "logs_system1/t10/isaac" / run / "dump"
         z = np.load(base / "nominal.sim2sim.npz")
         env = PairEnv(base, task)

@@ -25,14 +25,16 @@ def now():
     return datetime.now(NY).isoformat(timespec="seconds")
 
 
-def jobs():
+def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket")):
     out = []
-    for task in ("table", "bucket"):
+    for task in dict.fromkeys(list(d_tasks) + list(cin_tasks)):
         for seed in (721, 722, 723):
             for lvl in (2, 8):
-                out.append(("D", task, seed, lvl, "isaac"))
-                out.append(("C-in", task, seed, lvl, "isaac"))
-                out.append(("C-in", task, seed, lvl, "official"))
+                if task in d_tasks:
+                    out.append(("D", task, seed, lvl, "isaac"))
+                if task in cin_tasks:
+                    out.append(("C-in", task, seed, lvl, "isaac"))
+                    out.append(("C-in", task, seed, lvl, "official"))
     out.sort(key=lambda j: (j[0] == "D", j))  # C-in (slower) first
     return out
 
@@ -42,10 +44,12 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--jobs", type=int, default=16)
     ap.add_argument("--first-core", type=int, default=0)
+    ap.add_argument("--d-tasks", default="table,bucket")
+    ap.add_argument("--cin-tasks", default="table,bucket")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
-    todo = jobs()
+    todo = jobs(tuple(x for x in a.d_tasks.split(",") if x), tuple(x for x in a.cin_tasks.split(",") if x))
     free = list(range(a.first_core, a.first_core + a.jobs))
     running = {}
     env = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")

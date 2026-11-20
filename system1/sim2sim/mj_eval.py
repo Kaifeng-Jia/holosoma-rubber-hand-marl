@@ -68,17 +68,30 @@ def official_pd():
     return dict(zip(MUJOCO_ORDER, kp)), dict(zip(MUJOCO_ORDER, kd)), dict(zip(MUJOCO_ORDER, eff_body))
 
 
+def final_row(scheme, task, seed, level):
+    """The laptop-5070 final evaluation of this policy (T03 c2_main; D Push / Kick / Chair: T03 d_final_5070)."""
+    f = "d_final_5070" if (scheme == "D" and task in ("push", "kick", "chair")) else "c2_main"
+    rows = list(csv.DictReader((ROOT / f"results_system1/T03/{f}/per_seed_summary.csv").open()))
+    return next(x for x in rows if x["variant"] == scheme and x["task"] == task and int(x["training_seed"]) == seed
+                and x["perturbation_level_cm"] == str(level))
+
+
 def checkpoint_for(scheme, task, seed):
-    rows = list(csv.DictReader((ROOT / "results_system1/T03/c2_main/per_seed_summary.csv").open()))
-    r = next(x for x in rows if x["variant"] == scheme and x["task"] == task and int(x["training_seed"]) == seed and x["perturbation_level_cm"] == "2")
-    return r["checkpoint_sha256"]
+    return final_row(scheme, task, seed, 2)["checkpoint_sha256"]
 
 
-def states_for(task, level):
-    name = {("table", 2): "cin_table_m5kg_seed721_fresh12000_pm2", ("table", 8): "cin_table_m5kg_seed721_fresh12000_pm8",
-            ("bucket", 2): "cin_bucket_m1kg_seed721_fresh12000_pm2", ("bucket", 8): "cin_bucket_m1kg_seed721_fresh12000_pm8"}[(task, level)]
-    argv = json.loads((ROOT / "logs_system1/post_train/final" / (name + ".launch.json")).read_text())["argv"]
-    return Path(argv[argv.index("--states") + 1])
+def states_for(task, level, scheme="C-in", seed=721):
+    if task in ("table", "bucket"):  # T10 (unchanged): the C-in seed-721 finals
+        name = {("table", 2): "cin_table_m5kg_seed721_fresh12000_pm2", ("table", 8): "cin_table_m5kg_seed721_fresh12000_pm8",
+                ("bucket", 2): "cin_bucket_m1kg_seed721_fresh12000_pm2", ("bucket", 8): "cin_bucket_m1kg_seed721_fresh12000_pm8"}[(task, level)]
+        argv = json.loads((ROOT / "logs_system1/post_train/final" / (name + ".launch.json")).read_text())["argv"]
+        return Path(argv[argv.index("--states") + 1])
+    d = ROOT / final_row(scheme, task, seed, level)["eval_dir"]
+    argv = json.loads(d.with_name(d.name + ".launch.json").read_text())["argv"]
+    p = Path(argv[argv.index("--states") + 1])
+    if sha(p) != json.loads((d / "summary.json").read_text())["states_sha256"]:
+        raise ValueError("state file sha256 differs from the final evaluation")
+    return p
 
 
 def run_episode(env, ctrl, init, save=None):
@@ -103,7 +116,7 @@ def run_episode(env, ctrl, init, save=None):
         tm = env.termination(t=k)
         bad = tm["bad_robot"] or tm["bad_object_pos"] or tm["bad_object_ori"]
         horizon = (k >= n - 1) and not bad
-        terms = dict(reference_horizon=bool(horizon), joint_bad_tracking=bool(bad))
+        terms = {env.horizon_term: bool(horizon), "joint_bad_tracking": bool(bad)}
         frames.append(snap(min(step, n - 1)))
         if not np.isfinite(frames[-1]["root_pos"]).all():
             raise ValueError("non-finite state")
@@ -123,7 +136,7 @@ def run_episode(env, ctrl, init, save=None):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--task", choices=("table", "bucket"), required=True)
+    ap.add_argument("--task", choices=("table", "bucket", "chair", "push", "pull", "kick"), required=True)
     ap.add_argument("--scheme", choices=("D", "C-in"), required=True)
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--level", type=int, choices=(2, 8), required=True)
@@ -154,7 +167,7 @@ def main():
             for r in range(2):
                 env.model.actuator_ctrlrange[env.act[r]] = np.stack([-env.tau_lim, env.tau_lim], axis=1)
             pd_note = "official deploy kp/kd (policy_parameters.hpp formulas) + official sim2sim motor effort limits"
-    states_path = states_for(a.task, a.level)
+    states_path = states_for(a.task, a.level, a.scheme, a.seed)
     states = json.loads(states_path.read_text())["states"][: a.limit or None]
     manifest = dict(task=a.task, scheme=a.scheme, seed=a.seed, level=a.level, pd=a.pd, pd_note=pd_note, onnx=str(onnx), onnx_sha256=sha(onnx),
                     checkpoint_sha256=checkpoint_for(a.scheme, a.task, a.seed), states=str(states_path), states_sha256=sha(states_path),

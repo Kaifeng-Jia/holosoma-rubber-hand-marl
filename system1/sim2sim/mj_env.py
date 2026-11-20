@@ -224,6 +224,28 @@ def build_model(ss: SceneSpec, task: str):
 
 
 # ----------------------------------------------------------------------------------------------------------------------------
+class ArrayReference:
+    """The paired reference exactly as the Isaac command sampled it (isaac_dump.py runtime_reference.npz, every frame)."""
+
+    def __init__(self, path):
+        z = np.load(path, allow_pickle=False)
+        self.keys = [k for k in z.files if k.startswith(("agent_", "object_"))]
+        self.data = {k: torch.as_tensor(z[k]) for k in self.keys}
+        self.num_frames = int(self.data["agent_joint_pos"].shape[0])
+        self.fps = int(z["fps"])
+        self.body_names = [str(x) for x in z["body_names"]]
+        self.ref_body_name = str(z["ref_body_name"])
+
+    def sample(self, time_steps):
+        t = torch.as_tensor(time_steps).long()
+        if torch.any(t < 0) or torch.any(t >= self.num_frames):
+            raise IndexError("reference frame out of range")
+        return {k: v[t] for k, v in self.data.items()}
+
+
+PLAN5 = ("push", "pull", "kick")
+
+
 class PairEnv:
     """Evaluation-time paired environment on MuJoCo (one environment, two agents), mirroring the holosoma Core4D managers."""
 
@@ -255,11 +277,20 @@ class PairEnv:
         self.default = np.array(c["default_dof_pos"], dtype=np.float64)
         self.scales = np.array(c["action_scales"], dtype=np.float64)
         self.clip_a = float(c["action_clip_value"]) if c["clip_actions"] else None
-        from holosoma.managers.command.terms.wbt import FAKE_BODY_NAME_ALIASES  # the paired command's alias map
-        aliases = [FAKE_BODY_NAME_ALIASES.get(n, n) for n in self.body_list]
-        self.ref = PairedMotionReference(str(ROOT / "src/holosoma" / TASK[task]["runtime"]), aliases, self.dof_names, device="cpu")
+        rr = Path(dump_dir) / "runtime_reference.npz"
+        if rr.exists():  # T10s: the reference exactly as Isaac's command sampled it
+            self.ref = ArrayReference(rr)
+            if self.ref.body_names != self.body_list:
+                raise ValueError("runtime reference body order differs from the Isaac body list")
+            ref_body_name = self.ref.ref_body_name
+        else:  # T10 (Table, Bin): holosoma's own loader of the runtime reference file
+            from holosoma.managers.command.terms.wbt import FAKE_BODY_NAME_ALIASES  # the paired command's alias map
+            aliases = [FAKE_BODY_NAME_ALIASES.get(n, n) for n in self.body_list]
+            self.ref = PairedMotionReference(str(ROOT / "src/holosoma" / TASK[task]["runtime"]), aliases, self.dof_names, device="cpu")
+            ref_body_name = "torso_link"
         self.n = int(self.ref.num_frames)
-        self.ref_body = self.body_list.index("torso_link")
+        self.ref_body = self.body_list.index(ref_body_name)
+        self.horizon_term = "timeout" if task in PLAN5 else "reference_horizon"  # the timeout-type term name of the task's config
         self.t = 0
         self.substep_torques = None
 
