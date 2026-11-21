@@ -1,0 +1,29 @@
+{
+ "name": "d_table_seed721_rand",
+ "train_returncode": 0,
+ "stopped_by_rule": {
+  "time": "2026-11-21T18:51:18-05:00",
+  "at_validation_iteration": 14000,
+  "curve": {
+   "2000": 4,
+   "4000": 30,
+   "6000": 26,
+   "8000": 32,
+   "10000": 45,
+   "12000": 36,
+   "14000": 31
+  },
+  "rule": "no improvement in 4000 its after 8000"
+ },
+ "final_checkpoint": "/root/autodl-tmp/system1/logs/t10b_pilot/d_table_seed721_rand/train/model_14000.pt",
+ "validation_curve": {
+  "2000": 4,
+  "4000": 30,
+  "6000": 26,
+  "8000": 32,
+  "10000": 45,
+  "12000": 36,
+  "14000": 31
+ },
+ "ended": "2026-11-21T18:53:18-05:00"
+}
