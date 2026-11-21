@@ -99,6 +99,26 @@ def holder(cw):
     return "+".join(h) if h else "none"
 
 
+def yaw_xyzw(q):
+    x, y, z, w = q
+    return float(np.arctan2(2 * (w * z + x * y), 1 - 2 * (y * y + z * z)))
+
+
+def reference_kinematics(ref, a, b):
+    """Reference object and pelvis motion over frames a..b (50 Hz): height range, planar path / mean speed, rotation, yaw."""
+    p, q = ref["object_pos_w"], ref["object_quat_w"][:, [1, 2, 3, 0]]
+    out = dict(frames=[a, b], object_z_m=[float(p[a:b + 1, 2].min()), float(p[a:b + 1, 2].max())], object_initial_z_m=float(p[0, 2]),
+               object_planar_path_m=float(np.linalg.norm(np.diff(p[a:b + 1, :2], axis=0), axis=1).sum()),
+               object_rotation_rad=float(quat_angle_xyzw(q[a], q[b])), object_yaw_rad=[yaw_xyzw(q[a]), yaw_xyzw(q[b])])
+    out["object_planar_speed_mean_m_s"] = out["object_planar_path_m"] / ((b - a) / 50)
+    pel = list(ref["body_names"]).index("pelvis")
+    for r in range(ref["agent_body_pos_w"].shape[1]):
+        pp, pq = ref["agent_body_pos_w"][:, r, pel], ref["agent_body_quat_w"][:, r, pel][:, [1, 2, 3, 0]]
+        path = float(np.linalg.norm(np.diff(pp[a:b + 1, :2], axis=0), axis=1).sum())
+        out[f"robot{r}_pelvis"] = dict(planar_path_m=path, planar_speed_mean_m_s=path / ((b - a) / 50), yaw_rad=[yaw_xyzw(pq[a]), yaw_xyzw(pq[b])])
+    return out
+
+
 def save_csv(path, rows):
     keys = list(dict.fromkeys(k for r in rows for k in r))
     with path.open("w", newline="") as f:
@@ -178,6 +198,7 @@ def main():
                                  horizon_steps=pert[0]["horizon_steps"] if pert else None,
                                  failed_steps_median=statistics.median(steps) if steps else None,
                                  failed_steps_min=min(steps) if steps else None, failed_steps_max=max(steps) if steps else None,
+                                 reference_kinematics_over_failed_steps=json.dumps(reference_kinematics(z, min(steps), max(steps))) if steps else None,
                                  reasons=json.dumps(dict(reasons)), phase_at_termination=json.dumps(dict(ph_term), ensure_ascii=False),
                                  holder_at_termination=json.dumps(dict(hold_term)),
                                  phase_at_divergence=json.dumps({str(k): v for k, v in ph_div.items()}, ensure_ascii=False),
