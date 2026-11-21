@@ -53,6 +53,26 @@ def divergence_step(obj_pos, ref_pos, threshold=0.1):
     return int(idx[0]) if idx.size else None
 
 
+def termination_errors(z):
+    """Object position / orientation error of an evaluator trajectory (scripts/evaluate_paper_supplement.py) at its last saved row,
+    against the reference frame the termination term compared with: the motion command's frame at that row, saved as
+    reward_reference_frame (one control step behind the row's own reference_frame; row k holds reference frame min(k, N-1)).
+    Returns (position error m, orientation error rad, that frame)."""
+    f = int(z["reward_reference_frame"][-1])
+    rows = np.flatnonzero(np.asarray(z["reference_frame"]) == f)
+    if rows.size == 0:
+        raise ValueError(f"reference frame {f} not saved in the trajectory")
+    j = int(rows[0])
+    pe = float(np.linalg.norm(z["object_pos_w"][-1] - z["reference_object_pos_w"][j]))
+    oe = float(quat_angle_xyzw(z["object_quat_xyzw"][-1], z["reference_object_quat_xyzw"][j]))
+    return pe, oe, f
+
+
+def termination_reason(pe, oe, pos_threshold=0.25, ori_threshold=0.8):
+    """joint_bad_tracking's object parts in order; otherwise the robot part (torso tilt, not saved in the trajectory)."""
+    return "object_position" if pe > pos_threshold else "object_orientation" if oe > ori_threshold else "robot_orientation"
+
+
 def segments(labels):
     """[(label, first_frame, last_frame)] runs of equal labels."""
     out = []

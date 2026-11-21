@@ -16,7 +16,7 @@ import numpy as np
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 from system1.t10b.make_validation_states import TEST, key  # noqa: E402
-from system1.t10b.phases import divergence_step, label_frames, segments  # noqa: E402
+from system1.t10b.phases import divergence_step, label_frames, segments, termination_errors, termination_reason  # noqa: E402
 from system1.t10b.pilot_cloud import stop_decision  # noqa: E402
 
 SHA = dict(table="87a716562282bb838e253fa7578c28d9839fba6ac0a981f4f01368f06e50670d",
@@ -49,6 +49,20 @@ def test_phases():
     assert divergence_step(obj, ref, 0.1) == 120 and divergence_step(ref, ref) is None
 
 
+def test_termination_errors():
+    # rows 0..3, row k has reference frame k; the termination at row 3 compared with frame 2 (reward_reference_frame)
+    ref = np.zeros((4, 3))
+    ref[:, 0] = [0.0, 0.1, 0.2, 0.5]
+    obj = ref.copy()
+    obj[3, 0] = 0.48  # 0.28 m from frame 2, 0.02 m from frame 3
+    q = np.tile([0, 0, 0, 1.0], (4, 1))
+    z = dict(object_pos_w=obj, reference_object_pos_w=ref, object_quat_xyzw=q, reference_object_quat_xyzw=q,
+             reference_frame=np.arange(4), reward_reference_frame=np.array([0, 0, 1, 2]))
+    pe, oe, f = termination_errors(z)
+    assert f == 2 and abs(pe - 0.28) < 1e-12 and oe == 0.0 and termination_reason(pe, oe) == "object_position"
+    assert termination_reason(0.1, 0.9) == "object_orientation" and termination_reason(0.25, 0.8) == "robot_orientation"
+
+
 def test_validation_states():
     for task, tests in TEST.items():
         p = ROOT / f"system1/t10b/validation_states/{task}_validation_states.json"
@@ -60,6 +74,6 @@ def test_validation_states():
 
 
 if __name__ == "__main__":
-    for f in (test_stop_rule, test_phases, test_validation_states):
+    for f in (test_stop_rule, test_phases, test_termination_errors, test_validation_states):
         f()
         print("ok", f.__name__)

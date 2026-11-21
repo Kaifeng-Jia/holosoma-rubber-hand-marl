@@ -13,7 +13,8 @@
      without the bootstrap), and the bucket_interaction term's logged parts (Bucket/*: raw reward, ungated, position, orientation,
      height, relative, gate, contact_agent0/1). Per-term values of the other 9 reward terms are not in metrics.jsonl.
 2. Validation episodes (pilot only): termination step, termination reason by the T10b A rule (system1/t10b/package_friction.py:
-   object position error > 0.25 m or orientation error > 0.8 rad at the last saved row, otherwise robot orientation), first step
+   object position error > 0.25 m or orientation error > 0.8 rad at the last saved row against the reference frame the termination
+   compared with, phases.termination_errors; otherwise robot orientation; phase / holder at termination at that frame), first step
    with object error > 0.1 m, the reference phase (system1/t10b/phases.py) at those steps, and which robot holds the object in the
    reference there (reference_contact_weights > 0.5, interaction_vectors_v1.npz). Next to it, the original run's completion count at
    the same iteration from results_system1/T03/train_efficiency/curve_points.csv (cloud RTX 4090, same protocol, but on the frozen
@@ -37,7 +38,7 @@ import numpy as np
 
 ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
-from system1.t10b.phases import NAME_ZH, divergence_step, label_frames, quat_angle_xyzw, segments  # noqa: E402
+from system1.t10b.phases import NAME_ZH, divergence_step, label_frames, quat_angle_xyzw, segments, termination_errors, termination_reason  # noqa: E402
 
 CLOUD_PILOT = "/root/autodl-tmp/system1/logs/t10b_pilot/"
 CLOUD_REPO = "/root/autodl-tmp/system1/duet-system1/"
@@ -169,10 +170,8 @@ def main():
                            steps=e["steps"], horizon_steps=e["horizon_steps"], progress=e["progress"])
                 if not e["completed_reference"]:
                     t = np.load(local_path(e["trajectory"].replace(CLOUD_PILOT, str(a.pilot.resolve()) + "/")))
-                    k = int(t["reference_frame"][-1])
-                    pe = float(np.linalg.norm(t["object_pos_w"][-1] - t["reference_object_pos_w"][-1]))
-                    oe = float(quat_angle_xyzw(t["object_quat_xyzw"][-1], t["reference_object_quat_xyzw"][-1]))
-                    reason = "object_position" if pe > 0.25 else "object_orientation" if oe > 0.8 else "robot_orientation"
+                    pe, oe, k = termination_errors(t)  # k = the reference frame the termination compared with
+                    reason = termination_reason(pe, oe)
                     dv = divergence_step(t["object_pos_w"], t["reference_object_pos_w"], 0.1)
                     dvf = int(t["reference_frame"][dv]) if dv is not None else None
                     row.update(last_reference_frame=k, reason=reason, object_pos_err_last_m=pe, object_ori_err_last_rad=oe,
