@@ -1,0 +1,235 @@
+{
+ "source": "logs_system1/t10b/verify_hand_material",
+ "case": "table",
+ "checkpoint": "/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/model_12000.pt",
+ "checkpoint_sha256": "f163d11a9629edae5dd72732c4ddec08a43024533a47b349a099a3275a8d1c50",
+ "model_id": "t10b_verify_hand_friction_0p5",
+ "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+ "hand_friction_requested": {
+  "static_friction": 0.5,
+  "dynamic_friction": 0.5,
+  "restitution": 0.0,
+  "record": "hand_material.json"
+ },
+ "usd_physics_materials": [
+  {
+   "path": "/physicsScene/defaultMaterial",
+   "static_friction": 1.0,
+   "dynamic_friction": 1.0,
+   "restitution": 0.0,
+   "friction_combine_mode": "average",
+   "restitution_combine_mode": "average"
+  },
+  {
+   "path": "/World/ground/terrain/physicsMaterial",
+   "static_friction": 1.0,
+   "dynamic_friction": 1.0,
+   "restitution": 0.0,
+   "friction_combine_mode": "multiply",
+   "restitution_combine_mode": "multiply"
+  }
+ ],
+ "scene_default_material": "/physicsScene/defaultMaterial",
+ "usd_material_of_hand_object_ground_shapes": [
+  {
+   "path": "/World/envs/env_0/Robot/left_rubber_hand_link/collisions/left_rubber_hand_link/node_STL_BINARY_",
+   "body": "/World/envs/env_0/Robot/left_rubber_hand_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Robot/right_rubber_hand_link/collisions/right_rubber_hand_link/node_STL_BINARY_",
+   "body": "/World/envs/env_0/Robot/right_rubber_hand_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Robot_1/left_rubber_hand_link/collisions/left_rubber_hand_link/node_STL_BINARY_",
+   "body": "/World/envs/env_0/Robot_1/left_rubber_hand_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Robot_1/right_rubber_hand_link/collisions/right_rubber_hand_link/node_STL_BINARY_",
+   "body": "/World/envs/env_0/Robot_1/right_rubber_hand_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Object/desk001_link/collisions/desk001_tabletop/box",
+   "body": "/World/envs/env_0/Object/desk001_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Object/desk001_link/collisions/desk001_vertical_support_negative_z/box",
+   "body": "/World/envs/env_0/Object/desk001_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Object/desk001_link/collisions/desk001_vertical_support_positive_z/box",
+   "body": "/World/envs/env_0/Object/desk001_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Object/desk001_link/collisions/desk001_bottom_foot_negative_z/box",
+   "body": "/World/envs/env_0/Object/desk001_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/envs/env_0/Object/desk001_link/collisions/desk001_bottom_foot_positive_z/box",
+   "body": "/World/envs/env_0/Object/desk001_link",
+   "usd_bound_physics_material": null
+  },
+  {
+   "path": "/World/ground/terrain/GroundPlane/CollisionPlane",
+   "body": null,
+   "usd_bound_physics_material": {
+    "path": "/World/ground/terrain/physicsMaterial",
+    "static_friction": 1.0,
+    "dynamic_friction": 1.0,
+    "restitution": 0.0,
+    "friction_combine_mode": "multiply",
+    "restitution_combine_mode": "multiply"
+   }
+  }
+ ],
+ "physx_material_per_shape": {
+  "robot": {
+   "n_shapes": 38,
+   "shapes_not_1_1_0": {
+    "36": [
+     0.5,
+     0.5,
+     0.0
+    ],
+    "37": [
+     0.5,
+     0.5,
+     0.0
+    ]
+   },
+   "hand_shape_indices": [
+    36,
+    37
+   ]
+  },
+  "robot_1": {
+   "n_shapes": 38,
+   "shapes_not_1_1_0": {
+    "36": [
+     0.5,
+     0.5,
+     0.0
+    ],
+    "37": [
+     0.5,
+     0.5,
+     0.0
+    ]
+   },
+   "hand_shape_indices": [
+    36,
+    37
+   ]
+  },
+  "object": [
+   [
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ]
+  ]
+ },
+ "evaluator_read_back": {
+  "robot": {
+   "changed_bodies": [
+    "left_rubber_hand_link",
+    "right_rubber_hand_link"
+   ],
+   "changed_shape_indices": [
+    36,
+    37
+   ],
+   "before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ],
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "after": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "unchanged_shapes_identical": true
+  },
+  "robot_1": {
+   "changed_bodies": [
+    "left_rubber_hand_link",
+    "right_rubber_hand_link"
+   ],
+   "changed_shape_indices": [
+    36,
+    37
+   ],
+   "before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ],
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "after": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ],
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "unchanged_shapes_identical": true
+  }
+ },
+ "scene_sha256": "21925477a06ecc7d7f8e12fa15abbad1f0b95906f781dee599825b6b86852550",
+ "hand_material_sha256": "e3f66b465c71357c3235ec53bb03566e572bcbdfacae68da011a0115633c898e"
+}

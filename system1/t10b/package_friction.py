@@ -101,6 +101,52 @@ def compare_with_final(d, L, s):
                 git_status_friction=L["git_status"].strip().replace("\n", "; "))
 
 
+def repro_compare(rdir, out):
+    """Each re-run of a friction-1.0 final (same argv + --hand-friction 1.0, current code) against that final, episode by episode:
+    completion, executed steps, object RMSE, and the largest object-position difference between the two trajectories."""
+    out.mkdir(parents=True, exist_ok=True)
+    rows, summ = [], []
+    for d in sorted(p for p in rdir.iterdir() if p.is_dir()):
+        L = json.loads(d.with_name(d.name + ".launch.json").read_text())
+        exf = d.with_name(d.name + ".exit.json")
+        ex = json.loads(exf.read_text()) if exf.exists() else dict(returncode=None)
+        s = json.loads((d / "summary.json").read_text()) if (d / "summary.json").exists() else {}
+        if ex["returncode"] != 0 or not s.get("complete"):
+            summ.append(dict(name=d.name, status="incomplete"))
+            continue
+        src = ROOT / L["source_final_launch"]
+        B = json.loads((src.with_name(src.name[: -len(".launch.json")]) / "summary.json").read_text())
+        hm = json.loads((d / "hand_material.json").read_text())
+        hand_ok = all(r["unchanged_shapes_identical"] and all(r["after"][i] == [1.0, 1.0, 0.0] for i in r["hand_shape_indices"]) for r in hm["per_robot"].values())
+        base = {e["state_id"]: e for e in B["episodes"]}
+        n_same = 0
+        for e in s["episodes"]:
+            b = base[e["state_id"]]
+            za, zb = np.load(e["trajectory"]), np.load(b["trajectory"])
+            n = min(len(za["object_pos_w"]), len(zb["object_pos_w"]))
+            dmax = float(np.abs(za["object_pos_w"][:n] - zb["object_pos_w"][:n]).max())
+            same = e["completed_reference"] == b["completed_reference"] and e["steps"] == b["steps"]
+            n_same += same
+            rows.append(dict(name=d.name, state_id=e["state_id"], is_nominal=e["kind"] == "nominal", completed_final=b["completed_reference"], completed_repro=e["completed_reference"],
+                             steps_final=b["steps"], steps_repro=e["steps"], object_rmse_cm_final=b["object_rmse_3d_m"] * 100, object_rmse_cm_repro=e["object_rmse_3d_m"] * 100,
+                             object_pos_max_abs_diff_m=dmax, same_completion_and_steps=same))
+        pert = [e for e in s["episodes"] if e["kind"] != "nominal"]
+        pb = [e for e in B["episodes"] if e["kind"] != "nominal"]
+        rr = [r for r in rows if r["name"] == d.name]
+        summ.append(dict(name=d.name, status="complete", source_final=L["source_final_launch"], completed_final=sum(e["completed_reference"] for e in pb),
+                         completed_repro=sum(e["completed_reference"] for e in pert), episodes=len(s["episodes"]), same_completion_and_steps=n_same,
+                         object_pos_max_abs_diff_m=max(r["object_pos_max_abs_diff_m"] for r in rr),
+                         episodes_with_object_pos_diff_gt_1mm=sum(r["object_pos_max_abs_diff_m"] > 1e-3 for r in rr),
+                         argv_identical_except_slot_and_run_args=strip_run_args(L["argv"]) == strip_run_args(json.loads(src.read_text())["argv"]),
+                         summary_settings_identical=not sorted(k for k in (set(s) | set(B)) - SETTING_SKIP if s.get(k) != B.get(k)),
+                         hand_material_1p0_read_back_ok=hand_ok, git_head_repro=L["git_head"], git_head_final=json.loads(src.read_text()).get("git_head"),
+                         gpu_final=B.get("gpu_name"), gpu_repro=s.get("gpu_name")))
+        for f in (d.with_name(d.name + ".launch.json"), d.with_name(d.name + ".exit.json"), d / "hand_material.json", d / "run_manifest.json"):
+            (out / f"{d.name}__{f.name.replace(d.name + '.', '')}.gz").write_bytes(gzip.compress(f.read_bytes(), mtime=0))
+    save_csv(out / "episodes_vs_final.csv", rows)
+    save_csv(out / "summary.csv", summ)
+
+
 def verify_record(v):
     """From the scene export (--sim2sim-dump) of the check run: the USD physics materials with their combine modes, the USD-bound
     material of every hand / object shape, the PhysX per-shape material table of both robots and the object (which shapes are not
@@ -129,6 +175,7 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--evals", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--repro", type=Path, default=None, help="re-runs of finals with --hand-friction 1.0 (run_friction.py --levels 1.0): writes repro_hand_1p0/")
     ap.add_argument("--verify", type=Path, default=None, help="the --sim2sim-dump check run (D Table 721, nominal, hand friction 0.5): writes hand_material_check.json")
     a = ap.parse_args()
     out = a.out.resolve()
@@ -239,6 +286,8 @@ def main():
                          apart_step_max=max(kx) if kx else None, phase_at_apart_counts=json.dumps(dict(sorted(pa.items(), key=lambda x: -x[1])))))
     save_csv(out / "divergence_summary.csv", dsum)
     save_csv(out / "configs" / "launch_vs_final.csv", cmp_rows)
+    if a.repro is not None:
+        repro_compare(a.repro.resolve(), out / "repro_hand_1p0")
     if a.verify is not None:
         (out / "hand_material_check.json").write_text(json.dumps(verify_record(a.verify.resolve()), indent=1) + "\n")
     (out / "provenance.json").write_text(json.dumps(dict(missing=missing, n_evaluations=len(per), n_episodes=len(eps),
