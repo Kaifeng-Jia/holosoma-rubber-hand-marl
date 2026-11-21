@@ -15,7 +15,9 @@
 2. Validation episodes (pilot only): termination step, termination reason by the T10b A rule (system1/t10b/package_friction.py:
    object position error > 0.25 m or orientation error > 0.8 rad at the last saved row, otherwise robot orientation), first step
    with object error > 0.1 m, the reference phase (system1/t10b/phases.py) at those steps, and which robot holds the object in the
-   reference there (reference_contact_weights > 0.5, interaction_vectors_v1.npz).
+   reference there (reference_contact_weights > 0.5, interaction_vectors_v1.npz). Next to it, the original run's completion count at
+   the same iteration from results_system1/T03/train_efficiency/curve_points.csv (cloud RTX 4090, same protocol, but on the frozen
+   +/-2 TEST states, not the validation states); the original checkpoint's sha256 is checked against that row.
 
     hssim_s1/bin/python -B system1/t10b/pilot_report.py --pilot logs_system1/t10b/pilot_cloud_mirror --iterations 2000,4000 \
         --out logs_system1/t10b/pilot_report
@@ -41,11 +43,12 @@ CLOUD_PILOT = "/root/autodl-tmp/system1/logs/t10b_pilot/"
 CLOUD_REPO = "/root/autodl-tmp/system1/duet-system1/"
 RUNS = {
     "d_table_seed721_rand": dict(
-        label="D Table 721", original="/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/"
+        label="D Table 721", curve_run="D_table_paper_T-07_seed721", original="/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/"
         "A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/metrics.jsonl"),
     "cin_bucket_seed721_rand": dict(
-        label="C-in Bin 721", original=str(ROOT / "exports_system1/cloud_sync/logs/train/cin_bucket_m1kg_seed721_fresh12000/metrics.jsonl")),
+        label="C-in Bin 721", curve_run="cin_bucket_m1kg_seed721_fresh12000", original=str(ROOT / "exports_system1/cloud_sync/logs/train/cin_bucket_m1kg_seed721_fresh12000/metrics.jsonl")),
 }
+CURVE = ROOT / "results_system1/T03/train_efficiency/curve_points.csv"  # original runs' checkpoint curve (frozen +/-2 TEST states)
 BUCKET = ["raw_reward", "raw_ungated", "position", "orientation", "height", "relative", "gate", "contact_agent0", "contact_agent1"]
 
 
@@ -162,6 +165,9 @@ def main():
                         ph_div[row["phase_at_divergence"]] += 1
                         steps.append(e["steps"])
                 ep_rows.append(row)
+            orig_ck = Path(info["original"]).with_name(f"model_{it:05d}.pt")
+            cr = [r for r in csv.DictReader(CURVE.open()) if r["run"] == info["curve_run"] and int(r["iteration"]) == it]
+            assert len(cr) == 1 and cr[0]["checkpoint_sha256"] == sha(orig_ck), (name, it)
             pert = [e for e in s["episodes"] if e["kind"] != "nominal"]
             nom = [e for e in s["episodes"] if e["kind"] == "nominal"]
             val_rows.append(dict(run=info["label"], iteration=it, completed=sum(e["completed_reference"] for e in pert), perturbed=len(pert),
@@ -172,13 +178,16 @@ def main():
                                  reasons=json.dumps(dict(reasons)), phase_at_termination=json.dumps(dict(ph_term), ensure_ascii=False),
                                  holder_at_termination=json.dumps(dict(hold_term)),
                                  phase_at_divergence=json.dumps({str(k): v for k, v in ph_div.items()}, ensure_ascii=False),
-                                 checkpoint_sha256=json.loads((summ.parent / "run_manifest.json").read_text()).get("checkpoint_sha256")))
+                                 checkpoint_sha256=json.loads((summ.parent / "run_manifest.json").read_text()).get("checkpoint_sha256"),
+                                 validation_states_sha256=json.loads((summ.parent / "run_manifest.json").read_text()).get("states_sha256"),
+                                 original_completed_on_test_states=int(cr[0]["n_completed"]), original_checkpoint_sha256=cr[0]["checkpoint_sha256"],
+                                 original_test_states_sha256=cr[0]["states_sha256"], original_eval_dir=cr[0]["eval_dir"]))
     save_csv(a.out / "training_side_by_side.csv", train_rows)
     save_csv(a.out / "validation_summary.csv", val_rows)
     save_csv(a.out / "validation_episodes.csv", ep_rows)
     (a.out / "references.json").write_text(json.dumps(refs, ensure_ascii=False, indent=1) + "\n")
     (a.out / "provenance.json").write_text(json.dumps(dict(
-        script_sha256=sha(__file__), window=a.window, iterations=its,
+        script_sha256=sha(__file__), window=a.window, iterations=its, curve_points_csv_sha256=sha(CURVE),
         metrics_sha256={str(p): sha(p) for n, i in RUNS.items() for p in (a.pilot / n / "train/metrics.jsonl", Path(i["original"]))}),
         indent=1) + "\n")
     for r in val_rows:
