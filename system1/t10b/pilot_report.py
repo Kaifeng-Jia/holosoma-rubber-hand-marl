@@ -157,7 +157,10 @@ def main():
                     dvf = int(t["reference_frame"][dv]) if dv is not None else None
                     row.update(last_reference_frame=k, reason=reason, object_pos_err_last_m=pe, object_ori_err_last_rad=oe,
                                phase_at_termination=labels[min(k, len(labels) - 1)], holder_at_termination=holder(cw[min(k, len(cw) - 1)]),
-                               object_divergence_step_0p1m=dv, phase_at_divergence=labels[min(dvf, len(labels) - 1)] if dvf is not None else None)
+                               object_divergence_step_0p1m=dv, phase_at_divergence=labels[min(dvf, len(labels) - 1)] if dvf is not None else None,
+                               object_dz_at_divergence_m=float(t["object_pos_w"][dv, 2] - t["reference_object_pos_w"][dv, 2]) if dv is not None else None,
+                               object_dxy_at_divergence_m=float(np.linalg.norm(t["object_pos_w"][dv, :2] - t["reference_object_pos_w"][dv, :2])) if dv is not None else None,
+                               object_z_last_m=float(t["object_pos_w"][-1, 2]), reference_object_z_last_m=float(t["reference_object_pos_w"][-1, 2]))
                     if e["kind"] != "nominal":
                         reasons[reason] += 1
                         ph_term[row["phase_at_termination"]] += 1
