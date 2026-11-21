@@ -1,0 +1,1025 @@
+{
+ "meta": {
+  "argv": [
+   "system1/t10b/combine_mode_test.py",
+   "--out",
+   "logs_system1/t10b/combine_mode_test",
+   "--device",
+   "cuda:0"
+  ],
+  "started": "2026-11-21T14:41:55-0500",
+  "git_head": "23957c30cd54264e601a1182bd7e059906ecdf20",
+  "git_dirty": "?? system1/t10b/combine_mode_test.py\n?? system1/t10b/test_combine_mode_test.py",
+  "script_sha256": "62b2977e9fa43c9d62697a1eb24ae96ee9d8a75c0af1e32c32091055515e6a22",
+  "device": "cuda:0",
+  "gpu": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "isaac_sim_version": "5.1.0.rc.19.5",
+  "dt": 0.005,
+  "g": 9.81,
+  "plate_size_m": [
+   3.0,
+   1.0,
+   0.05
+  ],
+  "box_size_m": [
+   0.3,
+   0.3,
+   0.1
+  ],
+  "box_mass_kg": 1.0,
+  "plate_top_m": 0.3,
+  "settle_steps": 100,
+  "slide_steps": 400,
+  "start_x": -1.3,
+  "scene": {
+   "default_material": {
+    "static": 1.0,
+    "dynamic": 1.0,
+    "combine": "average"
+   },
+   "ground": {
+    "static": 1.0,
+    "dynamic": 1.0,
+    "combine": "multiply"
+   },
+   "solver": "TGS",
+   "articulation_iters": [
+    8,
+    4
+   ],
+   "rigid_body_iters": [
+    16,
+    1
+   ],
+   "bounce_threshold": 0.5,
+   "friction_offset_threshold": 0.04,
+   "friction_correlation_distance": 0.025,
+   "enable_stabilization": false,
+   "enable_ccd": false
+  },
+  "view_prim_order": [
+   "C00",
+   "C01",
+   "C02",
+   "C03",
+   "C04",
+   "C05",
+   "C06",
+   "C07",
+   "C08",
+   "C09",
+   "C10",
+   "C11",
+   "C12",
+   "C13",
+   "C14",
+   "C15"
+  ]
+ },
+ "rows": [
+  {
+   "condition": 0,
+   "kind": "tensor_api",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.749999017009828,
+   "fit_first_step": 3,
+   "fit_last_step": 23,
+   "fit_n": 21,
+   "fit_rms_residual_m_s": 5.477962050583219e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 9.829901720381784e-07,
+   "abs_err_min": 0.24999901700982796,
+   "abs_err_multiply": 0.24999901700982796,
+   "abs_err_max": 0.25000098299017204,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022992742015048862,
+   "box_travel_m": 0.06547634601593022,
+   "plate_root_pos_w": [
+    0.0,
+    0.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 1,
+   "kind": "tensor_api",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.7500010599576947,
+   "fit_first_step": 3,
+   "fit_last_step": 47,
+   "fit_n": 45,
+   "fit_rms_residual_m_s": 9.945750119582076e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 1.0599576947267764e-06,
+   "abs_err_min": 0.2500010599576947,
+   "abs_err_multiply": 0.2500010599576947,
+   "abs_err_max": 0.24999894004230527,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.0003360513364896178,
+   "box_travel_m": 0.26685552597045903,
+   "plate_root_pos_w": [
+    0.0,
+    2.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 2,
+   "kind": "tensor_api",
+   "hand_friction": 0.75,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.75,
+     0.75,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.625000045117502,
+   "fit_first_step": 3,
+   "fit_last_step": 28,
+   "fit_n": 26,
+   "fit_rms_residual_m_s": 8.014559776421081e-08,
+   "mu_pred_average": 0.625,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.375,
+   "mu_pred_max": 0.75,
+   "abs_err_average": 4.511750195668185e-08,
+   "abs_err_min": 0.12500004511750196,
+   "abs_err_multiply": 0.25000004511750196,
+   "abs_err_max": 0.12499995488249804,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.0003290996828582138,
+   "box_travel_m": 0.0790690660476685,
+   "plate_root_pos_w": [
+    0.0,
+    4.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 3,
+   "kind": "tensor_api",
+   "hand_friction": 0.75,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.75,
+     0.75,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.625002278304568,
+   "fit_first_step": 3,
+   "fit_last_step": 57,
+   "fit_n": 55,
+   "fit_rms_residual_m_s": 8.89414039561583e-07,
+   "mu_pred_average": 0.625,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.375,
+   "mu_pred_max": 0.75,
+   "abs_err_average": 2.2783045680041525e-06,
+   "abs_err_min": 0.125002278304568,
+   "abs_err_multiply": 0.250002278304568,
+   "abs_err_max": 0.124997721695432,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.0002650179958436638,
+   "box_travel_m": 0.3212139487266541,
+   "plate_root_pos_w": [
+    0.0,
+    6.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 4,
+   "kind": "tensor_api",
+   "hand_friction": 0.5,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.49999950920775105,
+   "fit_first_step": 3,
+   "fit_last_step": 35,
+   "fit_n": 33,
+   "fit_rms_residual_m_s": 1.300839831383876e-07,
+   "mu_pred_average": 0.5,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.25,
+   "mu_pred_max": 0.5,
+   "abs_err_average": 4.90792248952765e-07,
+   "abs_err_min": 4.90792248952765e-07,
+   "abs_err_multiply": 0.24999950920775105,
+   "abs_err_max": 4.90792248952765e-07,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022842641919851303,
+   "box_travel_m": 0.09944837093353276,
+   "plate_root_pos_w": [
+    0.0,
+    8.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 5,
+   "kind": "tensor_api",
+   "hand_friction": 0.5,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.4999980153397678,
+   "fit_first_step": 3,
+   "fit_last_step": 72,
+   "fit_n": 70,
+   "fit_rms_residual_m_s": 8.874795441342101e-07,
+   "mu_pred_average": 0.5,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.25,
+   "mu_pred_max": 0.5,
+   "abs_err_average": 1.984660232212665e-06,
+   "abs_err_min": 1.984660232212665e-06,
+   "abs_err_multiply": 0.2499980153397678,
+   "abs_err_max": 1.984660232212665e-06,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022596748021896929,
+   "box_travel_m": 0.4027656197547913,
+   "plate_root_pos_w": [
+    0.0,
+    10.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 6,
+   "kind": "tensor_api",
+   "hand_friction": 0.25,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.25,
+     0.25,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.37500011423152896,
+   "fit_first_step": 3,
+   "fit_last_step": 47,
+   "fit_n": 45,
+   "fit_rms_residual_m_s": 1.6512485197714801e-07,
+   "mu_pred_average": 0.375,
+   "mu_pred_min": 0.25,
+   "mu_pred_multiply": 0.125,
+   "mu_pred_max": 0.5,
+   "abs_err_average": 1.1423152895817523e-07,
+   "abs_err_min": 0.12500011423152896,
+   "abs_err_multiply": 0.25000011423152896,
+   "abs_err_max": 0.12499988576847104,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00026749662356451154,
+   "box_travel_m": 0.133427906036377,
+   "plate_root_pos_w": [
+    0.0,
+    12.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 7,
+   "kind": "tensor_api",
+   "hand_friction": 0.25,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": null,
+   "hand_material_read_back": [
+    [
+     0.25,
+     0.25,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.37499868326788144,
+   "fit_first_step": 3,
+   "fit_last_step": 96,
+   "fit_n": 94,
+   "fit_rms_residual_m_s": 9.987104735053067e-07,
+   "mu_pred_average": 0.375,
+   "mu_pred_min": 0.25,
+   "mu_pred_multiply": 0.125,
+   "mu_pred_max": 0.5,
+   "abs_err_average": 1.3167321185614256e-06,
+   "abs_err_min": 0.12499868326788144,
+   "abs_err_multiply": 0.24999868326788144,
+   "abs_err_max": 0.12500131673211856,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00023192091612145305,
+   "box_travel_m": 0.538675594329834,
+   "plate_root_pos_w": [
+    0.0,
+    14.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 8,
+   "kind": "usd_bound_average",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": "average",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.7499992667532661,
+   "fit_first_step": 3,
+   "fit_last_step": 23,
+   "fit_n": 21,
+   "fit_rms_residual_m_s": 5.588869167785409e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 7.332467338860837e-07,
+   "abs_err_min": 0.24999926675326611,
+   "abs_err_multiply": 0.24999926675326611,
+   "abs_err_max": 0.2500007332467339,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.0002614730619825423,
+   "box_travel_m": 0.06547610759735112,
+   "plate_root_pos_w": [
+    0.0,
+    16.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 9,
+   "kind": "usd_bound_average",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": "average",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.750000999198628,
+   "fit_first_step": 3,
+   "fit_last_step": 47,
+   "fit_n": 45,
+   "fit_rms_residual_m_s": 7.641086139459445e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 9.991986279489495e-07,
+   "abs_err_min": 0.25000099919862795,
+   "abs_err_multiply": 0.25000099919862795,
+   "abs_err_max": 0.24999900080137205,
+   "closest_mode": "average",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022697668464388698,
+   "box_travel_m": 0.26685552597045903,
+   "plate_root_pos_w": [
+    0.0,
+    18.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 10,
+   "kind": "usd_bound_min",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": "min",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.5000000503939596,
+   "fit_first_step": 3,
+   "fit_last_step": 35,
+   "fit_n": 33,
+   "fit_rms_residual_m_s": 1.1643002303631002e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.24999994960604044,
+   "abs_err_min": 5.0393959560857127e-08,
+   "abs_err_multiply": 5.0393959560857127e-08,
+   "abs_err_max": 0.49999994960604044,
+   "closest_mode": "min",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022684602299705148,
+   "box_travel_m": 0.09944837093353276,
+   "plate_root_pos_w": [
+    0.0,
+    20.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 11,
+   "kind": "usd_bound_min",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": "min",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.499997985074513,
+   "fit_first_step": 3,
+   "fit_last_step": 72,
+   "fit_n": 70,
+   "fit_rms_residual_m_s": 9.638490261932492e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.250002014925487,
+   "abs_err_min": 2.0149254870149846e-06,
+   "abs_err_multiply": 2.0149254870149846e-06,
+   "abs_err_max": 0.500002014925487,
+   "closest_mode": "min",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022888698731549084,
+   "box_travel_m": 0.40276597738265996,
+   "plate_root_pos_w": [
+    0.0,
+    22.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 12,
+   "kind": "usd_bound_multiply",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": "multiply",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.5000000503939596,
+   "fit_first_step": 3,
+   "fit_last_step": 35,
+   "fit_n": 33,
+   "fit_rms_residual_m_s": 1.1643002303631002e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.24999994960604044,
+   "abs_err_min": 5.0393959560857127e-08,
+   "abs_err_multiply": 5.0393959560857127e-08,
+   "abs_err_max": 0.49999994960604044,
+   "closest_mode": "min",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022684602299705148,
+   "box_travel_m": 0.09944837093353276,
+   "plate_root_pos_w": [
+    0.0,
+    24.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 13,
+   "kind": "usd_bound_multiply",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": "multiply",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 0.499997985074513,
+   "fit_first_step": 3,
+   "fit_last_step": 72,
+   "fit_n": 70,
+   "fit_rms_residual_m_s": 9.638490261932492e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.250002014925487,
+   "abs_err_min": 2.0149254870149846e-06,
+   "abs_err_multiply": 2.0149254870149846e-06,
+   "abs_err_max": 0.500002014925487,
+   "closest_mode": "min",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00022888698731549084,
+   "box_travel_m": 0.40276597738265996,
+   "plate_root_pos_w": [
+    0.0,
+    26.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 14,
+   "kind": "usd_bound_max",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 1.0,
+   "usd_combine": "max",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 1.0000002303680031,
+   "fit_first_step": 3,
+   "fit_last_step": 17,
+   "fit_n": 15,
+   "fit_rms_residual_m_s": 4.285078157194175e-06,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.2500002303680031,
+   "abs_err_min": 0.5000002303680031,
+   "abs_err_multiply": 0.5000002303680031,
+   "abs_err_max": 2.3036800311793115e-07,
+   "closest_mode": "max",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.0002628083748277277,
+   "box_travel_m": 0.04850118160247807,
+   "plate_root_pos_w": [
+    0.0,
+    28.0,
+    0.2750000059604645
+   ]
+  },
+  {
+   "condition": 15,
+   "kind": "usd_bound_max",
+   "hand_friction": 1.0,
+   "object_friction": 0.5,
+   "speed": 2.0,
+   "usd_combine": "max",
+   "hand_material_read_back": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_read_back": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "hand_material_before": [
+    [
+     1.0,
+     1.0,
+     0.0
+    ]
+   ],
+   "object_material_before": [
+    [
+     0.5,
+     0.5,
+     0.0
+    ]
+   ],
+   "mu_measured": 1.0000003838699363,
+   "fit_first_step": 3,
+   "fit_last_step": 35,
+   "fit_n": 33,
+   "fit_rms_residual_m_s": 9.07028222663922e-07,
+   "mu_pred_average": 0.75,
+   "mu_pred_min": 0.5,
+   "mu_pred_multiply": 0.5,
+   "mu_pred_max": 1.0,
+   "abs_err_average": 0.2500003838699363,
+   "abs_err_min": 0.5000003838699363,
+   "abs_err_multiply": 0.5000003838699363,
+   "abs_err_max": 3.838699362823661e-07,
+   "closest_mode": "max",
+   "box_z_settled_m": 0.3499999940395355,
+   "box_z_range_while_sliding_m": 2.9802322387695312e-08,
+   "box_max_abs_pitch_rate_rad_s": 0.00030233347206376493,
+   "box_travel_m": 0.19889645576477055,
+   "plate_root_pos_w": [
+    0.0,
+    30.0,
+    0.2750000059604645
+   ]
+  }
+ ]
+}

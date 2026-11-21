@@ -32,16 +32,59 @@
   - 改后的值等于设定值。
   - 54 组全部通过，见 `per_seed_summary.csv` 的 `hand_shapes_only_changed` 列。
 
-**组合方式：只核对到一部分。**
+**组合方式：从导出里读不到，另做了实测，结果是 `average`。**
 - 导出的 USD 场景里只有两个物理材质：
   - `/physicsScene/defaultMaterial`：1.0 / 1.0，摩擦组合方式 `average`；它是场景默认材质。
   - 地面 `/World/ground/terrain/physicsMaterial`：1.0 / 1.0，组合方式 `multiply`。
 - 手和物体的碰撞体都没有绑定 USD 物理材质。
   - 它们的摩擦值是用 PhysX tensor API 写进去的：物体由 holosoma 写，手由本次的 `--hand-friction` 写。
   - 这一层材质的组合方式不在 USD 里，导出里读不到。
-- 表里"手和物体之间的实际摩擦"按 `average` 组合算：0.625 和 0.5。前提是 tensor API 写入的材质用 PhysX 默认的 `average`，这个前提没有从导出里直接读到。
-  - T10 的 MuJoCo 场景也是按同一个前提设的：机器人对物体 0.75。
-  - `episodes.csv` 和 `per_seed_summary.csv` 的 `hand_object_friction` 列也是按这个前提算的。
+- 所以另做了实测（Kevin 2026-11-21 同意，用本机 5070），见下面"组合方式实测"。实测得到的手对物体摩擦，和按 `average` 算的值一致：手 1.0、0.75、0.5 时分别是 0.75、0.625、0.5。
+  - 表里"手和物体之间的实际摩擦"就是按 `average` 算的。
+  - `episodes.csv` 和 `per_seed_summary.csv` 的 `hand_object_friction` 列也是按 `average` 算的。
+  - T10 的 MuJoCo 场景同样按 `average` 设：机器人对物体 0.75。
+
+**组合方式实测（`combine_mode_test/`）**
+
+- **场景：** 一个最小场景，不是评测场景。写材质的两条路径和评测相同：
+  - "手"：一个固定底座、只有一个连杆的关节体，是一块平板，没有绑定 USD 材质。摩擦用 `Articulation.root_physx_view.set_material_properties` 写，和 `system1/t10b/hand_material.py` 相同。
+  - "物体"：一个放在平板上的 `RigidObject` 扁盒（0.3 × 0.3 × 0.1 m，1 kg），也没有绑定 USD 材质。摩擦用 `RigidObject.root_physx_view.set_material_properties` 写，和 holosoma 的 `set_object_rigid_body_material_startup` 相同。
+  - 写入顺序和评测一样：先写物体，再写手。写完都读回核对过。
+- **场景级物理设置：** 按上面导出的 `scene.json` 设：
+  - dt 1/200，TGS，场景默认材质 1.0 / 1.0 `average`，地面 1.0 / 1.0 `multiply`，重力 9.81；
+  - bounce threshold 0.5，friction offset threshold 0.04，friction correlation distance 0.025，不开 stabilization 和 CCD；
+  - 关节体求解迭代 8 / 4，刚体 16 / 1，GPU PhysX。
+- **测法：**
+  - 盒子在平板上静置 100 步，然后给它一个水平初速度，1.0 或 2.0 m/s。
+  - 对滑动段的速度做直线拟合，从推后第 3 步起，到速度降到初速度 10% 为止。
+  - 摩擦 = −加速度 / g。静、动摩擦设成相等，所以测到的是组合后的动摩擦。
+- **对照组：** 平板和盒子都绑定 USD 材质，组合方式已知（average、min、multiply、max），不用 tensor API 写。手 0.75、物体 0.5，四种方式的预测值都不同：0.625、0.5、0.375、0.75。
+- **结果：** 物体 0.5；每个值都有两个初速度。
+
+| 组 | 手 | 实测摩擦（初速度 1.0 / 2.0 m/s） | average | min | multiply | max | 最接近 |
+|---|---|---|---|---|---|---|---|
+| tensor API | 1.0 | 0.7500 / 0.7500 | 0.75 | 0.5 | 0.5 | 1.0 | average |
+| tensor API | 0.75 | 0.6250 / 0.6250 | 0.625 | 0.5 | 0.375 | 0.75 | average |
+| tensor API | 0.5 | 0.5000 / 0.5000 | 0.5 | 0.5 | 0.25 | 0.5 | average、min、max 相同，排除 multiply |
+| tensor API | 0.25 | 0.3750 / 0.3750 | 0.375 | 0.25 | 0.125 | 0.5 | average |
+| USD 绑定 average | 0.75 | 0.6250 / 0.6250 | 0.625 | 0.5 | 0.375 | 0.75 | average |
+| USD 绑定 min | 0.75 | 0.5000 / 0.5000 | 0.625 | 0.5 | 0.375 | 0.75 | min |
+| USD 绑定 multiply | 0.75 | 0.3750 / 0.3750 | 0.625 | 0.5 | 0.375 | 0.75 | multiply |
+| USD 绑定 max | 0.75 | 0.7500 / 0.7500 | 0.625 | 0.5 | 0.375 | 0.75 | max |
+
+- **误差：**
+  - tensor API 的 8 次，实测和 `average` 预测最多差 2.3e-6；离 `multiply` 预测最近的一次也差 0.25。
+  - 拟合残差都在 1e-6 m/s 以内。
+  - 盒子滑动时高度不变，没有翻转。
+- **运行：**
+  - 2026-11-21 14:52 在本机 5070 上跑，代码 `23957c3`，`combine_mode_test.py` 当时未提交，sha256 `9b90c519…cd0e`。
+  - Isaac Sim 5.1.0，命令记在 `results.json` 的 `meta.argv`。
+- **之前的两次：**
+  - 第 1 次：单连杆关节体没有关节，Isaac Lab 默认的关节初始值匹配不上，在 `sim.reset()` 报错退出，没有结果。
+  - 第 2 次：测完了，但对照组用的是手 1.0、物体 0.5，`min` 和 `multiply` 的预测都是 0.5，区分不开；跑完后进程卡在 `app.close()`，我按记下的进程号停掉了它。
+    - 这次 tensor API 8 组的实测和第 3 次相同。
+    - 它的结果在 `combine_mode_test/try2_controls_hand1p0_results.json`。
+  - 第 3 次把对照组改成手 0.75，写完结果直接退出，就是上表。
 
 ## 1. 完成数（50 个 ±2 扰动回合，nominal 不计入）
 
@@ -183,7 +226,7 @@ nominal 完成的种子数（共 3 个），依次为 1.0 / 0.75 / 0.5：
   - 半截输出已移到 `_to_delete/t10b_friction_cin_table_seed721_hf075_aborted_20261120/`。
   - 2026-11-21 00:29 用同一命令补跑（`run_friction.py --only`，提交 `97627d8`）：参数和输出名都一样，只有 CPU 槽位不同。01:09 跑完，退出码 0。
 - **终止原因规则：** 第 2 节的对齐方式比本脚本最初的写法晚一帧，见第 2 节。
-- **组合方式：** 只核对到一部分，见第 0 节。
+- **组合方式：** 导出里读不到，另做了实测（不在任务书里，Kevin 2026-11-21 同意），结果是 `average`，见第 0 节。
 - **复现检查（不在任务书里）：** 用现在的代码（`8a90575`）、`--hand-friction 1.0` 重跑两组最终评测，D Table 721 和 C-in Bin 721，看能否复现原来的完成数。
   - 在 5070 上跑，2026-11-21 04:08 开始，05:21 跑完，两组退出码都是 0。原最终评测也在 5070 上跑。
   - 结果在 `repro_hand_1p0/`：
@@ -207,6 +250,7 @@ nominal 完成的种子数（共 3 个），依次为 1.0 / 0.75 / 0.5：
 | `hand_material_check.json` | 第 0 节的核对：USD 物理材质和组合方式、手、物体、地面碰撞体绑定的材质、PhysX 逐碰撞体材质表、评测器读回 |
 | `configs/` | 每组的 launch / exit 记录、`hand_material.json`、`run_manifest.json`（gzip）；`launch_vs_final.csv` |
 | `provenance.json` | 缺失组（无）、组数、回合数、1.0 的来源 |
+| `combine_mode_test/` | 第 0 节的组合方式实测：`results.csv`（每个条件一行），`results.json`（含运行记录 `meta`），`traces.npz`（盒子逐步的速度、位置），`stdout.log.gz`，以及第 2 次的 `try2_controls_hand1p0_results.json` |
 | `repro_hand_1p0/` | 第 5 节的复现检查：`summary.csv`（每组一行），`episodes_vs_final.csv`（逐回合和原最终评测并排），以及 launch / exit / `hand_material.json` / `run_manifest.json`（gzip） |
 | `SHA256SUMS` | 本目录（不含 `retrain/`）所有文件的校验和 |
 
