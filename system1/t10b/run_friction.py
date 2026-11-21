@@ -42,14 +42,14 @@ def final_launch(scheme, task, seed):
     return d.with_name(d.name + ".launch.json")
 
 
-def jobs():
+def jobs(levels=LEVELS):
     out = []
     for task in ORDER:
         for scheme in ("D", "C-in"):
             if scheme == "C-in" and task not in ("pull", "table", "bucket"):
                 continue
             for seed in (721, 722, 723):
-                for f in LEVELS:
+                for f in levels:
                     out.append((task, scheme, seed, f))
     return out
 
@@ -62,13 +62,15 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--only", default="", help="comma-separated run names to (re)run, e.g. cin_table_seed721_hf075 (default: all)")
+    ap.add_argument("--levels", default="", help="comma-separated hand frictions instead of 0.75,0.5 (e.g. 1.0 for the reproducibility check of the finals; default: unchanged)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     ctl = a.out / "slots.txt"
     if not ctl.exists():
         ctl.write_text("1\n")
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
-    todo = [j for j in jobs() if not a.only or run_name(*j) in a.only.split(",")]
+    levels = tuple(float(x) for x in a.levels.split(",")) if a.levels else LEVELS
+    todo = [j for j in jobs(levels) if not a.only or run_name(*j) in a.only.split(",")]
     if a.only:
         assert len(todo) == len(a.only.split(",")), (a.only, todo)
     running = {}
