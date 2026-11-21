@@ -1,0 +1,28 @@
+{
+ "pilot_export": "logs_system1/t10b/finals/cin_bucket_seed721_rand_dump/dump",
+ "original_export": "logs_system1/t10/isaac/cin_bucket/dump",
+ "differences": [
+  {
+   "path": "/extra/checkpoint",
+   "diff": "value",
+   "pilot": "\"/home/kevin/duet-system1/exports_system1/t10b_pilot/cin_bucket_seed721_rand/model_12000.pt\"",
+   "original": "\"/home/kevin/duet-system1/exports_system1/train/cin_bucket_m1kg_seed721_fresh12000/model_12000.pt\""
+  },
+  {
+   "path": "/physics_materials",
+   "diff": "only in the pilot export"
+  },
+  {
+   "path": "/runtime_reference",
+   "diff": "only in the pilot export"
+  },
+  {
+   "path": "/scene_default_material",
+   "diff": "only in the pilot export"
+  }
+ ],
+ "collision_convexes_same_keys": true,
+ "collision_convexes_all_equal": true,
+ "pilot_scene_json_sha256": "a8237cb1606d361138eba4acc96362545208df497ae47b51b2fa228caeebd460",
+ "original_scene_json_sha256": "11f2e971507bd62f4b31c2a20bca6f6403b430166a63a5fd6040e7df9bfbf333"
+}
