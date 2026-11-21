@@ -54,16 +54,23 @@ def jobs():
     return out
 
 
+def run_name(task, scheme, seed, f):
+    return f"{scheme.replace('-', '').lower()}_{task}_seed{seed}_hf{int(round(f * 100)):03d}"
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--only", default="", help="comma-separated run names to (re)run, e.g. cin_table_seed721_hf075 (default: all)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     ctl = a.out / "slots.txt"
     if not ctl.exists():
         ctl.write_text("1\n")
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
-    todo = jobs()
+    todo = [j for j in jobs() if not a.only or run_name(*j) in a.only.split(",")]
+    if a.only:
+        assert len(todo) == len(a.only.split(",")), (a.only, todo)
     running = {}
     while todo or running:
         n = max(1, min(2, int(ctl.read_text().strip() or 1)))
@@ -71,7 +78,7 @@ def main():
             if slot in running or not todo:
                 continue
             task, scheme, seed, f = todo.pop(0)
-            name = f"{scheme.replace('-', '').lower()}_{task}_seed{seed}_hf{int(round(f * 100)):03d}"
+            name = run_name(task, scheme, seed, f)
             src = final_launch(scheme, task, seed)
             argv = list(json.loads(src.read_text())["argv"])
             if argv[0] == "taskset":
