@@ -75,10 +75,19 @@ def algo_config(task):
     return g1_29dof_core4d_smalltable_smoke.algo.config
 
 
-def actors(onnx_dir, rows_out, tasks=("table", "bucket")):
+def extra_checkpoints(specs):
+    """--extra-checkpoint SCHEME,TASK,SEED,NAME,PATH (T10b: a pilot's final checkpoint); NAME is the ONNX file stem."""
+    out = []
+    for s in specs:
+        scheme, task, seed, name, path = s.split(",")
+        out.append(dict(scheme=scheme, task=task, seed=int(seed), name=name, checkpoint=str(Path(path).resolve()), checkpoint_sha256=sha(path)))
+    return out
+
+
+def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
     import onnxruntime as ort
     from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
-    for c in checkpoints(tasks):
+    for c in (checkpoints(tasks) if cks is None else cks):
         m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
         ck = torch.load(c["checkpoint"], map_location="cpu", weights_only=False)
         m.actor.load_state_dict(ck["actor_model_state_dict"], strict=True)
@@ -86,7 +95,7 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket")):
         m.actor.eval()
         m.actor_obs_normalizer.eval()
         wrap = ActorOnnx(m.actor, m.actor_obs_normalizer).eval()
-        name = f"{c['scheme'].replace('-', '').lower()}_{c['task']}_seed{c['seed']}"
+        name = c.get("name") or f"{c['scheme'].replace('-', '').lower()}_{c['task']}_seed{c['seed']}"
         path = Path(onnx_dir) / f"{name}.onnx"
         path.parent.mkdir(parents=True, exist_ok=True)
         torch.onnx.export(wrap, torch.zeros(1, 158), str(path), input_names=["obs"], output_names=["action"],
@@ -156,13 +165,18 @@ def main():
     ap.add_argument("--sonic-ref", default="logs_system1/t10/onnx/sonic_torch_ref_random.npz")
     ap.add_argument("--skip-actors", action="store_true")
     ap.add_argument("--tasks", default="table,bucket")
+    ap.add_argument("--extra-checkpoint", action="append", default=[],
+                    help="SCHEME,TASK,SEED,NAME,PATH: export and check only these actors (no SONIC check, no default list); off = unchanged")
     a = ap.parse_args()
     torch.set_num_threads(4)
     rows = []
-    for p in [x for x in a.sonic_ref.split(",") if x]:
-        sonic(ROOT / p, rows, Path(p).stem)
-    if not a.skip_actors:
-        actors(a.onnx_dir, rows, tuple(a.tasks.split(",")))
+    if a.extra_checkpoint:
+        actors(a.onnx_dir, rows, cks=extra_checkpoints(a.extra_checkpoint))
+    else:
+        for p in [x for x in a.sonic_ref.split(",") if x]:
+            sonic(ROOT / p, rows, Path(p).stem)
+        if not a.skip_actors:
+            actors(a.onnx_dir, rows, tuple(a.tasks.split(",")))
     a.out.mkdir(parents=True, exist_ok=True)
     keys = list(dict.fromkeys(k for r in rows for k in r))
     with (a.out / "onnx_check.csv").open("w", newline="") as f:

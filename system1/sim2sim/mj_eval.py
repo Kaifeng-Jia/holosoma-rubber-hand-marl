@@ -143,14 +143,18 @@ def main():
     ap.add_argument("--pd", choices=("isaac", "official"), default="isaac")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--limit", type=int, default=0)
+    ap.add_argument("--onnx", type=Path, default=None, help="T10b: actor ONNX of another checkpoint (default: the T10 export of the final)")
+    ap.add_argument("--checkpoint", type=Path, default=None, help="T10b: the checkpoint that ONNX was exported from (recorded; required with --onnx)")
     a = ap.parse_args()
+    if (a.onnx is None) != (a.checkpoint is None):
+        raise ValueError("--onnx and --checkpoint go together")
     if a.out.exists():
         raise FileExistsError(a.out)
     a.out.mkdir(parents=True)
     dump = ROOT / "logs_system1/t10/isaac" / (("d_" if a.scheme == "D" else "cin_") + a.task) / "dump"
     env = PairEnv(dump, a.task)
     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"
-    onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx"
+    onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx" if a.onnx is None else a.onnx.resolve()
     pd_note = "isaac"
     if a.scheme == "D":
         if a.pd != "isaac":
@@ -170,7 +174,8 @@ def main():
     states_path = states_for(a.task, a.level, a.scheme, a.seed)
     states = json.loads(states_path.read_text())["states"][: a.limit or None]
     manifest = dict(task=a.task, scheme=a.scheme, seed=a.seed, level=a.level, pd=a.pd, pd_note=pd_note, onnx=str(onnx), onnx_sha256=sha(onnx),
-                    checkpoint_sha256=checkpoint_for(a.scheme, a.task, a.seed), states=str(states_path), states_sha256=sha(states_path),
+                    checkpoint_sha256=checkpoint_for(a.scheme, a.task, a.seed) if a.checkpoint is None else sha(a.checkpoint),
+                    checkpoint=None if a.checkpoint is None else str(a.checkpoint.resolve()), states=str(states_path), states_sha256=sha(states_path),
                     isaac_dump=str(dump.relative_to(ROOT)), scene_json_sha256=sha(dump / "scene.json"), convexes_sha256=sha(dump / "collision_convexes.npz"),
                     kp=env.kp.tolist(), kd=env.kd.tolist(), torque_limits=env.tau_lim.tolist(), sim_dt=float(env.model.opt.timestep), decimation=4,
                     sonic_encoder_sha256=sha(ctrl.sonic.enc._model_path) if False else None, command=[sys.executable, *sys.argv])
