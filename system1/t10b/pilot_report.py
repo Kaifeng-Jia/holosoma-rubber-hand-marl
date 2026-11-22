@@ -189,7 +189,10 @@ def main():
                 ep_rows.append(row)
             orig_ck = Path(info["original"]).with_name(f"model_{it:05d}.pt")
             cr = [r for r in csv.DictReader(CURVE.open()) if r["run"] == info["curve_run"] and int(r["iteration"]) == it]
-            assert len(cr) == 1 and cr[0]["checkpoint_sha256"] == sha(orig_ck), (name, it)
+            if cr or orig_ck.exists():  # the original run reached this iteration: its curve point must exist and match
+                assert len(cr) == 1 and cr[0]["checkpoint_sha256"] == sha(orig_ck), (name, it)
+            else:  # beyond the original run (D Table pilot past 12000): no original point
+                cr = [dict(n_completed=None, checkpoint_sha256=None, states_sha256=None, eval_dir="original run has no checkpoint at this iteration")]
             pert = [e for e in s["episodes"] if e["kind"] != "nominal"]
             nom = [e for e in s["episodes"] if e["kind"] == "nominal"]
             val_rows.append(dict(run=info["label"], iteration=it, completed=sum(e["completed_reference"] for e in pert), perturbed=len(pert),
@@ -203,7 +206,7 @@ def main():
                                  phase_at_divergence=json.dumps({str(k): v for k, v in ph_div.items()}, ensure_ascii=False),
                                  checkpoint_sha256=json.loads((summ.parent / "run_manifest.json").read_text()).get("checkpoint_sha256"),
                                  validation_states_sha256=json.loads((summ.parent / "run_manifest.json").read_text()).get("states_sha256"),
-                                 original_completed_on_test_states=int(cr[0]["n_completed"]), original_checkpoint_sha256=cr[0]["checkpoint_sha256"],
+                                 original_completed_on_test_states=None if cr[0]["n_completed"] is None else int(cr[0]["n_completed"]), original_checkpoint_sha256=cr[0]["checkpoint_sha256"],
                                  original_test_states_sha256=cr[0]["states_sha256"], original_eval_dir=cr[0]["eval_dir"]))
     save_csv(a.out / "training_side_by_side.csv", train_rows)
     save_csv(a.out / "validation_summary.csv", val_rows)

@@ -1,0 +1,28 @@
+{
+ "pilot_export": "logs_system1/t10b/finals/d_table_seed721_rand_dump/dump",
+ "original_export": "logs_system1/t10/isaac/d_table/dump",
+ "differences": [
+  {
+   "path": "/extra/checkpoint",
+   "diff": "value",
+   "pilot": "\"/home/kevin/duet-system1/exports_system1/t10b_pilot/d_table_seed721_rand/model_14000.pt\"",
+   "original": "\"/home/kevin/holosoma-core4d-base/logs/Core4DSmallTableA/A_no_rel_no_height_5kg_fresh12000_env2048_seed721_cloud_20260920/model_12000.pt\""
+  },
+  {
+   "path": "/physics_materials",
+   "diff": "only in the pilot export"
+  },
+  {
+   "path": "/runtime_reference",
+   "diff": "only in the pilot export"
+  },
+  {
+   "path": "/scene_default_material",
+   "diff": "only in the pilot export"
+  }
+ ],
+ "collision_convexes_same_keys": true,
+ "collision_convexes_all_equal": true,
+ "pilot_scene_json_sha256": "a95402db321d5e5bc0222c93e38d4b897a229fbd94eabfea53cb78c603fa66f4",
+ "original_scene_json_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77"
+}
