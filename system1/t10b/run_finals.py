@@ -31,7 +31,7 @@ ORIGINAL = {
     },
     "d_table_seed721_rand": {
         2: ROOT / "logs_system1/post_train/d_curve/D_table_paper_T-07_seed721/it12000_pm2.launch.json",
-        8: None,  # filled in when the D pilot stops (its +/-8 original record is located then)
+        8: ROOT / "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed721/it12000_pm8.launch.json",
     },
 }
 
