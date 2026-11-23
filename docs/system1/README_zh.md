@@ -82,7 +82,7 @@
 | T10 | MuJoCo sim2sim：C-in（官方 SONIC 部署设置和训练设置两种）和 D，Table、Bin；为上真机准备接口说明 | T09 优先用 GPU | 本机（MuJoCo 用 CPU） |
 | T10 补充 | MuJoCo sim2sim 其余任务：D 的 Push、Pull、Kick、Chair，C-in 的 Pull；设置沿用 T10 | T10 | 本机（MuJoCo 用 CPU） |
 | T10b | Isaac 里只调低手和物体之间的摩擦（0.625、0.5），看策略余量；准备随机化重训的代码和配置（不开训） | — | 本机 5070 |
-| T13 | 出差期间（11/24–28）的并行实验：3 个随机化 run（D Table + 观测 v1；C-out Table、Pull，对标 HeaveHo）；C-out 的 sim2sim（C1）、D Table 回放视频（C2）；本机无人值守自动拷回、评测、推送；rclone 传 Google Drive。Kick 不进论文 | T10b | 云端 3 张卡（4090 或 5090）；本机 5070 和 CPU |
+| T13 | 真机线的 Table 训练（第三版）：观测 v1 + 随机化 + critic 修正；R1 原参考现在开，R2 用 T14 新参考、验收后再开；C-out 的 sim2sim（C1）；本机无人值守拷回、评测、推送 | T10b、T14 | 云端 1–2 张卡（4090 或 5090）；本机 5070 和 CPU |
 | T14 | 重定向修正（草稿）：手掌进交互网格、碰撞形状和仿真对齐；双人围绕同一个物体重新求解；物体沿伸展轴尺寸可调 [a, b]；按同行指标做数据集级评测和尺寸伸缩演示。只生成参考，不训练 | T12-diag | 本机 CPU |
 
 - **训练 run 总数：** 第一轮 15 个（C 主实验 3、T04-D 6、T04-C 6）。
