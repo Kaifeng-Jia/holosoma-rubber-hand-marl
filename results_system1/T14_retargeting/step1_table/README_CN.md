@@ -119,3 +119,21 @@ sonic_s1/bin/python -B system1/t14/eval_table_refs.py --ref current=<现有 comp
 ```
 
 所用代码的 git hash 见提交记录；每次求解的输入、环境、模块路径、sha256 都在 `records/*_run_record.json`。
+
+## 7. 对比图（2026-11-23 补充，Kevin 要求）
+
+`figures/` 下两张图，渲染的是运动学参考本身（50 Hz 运行时参考），不是策略回放。
+
+- **布局：** 三行分别是 t = 4.0 s（抬起）、6.5 s（搬运中）、9.5 s（放下），即第 200、325、475 帧；左列旧参考（现有），右列新参考（T14，1.0 倍）。
+- **相机：** 同一行两格用同一组相机参数，按旧参考这一帧算出；参数记录在同名 `.json` 里。
+- **风格：** U5 / 论文 Fig. 4 风格，preset `g1_native_execution`：Unitree 原色，桌子浅蓝，棋盘地面。
+- **图 1 `table_ref_old_vs_new_side.jpg`：** 侧面近景，两台机器人都在画面里。
+  - 相机对准桌面高度处的桌子中心，视线垂直于两台机器人的连线。
+  - 俯角 10°，距离 1.75 m。
+- **图 2 `table_ref_old_vs_new_robot0_hands.jpg`：** 机器人 0 两只手和桌沿的特写。
+  - 相机对准机器人 0 两个手掌点的中点，从机器人 1 一侧越过桌面看过去。
+  - 俯角 40°，距离 0.6 m。
+  - **这张图没有画机器人 1**：它站在相机和机器人 0 之间，会挡住视线。每格标注里写了"只画机器人 0"。
+- **手的样子：** 画出来的手是橡胶手的可视网格，和碰撞网格是同一个 STL。仿真里起接触作用的是它的凸包（PhysX 34 顶点凸包），所以手指之间的空隙在仿真里不算空隙。
+- **Drive：** 两张 jpg 已传到 `DuetMimic_transfer/T14_retargeting/`，rclone copy --checksum 后核对一致，Drive 上的 sha256 和大小与本地相同，见 `../drive_manifest.csv`。
+- **脚本：** `system1/t14/render_table_compare.py`。

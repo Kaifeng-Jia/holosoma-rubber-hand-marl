@@ -1,0 +1,67 @@
+{
+ "figure": "hands",
+ "file": "table_ref_old_vs_new_robot0_hands.jpg",
+ "bytes": 609098,
+ "jpeg_quality": 90,
+ "cameras": [
+  {
+   "time_s": 4.0,
+   "frame_50hz": 200,
+   "lookat": [
+    0.5189,
+    0.1061,
+    0.593
+   ],
+   "distance": 0.6,
+   "azimuth": 265.93,
+   "elevation": -40.0,
+   "fovy": 45
+  },
+  {
+   "time_s": 6.5,
+   "frame_50hz": 325,
+   "lookat": [
+    0.1089,
+    -0.4246,
+    0.6436
+   ],
+   "distance": 0.6,
+   "azimuth": 256.06,
+   "elevation": -40.0,
+   "fovy": 45
+  },
+  {
+   "time_s": 9.5,
+   "frame_50hz": 475,
+   "lookat": [
+    -0.3162,
+    -1.302,
+    0.6109
+   ],
+   "distance": 0.6,
+   "azimuth": 266.16,
+   "elevation": -40.0,
+   "fovy": 45
+  }
+ ],
+ "refs": {
+  "old": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+   "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153"
+  },
+  "new": {
+   "path": "exports_system1/T14_references/table_k1p0/core4d_pair_runtime_fps50.npz",
+   "sha256": "1d9b9292987cc294a9e60cb200040db51597757e1528fdeb98912b9ff4ec053c"
+  }
+ },
+ "object_urdf": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+ "robot_urdf": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "helper_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "preset": "g1_native_execution",
+ "cell_px": [
+  1280,
+  853
+ ],
+ "script": "system1/t14/render_table_compare.py",
+ "rules": "T14: Table reference comparison stills (kinematic reference itself, not a policy replay). Render only, CPU.\n\nRows: t = 4.0 s (lift), 6.5 s (carry), 9.5 s (lower) -> 50 Hz runtime frames 200, 325, 475. Columns: left the current\nreference (core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz, sha 582e7669...), right the T14 1.0x reference\n(exports_system1/T14_references/table_k1p0/core4d_pair_runtime_fps50.npz). Robots = reference pelvis pose + 29 joint\nangles (URDF order, checked), table = reference object pose; training Table URDF.\n\nScene: U5 / paper Fig. 4 style (system1/render/u5 helper, preset g1_native_execution: Unitree colours, light-blue object,\nchequered ground). Both cells of a row use the same camera parameters, computed from the current reference at that frame:\n  * --fig side:  lookat = (table x, y, table-top height); azimuth = robot-0 -> robot-1 horizontal direction - 90 deg\n                 (looking across the line between the robots), elevation SIDE_EL, distance SIDE_DIST;\n  * --fig hands: lookat = midpoint of robot 0's two rubber-hand palm points; the camera looks from robot 1's side over the\n                 table at robot 0 (azimuth = robot-1 -> robot-0 direction), elevation HANDS_EL, distance HANDS_DIST. Robot 1 is\n                 not drawn in this figure (its geoms are put in a hidden render group; otherwise it sits between the camera and\n                 robot 0's hands) and the cell label says so.\nEach cell is labelled (old / new, time); jpg <= 1 MB (quality lowered from 90 in steps of 5).\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_table_compare.py --fig side --out results_system1/T14_retargeting/step1_table/figures\n"
+}
