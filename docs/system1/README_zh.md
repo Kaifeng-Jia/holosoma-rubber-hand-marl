@@ -82,6 +82,7 @@
 | T10 | MuJoCo sim2sim：C-in（官方 SONIC 部署设置和训练设置两种）和 D，Table、Bin；为上真机准备接口说明 | T09 优先用 GPU | 本机（MuJoCo 用 CPU） |
 | T10 补充 | MuJoCo sim2sim 其余任务：D 的 Push、Pull、Kick、Chair，C-in 的 Pull；设置沿用 T10 | T10 | 本机（MuJoCo 用 CPU） |
 | T10b | Isaac 里只调低手和物体之间的摩擦（0.625、0.5），看策略余量；准备随机化重训的代码和配置（不开训） | — | 本机 5070 |
+| T13 | 出差期间（11/24–28）的并行实验：观测 v1（真机可测）+ 10 个随机化 run（论文线对标 HeaveHo、真机线）；C-out 的 sim2sim（C1）、D Table 回放视频（C2）；本机无人值守自动拷回、评测、推送；rclone 传 Google Drive | T10b | 云端 4 张 4090；本机 5070 和 CPU |
 
 - **训练 run 总数：** 第一轮 15 个（C 主实验 3、T04-D 6、T04-C 6）。
   - 之后另定：较轻档位重训 6 个。
