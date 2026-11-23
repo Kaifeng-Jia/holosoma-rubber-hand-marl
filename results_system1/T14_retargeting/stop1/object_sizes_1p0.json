@@ -1,0 +1,186 @@
+[
+ {
+  "task": "push",
+  "dataset": "OMOMO",
+  "source": "sub6_largetable_033",
+  "pairing": "single person, role isometry (registered spacing 0.8780472 m)",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+  "object_urdf_sha256": "c6de78a48eb7a35454a710ab77369e138112b2f62d9efa189f6ca7c05b414c2a",
+  "local_extent_xyz_m": [
+   1.4,
+   0.428,
+   0.522
+  ],
+  "world_extent_xyz_m_frame0": [
+   1.4084,
+   0.5459,
+   0.4452
+  ],
+  "extent_along_robot_axis_m": 1.4019,
+  "extent_across_robot_axis_m": 0.5283,
+  "height_m": 0.4452,
+  "top_height_above_ground_m_frame0": 0.4359,
+  "object_local_axis_closest_to_robot_axis": "x",
+  "pelvis_separation_m_frame0": 0.878,
+  "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+  "reference_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207"
+ },
+ {
+  "task": "pull",
+  "dataset": "OMOMO",
+  "source": "sub3_largetable_010",
+  "pairing": "single person, mirrored role",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+  "object_urdf_sha256": "c260652d23e31dc0978a167137c45727cddb156eebedab77c9a40aa30079a8c2",
+  "local_extent_xyz_m": [
+   0.522,
+   0.428,
+   1.4
+  ],
+  "world_extent_xyz_m_frame0": [
+   1.4871,
+   0.8293,
+   0.4513
+  ],
+  "extent_along_robot_axis_m": 1.4057,
+  "extent_across_robot_axis_m": 0.5229,
+  "height_m": 0.4513,
+  "top_height_above_ground_m_frame0": 0.4381,
+  "object_local_axis_closest_to_robot_axis": "z",
+  "pelvis_separation_m_frame0": 1.0519,
+  "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/pull/plan5_attempt08_mirrored_pair_runtime.npz",
+  "reference_sha256": "571f23055f06648fb30b7abe5d90746a80c8555461ef91b6a23bccd9ad8404d4"
+ },
+ {
+  "task": "table",
+  "dataset": "CORE4D",
+  "source": "20231030/001 desk001",
+  "pairing": "two persons",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+  "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+  "local_extent_xyz_m": [
+   0.4437,
+   0.5411,
+   0.5922
+  ],
+  "world_extent_xyz_m_frame0": [
+   0.4662,
+   0.6089,
+   0.5437
+  ],
+  "extent_along_robot_axis_m": 0.6215,
+  "extent_across_robot_axis_m": 0.4837,
+  "height_m": 0.5437,
+  "top_height_above_ground_m_frame0": 0.5473,
+  "object_local_axis_closest_to_robot_axis": "z",
+  "pelvis_separation_m_frame0": 1.129,
+  "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+  "reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+  "raw_mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk001_m.obj",
+  "raw_mesh_sha256": "f8f9dffa9f1ccdbd2ff90125cd39c96e79bf84ccebd8a81fcef656c4fbc7c00b",
+  "raw_extent_xyz_m": [
+   0.5986,
+   0.7305,
+   0.799
+  ],
+  "person_scales": [
+   0.7477,
+   0.7347
+  ],
+  "shared_object_scale_in_manifest": 0.7412283856190455,
+  "baseline_kind": "arithmetic_mean_balancing_two_person_scales",
+  "current_over_raw_extent": [
+   0.7412,
+   0.7407,
+   0.7412
+  ]
+ },
+ {
+  "task": "bucket",
+  "dataset": "CORE4D",
+  "source": "20231020/071 bucket003",
+  "pairing": "two persons",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/bucket003_training.urdf",
+  "object_urdf_sha256": "6c0ff9f60d8ef7ef057a988f4e95a6b89cd7e0f5ae55ea9e6697596955f28cde",
+  "local_extent_xyz_m": [
+   0.5408,
+   0.7628,
+   0.4658
+  ],
+  "world_extent_xyz_m_frame0": [
+   0.533,
+   0.5987,
+   0.7648
+  ],
+  "extent_along_robot_axis_m": 0.6275,
+  "extent_across_robot_axis_m": 0.5678,
+  "height_m": 0.7648,
+  "top_height_above_ground_m_frame0": 0.75,
+  "object_local_axis_closest_to_robot_axis": "x",
+  "pelvis_separation_m_frame0": 0.6168,
+  "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_runtime_fps50.npz",
+  "reference_sha256": "071ac78bac440fee72a2cf861e1c00ba3df9531b371292d930e04d61aa8b23a8",
+  "raw_mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket003_m.obj",
+  "raw_mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+  "raw_extent_xyz_m": [
+   0.5408,
+   0.7628,
+   0.4658
+  ],
+  "person_scales": [
+   0.7615,
+   0.7223
+  ],
+  "shared_object_scale_in_manifest": null,
+  "baseline_kind": "fixed-object",
+  "current_over_raw_extent": [
+   1.0,
+   1.0,
+   1.0
+  ]
+ },
+ {
+  "task": "chair",
+  "dataset": "CORE4D",
+  "source": "20231020/074 chair021",
+  "pairing": "two persons",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/chair021_training.urdf",
+  "object_urdf_sha256": "78496902eb84489011d2a5241e32994cebb1ea3784b534bf8cd75151824469ee",
+  "local_extent_xyz_m": [
+   0.4,
+   0.5725,
+   0.381
+  ],
+  "world_extent_xyz_m_frame0": [
+   0.3986,
+   0.5732,
+   0.383
+  ],
+  "extent_along_robot_axis_m": 0.3979,
+  "extent_across_robot_axis_m": 0.5724,
+  "height_m": 0.383,
+  "top_height_above_ground_m_frame0": 0.3589,
+  "object_local_axis_closest_to_robot_axis": "x",
+  "pelvis_separation_m_frame0": 0.8683,
+  "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_chair021_20231020_074_a1/core4d_pair_runtime_fps50.npz",
+  "reference_sha256": "9de64128209230229e40a675ed6b204e1c4b7655a81cbef773f76557a0350ba5",
+  "raw_mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair021_m.obj",
+  "raw_mesh_sha256": "7fb3283f1b67c8d08bb1f68c51d15aab5e6c940b8571e704bca265701b776161",
+  "raw_extent_xyz_m": [
+   0.5375,
+   0.7693,
+   0.5119
+  ],
+  "person_scales": [
+   0.7617,
+   0.7267
+  ],
+  "shared_object_scale_in_manifest": 0.744193062691336,
+  "baseline_kind": "shared-scaled-preview",
+  "current_over_raw_extent": [
+   0.7442,
+   0.7442,
+   0.7442
+  ]
+ }
+]

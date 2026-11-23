@@ -1,0 +1,253 @@
+{
+ "rule": "T14 stop 1: one example contact frame per CORE4D category and per OMOMO object, for the rule-2 list. Read only, CPU.\n\nExample choice (fixed before rendering): sequences in CORE4D path order, OMOMO split order (test, then train) and name\norder; the first sequence of that category / object with at least one contact hand-frame; among its\ncontact hand-frames ordered by (frame, person, hand), the middle one (index n // 2).\n\nPicture: the dataset person(s) (SMPL-X mesh, CORE4D both persons, OMOMO the one person) and the object at that frame,\nobject light blue, the object's rule-5 thin-part (\"rod\") surface in salmon, chequered floor at the lowest foot vertex.\nTwo views of the same frame: close (0.55 m from the contact hand's closest vertex) and context (1.8 m), azimuth from\nthe object's centre towards the contact point plus 35 deg, elevation 25 deg. Contact sheets: jpg, each <= 1 MB.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_contact_examples.py --out results_system1/T14_retargeting/stop1/examples\n",
+ "examples": [
+  {
+   "dataset": "CORE4D",
+   "category": "board",
+   "object": "board007",
+   "sequence": "20231002/009",
+   "frame": 130,
+   "hand": "person1_left",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 354
+  },
+  {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box004",
+   "sequence": "20231002/048",
+   "frame": 97,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": false,
+   "contact_hand_frames_in_sequence": 224
+  },
+  {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket005",
+   "sequence": "20231002/003",
+   "frame": 134,
+   "hand": "person2_left",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 243
+  },
+  {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair006",
+   "sequence": "20231003_1/000",
+   "frame": 97,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": false,
+   "contact_hand_frames_in_sequence": 228
+  },
+  {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk001",
+   "sequence": "20231003_2/000",
+   "frame": 101,
+   "hand": "person2_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 463
+  },
+  {
+   "dataset": "CORE4D",
+   "category": "stick",
+   "object": "stick006",
+   "sequence": "20231002/015",
+   "frame": 202,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 206
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "clothesstand",
+   "object": "clothesstand",
+   "sequence": "sub16_clothesstand_000",
+   "frame": 78,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 30
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "floorlamp",
+   "object": "floorlamp",
+   "sequence": "sub17_floorlamp_000",
+   "frame": 66,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 90
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "largebox",
+   "object": "largebox",
+   "sequence": "sub16_largebox_000",
+   "frame": 33,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": false,
+   "contact_hand_frames_in_sequence": 6
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "largetable",
+   "object": "largetable",
+   "sequence": "sub16_largetable_000",
+   "frame": 72,
+   "hand": "person1_left",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 66
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "monitor",
+   "object": "monitor",
+   "sequence": "sub17_monitor_000",
+   "frame": 87,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 81
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "mop",
+   "object": "mop",
+   "sequence": "sub17_mop_000",
+   "frame": 78,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 52
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "plasticbox",
+   "object": "plasticbox",
+   "sequence": "sub16_plasticbox_000",
+   "frame": 57,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 22
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "smallbox",
+   "object": "smallbox",
+   "sequence": "sub17_smallbox_001",
+   "frame": 36,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": false,
+   "contact_hand_frames_in_sequence": 41
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "smalltable",
+   "object": "smalltable",
+   "sequence": "sub17_smalltable_000",
+   "frame": 39,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 27
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "suitcase",
+   "object": "suitcase",
+   "sequence": "sub17_suitcase_000",
+   "frame": 57,
+   "hand": "person1_right",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 42
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "trashcan",
+   "object": "trashcan",
+   "sequence": "sub16_trashcan_000",
+   "frame": 114,
+   "hand": "person1_left",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 83
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "tripod",
+   "object": "tripod",
+   "sequence": "sub17_tripod_000",
+   "frame": 63,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 43
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "vacuum",
+   "object": "vacuum",
+   "sequence": "sub16_vacuum_000",
+   "frame": 60,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 40
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "whitechair",
+   "object": "whitechair",
+   "sequence": "sub16_whitechair_000",
+   "frame": 78,
+   "hand": "person1_right",
+   "rod": true,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 85
+  },
+  {
+   "dataset": "OMOMO",
+   "category": "woodchair",
+   "object": "woodchair",
+   "sequence": "sub17_woodchair_000",
+   "frame": 84,
+   "hand": "person1_left",
+   "rod": false,
+   "opposing": true,
+   "contact_hand_frames_in_sequence": 113
+  }
+ ],
+ "sheets": [
+  {
+   "file": "core4d_examples.jpg",
+   "bytes": 384099,
+   "jpeg_quality": 88
+  },
+  {
+   "file": "omomo_examples_1.jpg",
+   "bytes": 479347,
+   "jpeg_quality": 88
+  },
+  {
+   "file": "omomo_examples_2.jpg",
+   "bytes": 449852,
+   "jpeg_quality": 88
+  }
+ ]
+}

@@ -1,0 +1,1077 @@
+{
+ "script": "system1/t14/contact_parts.py",
+ "script_sha256": "2ece0317aeb0e11c06fa7f8e71ba6acdc0bd42b4ce9455e41fa1f74cda088568",
+ "rules": "T14 stop 1, rule 2 (section 3): does the human hand touch the object with the palm on a surface, or do the fingers have\nto go around a part thinner than the palm? Per CORE4D category / object and per OMOMO object. Read only, CPU.\n\nRules (fixed here before any number was computed; the verdict cut-offs in rule 8 are Claude's proposal, no external\nsource, for Kevin to confirm or change at the stop point):\n\n1. Palm width W = 0.1044 m: the middle extent of the oriented bounding box of the robot's rubber hand collision mesh\n   (main_mesh_collision_rubberhand.urdf, left_rubber_hand_link: 0.044 x 0.104 x 0.142 m). The robot palm is what has to\n   lie on the surface.\n2. Hand: SMPL-X vertices whose largest skinning weight is that hand's wrist or finger joints (wrist 20 / 21 and the 15\n   finger joints of each hand; 780 / 778 vertices), as T12-diag source_trace.\n   * CORE4D: the stored per-frame SMPL-X vertices of person1 and person2, every frame (15 Hz).\n   * OMOMO: SMPL-X vertices from the stored parameters (the sequence's gender model, 16 betas, root_orient, pose_body,\n     trans; flat hands: OMOMO has no finger capture), every 3rd frame (10 Hz).\n3. Object: the dataset mesh placed by the stored pose. CORE4D object_models/<category>/<name>_m.obj (name lower-cased),\n   smooth_objposes.npy. OMOMO captured_objects/<name>_cleaned_simplified.obj scaled by obj_scale, obj_rot, obj_trans;\n   mop and vacuum: the _top part with obj_*, the _bottom part with obj_bottom_*, union of the two.\n   Meshes with inconsistent winding get trimesh.repair.fix_normals in memory (the files are not touched); listed.\n3b. (Added after the first full run stopped on it.) OMOMO frames in which a part's stored pose is invalid (obj_scale <= 0\n   or a non-finite scale / rotation / translation; 39 sequences have such frames, mostly the vacuum's bottom part): that\n   part is left out of that frame; a frame with no valid part is not used. Counted per sequence.\n4. Signed distance of a point (positive inside, as T12): to the nearest of dense surface samples of the mesh (area-\n   uniform, seed 0, about one per (3 mm)^2, at most 400 000), signed by that sample's outward face normal.\n   A hand is in contact in a frame when its largest vertex signed distance is >= -1.5 cm (T12 rule). Its contact\n   vertices are the vertices with signed distance >= -1.5 cm.\n5. Thin-part (\"rod\") points, object geometry only: on coarse surface samples (about one per cm^2, at most 50 000), take the\n   outward normals of all coarse samples within W of the point (a cross-section narrower than W is then always inside\n   the neighbourhood, from any point on it; first written as W / 2, changed after the 12-sequence smoke run because from an\n   off-centre point of stick006, 3.7 x 7.2 cm, the far side was out of a W / 2 ball); axis = the eigenvector of the smallest eigenvalue of\n   the normals' scatter matrix; project the normals onto the plane normal to the axis; the point is a rod point when the\n   largest angular gap between the projected normals is < 105 deg (the surface turns all the way round the axis) and the\n   extent of the neighbourhood points across the axis is < W: the part's cross-section is smaller than the palm (stick,\n   pole, leg, handle, bail, rim with a lip, narrow bar). (The extent condition was added after the 30-sequence smoke run:\n   without it the turn alone also fired where a table top's edge has an apron below it, cross-section 11-17 cm.) A face wider than the palm has one normal direction; the edge of a plate (table top, board, seat) has\n   at most half a turn (top, side, bottom: gap 180 deg); a box corner about 120 deg. Dense samples take the flag of the\n   nearest coarse sample. Rod size = the extent of the neighbourhood points across the axis (about the part diameter).\n6. A contact hand-frame is a rod contact when more than half of its contact vertices have their nearest surface sample on\n   a rod point.\n7. Secondary, behavioural: opposing contact = among (up to 64 evenly chosen) contact vertices of the hand, two whose nearest\n   surface normals point against each other (dot < -0.5) and whose surface points are less than W apart along that\n   normal: the hand is on two opposite faces of something thinner than the palm (fingers and palm around it; for the\n   flat OMOMO hands, the hand cuts through it).\n8. Verdict per CORE4D category / OMOMO object (proposal): rod-contact share of all contact hand-frames < 20 %: applicable;\n   > 50 %: not applicable; otherwise undecided. Per-object rows are reported under each category.\n\n    sonic_s1/bin/python -B system1/t14/contact_parts.py --out results_system1/T14_retargeting/stop1 --workers 24\n",
+ "palm_width_m": 0.1044,
+ "contact_threshold_m": -0.015,
+ "rod_gap_deg": 105.0,
+ "omomo_stride": 3,
+ "core4d_sequences_without_mesh": [
+  {
+   "sequence": "20231030/065",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/066",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/067",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/068",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/069",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/070",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/072",
+   "category": "board",
+   "object": "board021"
+  },
+  {
+   "sequence": "20231030/073",
+   "category": "board",
+   "object": "board021"
+  }
+ ],
+ "objects": {
+  "core4d_board005": {
+   "dataset": "CORE4D",
+   "category": "board",
+   "object": "board005",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/board/board005_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "ee057eb0037a742765026326ce146a5b1828096aa5893c1bde10ccf42e19517d",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5,
+    0.017,
+    0.7
+   ],
+   "area_m2": 0.7722,
+   "rod_area_share": 0.0683,
+   "dense_samples": 85798,
+   "coarse_samples": 7721
+  },
+  "core4d_board007": {
+   "dataset": "CORE4D",
+   "category": "board",
+   "object": "board007",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/board/board007_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "6c6ede9c62255e14f9b49339d01384c56b8624f951167ee42f294839e47088bf",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.398,
+    0.015,
+    1.0
+   ],
+   "area_m2": 0.8379,
+   "rod_area_share": 0.0,
+   "dense_samples": 93104,
+   "coarse_samples": 8379
+  },
+  "core4d_board020": {
+   "dataset": "CORE4D",
+   "category": "board",
+   "object": "board020",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/board/board020_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "c62641a9de13ad440c8943d35c4a68b85743bb547ee13e97f20da62712107d59",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.6136,
+    0.027,
+    0.9058
+   ],
+   "area_m2": 1.12,
+   "rod_area_share": 0.0,
+   "dense_samples": 124440,
+   "coarse_samples": 11199
+  },
+  "core4d_box001": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box001",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box001_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "721906a338a810d83bef885ce88f725f941dbc97b78e132ef2920818caea0205",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5022,
+    0.6264,
+    0.8126
+   ],
+   "area_m2": 2.3098,
+   "rod_area_share": 0.0,
+   "dense_samples": 256644,
+   "coarse_samples": 23098
+  },
+  "core4d_box004": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box004",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box004_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "d964da5e48947b3cdf8c99591f3864d1cc4ceee380a08d484971087f11f05708",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3479,
+    0.2636,
+    0.4472
+   ],
+   "area_m2": 0.6743,
+   "rod_area_share": 0.0,
+   "dense_samples": 74926,
+   "coarse_samples": 6743
+  },
+  "core4d_box020": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box020",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box020_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "b02905df3545a5163adac1c8ec043207fe841268ba2d14bc0d4d524e98386d8c",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.1971,
+    0.1677,
+    0.4067
+   ],
+   "area_m2": 0.3451,
+   "rod_area_share": 0.0,
+   "dense_samples": 38346,
+   "coarse_samples": 5000
+  },
+  "core4d_box021": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box021",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box021_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "436b2c2a41888de9e2a172e7b3ab2737ca63bb79bce474a4602c4abd3bb4d6cd",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.391,
+    0.3031,
+    0.5001
+   ],
+   "area_m2": 1.0544,
+   "rod_area_share": 0.0009,
+   "dense_samples": 117152,
+   "coarse_samples": 10543
+  },
+  "core4d_box022": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box022",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box022_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "d267ecca81ffdd904e80c652f40823b11e6964544f4bc0278338e0d56789924a",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.2708,
+    0.6671,
+    0.4584
+   ],
+   "area_m2": 1.0069,
+   "rod_area_share": 0.0003,
+   "dense_samples": 111880,
+   "coarse_samples": 10069
+  },
+  "core4d_box023": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box023",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box023_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "ec53d6ad3507bd12e2eaccca396391cd7ec712db2580fc7ad55bcea2a7c76489",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3039,
+    0.3032,
+    0.391
+   ],
+   "area_m2": 0.622,
+   "rod_area_share": 0.0,
+   "dense_samples": 69112,
+   "coarse_samples": 6220
+  },
+  "core4d_box024": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box024",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box024_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "33aec2e8fdf91de42c461e964cc9c67ea9fc8b91039f15f65d14a31e4d57eee6",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.509,
+    0.5052,
+    0.982
+   ],
+   "area_m2": 2.3939,
+   "rod_area_share": 0.0,
+   "dense_samples": 265986,
+   "coarse_samples": 23938
+  },
+  "core4d_box025": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box025",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box025_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "361274a18d0c14dc9cfb03f2f1565f25c4a1a0fce275abb7cbb7eb78340a9865",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.6115,
+    0.6105,
+    0.8931
+   ],
+   "area_m2": 2.7924,
+   "rod_area_share": 0.0,
+   "dense_samples": 310267,
+   "coarse_samples": 27924
+  },
+  "core4d_box026": {
+   "dataset": "CORE4D",
+   "category": "box",
+   "object": "box026",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/box/box026_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "5e459b827b29e9f5e061b25b5414f78e1db45aae58c12593fa612f0cc0971030",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.629,
+    0.3945,
+    0.469
+   ],
+   "area_m2": 1.2237,
+   "rod_area_share": 0.0004,
+   "dense_samples": 135968,
+   "coarse_samples": 12237
+  },
+  "core4d_bucket001": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket001",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket001_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "6cbe3bd688c989d7b34fd4c60e2381a7d897d3f01a93fbf0aba377f33c083332",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3524,
+    0.4562,
+    0.2087
+   ],
+   "area_m2": 0.5279,
+   "rod_area_share": 0.0,
+   "dense_samples": 58650,
+   "coarse_samples": 5278
+  },
+  "core4d_bucket003": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket003",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket003_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "2a95d824af8facbd363ce00eba0534cd7c341b51f9997e3b137990f5fb503bdf",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5408,
+    0.7628,
+    0.4658
+   ],
+   "area_m2": 1.6137,
+   "rod_area_share": 0.0004,
+   "dense_samples": 179302,
+   "coarse_samples": 16137
+  },
+  "core4d_bucket004": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket004",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket004_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "913dece7910b29cff94bec3dfd9fe0bb1924b8caaf08768a91d87c07ea0032fa",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3231,
+    0.4621,
+    0.3046
+   ],
+   "area_m2": 0.6489,
+   "rod_area_share": 0.0,
+   "dense_samples": 72096,
+   "coarse_samples": 6488
+  },
+  "core4d_bucket005": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket005",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket005_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "2296fc2c931d9cb73ab6df5b307ad2c146ad6fa299d14366ca94068c68aa196f",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.2951,
+    0.4102,
+    0.2865
+   ],
+   "area_m2": 0.5147,
+   "rod_area_share": 0.0,
+   "dense_samples": 57187,
+   "coarse_samples": 5146
+  },
+  "core4d_bucket006": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket006",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket006_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "23902ae6344294af5352d8f2dbf9ac2c783cbbbc023842b0667fa06272e2c4fa",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3052,
+    0.3775,
+    0.3045
+   ],
+   "area_m2": 0.4709,
+   "rod_area_share": 0.0,
+   "dense_samples": 52320,
+   "coarse_samples": 5000
+  },
+  "core4d_bucket007": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket007",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket007_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "ff12e658cc96f68de783257dfe6057f9046b3a1c68053ffb59d4bdb6576afe56",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5466,
+    0.5739,
+    0.5698
+   ],
+   "area_m2": 1.2134,
+   "rod_area_share": 0.0002,
+   "dense_samples": 134825,
+   "coarse_samples": 12134
+  },
+  "core4d_bucket008": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket008",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket008_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "bae500bea2d79be568677748a6c608d613d1f2b5c6838d025b7a717e2dc0be5f",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3321,
+    0.464,
+    0.2283
+   ],
+   "area_m2": 0.5758,
+   "rod_area_share": 0.0,
+   "dense_samples": 63977,
+   "coarse_samples": 5757
+  },
+  "core4d_bucket009": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket009",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket009_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "600d2ce15d017a0b90d50f3cbf7d19e5fe545291c2ff516855c1b894a0f1e17d",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3835,
+    0.6097,
+    0.3927
+   ],
+   "area_m2": 0.8655,
+   "rod_area_share": 0.0,
+   "dense_samples": 96170,
+   "coarse_samples": 8655
+  },
+  "core4d_bucket010": {
+   "dataset": "CORE4D",
+   "category": "bucket",
+   "object": "bucket010",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket010_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "bbfbbdf669f24e19507e25122dfc40302dc6c486440594e8f8ff1a346ce8c96b",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.401,
+    0.7417,
+    0.4034
+   ],
+   "area_m2": 1.1202,
+   "rod_area_share": 0.0,
+   "dense_samples": 124467,
+   "coarse_samples": 11202
+  },
+  "core4d_chair005": {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair005",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair005_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "2d96ce5cc6d3ad37613909440b8500af45b523be12e18eef5fb4131f19cba7a3",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.2999,
+    0.5848,
+    0.2954
+   ],
+   "area_m2": 0.5647,
+   "rod_area_share": 0.074,
+   "dense_samples": 62742,
+   "coarse_samples": 5646
+  },
+  "core4d_chair006": {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair006",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair006_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "1e14489db1c55f7be38eae7c1b9755dbdf0bcc627cde0894d33c2e990d6ae6b0",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5944,
+    0.8559,
+    0.5606
+   ],
+   "area_m2": 1.641,
+   "rod_area_share": 0.1237,
+   "dense_samples": 182333,
+   "coarse_samples": 16410
+  },
+  "core4d_chair020": {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair020",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair020_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "95a9f9d01aefdf054a7ca683e23c1f71ca871536fac88e79cfe8ce423ad4f309",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.4263,
+    0.722,
+    0.4181
+   ],
+   "area_m2": 0.571,
+   "rod_area_share": 0.2848,
+   "dense_samples": 63446,
+   "coarse_samples": 5710
+  },
+  "core4d_chair021": {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair021",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair021_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "7fb3283f1b67c8d08bb1f68c51d15aab5e6c940b8571e704bca265701b776161",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5375,
+    0.7693,
+    0.5119
+   ],
+   "area_m2": 1.241,
+   "rod_area_share": 0.1436,
+   "dense_samples": 137888,
+   "coarse_samples": 12409
+  },
+  "core4d_chair022": {
+   "dataset": "CORE4D",
+   "category": "chair",
+   "object": "chair022",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair022_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "edb28dfe53e7557a1cc4b36502d32059bbcb2d33833aaf2bb9aca1763c3f886c",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5683,
+    0.8596,
+    0.5342
+   ],
+   "area_m2": 1.249,
+   "rod_area_share": 0.1858,
+   "dense_samples": 138772,
+   "coarse_samples": 12489
+  },
+  "core4d_desk001": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk001",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk001_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "f8f9dffa9f1ccdbd2ff90125cd39c96e79bf84ccebd8a81fcef656c4fbc7c00b",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5986,
+    0.7305,
+    0.799
+   ],
+   "area_m2": 1.5593,
+   "rod_area_share": 0.1875,
+   "dense_samples": 173260,
+   "coarse_samples": 15593
+  },
+  "core4d_desk005": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk005",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk005_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "68ef47787ceeda39d1c5a0988372a810d79f9f9a1290fe4492138138e37e157c",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.4007,
+    0.7406,
+    0.8006
+   ],
+   "area_m2": 1.9866,
+   "rod_area_share": 0.1621,
+   "dense_samples": 220731,
+   "coarse_samples": 19865
+  },
+  "core4d_desk007": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk007",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk007_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "93bb8b3bb1c441e3d71fa362b2b4f6c8a15709b83cba9c11954729b995761c93",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.4305,
+    0.698,
+    0.8016
+   ],
+   "area_m2": 1.1001,
+   "rod_area_share": 0.1484,
+   "dense_samples": 122231,
+   "coarse_samples": 11000
+  },
+  "core4d_desk020": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk020",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk020_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "a66074113fd95994b057d10036b294ea6d422199c008454e56dc90d3610a58f6",
+   "watertight": false,
+   "fixed_normals": true,
+   "extents_m": [
+    0.4921,
+    0.3302,
+    0.492
+   ],
+   "area_m2": 0.494,
+   "rod_area_share": 0.1394,
+   "dense_samples": 54889,
+   "coarse_samples": 5000
+  },
+  "core4d_desk021": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk021",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk021_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "8b25d7d168fd8fbd1f196b731a351a1a52445b3161ac18038980e1e5b0724b0c",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5089,
+    0.4571,
+    0.5057
+   ],
+   "area_m2": 0.8761,
+   "rod_area_share": 0.2648,
+   "dense_samples": 97341,
+   "coarse_samples": 8760
+  },
+  "core4d_desk023": {
+   "dataset": "CORE4D",
+   "category": "desk",
+   "object": "desk023",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk023_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "34f8e1d866a51976ce6ffd13f4873244ef1f85e141783d12bc68ed6cbe590bca",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5134,
+    0.4615,
+    0.8091
+   ],
+   "area_m2": 1.3535,
+   "rod_area_share": 0.1639,
+   "dense_samples": 150389,
+   "coarse_samples": 13535
+  },
+  "core4d_stick001": {
+   "dataset": "CORE4D",
+   "category": "stick",
+   "object": "stick001",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/stick/stick001_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "5d6ecab9b102b79745d57d345bd634bc39c40537fa58636b609d6975979207e4",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.7611,
+    0.0528,
+    0.0574
+   ],
+   "area_m2": 0.0996,
+   "rod_area_share": 1.0,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "core4d_stick003": {
+   "dataset": "CORE4D",
+   "category": "stick",
+   "object": "stick003",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/stick/stick003_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "2324994af34ffdf6c06a9effdd83d89e18ae3df1c96d64351686039438e63365",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    1.3788,
+    0.0418,
+    0.0475
+   ],
+   "area_m2": 0.1779,
+   "rod_area_share": 1.0,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "core4d_stick006": {
+   "dataset": "CORE4D",
+   "category": "stick",
+   "object": "stick006",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/stick/stick006_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "21f8d542e598ffe150e24377b77d8a22a7ddf461d580623bd4bc23e881e2df10",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    1.3007,
+    0.0369,
+    0.0719
+   ],
+   "area_m2": 0.202,
+   "rod_area_share": 1.0,
+   "dense_samples": 22443,
+   "coarse_samples": 5000
+  },
+  "core4d_stick008": {
+   "dataset": "CORE4D",
+   "category": "stick",
+   "object": "stick008",
+   "mesh": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/stick/stick008_m.obj",
+   "scale": 1.0,
+   "mesh_sha256": "ebaaf40e03eb6e6094cec1c82784588fa0a6a942236d93295cb3721e3833f396",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    1.2061,
+    0.0539,
+    0.0534
+   ],
+   "area_m2": 0.1,
+   "rod_area_share": 1.0,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "omomo_clothesstand": {
+   "dataset": "OMOMO",
+   "category": "clothesstand",
+   "object": "clothesstand",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/clothesstand_cleaned_simplified.obj",
+   "scale": 0.2745881527662277,
+   "mesh_sha256": "43d7a5221325bb582cda59ce90620ca6ae84008fce6d2e21ae477df2848e2b22",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    1.2267,
+    1.4979,
+    0.527
+   ],
+   "area_m2": 0.4897,
+   "rod_area_share": 0.1966,
+   "dense_samples": 54416,
+   "coarse_samples": 5000
+  },
+  "omomo_floorlamp": {
+   "dataset": "OMOMO",
+   "category": "floorlamp",
+   "object": "floorlamp",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/floorlamp_cleaned_simplified.obj",
+   "scale": 0.37936876714229584,
+   "mesh_sha256": "f9d627d546dcaf118f662a37445b0d8ccdc4adaf5affab69d384ff8fd38d7a7d",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    1.7163,
+    0.7804,
+    0.5355
+   ],
+   "area_m2": 0.3744,
+   "rod_area_share": 0.4008,
+   "dense_samples": 41596,
+   "coarse_samples": 5000
+  },
+  "omomo_largebox": {
+   "dataset": "OMOMO",
+   "category": "largebox",
+   "object": "largebox",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/largebox_cleaned_simplified.obj",
+   "scale": 0.34871187806129456,
+   "mesh_sha256": "b12b8e95cf12cc95f18cb9757048f35ad92764b78fa059a31742e3e35b88ffae",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.4705,
+    0.4581,
+    0.4073
+   ],
+   "area_m2": 0.637,
+   "rod_area_share": 0.0,
+   "dense_samples": 70783,
+   "coarse_samples": 6370
+  },
+  "omomo_largetable": {
+   "dataset": "OMOMO",
+   "category": "largetable",
+   "object": "largetable",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/largetable_cleaned_simplified.obj",
+   "scale": 0.02585613541305065,
+   "mesh_sha256": "17f0ccfc25481e397f5491100c53d6337341b8eb105fee872635f6ab7948c5e8",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5586,
+    0.458,
+    0.5586
+   ],
+   "area_m2": 1.0593,
+   "rod_area_share": 0.2627,
+   "dense_samples": 117699,
+   "coarse_samples": 10592
+  },
+  "omomo_monitor": {
+   "dataset": "OMOMO",
+   "category": "monitor",
+   "object": "monitor",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/monitor_cleaned_simplified.obj",
+   "scale": 0.15825824439525604,
+   "mesh_sha256": "3f49731248ff12af19d8af9188bf2ae263b92c458644015210283724ee1b9851",
+   "watertight": false,
+   "fixed_normals": true,
+   "extents_m": [
+    0.5578,
+    0.4623,
+    0.1667
+   ],
+   "area_m2": 0.4064,
+   "rod_area_share": 0.0084,
+   "dense_samples": 45157,
+   "coarse_samples": 5000
+  },
+  "omomo_mop_top": {
+   "dataset": "OMOMO",
+   "category": "mop",
+   "object": "mop_top",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/mop_cleaned_simplified_top.obj",
+   "scale": 0.16722442209720612,
+   "mesh_sha256": "4eae4476793c3ed7dfba21fa066628a0f9d998d9d1029e5a534b3d8fb0537aef",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.6938,
+    0.8029,
+    0.581
+   ],
+   "area_m2": 0.1354,
+   "rod_area_share": 1.0,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "omomo_mop_bottom": {
+   "dataset": "OMOMO",
+   "category": "mop",
+   "object": "mop_bottom",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/mop_cleaned_simplified_bottom.obj",
+   "scale": 0.16088470816612244,
+   "mesh_sha256": "63e87c9836729cce0e5dddee378e36ae27865df4b1b5f28110d8f552b3b29f68",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.2362,
+    0.339,
+    0.2966
+   ],
+   "area_m2": 0.1434,
+   "rod_area_share": 0.039,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "omomo_plasticbox": {
+   "dataset": "OMOMO",
+   "category": "plasticbox",
+   "object": "plasticbox",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/plasticbox_cleaned_simplified.obj",
+   "scale": 0.025237061083316803,
+   "mesh_sha256": "8ed91a5cc833cd5ae90a921e698006b63bbcf76403d3e09a22b0356aaf2bf150",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.5557,
+    0.2784,
+    0.3857
+   ],
+   "area_m2": 1.3792,
+   "rod_area_share": 0.0168,
+   "dense_samples": 153244,
+   "coarse_samples": 13791
+  },
+  "omomo_smallbox": {
+   "dataset": "OMOMO",
+   "category": "smallbox",
+   "object": "smallbox",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/smallbox_cleaned_simplified.obj",
+   "scale": 0.3145338296890259,
+   "mesh_sha256": "3dc2468ccb5447194207f763a2275b32ab63088b45fc0725ce081022eecd24cf",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3864,
+    0.4376,
+    0.2362
+   ],
+   "area_m2": 0.3229,
+   "rod_area_share": 0.0,
+   "dense_samples": 35876,
+   "coarse_samples": 5000
+  },
+  "omomo_smalltable": {
+   "dataset": "OMOMO",
+   "category": "smalltable",
+   "object": "smalltable",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/smalltable_cleaned_simplified.obj",
+   "scale": 0.016265029087662697,
+   "mesh_sha256": "c2271eacab1077142e62f24ddc6f76f478a76b997ed31c5dae36f459e77d289d",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3536,
+    0.349,
+    0.3666
+   ],
+   "area_m2": 0.4438,
+   "rod_area_share": 0.276,
+   "dense_samples": 49311,
+   "coarse_samples": 5000
+  },
+  "omomo_suitcase": {
+   "dataset": "OMOMO",
+   "category": "suitcase",
+   "object": "suitcase",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/suitcase_cleaned_simplified.obj",
+   "scale": 0.36724308133125305,
+   "mesh_sha256": "40aebe2e2cd9e232f145ca0959771806e5de6327b269a586c4ad318c3331c827",
+   "watertight": true,
+   "fixed_normals": false,
+   "extents_m": [
+    0.4116,
+    0.5337,
+    0.415
+   ],
+   "area_m2": 0.7616,
+   "rod_area_share": 0.0,
+   "dense_samples": 84617,
+   "coarse_samples": 7615
+  },
+  "omomo_trashcan": {
+   "dataset": "OMOMO",
+   "category": "trashcan",
+   "object": "trashcan",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/trashcan_cleaned_simplified.obj",
+   "scale": 0.23269648104906082,
+   "mesh_sha256": "d23e3e6ae8b715464d06076a73a95685b983954f0ba1e402d01c80ad3a194733",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.3258,
+    0.3678,
+    0.3051
+   ],
+   "area_m2": 0.314,
+   "rod_area_share": 0.0006,
+   "dense_samples": 34888,
+   "coarse_samples": 5000
+  },
+  "omomo_tripod": {
+   "dataset": "OMOMO",
+   "category": "tripod",
+   "object": "tripod",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/tripod_cleaned_simplified.obj",
+   "scale": 0.22387447953224182,
+   "mesh_sha256": "dec2043d5e0ca8b11ad6dd1cd6a29a7b5a2fe83e37a1c6d6fd3da02230baea33",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    1.3005,
+    1.1662,
+    0.3082
+   ],
+   "area_m2": 0.1374,
+   "rod_area_share": 0.7192,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "omomo_vacuum_top": {
+   "dataset": "OMOMO",
+   "category": "vacuum",
+   "object": "vacuum_top",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/vacuum_cleaned_simplified_top.obj",
+   "scale": 0.19146177172660828,
+   "mesh_sha256": "cd13a8aea2d0d85ea58b91435ef47da9e81abe2dd2f5bd221b853ca01b1d6438",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.9095,
+    0.3909,
+    0.5612
+   ],
+   "area_m2": 0.3081,
+   "rod_area_share": 0.1632,
+   "dense_samples": 34232,
+   "coarse_samples": 5000
+  },
+  "omomo_vacuum_bottom": {
+   "dataset": "OMOMO",
+   "category": "vacuum",
+   "object": "vacuum_bottom",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/vacuum_cleaned_simplified_bottom.obj",
+   "scale": 0.19295396655797958,
+   "mesh_sha256": "5d4168d4bc6c343b24400d5c93c3bd32af599b4484c72666ac617ba67e9d0315",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.1801,
+    0.2491,
+    0.0775
+   ],
+   "area_m2": 0.0702,
+   "rod_area_share": 0.0632,
+   "dense_samples": 20000,
+   "coarse_samples": 5000
+  },
+  "omomo_whitechair": {
+   "dataset": "OMOMO",
+   "category": "whitechair",
+   "object": "whitechair",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/whitechair_cleaned_simplified.obj",
+   "scale": 0.31307509541511536,
+   "mesh_sha256": "1185e346b72137054eec9734f803249b1a6c1ce96c26bff1f34191b148464820",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.9242,
+    0.6832,
+    0.8155
+   ],
+   "area_m2": 0.5933,
+   "rod_area_share": 0.1723,
+   "dense_samples": 65924,
+   "coarse_samples": 5933
+  },
+  "omomo_woodchair": {
+   "dataset": "OMOMO",
+   "category": "woodchair",
+   "object": "woodchair",
+   "mesh": "/home/kevin/holosoma/data/captured_objects/woodchair_cleaned_simplified.obj",
+   "scale": 0.02489704266190529,
+   "mesh_sha256": "b1d5c05d65abcaca0f33142ee5b5c658af6b597b84d48661faf73d6cbb14a813",
+   "watertight": false,
+   "fixed_normals": false,
+   "extents_m": [
+    0.6395,
+    0.6239,
+    0.8782
+   ],
+   "area_m2": 0.9466,
+   "rod_area_share": 0.1999,
+   "dense_samples": 105183,
+   "coarse_samples": 9466
+  }
+ },
+ "smplx_models": {
+  "MALE": "ab318e3f37d2bfaae26abf4e6fab445c2a610e1d63714794d60379cc263bc2a5",
+  "FEMALE": "b2a3686c9d6d218ff6822fba411c607a3c8125a70af340f384ce68bebecabe0e",
+  "NEUTRAL": "376021446ddc86e99acacd795182bbef903e61d33b76b9d8b359c2b0865bd992"
+ },
+ "omomo_pickles": {
+  "train": "048d55d1801ea8c70d86b84a10052654cdbac267504873d455116f459c9048b9",
+  "test": "1a3236c485468d9e89abf12b79b2bbdf7251b60b6da8b0c0ddeacf2507335ead"
+ },
+ "sequences": 6794,
+ "seconds": 902.6,
+ "limit": null,
+ "memory": {
+  "parent_peak_rss_gb": 0.833,
+  "worker_peak_rss_gb_max": 1.021,
+  "workers": 8
+ }
+}
