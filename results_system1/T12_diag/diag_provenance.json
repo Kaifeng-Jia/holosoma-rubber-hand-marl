@@ -1,0 +1,211 @@
+{
+ "script": "system1/t12diag/diag_table.py",
+ "script_sha256": "21a4135d74f7cb18916c6e17979e71c5c590491b802db50707ca6b4583d7a450",
+ "contact_stats_sha256": "2e2c60445510c28aeb3d676a8200a5b921b63167ee64b48649d38bf74d018cef",
+ "force_threshold_n": 1.0,
+ "windows_first_contact_frame": {
+  "table": 1,
+  "bucket": 0
+ },
+ "reference": {
+  "task": "table",
+  "file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+  "sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+  "loader": "PairedMotionReference"
+ },
+ "runs": [
+  {
+   "task": "bucket",
+   "seed": 721,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed721/it12000_pm2",
+   "summary_sha256": "bf29364c04c0184488cf45881733b194a3134097d991f4b4b1f09e170f68b907"
+  },
+  {
+   "task": "bucket",
+   "seed": 721,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed721_pm2",
+   "summary_sha256": "d64e0ce9fb8df8884431e3e427d4a83875f2d1a1367358d789976a46eb047802"
+  },
+  {
+   "task": "bucket",
+   "seed": 721,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed721/it12000_pm8",
+   "summary_sha256": "37309af4c388089fa0a0f89d1ed46956738a12e86883e662268f00ea33306b69"
+  },
+  {
+   "task": "bucket",
+   "seed": 721,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed721_pm8",
+   "summary_sha256": "e37ad8bfd99e817b55bfa8ae30c668657ade83aa63f9270b1596c7cbb5190985"
+  },
+  {
+   "task": "bucket",
+   "seed": 722,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed722/it12000_pm2",
+   "summary_sha256": "6a9b33d45e6ef90bca1a425c78bcb706a571b03f5351c5593a93241a4ff4c5b5"
+  },
+  {
+   "task": "bucket",
+   "seed": 722,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed722_pm2",
+   "summary_sha256": "38b1b1cf6ea322e1c7dbac3db6eb2438923d97d7656a3ec944ef1d8b672059d3"
+  },
+  {
+   "task": "bucket",
+   "seed": 722,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed722/it12000_pm8",
+   "summary_sha256": "64ff7dc4b0bb1747bbd23431075cb787b880f7d96e46d5e69cb1d33d8202a9bd"
+  },
+  {
+   "task": "bucket",
+   "seed": 722,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed722_pm8",
+   "summary_sha256": "a8fda151f4883970ea9a760a839e4c4a2604f2af9c02d061a107cdbb6d7f8d7d"
+  },
+  {
+   "task": "bucket",
+   "seed": 723,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_bucket_paper_B-RZ0_seed723/it12000_pm2",
+   "summary_sha256": "f70bd0f626bfbefead00ca1a96607a8bec0fa0f9d81bfb6b7af60ff8734b9be5"
+  },
+  {
+   "task": "bucket",
+   "seed": 723,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed723_pm2",
+   "summary_sha256": "4c62ff0726579286ddb22685f819260b8446bf62e7b10d2589158f66de3531a8"
+  },
+  {
+   "task": "bucket",
+   "seed": 723,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_bucket_paper_B-RZ0_seed723/it12000_pm8",
+   "summary_sha256": "8ee8af91f9484cd36f0bdba1eac834c1a29828615a067b90d526cd678a14a7a9"
+  },
+  {
+   "task": "bucket",
+   "seed": 723,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_bucket_seed723_pm8",
+   "summary_sha256": "7854f8b642e20291e14d81adea9888801048ab4aa7bd1260ac284320212845a7"
+  },
+  {
+   "task": "table",
+   "seed": 721,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed721/it12000_pm2",
+   "summary_sha256": "e0582e30b97fb6b6ba3b87654c125cf07ecffe0fce0e2dba976213975c9bc2bf"
+  },
+  {
+   "task": "table",
+   "seed": 721,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed721_pm2",
+   "summary_sha256": "e052b8915f090921f0f4c023afed0591b4e6a765438ede928966db7145638153"
+  },
+  {
+   "task": "table",
+   "seed": 721,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed721/it12000_pm8",
+   "summary_sha256": "7523c4ceef5472164cef661c0c2b10992ba7ffbb6e4a13740229d01dcc420ab2"
+  },
+  {
+   "task": "table",
+   "seed": 721,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed721_pm8",
+   "summary_sha256": "f0ed2ad46df48c1bd5b86f20591130a5c741ecbb0abc461cfd84dadbca7ea254"
+  },
+  {
+   "task": "table",
+   "seed": 722,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed722/it12000_pm2",
+   "summary_sha256": "4e15ecb89c0b01e7b941cfcfc0810acb04d03f7683f1ebae519b15cd09412afe"
+  },
+  {
+   "task": "table",
+   "seed": 722,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed722_pm2",
+   "summary_sha256": "7f171a9c32aeced7bdafe2af0e2388e9ea60ff1755c8980f5d8eaf156e9e9f70"
+  },
+  {
+   "task": "table",
+   "seed": 722,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed722/it12000_pm8",
+   "summary_sha256": "d8d04e72d9687824f2f3915b870dceac61620a28667205976f25a755a740caff"
+  },
+  {
+   "task": "table",
+   "seed": 722,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed722_pm8",
+   "summary_sha256": "765f510adb50501ad82f969193777a00e0bcc0e0f96006fd3820fc27c6c87002"
+  },
+  {
+   "task": "table",
+   "seed": 723,
+   "level_cm": 2,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_curve/D_table_paper_T-07_seed723/it12000_pm2",
+   "summary_sha256": "110518960f42e84f4fef48929ff8a7ef3b553d4f6b53df02baeda21f3dd6eb0b"
+  },
+  {
+   "task": "table",
+   "seed": 723,
+   "level_cm": 2,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed723_pm2",
+   "summary_sha256": "5d089315e26e60e28c3e561fd323d060d89f8289abb1dabf467d41bfe3a9189d"
+  },
+  {
+   "task": "table",
+   "seed": 723,
+   "level_cm": 8,
+   "simulator": "isaac",
+   "eval_dir": "logs_system1/post_train/d_paper_final/D_table_paper_T-07_seed723/it12000_pm8",
+   "summary_sha256": "9cfe4855d412ba7e45d6d354cdec9dfe4f47125ebda17f56fa3c92ed08d7e4d9"
+  },
+  {
+   "task": "table",
+   "seed": 723,
+   "level_cm": 8,
+   "simulator": "mujoco",
+   "eval_dir": "logs_system1/t10/mj_eval/d_table_seed723_pm8",
+   "summary_sha256": "e62efc9175097b0e27b157b092451fe32231f8f273372e738aff78e366c28bc0"
+  }
+ ],
+ "wall_s": 522
+}

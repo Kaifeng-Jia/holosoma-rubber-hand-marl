@@ -1,0 +1,271 @@
+{
+ "frames": 687,
+ "window": [
+  1,
+  686
+ ],
+ "urdf": {
+  "robot0": {
+   "closest_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0087,
+    "p75": -0.0059,
+    "p95": -0.0043,
+    "share_within_1p5cm": 0.5845,
+    "share_penetrating": 0.0029,
+    "max_penetration_cm": 0.05
+   },
+   "left_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0164,
+    "p75": -0.0132,
+    "p95": -0.0091,
+    "share_within_1p5cm": 0.3528,
+    "share_penetrating": 0.0015,
+    "max_penetration_cm": 0.02
+   },
+   "right_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0098,
+    "p75": -0.006,
+    "p95": -0.0045,
+    "share_within_1p5cm": 0.5845,
+    "share_penetrating": 0.0015,
+    "max_penetration_cm": 0.05
+   },
+   "per_phase_closest_hand": {
+    "still": {
+     "frames": 372,
+     "median_cm": -100.0,
+     "share_within_1p5cm": 0.2339,
+     "share_penetrating": 0.0054
+    },
+    "lift": {
+     "frames": 25,
+     "median_cm": -0.95,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    },
+    "push": {
+     "frames": 95,
+     "median_cm": -0.6,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    },
+    "carry": {
+     "frames": 185,
+     "median_cm": -0.6,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    },
+    "lower": {
+     "frames": 9,
+     "median_cm": -0.62,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    }
+   }
+  },
+  "robot1": {
+   "closest_hand": {
+    "p5": -1.0,
+    "p25": -0.0046,
+    "p50": -0.001,
+    "p75": 0.0024,
+    "p95": 0.0078,
+    "share_within_1p5cm": 0.7988,
+    "share_penetrating": 0.4329,
+    "max_penetration_cm": 0.8
+   },
+   "left_hand": {
+    "p5": -1.0,
+    "p25": -0.0162,
+    "p50": -0.0084,
+    "p75": -0.0038,
+    "p95": 0.0078,
+    "share_within_1p5cm": 0.7289,
+    "share_penetrating": 0.1268,
+    "max_penetration_cm": 0.8
+   },
+   "right_hand": {
+    "p5": -1.0,
+    "p25": -0.0105,
+    "p50": -0.0017,
+    "p75": 0.0011,
+    "p95": 0.0038,
+    "share_within_1p5cm": 0.7988,
+    "share_penetrating": 0.3469,
+    "max_penetration_cm": 0.64
+   },
+   "per_phase_closest_hand": {
+    "still": {
+     "frames": 372,
+     "median_cm": -0.17,
+     "share_within_1p5cm": 0.629,
+     "share_penetrating": 0.4301
+    },
+    "lift": {
+     "frames": 25,
+     "median_cm": -0.57,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    },
+    "push": {
+     "frames": 95,
+     "median_cm": 0.13,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.7789
+    },
+    "carry": {
+     "frames": 185,
+     "median_cm": -0.14,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.2919
+    },
+    "lower": {
+     "frames": 9,
+     "median_cm": 0.23,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    }
+   }
+  }
+ },
+ "physx": {
+  "robot0": {
+   "closest_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0028,
+    "p75": 0.0002,
+    "p95": 0.0031,
+    "share_within_1p5cm": 0.5845,
+    "share_penetrating": 0.2624,
+    "max_penetration_cm": 0.36
+   },
+   "left_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0104,
+    "p75": -0.0062,
+    "p95": -0.0039,
+    "share_within_1p5cm": 0.5685,
+    "share_penetrating": 0.0,
+    "max_penetration_cm": -0.12
+   },
+   "right_hand": {
+    "p5": -1.0,
+    "p25": -1.0,
+    "p50": -0.0028,
+    "p75": 0.0002,
+    "p95": 0.0031,
+    "share_within_1p5cm": 0.5845,
+    "share_penetrating": 0.2624,
+    "max_penetration_cm": 0.36
+   },
+   "per_phase_closest_hand": {
+    "still": {
+     "frames": 372,
+     "median_cm": -100.0,
+     "share_within_1p5cm": 0.2339,
+     "share_penetrating": 0.1129
+    },
+    "lift": {
+     "frames": 25,
+     "median_cm": -0.3,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.0
+    },
+    "push": {
+     "frames": 95,
+     "median_cm": 0.24,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.8316
+    },
+    "carry": {
+     "frames": 185,
+     "median_cm": -0.07,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 0.2703
+    },
+    "lower": {
+     "frames": 9,
+     "median_cm": 0.22,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    }
+   }
+  },
+  "robot1": {
+   "closest_hand": {
+    "p5": -1.0,
+    "p25": 0.0024,
+    "p50": 0.0046,
+    "p75": 0.0068,
+    "p95": 0.0082,
+    "share_within_1p5cm": 0.7988,
+    "share_penetrating": 0.7915,
+    "max_penetration_cm": 0.87
+   },
+   "left_hand": {
+    "p5": -1.0,
+    "p25": -0.0174,
+    "p50": -0.0008,
+    "p75": 0.0022,
+    "p95": 0.007,
+    "share_within_1p5cm": 0.7347,
+    "share_penetrating": 0.4329,
+    "max_penetration_cm": 0.75
+   },
+   "right_hand": {
+    "p5": -1.0,
+    "p25": 0.0024,
+    "p50": 0.0042,
+    "p75": 0.0059,
+    "p95": 0.0082,
+    "share_within_1p5cm": 0.7988,
+    "share_penetrating": 0.7915,
+    "max_penetration_cm": 0.87
+   },
+   "per_phase_closest_hand": {
+    "still": {
+     "frames": 372,
+     "median_cm": 0.35,
+     "share_within_1p5cm": 0.629,
+     "share_penetrating": 0.6156
+    },
+    "lift": {
+     "frames": 25,
+     "median_cm": 0.46,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    },
+    "push": {
+     "frames": 95,
+     "median_cm": 0.78,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    },
+    "carry": {
+     "frames": 185,
+     "median_cm": 0.46,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    },
+    "lower": {
+     "frames": 9,
+     "median_cm": 0.79,
+     "share_within_1p5cm": 1.0,
+     "share_penetrating": 1.0
+    }
+   }
+  }
+ },
+ "reference_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+ "reference_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+ "phase_rule": "T10b phase labels (references.json d_table)",
+ "distance_convention": "signed distance in m, positive = penetration into the table; culled hands (farther than about 1.5 cm + link radius) = -1 m"
+}
