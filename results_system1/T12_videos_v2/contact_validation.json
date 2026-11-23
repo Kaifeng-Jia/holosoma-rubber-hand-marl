@@ -1,0 +1,243 @@
+{
+ "geometry": "urdf",
+ "fk": {
+  "samples": 40,
+  "max_position_diff_m": 8.881784197001252e-16,
+  "max_rotation_entry_diff": 5.551115123125783e-16
+ },
+ "sdf_push": {
+  "kind": "boxes",
+  "near_surface": {
+   "points": 20000,
+   "max_abs_diff_m": 1.1374102991006975e-06,
+   "p99_abs_diff_m": 2.0816681711721685e-17,
+   "contact_class_mismatch_share": 0.0,
+   "mismatch_within_2mm_of_threshold": 0
+  },
+  "uniform_in_box": {
+   "points": 20000,
+   "max_abs_diff_m": 1.3385657316074273e-07,
+   "p99_abs_diff_m": 2.0816681711721685e-17,
+   "contact_class_mismatch_share": 0.0,
+   "mismatch_within_2mm_of_threshold": 0
+  }
+ },
+ "sdf_pull": {
+  "kind": "boxes",
+  "near_surface": {
+   "points": 20000,
+   "max_abs_diff_m": 0.009623852991234371,
+   "p99_abs_diff_m": 2.0816681711721685e-17,
+   "contact_class_mismatch_share": 0.0,
+   "mismatch_within_2mm_of_threshold": 0
+  },
+  "uniform_in_box": {
+   "points": 20000,
+   "max_abs_diff_m": 3.951508092438216e-08,
+   "p99_abs_diff_m": 2.0816681711721685e-17,
+   "contact_class_mismatch_share": 0.0,
+   "mismatch_within_2mm_of_threshold": 0
+  }
+ },
+ "sdf_bucket": {
+  "kind": "grid",
+  "near_surface": {
+   "points": 20000,
+   "max_abs_diff_m": 0.9662911848657959,
+   "p99_abs_diff_m": 0.0016177330548104829,
+   "contact_class_mismatch_share": 0.0015,
+   "mismatch_within_2mm_of_threshold": 28
+  },
+  "uniform_in_box": {
+   "points": 20000,
+   "max_abs_diff_m": 0.028267699322435925,
+   "p99_abs_diff_m": 0.0007799231217316041,
+   "contact_class_mismatch_share": 0.00035,
+   "mismatch_within_2mm_of_threshold": 7
+  }
+ },
+ "sdf_chair": {
+  "kind": "grid",
+  "near_surface": {
+   "points": 20000,
+   "max_abs_diff_m": 0.967089064438821,
+   "p99_abs_diff_m": 0.0019398269758800634,
+   "contact_class_mismatch_share": 0.0011,
+   "mismatch_within_2mm_of_threshold": 21
+  },
+  "uniform_in_box": {
+   "points": 20000,
+   "max_abs_diff_m": 0.014199610000254069,
+   "p99_abs_diff_m": 0.0010004892015677664,
+   "contact_class_mismatch_share": 0.00025,
+   "mismatch_within_2mm_of_threshold": 5
+  }
+ },
+ "sdf_table": {
+  "kind": "boxes",
+  "near_surface": {
+   "points": 20000,
+   "max_abs_diff_m": 0.038915642063249746,
+   "p99_abs_diff_m": 0.011440490013739701,
+   "contact_class_mismatch_share": 0.00045,
+   "mismatch_within_2mm_of_threshold": 6
+  },
+  "uniform_in_box": {
+   "points": 20000,
+   "max_abs_diff_m": 0.030617084573234463,
+   "p99_abs_diff_m": 2.7755575615628914e-17,
+   "contact_class_mismatch_share": 0.0001,
+   "mismatch_within_2mm_of_threshold": 0
+  }
+ },
+ "t12_reproduction": {
+  "episodes": [
+   {
+    "simulator": "isaac",
+    "state_id": "perturbed_000",
+    "contact_fraction_r0_left": {
+     "t12": 0.08,
+     "fast": 0.08
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 0.911,
+     "fast": 0.911
+    },
+    "contact_fraction_r1_right": {
+     "t12": 0.942,
+     "fast": 0.942
+    }
+   },
+   {
+    "simulator": "isaac",
+    "state_id": "perturbed_001",
+    "contact_fraction_r0_left": {
+     "t12": 0.052,
+     "fast": 0.052
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 0.938,
+     "fast": 0.938
+    },
+    "contact_fraction_r1_right": {
+     "t12": 0.924,
+     "fast": 0.924
+    }
+   },
+   {
+    "simulator": "isaac",
+    "state_id": "perturbed_002",
+    "contact_fraction_r0_left": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 1.0,
+     "fast": 1.0
+    },
+    "contact_fraction_r1_right": {
+     "t12": 0.664,
+     "fast": 0.664
+    }
+   },
+   {
+    "simulator": "mujoco",
+    "state_id": "perturbed_000",
+    "contact_fraction_r0_left": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 1.0,
+     "fast": 1.0
+    },
+    "contact_fraction_r1_right": {
+     "t12": 1.0,
+     "fast": 1.0
+    }
+   },
+   {
+    "simulator": "mujoco",
+    "state_id": "perturbed_001",
+    "contact_fraction_r0_left": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 1.0,
+     "fast": 1.0
+    },
+    "contact_fraction_r1_right": {
+     "t12": 0.963,
+     "fast": 0.963
+    }
+   },
+   {
+    "simulator": "mujoco",
+    "state_id": "perturbed_002",
+    "contact_fraction_r0_left": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r0_right": {
+     "t12": 0.0,
+     "fast": 0.0
+    },
+    "contact_fraction_r1_left": {
+     "t12": 0.984,
+     "fast": 0.984
+    },
+    "contact_fraction_r1_right": {
+     "t12": 0.862,
+     "fast": 0.862
+    }
+   }
+  ],
+  "max_abs_diff": 0.0
+ },
+ "sample_points": {
+  "pelvis": 1666,
+  "left_hip_roll_link": 1618,
+  "left_hip_yaw_link": 2490,
+  "left_knee_link": 1929,
+  "left_ankle_roll_link": 758,
+  "right_hip_roll_link": 1612,
+  "right_hip_yaw_link": 2488,
+  "right_knee_link": 1929,
+  "right_ankle_roll_link": 758,
+  "torso_link": 13326,
+  "head_link": 2415,
+  "left_shoulder_yaw_link": 796,
+  "left_elbow_link": 656,
+  "left_wrist_roll_link": 301,
+  "left_wrist_pitch_link": 550,
+  "left_wrist_yaw_link": 299,
+  "left_rubber_hand_link": 1526,
+  "right_shoulder_yaw_link": 796,
+  "right_elbow_link": 659,
+  "right_wrist_roll_link": 329,
+  "right_wrist_pitch_link": 552,
+  "right_wrist_yaw_link": 296,
+  "right_rubber_hand_link": 1567
+ }
+}
