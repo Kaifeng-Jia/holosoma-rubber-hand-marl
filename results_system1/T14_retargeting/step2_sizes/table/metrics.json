@@ -1,0 +1,723 @@
+{
+ "rules": "T14 section 4 metrics for Table references (30 Hz compact pairs). Read only, CPU.\n\nGeometry = the simulator's: robot links = the PhysX-cooked shapes of the T10 Isaac dump (T12-v2 Robot('physx')); object =\nthe training Table (desk001_5kg_training.urdf, five boxes = desk001 proxy x 0.7412, exact union-of-boxes signed distance,\npositive inside). Robot r <-> CORE4D person r+1 (robot 0 = person1). Source 15 Hz frame t <-> reference 30 Hz frame 2t.\n\n* palm signed distance: per robot and hand, the hand link's largest signed distance (exact, no culling).\n* contact retention (CoCarry definition as written in T14 section 4): condition frames = source frames where that person's\n  hand is within 0.10 m of the source object's surface (any SMPL-X hand vertex, raw desk001 mesh, stop-1 surface-sample\n  signed distance) and the source object moves faster than 0.03 m/s (object origin, central difference, 15 Hz); retained\n  when the robot hand's signed distance >= -0.02 m. Per robot / hand and pooled.\n* penetration: a frame penetrates when any link of the robot has signed distance > 0 (also reported with OmniRetarget's\n  1 cm tolerance, > 0.01 m); share of frames and the largest depth; hands and other links separately.\n* foot slip: robot toe = left/right_ankle_roll_sphere_5_link of the retargeting MJCF (OmniRetarget's evaluator), human toe\n  = SMPL-X L_Foot / R_Foot of the canonical sequence resampled to 30 Hz (the solve input); horizontal displacement per\n  frame. Two definitions: (T14 text) support = human toe speed < 0.01 m/s, slide = robot toe speed > 0.01 m/s;\n  (OmniRetarget code, eval_retargeting.py) support = human toe moves < 0.01 m per frame, slide = robot toe moves > 0.01 m\n  per frame. Share of support frames with a slide, and the largest robot toe speed in a sliding frame (m/s).\n* robot-robot clearance: smallest distance between the two robots' link sample points (every 3rd frame).\n* T12-diag phases (reference_hand_table_distance_per_frame.csv, 50 Hz labels mapped by time): per robot, the closer hand's\n  signed distance in lift / push / carry / lower: median, share within 1.5 cm, share penetrating.\n\n    sonic_s1/bin/python -B system1/t14/eval_table_refs.py --ref current=... --ref new=... --out results_system1/T14_retargeting/step1_table\n",
+ "object_urdf": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+ "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+ "refs": {
+  "k0.8": {
+   "path": "exports_system1/T14_references/table_k0p8/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "d8be2251f73c616b57d812f01145578db1dd474cae72d2700ff82a8ae0b880e0",
+   "frames": 413,
+   "object_urdf": "/home/kevin/duet-system1/exports_system1/T14_references/table_k0p8/desk001_k0p8.urdf",
+   "object_urdf_sha256": "c729ffa58d1d5c99745960fef75661bb9cc2f7e09e90802274d6020718724da4",
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 0.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 0.0
+    },
+    "r0_both_hands_pooled": 0.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 0.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 0.0
+    },
+    "r1_both_hands_pooled": 0.0,
+    "pooled": 0.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.0,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.0,
+     "hand_max_depth_cm": 0.0,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.0
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.0,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.0,
+     "hand_max_depth_cm": 0.0,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.0
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0421
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.9211,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.42,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 14.71,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -4.62,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": -4.7,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -5.01,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": -4.72,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -19.32,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": -4.83,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": -3.77,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": -4.78,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": -3.45,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": -9.59,
+     "within_1p5cm": 0.0,
+     "penetrating": 0.0
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.0
+   }
+  },
+  "k0.9": {
+   "path": "exports_system1/T14_references/table_k0p9/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c68412084a63749c844fb4ff83c9a02be26aba3e4608260e7a1e1efa3471c721",
+   "frames": 413,
+   "object_urdf": "/home/kevin/duet-system1/exports_system1/T14_references/table_k0p9/desk001_k0p9.urdf",
+   "object_urdf_sha256": "b9a176db2f67d9d2b661aa1f2e737beef835438f94560ae4d53b89351fc6e3af",
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 0.9899
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 0.2222
+    },
+    "r0_both_hands_pooled": 0.6061,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 0.7879
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 0.8939,
+    "pooled": 0.75
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.0,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.0,
+     "hand_max_depth_cm": 0.0,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.0
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.0,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.0,
+     "hand_max_depth_cm": 0.0,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.0
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0354
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.8421,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.42,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 20.52,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.6,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": -0.69,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -0.54,
+     "within_1p5cm": 0.982,
+     "penetrating": 0.0
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": -0.77,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -15.34,
+     "within_1p5cm": 0.143,
+     "penetrating": 0.0
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": -0.71,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": -0.71,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": -1.16,
+     "within_1p5cm": 0.91,
+     "penetrating": 0.0
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": -0.65,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": -4.77,
+     "within_1p5cm": 0.237,
+     "penetrating": 0.0
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.1489633236432173
+   }
+  },
+  "k1.0": {
+   "path": "exports_system1/T14_references/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "6166aa3c52ec5acaef8560160ab52d0bb890be143ef40fb40c54f543e4105da8",
+   "frames": 413,
+   "object_urdf": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.3777,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.11,
+     "hand_max_depth_cm": 0.11,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.3777
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.6731,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.36,
+     "hand_max_depth_cm": 0.36,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.6731
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 0.9,
+      "max_sliding_toe_speed_mps": 0.0412
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.7895,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.4,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 26.42,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.25
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.05,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.789
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": 0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.586
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.03,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -12.53,
+     "within_1p5cm": 0.228,
+     "penetrating": 0.165
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.21,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.14,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.08,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.982
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.11,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": -0.71,
+     "within_1p5cm": 0.616,
+     "penetrating": 0.406
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.29792664728643425
+   }
+  },
+  "k1.1": {
+   "path": "exports_system1/T14_references/table_k1p1/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c881617a6d61b5a176c5e350ef6bb718682dc2e1763c26d4612b80c825c8b763",
+   "frames": 413,
+   "object_urdf": "/home/kevin/duet-system1/exports_system1/T14_references/table_k1p1/desk001_k1p1.urdf",
+   "object_urdf_sha256": "b56ec77502f67d3b4af207e82337fb94f60a93355c9fdf6ce074d38e52ee22f7",
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.322,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.11,
+     "hand_max_depth_cm": 0.11,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.322
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.7433,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.61,
+     "hand_max_depth_cm": 0.61,
+     "nonhand_max_depth_cm": 0.26,
+     "frames_hand_gt0": 0.7433
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0339
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.7632,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.42,
+    "r1": 0.87
+   },
+   "robot_robot_min_clearance_cm": 32.25,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.25
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.719
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -0.0,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.432
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -11.01,
+     "within_1p5cm": 0.241,
+     "penetrating": 0.156
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.24,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.11,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.93
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.17,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.991
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.16,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": 0.05,
+     "within_1p5cm": 0.625,
+     "penetrating": 0.549
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.4468899709296511
+   }
+  },
+  "k1.2": {
+   "path": "exports_system1/T14_references/table_k1p2/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "54f489a19d53e5bcad4e9b39095c0ecdc9507b38c9265c1bbee6f1d03afefcd6",
+   "frames": 413,
+   "object_urdf": "/home/kevin/duet-system1/exports_system1/T14_references/table_k1p2/desk001_k1p2.urdf",
+   "object_urdf_sha256": "69b7bbea2b6e3dc2cc44dd3702ec03bbd63b250c8b8834bf5c4c3b929125719a",
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.339,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.07,
+     "hand_max_depth_cm": 0.07,
+     "nonhand_max_depth_cm": 0.04,
+     "frames_hand_gt0": 0.2591
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.7288,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.58,
+     "hand_max_depth_cm": 0.46,
+     "nonhand_max_depth_cm": 0.58,
+     "frames_hand_gt0": 0.7288
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0406
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.005,
+      "max_sliding_toe_speed_mps": 0.4955
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.7632,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.42,
+    "r1": 0.75
+   },
+   "robot_robot_min_clearance_cm": 37.09,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.06,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.0,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.526
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.405
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.04,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.8
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -9.94,
+     "within_1p5cm": 0.263,
+     "penetrating": 0.125
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.33,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.1,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.93
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.1,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.991
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.07,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.8
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": 0.13,
+     "within_1p5cm": 0.625,
+     "penetrating": 0.527
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.595853294572868
+   }
+  }
+ }
+}

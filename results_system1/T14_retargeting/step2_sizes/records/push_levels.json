@@ -1,0 +1,82 @@
+{
+ "task": "push",
+ "contact_frames_30hz": [
+  4,
+  77,
+  150
+ ],
+ "levels": [
+  {
+   "label": "a = 0.70（桌长 0.98 m）",
+   "size": 0.7,
+   "pair": "exports_system1/T14_references/push_sizes/m0p70/push_m0p70_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/push_sizes/m0p70/table_m0p70.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.63 cm",
+    "求解成功：是",
+    "机器人最小间隙 0.03 mm（不相交）"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.63,
+    "success": true,
+    "robot_robot_min_distance_cm": 0.003181925234252425
+   }
+  },
+  {
+   "label": "m = 1.0（桌长 1.40 m）",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/push_sizes/m1p00/push_m1p00_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/push_sizes/m1p00/table_m1p00.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.63 cm",
+    "求解成功：是",
+    "机器人最小间隙 35.6 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.63,
+    "success": true,
+    "robot_robot_min_distance_cm": 35.62383399777339
+   }
+  },
+  {
+   "label": "m = 1.5（桌长 2.10 m）",
+   "size": 1.5,
+   "pair": "exports_system1/T14_references/push_sizes/m1p50/push_m1p50_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/push_sizes/m1p50/table_m1p50.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.63 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.63,
+    "success": true,
+    "robot_robot_min_distance_cm": Infinity
+   }
+  },
+  {
+   "label": "m = 2.0（桌长 2.80 m）",
+   "size": 2.0,
+   "pair": "exports_system1/T14_references/push_sizes/m2p00/push_m2p00_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/push_sizes/m2p00/table_m2p00.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.63 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.63,
+    "success": true,
+    "robot_robot_min_distance_cm": Infinity
+   }
+  }
+ ]
+}

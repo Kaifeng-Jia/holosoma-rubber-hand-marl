@@ -13,8 +13,9 @@ Variants (--variant):
              * no new cost term.
   omni_asis  comparison "OmniRetarget as is": the same solve around the shared object without the palm points, with the
              retargeting hand mesh, and with the unshifted Stage-1 solve as prior and initial pose.
-Both: shared object = desk001 five-box proxy x s_bar (mean of the two person scales, 0.7412283856) about the existing
-ground anchor, pose translation anchor + s_bar (x - anchor) (= the current training table); the person's own scaled
+Both: shared object = desk001 five-box proxy x s_shared, s_shared = s_bar * k (s_bar = mean of the two person scales,
+0.7412283856; --k = T14 step 3 uniform scale, 1.0 = the current training table), about the existing ground anchor, pose
+translation anchor + s_shared (x - anchor); the person's own scaled
 human joints and person-scaled object points form the source mesh (Stage 2's nominal / physical split); all solver
 parameters are the existing CORE4D two-stage Stage-2 profile (scripts/retarget_core4d_pair.py: elastic object 1e5 /
 foot 1e4, foot xy tolerance 1 mm, URDF joint limits, nominal prior lambda 5 on all 36 robot qpos, nominal foot height
@@ -23,7 +24,7 @@ foot 1e4, foot xy tolerance 1 mm, URDF joint limits, nominal prior lambda 5 on a
 Hand anchors (step 2 definition, used here only for the step-3 shift): per hand, the frames in which the person's hand
 touches the raw desk001 mesh in the source (any hand vertex signed distance >= -1.5 cm, the T12 / stop-1 rule); anchor =
 per-coordinate median over those frames of the palm point in the object frame, projected to the nearest raw-mesh surface
-point. Displacement of an anchor a at a frame = (s_bar - s_i) * ((x(t) - anchor_ground) + R(t) a); the shift is the mean
+point. Displacement of an anchor a at a frame = (s_shared - s_i) * ((x(t) - anchor_ground) + R(t) a); the shift is the mean
 over both hands' anchors and their contact frames (30 Hz), horizontal part only.
 
     hsretargeting/bin/python -B system1/t14/table_shared.py --variant new --person 1 --out logs_system1/t14/table/new
@@ -48,9 +49,24 @@ sys.path.insert(0, str(ROOT / "src/holosoma_retargeting"))
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 
 CORE4D = Path("/home/kevin/datasets/CORE4D-V1-full")
-SEQ_RAW = CORE4D / "CORE4D_Real/human_object_motions/20231030/001"
-CANON = CORE4D / "derived/20231030_001_desk001_v1_canonical.npz"
-STAGE1 = CORE4D / "retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal"
+PREVIEWS = Path("/home/kevin/holosoma-core4d-base/logs/Core4DPreviews")  # read only
+WBT = Path(__file__).resolve().parents[2] / "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking"
+# --task: the CORE4D two-person sequences of the paper tasks. base = the 1.0x object scale: "mean" = mean of the two person
+# scales (Table, Chair: the current training objects), "one" = the original size (Bin, T14 section 7 item 2).
+TASKS = dict(
+    table=dict(raw="20231030/001", canon=CORE4D / "derived/20231030_001_desk001_v1_canonical.npz",
+               stage1=CORE4D / "retarget_results/method_comparison_20260904/20231030_001_desk001_move/two_stage_fullnominal",
+               obj_key="core4d_desk001", current=WBT / "core4d_smalltable/20231030_001_desk001_move_compact_fps30.npz", base="mean"),
+    bin=dict(raw="20231020/071", canon=PREVIEWS / "bucket003_20231020_071_20260918/source_canonical.npz",
+             stage1=PREVIEWS / "bucket003_20231020_071_20260918/two_stage", obj_key="core4d_bucket003",
+             current=WBT / "core4d_bucket003_20231020_071_a1/core4d_pair_compact_fps30.npz", base="one"),
+    chair=dict(raw="20231020/074", canon=PREVIEWS / "chair021_20231020_074_baseline_20260908/source_canonical.npz",
+               stage1=PREVIEWS / "chair021_20231020_074_baseline_20260908/two_stage", obj_key="core4d_chair021",
+               current=WBT / "core4d_chair021_20231020_074_a1/core4d_pair_compact_fps30.npz", base="mean"))
+SEQ_RAW = CORE4D / "CORE4D_Real/human_object_motions" / TASKS["table"]["raw"]
+CANON = TASKS["table"]["canon"]
+STAGE1 = TASKS["table"]["stage1"]
+OBJ_KEY = TASKS["table"]["obj_key"]
 SMPLX_NEUTRAL = Path("/home/kevin/CS6758Project/data/smplx_models/smplx/SMPLX_NEUTRAL.npz")
 OUTPUT_FPS = 30
 CONTACT = -0.015
@@ -112,7 +128,7 @@ def source_palms_and_contacts(core4d_to_omni):
             flags, loc = [], []
             for t in range(len(V)):
                 R, x = To[t, :3, :3], To[t, :3, 3]
-                r = cp.hand_frame([((V[t, hv[side]] - x) @ R, "core4d_desk001")], None, None)
+                r = cp.hand_frame([((V[t, hv[side]] - x) @ R, OBJ_KEY)], None, None)
                 flags.append(r is not None)
                 loc.append((c[t] - x) @ R)
             contact[(pi, side)] = np.array(flags)
@@ -176,10 +192,15 @@ def palm_point(vertices, side):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--variant", choices=("new", "omni_asis"), required=True)
+    ap.add_argument("--task", choices=tuple(TASKS), default="table")
     ap.add_argument("--person", type=int, choices=(1, 2), required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--max-frames", type=int, default=None, help="smoke only")
+    ap.add_argument("--k", type=float, default=1.0, help="T14 step 3 uniform object scale relative to the 1.0x shared table (s_bar)")
     a = ap.parse_args()
+    global SEQ_RAW, CANON, STAGE1, OBJ_KEY
+    cfg_t = TASKS[a.task]
+    SEQ_RAW, CANON, STAGE1, OBJ_KEY = CORE4D / "CORE4D_Real/human_object_motions" / cfg_t["raw"], cfg_t["canon"], cfg_t["stage1"], cfg_t["obj_key"]
     t0 = time.time()
     out = a.out / f"person{a.person}"
     out.mkdir(parents=True, exist_ok=False)
@@ -202,22 +223,24 @@ def main():
     persons = [prepare_core4d_person_retarget_input(seq, i) for i in range(2)]
     pin = persons[pidx]
     s_i = pin.human_to_robot_scale
-    s_bar = float(np.mean([p.human_to_robot_scale for p in persons]))
+    s_bar = float(np.mean([p.human_to_robot_scale for p in persons])) if cfg_t["base"] == "mean" else 1.0
+    s_shared = s_bar * a.k  # k = 1: the current training object
     anchor = pin.scale_anchor
     assert np.allclose(persons[0].scale_anchor, persons[1].scale_anchor)
     phys = pin.physical_object_poses  # [T, 7] wxyz + xyz, Z-up
     shared = phys.copy()
-    shared[:, 4:] = anchor + s_bar * (phys[:, 4:] - anchor)
+    shared[:, 4:] = anchor + s_shared * (phys[:, 4:] - anchor)
     import holosoma_retargeting
-    rec = dict(holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()), python=sys.executable, variant=a.variant, person=a.person, s_i=s_i, s_bar=s_bar, scale_anchor=anchor.tolist(), canonical=str(CANON), canonical_sha256=sha(CANON),
+    rec = dict(task=a.task, base=cfg_t["base"], holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()), python=sys.executable, variant=a.variant, person=a.person, s_i=s_i, s_bar=s_bar, k=a.k, s_shared=s_shared, scale_anchor=anchor.tolist(), canonical=str(CANON), canonical_sha256=sha(CANON),
                frames=len(phys), fps=OUTPUT_FPS)
 
     # Stage-1 solve of this person (existing, unchanged), checked against the current reference
     st1_path = STAGE1 / f"person{a.person}/person{a.person}_nominal_scaled.npz"
     q1 = np.load(st1_path)["qpos"].astype(np.float64)
     rec.update(stage1=str(st1_path), stage1_sha256=sha(st1_path))
-    cur = np.load(ROOT / "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/20231030_001_desk001_move_compact_fps30.npz")
-    rec["stage1_equals_current_reference_robot"] = float(np.abs(q1[:, :36] - cur["robot_qpos"][:, pidx]).max())
+    cur = np.load(cfg_t["current"])
+    rec["stage1_equals_current_reference_robot"] = (float(np.abs(q1[:, :36] - cur["robot_qpos"][:, pidx]).max())
+                                                    if cur["robot_qpos"].shape[0] == len(q1) else f"frames differ {cur['robot_qpos'].shape[0]} vs {len(q1)}")
     assert len(q1) == len(phys)
 
     human = pin.human_joints
@@ -248,7 +271,7 @@ def main():
             c30 = resample_linear(c15.astype(float)[:, None], src.fps, OUTPUT_FPS)[:, 0] > 0.5
             from scipy.spatial.transform import Rotation
             R = Rotation.from_quat(phys[:, [1, 2, 3, 0]]).as_matrix()
-            d = (s_bar - s_i) * ((phys[:, 4:] - anchor) + R @ surf)
+            d = (s_shared - s_i) * ((phys[:, 4:] - anchor) + R @ surf)
             disp.append(d[c30])
         shift = np.concatenate(disp).mean(0)
         shift_xy = np.array([shift[0], shift[1], 0.0])
@@ -279,7 +302,7 @@ def main():
     assets = create_core4d_retarget_assets(seq.object_mesh_path, pair.BASE_G1_XML, seq.object_name, out / "assets", mass_kg=1.0)
     constants.OBJECT_MESH_FILE = seq.object_mesh_path
     constants.OBJECT_URDF_FILE = str(assets.object_urdf_path)
-    shared_scene = create_uniformly_scaled_object_scene_xml(assets.scene_xml_path, seq.object_name, s_bar, out / "assets" / "shared_scene.xml")
+    shared_scene = create_uniformly_scaled_object_scene_xml(assets.scene_xml_path, seq.object_name, s_shared, out / "assets" / "shared_scene.xml")
     if a.variant == "new":
         shared_scene = patch_hand_meshes(shared_scene, out / "assets" / "shared_scene_simhands.xml", sim_hands)
         assert len(constants.DEMO_JOINTS) == 22 and human.shape[1] == 24, (len(constants.DEMO_JOINTS), human.shape)
@@ -287,7 +310,7 @@ def main():
         constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
     constants.SCENE_XML_FILE = str(shared_scene)
     obj_pts, obj_pts_demo, urdf_path = setup_object_data("object_interaction", constants, None, s_i, task_config, False)
-    obj_pts_shared = obj_pts * s_bar
+    obj_pts_shared = obj_pts * s_shared
     rec["object_points"] = dict(count=int(len(obj_pts)), demo_over_raw=float(np.median(np.linalg.norm(obj_pts_demo, axis=1) / np.maximum(np.linalg.norm(obj_pts, axis=1), 1e-9))))
     kw = build_retargeter_kwargs_from_config(cfg, constants, urdf_path, "object_interaction")
     kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau

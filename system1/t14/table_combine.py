@@ -31,9 +31,12 @@ def main():
     ap.add_argument("--variant-dir", type=Path, required=True)
     ap.add_argument("--variant", required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--task", default="table")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=False)
-    cur = np.load(CURRENT, allow_pickle=False)
+    sys.path.insert(0, str(Path(__file__).resolve().parent))
+    from table_shared import TASKS
+    cur = np.load(TASKS[a.task]["current"], allow_pickle=False)
     qs, recs = [], []
     for p in (1, 2):
         z = np.load(a.variant_dir / f"person{p}/person{p}_{a.variant}_qpos.npz")
@@ -42,18 +45,21 @@ def main():
         obj = z["shared_object_qpos_mj"]
     assert qs[0].shape == qs[1].shape == (len(cur["robot_qpos"]), 43), [q.shape for q in qs]
     assert np.abs(qs[0][:, -7:] - qs[1][:, -7:]).max() == 0.0, "the two solves must share one object track"
-    s_bar = recs[0]["s_bar"]
-    assert abs(s_bar - float(cur["shared_object_scale"])) < 1e-12, (s_bar, float(cur["shared_object_scale"]))
+    k = recs[0].get("k", 1.0)
+    assert recs[1].get("k", 1.0) == k
+    s_bar = recs[0].get("s_shared", recs[0]["s_bar"])
+    if k == 1.0 and "shared_object_scale" in cur.files:
+        assert abs(s_bar - float(cur["shared_object_scale"])) < 1e-12, (s_bar, float(cur["shared_object_scale"]))
     obj_cur_err = float(np.abs(obj - cur["object_qpos"]).max())  # same shared object track as the current reference
-    prov = dict(kind="t14_step1_shared_object_resolve" if a.variant == "new" else "t14_omniretarget_as_is_shared_object", variant=a.variant,
+    prov = dict(kind="t14_step1_shared_object_resolve" if a.variant == "new" else "t14_omniretarget_as_is_shared_object", variant=a.variant, k=k,
                 robot_reference=f"per-person re-solve around the shared object ({a.variant})", shared_object_scale=s_bar,
                 person_run_records=[str(a.variant_dir / f"person{p}/run_record.json") for p in (1, 2)],
                 person_qpos_sha256=[sha(a.variant_dir / f"person{p}/person{p}_{a.variant}_qpos.npz") for p in (1, 2)],
                 object_track_vs_current_reference_max_abs=obj_cur_err)
-    pair = a.out / f"20231030_001_desk001_move_{a.variant}_fps30.npz"
+    pair = a.out / (f"20231030_001_desk001_move_{a.variant}_fps30.npz" if a.task == "table" else f"{a.task}_{a.variant}_fps30.npz")
     np.savez(pair, robot_qpos=np.stack([q[:, :36] for q in qs], 1).astype(np.float64), object_qpos=obj.astype(np.float64), fps=np.int64(30),
              human_heights=cur["human_heights"], human_to_robot_scales=cur["human_to_robot_scales"], scale_anchor=cur["scale_anchor"],
-             object_name=cur["object_name"], object_mesh_path=cur["object_mesh_path"], shared_object_scale=np.float64(s_bar),
+             object_name=cur["object_name"], object_mesh_path=cur["object_mesh_path"], shared_object_scale=np.float64(s_bar), task=np.array(a.task),
              provenance_json=np.array(json.dumps(prov)))
     manifest = a.out / "source_manifest.json"
     manifest.write_text(json.dumps(dict(pair_sha256=sha(pair), **prov), indent=1) + "\n")

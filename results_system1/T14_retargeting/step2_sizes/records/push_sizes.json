@@ -1,0 +1,299 @@
+{
+ "task": "push",
+ "sequence": "sub6_largetable_033",
+ "single": "/home/kevin/duet-system1/logs_system1/t14/single/push/push_new_qpos.npz",
+ "single_sha256": "4ec39e38cd2f005aab67977420bd075c6de1b76ea9d8a9249efb34c8e260170c",
+ "rules": "T14 item 1 part B: single person -> two robots on the stretched table (Push / Pull), size levels m, lower bound a.\n\nRole isometry (existing constructions, exact for any length): 1.0x table = the current training table (1.4 m along the\nstretch axis); a table of m x has its top 1.4 m x m long and its legs at +-(0.7 m - 0.0257264) along the axis (all else\nunchanged). The source table (0.5219528 m wide) end region is mapped to each end, so each role is offset by\nc(m) = 0.7 m - 0.5219528 / 2 along the axis (c(1) = 0.4390236, the registered Push spacing / 2 and the Pull leg offset).\n  * Push: both robots keep the source pose; root shifted by -c / +c along the table's local x (dual_a1_layout semantics).\n  * Pull: dual_pull_reference.synthesize_dual_pull_reference(single qpos, lateral_leg_offset_m = c) (object symmetrised,\n    robot B = G1 sagittal mirror across the table's local XY plane, both moved outward along local z).\nSingle robot = system1/t14/single_shared.py (T14 step 1). Robot 0 = the source role, robot 1 = the partner.\n\nPer level (30 Hz, all frames), geometry = the simulator's (robot links: PhysX shapes of the T10 dump; table: boxes):\n  * robot-robot: smallest distance between the two robots' link shapes (MuJoCo convex collision of cross-robot pairs only,\n    margin 0.5 m); \"intersect\" when any cross-robot pair has distance < 0;\n  * robot-table penetration: largest link signed distance > 0 (any link; hands separately);\n  * contact retention (CoCarry, as Table): source frames where the person's hand (SMPL-X hand vertices, original OMOMO\n    parameters, captured largetable mesh) is within 0.10 m of the object and the object moves faster than 0.03 m/s; robot\n    hand signed distance >= -0.02 m; robot 1 uses robot 0's (the source person's) labels and hands (mirrored for Pull:\n    the partner's left hand mirrors the source's right hand);\n  * lower bound a: levels m = 1.0, 0.95, ... (step 0.05); a = the last level before the first one in which the two\n    robots intersect in any frame (T14 section 7 item 5).\n\n    sonic_s1/bin/python -B system1/t14/dual_stretch.py --task push --out exports_system1/T14_references/push_sizes\n",
+ "a": 0.7,
+ "search": [
+  {
+   "m": 1.0,
+   "robot_robot_min_distance_cm": 35.62,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.95,
+   "robot_robot_min_distance_cm": 28.66,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.9,
+   "robot_robot_min_distance_cm": 21.7,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.85,
+   "robot_robot_min_distance_cm": 14.76,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.8,
+   "robot_robot_min_distance_cm": 7.79,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.75,
+   "robot_robot_min_distance_cm": 0.82,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.7,
+   "robot_robot_min_distance_cm": 0.0,
+   "intersect_frames": 0
+  },
+  {
+   "m": 0.65,
+   "robot_robot_min_distance_cm": -5.05,
+   "intersect_frames": 48
+  }
+ ],
+ "report_levels": [
+  0.7,
+  1.0,
+  1.5,
+  2.0
+ ],
+ "levels": {
+  "1.0": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 35.62,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 1.0,
+   "c_m": 0.4390236,
+   "urdf": "exports_system1/T14_references/push_sizes/m1p00/table_m1p00.urdf",
+   "urdf_sha256": "ddefa875154e972bd50df0e67368ae3a11219a2ce26316aaff89afa84a230439",
+   "finite": true
+  },
+  "0.95": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 28.66,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.95,
+   "c_m": 0.4040236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p95/table_m0p95.urdf",
+   "urdf_sha256": "d188f66aa56ede4375a933c01e2d1298ec81fa40fbf2ade41fc43f6f8a3d0ba1",
+   "finite": true
+  },
+  "0.9": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 21.7,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.9,
+   "c_m": 0.3690236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p90/table_m0p90.urdf",
+   "urdf_sha256": "1f50b744a2c0a861e86a35d04ff8fa558393a146c8deeff33c973b41f8d258cf",
+   "finite": true
+  },
+  "0.85": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 14.76,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.85,
+   "c_m": 0.3340236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p85/table_m0p85.urdf",
+   "urdf_sha256": "32150e0ac42c4d1cf1aec9f745752cd08b72d4f6702fea12a9f837c0f6706f82",
+   "finite": true
+  },
+  "0.8": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 7.79,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.8,
+   "c_m": 0.2990236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p80/table_m0p80.urdf",
+   "urdf_sha256": "d4478952bc0af0190e2adcf8ab8c1e0157c18e8c72ec471d1edf344ee60da30b",
+   "finite": true
+  },
+  "0.75": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 0.82,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.75,
+   "c_m": 0.2640236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p75/table_m0p75.urdf",
+   "urdf_sha256": "7d2c2e2aff93c06b6b0ccf676a0abed3d0cfce0a372ec78a64cec80fae087d09",
+   "finite": true
+  },
+  "0.7": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": 0.0,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 0.7,
+   "c_m": 0.2290236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p70/table_m0p70.urdf",
+   "urdf_sha256": "94e4a30d8a6c3557d43ec34d639b282dfdd3013f60ed5f1d9fb535ebf7e24095",
+   "finite": true
+  },
+  "0.65": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": -5.05,
+   "robot_robot_intersect_frames": 48,
+   "first_intersect_frame": 3,
+   "m": 0.65,
+   "c_m": 0.1940236,
+   "urdf": "exports_system1/T14_references/push_sizes/m0p65/table_m0p65.urdf",
+   "urdf_sha256": "5aa2d9623b6ecbf53370516e07b546c130b46e5a89a0582b7cf4c1ab4a72742a",
+   "finite": true
+  },
+  "1.5": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": Infinity,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 1.5,
+   "c_m": 0.7890236,
+   "urdf": "exports_system1/T14_references/push_sizes/m1p50/table_m1p50.urdf",
+   "urdf_sha256": "19041d2d0599a4c6b05896db62376258ee95334377b329fa7f5be936b2ec34ac",
+   "finite": true
+  },
+  "2.0": {
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "condition_frames": 248,
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "robot_robot_min_distance_cm": Infinity,
+   "robot_robot_intersect_frames": 0,
+   "first_intersect_frame": null,
+   "m": 2.0,
+   "c_m": 1.1390236,
+   "urdf": "exports_system1/T14_references/push_sizes/m2p00/table_m2p00.urdf",
+   "urdf_sha256": "a06c2edd70e1547e6e82da207012823d1d0539a129907f6b29583d2d586e5bc0",
+   "finite": true
+  }
+ },
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77"
+}

@@ -1,0 +1,142 @@
+{
+ "task": "chair",
+ "rules": "T14 item 2: per-level metrics of two-person CORE4D references (Bin, Chair; also usable for Table) with exact convex\ndistances. Read only, CPU.\n\nGeometry = the simulator's: object = the PhysX convex pieces of the T10 Isaac dump (d_<task>: Bin / Chair 16 pieces of the\ntraining object, Table 5 boxes), scaled by k about the object frame origin (k = level / 1.0x object); robot links = the\nPhysX link shapes of the same dump. MuJoCo convex collision with a 0.1 m margin, robot-object pairs only:\n  * hand signed distance = - (smallest distance between that hand's shape and any object piece), positive = penetration;\n    below -0.1 m when nothing is within the margin;\n  * penetration of a frame = largest depth over all robot-object pairs (any link), per robot;\n  * contact retention (CoCarry, as Table): source 15 Hz frame t <-> reference 30 Hz frame 2t; condition = the person's hand\n    (any SMPL-X hand vertex) within 0.10 m of the raw CORE4D mesh and the object moving faster than 0.03 m/s; retained when\n    the robot hand signed distance >= -0.02 m; robot r <-> person r + 1;\n  * robot-robot: dual_stretch.PairCollision (smallest distance between the two robots' shapes, < 0 = intersection).\n\n    sonic_s1/bin/python -B system1/t14/eval_core4d_hulls.py --task chair --ref k1.0=<pair npz>@1.0 ... --out <dir>\n",
+ "refs": {
+  "k0.8": {
+   "path": "exports_system1/T14_references/chair_k0p8/chair_new_fps30.npz",
+   "sha256": "0749c307121728efcdb17235cf3d06a7781d7964e33c34e39496b51df596d427",
+   "k": 0.8,
+   "frames": 235,
+   "condition_frames": 102,
+   "contact_retention": {
+    "r0": 0.3721,
+    "r1": 0.8305,
+    "pooled": 0.6373
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.78
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.1872
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -3.4,
+    "r1": -0.24
+   },
+   "robot_robot_min_distance_cm": 4.085,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k0.9": {
+   "path": "exports_system1/T14_references/chair_k0p9/chair_new_fps30.npz",
+   "sha256": "5f5e9bbb745f93c73e6ecd27204bf5305816db1a189515977cd1f519e9d1b8bf",
+   "k": 0.9,
+   "frames": 235,
+   "condition_frames": 102,
+   "contact_retention": {
+    "r0": 0.7907,
+    "r1": 0.8475,
+    "pooled": 0.8235
+   },
+   "max_penetration_cm": {
+    "r0": 1.44,
+    "r1": 1.44
+   },
+   "frames_penetrating": {
+    "r0": 0.1489,
+    "r1": 0.2468
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -0.18,
+    "r1": 0.12
+   },
+   "robot_robot_min_distance_cm": 7.657,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.0": {
+   "path": "exports_system1/T14_references/chair_k1p0/chair_new_fps30.npz",
+   "sha256": "cf49bc66ab9ec2059a52ea23acfdf044b576b2f19171aabbcc7aec33d7d95c8b",
+   "k": 1.0,
+   "frames": 235,
+   "condition_frames": 102,
+   "contact_retention": {
+    "r0": 0.814,
+    "r1": 0.7119,
+    "pooled": 0.7549
+   },
+   "max_penetration_cm": {
+    "r0": 1.53,
+    "r1": 1.59
+   },
+   "frames_penetrating": {
+    "r0": 0.3404,
+    "r1": 0.1064
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": 0.96,
+    "r1": -0.96
+   },
+   "robot_robot_min_distance_cm": 10.075,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.1": {
+   "path": "exports_system1/T14_references/chair_k1p1/chair_new_fps30.npz",
+   "sha256": "982930f9bdd88147eaad9bb76d9f5f8b5cdfffb7c2dc4d11bdecbb26fba35e66",
+   "k": 1.1,
+   "frames": 235,
+   "condition_frames": 102,
+   "contact_retention": {
+    "r0": 0.7907,
+    "r1": 0.5424,
+    "pooled": 0.6471
+   },
+   "max_penetration_cm": {
+    "r0": 1.61,
+    "r1": 1.85
+   },
+   "frames_penetrating": {
+    "r0": 0.366,
+    "r1": 0.0809
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": 0.2,
+    "r1": -1.45
+   },
+   "robot_robot_min_distance_cm": 11.36,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.2": {
+   "path": "exports_system1/T14_references/chair_k1p2/chair_new_fps30.npz",
+   "sha256": "1889326782e1459fc1f0bf0c74e3bc030d76278bdf3b2141e27b2db7dbc95f23",
+   "k": 1.2,
+   "frames": 235,
+   "condition_frames": 102,
+   "contact_retention": {
+    "r0": 0.7209,
+    "r1": 0.4746,
+    "pooled": 0.5784
+   },
+   "max_penetration_cm": {
+    "r0": 1.59,
+    "r1": 2.37
+   },
+   "frames_penetrating": {
+    "r0": 0.3106,
+    "r1": 0.0979
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": 0.05,
+    "r1": -2.61
+   },
+   "robot_robot_min_distance_cm": 11.541,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  }
+ },
+ "physx_dump_task": "chair"
+}

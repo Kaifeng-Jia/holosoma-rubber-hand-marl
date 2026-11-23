@@ -1,0 +1,125 @@
+{
+ "task": "chair",
+ "base": "mean",
+ "holosoma_retargeting_module": "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/__init__.py",
+ "python": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting/bin/python",
+ "variant": "new",
+ "person": 2,
+ "s_i": 0.7267058142765197,
+ "s_bar": 0.744193062691336,
+ "k": 0.8,
+ "s_shared": 0.5953544501530689,
+ "scale_anchor": [
+  -0.16644054412841797,
+  0.6708015441894531,
+  0.0
+ ],
+ "canonical": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/source_canonical.npz",
+ "canonical_sha256": "e496e71901d50808b1d29d533b358117c64a1301b5244dfa134850fb8d729acc",
+ "frames": 235,
+ "fps": 30,
+ "stage1": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/two_stage/person2/person2_nominal_scaled.npz",
+ "stage1_sha256": "45bbeeba07af1bee87402386b0c3224c7b64312089b1b31167f50a225235d2c9",
+ "stage1_equals_current_reference_robot": 1.6642186449581802,
+ "palm": {
+  "palm_vertices_per_hand": {
+   "left": 67,
+   "right": 67
+  },
+  "axis_conversion_max_err_m": 0.0,
+  "resample_max_err_m": 0.0,
+  "anchors": {
+   "left": {
+    "contact_frames_15hz": 41,
+    "median_local_m": [
+     0.10059,
+     0.27012,
+     -0.22512
+    ],
+    "anchor_local_m": [
+     0.06095,
+     0.26577,
+     -0.23466
+    ]
+   },
+   "right": {
+    "contact_frames_15hz": 29,
+    "median_local_m": [
+     0.25052,
+     0.00932,
+     -0.23806
+    ],
+    "anchor_local_m": [
+     0.2341,
+     0.0097,
+     -0.2375
+    ]
+   }
+  },
+  "shift_mean_m": [
+   0.017671,
+   0.038376,
+   -0.079392
+  ],
+  "shift_xy_m": [
+   0.017671,
+   0.038376
+  ],
+  "robot_palm_offsets_m": {
+   "L_Palm": [
+    0.063785,
+    -0.042639,
+    0.008036
+   ],
+   "R_Palm": [
+    0.06378,
+    0.042687,
+    0.008938
+   ]
+  },
+  "sim_hand_meshes": {
+   "left": "logs_system1/t14/core4d/chair_k0p8/person2/left_rubber_hand_physx_hull.obj",
+   "right": "logs_system1/t14/core4d/chair_k0p8/person2/right_rubber_hand_physx_hull.obj"
+  },
+  "physx_dump": {
+   "scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+   "convexes_sha256": "f5ccf067d1acc0d87758c3bfc4b26a2968f3772c41739480d8017c29b4717714"
+  }
+ },
+ "object_points": {
+  "count": 82,
+  "demo_over_raw": 0.7267058142765197
+ },
+ "scene": {
+  "path": "logs_system1/t14/core4d/chair_k0p8/person2/assets/shared_scene_simhands.xml",
+  "left_hand_mesh_vertices": 34,
+  "interaction_mesh_keys": [
+   "Pelvis",
+   "L_Hip",
+   "R_Hip",
+   "L_Knee",
+   "R_Knee",
+   "L_Shoulder",
+   "R_Shoulder",
+   "L_Elbow",
+   "R_Elbow",
+   "L_Ankle",
+   "R_Ankle",
+   "L_Foot",
+   "R_Foot",
+   "L_Wrist",
+   "R_Wrist",
+   "L_Palm",
+   "R_Palm"
+  ],
+  "w_nominal_tracking_init": 5.0
+ },
+ "seconds": 248.2,
+ "finite": true,
+ "qpos_shape": [
+  235,
+  43
+ ],
+ "object_locked_max_err": 0.0,
+ "peak_rss_gb": 1.028
+}

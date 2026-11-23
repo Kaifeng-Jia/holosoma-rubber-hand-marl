@@ -1,0 +1,82 @@
+{
+ "task": "pull",
+ "contact_frames_30hz": [
+  0,
+  94,
+  189
+ ],
+ "levels": [
+  {
+   "label": "a = 0.55（桌长 0.77 m）",
+   "size": 0.55,
+   "pair": "exports_system1/T14_references/pull_sizes/m0p55/pull_m0p55_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/pull_sizes/m0p55/table_m0p55.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.50 cm",
+    "求解成功：是",
+    "机器人最小间隙 1.7 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.5,
+    "success": true,
+    "robot_robot_min_distance_cm": 1.6733257845460092
+   }
+  },
+  {
+   "label": "m = 1.0（桌长 1.40 m）",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/pull_sizes/m1p00/pull_m1p00_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/pull_sizes/m1p00/table_m1p00.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.50 cm",
+    "求解成功：是",
+    "机器人最小间隙 64.7 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.5,
+    "success": true,
+    "robot_robot_min_distance_cm": 64.6733257546565
+   }
+  },
+  {
+   "label": "m = 1.5（桌长 2.10 m）",
+   "size": 1.5,
+   "pair": "exports_system1/T14_references/pull_sizes/m1p50/pull_m1p50_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/pull_sizes/m1p50/table_m1p50.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.50 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.5,
+    "success": true,
+    "robot_robot_min_distance_cm": Infinity
+   }
+  },
+  {
+   "label": "m = 2.0（桌长 2.80 m）",
+   "size": 2.0,
+   "pair": "exports_system1/T14_references/pull_sizes/m2p00/pull_m2p00_pair_fps30.npz",
+   "urdf": "exports_system1/T14_references/pull_sizes/m2p00/table_m2p00.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.50 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.5,
+    "success": true,
+    "robot_robot_min_distance_cm": Infinity
+   }
+  }
+ ]
+}

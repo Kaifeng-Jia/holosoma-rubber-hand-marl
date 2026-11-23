@@ -1,0 +1,97 @@
+{
+ "task": "bin",
+ "contact_frames_30hz": [
+  0,
+  140,
+  282
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "failed": "机器人 0：Clarabel 求解失败（第 207/299 帧）",
+   "numbers": [
+    "求解成功：否",
+    "机器人 0：Clarabel 求解失败（第 207/299 帧）"
+   ],
+   "values": {
+    "retention": null,
+    "max_penetration_cm": null,
+    "success": false,
+    "robot_robot_min_distance_cm": null
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/bin_k0p9/bin_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/bin_k0p9/bin_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.817",
+    "最大穿透 2.35 cm",
+    "求解成功：是",
+    "机器人最小间隙 1.5 cm"
+   ],
+   "values": {
+    "retention": 0.8169,
+    "max_penetration_cm": 2.35,
+    "success": true,
+    "robot_robot_min_distance_cm": 1.526
+   }
+  },
+  {
+   "label": "k = 1.0（原尺寸桶）",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/bin_k1p0/bin_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/bin_k1p0/bin_k1p0.urdf",
+   "numbers": [
+    "接触保持率 0.653",
+    "最大穿透 2.26 cm",
+    "求解成功：是",
+    "机器人最小间隙 1.1 cm"
+   ],
+   "values": {
+    "retention": 0.6526,
+    "max_penetration_cm": 2.26,
+    "success": true,
+    "robot_robot_min_distance_cm": 1.113
+   }
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/bin_k1p1/bin_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/bin_k1p1/bin_k1p1.urdf",
+   "numbers": [
+    "接触保持率 0.714",
+    "最大穿透 2.28 cm",
+    "求解成功：是",
+    "机器人最小间隙 0.7 cm"
+   ],
+   "values": {
+    "retention": 0.7136,
+    "max_penetration_cm": 2.28,
+    "success": true,
+    "robot_robot_min_distance_cm": 0.659
+   }
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/bin_k1p2/bin_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/bin_k1p2/bin_k1p2.urdf",
+   "numbers": [
+    "接触保持率 0.681",
+    "最大穿透 2.92 cm",
+    "求解成功：是",
+    "机器人最小间隙 0.5 cm"
+   ],
+   "values": {
+    "retention": 0.6808,
+    "max_penetration_cm": 2.92,
+    "success": true,
+    "robot_robot_min_distance_cm": 0.505
+   }
+  }
+ ]
+}

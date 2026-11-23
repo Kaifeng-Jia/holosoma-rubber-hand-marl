@@ -1,0 +1,34 @@
+{
+ "task": "bin",
+ "rules": "T14 item 2: per-level metrics of two-person CORE4D references (Bin, Chair; also usable for Table) with exact convex\ndistances. Read only, CPU.\n\nGeometry = the simulator's: object = the PhysX convex pieces of the T10 Isaac dump (d_<task>: Bin / Chair 16 pieces of the\ntraining object, Table 5 boxes), scaled by k about the object frame origin (k = level / 1.0x object); robot links = the\nPhysX link shapes of the same dump. MuJoCo convex collision with a 0.1 m margin, robot-object pairs only:\n  * hand signed distance = - (smallest distance between that hand's shape and any object piece), positive = penetration;\n    below -0.1 m when nothing is within the margin;\n  * penetration of a frame = largest depth over all robot-object pairs (any link), per robot;\n  * contact retention (CoCarry, as Table): source 15 Hz frame t <-> reference 30 Hz frame 2t; condition = the person's hand\n    (any SMPL-X hand vertex) within 0.10 m of the raw CORE4D mesh and the object moving faster than 0.03 m/s; retained when\n    the robot hand signed distance >= -0.02 m; robot r <-> person r + 1;\n  * robot-robot: dual_stretch.PairCollision (smallest distance between the two robots' shapes, < 0 = intersection).\n\n    sonic_s1/bin/python -B system1/t14/eval_core4d_hulls.py --task chair --ref k1.0=<pair npz>@1.0 ... --out <dir>\n",
+ "refs": {
+  "current": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_compact_fps30.npz",
+   "sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+   "k": 1.0,
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9655,
+    "r1": 0.7032,
+    "pooled": 0.7746
+   },
+   "max_penetration_cm": {
+    "r0": 4.6,
+    "r1": 10.54
+   },
+   "frames_penetrating": {
+    "r0": 0.5585,
+    "r1": 0.903
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": 0.35,
+    "r1": -0.25
+   },
+   "robot_robot_min_distance_cm": -1.091,
+   "robot_robot_intersect_frames": 3,
+   "finite": true
+  }
+ },
+ "physx_dump_task": "bucket"
+}

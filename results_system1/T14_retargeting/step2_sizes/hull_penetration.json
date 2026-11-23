@@ -1,0 +1,260 @@
+{
+ "rules": "T14: robot-object penetration and hand signed distance of two-robot references with exact convex distances (the same\nmeasure for every task; eval_core4d_hulls.ObjectRobotDistance): object = the box-union URDF of that level (--ref\nname=pair@urdf) or the task's PhysX pieces x k (--ref name=pair@dump:<task>:<k>); robot = PhysX link shapes; MuJoCo convex\ncollision, robot-object pairs only. Penetration depth of a pair = the convex penetration depth (minimum separating\ntranslation), which also counts an object edge pushed into the side of a hand; the earlier point measure (largest depth of\nthe hand's surface samples) is reported next to it where available.\n\n    sonic_s1/bin/python -B system1/t14/hull_penetration.py --ref k1.0=<pair>@<urdf> ... --out <json>\n",
+ "refs": {
+  "table_current": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/20231030_001_desk001_move_compact_fps30.npz",
+   "sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05",
+   "object": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "max_penetration_cm": {
+    "r0": 0.48,
+    "r1": 1.1
+   },
+   "frames_penetrating": {
+    "r0": 0.3123,
+    "r1": 0.7918
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.48,
+    "r1": 1.1
+   }
+  },
+  "table_omni_asis": {
+   "path": "logs_system1/t14/table/omni_asis_pair/20231030_001_desk001_move_omni_asis_fps30.npz",
+   "sha256": "8779c96ac556d59865775a4a9851d961249e19f05e8504977ac11fad8e2ac288",
+   "object": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+   "max_penetration_cm": {
+    "r0": 0.14,
+    "r1": 0.62
+   },
+   "frames_penetrating": {
+    "r0": 0.5375,
+    "r1": 0.7918
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.14,
+    "r1": 0.62
+   }
+  },
+  "table_k0p8": {
+   "path": "exports_system1/T14_references/table_k0p8/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "d8be2251f73c616b57d812f01145578db1dd474cae72d2700ff82a8ae0b880e0",
+   "object": "exports_system1/T14_references/table_k0p8/desk001_k0p8.urdf",
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   }
+  },
+  "table_k0p9": {
+   "path": "exports_system1/T14_references/table_k0p9/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c68412084a63749c844fb4ff83c9a02be26aba3e4608260e7a1e1efa3471c721",
+   "object": "exports_system1/T14_references/table_k0p9/desk001_k0p9.urdf",
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   }
+  },
+  "table_k1p0": {
+   "path": "exports_system1/T14_references/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "6166aa3c52ec5acaef8560160ab52d0bb890be143ef40fb40c54f543e4105da8",
+   "object": "exports_system1/T14_references/table_k1p0/desk001_k1p0.urdf",
+   "max_penetration_cm": {
+    "r0": 0.22,
+    "r1": 1.19
+   },
+   "frames_penetrating": {
+    "r0": 0.5617,
+    "r1": 0.6852
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.22,
+    "r1": 1.19
+   }
+  },
+  "table_k1p1": {
+   "path": "exports_system1/T14_references/table_k1p1/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c881617a6d61b5a176c5e350ef6bb718682dc2e1763c26d4612b80c825c8b763",
+   "object": "exports_system1/T14_references/table_k1p1/desk001_k1p1.urdf",
+   "max_penetration_cm": {
+    "r0": 0.19,
+    "r1": 0.61
+   },
+   "frames_penetrating": {
+    "r0": 0.5787,
+    "r1": 0.7942
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.19,
+    "r1": 0.61
+   }
+  },
+  "table_k1p2": {
+   "path": "exports_system1/T14_references/table_k1p2/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "54f489a19d53e5bcad4e9b39095c0ecdc9507b38c9265c1bbee6f1d03afefcd6",
+   "object": "exports_system1/T14_references/table_k1p2/desk001_k1p2.urdf",
+   "max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.6
+   },
+   "frames_penetrating": {
+    "r0": 0.586,
+    "r1": 0.7942
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.6
+   }
+  },
+  "push_m0p70": {
+   "path": "exports_system1/T14_references/push_sizes/m0p70/push_m0p70_pair_fps30.npz",
+   "sha256": "8f9438a360c34ef2d31f5b212a457a3cef50f71e43009cb93f95b726fbc663dc",
+   "object": "exports_system1/T14_references/push_sizes/m0p70/table_m0p70.urdf",
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "frames_penetrating": {
+    "r0": 0.828,
+    "r1": 0.828
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   }
+  },
+  "push_m1p00": {
+   "path": "exports_system1/T14_references/push_sizes/m1p00/push_m1p00_pair_fps30.npz",
+   "sha256": "3825778169ea1e976cb079a9020da91f6df8be8a7eafa89075008deebb98a995",
+   "object": "exports_system1/T14_references/push_sizes/m1p00/table_m1p00.urdf",
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "frames_penetrating": {
+    "r0": 0.828,
+    "r1": 0.828
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   }
+  },
+  "push_m1p50": {
+   "path": "exports_system1/T14_references/push_sizes/m1p50/push_m1p50_pair_fps30.npz",
+   "sha256": "5dc1a61f52d9c349ee5f22db7c89b8df0d8c21cdb100a7b8fb7cd763dd735399",
+   "object": "exports_system1/T14_references/push_sizes/m1p50/table_m1p50.urdf",
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "frames_penetrating": {
+    "r0": 0.828,
+    "r1": 0.828
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   }
+  },
+  "push_m2p00": {
+   "path": "exports_system1/T14_references/push_sizes/m2p00/push_m2p00_pair_fps30.npz",
+   "sha256": "47e67025f0e4838aeab84d295e6aa56218997bb01795296f406a6e68fb599602",
+   "object": "exports_system1/T14_references/push_sizes/m2p00/table_m2p00.urdf",
+   "max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   },
+   "frames_penetrating": {
+    "r0": 0.828,
+    "r1": 0.828
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.63,
+    "r1": 0.63
+   }
+  },
+  "pull_m0p55": {
+   "path": "exports_system1/T14_references/pull_sizes/m0p55/pull_m0p55_pair_fps30.npz",
+   "sha256": "3471788a895865206df040f334e7cfc4d8f09914f2e90bef4f97437f6741db85",
+   "object": "exports_system1/T14_references/pull_sizes/m0p55/table_m0p55.urdf",
+   "max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   },
+   "frames_penetrating": {
+    "r0": 0.8639,
+    "r1": 0.8639
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   }
+  },
+  "pull_m1p00": {
+   "path": "exports_system1/T14_references/pull_sizes/m1p00/pull_m1p00_pair_fps30.npz",
+   "sha256": "0abc165e679816c2db806c144a4c194bb9587dddc3b1505ac0e7ace95edafe5a",
+   "object": "exports_system1/T14_references/pull_sizes/m1p00/table_m1p00.urdf",
+   "max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   },
+   "frames_penetrating": {
+    "r0": 0.8639,
+    "r1": 0.8639
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   }
+  },
+  "pull_m1p50": {
+   "path": "exports_system1/T14_references/pull_sizes/m1p50/pull_m1p50_pair_fps30.npz",
+   "sha256": "7f18b9c2bb1e16663e49c93b39140e8ad82946ca8721e786135b943c7aba0dcb",
+   "object": "exports_system1/T14_references/pull_sizes/m1p50/table_m1p50.urdf",
+   "max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   },
+   "frames_penetrating": {
+    "r0": 0.8639,
+    "r1": 0.8639
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   }
+  },
+  "pull_m2p00": {
+   "path": "exports_system1/T14_references/pull_sizes/m2p00/pull_m2p00_pair_fps30.npz",
+   "sha256": "952c3e6b763939b712d1edc3ef54a015a0ba3f67c9a2a0e3dd4317477bf90d06",
+   "object": "exports_system1/T14_references/pull_sizes/m2p00/table_m2p00.urdf",
+   "max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   },
+   "frames_penetrating": {
+    "r0": 0.8639,
+    "r1": 0.8639
+   },
+   "hand_max_penetration_cm": {
+    "r0": 0.5,
+    "r1": 0.5
+   }
+  }
+ }
+}

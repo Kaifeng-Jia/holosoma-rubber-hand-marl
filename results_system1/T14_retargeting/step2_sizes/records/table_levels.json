@@ -1,0 +1,100 @@
+{
+ "task": "table",
+ "contact_frames_30hz": [
+  0,
+  164,
+  330
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/table_k0p8/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/table_k0p8/desk001_k0p8.urdf",
+   "numbers": [
+    "接触保持率 0.000",
+    "最大穿透 0.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 14.6 cm"
+   ],
+   "values": {
+    "retention": 0.0,
+    "max_penetration_cm": 0.0,
+    "success": true,
+    "robot_robot_min_distance_cm": 14.56
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/table_k0p9/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/table_k0p9/desk001_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.750",
+    "最大穿透 0.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 20.5 cm"
+   ],
+   "values": {
+    "retention": 0.75,
+    "max_penetration_cm": 0.0,
+    "success": true,
+    "robot_robot_min_distance_cm": 20.52
+   }
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/table_k1p0/desk001_k1p0.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 1.19 cm",
+    "求解成功：是",
+    "机器人最小间隙 26.4 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 1.19,
+    "success": true,
+    "robot_robot_min_distance_cm": 26.42
+   }
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/table_k1p1/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/table_k1p1/desk001_k1p1.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.61 cm",
+    "求解成功：是",
+    "机器人最小间隙 32.2 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.61,
+    "success": true,
+    "robot_robot_min_distance_cm": 32.18
+   }
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/table_k1p2/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/table_k1p2/desk001_k1p2.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.60 cm",
+    "求解成功：是",
+    "机器人最小间隙 37.1 cm"
+   ],
+   "values": {
+    "retention": 1.0,
+    "max_penetration_cm": 0.6,
+    "success": true,
+    "robot_robot_min_distance_cm": 37.09
+   }
+  }
+ ]
+}

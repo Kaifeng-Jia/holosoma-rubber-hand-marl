@@ -1,0 +1,115 @@
+{
+ "task": "bin",
+ "rules": "T14 item 2: per-level metrics of two-person CORE4D references (Bin, Chair; also usable for Table) with exact convex\ndistances. Read only, CPU.\n\nGeometry = the simulator's: object = the PhysX convex pieces of the T10 Isaac dump (d_<task>: Bin / Chair 16 pieces of the\ntraining object, Table 5 boxes), scaled by k about the object frame origin (k = level / 1.0x object); robot links = the\nPhysX link shapes of the same dump. MuJoCo convex collision with a 0.1 m margin, robot-object pairs only:\n  * hand signed distance = - (smallest distance between that hand's shape and any object piece), positive = penetration;\n    below -0.1 m when nothing is within the margin;\n  * penetration of a frame = largest depth over all robot-object pairs (any link), per robot;\n  * contact retention (CoCarry, as Table): source 15 Hz frame t <-> reference 30 Hz frame 2t; condition = the person's hand\n    (any SMPL-X hand vertex) within 0.10 m of the raw CORE4D mesh and the object moving faster than 0.03 m/s; retained when\n    the robot hand signed distance >= -0.02 m; robot r <-> person r + 1;\n  * robot-robot: dual_stretch.PairCollision (smallest distance between the two robots' shapes, < 0 = intersection).\n\n    sonic_s1/bin/python -B system1/t14/eval_core4d_hulls.py --task chair --ref k1.0=<pair npz>@1.0 ... --out <dir>\n",
+ "refs": {
+  "k0.9": {
+   "path": "exports_system1/T14_references/bin_k0p9/bin_new_fps30.npz",
+   "sha256": "05f0471aacea8a5eaad9f8c3288643c97ab258a3c067b0aa75323424d6cd15f6",
+   "k": 0.9,
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9138,
+    "r1": 0.7806,
+    "pooled": 0.8169
+   },
+   "max_penetration_cm": {
+    "r0": 2.35,
+    "r1": 1.78
+   },
+   "frames_penetrating": {
+    "r0": 0.4381,
+    "r1": 0.5151
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -0.34,
+    "r1": -0.39
+   },
+   "robot_robot_min_distance_cm": 1.526,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.0": {
+   "path": "exports_system1/T14_references/bin_k1p0/bin_new_fps30.npz",
+   "sha256": "069c8c802577fc69ae479261b456aa64cb35723532e6525d41c831ed906b9d77",
+   "k": 1.0,
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7097,
+    "pooled": 0.6526
+   },
+   "max_penetration_cm": {
+    "r0": 2.26,
+    "r1": 2.12
+   },
+   "frames_penetrating": {
+    "r0": 0.3846,
+    "r1": 0.6154
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -1.94,
+    "r1": -0.4
+   },
+   "robot_robot_min_distance_cm": 1.113,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.1": {
+   "path": "exports_system1/T14_references/bin_k1p1/bin_new_fps30.npz",
+   "sha256": "e6387892b51715964bc9b1bdf9528b3918704f796bc1e989bf1bf0044aa767dd",
+   "k": 1.1,
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7935,
+    "pooled": 0.7136
+   },
+   "max_penetration_cm": {
+    "r0": 2.28,
+    "r1": 2.17
+   },
+   "frames_penetrating": {
+    "r0": 0.3311,
+    "r1": 0.4247
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -2.35,
+    "r1": -0.87
+   },
+   "robot_robot_min_distance_cm": 0.659,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  },
+  "k1.2": {
+   "path": "exports_system1/T14_references/bin_k1p2/bin_new_fps30.npz",
+   "sha256": "6835a949e73a369cca3d4b92df0145872c4ebcab0a7f86f4b3f29c466b777848",
+   "k": 1.2,
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7484,
+    "pooled": 0.6808
+   },
+   "max_penetration_cm": {
+    "r0": 2.92,
+    "r1": 2.55
+   },
+   "frames_penetrating": {
+    "r0": 0.3512,
+    "r1": 0.6087
+   },
+   "hand_median_signed_distance_cm_in_condition_frames": {
+    "r0": -1.86,
+    "r1": -1.01
+   },
+   "robot_robot_min_distance_cm": 0.505,
+   "robot_robot_intersect_frames": 0,
+   "finite": true
+  }
+ },
+ "physx_dump_task": "bucket"
+}

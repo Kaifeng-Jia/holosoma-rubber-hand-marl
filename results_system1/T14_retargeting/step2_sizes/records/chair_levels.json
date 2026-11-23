@@ -1,0 +1,100 @@
+{
+ "task": "chair",
+ "contact_frames_30hz": [
+  110,
+  154,
+  198
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/chair_k0p8/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/chair_k0p8/chair_k0p8.urdf",
+   "numbers": [
+    "接触保持率 0.637",
+    "最大穿透 0.78 cm",
+    "求解成功：是",
+    "机器人最小间隙 4.1 cm"
+   ],
+   "values": {
+    "retention": 0.6373,
+    "max_penetration_cm": 0.78,
+    "success": true,
+    "robot_robot_min_distance_cm": 4.085
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/chair_k0p9/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/chair_k0p9/chair_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.824",
+    "最大穿透 1.44 cm",
+    "求解成功：是",
+    "机器人最小间隙 7.7 cm"
+   ],
+   "values": {
+    "retention": 0.8235,
+    "max_penetration_cm": 1.44,
+    "success": true,
+    "robot_robot_min_distance_cm": 7.657
+   }
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/chair_k1p0/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/chair_k1p0/chair_k1p0.urdf",
+   "numbers": [
+    "接触保持率 0.755",
+    "最大穿透 1.59 cm",
+    "求解成功：是",
+    "机器人最小间隙 10.1 cm"
+   ],
+   "values": {
+    "retention": 0.7549,
+    "max_penetration_cm": 1.59,
+    "success": true,
+    "robot_robot_min_distance_cm": 10.075
+   }
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/chair_k1p1/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/chair_k1p1/chair_k1p1.urdf",
+   "numbers": [
+    "接触保持率 0.647",
+    "最大穿透 1.85 cm",
+    "求解成功：是",
+    "机器人最小间隙 11.4 cm"
+   ],
+   "values": {
+    "retention": 0.6471,
+    "max_penetration_cm": 1.85,
+    "success": true,
+    "robot_robot_min_distance_cm": 11.36
+   }
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/chair_k1p2/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/chair_k1p2/chair_k1p2.urdf",
+   "numbers": [
+    "接触保持率 0.578",
+    "最大穿透 2.37 cm",
+    "求解成功：是",
+    "机器人最小间隙 11.5 cm"
+   ],
+   "values": {
+    "retention": 0.5784,
+    "max_penetration_cm": 2.37,
+    "success": true,
+    "robot_robot_min_distance_cm": 11.541
+   }
+  }
+ ]
+}

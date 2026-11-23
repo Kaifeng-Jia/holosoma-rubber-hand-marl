@@ -123,18 +123,23 @@ def slip(robot_toe, human_toe, fps=30):
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--ref", action="append", required=True, help="name=path to a compact 30 Hz pair npz")
+    ap.add_argument("--ref", action="append", required=True, help="name=path to a compact 30 Hz pair npz[@object urdf] (default: the 1.0x training Table)")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     robot = cs.Robot("physx")
-    obj = cs.Object(OBJ_URDF, workers=1, geometry="physx", task="table")
+    objs = {}
     h_sd, obj_speed = human_hand_sd()
     htoe = human_toes_30hz()
     phase50 = np.array([r["phase"] for r in csv.DictReader(PHASES.open())])
     summary, per_frame = {}, {}
     for spec in a.ref:
         name, path = spec.split("=", 1)
+        path, urdf = path.split("@", 1) if "@" in path else (path, str(OBJ_URDF))
+        urdf = Path(urdf).resolve()
+        if urdf not in objs:  # boxes: the PhysX path only checks the dump equals the URDF boxes (1.0x table)
+            objs[urdf] = cs.Object(urdf, workers=1, geometry="physx" if urdf == OBJ_URDF.resolve() else "urdf", task="table")
+        obj = objs[urdf]
         z = np.load(path, allow_pickle=True)
         q = z["robot_qpos"].astype(np.float64)
         o = z["object_qpos"].astype(np.float64)
@@ -148,7 +153,7 @@ def main():
         D = cs.link_distances(robot, obj, root_pos, root_quat, dof, obj_pos, obj_quat)  # [T, 2, links], culled
         nonhand = D[:, :, 2:].max(-1)
         allmax = np.maximum(H.max(-1), nonhand)
-        rec = dict(path=str(path), sha256=sha(path), frames=T)
+        rec = dict(path=str(path), sha256=sha(path), frames=T, object_urdf=str(urdf), object_urdf_sha256=sha(urdf))
         # contact retention
         t15 = np.arange(min(len(h_sd), (T + 1) // 2))
         cond = (h_sd[t15] >= -0.10) & (obj_speed[t15, None, None] > 0.03)
@@ -194,7 +199,7 @@ def main():
         per_frame[name] = dict(H=H, phase=ph)
         print(name, json.dumps({k: rec[k] for k in ("contact_retention", "penetration", "foot_slip", "robot_robot_min_clearance_cm")}), flush=True)
     # object tracks identical?
-    objs = {s.split("=", 1)[0]: np.load(s.split("=", 1)[1])["object_qpos"] for s in a.ref}
+    objs = {s.split("=", 1)[0]: np.load(s.split("=", 1)[1].split("@")[0])["object_qpos"] for s in a.ref}
     base = next(iter(objs.values()))
     for k, v in objs.items():
         summary[k]["generation"]["object_track_equals_current"] = float(np.abs(v - base).max())
