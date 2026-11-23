@@ -1,0 +1,184 @@
+{
+ "mjcf": "src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof.xml",
+ "mjcf_sha256": "8c586e4747da85804180fe44d8692e0fd8231356728b6327e256dca498087a78",
+ "urdf": "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+ "urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+ "hands": {
+  "left": {
+   "shapes": {
+    "retarget_mjcf_obj": {
+     "vertices": 22876,
+     "hull_vertices": 3185,
+     "hull_volume_cm3": 375.71,
+     "extents_cm": [
+      13.18,
+      6.66,
+      10.65
+     ],
+     "obb_cm": [
+      4.4,
+      10.5,
+      14.13
+     ]
+    },
+    "stl_exact_hull": {
+     "vertices": 3184,
+     "hull_vertices": 3184,
+     "hull_volume_cm3": 375.71,
+     "extents_cm": [
+      13.18,
+      6.66,
+      10.65
+     ],
+     "obb_cm": [
+      4.41,
+      10.44,
+      14.17
+     ]
+    },
+    "physx_cooked_hull": {
+     "vertices": 34,
+     "hull_vertices": 34,
+     "hull_volume_cm3": 350.64,
+     "extents_cm": [
+      13.18,
+      6.52,
+      10.54
+     ],
+     "obb_cm": [
+      4.37,
+      10.31,
+      14.01
+     ]
+    }
+   },
+   "palm_point_m": {
+    "retarget_mjcf_obj": [
+     0.063764,
+     -0.043127,
+     0.00851
+    ],
+    "stl_exact_hull": [
+     0.063764,
+     -0.043127,
+     0.00851
+    ],
+    "physx_cooked_hull": [
+     0.063785,
+     -0.042639,
+     0.008036
+    ]
+   },
+   "distance": {
+    "retarget_mjcf_obj__vs__physx_cooked_hull": {
+     "mean_mm": 0.81,
+     "p95_mm": 1.99,
+     "max_mm": 2.74
+    },
+    "stl_exact_hull__vs__physx_cooked_hull": {
+     "mean_mm": 0.81,
+     "p95_mm": 1.99,
+     "max_mm": 2.75
+    },
+    "retarget_mjcf_obj__vs__stl_exact_hull": {
+     "mean_mm": 0.0,
+     "p95_mm": 0.0,
+     "max_mm": 0.25
+    }
+   },
+   "palm_point_shift_physx_minus_retarget_mm": [
+    0.02,
+    0.49,
+    -0.47
+   ]
+  },
+  "right": {
+   "shapes": {
+    "retarget_mjcf_obj": {
+     "vertices": 21928,
+     "hull_vertices": 2968,
+     "hull_volume_cm3": 375.72,
+     "extents_cm": [
+      13.18,
+      6.66,
+      10.65
+     ],
+     "obb_cm": [
+      4.41,
+      10.44,
+      14.17
+     ]
+    },
+    "stl_exact_hull": {
+     "vertices": 2967,
+     "hull_vertices": 2967,
+     "hull_volume_cm3": 375.72,
+     "extents_cm": [
+      13.18,
+      6.66,
+      10.65
+     ],
+     "obb_cm": [
+      4.41,
+      10.44,
+      14.17
+     ]
+    },
+    "physx_cooked_hull": {
+     "vertices": 34,
+     "hull_vertices": 34,
+     "hull_volume_cm3": 350.93,
+     "extents_cm": [
+      13.18,
+      6.52,
+      10.36
+     ],
+     "obb_cm": [
+      4.53,
+      10.04,
+      14.23
+     ]
+    }
+   },
+   "palm_point_m": {
+    "retarget_mjcf_obj": [
+     0.063764,
+     0.043127,
+     0.008513
+    ],
+    "stl_exact_hull": [
+     0.063764,
+     0.043127,
+     0.008513
+    ],
+    "physx_cooked_hull": [
+     0.06378,
+     0.042687,
+     0.008938
+    ]
+   },
+   "distance": {
+    "retarget_mjcf_obj__vs__physx_cooked_hull": {
+     "mean_mm": 0.8,
+     "p95_mm": 1.99,
+     "max_mm": 2.87
+    },
+    "stl_exact_hull__vs__physx_cooked_hull": {
+     "mean_mm": 0.8,
+     "p95_mm": 1.99,
+     "max_mm": 2.87
+    },
+    "retarget_mjcf_obj__vs__stl_exact_hull": {
+     "mean_mm": 0.0,
+     "p95_mm": 0.0,
+     "max_mm": 0.24
+    }
+   },
+   "palm_point_shift_physx_minus_retarget_mm": [
+    0.02,
+    -0.44,
+    0.43
+   ]
+  }
+ }
+}

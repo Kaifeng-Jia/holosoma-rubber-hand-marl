@@ -1,0 +1,431 @@
+{
+ "rules": "T14 section 4 metrics for Table references (30 Hz compact pairs). Read only, CPU.\n\nGeometry = the simulator's: robot links = the PhysX-cooked shapes of the T10 Isaac dump (T12-v2 Robot('physx')); object =\nthe training Table (desk001_5kg_training.urdf, five boxes = desk001 proxy x 0.7412, exact union-of-boxes signed distance,\npositive inside). Robot r <-> CORE4D person r+1 (robot 0 = person1). Source 15 Hz frame t <-> reference 30 Hz frame 2t.\n\n* palm signed distance: per robot and hand, the hand link's largest signed distance (exact, no culling).\n* contact retention (CoCarry definition as written in T14 section 4): condition frames = source frames where that person's\n  hand is within 0.10 m of the source object's surface (any SMPL-X hand vertex, raw desk001 mesh, stop-1 surface-sample\n  signed distance) and the source object moves faster than 0.03 m/s (object origin, central difference, 15 Hz); retained\n  when the robot hand's signed distance >= -0.02 m. Per robot / hand and pooled.\n* penetration: a frame penetrates when any link of the robot has signed distance > 0 (also reported with OmniRetarget's\n  1 cm tolerance, > 0.01 m); share of frames and the largest depth; hands and other links separately.\n* foot slip: robot toe = left/right_ankle_roll_sphere_5_link of the retargeting MJCF (OmniRetarget's evaluator), human toe\n  = SMPL-X L_Foot / R_Foot of the canonical sequence resampled to 30 Hz (the solve input); horizontal displacement per\n  frame. Two definitions: (T14 text) support = human toe speed < 0.01 m/s, slide = robot toe speed > 0.01 m/s;\n  (OmniRetarget code, eval_retargeting.py) support = human toe moves < 0.01 m per frame, slide = robot toe moves > 0.01 m\n  per frame. Share of support frames with a slide, and the largest robot toe speed in a sliding frame (m/s).\n* robot-robot clearance: smallest distance between the two robots' link sample points (every 3rd frame).\n* T12-diag phases (reference_hand_table_distance_per_frame.csv, 50 Hz labels mapped by time): per robot, the closer hand's\n  signed distance in lift / push / carry / lower: median, share within 1.5 cm, share penetrating.\n\n    sonic_s1/bin/python -B system1/t14/eval_table_refs.py --ref current=... --ref new=... --out results_system1/T14_retargeting/step1_table\n",
+ "object_urdf": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+ "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+ "refs": {
+  "current": {
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/20231030_001_desk001_move_compact_fps30.npz",
+   "sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05",
+   "frames": 413,
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.2615,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.34,
+     "hand_max_depth_cm": 0.34,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.2615
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.7893,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.87,
+     "hand_max_depth_cm": 0.87,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.7893
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0388
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.6842,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.4,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 26.27,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.3,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.0
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.24,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.842
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -0.07,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.27
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.21,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -12.11,
+     "within_1p5cm": 0.232,
+     "penetrating": 0.112
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.46,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.78,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.47,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.79,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": 0.37,
+     "within_1p5cm": 0.621,
+     "penetrating": 0.612
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 0.0
+   }
+  },
+  "omni_asis": {
+   "path": "logs_system1/t14/table/omni_asis_pair/20231030_001_desk001_move_omni_asis_fps30.npz",
+   "sha256": "8779c96ac556d59865775a4a9851d961249e19f05e8504977ac11fad8e2ac288",
+   "frames": 413,
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.2688,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.09,
+     "hand_max_depth_cm": 0.09,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.2688
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.6538,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.34,
+     "hand_max_depth_cm": 0.34,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.6538
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 1.0,
+      "max_sliding_toe_speed_mps": 0.0388
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.7105,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.4,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 26.25,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.06,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.125
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.544
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": -0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.432
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.6
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -10.75,
+     "within_1p5cm": 0.237,
+     "penetrating": 0.121
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.24,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.05,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.86
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.694
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.8
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": 0.02,
+     "within_1p5cm": 0.625,
+     "penetrating": 0.554
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 2.220446049250313e-16
+   }
+  },
+  "new": {
+   "path": "exports_system1/T14_references/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "6166aa3c52ec5acaef8560160ab52d0bb890be143ef40fb40c54f543e4105da8",
+   "frames": 413,
+   "contact_retention": {
+    "r0_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r0_both_hands_pooled": 1.0,
+    "r1_left": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_right": {
+     "condition_frames": 99,
+     "retention": 1.0
+    },
+    "r1_both_hands_pooled": 1.0,
+    "pooled": 1.0
+   },
+   "penetration": {
+    "r0": {
+     "frames_any_link_gt0": 0.3777,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.11,
+     "hand_max_depth_cm": 0.11,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.3777
+    },
+    "r1": {
+     "frames_any_link_gt0": 0.6731,
+     "frames_any_link_gt1cm": 0.0,
+     "max_depth_cm": 0.36,
+     "hand_max_depth_cm": 0.36,
+     "nonhand_max_depth_cm": 0.0,
+     "frames_hand_gt0": 0.6731
+    }
+   },
+   "foot_slip": {
+    "r0": {
+     "t14_text_mps": {
+      "support_frames": 10,
+      "sliding_share": 0.9,
+      "max_sliding_toe_speed_mps": 0.0412
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 400,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    },
+    "r1": {
+     "t14_text_mps": {
+      "support_frames": 38,
+      "sliding_share": 0.7895,
+      "max_sliding_toe_speed_mps": 0.0424
+     },
+     "omniretarget_m_per_frame": {
+      "support_frames": 392,
+      "sliding_share": 0.0,
+      "max_sliding_toe_speed_mps": 0.0
+     }
+    }
+   },
+   "foot_min_height_cm": {
+    "r0": 0.4,
+    "r1": 0.4
+   },
+   "robot_robot_min_clearance_cm": 26.42,
+   "phases_closer_hand": {
+    "r0_lift": {
+     "frames": 16,
+     "median_cm": -0.02,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.25
+    },
+    "r0_push": {
+     "frames": 57,
+     "median_cm": 0.05,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.789
+    },
+    "r0_carry": {
+     "frames": 111,
+     "median_cm": 0.01,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.586
+    },
+    "r0_lower": {
+     "frames": 5,
+     "median_cm": 0.03,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r0_still": {
+     "frames": 224,
+     "median_cm": -12.53,
+     "within_1p5cm": 0.228,
+     "penetrating": 0.165
+    },
+    "r1_lift": {
+     "frames": 16,
+     "median_cm": 0.21,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_push": {
+     "frames": 57,
+     "median_cm": 0.14,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_carry": {
+     "frames": 111,
+     "median_cm": 0.08,
+     "within_1p5cm": 1.0,
+     "penetrating": 0.982
+    },
+    "r1_lower": {
+     "frames": 5,
+     "median_cm": 0.11,
+     "within_1p5cm": 1.0,
+     "penetrating": 1.0
+    },
+    "r1_still": {
+     "frames": 224,
+     "median_cm": -0.71,
+     "within_1p5cm": 0.616,
+     "penetrating": 0.406
+    }
+   },
+   "generation": {
+    "finite": true,
+    "object_track_equals_current": 2.220446049250313e-16
+   }
+  }
+ }
+}
