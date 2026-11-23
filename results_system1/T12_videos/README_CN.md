@@ -130,10 +130,37 @@
 - **两个相机各出一个视频：** 每个状态有全景、近景两个视频，共 6 个。
 - **滑动的判定规则是我定的：** 任务书没有给，规则见上一节。
 
+## Google Drive 副本（任务 D0，2026-11-23）
+
+- **任务书：** Kevin 直接贴在对话里，`docs/system1/` 下没有对应文件。Kevin 已批准。
+- **rclone：** v1.76.0，`~/.local/bin/rclone`，未用 sudo。
+  - 来源是 downloads.rclone.org 的官方发布包 `rclone-v1.76.0-linux-amd64.zip`，sha256 `b00f00b3266c3764413afe599d3ec316f6f43b3e0ea8a0bc1d186d2133e46df7`。
+  - 这个值和发布目录里的 `SHA256SUMS` 一致；`SHA256SUMS` 的 GPG 签名有效，签名密钥指纹 `FBF737ECE9F8AB18604BD2AC93935E02FF3B54FA`。
+  - 装好的二进制 sha256 `62e4d3e5432f2c685f1834b8bb342058ff0611c99d048aeb44bb8d8fd611527e`。
+- **远端 `gdrive`：** 类型 Google Drive，`client_id` 留空，即 rclone 共用的 client_id；scope `drive.file`；没有配 shared drive。
+  - 授权走浏览器自动流程，Kevin 本人登录，02:05:56 完成。
+  - rclone 提示它的共用 client_id 正在退役，"2026 年内会停用"。
+- **Drive 文件夹：** `DuetMimic_transfer/T12_videos/`，在"我的云端硬盘"下。
+  - 文件夹、子文件夹和 7 个文件都只有所有者一个权限，没有共享，也没有链接分享。
+- **上传：** 6 个 mp4 来自 `exports_system1/T12_videos/`，`manifest.json` 来自本目录。
+  - D0 任务书写的是 `exports_system1/T12_videos/` 下的 `manifest.json`，但那里没有这个文件。
+  - 用 `rclone copy --checksum --files-from`，02:06:46 开始，02:07:31 结束，共 51.9 MiB 加 39 KB。
+- **核对：**
+  - `rclone check --checksum`（md5）：两组都是 0 处不同，分别 6 个和 1 个文件匹配。
+  - Drive 记录的 sha256 和字节数，和本地 7 个文件逐个相同。
+  - 6 个 mp4 的 sha256 和 `manifest.json` 里记的视频 sha256 相同。
+- **重跑核对：** 之后用 `system1/transfer/drive_upload.py` 又跑了一遍。
+  - copy 没有传任何东西（"There was nothing to transfer"）。
+  - check 和 sha256 比对都通过，`drive_manifest.csv` 由这一次生成。
+- **日志：** 只在本机，不进 git。
+  - 第一次上传：`logs_system1/d0_drive/T12_videos/`。
+  - 脚本那次：`logs_system1/drive/T12_videos/20261123_020930/record.json`，里面有每条命令和返回码。
+
 ## 文件
 
 | 文件 | 内容 |
 |---|---|
+| `drive_manifest.csv` | 传到 Google Drive 的 7 个文件：文件名、字节数、sha256、Drive 路径 |
 | `manifest.json` | 6 个视频各一项：视频路径和 sha256、每格的来源轨迹路径和 sha256、评测 summary 和 sha256、checkpoint、状态号、成功与否、终止步和原因、相机参数、帧号规则、GL vendor、代码 sha256 |
 | `slip_onset.csv` | 上一节表格的数，每个状态 × 仿真器一行 |
 | `slip_onset_per_step.csv.gz` | 逐行数据 |
