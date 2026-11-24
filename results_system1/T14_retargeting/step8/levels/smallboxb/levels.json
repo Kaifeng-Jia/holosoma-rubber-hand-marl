@@ -1,0 +1,98 @@
+{
+ "tag": "smallboxb",
+ "role_status": "不适用，仅示意：失败项最少的已求解候选 c15（V0 support drift r0、V0 support drift r1、V0 robot-robot clearance）",
+ "applicable": false,
+ "selected": 15,
+ "a": null,
+ "first_free_level_above_1": null,
+ "report_levels": [
+  1.0
+ ],
+ "levels": {
+  "1.00": {
+   "m": 1.0,
+   "pair": "/home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxb_c15_m1p00/pair_fps30.npz",
+   "urdf": "/home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00/r0/assets_target/smallbox.urdf",
+   "length_along_axis_m": 0.383972986,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.155,
+    "r1": 0.155
+   },
+   "robot_robot_min_distance_cm": -10.723,
+   "robot_robot_intersect_frames": 125,
+   "foot_slide": {
+    "r0_left": {
+     "support_frames": 40,
+     "segments": 2,
+     "drift_max_cm": 0.145,
+     "drift_mean_of_segments_cm": 0.116,
+     "robot_toe_speed_p95_mps": 0.0316,
+     "robot_toe_speed_max_mps": 0.0365,
+     "share_above_0p01mps": 0.125
+    },
+    "r0_right": {
+     "support_frames": 12,
+     "segments": 1,
+     "drift_max_cm": 0.136,
+     "drift_mean_of_segments_cm": 0.136,
+     "robot_toe_speed_p95_mps": 0.036,
+     "robot_toe_speed_max_mps": 0.0371,
+     "share_above_0p01mps": 0.5833
+    },
+    "r1_left": {
+     "support_frames": 40,
+     "segments": 2,
+     "drift_max_cm": 0.14,
+     "drift_mean_of_segments_cm": 0.097,
+     "robot_toe_speed_p95_mps": 0.0348,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.225
+    },
+    "r1_right": {
+     "support_frames": 12,
+     "segments": 1,
+     "drift_max_cm": 0.125,
+     "drift_mean_of_segments_cm": 0.125,
+     "robot_toe_speed_p95_mps": 0.0384,
+     "robot_toe_speed_max_mps": 0.0395,
+     "share_above_0p01mps": 0.6667
+    }
+   },
+   "contact_position_error_3d": {
+    "r0": {
+     "distance": {
+      "frames": 183,
+      "mean_cm": 8.34,
+      "p95_cm": 10.18
+     },
+     "normal_signed_mean_cm": 6.99
+    },
+    "r1": {
+     "distance": {
+      "frames": 183,
+      "mean_cm": 8.36,
+      "p95_cm": 10.31
+     },
+     "normal_signed_mean_cm": 6.99
+    }
+   },
+   "applicable": false,
+   "failed": [
+    "V0 support drift r0",
+    "V0 support drift r1",
+    "V0 robot-robot clearance"
+   ]
+  }
+ },
+ "source_box_m": [
+  0.383972986,
+  0.2861293708051798,
+  0.12270522642733554
+ ],
+ "solve_r0": "/home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00/r0"
+}

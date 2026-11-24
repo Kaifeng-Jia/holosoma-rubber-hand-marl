@@ -1,0 +1,85 @@
+{
+ "started": "2026-11-24 14:42:49",
+ "steps": [
+  {
+   "name": "solve_suitcasec_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:42:49",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "14:45:57"
+  },
+  {
+   "name": "eval_suitcasec_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c00_m1p00/pair_fps30.npz",
+   "started": "14:46:02",
+   "avail_gb": 22.5,
+   "rc": 0,
+   "done": "14:46:14"
+  },
+  {
+   "name": "eval_suitcasec_c03_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c03_m1p00/pair_fps30.npz",
+   "started": "14:46:05",
+   "avail_gb": 22.1,
+   "rc": 0,
+   "done": "14:46:17"
+  },
+  {
+   "name": "eval_suitcasec_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c05_m1p00/pair_fps30.npz",
+   "started": "14:46:08",
+   "avail_gb": 21.5,
+   "rc": 0,
+   "done": "14:46:20"
+  },
+  {
+   "name": "eval_suitcasec_c06_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c06_m1p00/pair_fps30.npz",
+   "started": "14:46:11",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "14:46:23"
+  },
+  {
+   "name": "eval_suitcasec_c09_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c09_m1p00/pair_fps30.npz",
+   "started": "14:46:14",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "14:46:26"
+  },
+  {
+   "name": "eval_suitcasec_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c10_m1p00/pair_fps30.npz",
+   "started": "14:46:17",
+   "avail_gb": 20.2,
+   "rc": 0,
+   "done": "14:46:31"
+  },
+  {
+   "name": "eval_suitcasec_c12_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c12_m1p00/pair_fps30.npz",
+   "started": "14:46:20",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:46:36"
+  },
+  {
+   "name": "eval_suitcasec_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c15_m1p00/pair_fps30.npz",
+   "started": "14:46:23",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:46:36"
+  }
+ ],
+ "summary": {
+  "suitcasec": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  }
+ },
+ "done": "2026-11-24 14:46:41"
+}

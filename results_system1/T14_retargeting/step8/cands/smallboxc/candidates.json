@@ -1,0 +1,452 @@
+{
+ "family": "box",
+ "task": null,
+ "cls": "c",
+ "source": "/home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+ "smpl_scale": 0.7301619648933411,
+ "pilot": {
+  "windows": {
+   "left_rubber_hand_link": [
+    [
+     "smallbox_box/axis1/-1",
+     16,
+     146
+    ],
+    [
+     "smallbox_box/axis2/-1",
+     25,
+     38
+    ],
+    [
+     "smallbox_box/axis2/-1",
+     113,
+     135
+    ],
+    [
+     "smallbox_box/axis2/+1",
+     143,
+     147
+    ]
+   ],
+   "right_rubber_hand_link": [
+    [
+     "smallbox_box/axis1/+1",
+     18,
+     56
+    ],
+    [
+     "smallbox_box/axis1/+1",
+     83,
+     147
+    ],
+    [
+     "smallbox_box/axis2/-1",
+     25,
+     53
+    ],
+    [
+     "smallbox_box/axis2/-1",
+     89,
+     98
+    ],
+    [
+     "smallbox_box/axis2/+1",
+     144,
+     147
+    ]
+   ]
+  },
+  "accepted_per_role": [
+   [
+    4,
+    4
+   ],
+   [
+    0,
+    0
+   ]
+  ],
+  "attempted_per_role": [
+   [
+    24,
+    24
+   ],
+   [
+    24,
+    24
+   ]
+  ]
+ },
+ "candidates": [
+  {
+   "index": 0,
+   "id": "axis0/role0/axes00 || axis0/role1/axes00",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 0.0,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.3886,
+    "lift_max_m": 1.0007,
+    "frames_lift_above_0p10": 100,
+    "longest_run_above_0p10": 100
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 0.1742
+  },
+  {
+   "index": 1,
+   "id": "axis0/role0/axes00 || axis0/role1/axes01",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 178.2036,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": false,
+    "travel_m": 0.1801,
+    "lift_max_m": 0.1171,
+    "frames_lift_above_0p10": 8,
+    "longest_run_above_0p10": 8
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.9968
+  },
+  {
+   "index": 2,
+   "id": "axis0/role0/axes00 || axis0/role1/axes02",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 3.024593730708204e-17,
+   "gravity_deg": 179.7895,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.449,
+    "lift_max_m": 0.173,
+    "frames_lift_above_0p10": 122,
+    "longest_run_above_0p10": 77
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.8877
+  },
+  {
+   "index": 3,
+   "id": "axis0/role0/axes00 || axis0/role1/axes03",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 3.024593730708204e-17,
+   "gravity_deg": 1.8087,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.02,
+    "lift_max_m": 1.2673,
+    "frames_lift_above_0p10": 101,
+    "longest_run_above_0p10": 101
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 1.3225
+  },
+  {
+   "index": 4,
+   "id": "axis0/role0/axes01 || axis0/role1/axes00",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 178.2036,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": false,
+    "travel_m": 0.1801,
+    "lift_max_m": 0.1171,
+    "frames_lift_above_0p10": 8,
+    "longest_run_above_0p10": 8
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.9968
+  },
+  {
+   "index": 5,
+   "id": "axis0/role0/axes01 || axis0/role1/axes01",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 0.0,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.3886,
+    "lift_max_m": 1.0007,
+    "frames_lift_above_0p10": 100,
+    "longest_run_above_0p10": 100
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 0.1742
+  },
+  {
+   "index": 6,
+   "id": "axis0/role0/axes01 || axis0/role1/axes02",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 3.024593730708204e-17,
+   "gravity_deg": 1.8087,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.02,
+    "lift_max_m": 1.2673,
+    "frames_lift_above_0p10": 101,
+    "longest_run_above_0p10": 101
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 1.3225
+  },
+  {
+   "index": 7,
+   "id": "axis0/role0/axes01 || axis0/role1/axes03",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 3.024593730708204e-17,
+   "gravity_deg": 179.7895,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.449,
+    "lift_max_m": 0.173,
+    "frames_lift_above_0p10": 122,
+    "longest_run_above_0p10": 77
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.8877
+  },
+  {
+   "index": 8,
+   "id": "axis0/role0/axes02 || axis0/role1/axes00",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 1.2091204494066302e-16,
+   "gravity_deg": 179.7895,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.256,
+    "lift_max_m": 0.1732,
+    "frames_lift_above_0p10": 122,
+    "longest_run_above_0p10": 77
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 1.236
+  },
+  {
+   "index": 9,
+   "id": "axis0/role0/axes02 || axis0/role1/axes01",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 1.2091204494066302e-16,
+   "gravity_deg": 1.8087,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.0178,
+    "lift_max_m": 1.1246,
+    "frames_lift_above_0p10": 102,
+    "longest_run_above_0p10": 102
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 1.5771
+  },
+  {
+   "index": 10,
+   "id": "axis0/role0/axes02 || axis0/role1/axes02",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 0.0,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.3886,
+    "lift_max_m": 1.0007,
+    "frames_lift_above_0p10": 100,
+    "longest_run_above_0p10": 100
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 0.1742
+  },
+  {
+   "index": 11,
+   "id": "axis0/role0/axes02 || axis0/role1/axes03",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 178.2036,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.1785,
+    "lift_max_m": 0.211,
+    "frames_lift_above_0p10": 135,
+    "longest_run_above_0p10": 86
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.9975
+  },
+  {
+   "index": 12,
+   "id": "axis0/role0/axes03 || axis0/role1/axes00",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 1.2091204494066302e-16,
+   "gravity_deg": 1.8087,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.0178,
+    "lift_max_m": 1.1246,
+    "frames_lift_above_0p10": 102,
+    "longest_run_above_0p10": 102
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 1.5771
+  },
+  {
+   "index": 13,
+   "id": "axis0/role0/axes03 || axis0/role1/axes01",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 1.2091204494066302e-16,
+   "gravity_deg": 179.7895,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.256,
+    "lift_max_m": 0.1732,
+    "frames_lift_above_0p10": 122,
+    "longest_run_above_0p10": 77
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 1.236
+  },
+  {
+   "index": 14,
+   "id": "axis0/role0/axes03 || axis0/role1/axes02",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 178.2036,
+   "gravity_passed": false,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.1785,
+    "lift_max_m": 0.211,
+    "frames_lift_above_0p10": 135,
+    "longest_run_above_0p10": 86
+   },
+   "passed": false,
+   "improper": false,
+   "S_translation_horizontal_m": 0.9975
+  },
+  {
+   "index": 15,
+   "id": "axis0/role0/axes03 || axis0/role1/axes03",
+   "axis": 0,
+   "parities": [
+    1,
+    1
+   ],
+   "fit_rmse_m": 8.81321148484389e-17,
+   "gravity_deg": 0.0,
+   "gravity_passed": true,
+   "main_motion": {
+    "cls": "c",
+    "passed": true,
+    "travel_m": 0.3886,
+    "lift_max_m": 1.0007,
+    "frames_lift_above_0p10": 100,
+    "longest_run_above_0p10": 100
+   },
+   "passed": true,
+   "improper": false,
+   "S_translation_horizontal_m": 0.1742
+  }
+ ],
+ "rules": "T14 step 8 (Kevin 2026-11-24, step-7 decisions item 4): the new partner construction for single-person demonstrations.\n\n* Roles: role 0 = the original demonstration; role 1 = the demonstration copied in the world by a fixed isometry S.\n  S comes from one candidate pair of the existing role check (the same candidate set and order as step 7: per role, the\n  region map M_r(x) = Q_r x + c_r from the source object frame to the lengthened target's frame); in the source object frame\n  S_local = M0^-1 o M1 (role 0's region -> role 1's region), and in the world S = O(0) S_local O(0)^-1 with O(0) the object pose\n  at the clip's first frame (object at rest), so the copy's feet start on the ground.\n* Object: role 0 sees the demonstration's object motion D0(t) = O(t) O(0)^-1, role 1 its copy D1(t) = S D0(t) S^-1. The shared\n  target (the lengthened object of the level) starts at P(0) = O(0) o M0^-1 (role 0's region on the source object, role 1's\n  region on S of it) and moves to the midpoint of D0(t) P(0) and D1(t) P(0): translation = mean of the two positions of the\n  target's origin, rotation = slerp midpoint. No parameter.\n* Everything is computed in the solver's (preprocessed) world, where the person is scaled by s about the origin and the\n  object trajectory is a similarity of the raw one (scale s), so midpoints and isometries commute with it; lengths of the\n  main-motion rule are divided by s (screen thresholds are on the person's real scale).\n* Gates before solving (existing numbers only): V0 relative_gravity_deviation_deg (5 deg) on S's rotation; main motion of the\n  shared trajectory with the screen thresholds: class b the target origin moves >= 0.5 m horizontally from frame 0; class c the\n  target's lowest corner is > 0.10 m above its rest height (lowest over the clip after a 5-frame running median) for >= 15\n  frames.\nFamilies: \"box\" (step-7 objects, robot object = oriented box x s, r = 1, nominal poses) and \"table\" (Push / Pull: round-6\nobjects, the training table at its real size, phys poses).\n",
+ "command": "system1/t14/objects/step8_candidates.py --family box --cls c --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc"
+}

@@ -1,0 +1,1472 @@
+{
+ "started": "2026-11-24 13:31:34",
+ "steps": [
+  {
+   "name": "cands_smallboxb",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls b --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:33:04",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "13:33:07"
+  },
+  {
+   "name": "cands_largeboxb",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls b --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxb --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxb",
+   "started": "13:33:12",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "13:33:15"
+  },
+  {
+   "name": "cands_suitcaseb",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls b --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:33:20",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "13:33:23"
+  },
+  {
+   "name": "cands_smallboxc",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls c --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:33:28",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "13:33:31"
+  },
+  {
+   "name": "cands_largeboxc",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls c --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:33:36",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "13:33:39"
+  },
+  {
+   "name": "cands_suitcasec",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step8_candidates.py --family box --cls c --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:33:44",
+   "avail_gb": 22.5,
+   "rc": 0,
+   "done": "13:33:47"
+  },
+  {
+   "name": "solve_smallboxb_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/m1p00/r0 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:33:52",
+   "avail_gb": 22.5,
+   "rc": 0,
+   "done": "13:36:05"
+  },
+  {
+   "name": "solve_smallboxb_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/m1p00/r1 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:33:55",
+   "avail_gb": 21.7,
+   "rc": 0,
+   "done": "13:36:28"
+  },
+  {
+   "name": "solve_smallboxb_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/m1p00/r0 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:33:58",
+   "avail_gb": 20.7,
+   "rc": 0,
+   "done": "13:36:51"
+  },
+  {
+   "name": "solve_smallboxb_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/m1p00/r1 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:34:01",
+   "avail_gb": 19.3,
+   "rc": 0,
+   "done": "13:36:51"
+  },
+  {
+   "name": "solve_smallboxb_c10_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/m1p00/r0 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:34:04",
+   "avail_gb": 17.9,
+   "rc": 0,
+   "done": "13:36:54"
+  },
+  {
+   "name": "solve_smallboxb_c10_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/m1p00/r1 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:34:07",
+   "avail_gb": 16.6,
+   "rc": 0,
+   "done": "13:37:20"
+  },
+  {
+   "name": "solve_smallboxb_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00/r0 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:36:05",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:37:43"
+  },
+  {
+   "name": "solve_smallboxb_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00/r1 --object smallbox --sequence sub10_smallbox_007 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb",
+   "started": "13:36:28",
+   "avail_gb": 16.1,
+   "rc": 0,
+   "done": "13:38:01"
+  },
+  {
+   "name": "solve_suitcaseb_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/m1p00/r0 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:36:51",
+   "avail_gb": 17.4,
+   "rc": 0,
+   "done": "13:39:50"
+  },
+  {
+   "name": "solve_suitcaseb_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/m1p00/r1 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:36:54",
+   "avail_gb": 17.8,
+   "rc": 0,
+   "done": "13:39:34"
+  },
+  {
+   "name": "solve_suitcaseb_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/m1p00/r0 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:36:57",
+   "avail_gb": 16.8,
+   "rc": 0,
+   "done": "13:39:47"
+  },
+  {
+   "name": "solve_suitcaseb_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/m1p00/r1 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:37:20",
+   "avail_gb": 16.1,
+   "rc": 0,
+   "done": "13:40:23"
+  },
+  {
+   "name": "solve_suitcaseb_c10_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/m1p00/r0 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:37:43",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:41:40"
+  },
+  {
+   "name": "solve_suitcaseb_c10_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/m1p00/r1 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:38:01",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:41:21"
+  },
+  {
+   "name": "solve_suitcaseb_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/m1p00/r0 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:39:34",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:41:37"
+  },
+  {
+   "name": "solve_suitcaseb_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcaseb --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/m1p00/r1 --object suitcase --sequence sub1_suitcase_065 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb",
+   "started": "13:39:47",
+   "avail_gb": 16.1,
+   "rc": 0,
+   "done": "13:41:34"
+  },
+  {
+   "name": "solve_smallboxc_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:39:50",
+   "avail_gb": 16.5,
+   "rc": 0,
+   "done": "13:43:28"
+  },
+  {
+   "name": "solve_smallboxc_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:40:23",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:44:09"
+  },
+  {
+   "name": "solve_smallboxc_c03_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:41:21",
+   "avail_gb": 16.0,
+   "rc": 0,
+   "done": "13:44:47"
+  },
+  {
+   "name": "solve_smallboxc_c03_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:41:34",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:43:56"
+  },
+  {
+   "name": "solve_smallboxc_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:41:37",
+   "avail_gb": 16.4,
+   "rc": 0,
+   "done": "13:46:10"
+  },
+  {
+   "name": "solve_smallboxc_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:41:40",
+   "avail_gb": 16.5,
+   "rc": 0,
+   "done": "13:46:33"
+  },
+  {
+   "name": "solve_smallboxc_c06_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:43:28",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:47:01"
+  },
+  {
+   "name": "solve_smallboxc_c06_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:43:56",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:47:49"
+  },
+  {
+   "name": "solve_smallboxc_c09_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:44:09",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:48:17"
+  },
+  {
+   "name": "solve_smallboxc_c09_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:44:47",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:48:35"
+  },
+  {
+   "name": "solve_smallboxc_c10_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:46:10",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:50:26"
+  },
+  {
+   "name": "solve_smallboxc_c10_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:46:33",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:50:26"
+  },
+  {
+   "name": "solve_smallboxc_c12_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:47:01",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:49:48"
+  },
+  {
+   "name": "solve_smallboxc_c12_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:47:49",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "13:51:08"
+  },
+  {
+   "name": "solve_smallboxc_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/m1p00/r0 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:48:17",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:50:57"
+  },
+  {
+   "name": "solve_smallboxc_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag smallboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/m1p00/r1 --object smallbox --sequence sub7_smallbox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc",
+   "started": "13:48:35",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:51:05"
+  },
+  {
+   "name": "solve_largeboxc_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:49:48",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:53:16"
+  },
+  {
+   "name": "solve_largeboxc_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:50:26",
+   "avail_gb": 17.1,
+   "rc": 0,
+   "done": "13:53:47"
+  },
+  {
+   "name": "solve_largeboxc_c03_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:50:29",
+   "avail_gb": 16.3,
+   "rc": 0,
+   "done": "13:54:15"
+  },
+  {
+   "name": "solve_largeboxc_c03_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:50:57",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:53:34"
+  },
+  {
+   "name": "solve_largeboxc_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:51:05",
+   "avail_gb": 15.6,
+   "rc": 0,
+   "done": "13:54:48"
+  },
+  {
+   "name": "solve_largeboxc_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:51:08",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:54:51"
+  },
+  {
+   "name": "solve_largeboxc_c06_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:53:16",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "13:56:39"
+  },
+  {
+   "name": "solve_largeboxc_c06_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:53:34",
+   "avail_gb": 14.3,
+   "rc": 0,
+   "done": "13:57:07"
+  },
+  {
+   "name": "solve_largeboxc_c09_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:53:47",
+   "avail_gb": 14.1,
+   "rc": 0,
+   "done": "13:57:15"
+  },
+  {
+   "name": "solve_largeboxc_c09_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:54:15",
+   "avail_gb": 15.2,
+   "rc": 0,
+   "done": "13:57:15"
+  },
+  {
+   "name": "solve_largeboxc_c10_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:54:48",
+   "avail_gb": 15.6,
+   "rc": 0,
+   "done": "13:58:21"
+  },
+  {
+   "name": "solve_largeboxc_c10_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:54:51",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:58:21"
+  },
+  {
+   "name": "solve_largeboxc_c12_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:56:39",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "13:59:35"
+  },
+  {
+   "name": "solve_largeboxc_c12_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:57:07",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "14:00:09"
+  },
+  {
+   "name": "solve_largeboxc_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/m1p00/r0 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:57:15",
+   "avail_gb": 17.0,
+   "rc": 0,
+   "done": "14:00:01"
+  },
+  {
+   "name": "solve_largeboxc_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag largeboxc --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/m1p00/r1 --object largebox --sequence sub7_largebox_027 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc",
+   "started": "13:57:18",
+   "avail_gb": 16.2,
+   "rc": 0,
+   "done": "13:59:58"
+  },
+  {
+   "name": "solve_suitcasec_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:58:21",
+   "avail_gb": 16.8,
+   "rc": -6,
+   "done": "13:58:24"
+  },
+  {
+   "name": "solve_suitcasec_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c00/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:58:24",
+   "avail_gb": 16.5,
+   "rc": 0,
+   "done": "14:02:13"
+  },
+  {
+   "name": "solve_suitcasec_c03_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:58:27",
+   "avail_gb": 15.2,
+   "rc": 0,
+   "done": "14:01:57"
+  },
+  {
+   "name": "solve_suitcasec_c03_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:59:35",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:02:10"
+  },
+  {
+   "name": "solve_suitcasec_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "13:59:58",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:04:47"
+  },
+  {
+   "name": "solve_suitcasec_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:00:01",
+   "avail_gb": 16.4,
+   "rc": 0,
+   "done": "14:03:51"
+  },
+  {
+   "name": "solve_suitcasec_c06_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:00:09",
+   "avail_gb": 15.7,
+   "rc": 0,
+   "done": "14:04:19"
+  },
+  {
+   "name": "solve_suitcasec_c06_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:01:57",
+   "avail_gb": 16.0,
+   "rc": 0,
+   "done": "14:05:10"
+  },
+  {
+   "name": "solve_suitcasec_c09_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:02:10",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:05:48"
+  },
+  {
+   "name": "solve_suitcasec_c09_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:02:13",
+   "avail_gb": 16.4,
+   "rc": 0,
+   "done": "14:06:26"
+  },
+  {
+   "name": "solve_suitcasec_c10_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:03:51",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:07:34"
+  },
+  {
+   "name": "solve_suitcasec_c10_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:04:19",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:08:05"
+  },
+  {
+   "name": "solve_suitcasec_c12_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:04:47",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "14:07:42"
+  },
+  {
+   "name": "solve_suitcasec_c12_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:05:10",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "14:08:08"
+  },
+  {
+   "name": "solve_suitcasec_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00/r0 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:05:48",
+   "avail_gb": 15.9,
+   "rc": 0,
+   "done": "14:08:31"
+  },
+  {
+   "name": "solve_suitcasec_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --mode role --tag suitcasec --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00/r1 --object suitcase --sequence sub14_suitcase_016 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec",
+   "started": "14:06:26",
+   "avail_gb": 16.0,
+   "rc": 0,
+   "done": "14:08:44"
+  },
+  {
+   "name": "solve_push_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:07:34",
+   "avail_gb": 16.0,
+   "rc": 0,
+   "done": "14:11:12"
+  },
+  {
+   "name": "solve_push_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:07:42",
+   "avail_gb": 16.1,
+   "rc": 0,
+   "done": "14:11:30"
+  },
+  {
+   "name": "solve_push_c04_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:08:05",
+   "avail_gb": 15.6,
+   "rc": 0,
+   "done": "14:11:48"
+  },
+  {
+   "name": "solve_push_c04_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:08:08",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "14:13:52"
+  },
+  {
+   "name": "solve_push_c06_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:08:31",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:12:16"
+  },
+  {
+   "name": "solve_push_c06_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:08:44",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:12:44"
+  },
+  {
+   "name": "solve_push_c09_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:11:12",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:14:10"
+  },
+  {
+   "name": "solve_push_c09_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:11:30",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:14:28"
+  },
+  {
+   "name": "solve_push_c13_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:11:48",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:15:30"
+  },
+  {
+   "name": "solve_push_c13_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:12:16",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:15:22"
+  },
+  {
+   "name": "solve_push_c15_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:12:44",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:15:43"
+  },
+  {
+   "name": "solve_push_c15_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:13:52",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:17:16"
+  },
+  {
+   "name": "solve_push_c18_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:14:10",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:17:54"
+  },
+  {
+   "name": "solve_push_c18_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:14:28",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:18:22"
+  },
+  {
+   "name": "solve_push_c20_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:15:22",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:19:25"
+  },
+  {
+   "name": "solve_push_c20_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:15:30",
+   "avail_gb": 15.2,
+   "rc": 0,
+   "done": "14:20:45"
+  },
+  {
+   "name": "solve_push_c22_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c22/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c22/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:15:43",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:19:28"
+  },
+  {
+   "name": "solve_push_c22_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c22/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c22/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:17:16",
+   "avail_gb": 15.1,
+   "rc": 1,
+   "done": "14:20:24"
+  },
+  {
+   "name": "solve_push_c27_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:17:54",
+   "avail_gb": 15.2,
+   "rc": 0,
+   "done": "14:20:06"
+  },
+  {
+   "name": "solve_push_c27_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:18:22",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:20:32"
+  },
+  {
+   "name": "solve_push_c29_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:19:25",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:21:38"
+  },
+  {
+   "name": "solve_push_c29_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:19:28",
+   "avail_gb": 15.4,
+   "rc": 0,
+   "done": "14:22:59"
+  },
+  {
+   "name": "solve_push_c31_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:20:06",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:22:16"
+  },
+  {
+   "name": "solve_push_c31_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:20:24",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "14:23:22"
+  },
+  {
+   "name": "solve_push_c32_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:20:32",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:24:00"
+  },
+  {
+   "name": "solve_push_c32_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:20:45",
+   "avail_gb": 14.7,
+   "rc": 0,
+   "done": "14:24:48"
+  },
+  {
+   "name": "solve_push_c34_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:21:38",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:25:21"
+  },
+  {
+   "name": "solve_push_c34_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:22:16",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:26:09"
+  },
+  {
+   "name": "solve_push_c36_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:22:59",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:26:09"
+  },
+  {
+   "name": "solve_push_c36_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:23:22",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:29:02"
+  },
+  {
+   "name": "solve_push_c41_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:24:00",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:27:15"
+  },
+  {
+   "name": "solve_push_c41_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:24:48",
+   "avail_gb": 13.9,
+   "rc": 0,
+   "done": "14:27:43"
+  },
+  {
+   "name": "solve_push_c43_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:25:21",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:28:29"
+  },
+  {
+   "name": "solve_push_c43_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:26:09",
+   "avail_gb": 16.5,
+   "rc": 0,
+   "done": "14:28:26"
+  },
+  {
+   "name": "solve_push_c45_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:26:12",
+   "avail_gb": 15.4,
+   "rc": 0,
+   "done": "14:29:20"
+  },
+  {
+   "name": "solve_push_c45_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:27:15",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:29:53"
+  },
+  {
+   "name": "solve_push_c48_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:27:43",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:32:14"
+  },
+  {
+   "name": "solve_push_c48_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:28:26",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:32:11"
+  },
+  {
+   "name": "solve_push_c50_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:28:29",
+   "avail_gb": 15.2,
+   "rc": 0,
+   "done": "14:33:00"
+  },
+  {
+   "name": "solve_push_c50_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:29:02",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:33:28"
+  },
+  {
+   "name": "solve_push_c54_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:29:20",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "14:33:51"
+  },
+  {
+   "name": "solve_push_c54_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:29:53",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:32:47"
+  },
+  {
+   "name": "solve_push_c57_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:32:11",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:35:45"
+  },
+  {
+   "name": "solve_push_c57_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:32:14",
+   "avail_gb": 15.4,
+   "rc": 0,
+   "done": "14:35:14"
+  },
+  {
+   "name": "solve_push_c59_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:32:47",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "14:36:21"
+  },
+  {
+   "name": "solve_push_c59_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:33:00",
+   "avail_gb": 14.7,
+   "rc": 0,
+   "done": "14:35:22"
+  },
+  {
+   "name": "solve_push_c63_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/m1p00/r0 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:33:28",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "14:35:58"
+  },
+  {
+   "name": "solve_push_c63_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag push --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/m1p00/r1 --task push --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+   "started": "14:33:51",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "14:36:51"
+  },
+  {
+   "name": "solve_pull_c00_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag pull --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/m1p00/r0 --task pull --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "started": "14:35:14",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "14:39:31"
+  },
+  {
+   "name": "solve_pull_c00_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag pull --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/m1p00/r1 --task pull --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "started": "14:35:22",
+   "avail_gb": 15.3,
+   "rc": 0,
+   "done": "14:39:36"
+  },
+  {
+   "name": "solve_pull_c05_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag pull --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/cand.json --role 0 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/m1p00/r0 --task pull --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "started": "14:35:45",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "14:37:56"
+  },
+  {
+   "name": "solve_pull_c05_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family table --mode role --tag pull --cand /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/cand.json --role 1 --m 1.0 --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/m1p00/r1 --task pull --target-urdf /home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "started": "14:35:58",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "14:38:01"
+  },
+  {
+   "name": "eval_smallboxb_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxb_c00_m1p00/pair_fps30.npz",
+   "started": "14:39:41",
+   "avail_gb": 22.6,
+   "rc": 0,
+   "done": "14:39:53"
+  },
+  {
+   "name": "eval_smallboxb_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxb_c05_m1p00/pair_fps30.npz",
+   "started": "14:39:44",
+   "avail_gb": 22.2,
+   "rc": 0,
+   "done": "14:39:56"
+  },
+  {
+   "name": "eval_smallboxb_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxb_c10_m1p00/pair_fps30.npz",
+   "started": "14:39:47",
+   "avail_gb": 21.5,
+   "rc": 0,
+   "done": "14:39:59"
+  },
+  {
+   "name": "eval_smallboxb_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxb/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxb_c15_m1p00/pair_fps30.npz",
+   "started": "14:39:50",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "14:40:02"
+  },
+  {
+   "name": "eval_suitcaseb_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcaseb_c00_m1p00/pair_fps30.npz",
+   "started": "14:39:53",
+   "avail_gb": 19.8,
+   "rc": 0,
+   "done": "14:40:05"
+  },
+  {
+   "name": "eval_suitcaseb_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcaseb_c05_m1p00/pair_fps30.npz",
+   "started": "14:39:56",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:40:08"
+  },
+  {
+   "name": "eval_suitcaseb_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcaseb_c10_m1p00/pair_fps30.npz",
+   "started": "14:39:59",
+   "avail_gb": 19.8,
+   "rc": 0,
+   "done": "14:40:14"
+  },
+  {
+   "name": "eval_suitcaseb_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcaseb --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcaseb/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcaseb_c15_m1p00/pair_fps30.npz",
+   "started": "14:40:02",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:40:14"
+  },
+  {
+   "name": "eval_smallboxc_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c00_m1p00/pair_fps30.npz",
+   "started": "14:40:05",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:40:20"
+  },
+  {
+   "name": "eval_smallboxc_c03_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c03/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c03_m1p00/pair_fps30.npz",
+   "started": "14:40:08",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:40:20"
+  },
+  {
+   "name": "eval_smallboxc_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c05_m1p00/pair_fps30.npz",
+   "started": "14:40:11",
+   "avail_gb": 19.3,
+   "rc": 0,
+   "done": "14:40:26"
+  },
+  {
+   "name": "eval_smallboxc_c06_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c06/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c06_m1p00/pair_fps30.npz",
+   "started": "14:40:14",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:40:26"
+  },
+  {
+   "name": "eval_smallboxc_c09_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c09/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c09_m1p00/pair_fps30.npz",
+   "started": "14:40:17",
+   "avail_gb": 19.2,
+   "rc": 0,
+   "done": "14:40:29"
+  },
+  {
+   "name": "eval_smallboxc_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c10_m1p00/pair_fps30.npz",
+   "started": "14:40:20",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:40:35"
+  },
+  {
+   "name": "eval_smallboxc_c12_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c12/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c12_m1p00/pair_fps30.npz",
+   "started": "14:40:23",
+   "avail_gb": 18.7,
+   "rc": 0,
+   "done": "14:40:35"
+  },
+  {
+   "name": "eval_smallboxc_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/smallboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/smallboxc/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/smallboxc_c15_m1p00/pair_fps30.npz",
+   "started": "14:40:26",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:40:38"
+  },
+  {
+   "name": "eval_largeboxc_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c00_m1p00/pair_fps30.npz",
+   "started": "14:40:29",
+   "avail_gb": 20.2,
+   "rc": 0,
+   "done": "14:40:41"
+  },
+  {
+   "name": "eval_largeboxc_c03_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c03/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c03_m1p00/pair_fps30.npz",
+   "started": "14:40:32",
+   "avail_gb": 18.6,
+   "rc": 0,
+   "done": "14:40:44"
+  },
+  {
+   "name": "eval_largeboxc_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c05_m1p00/pair_fps30.npz",
+   "started": "14:40:35",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:40:47"
+  },
+  {
+   "name": "eval_largeboxc_c06_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c06/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c06_m1p00/pair_fps30.npz",
+   "started": "14:40:38",
+   "avail_gb": 19.7,
+   "rc": 0,
+   "done": "14:40:50"
+  },
+  {
+   "name": "eval_largeboxc_c09_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c09/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c09_m1p00/pair_fps30.npz",
+   "started": "14:40:41",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:40:53"
+  },
+  {
+   "name": "eval_largeboxc_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c10_m1p00/pair_fps30.npz",
+   "started": "14:40:44",
+   "avail_gb": 19.8,
+   "rc": 0,
+   "done": "14:40:56"
+  },
+  {
+   "name": "eval_largeboxc_c12_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c12/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c12_m1p00/pair_fps30.npz",
+   "started": "14:40:47",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "14:40:59"
+  },
+  {
+   "name": "eval_largeboxc_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/largeboxc --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/largeboxc/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/largeboxc_c15_m1p00/pair_fps30.npz",
+   "started": "14:40:50",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:02"
+  },
+  {
+   "name": "eval_suitcasec_c03_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c03/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c03_m1p00/pair_fps30.npz",
+   "started": "14:40:53",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:05"
+  },
+  {
+   "name": "eval_suitcasec_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c05_m1p00/pair_fps30.npz",
+   "started": "14:40:56",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "14:41:08"
+  },
+  {
+   "name": "eval_suitcasec_c06_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c06/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c06_m1p00/pair_fps30.npz",
+   "started": "14:40:59",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:11"
+  },
+  {
+   "name": "eval_suitcasec_c09_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c09/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c09_m1p00/pair_fps30.npz",
+   "started": "14:41:02",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:41:14"
+  },
+  {
+   "name": "eval_suitcasec_c10_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c10/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c10_m1p00/pair_fps30.npz",
+   "started": "14:41:05",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:17"
+  },
+  {
+   "name": "eval_suitcasec_c12_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c12/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c12_m1p00/pair_fps30.npz",
+   "started": "14:41:08",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:20"
+  },
+  {
+   "name": "eval_suitcasec_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step8/src/suitcasec --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/suitcasec/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/suitcasec_c15_m1p00/pair_fps30.npz",
+   "started": "14:41:11",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "14:41:23"
+  },
+  {
+   "name": "eval_push_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c00_m1p00/pair_fps30.npz",
+   "started": "14:41:14",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:41:29"
+  },
+  {
+   "name": "eval_push_c04_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c04/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c04_m1p00/pair_fps30.npz",
+   "started": "14:41:17",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "14:41:32"
+  },
+  {
+   "name": "eval_push_c06_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c06/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c06_m1p00/pair_fps30.npz",
+   "started": "14:41:20",
+   "avail_gb": 19.7,
+   "rc": 0,
+   "done": "14:41:35"
+  },
+  {
+   "name": "eval_push_c09_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c09/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c09_m1p00/pair_fps30.npz",
+   "started": "14:41:23",
+   "avail_gb": 19.8,
+   "rc": 0,
+   "done": "14:41:38"
+  },
+  {
+   "name": "eval_push_c13_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c13/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c13_m1p00/pair_fps30.npz",
+   "started": "14:41:26",
+   "avail_gb": 18.6,
+   "rc": 0,
+   "done": "14:41:41"
+  },
+  {
+   "name": "eval_push_c15_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c15/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c15_m1p00/pair_fps30.npz",
+   "started": "14:41:29",
+   "avail_gb": 19.5,
+   "rc": 0,
+   "done": "14:41:41"
+  },
+  {
+   "name": "eval_push_c18_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c18/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c18_m1p00/pair_fps30.npz",
+   "started": "14:41:32",
+   "avail_gb": 18.4,
+   "rc": 0,
+   "done": "14:41:47"
+  },
+  {
+   "name": "eval_push_c20_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c20/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c20_m1p00/pair_fps30.npz",
+   "started": "14:41:35",
+   "avail_gb": 18.3,
+   "rc": 0,
+   "done": "14:41:50"
+  },
+  {
+   "name": "eval_push_c27_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c27/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c27_m1p00/pair_fps30.npz",
+   "started": "14:41:38",
+   "avail_gb": 18.5,
+   "rc": 0,
+   "done": "14:41:53"
+  },
+  {
+   "name": "eval_push_c29_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c29/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c29_m1p00/pair_fps30.npz",
+   "started": "14:41:41",
+   "avail_gb": 19.5,
+   "rc": 0,
+   "done": "14:41:56"
+  },
+  {
+   "name": "eval_push_c31_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c31/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c31_m1p00/pair_fps30.npz",
+   "started": "14:41:44",
+   "avail_gb": 18.3,
+   "rc": 0,
+   "done": "14:41:59"
+  },
+  {
+   "name": "eval_push_c32_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c32/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c32_m1p00/pair_fps30.npz",
+   "started": "14:41:47",
+   "avail_gb": 18.5,
+   "rc": 0,
+   "done": "14:42:02"
+  },
+  {
+   "name": "eval_push_c34_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c34/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c34_m1p00/pair_fps30.npz",
+   "started": "14:41:50",
+   "avail_gb": 18.3,
+   "rc": 0,
+   "done": "14:42:05"
+  },
+  {
+   "name": "eval_push_c36_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c36/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c36_m1p00/pair_fps30.npz",
+   "started": "14:41:53",
+   "avail_gb": 18.4,
+   "rc": 0,
+   "done": "14:42:08"
+  },
+  {
+   "name": "eval_push_c41_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c41/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c41_m1p00/pair_fps30.npz",
+   "started": "14:41:56",
+   "avail_gb": 19.1,
+   "rc": 0,
+   "done": "14:42:08"
+  },
+  {
+   "name": "eval_push_c43_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c43/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c43_m1p00/pair_fps30.npz",
+   "started": "14:41:59",
+   "avail_gb": 18.4,
+   "rc": 0,
+   "done": "14:42:14"
+  },
+  {
+   "name": "eval_push_c45_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c45/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c45_m1p00/pair_fps30.npz",
+   "started": "14:42:02",
+   "avail_gb": 18.3,
+   "rc": 0,
+   "done": "14:42:17"
+  },
+  {
+   "name": "eval_push_c48_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c48/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c48_m1p00/pair_fps30.npz",
+   "started": "14:42:05",
+   "avail_gb": 18.2,
+   "rc": 0,
+   "done": "14:42:20"
+  },
+  {
+   "name": "eval_push_c50_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c50/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c50_m1p00/pair_fps30.npz",
+   "started": "14:42:08",
+   "avail_gb": 19.7,
+   "rc": 0,
+   "done": "14:42:20"
+  },
+  {
+   "name": "eval_push_c54_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c54/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c54_m1p00/pair_fps30.npz",
+   "started": "14:42:11",
+   "avail_gb": 19.5,
+   "rc": 0,
+   "done": "14:42:26"
+  },
+  {
+   "name": "eval_push_c57_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c57/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c57_m1p00/pair_fps30.npz",
+   "started": "14:42:14",
+   "avail_gb": 18.3,
+   "rc": 0,
+   "done": "14:42:29"
+  },
+  {
+   "name": "eval_push_c59_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c59/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c59_m1p00/pair_fps30.npz",
+   "started": "14:42:17",
+   "avail_gb": 19.4,
+   "rc": 0,
+   "done": "14:42:34"
+  },
+  {
+   "name": "eval_push_c63_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_push_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/push/c63/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/push_c63_m1p00/pair_fps30.npz",
+   "started": "14:42:20",
+   "avail_gb": 19.7,
+   "rc": 0,
+   "done": "14:42:34"
+  },
+  {
+   "name": "eval_pull_c00_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_pull_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c00/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/pull_c00_m1p00/pair_fps30.npz",
+   "started": "14:42:23",
+   "avail_gb": 18.2,
+   "rc": 0,
+   "done": "14:42:39"
+  },
+  {
+   "name": "eval_pull_c05_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/r6/single_pull_C --gates /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step8/pull_c05_m1p00/pair_fps30.npz",
+   "started": "14:42:26",
+   "avail_gb": 18.4,
+   "rc": 0,
+   "done": "14:42:39"
+  }
+ ],
+ "summary": {
+  "smallboxb": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "largeboxb": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "suitcaseb": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "smallboxc": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "largeboxc": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "suitcasec": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "push": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  },
+  "pull": {
+   "applicable": false,
+   "applicable_candidates": [],
+   "selected": null
+  }
+ },
+ "done": "2026-11-24 14:42:44"
+}

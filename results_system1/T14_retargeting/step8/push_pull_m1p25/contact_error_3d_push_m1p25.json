@@ -1,0 +1,49 @@
+{
+ "task": "push",
+ "m": 1.25,
+ "pair": "exports_system1/T14_references/step8/push_sizes_C/m1p25/push_m1p25_pair_fps30.npz",
+ "pair_sha256": "135bbba4a279a790a2bacc7da283c4baaf8feddb6faf0a3af354e77cdf7285b7",
+ "rules": "T14 (Kevin 2026-11-24): contact-position error as a 3-D distance; replaces the surface-only version of contact_gap.py\n(which compared the two points' projections onto the surface and could not see a hand hovering above it).\n\n  * frames: every frame in which the person's hand touches the object (any SMPL-X hand vertex within 1.5 cm of the captured\n    mesh); CORE4D 15 Hz frame t <-> reference frame 2t, robot r <-> person r + 1; Push / Pull 30 Hz, robot 1 inherits the\n    source (Pull mirrored across the table's local XY plane, hands swapped);\n  * target = the person's palm point -> nearest point on the captured object mesh (object frame), moved to the level's object\n    by the level's transform (CORE4D x s, s = s_bar k; Push / Pull: the OMOMO capture table the hands touch, moved to the\n    training table by the exact similarity of omomo_table.py (round 6; earlier recomputations used the InterMimic table), then\n    the role-isometry translation +-c(m), Pull robot 1 mirrored);\n    n = the mesh face normal at that point, oriented toward the person's palm point (outside the object);\n  * robot = the robot palm point (palm point of the simulator hand hull, simulator FK) in the reference's object frame;\n  * error vector e = robot - target: distance |e|; normal component e.n (signed: + = outside / hovering, - = inside the object\n    surface); tangential component |e - (e.n) n|.\nPer robot and hand over the contact frames: mean and 95th percentile of the distance, of the tangential component and of\n|normal|, and the mean signed normal component (cm).\n",
+ "result": {
+  "r0_left": {
+   "frames": 147,
+   "dist_mean_cm": 5.09,
+   "dist_p95_cm": 8.86,
+   "tangential_mean_cm": 3.49,
+   "tangential_p95_cm": 8.19,
+   "normal_abs_mean_cm": 3.46,
+   "normal_abs_p95_cm": 3.78,
+   "normal_signed_mean_cm": 3.46
+  },
+  "r0_right": {
+   "frames": 146,
+   "dist_mean_cm": 4.76,
+   "dist_p95_cm": 8.97,
+   "tangential_mean_cm": 3.13,
+   "tangential_p95_cm": 7.89,
+   "normal_abs_mean_cm": 3.42,
+   "normal_abs_p95_cm": 4.58,
+   "normal_signed_mean_cm": 3.42
+  },
+  "r1_left": {
+   "frames": 147,
+   "dist_mean_cm": 5.09,
+   "dist_p95_cm": 8.86,
+   "tangential_mean_cm": 3.49,
+   "tangential_p95_cm": 8.19,
+   "normal_abs_mean_cm": 3.46,
+   "normal_abs_p95_cm": 3.78,
+   "normal_signed_mean_cm": 3.46
+  },
+  "r1_right": {
+   "frames": 146,
+   "dist_mean_cm": 4.76,
+   "dist_p95_cm": 8.97,
+   "tangential_mean_cm": 3.13,
+   "tangential_p95_cm": 7.89,
+   "normal_abs_mean_cm": 3.42,
+   "normal_abs_p95_cm": 4.58,
+   "normal_signed_mean_cm": 3.42
+  }
+ }
+}

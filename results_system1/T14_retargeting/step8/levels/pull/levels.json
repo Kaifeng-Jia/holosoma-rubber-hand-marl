@@ -1,0 +1,97 @@
+{
+ "tag": "pull",
+ "role_status": "不适用，仅示意：失败项最少的已求解候选 c05（V0 support drift r0、V0 support drift r1）",
+ "applicable": false,
+ "selected": 5,
+ "a": null,
+ "first_free_level_above_1": null,
+ "report_levels": [
+  1.0
+ ],
+ "levels": {
+  "1.00": {
+   "m": 1.0,
+   "pair": "/home/kevin/duet-system1/exports_system1/T14_references/step8/pull_c05_m1p00/pair_fps30.npz",
+   "urdf": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+   "length_along_axis_m": 1.4,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.1
+   },
+   "robot_robot_min_distance_cm": 50.0,
+   "robot_robot_intersect_frames": 0,
+   "foot_slide": {
+    "r0_left": {
+     "support_frames": 50,
+     "segments": 2,
+     "drift_max_cm": 0.2,
+     "drift_mean_of_segments_cm": 0.118,
+     "robot_toe_speed_p95_mps": 0.0376,
+     "robot_toe_speed_max_mps": 0.0483,
+     "share_above_0p01mps": 0.24
+    },
+    "r0_right": {
+     "support_frames": 92,
+     "segments": 2,
+     "drift_max_cm": 0.269,
+     "drift_mean_of_segments_cm": 0.147,
+     "robot_toe_speed_p95_mps": 0.0272,
+     "robot_toe_speed_max_mps": 0.0536,
+     "share_above_0p01mps": 0.0761
+    },
+    "r1_left": {
+     "support_frames": 92,
+     "segments": 2,
+     "drift_max_cm": 0.314,
+     "drift_mean_of_segments_cm": 0.176,
+     "robot_toe_speed_p95_mps": 0.0078,
+     "robot_toe_speed_max_mps": 0.0572,
+     "share_above_0p01mps": 0.0435
+    },
+    "r1_right": {
+     "support_frames": 50,
+     "segments": 2,
+     "drift_max_cm": 0.185,
+     "drift_mean_of_segments_cm": 0.099,
+     "robot_toe_speed_p95_mps": 0.0386,
+     "robot_toe_speed_max_mps": 0.0472,
+     "share_above_0p01mps": 0.18
+    }
+   },
+   "contact_position_error_3d": {
+    "r0": {
+     "distance": {
+      "frames": 317,
+      "mean_cm": 5.53,
+      "p95_cm": 7.37
+     },
+     "normal_signed_mean_cm": -1.62
+    },
+    "r1": {
+     "distance": {
+      "frames": 317,
+      "mean_cm": 5.59,
+      "p95_cm": 7.36
+     },
+     "normal_signed_mean_cm": -1.67
+    }
+   },
+   "applicable": false,
+   "failed": [
+    "V0 support drift r0",
+    "V0 support drift r1"
+   ]
+  }
+ },
+ "source_box_m": [
+  0.522,
+  0.428,
+  1.4
+ ],
+ "solve_r0": "/home/kevin/duet-system1/logs_system1/t14/step8/cands/pull/c05/m1p00/r0"
+}
