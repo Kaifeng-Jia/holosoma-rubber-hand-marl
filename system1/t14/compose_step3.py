@@ -104,6 +104,20 @@ def main():
             w.writeheader()
             w.writerows(data)
         print(name, len(data))
+    # small records: every solve's run_record, combine records, pipeline decisions, levels, test outputs
+    import shutil
+    rec = OUT / "records"
+    rec.mkdir(exist_ok=True)
+    for rr in sorted(S.glob("*/person*/run_record.json")) + sorted(S.glob("single*/run_record.json")):
+        shutil.copy(rr, rec / ("solve__" + "__".join(rr.relative_to(S).parts[:-1]) + ".json"))
+    for cr in sorted((ROOT / "exports_system1/T14_references/r3").glob("*/combine_record.json")):
+        shutil.copy(cr, rec / f"combine__{cr.parent.name}.json")
+    for f in [S / "pipeline.json", S / "jobs.txt"] + sorted(S.glob("jobs_a10_*.txt")) + sorted((S / "levels").glob("*.json")):
+        if f.exists():
+            shutil.copy(f, rec / (f"levels__{f.name}" if f.parent.name == "levels" else f.name))
+    for f in ("run.log", "a10_queue.log", "a10_k08_queue.log", "test_sim_scene.log", "test_palm.log"):
+        if (S / f).exists():
+            shutil.copy(S / f, rec / f)
     a = {t: (load(OUT / t / "eval_r3.json") or {}).get("a") for t in ("push", "pull")}
     a2 = {t: (load(OUT / t / "eval_r3_a10.json") or {}).get("a") for t in ("push", "pull")}
     (OUT / "a_levels.json").write_text(json.dumps(dict(round3=a, round3_step2=a2, round2=dict(push=0.70, pull=0.55)), indent=1) + "\n")

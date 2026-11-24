@@ -1,0 +1,214 @@
+{
+ "task": "table",
+ "contact_frames_30hz": [
+  0,
+  164,
+  330
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r3/table_k0p8_a10/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/table_k0p8_a10/table_k0p8.urdf",
+   "numbers": [
+    "接触保持率 0.455",
+    "最大穿透 0.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 15.4 cm",
+    "接触位置误差 1.5 / 1.2 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 0.4899,
+     "r1": 0.4192,
+     "pooled": 0.4545
+    },
+    "max_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "frames_penetrating": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "robot_robot_min_distance_cm": 15.424,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 1.42,
+      "p95_cm": 1.84
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.5,
+      "p95_cm": 1.69
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.46,
+      "p95_cm": 1.81
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.39,
+      "p95_cm": 2.28
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 0.96,
+      "p95_cm": 1.34
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 1.17,
+      "p95_cm": 1.87
+     }
+    },
+    "path": "exports_system1/T14_references/r3/table_k0p8_a10/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "bcae53499feee05c97d83e3307f7fc38f660dbf706ff47ea15a6724eebc6ce04",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r3/table_k0p9_a10/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/table_k0p9_a10/table_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.727",
+    "最大穿透 0.10 cm",
+    "求解成功：是",
+    "机器人最小间隙 21.7 cm",
+    "接触位置误差 1.4 / 1.2 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 0.5152,
+     "r1": 0.9394,
+     "pooled": 0.7273
+    },
+    "max_penetration_cm": {
+     "r0": 0.1,
+     "r1": 0.1
+    },
+    "frames_penetrating": {
+     "r0": 0.3123,
+     "r1": 0.0654
+    },
+    "robot_robot_min_distance_cm": 21.734,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 1.05,
+      "p95_cm": 1.26
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.73,
+      "p95_cm": 1.87
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.39,
+      "p95_cm": 1.85
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.31,
+      "p95_cm": 2.04
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 1.07,
+      "p95_cm": 1.34
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 1.18,
+      "p95_cm": 1.69
+     }
+    },
+    "path": "exports_system1/T14_references/r3/table_k0p9_a10/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "b04c0d4edfedd8541590e0189c3b008be4bf702d8a92210b5c099bc9cc85ac58",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r3/table_k1p0_a10/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/table_k1p0_a10/table_k1p0.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.14 cm",
+    "求解成功：是",
+    "机器人最小间隙 26.5 cm",
+    "接触位置误差 1.5 / 1.1 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 1.0,
+     "r1": 1.0,
+     "pooled": 1.0
+    },
+    "max_penetration_cm": {
+     "r0": 0.14,
+     "r1": 0.1
+    },
+    "frames_penetrating": {
+     "r0": 0.5545,
+     "r1": 0.109
+    },
+    "robot_robot_min_distance_cm": 26.502,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 1.42,
+      "p95_cm": 1.81
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.63,
+      "p95_cm": 1.96
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.53,
+      "p95_cm": 1.92
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.11,
+      "p95_cm": 1.75
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 0.99,
+      "p95_cm": 1.51
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 1.05,
+      "p95_cm": 1.67
+     }
+    },
+    "path": "exports_system1/T14_references/r3/table_k1p0_a10/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "96154179b16b645f7c6086aee835b95ea8fb48d072fa03c3affa0a2cd26559c9",
+    "success": true
+   }
+  }
+ ]
+}

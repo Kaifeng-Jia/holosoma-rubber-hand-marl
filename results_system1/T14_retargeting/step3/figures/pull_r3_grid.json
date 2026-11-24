@@ -1,0 +1,166 @@
+{
+ "task": "pull",
+ "grid": "pull_r3_grid.jpg",
+ "bytes": 917080,
+ "jpeg_quality": 90,
+ "cameras": [
+  {
+   "column": "接触开始",
+   "frame_30hz": 0,
+   "time_s": 0.0,
+   "lookat": [
+    0.18685080476445703,
+    0.04374243826455965,
+    0.566609795829751
+   ],
+   "distance": 3.4936887061464086,
+   "azimuth": -226.8320953025946,
+   "elevation": -25.0
+  },
+  {
+   "column": "中段",
+   "frame_30hz": 94,
+   "time_s": 3.133,
+   "lookat": [
+    0.06716582200554377,
+    0.39679787234036923,
+    0.4768267243253262
+   ],
+   "distance": 3.5558955524818776,
+   "azimuth": -226.8320953025946,
+   "elevation": -25.0
+  },
+  {
+   "column": "接触结束",
+   "frame_30hz": 189,
+   "time_s": 6.3,
+   "lookat": [
+    0.06945554982563062,
+    0.6177302130096639,
+    0.641890604619867
+   ],
+   "distance": 3.6445797693506274,
+   "azimuth": -226.8320953025946,
+   "elevation": -25.0
+  }
+ ],
+ "closeup_camera": {
+  "r0": {
+   "column": "手部特写",
+   "rule": "mid",
+   "robot": 0,
+   "lookat": [
+    1.3925555200447537,
+    0.6658660388148767,
+    0.4774231742748291
+   ],
+   "distance": 0.898353399028122,
+   "azimuth": -21.321354321980138,
+   "elevation": -10.0
+  }
+ },
+ "closeup_frames": {
+  "a = 0.65（桌长 0.91 m）": {
+   "frame_30hz": 94,
+   "lookat_r0": [
+    0.4725,
+    0.4506,
+    0.4918
+   ]
+  },
+  "m = 1.0（桌长 1.40 m）": {
+   "frame_30hz": 94,
+   "lookat_r0": [
+    0.711,
+    0.5064,
+    0.4881
+   ]
+  },
+  "m = 1.5（桌长 2.10 m）": {
+   "frame_30hz": 94,
+   "lookat_r0": [
+    1.0518,
+    0.5861,
+    0.4827
+   ]
+  },
+  "m = 2.0（桌长 2.80 m）": {
+   "frame_30hz": 94,
+   "lookat_r0": [
+    1.3926,
+    0.6659,
+    0.4774
+   ]
+  }
+ },
+ "levels": [
+  {
+   "label": "a = 0.65（桌长 0.91 m）",
+   "size": 0.65,
+   "pair": "exports_system1/T14_references/r3/pull_sizes/m0p65/pull_m0p65_pair_fps30.npz",
+   "pair_sha256": "5e8ef35d534dd9c183c6a437ec2000e1fd785862a4bf623cb2141804d726ff79",
+   "urdf": "exports_system1/T14_references/r3/pull_sizes/m0p65/table_m0p65.urdf",
+   "urdf_sha256": "9a40b128a37d956f429b101df361c9fd9af08cdc57a16c100bb344e72d6c31ea",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.46 cm",
+    "求解成功：是",
+    "机器人最小间隙 4.7 cm",
+    "接触位置误差 3.9 / 4.0 cm"
+   ]
+  },
+  {
+   "label": "m = 1.0（桌长 1.40 m）",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r3/pull_sizes/m1p00/pull_m1p00_pair_fps30.npz",
+   "pair_sha256": "77e95ab81f5df3dfbe3438b6071e7dab549309a329240813d70995ba0db6059b",
+   "urdf": "exports_system1/T14_references/r3/pull_sizes/m1p00/table_m1p00.urdf",
+   "urdf_sha256": "3ed384401e7b4e5efab08a5f94d2c4fab9b14b02aa3d9a3b6d48d0d72d3d86b4",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.46 cm",
+    "求解成功：是",
+    "机器人最小间隙 50.0 cm",
+    "接触位置误差 3.9 / 4.0 cm"
+   ]
+  },
+  {
+   "label": "m = 1.5（桌长 2.10 m）",
+   "size": 1.5,
+   "pair": "exports_system1/T14_references/r3/pull_sizes/m1p50/pull_m1p50_pair_fps30.npz",
+   "pair_sha256": "a23253936c9c0fe9e21e09759bfa2dd33b5ea7423661bf8c701b8c6c5c18f248",
+   "urdf": "exports_system1/T14_references/r3/pull_sizes/m1p50/table_m1p50.urdf",
+   "urdf_sha256": "e7c76503492218e5abf97d55b51e673358ac4f480f21356982023d2ca20ae8c8",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.46 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm",
+    "接触位置误差 3.9 / 4.0 cm"
+   ]
+  },
+  {
+   "label": "m = 2.0（桌长 2.80 m）",
+   "size": 2.0,
+   "pair": "exports_system1/T14_references/r3/pull_sizes/m2p00/pull_m2p00_pair_fps30.npz",
+   "pair_sha256": "26e50347c58ec819015ce2d414c9eaab16108691d257f5d5a2ddc6f3543f538d",
+   "urdf": "exports_system1/T14_references/r3/pull_sizes/m2p00/table_m2p00.urdf",
+   "urdf_sha256": "b1c8229f597c9bf46c12c4f2a86fbf8aff22ff32ffab5c301f23ca6a6d8bc083",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.46 cm",
+    "求解成功：是",
+    "机器人最小间隙 > 50 cm",
+    "接触位置误差 3.9 / 4.0 cm"
+   ]
+  }
+ ],
+ "contact_frames_30hz": [
+  0,
+  94,
+  189
+ ],
+ "helper_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "preset": "g1_native_execution",
+ "rules": "T14 items 1-2: size-level grid figure and video per task (kinematic references, not policy replays). Render only, CPU.\n\nLevels: Table / Bin / Chair k = 0.8 ... 1.2 (two-person, uniform scale); Push / Pull m = a, 1.0, 1.5, 2.0 (single person,\nstretched table). Each level = a 30 Hz two-robot reference (robot_qpos [T, 2, 36] wxyz) + object pose + that level's object\nURDF.\n\nColumns (same for every level): contact start, middle, end = first / middle / last source frame in which any hand of the\nperson(s) touches the object (any SMPL-X hand vertex within 1.5 cm, the stop-1 rule), as 30 Hz reference frames.\n\nGrid: one row per level, one column per moment, full view (both robots and the whole object). The camera of a column is\nthe same for every row, fitted (U5 camera_for, 7 % border) to the robot and object mesh bounds of the LARGEST level at that\nframe; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 deg + 30 deg, elevation -25 deg. Each cell\nis labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max\npenetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).\n\nClose-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical\nposition. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the\nmiddle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),\nelevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width\npanels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are\nthose of the largest level; the look-at point is that robot's hand centroid at each level's own frame.\n\nVideo: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over\nits whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_sizes.py --task table --levels levels.json --out results_system1/T14_retargeting/step2_sizes/figures --video-out exports_system1/T14_videos\n"
+}

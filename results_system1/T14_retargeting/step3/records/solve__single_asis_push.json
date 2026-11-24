@@ -1,0 +1,58 @@
+{
+ "task": "push",
+ "variant": "omni_asis",
+ "anchor_term": null,
+ "sim_scene": null,
+ "prior": {
+  "scope": "all",
+  "qpos_indices": "0..35"
+ },
+ "sequence": "sub6_largetable_033",
+ "python": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python",
+ "holosoma_retargeting_module": "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/__init__.py",
+ "smpl_scale": "0.74906534",
+ "stage1": "/home/kevin/holosoma-rubber-hand-largetable/data/retargeted/rubber_hand_largetable_v1/sub6_largetable_033/a1/sub6_largetable_033_nominal_scaled.npz",
+ "stage1_sha256": "bc3c934e2aa0d9ca44e03d03973d965ca9e766c5e3d9f2ccfc159782cb260e63",
+ "preprocess_vs_stage1_human_joints_max_abs": 0.0,
+ "palm_fit": null,
+ "robot_palm_offsets_m": {},
+ "physx_dump": null,
+ "scene": "/home/kevin/duet-system1/logs_system1/t14/r3/single_asis_push/scene_asis.xml",
+ "left_hand_mesh_vertices": 22876,
+ "interaction_mesh_keys": [
+  "Pelvis",
+  "L_Hip",
+  "R_Hip",
+  "L_Knee",
+  "R_Knee",
+  "L_Shoulder",
+  "R_Shoulder",
+  "L_Elbow",
+  "R_Elbow",
+  "L_Ankle",
+  "R_Ankle",
+  "L_Toe",
+  "R_Toe",
+  "L_Wrist",
+  "R_Wrist"
+ ],
+ "object_points": 93,
+ "frames": 186,
+ "profile": {
+  "foot_xy_tolerance": 0.001,
+  "elastic_object": 100000.0,
+  "elastic_foot": 10000.0,
+  "foot_height_tolerance": 0.005,
+  "nominal_indices": "0..35",
+  "w_nominal": 5.0,
+  "manual_joint_limits": false
+ },
+ "seconds": 121.4,
+ "finite": true,
+ "qpos_shape": [
+  186,
+  43
+ ],
+ "object_locked_max_err": 0.0,
+ "peak_rss_gb": 1.116
+}

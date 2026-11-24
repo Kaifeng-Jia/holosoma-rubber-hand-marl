@@ -1,0 +1,350 @@
+{
+ "task": "chair",
+ "contact_frames_30hz": [
+  110,
+  154,
+  198
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r3/chair_k0p8_a10/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/chair_k0p8_a10/chair_k0p8.urdf",
+   "numbers": [
+    "接触保持率 0.794",
+    "最大穿透 0.12 cm",
+    "求解成功：是",
+    "机器人最小间隙 7.8 cm",
+    "接触位置误差 1.4 / 1.6 cm"
+   ],
+   "values": {
+    "frames": 235,
+    "condition_frames": 102,
+    "contact_retention": {
+     "r0": 0.6744,
+     "r1": 0.8814,
+     "pooled": 0.7941
+    },
+    "max_penetration_cm": {
+     "r0": 0.123,
+     "r1": 0.121
+    },
+    "frames_penetrating": {
+     "r0": 0.2085,
+     "r1": 0.3106
+    },
+    "robot_robot_min_distance_cm": 7.815,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 8,
+      "mean_cm": 2.38,
+      "p95_cm": 3.13
+     },
+     "r0_right": {
+      "frames": 44,
+      "mean_cm": 1.25,
+      "p95_cm": 1.67
+     },
+     "r0": {
+      "frames": 52,
+      "mean_cm": 1.43,
+      "p95_cm": 2.79
+     },
+     "r1_left": {
+      "frames": 41,
+      "mean_cm": 1.75,
+      "p95_cm": 2.2
+     },
+     "r1_right": {
+      "frames": 29,
+      "mean_cm": 1.38,
+      "p95_cm": 2.1
+     },
+     "r1": {
+      "frames": 70,
+      "mean_cm": 1.59,
+      "p95_cm": 2.17
+     }
+    },
+    "path": "exports_system1/T14_references/r3/chair_k0p8_a10/chair_new_fps30.npz",
+    "sha256": "412e21fd3595a3990b541a8721c5bad14e606a4063287598ef963cefcd5ba52c",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r3/chair_k0p9_a10/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/chair_k0p9_a10/chair_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.882",
+    "最大穿透 1.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 6.4 cm",
+    "接触位置误差 1.3 / 1.8 cm"
+   ],
+   "values": {
+    "frames": 235,
+    "condition_frames": 102,
+    "contact_retention": {
+     "r0": 0.8605,
+     "r1": 0.8983,
+     "pooled": 0.8824
+    },
+    "max_penetration_cm": {
+     "r0": 0.997,
+     "r1": 0.103
+    },
+    "frames_penetrating": {
+     "r0": 0.3149,
+     "r1": 0.3574
+    },
+    "robot_robot_min_distance_cm": 6.397,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 8,
+      "mean_cm": 1.34,
+      "p95_cm": 1.82
+     },
+     "r0_right": {
+      "frames": 44,
+      "mean_cm": 1.24,
+      "p95_cm": 1.57
+     },
+     "r0": {
+      "frames": 52,
+      "mean_cm": 1.26,
+      "p95_cm": 1.69
+     },
+     "r1_left": {
+      "frames": 41,
+      "mean_cm": 1.88,
+      "p95_cm": 2.41
+     },
+     "r1_right": {
+      "frames": 29,
+      "mean_cm": 1.73,
+      "p95_cm": 2.59
+     },
+     "r1": {
+      "frames": 70,
+      "mean_cm": 1.82,
+      "p95_cm": 2.58
+     }
+    },
+    "path": "exports_system1/T14_references/r3/chair_k0p9_a10/chair_new_fps30.npz",
+    "sha256": "34d3f27acd616748f517e4344c8200470aaef57957faf52e94a141bd8650678e",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r3/chair_k1p0_a10/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/chair_k1p0_a10/chair_k1p0.urdf",
+   "numbers": [
+    "接触保持率 0.902",
+    "最大穿透 0.53 cm",
+    "求解成功：是",
+    "机器人最小间隙 7.1 cm",
+    "接触位置误差 1.5 / 1.9 cm"
+   ],
+   "values": {
+    "frames": 235,
+    "condition_frames": 102,
+    "contact_retention": {
+     "r0": 0.8837,
+     "r1": 0.9153,
+     "pooled": 0.902
+    },
+    "max_penetration_cm": {
+     "r0": 0.525,
+     "r1": 0.121
+    },
+    "frames_penetrating": {
+     "r0": 0.3489,
+     "r1": 0.383
+    },
+    "robot_robot_min_distance_cm": 7.085,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 8,
+      "mean_cm": 1.17,
+      "p95_cm": 1.83
+     },
+     "r0_right": {
+      "frames": 44,
+      "mean_cm": 1.6,
+      "p95_cm": 2.32
+     },
+     "r0": {
+      "frames": 52,
+      "mean_cm": 1.54,
+      "p95_cm": 2.31
+     },
+     "r1_left": {
+      "frames": 41,
+      "mean_cm": 1.85,
+      "p95_cm": 2.63
+     },
+     "r1_right": {
+      "frames": 29,
+      "mean_cm": 1.95,
+      "p95_cm": 2.9
+     },
+     "r1": {
+      "frames": 70,
+      "mean_cm": 1.89,
+      "p95_cm": 2.77
+     }
+    },
+    "path": "exports_system1/T14_references/r3/chair_k1p0_a10/chair_new_fps30.npz",
+    "sha256": "10d8c45552631775df6e977664f856f161109dd795b657860515631121f14abb",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/r3/chair_k1p1_a10/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/chair_k1p1_a10/chair_k1p1.urdf",
+   "numbers": [
+    "接触保持率 0.922",
+    "最大穿透 0.37 cm",
+    "求解成功：是",
+    "机器人最小间隙 8.8 cm",
+    "接触位置误差 1.9 / 1.7 cm"
+   ],
+   "values": {
+    "frames": 235,
+    "condition_frames": 102,
+    "contact_retention": {
+     "r0": 0.8837,
+     "r1": 0.9492,
+     "pooled": 0.9216
+    },
+    "max_penetration_cm": {
+     "r0": 0.112,
+     "r1": 0.369
+    },
+    "frames_penetrating": {
+     "r0": 0.2936,
+     "r1": 0.3702
+    },
+    "robot_robot_min_distance_cm": 8.762,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 8,
+      "mean_cm": 1.24,
+      "p95_cm": 2.21
+     },
+     "r0_right": {
+      "frames": 44,
+      "mean_cm": 2.07,
+      "p95_cm": 3.16
+     },
+     "r0": {
+      "frames": 52,
+      "mean_cm": 1.94,
+      "p95_cm": 3.14
+     },
+     "r1_left": {
+      "frames": 41,
+      "mean_cm": 1.4,
+      "p95_cm": 2.28
+     },
+     "r1_right": {
+      "frames": 29,
+      "mean_cm": 2.1,
+      "p95_cm": 3.02
+     },
+     "r1": {
+      "frames": 70,
+      "mean_cm": 1.69,
+      "p95_cm": 2.76
+     }
+    },
+    "path": "exports_system1/T14_references/r3/chair_k1p1_a10/chair_new_fps30.npz",
+    "sha256": "67521501a8ea40948d3f2db649f808de33030bfddcfd084f0f6c9aa09fa5f791",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/r3/chair_k1p2_a10/chair_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r3/chair_k1p2_a10/chair_k1p2.urdf",
+   "numbers": [
+    "接触保持率 0.902",
+    "最大穿透 0.50 cm",
+    "求解成功：是",
+    "机器人最小间隙 11.3 cm",
+    "接触位置误差 2.4 / 1.9 cm"
+   ],
+   "values": {
+    "frames": 235,
+    "condition_frames": 102,
+    "contact_retention": {
+     "r0": 0.8372,
+     "r1": 0.9492,
+     "pooled": 0.902
+    },
+    "max_penetration_cm": {
+     "r0": 0.178,
+     "r1": 0.498
+    },
+    "frames_penetrating": {
+     "r0": 0.2085,
+     "r1": 0.3745
+    },
+    "robot_robot_min_distance_cm": 11.321,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 8,
+      "mean_cm": 1.77,
+      "p95_cm": 3.37
+     },
+     "r0_right": {
+      "frames": 44,
+      "mean_cm": 2.57,
+      "p95_cm": 4.3
+     },
+     "r0": {
+      "frames": 52,
+      "mean_cm": 2.44,
+      "p95_cm": 4.28
+     },
+     "r1_left": {
+      "frames": 41,
+      "mean_cm": 1.62,
+      "p95_cm": 2.77
+     },
+     "r1_right": {
+      "frames": 29,
+      "mean_cm": 2.4,
+      "p95_cm": 3.18
+     },
+     "r1": {
+      "frames": 70,
+      "mean_cm": 1.95,
+      "p95_cm": 2.98
+     }
+    },
+    "path": "exports_system1/T14_references/r3/chair_k1p2_a10/chair_new_fps30.npz",
+    "sha256": "a288b28c48f4b519dda429a0f48aa1d8bfe398cffdb10ce7710ea4517218c935",
+    "success": true
+   }
+  }
+ ]
+}

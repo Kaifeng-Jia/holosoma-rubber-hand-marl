@@ -1,0 +1,603 @@
+{
+ "task": "bin",
+ "rules": "T14 round 3: per-level metrics of two-robot references, one measure for every task and every compared reference\n(round 3, round 2 re-measured, current, OmniRetarget as is). Read only, CPU.\n\nGeometry = the simulator's: robot = PhysX link shapes of the T10 dump with the simulator URDF FK; object = Table / Bin /\nChair PhysX pieces x k (eval_core4d_hulls.dump_object_meshes), Push / Pull the stretched training-table boxes of the level.\nDistances = exact convex signed distances (depth=\"exact\": mj_collision proposes candidate pairs within the margin,\nmj_geomDistance gives each pair's distance; equal to the Minkowski-difference depth, test_sim_scene.py). Rounds 1-2 used\nthe deepest mj_collision contact, which overstates some box-hull depths (Table k = 1: 1.19 cm reported, exact 0.53 cm).\n\n  * contact retention (CoCarry): source frames where the person's hand is within 0.10 m of the captured mesh and the\n    object moves faster than 0.03 m/s; retained when the robot hand's signed distance >= -0.02 m. CORE4D: robot r <->\n    person r + 1, 15 Hz source frame t <-> reference frame 2t, pooled over both robots' frames; Push / Pull: 30 Hz, robot 1\n    inherits the source labels (Pull: left / right swapped by the mirror), pooled = mean of the two robots;\n  * max penetration: largest penetration depth over all robot-object pairs (any link), per robot, cm; frames penetrating;\n  * robot-robot: smallest exact distance between the two robots' shapes (dual_stretch.PairCollision, depth exact);\n  * solve success: every solve of the level finished with a finite trajectory and the object locked;\n  * contact-position error: contact_gap.py (report only).\nPush / Pull lower bound a (T14 section 7 item 5): from m = 1.0 down in 0.05 steps, the last level before the first one at\nwhich the two robots' shapes intersect in any frame.\n\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task bin --ref r3_k1.0=<pair npz>@1.0 ... --out <json>\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task push --single r3=<single qpos npz> --search-a --levels 1.0 1.5 2.0 --pairs-out <dir> --out <json>\n",
+ "a": null,
+ "a_search": [],
+ "refs": {
+  "r3_k0.8": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.8448,
+    "r1": 0.9097,
+    "pooled": 0.892
+   },
+   "max_penetration_cm": {
+    "r0": 0.224,
+    "r1": 0.261
+   },
+   "frames_penetrating": {
+    "r0": 0.4716,
+    "r1": 0.6187
+   },
+   "robot_robot_min_distance_cm": -4.069,
+   "robot_robot_intersect_frames": 20,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 1.34,
+     "p95_cm": 2.09
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 1.67,
+     "p95_cm": 2.41
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 1.51,
+     "p95_cm": 2.37
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 3.29,
+     "p95_cm": 5.99
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 3.27,
+     "p95_cm": 6.65
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 3.28,
+     "p95_cm": 6.31
+    }
+   },
+   "path": "exports_system1/T14_references/r3/bin_k0p8/bin_new_fps30.npz",
+   "sha256": "7bb59cdd2ba195bb2e657d865d83dabae64124c2614d3f8313da7ea30c3f2df8"
+  },
+  "r3_k0.9": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9483,
+    "r1": 0.9032,
+    "pooled": 0.9155
+   },
+   "max_penetration_cm": {
+    "r0": 0.111,
+    "r1": 0.368
+   },
+   "frames_penetrating": {
+    "r0": 0.5217,
+    "r1": 0.7191
+   },
+   "robot_robot_min_distance_cm": -2.947,
+   "robot_robot_intersect_frames": 17,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 3.95,
+     "p95_cm": 7.28
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 2.06,
+     "p95_cm": 3.81
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 2.98,
+     "p95_cm": 6.26
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 4.68,
+     "p95_cm": 7.12
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 3.92,
+     "p95_cm": 7.44
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 4.37,
+     "p95_cm": 7.15
+    }
+   },
+   "path": "exports_system1/T14_references/r3/bin_k0p9/bin_new_fps30.npz",
+   "sha256": "9be0511bc615cf3d056cf0444219bf03261307defd99ba0c8949c1be78fda149"
+  },
+  "r2_k0.9": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9138,
+    "r1": 0.7806,
+    "pooled": 0.8169
+   },
+   "max_penetration_cm": {
+    "r0": 2.348,
+    "r1": 1.781
+   },
+   "frames_penetrating": {
+    "r0": 0.4381,
+    "r1": 0.5151
+   },
+   "robot_robot_min_distance_cm": -2.662,
+   "robot_robot_intersect_frames": 3,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 9.95,
+     "p95_cm": 12.55
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 6.06,
+     "p95_cm": 7.33
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 7.95,
+     "p95_cm": 12.3
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 4.12,
+     "p95_cm": 6.95
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 4.76,
+     "p95_cm": 8.23
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 4.38,
+     "p95_cm": 7.62
+    }
+   },
+   "path": "exports_system1/T14_references/bin_k0p9/bin_new_fps30.npz",
+   "sha256": "05f0471aacea8a5eaad9f8c3288643c97ab258a3c067b0aa75323424d6cd15f6"
+  },
+  "r3_k1.0": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9483,
+    "r1": 0.8903,
+    "pooled": 0.9061
+   },
+   "max_penetration_cm": {
+    "r0": 0.399,
+    "r1": 0.547
+   },
+   "frames_penetrating": {
+    "r0": 0.5284,
+    "r1": 0.7826
+   },
+   "robot_robot_min_distance_cm": -3.035,
+   "robot_robot_intersect_frames": 19,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 6.89,
+     "p95_cm": 11.4
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 3.25,
+     "p95_cm": 5.91
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 5.02,
+     "p95_cm": 9.81
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 5.47,
+     "p95_cm": 8.41
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 5.0,
+     "p95_cm": 8.07
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 5.28,
+     "p95_cm": 8.34
+    }
+   },
+   "path": "exports_system1/T14_references/r3/bin_k1p0/bin_new_fps30.npz",
+   "sha256": "5a0ebe1e514a03712f73b57f59bdcd5173d8d9888fe44f3a341b37d959e99596"
+  },
+  "r2_k1.0": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7097,
+    "pooled": 0.6526
+   },
+   "max_penetration_cm": {
+    "r0": 2.25,
+    "r1": 2.117
+   },
+   "frames_penetrating": {
+    "r0": 0.3846,
+    "r1": 0.6154
+   },
+   "robot_robot_min_distance_cm": -2.104,
+   "robot_robot_intersect_frames": 2,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 16.39,
+     "p95_cm": 20.27
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 10.24,
+     "p95_cm": 11.68
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 13.24,
+     "p95_cm": 19.55
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 7.83,
+     "p95_cm": 9.88
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 7.99,
+     "p95_cm": 13.6
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 7.9,
+     "p95_cm": 13.05
+    }
+   },
+   "path": "exports_system1/T14_references/bin_k1p0/bin_new_fps30.npz",
+   "sha256": "069c8c802577fc69ae479261b456aa64cb35723532e6525d41c831ed906b9d77"
+  },
+  "r3_k1.1": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.7586,
+    "r1": 0.8645,
+    "pooled": 0.8357
+   },
+   "max_penetration_cm": {
+    "r0": 0.526,
+    "r1": 0.495
+   },
+   "frames_penetrating": {
+    "r0": 0.495,
+    "r1": 0.9064
+   },
+   "robot_robot_min_distance_cm": -5.665,
+   "robot_robot_intersect_frames": 21,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 9.38,
+     "p95_cm": 16.1
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 4.16,
+     "p95_cm": 7.88
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 6.7,
+     "p95_cm": 13.34
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 6.32,
+     "p95_cm": 9.6
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 4.67,
+     "p95_cm": 8.41
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 5.66,
+     "p95_cm": 9.46
+    }
+   },
+   "path": "exports_system1/T14_references/r3/bin_k1p1/bin_new_fps30.npz",
+   "sha256": "bff0b0cdc63b1719edd4b4831cab13cb8545b123c7cbf1458e1981bb02133e27"
+  },
+  "r2_k1.1": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7935,
+    "pooled": 0.7136
+   },
+   "max_penetration_cm": {
+    "r0": 2.281,
+    "r1": 2.178
+   },
+   "frames_penetrating": {
+    "r0": 0.3311,
+    "r1": 0.4247
+   },
+   "robot_robot_min_distance_cm": -1.371,
+   "robot_robot_intersect_frames": 2,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 22.45,
+     "p95_cm": 27.2
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 14.5,
+     "p95_cm": 16.25
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 18.37,
+     "p95_cm": 26.52
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 14.28,
+     "p95_cm": 20.59
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 11.75,
+     "p95_cm": 19.08
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 13.26,
+     "p95_cm": 20.56
+    }
+   },
+   "path": "exports_system1/T14_references/bin_k1p1/bin_new_fps30.npz",
+   "sha256": "e6387892b51715964bc9b1bdf9528b3918704f796bc1e989bf1bf0044aa767dd"
+  },
+  "r3_k1.2": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.7931,
+    "r1": 0.8903,
+    "pooled": 0.8638
+   },
+   "max_penetration_cm": {
+    "r0": 0.33,
+    "r1": 2.337
+   },
+   "frames_penetrating": {
+    "r0": 0.5318,
+    "r1": 0.9666
+   },
+   "robot_robot_min_distance_cm": -5.443,
+   "robot_robot_intersect_frames": 34,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 9.6,
+     "p95_cm": 16.14
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 5.66,
+     "p95_cm": 9.61
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 7.58,
+     "p95_cm": 13.45
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 11.47,
+     "p95_cm": 22.31
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 6.45,
+     "p95_cm": 13.11
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 9.45,
+     "p95_cm": 20.49
+    }
+   },
+   "path": "exports_system1/T14_references/r3/bin_k1p2/bin_new_fps30.npz",
+   "sha256": "65e5e2a84ed458b0a4e7fe11e93d9b561c855af8466913dc339e833e969f4b76"
+  },
+  "r2_k1.2": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.7484,
+    "pooled": 0.6808
+   },
+   "max_penetration_cm": {
+    "r0": 2.922,
+    "r1": 2.546
+   },
+   "frames_penetrating": {
+    "r0": 0.3545,
+    "r1": 0.6087
+   },
+   "robot_robot_min_distance_cm": -2.639,
+   "robot_robot_intersect_frames": 2,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 28.16,
+     "p95_cm": 33.02
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 18.84,
+     "p95_cm": 20.77
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 23.38,
+     "p95_cm": 32.16
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 18.86,
+     "p95_cm": 26.95
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 15.96,
+     "p95_cm": 24.78
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 17.69,
+     "p95_cm": 26.94
+    }
+   },
+   "path": "exports_system1/T14_references/bin_k1p2/bin_new_fps30.npz",
+   "sha256": "6835a949e73a369cca3d4b92df0145872c4ebcab0a7f86f4b3f29c466b777848"
+  },
+  "current": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.9655,
+    "r1": 0.7032,
+    "pooled": 0.7746
+   },
+   "max_penetration_cm": {
+    "r0": 4.602,
+    "r1": 10.537
+   },
+   "frames_penetrating": {
+    "r0": 0.5585,
+    "r1": 0.903
+   },
+   "robot_robot_min_distance_cm": -1.094,
+   "robot_robot_intersect_frames": 15,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 16.59,
+     "p95_cm": 20.03
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 16.88,
+     "p95_cm": 21.2
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 16.74,
+     "p95_cm": 21.22
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 13.09,
+     "p95_cm": 21.09
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 13.04,
+     "p95_cm": 20.41
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 13.07,
+     "p95_cm": 20.68
+    }
+   },
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_bucket003_20231020_071_a1/core4d_pair_compact_fps30.npz",
+   "sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af"
+  },
+  "omni_asis": {
+   "frames": 299,
+   "condition_frames": 213,
+   "contact_retention": {
+    "r0": 0.5,
+    "r1": 0.8,
+    "pooled": 0.7183
+   },
+   "max_penetration_cm": {
+    "r0": 2.259,
+    "r1": 1.908
+   },
+   "frames_penetrating": {
+    "r0": 0.4816,
+    "r1": 0.7525
+   },
+   "robot_robot_min_distance_cm": -1.897,
+   "robot_robot_intersect_frames": 2,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 37,
+     "mean_cm": 18.9,
+     "p95_cm": 22.82
+    },
+    "r0_right": {
+     "frames": 39,
+     "mean_cm": 13.27,
+     "p95_cm": 15.74
+    },
+    "r0": {
+     "frames": 76,
+     "mean_cm": 16.01,
+     "p95_cm": 22.32
+    },
+    "r1_left": {
+     "frames": 110,
+     "mean_cm": 10.46,
+     "p95_cm": 15.01
+    },
+    "r1_right": {
+     "frames": 74,
+     "mean_cm": 11.47,
+     "p95_cm": 18.62
+    },
+    "r1": {
+     "frames": 184,
+     "mean_cm": 10.87,
+     "p95_cm": 17.17
+    }
+   },
+   "path": "exports_system1/T14_references/r3/asis_bin_k1p0/bin_omni_asis_fps30.npz",
+   "sha256": "4ccd7b74e6097d7a77fea90b63eb1cca2e39d0f95408e4a74e1f9c9ed1edb2f5"
+  }
+ },
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77"
+}

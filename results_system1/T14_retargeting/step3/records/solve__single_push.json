@@ -1,0 +1,315 @@
+{
+ "task": "push",
+ "variant": "new",
+ "anchor_term": null,
+ "sim_scene": {
+  "scene_in": "/home/kevin/duet-system1/logs_system1/t14/r3/single_push/scene_simhands.xml",
+  "sim_urdf": "/home/kevin/duet-system1/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+  "kinematics_changed": {
+   "waist_roll_link": {
+    "old_pos": [
+     -0.0039635,
+     0.0,
+     0.035
+    ],
+    "new_pos": [
+     -0.0039635,
+     0.0,
+     0.044
+    ],
+    "old_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "new_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "torso_link": {
+    "old_pos": [
+     0.0,
+     0.0,
+     0.019
+    ],
+    "new_pos": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "old_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "new_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "left_shoulder_pitch_link": {
+    "old_pos": [
+     0.0039563,
+     0.10022,
+     0.23778
+    ],
+    "new_pos": [
+     0.0039563,
+     0.10022,
+     0.24778
+    ],
+    "old_quat": [
+     0.990264,
+     0.139201,
+     1.38722e-05,
+     -9.86868e-05
+    ],
+    "new_quat": [
+     0.9902640744,
+     0.1392014837,
+     1.38722e-05,
+     -9.86868e-05
+    ]
+   },
+   "right_shoulder_pitch_link": {
+    "old_pos": [
+     0.0039563,
+     -0.10021,
+     0.23778
+    ],
+    "new_pos": [
+     0.0039563,
+     -0.10021,
+     0.24778
+    ],
+    "old_quat": [
+     0.990264,
+     -0.139201,
+     1.38722e-05,
+     9.86868e-05
+    ],
+    "new_quat": [
+     0.9902640744,
+     -0.1392014837,
+     1.38722e-05,
+     9.86868e-05
+    ]
+   }
+  },
+  "kinematics_skipped": [],
+  "robot_original_collision_geoms_ground_only": 48,
+  "physx_robot_shapes": {
+   "pelvis": {
+    "host": "pelvis",
+    "pieces": 1
+   },
+   "left_hip_roll_link": {
+    "host": "left_hip_roll_link",
+    "pieces": 1
+   },
+   "left_hip_yaw_link": {
+    "host": "left_hip_yaw_link",
+    "pieces": 1
+   },
+   "left_knee_link": {
+    "host": "left_knee_link",
+    "pieces": 1
+   },
+   "left_ankle_roll_link": {
+    "host": "left_ankle_roll_link",
+    "pieces": 7
+   },
+   "right_hip_roll_link": {
+    "host": "right_hip_roll_link",
+    "pieces": 1
+   },
+   "right_hip_yaw_link": {
+    "host": "right_hip_yaw_link",
+    "pieces": 1
+   },
+   "right_knee_link": {
+    "host": "right_knee_link",
+    "pieces": 1
+   },
+   "right_ankle_roll_link": {
+    "host": "right_ankle_roll_link",
+    "pieces": 7
+   },
+   "torso_link": {
+    "host": "torso_link",
+    "pieces": 4
+   },
+   "head_link": {
+    "host": "torso_link",
+    "pieces": 1
+   },
+   "left_shoulder_yaw_link": {
+    "host": "left_shoulder_yaw_link",
+    "pieces": 1
+   },
+   "left_elbow_link": {
+    "host": "left_elbow_link",
+    "pieces": 1
+   },
+   "left_wrist_roll_link": {
+    "host": "left_wrist_roll_link",
+    "pieces": 1
+   },
+   "left_wrist_pitch_link": {
+    "host": "left_wrist_pitch_link",
+    "pieces": 1
+   },
+   "left_wrist_yaw_link": {
+    "host": "left_wrist_yaw_link",
+    "pieces": 1
+   },
+   "left_rubber_hand_link": {
+    "host": "left_rubber_hand_link",
+    "pieces": 1
+   },
+   "right_shoulder_yaw_link": {
+    "host": "right_shoulder_yaw_link",
+    "pieces": 1
+   },
+   "right_elbow_link": {
+    "host": "right_elbow_link",
+    "pieces": 1
+   },
+   "right_wrist_roll_link": {
+    "host": "right_wrist_roll_link",
+    "pieces": 1
+   },
+   "right_wrist_pitch_link": {
+    "host": "right_wrist_pitch_link",
+    "pieces": 1
+   },
+   "right_wrist_yaw_link": {
+    "host": "right_wrist_yaw_link",
+    "pieces": 1
+   },
+   "right_rubber_hand_link": {
+    "host": "right_rubber_hand_link",
+    "pieces": 1
+   }
+  },
+  "physx_dump": {
+   "task": "table",
+   "scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+   "convexes_sha256": "f5ccf067d1acc0d87758c3bfc4b26a2968f3772c41739480d8017c29b4717714"
+  },
+  "object": {
+   "body": "largetable_link",
+   "collision": "scene geoms",
+   "geoms": [
+    "largetable_tabletop",
+    "largetable_leg_neg_x_neg_z",
+    "largetable_leg_neg_x_pos_z",
+    "largetable_leg_pos_x_neg_z",
+    "largetable_leg_pos_x_pos_z"
+   ]
+  },
+  "scene_out": "/home/kevin/duet-system1/logs_system1/t14/r3/single_push/scene_sim.xml"
+ },
+ "prior": {
+  "scope": "body",
+  "qpos_indices": "0..21"
+ },
+ "sequence": "sub6_largetable_033",
+ "python": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python",
+ "holosoma_retargeting_module": "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/__init__.py",
+ "smpl_scale": "0.74906534",
+ "stage1": "/home/kevin/holosoma-rubber-hand-largetable/data/retargeted/rubber_hand_largetable_v1/sub6_largetable_033/a1/sub6_largetable_033_nominal_scaled.npz",
+ "stage1_sha256": "bc3c934e2aa0d9ca44e03d03973d965ca9e766c5e3d9f2ccfc159782cb260e63",
+ "preprocess_vs_stage1_human_joints_max_abs": 7.583683592216062e-08,
+ "palm_fit": {
+  "source_split": "train",
+  "frames": 186,
+  "rotation": [
+   [
+    -0.80062304,
+    0.59916838,
+    -0.0
+   ],
+   [
+    -0.59916838,
+    -0.80062304,
+    -1e-08
+   ],
+   [
+    -1e-08,
+    -1e-08,
+    1.0
+   ]
+  ],
+  "translation": [
+   0.23339412,
+   -0.30990683,
+   0.01711087
+  ],
+  "fit_residual_max_m": 6.402941505955606e-07,
+  "fit_residual_mean_m": 1.4633545700897583e-07
+ },
+ "robot_palm_offsets_m": {
+  "L_Palm": [
+   0.063785,
+   -0.042639,
+   0.008036
+  ],
+  "R_Palm": [
+   0.06378,
+   0.042687,
+   0.008938
+  ]
+ },
+ "physx_dump": {
+  "scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+  "convexes_sha256": "f5ccf067d1acc0d87758c3bfc4b26a2968f3772c41739480d8017c29b4717714"
+ },
+ "scene": "/home/kevin/duet-system1/logs_system1/t14/r3/single_push/scene_sim.xml",
+ "left_hand_mesh_vertices": 34,
+ "interaction_mesh_keys": [
+  "Pelvis",
+  "L_Hip",
+  "R_Hip",
+  "L_Knee",
+  "R_Knee",
+  "L_Shoulder",
+  "R_Shoulder",
+  "L_Elbow",
+  "R_Elbow",
+  "L_Ankle",
+  "R_Ankle",
+  "L_Toe",
+  "R_Toe",
+  "L_Wrist",
+  "R_Wrist",
+  "L_Palm",
+  "R_Palm"
+ ],
+ "object_points": 93,
+ "frames": 186,
+ "profile": {
+  "foot_xy_tolerance": 0.001,
+  "elastic_object": 100000.0,
+  "elastic_foot": 10000.0,
+  "foot_height_tolerance": 0.005,
+  "nominal_indices": "0..21",
+  "w_nominal": 5.0,
+  "manual_joint_limits": false
+ },
+ "seconds": 127.3,
+ "finite": true,
+ "qpos_shape": [
+  186,
+  43
+ ],
+ "object_locked_max_err": 0.0,
+ "peak_rss_gb": 1.637
+}

@@ -1,0 +1,171 @@
+{
+ "task": "table",
+ "rules": "T14 round 3: per-level metrics of two-robot references, one measure for every task and every compared reference\n(round 3, round 2 re-measured, current, OmniRetarget as is). Read only, CPU.\n\nGeometry = the simulator's: robot = PhysX link shapes of the T10 dump with the simulator URDF FK; object = Table / Bin /\nChair PhysX pieces x k (eval_core4d_hulls.dump_object_meshes), Push / Pull the stretched training-table boxes of the level.\nDistances = exact convex signed distances (depth=\"exact\": mj_collision proposes candidate pairs within the margin,\nmj_geomDistance gives each pair's distance; equal to the Minkowski-difference depth, test_sim_scene.py). Rounds 1-2 used\nthe deepest mj_collision contact, which overstates some box-hull depths (Table k = 1: 1.19 cm reported, exact 0.53 cm).\n\n  * contact retention (CoCarry): source frames where the person's hand is within 0.10 m of the captured mesh and the\n    object moves faster than 0.03 m/s; retained when the robot hand's signed distance >= -0.02 m. CORE4D: robot r <->\n    person r + 1, 15 Hz source frame t <-> reference frame 2t, pooled over both robots' frames; Push / Pull: 30 Hz, robot 1\n    inherits the source labels (Pull: left / right swapped by the mirror), pooled = mean of the two robots;\n  * max penetration: largest penetration depth over all robot-object pairs (any link), per robot, cm; frames penetrating;\n  * robot-robot: smallest exact distance between the two robots' shapes (dual_stretch.PairCollision, depth exact);\n  * solve success: every solve of the level finished with a finite trajectory and the object locked;\n  * contact-position error: contact_gap.py (report only).\nPush / Pull lower bound a (T14 section 7 item 5): from m = 1.0 down in 0.05 steps, the last level before the first one at\nwhich the two robots' shapes intersect in any frame.\n\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task bin --ref r3_k1.0=<pair npz>@1.0 ... --out <json>\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task push --single r3=<single qpos npz> --search-a --levels 1.0 1.5 2.0 --pairs-out <dir> --out <json>\n",
+ "a": null,
+ "a_search": [],
+ "refs": {
+  "r3_a10_k0.8": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.4899,
+    "r1": 0.4192,
+    "pooled": 0.4545
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "robot_robot_min_distance_cm": 15.424,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 1.42,
+     "p95_cm": 1.84
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.5,
+     "p95_cm": 1.69
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.46,
+     "p95_cm": 1.81
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 1.39,
+     "p95_cm": 2.28
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 0.96,
+     "p95_cm": 1.34
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.17,
+     "p95_cm": 1.87
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k0p8_a10/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "bcae53499feee05c97d83e3307f7fc38f660dbf706ff47ea15a6724eebc6ce04"
+  },
+  "r3_a10_k0.9": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.5152,
+    "r1": 0.9394,
+    "pooled": 0.7273
+   },
+   "max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.1
+   },
+   "frames_penetrating": {
+    "r0": 0.3123,
+    "r1": 0.0654
+   },
+   "robot_robot_min_distance_cm": 21.734,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 1.05,
+     "p95_cm": 1.26
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.73,
+     "p95_cm": 1.87
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.39,
+     "p95_cm": 1.85
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 1.31,
+     "p95_cm": 2.04
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.07,
+     "p95_cm": 1.34
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.18,
+     "p95_cm": 1.69
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k0p9_a10/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "b04c0d4edfedd8541590e0189c3b008be4bf702d8a92210b5c099bc9cc85ac58"
+  },
+  "r3_a10_k1.0": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.14,
+    "r1": 0.1
+   },
+   "frames_penetrating": {
+    "r0": 0.5545,
+    "r1": 0.109
+   },
+   "robot_robot_min_distance_cm": 26.502,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 1.42,
+     "p95_cm": 1.81
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.63,
+     "p95_cm": 1.96
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.53,
+     "p95_cm": 1.92
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 1.11,
+     "p95_cm": 1.75
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 0.99,
+     "p95_cm": 1.51
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.05,
+     "p95_cm": 1.67
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k1p0_a10/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "96154179b16b645f7c6086aee835b95ea8fb48d072fa03c3affa0a2cd26559c9"
+  }
+ },
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77"
+}

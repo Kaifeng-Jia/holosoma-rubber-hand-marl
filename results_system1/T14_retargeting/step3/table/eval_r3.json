@@ -1,0 +1,657 @@
+{
+ "task": "table",
+ "rules": "T14 round 3: per-level metrics of two-robot references, one measure for every task and every compared reference\n(round 3, round 2 re-measured, current, OmniRetarget as is). Read only, CPU.\n\nGeometry = the simulator's: robot = PhysX link shapes of the T10 dump with the simulator URDF FK; object = Table / Bin /\nChair PhysX pieces x k (eval_core4d_hulls.dump_object_meshes), Push / Pull the stretched training-table boxes of the level.\nDistances = exact convex signed distances (depth=\"exact\": mj_collision proposes candidate pairs within the margin,\nmj_geomDistance gives each pair's distance; equal to the Minkowski-difference depth, test_sim_scene.py). Rounds 1-2 used\nthe deepest mj_collision contact, which overstates some box-hull depths (Table k = 1: 1.19 cm reported, exact 0.53 cm).\n\n  * contact retention (CoCarry): source frames where the person's hand is within 0.10 m of the captured mesh and the\n    object moves faster than 0.03 m/s; retained when the robot hand's signed distance >= -0.02 m. CORE4D: robot r <->\n    person r + 1, 15 Hz source frame t <-> reference frame 2t, pooled over both robots' frames; Push / Pull: 30 Hz, robot 1\n    inherits the source labels (Pull: left / right swapped by the mirror), pooled = mean of the two robots;\n  * max penetration: largest penetration depth over all robot-object pairs (any link), per robot, cm; frames penetrating;\n  * robot-robot: smallest exact distance between the two robots' shapes (dual_stretch.PairCollision, depth exact);\n  * solve success: every solve of the level finished with a finite trajectory and the object locked;\n  * contact-position error: contact_gap.py (report only).\nPush / Pull lower bound a (T14 section 7 item 5): from m = 1.0 down in 0.05 steps, the last level before the first one at\nwhich the two robots' shapes intersect in any frame.\n\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task bin --ref r3_k1.0=<pair npz>@1.0 ... --out <json>\n    sonic_s1/bin/python -B system1/t14/eval_r3.py --task push --single r3=<single qpos npz> --search-a --levels 1.0 1.5 2.0 --pairs-out <dir> --out <json>\n",
+ "a": null,
+ "a_search": [],
+ "refs": {
+  "r3_k0.8": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.3131,
+    "r1": 0.3838,
+    "pooled": 0.3485
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "robot_robot_min_distance_cm": 17.872,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.4,
+     "p95_cm": 2.74
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.57,
+     "p95_cm": 1.7
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.98,
+     "p95_cm": 2.71
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 2.03,
+     "p95_cm": 2.62
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.58,
+     "p95_cm": 1.98
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.8,
+     "p95_cm": 2.59
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k0p8/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "d6f018f0adf4155ff7e3daaf2efc2126576bba9e2c4803420ca681cd6ca7620c"
+  },
+  "r2_k0.8": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.0,
+    "r1": 0.0,
+    "pooled": 0.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "robot_robot_min_distance_cm": 14.561,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.4,
+     "p95_cm": 2.76
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.49,
+     "p95_cm": 1.68
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.94,
+     "p95_cm": 2.72
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 2.17,
+     "p95_cm": 3.02
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.97,
+     "p95_cm": 2.5
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 2.07,
+     "p95_cm": 2.89
+    }
+   },
+   "path": "exports_system1/T14_references/table_k0p8/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "d8be2251f73c616b57d812f01145578db1dd474cae72d2700ff82a8ae0b880e0"
+  },
+  "r3_k0.9": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.4697,
+    "r1": 0.197,
+    "pooled": 0.3333
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "robot_robot_min_distance_cm": 22.56,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 1.84,
+     "p95_cm": 2.27
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.76,
+     "p95_cm": 1.9
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 1.8,
+     "p95_cm": 2.2
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 2.21,
+     "p95_cm": 2.83
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.76,
+     "p95_cm": 2.23
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.98,
+     "p95_cm": 2.56
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k0p9/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c101b6e09e4c8bcbadcf9e23c3babd99e72b05c851e338d760fc766c569815d0"
+  },
+  "r2_k0.9": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.6263,
+    "r1": 0.8939,
+    "pooled": 0.7601
+   },
+   "max_penetration_cm": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "frames_penetrating": {
+    "r0": 0.0,
+    "r1": 0.0
+   },
+   "robot_robot_min_distance_cm": 20.518,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.97,
+     "p95_cm": 3.54
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.15,
+     "p95_cm": 1.79
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 2.05,
+     "p95_cm": 3.45
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 2.75,
+     "p95_cm": 3.4
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 2.66,
+     "p95_cm": 3.31
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 2.7,
+     "p95_cm": 3.33
+    }
+   },
+   "path": "exports_system1/T14_references/table_k0p9/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c68412084a63749c844fb4ff83c9a02be26aba3e4608260e7a1e1efa3471c721"
+  },
+  "r3_k1.0": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 0.8131,
+    "r1": 0.697,
+    "pooled": 0.7551
+   },
+   "max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.1
+   },
+   "frames_penetrating": {
+    "r0": 0.5375,
+    "r1": 0.0024
+   },
+   "robot_robot_min_distance_cm": 26.543,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.21,
+     "p95_cm": 2.62
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.79,
+     "p95_cm": 2.01
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 2.0,
+     "p95_cm": 2.56
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 1.81,
+     "p95_cm": 2.31
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.6,
+     "p95_cm": 2.6
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.7,
+     "p95_cm": 2.59
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "53dde256cefc11af408a869330324e396e8dd4f368ae7dbb4338032fce9cf993"
+  },
+  "r2_k1.0": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.181,
+    "r1": 0.528
+   },
+   "frames_penetrating": {
+    "r0": 0.5617,
+    "r1": 0.6877
+   },
+   "robot_robot_min_distance_cm": 26.418,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 4.09,
+     "p95_cm": 4.6
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 2.1,
+     "p95_cm": 2.62
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 3.08,
+     "p95_cm": 4.56
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 3.12,
+     "p95_cm": 4.25
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 3.18,
+     "p95_cm": 4.41
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 3.15,
+     "p95_cm": 4.38
+    }
+   },
+   "path": "exports_system1/T14_references/table_k1p0/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "6166aa3c52ec5acaef8560160ab52d0bb890be143ef40fb40c54f543e4105da8"
+  },
+  "r3_k1.1": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.1,
+    "r1": 0.1
+   },
+   "frames_penetrating": {
+    "r0": 0.5521,
+    "r1": 0.5787
+   },
+   "robot_robot_min_distance_cm": 29.999,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.89,
+     "p95_cm": 3.35
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 1.9,
+     "p95_cm": 2.51
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 2.39,
+     "p95_cm": 3.31
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 1.22,
+     "p95_cm": 1.78
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 1.6,
+     "p95_cm": 2.15
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 1.42,
+     "p95_cm": 2.08
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k1p1/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "ebbf37c6e62a65ba70852e6f2f33875300f3c03e59eb60186b306195e9f33910"
+  },
+  "r2_k1.1": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.171,
+    "r1": 0.611
+   },
+   "frames_penetrating": {
+    "r0": 0.5787,
+    "r1": 0.7942
+   },
+   "robot_robot_min_distance_cm": 32.184,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 5.57,
+     "p95_cm": 6.48
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 3.55,
+     "p95_cm": 4.87
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 4.55,
+     "p95_cm": 6.27
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 3.19,
+     "p95_cm": 3.87
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 3.43,
+     "p95_cm": 4.21
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 3.31,
+     "p95_cm": 4.09
+    }
+   },
+   "path": "exports_system1/T14_references/table_k1p1/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "c881617a6d61b5a176c5e350ef6bb718682dc2e1763c26d4612b80c825c8b763"
+  },
+  "r3_k1.2": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.389,
+    "r1": 0.226
+   },
+   "frames_penetrating": {
+    "r0": 0.5569,
+    "r1": 0.6828
+   },
+   "robot_robot_min_distance_cm": 33.461,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 2.1,
+     "p95_cm": 2.59
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 3.65,
+     "p95_cm": 4.47
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 2.88,
+     "p95_cm": 4.41
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 3.14,
+     "p95_cm": 4.07
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 2.43,
+     "p95_cm": 2.93
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 2.78,
+     "p95_cm": 4.05
+    }
+   },
+   "path": "exports_system1/T14_references/r3/table_k1p2/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "aa92a28755449399406d004e4d932d5ca8c0697d2f52f51338133f8ebaadcd56"
+  },
+  "r2_k1.2": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.102,
+    "r1": 0.596
+   },
+   "frames_penetrating": {
+    "r0": 0.586,
+    "r1": 0.7942
+   },
+   "robot_robot_min_distance_cm": 37.088,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 4.86,
+     "p95_cm": 5.82
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 4.48,
+     "p95_cm": 4.76
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 4.67,
+     "p95_cm": 5.66
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 4.44,
+     "p95_cm": 5.27
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 4.56,
+     "p95_cm": 5.25
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 4.5,
+     "p95_cm": 5.27
+    }
+   },
+   "path": "exports_system1/T14_references/table_k1p2/20231030_001_desk001_move_new_fps30.npz",
+   "sha256": "54f489a19d53e5bcad4e9b39095c0ecdc9507b38c9265c1bbee6f1d03afefcd6"
+  },
+  "current": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.477,
+    "r1": 1.094
+   },
+   "frames_penetrating": {
+    "r0": 0.3123,
+    "r1": 0.7918
+   },
+   "robot_robot_min_distance_cm": 26.23,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 4.79,
+     "p95_cm": 5.66
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 2.85,
+     "p95_cm": 3.54
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 3.81,
+     "p95_cm": 5.55
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 4.39,
+     "p95_cm": 5.95
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 4.23,
+     "p95_cm": 5.74
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 4.31,
+     "p95_cm": 5.78
+    }
+   },
+   "path": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable/20231030_001_desk001_move_compact_fps30.npz",
+   "sha256": "d9d17e96f5f0b73aa76a1bf32f1ec50cfb7fa7fe78a847dd890882add4bbfd05"
+  },
+  "omni_asis": {
+   "frames": 413,
+   "condition_frames": 396,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 1.0,
+    "pooled": 1.0
+   },
+   "max_penetration_cm": {
+    "r0": 0.138,
+    "r1": 0.584
+   },
+   "frames_penetrating": {
+    "r0": 0.5375,
+    "r1": 0.7918
+   },
+   "robot_robot_min_distance_cm": 26.206,
+   "robot_robot_intersect_frames": 0,
+   "finite": true,
+   "contact_position_error": {
+    "r0_left": {
+     "frames": 116,
+     "mean_cm": 5.35,
+     "p95_cm": 5.81
+    },
+    "r0_right": {
+     "frames": 118,
+     "mean_cm": 3.43,
+     "p95_cm": 4.34
+    },
+    "r0": {
+     "frames": 234,
+     "mean_cm": 4.38,
+     "p95_cm": 5.76
+    },
+    "r1_left": {
+     "frames": 142,
+     "mean_cm": 4.74,
+     "p95_cm": 6.03
+    },
+    "r1_right": {
+     "frames": 146,
+     "mean_cm": 4.6,
+     "p95_cm": 6.17
+    },
+    "r1": {
+     "frames": 288,
+     "mean_cm": 4.67,
+     "p95_cm": 6.09
+    }
+   },
+   "path": "exports_system1/T14_references/r3/asis_table_k1p0/20231030_001_desk001_move_omni_asis_fps30.npz",
+   "sha256": "ccf6bfcd790730a68565e5d6e09798b00707a5e9da0ff507daba949025c097b8"
+  }
+ },
+ "physx_dump_scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77"
+}

@@ -1,0 +1,63 @@
+{
+ "task": "bin",
+ "base": "one",
+ "holosoma_retargeting_module": "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/__init__.py",
+ "python": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python",
+ "variant": "omni_asis",
+ "person": 2,
+ "s_i": 0.7222941753069272,
+ "s_bar": 1.0,
+ "k": 1.0,
+ "s_shared": 1.0,
+ "scale_anchor": [
+  -0.9986100769042969,
+  -1.8847538757324218,
+  0.0
+ ],
+ "canonical": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/source_canonical.npz",
+ "canonical_sha256": "1208deb13bf70daee2d42343c6728656cca8586ae46efc7a2bb718d514079083",
+ "frames": 299,
+ "fps": 30,
+ "stage1": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/two_stage/person2/person2_nominal_scaled.npz",
+ "stage1_sha256": "6a087061a7c6e76c28fd8aa5deefb1f925e2a0082ae4c450371162b9999815b5",
+ "stage1_equals_current_reference_robot": 1.145536295055429,
+ "object_points": {
+  "count": 89,
+  "demo_over_raw": 0.7222941753069272
+ },
+ "prior": {
+  "scope": "all",
+  "qpos_indices": "0..35",
+  "weight": 5.0
+ },
+ "scene": {
+  "path": "logs_system1/t14/r3/asis_bin_k1p0/person2/assets/shared_scene.xml",
+  "left_hand_mesh_vertices": 22876,
+  "interaction_mesh_keys": [
+   "Pelvis",
+   "L_Hip",
+   "R_Hip",
+   "L_Knee",
+   "R_Knee",
+   "L_Shoulder",
+   "R_Shoulder",
+   "L_Elbow",
+   "R_Elbow",
+   "L_Ankle",
+   "R_Ankle",
+   "L_Foot",
+   "R_Foot",
+   "L_Wrist",
+   "R_Wrist"
+  ],
+  "w_nominal_tracking_init": 5.0
+ },
+ "seconds": 305.7,
+ "finite": true,
+ "qpos_shape": [
+  299,
+  43
+ ],
+ "object_locked_max_err": 0.0,
+ "peak_rss_gb": 1.09
+}
