@@ -18,7 +18,25 @@ def save():
     (S / "pipeline.json").write_text(json.dumps(log, indent=1) + "\n")
 
 
-def sh(cmd, name):
+def available_gb():
+    for line in open("/proc/meminfo"):
+        if line.startswith("MemAvailable:"):
+            return int(line.split()[1]) / 1024 ** 2
+    return 0.0
+
+
+GATE = __import__("threading").Lock()
+
+
+def sh(cmd, name, need_gb=4.5):
+    # Kevin's rule: keep >= 8 GB available; start a job only when available >= 8 + its expected peak (measured: render ~4 GB)
+    with GATE:
+        waited = 0
+        while available_gb() < 8.0 + need_gb:
+            time.sleep(20)
+            waited += 20
+        time.sleep(30)  # let the job just started by the other worker reach its working size before the next check
+    log.setdefault("waits_s", {})[name] = waited
     with open(S / f"{name}.log", "w") as f:
         rc = subprocess.run(cmd, cwd=ROOT, stdout=f, stderr=subprocess.STDOUT).returncode
     log["steps"].append(dict(name=name, rc=rc, at=time.strftime("%T")))
