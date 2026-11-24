@@ -1,0 +1,60 @@
+{
+ "tag": "t4096_default",
+ "num_envs": 4096,
+ "threads": null,
+ "argv": [
+  "/root/autodl-tmp/system1/deps/miniconda3/envs/hssim_s1/bin/python",
+  "-B",
+  "scripts/train_core4d_smalltable.py",
+  "--experiment",
+  "smalltable5kg_A",
+  "--reward-variant",
+  "bucket_A_no_rel_no_height",
+  "--steps-per-env",
+  "24",
+  "--seed",
+  "721",
+  "--obs-v1",
+  "--critic-v1",
+  "--system1-randomization",
+  "--contact-v1",
+  "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+  "--t14-reference",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+  "--num-envs",
+  "4096",
+  "--save-interval",
+  "500",
+  "--iterations",
+  "100",
+  "--output-dir",
+  "/root/autodl-tmp/system1/logs/t13v4/speed4b/t4096_default"
+ ],
+ "env_threads": {
+  "OMP_NUM_THREADS": null,
+  "MKL_NUM_THREADS": null,
+  "OPENBLAS_NUM_THREADS": null
+ },
+ "returncode": 0,
+ "wall_seconds": 726.9,
+ "iterations": 100,
+ "s_per_it_median_after_3": 6.165862808004022,
+ "nonfinite_keys": [],
+ "gpu_util_mean": 43.7,
+ "cpu_percent_mean": 196.3,
+ "gpu_mem_peak_mib": 9793.0,
+ "gpu_mem_total_mib": 24564.0,
+ "overflow_lines": [],
+ "torch_threads_record": {
+  "actual": 64,
+  "env": {
+   "MKL_NUM_THREADS": null,
+   "OMP_NUM_THREADS": null,
+   "OPENBLAS_NUM_THREADS": "32"
+  },
+  "requested": null
+ },
+ "checkpoint_sha256": "e3b3230b1918c7546aca3f0efb5989dd8e0408c73235b118619c2eaaeb44f102",
+ "cgroup_cpu_stat_before": "usage_usec 2552499212\nuser_usec 2265267643\nsystem_usec 287231568\nnr_periods 51090\nnr_throttled 164\nthrottled_usec 191510468\n",
+ "cgroup_cpu_stat_after": "usage_usec 4234532897\nuser_usec 3801847030\nsystem_usec 432685867\nnr_periods 58378\nnr_throttled 297\nthrottled_usec 379522219\n"
+}

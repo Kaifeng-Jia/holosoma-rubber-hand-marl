@@ -1,0 +1,49 @@
+{
+ "started": "2026-11-24T18:05:33-05:00",
+ "waits": [],
+ "speed_decision": {
+  "num_envs": 4096,
+  "threads": null,
+  "conditions": {
+   "ratio_4096_over_2048": 1.196,
+   "a_ratio_below_1p5": true,
+   "b_no_overflow_warning": true,
+   "c_memory_enough": true
+  },
+  "thread_setting": {
+   "faster": "t2048_default",
+   "threads": null
+  }
+ },
+ "smokes": {
+  "smoke_d_push": true,
+  "smoke_d_table": true,
+  "smoke_d_table_pa": true
+ },
+ "problems": [],
+ "commands": {
+  "d_table": "source /root/autodl-tmp/system1/s1_env.sh; cd /root/autodl-tmp/system1/duet-system1; mkdir -p /root/autodl-tmp/system1/logs/t13v4/runs; nohup python3 system1/t13v4/cloud_runs.py --run d_table --num-envs 4096 --gpu 0 --out /root/autodl-tmp/system1/logs/t13v4/runs > /root/autodl-tmp/system1/logs/t13v4/runs/d_table.runner.log 2>&1 < /dev/null &\nP=$!\necho $P > /root/autodl-tmp/system1/logs/t13v4/runs/d_table.runner.pid\nsleep 5; kill -0 $P && echo RUNNER_ALIVE $P; git -C /root/autodl-tmp/system1/duet-system1 rev-parse HEAD",
+  "d_push": "source /root/autodl-tmp/system1/s1_env.sh; cd /root/autodl-tmp/system1/duet-system1; mkdir -p /root/autodl-tmp/system1/logs/t13v4/runs; nohup python3 system1/t13v4/cloud_runs.py --run d_push --num-envs 4096 --gpu 0 --out /root/autodl-tmp/system1/logs/t13v4/runs > /root/autodl-tmp/system1/logs/t13v4/runs/d_push.runner.log 2>&1 < /dev/null &\nP=$!\necho $P > /root/autodl-tmp/system1/logs/t13v4/runs/d_push.runner.pid\nsleep 5; kill -0 $P && echo RUNNER_ALIVE $P; git -C /root/autodl-tmp/system1/duet-system1 rev-parse HEAD",
+  "d_table_pa": "source /root/autodl-tmp/system1/s1_env.sh; cd /root/autodl-tmp/system1/duet-system1; mkdir -p /root/autodl-tmp/system1/logs/t13v4/runs; nohup python3 system1/t13v4/cloud_runs.py --run d_table_pa --num-envs 4096 --gpu 0 --out /root/autodl-tmp/system1/logs/t13v4/runs > /root/autodl-tmp/system1/logs/t13v4/runs/d_table_pa.runner.log 2>&1 < /dev/null &\nP=$!\necho $P > /root/autodl-tmp/system1/logs/t13v4/runs/d_table_pa.runner.pid\nsleep 5; kill -0 $P && echo RUNNER_ALIVE $P; git -C /root/autodl-tmp/system1/duet-system1 rev-parse HEAD"
+ },
+ "launched": {
+  "d_table": {
+   "machine": "199",
+   "time": "2026-11-24T18:21:25-05:00",
+   "returncode": 0,
+   "output": "RUNNER_ALIVE 7376\nbcff097094aaa93ecf4392f236dea5ec50f042f4"
+  },
+  "d_push": {
+   "machine": "196",
+   "time": "2026-11-24T18:21:34-05:00",
+   "returncode": 0,
+   "output": "RUNNER_ALIVE 7765\nbcff097094aaa93ecf4392f236dea5ec50f042f4"
+  },
+  "d_table_pa": {
+   "machine": "210",
+   "time": "2026-11-24T18:21:43-05:00",
+   "returncode": 0,
+   "output": "RUNNER_ALIVE 8075\nbcff097094aaa93ecf4392f236dea5ec50f042f4"
+  }
+ }
+}

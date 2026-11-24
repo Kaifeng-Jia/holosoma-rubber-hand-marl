@@ -1,0 +1,142 @@
+{
+ "run": "d_table",
+ "num_envs": 2048,
+ "main_iterations": 10,
+ "plan": {
+  "run": "d_table",
+  "task": "table",
+  "num_envs": 2048,
+  "gpu": "0",
+  "rules": {
+   "save": 1000,
+   "val": 2000,
+   "stop_after": 8000,
+   "patience": 4000,
+   "max_it": 20000,
+   "earliest_stop": 12000
+  },
+  "iteration_counting": {
+   "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+   "warmup_iterations": 0,
+   "counted_iteration": "checkpoint file number - warmup_iterations",
+   "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+  },
+  "warmup_iterations": 0,
+  "stages": [
+   {
+    "name": "train",
+    "argv": [
+     "/root/autodl-tmp/system1/deps/miniconda3/envs/hssim_s1/bin/python",
+     "-B",
+     "scripts/train_core4d_smalltable.py",
+     "--experiment",
+     "smalltable5kg_A",
+     "--reward-variant",
+     "bucket_A_no_rel_no_height",
+     "--steps-per-env",
+     "24",
+     "--seed",
+     "721",
+     "--obs-v1",
+     "--critic-v1",
+     "--system1-randomization",
+     "--contact-v1",
+     "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+     "--t14-reference",
+     "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+     "--num-envs",
+     "2048",
+     "--save-interval",
+     "1000",
+     "--iterations",
+     "20000",
+     "--output-dir",
+     "/root/autodl-tmp/system1/logs/t13v4/smoke_cloud/d_table/train"
+    ]
+   }
+  ],
+  "validation_states": "system1/t13v4/states_t14r6C/table_validation_states.json",
+  "validation_flags": [
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json"
+  ]
+ },
+ "stages": [
+  {
+   "name": "train",
+   "argv": [
+    "/root/autodl-tmp/system1/deps/miniconda3/envs/hssim_s1/bin/python",
+    "-B",
+    "scripts/train_core4d_smalltable.py",
+    "--experiment",
+    "smalltable5kg_A",
+    "--reward-variant",
+    "bucket_A_no_rel_no_height",
+    "--steps-per-env",
+    "24",
+    "--seed",
+    "721",
+    "--obs-v1",
+    "--critic-v1",
+    "--system1-randomization",
+    "--contact-v1",
+    "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+    "--t14-reference",
+    "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+    "--num-envs",
+    "2048",
+    "--save-interval",
+    "1000",
+    "--iterations",
+    "10",
+    "--output-dir",
+    "/root/autodl-tmp/system1/logs/t13v4/smoke_cloud/d_table/train"
+   ],
+   "returncode": 0,
+   "seconds": 123.2,
+   "overflow_lines": [],
+   "last_checkpoint": "/root/autodl-tmp/system1/logs/t13v4/smoke_cloud/d_table/train/model_00010.pt",
+   "last_checkpoint_sha256": "6d62503e31709211595058df4303baab965a05ce6c110c971a4033886f2278d8",
+   "iterations": 10,
+   "s_per_it_median_after_3": 5.203040543012321,
+   "nonfinite_keys": []
+  }
+ ],
+ "git_head": "bcff097094aaa93ecf4392f236dea5ec50f042f4",
+ "git_status": "",
+ "validation": {
+  "argv": [
+   "/root/autodl-tmp/system1/deps/miniconda3/envs/hssim_s1/bin/python",
+   "-B",
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "table",
+   "--controller",
+   "policy",
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+   "--checkpoint",
+   "/root/autodl-tmp/system1/logs/t13v4/smoke_cloud/d_table/train/model_00010.pt",
+   "--device",
+   "cuda:0",
+   "--states",
+   "system1/t13v4/states_t14r6C/table_validation_states.json",
+   "--model-id",
+   "t13v4_cloud_smoke__d_table",
+   "--output-dir",
+   "/root/autodl-tmp/system1/logs/t13v4/smoke_cloud/d_table/validation"
+  ],
+  "returncode": 0,
+  "seconds": 236.9,
+  "complete": true,
+  "episodes": 51,
+  "completed_non_nominal": 0,
+  "states_sha256": "0caf56dd1826c1f26a471ad1fbb99ebcd679edd1970a293c55b63f76194bbf3a",
+  "overflow_lines": []
+ },
+ "passed": true
+}
