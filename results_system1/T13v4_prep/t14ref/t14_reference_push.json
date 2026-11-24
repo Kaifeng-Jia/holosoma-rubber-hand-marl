@@ -1,0 +1,64 @@
+{
+  "conversion_command": [
+    "data_conversion/convert_data_format_mj.py",
+    "--input-file",
+    "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_fixed_object.npz",
+    "--output-fps",
+    "50",
+    "--output-name",
+    "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+    "--data-format",
+    "smplh",
+    "--object-name",
+    "largetable",
+    "--has-dynamic-object",
+    "--once",
+    "--headless"
+  ],
+  "decision": "Kevin 2026-11-24: Push training reference = T14 round 6 C, m = 1.0",
+  "files": {
+    "loader_channels": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/push_t14r6C_loader_channels.npz",
+      "sha256": "89b69c7283653594e85bfe17260507d15cec8775e53811ace74d251ee77246ff"
+    },
+    "motion": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+      "sha256": "ec7062d673720a982d723088f286d296f4a4a60ea28b39caa1414c97f72a20f1"
+    },
+    "source_qpos": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_fixed_object.npz",
+      "sha256": "68cbdbda99dc608d6900c2ff0dda10cb8e121bbffdcee1c33906893a45bce68a"
+    }
+  },
+  "lateral_spacing_m": 0.8780472,
+  "loader": "original_PairedA1Reference",
+  "loader_channels_reproduction_of_original_max_abs": {
+    "agent_body_ang_vel_w": 0.0,
+    "agent_body_lin_vel_w": 0.0,
+    "agent_body_pos_w": 0.0,
+    "agent_body_quat_w": 0.0,
+    "agent_joint_pos": 0.0,
+    "agent_joint_vel": 0.0,
+    "object_lin_vel_w": 0.0,
+    "object_pos_w": 0.0,
+    "object_quat_w": 0.0
+  },
+  "name": "t14_r6C_m1p00",
+  "object_urdf_unchanged": "objects_widetable_plan5_training.urdf (training table, Kevin: \u8bad\u7ec3\u7528\u7684\u684c\u5b50\u5c3a\u5bf8\u4e0d\u53d8)",
+  "pair_check": {
+    "c_m": 0.43902359999999996,
+    "m": 1.0,
+    "object_max_abs": 0.0,
+    "robot0_rest_max_abs": 0.0,
+    "robot0_root_pos_max_abs_m": 2.220446049250313e-16,
+    "robot1_rest_max_abs": 0.0,
+    "robot1_root_pos_max_abs_m": 2.220446049250313e-16,
+    "spacing_m": 0.8780471999999999
+  },
+  "schema": "system1_t14_reference_v1",
+  "t14_pair": {
+    "path": "exports_system1/T14_references/r6/push_sizes_C/m1p00/push_m1p00_pair_fps30.npz",
+    "sha256": "bb82d08b2a4038a69d907f7e721c0f9bbeb92e25ff284a9165d16787aa05f956"
+  },
+  "task": "push"
+}

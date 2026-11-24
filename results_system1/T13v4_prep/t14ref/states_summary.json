@@ -1,0 +1,363 @@
+{
+ "rules": "T13 v4 section 0 item 4: test and validation initial states on the T14 round 6 C references (Kevin 2026-11-24).\n\nGenerators and seeds = the original ones:\n  * +/-2 test: scripts/paper_evaluation_utils.make_states(case, seed=241003) (nominal + 50 states, independent uniform per robot\n    world XY within +/-2 cm and yaw within +/-2 deg);\n  * +/-8 test: the +/-2 draws scaled exactly by 4.0 (method of the V3 extended evaluation, recorded in its pm8 files);\n  * validation: the T10b generator = make_states(case, seed=20261120); Table had one (system1/t10b/validation_states), Push had\n    none and gets 50 +/-2 states here. Every validation state is checked against every +/-2 and +/-8 test state: no duplicate.\nThe states are perturbations relative to the reference's first frame (robot_xy_m, robot_yaw_rad; the evaluator applies them\nwith paper_evaluation_utils.yaw_transform to the nominal roots); so the regenerated values equal the old files' values. Each new\nfile carries a system1_t13v4 block naming the T14 reference it belongs to.\n\nAlso checked here (geometry only, no simulation): every state applied to frame 0 of the new reference (and, for comparison, of\nthe old one) - largest robot-object penetration per robot (simulator collision shapes, MuJoCo mj_geomDistance as T14) and the\nsmallest robot-robot distance.\n\n    sonic_s1/bin/python -B system1/t13v4/make_states_t14.py\n",
+ "table": {
+  "files": {
+   "pm2": {
+    "path": "system1/t13v4/states_t14r6C/table_pm2_states.json",
+    "sha256": "74a5532069d46662412e740e27f036cf4c2bb5db6cf23ce2bbdc2d9894bf4ccd",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "pm8": {
+    "path": "system1/t13v4/states_t14r6C/table_pm8_states.json",
+    "sha256": "c1b788011953fc69addff6cae061456ec506c87778a929c1d9dd2ff6b1511a8a",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "validation": {
+    "path": "system1/t13v4/states_t14r6C/table_validation_states.json",
+    "sha256": "0caf56dd1826c1f26a471ad1fbb99ebcd679edd1970a293c55b63f76194bbf3a",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   }
+  },
+  "frame0_check": {
+   "new_pm2": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -10.0,
+     "r1": -1.414
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   },
+   "new_pm8": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 4.511
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 14
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -7.887,
+     "r1": -1.147
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   },
+   "new_validation": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -10.0,
+     "r1": -1.474
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   },
+   "old_pm2": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -10.0,
+     "r1": -1.622
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   },
+   "old_pm8": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 4.538
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 16
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -8.765,
+     "r1": -1.528
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   },
+   "old_validation": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "582e76693f877c61b0b09ab3b584922f330aeb85cae6035f6b7cd2ae729ee153",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -10.0,
+     "r1": -1.66
+    },
+    "robot_robot_min_distance_cm": 50.0,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 50.0
+    }
+   }
+  }
+ },
+ "push": {
+  "files": {
+   "pm2": {
+    "path": "system1/t13v4/states_t14r6C/push_pm2_states.json",
+    "sha256": "a6933d54b221932bf2c3a28c8e7c3a4720a80960d586a8f83286e9c43875f986",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "pm8": {
+    "path": "system1/t13v4/states_t14r6C/push_pm8_states.json",
+    "sha256": "2edd4351519fe01054a1fe2d501755e8628e79b559c9d6f3f8f7241ce1d59aaf",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "validation": {
+    "path": "system1/t13v4/states_t14r6C/push_validation_states.json",
+    "sha256": "bb7cedf4fc82a8c570fbbe2cef16b2cd7455a6a20906bd5a2ee052902931b91e",
+    "states": 51,
+    "max_abs_value_difference_vs_old": null
+   }
+  },
+  "frame0_check": {
+   "new_pm2": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+    "runtime_sha256": "ec7062d673720a982d723088f286d296f4a4a60ea28b39caa1414c97f72a20f1",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.145,
+     "r1": 0.15
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 51,
+     "r1": 51
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 0.145,
+     "r1": 0.15
+    },
+    "robot_robot_min_distance_cm": 30.578,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 33.861
+    }
+   },
+   "new_pm8": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+    "runtime_sha256": "ec7062d673720a982d723088f286d296f4a4a60ea28b39caa1414c97f72a20f1",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.276,
+     "r1": 0.299
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 45,
+     "r1": 44
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 0.276,
+     "r1": 0.299
+    },
+    "robot_robot_min_distance_cm": 22.295,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 33.861
+    }
+   },
+   "new_validation": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+    "runtime_sha256": "ec7062d673720a982d723088f286d296f4a4a60ea28b39caa1414c97f72a20f1",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.152,
+     "r1": 0.147
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 51,
+     "r1": 51
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 0.152,
+     "r1": 0.147
+    },
+    "robot_robot_min_distance_cm": 30.406,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 33.861
+    }
+   },
+   "old_pm2": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "runtime_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -0.49,
+     "r1": -0.488
+    },
+    "robot_robot_min_distance_cm": 39.552,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 42.851
+    }
+   },
+   "old_pm8": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "runtime_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -0.365,
+     "r1": -0.354
+    },
+    "robot_robot_min_distance_cm": 31.002,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 42.851
+    }
+   },
+   "old_validation": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/rubber_hand_largetable_v1/a1/sub6_largetable_033_a1_mj_fps50_w_obj.npz",
+    "runtime_sha256": "b669468ade12f8c271119d6c8c120463223ab65489805c486e43b0c3a4ba2207",
+    "max_robot_object_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 0,
+     "r1": 0
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": -0.494,
+     "r1": -0.492
+    },
+    "robot_robot_min_distance_cm": 39.367,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.0,
+      0.0
+     ],
+     "robot_robot_cm": 42.851
+    }
+   }
+  }
+ }
+}

@@ -71,6 +71,8 @@ PARSER.add_argument("--torch-threads", type=int, default=None,
                     help="T13 v4 section 4 B cloud speed test: torch.set_num_threads(N) (default: PyTorch's own default, unchanged)")
 PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
 PARSER.add_argument("--per-agent-reward", action="store_true", help="T13 v4 D-Table-PA: per-robot rewards / values / GAE")
+PARSER.add_argument("--t14-reference", type=Path, default=None,
+                    help="T13 v4 section 0: T14 round 6 C Table reference manifest (system1/t13v4/t14_reference.py); off = original reference")
 ARGS = PARSER.parse_args()
 if ARGS.per_agent_reward and not (ARGS.obs_v1 and ARGS.critic_v1):
     PARSER.error("--per-agent-reward (D-Table-PA) goes with --obs-v1 --critic-v1")
@@ -136,6 +138,15 @@ from holosoma.config_values.marl.g1.core4d_smalltable_reward import (  # noqa: E
 
 from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
 EXPERIMENT = with_reference_variant(get_core4d_pair_experiment(ARGS.experiment), ARGS.reference_variant, reward_variant=ARGS.reward_variant)
+T14_REFERENCE = None
+if ARGS.t14_reference is not None:  # System1 T13 v4 section 0 (off = unchanged): new motion, same URDF / physics / reward
+    if ARGS.experiment != "smalltable5kg_A" or ARGS.reference_variant is not None:
+        PARSER.error("--t14-reference: smalltable5kg_A only, without --reference-variant")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t13v4.t14_reference import table_experiment
+    EXPERIMENT, T14_REFERENCE = table_experiment(EXPERIMENT, ARGS.t14_reference.expanduser().resolve())
+    from system1.t13v4.t14_reference import check_labels as _t14_check_labels
+    _t14_check_labels(None if ARGS.contact_v1 is None else ARGS.contact_v1.expanduser().resolve(), ARGS.t14_reference.expanduser().resolve(), "table")
 OBJECT_MASS_VARIANT = None
 if ARGS.object_mass_kg is not None:
     if ARGS.object_mass_kg <= 0.0:
@@ -297,6 +308,8 @@ def _with_system1(state: dict) -> dict:
     if ARGS.finger_mode is not None:
         state["system1_finger_mode"] = ARGS.finger_mode
         state["system1_hand_reference_sha256"] = _sha256(ARGS.hand_reference.expanduser().resolve())
+    if T14_REFERENCE is not None:
+        state["system1_t14_reference"] = T14_REFERENCE
     if ARGS.sonic_residual:
         state["system1_sonic_residual"] = True
         if ARGS.sonic_residual_kind != "v1":
@@ -658,6 +671,8 @@ def main() -> int:
 
         if ARGS.reference_variant is not None:
             run_config.update(reference_variant=str(ARGS.reference_variant), reference_variant_sha256=_sha256(ARGS.reference_variant))
+        if T14_REFERENCE is not None:
+            run_config["system1_t14_reference"] = T14_REFERENCE
         if ARGS.episode_telemetry:
             from holosoma.utils.v3_episode_telemetry import EpisodeTelemetry, CONTRACT
             episode_telemetry = EpisodeTelemetry(env, output_dir / "episodes_raw.jsonl.gz")

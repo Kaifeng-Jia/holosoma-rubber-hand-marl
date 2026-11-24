@@ -1,0 +1,283 @@
+{
+  "reference_variant": null,
+  "reference_variant_sha256": null,
+  "case": "table",
+  "model_id": "t13v4_t14_validation_test__table_pa",
+  "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/t14/smoke/d_table_pa_200/model_00200.pt",
+  "checkpoint_sha256": "51c0a5495bf4cfb50865bd4a132e164279af69d8b1e220b77346e8ffe92bb010",
+  "v3_ablation": null,
+  "checkpoint_iteration": 200,
+  "states_sha256": "0caf56dd1826c1f26a471ad1fbb99ebcd679edd1970a293c55b63f76194bbf3a",
+  "reference_frames": 687,
+  "horizon_control_steps": 687,
+  "dt": 0.02,
+  "inference": "actor_mean_only_critic_forbidden",
+  "observation_noise": false,
+  "physics": {
+    "mass": [
+      [
+        5.0
+      ]
+    ],
+    "material": [
+      [
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ]
+      ]
+    ],
+    "inertia_row_major": [
+      [
+        0.3770883083343506,
+        0.0,
+        0.0,
+        0.0,
+        0.2411184161901474,
+        0.0,
+        0.0,
+        0.0,
+        0.2676142752170563
+      ]
+    ],
+    "com_pose_xyzw": [
+      [
+        0.0,
+        0.12641499936580658,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "robot_urdf": "g1/main_mesh_collision_rubberhand.urdf",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/core4d_smalltable5kg_A/desk001_5kg_training.urdf",
+  "placement_provenance": null,
+  "runtime_reference_check": null,
+  "endpoint_rule": "Execute each reference frame once; stop at clip end before the next wrapped state",
+  "error_alignment": "Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset",
+  "training_contract": {
+    "version": "core4d_pair_shared_actor_mappo_158_v1",
+    "num_agents": 2,
+    "actor_obs_dim": 159,
+    "critic_obs_dim": 585,
+    "action_dim": 29,
+    "initialization": "fresh_random_initialization_v1",
+    "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+    "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+    "training_promotion_sha256": "9716fe3a4240b550c97c71db089d0ace8ac9e93bacca0700fa6aaf243f9bb145",
+    "physics_contract": {
+      "object_mass_kg": 5.0,
+      "material_static_dynamic_restitution": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "object_collider_type": "convex_hull",
+      "physics_hz": 200,
+      "control_hz": 50
+    },
+    "reward_contract": "core4d_bucket_vectors_soft_contact_v1",
+    "termination_contract": "nonloop_joint_tracking_v1",
+    "experiment_contract": {
+      "experiment_id": "smalltable5kg_A",
+      "object_name": "desk001",
+      "source_pair_sha256": "059deaee7c8f56058816559f67f6ac33eec12f768629bd578f6d0249e4400928",
+      "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+      "object_urdf_sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d",
+      "training_promotion_sha256": "9716fe3a4240b550c97c71db089d0ace8ac9e93bacca0700fa6aaf243f9bb145",
+      "reference_frames": 687,
+      "reference_fps": 50,
+      "physics_contract": {
+        "object_mass_kg": 5.0,
+        "material_static_dynamic_restitution": [
+          0.5,
+          0.5,
+          0.0
+        ],
+        "object_collider_type": "convex_hull",
+        "physics_hz": 200,
+        "control_hz": 50
+      }
+    },
+    "bucket_reward": {
+      "version": "core4d_bucket_vectors_soft_contact_v1",
+      "variant": "A_no_rel_no_height",
+      "artifact_sha256": "d505cdcae064aa6530ed5e3d10f288154c8e9b64761c3e139eaf0156829dd10f",
+      "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612",
+      "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+      "position_sigma_m": 0.3,
+      "position_error_weights_xyz": [
+        1.0,
+        1.0,
+        2.0
+      ],
+      "rotation_sigma_rad": 0.4,
+      "height_sigma_m": 0.1,
+      "relation_sigma_m": 0.04,
+      "relation_distance_floor_m": 0.1,
+      "block_weights_position_rotation_height_relation": [
+        1.0,
+        1.0,
+        0.0,
+        0.0
+      ],
+      "contact_gate_floor": 0.5,
+      "contact_gate_scale": 2.0,
+      "contact_threshold_n": 1.0,
+      "contact_error_normalization": "sum(alpha*(1-contact))/max(1,sum(alpha))",
+      "contact_detection": "current_physics_sample_any_hand_per_agent_normal_force",
+      "contact_target": "not_used_for_smalltable_A",
+      "reward_composition": "unchanged_body_and_regularizers_plus_gated_interaction_block"
+    }
+  },
+  "system1_t13v4": {
+    "obs_v1": true,
+    "critic_v1": true,
+    "noise": false,
+    "teammate": 5,
+    "critic": 585,
+    "mappo_dims": {
+      "actor_obs": 154,
+      "teammate_obs": 5,
+      "actor_input": 159,
+      "critic_obs": 585
+    },
+    "return_model": "per_agent_reward_value_return_advantage",
+    "obs_v1_noise_enabled_in_env": false
+  },
+  "system1_t14_reference": {
+    "manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+    "manifest_sha256": "7070ff9a7ca836dd63dd9286bdf85b58ba71cd4b9b47497690826512877d5940",
+    "name": "t14_r6C_k1p0",
+    "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612"
+  },
+  "gpu_name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "episodes": [
+    {
+      "model_id": "t13v4_t14_validation_test__table_pa",
+      "case": "table",
+      "state_id": "nominal",
+      "kind": "nominal",
+      "steps": 204,
+      "horizon_steps": 687,
+      "completed_reference": false,
+      "progress": 0.29694323144104806,
+      "terminal_terms": {
+        "reference_horizon": false,
+        "joint_bad_tracking": true
+      },
+      "reward_sum_common": 22.40076694637537,
+      "object_rmse_3d_m": 0.03790740668773651,
+      "object_rmse_xy_m": 0.0374646931886673,
+      "height_rmse_m": 0.005776548758149147,
+      "height_bias_m": -0.005134206265211105,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/t14/validation/table_pa/nominal.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_t14_validation_test__table_pa",
+      "case": "table",
+      "state_id": "perturbed_000",
+      "kind": "perturbed",
+      "steps": 193,
+      "horizon_steps": 687,
+      "completed_reference": false,
+      "progress": 0.28093158660844253,
+      "terminal_terms": {
+        "reference_horizon": false,
+        "joint_bad_tracking": true
+      },
+      "reward_sum_common": 21.633914537727833,
+      "object_rmse_3d_m": 0.02338026650249958,
+      "object_rmse_xy_m": 0.022854477167129517,
+      "height_rmse_m": 0.004930499009788036,
+      "height_bias_m": -0.00475867185741663,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/t14/validation/table_pa/perturbed_000.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_t14_validation_test__table_pa",
+      "case": "table",
+      "state_id": "perturbed_001",
+      "kind": "perturbed",
+      "steps": 199,
+      "horizon_steps": 687,
+      "completed_reference": false,
+      "progress": 0.28966521106259097,
+      "terminal_terms": {
+        "reference_horizon": false,
+        "joint_bad_tracking": true
+      },
+      "reward_sum_common": 22.343412399291992,
+      "object_rmse_3d_m": 0.02121058478951454,
+      "object_rmse_xy_m": 0.020425066351890564,
+      "height_rmse_m": 0.0057188766077160835,
+      "height_bias_m": -0.005177606362849474,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/t14/validation/table_pa/perturbed_001.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_t14_validation_test__table_pa",
+      "case": "table",
+      "state_id": "perturbed_002",
+      "kind": "perturbed",
+      "steps": 199,
+      "horizon_steps": 687,
+      "completed_reference": false,
+      "progress": 0.28966521106259097,
+      "terminal_terms": {
+        "reference_horizon": false,
+        "joint_bad_tracking": true
+      },
+      "reward_sum_common": 19.60969641432166,
+      "object_rmse_3d_m": 0.029638923704624176,
+      "object_rmse_xy_m": 0.029159724712371826,
+      "height_rmse_m": 0.005308142397552729,
+      "height_bias_m": -0.0049772243946790695,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/t14/validation/table_pa/perturbed_002.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_t14_validation_test__table_pa",
+      "case": "table",
+      "state_id": "perturbed_003",
+      "kind": "perturbed",
+      "steps": 197,
+      "horizon_steps": 687,
+      "completed_reference": false,
+      "progress": 0.2867540029112082,
+      "terminal_terms": {
+        "reference_horizon": false,
+        "joint_bad_tracking": true
+      },
+      "reward_sum_common": 22.14523696154356,
+      "object_rmse_3d_m": 0.015888215973973274,
+      "object_rmse_xy_m": 0.014976739883422852,
+      "height_rmse_m": 0.005304024089127779,
+      "height_bias_m": -0.004906265530735254,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/t14/validation/table_pa/perturbed_003.trajectory.npz"
+    }
+  ],
+  "complete": true,
+  "episode_count": 5
+}

@@ -1,0 +1,41 @@
+{
+  "decision": "Kevin 2026-11-24: Table training reference = T14 round 6 C, k = 1.0",
+  "files": {
+    "interaction_artifact": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/interaction_vectors_v1.npz",
+      "sha256": "d505cdcae064aa6530ed5e3d10f288154c8e9b64761c3e139eaf0156829dd10f"
+    },
+    "object_urdf": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/desk001_5kg_training.urdf",
+      "sha256": "942cea0e35e45c67ba0377a42b382a28e2e52ba5b05238a3066697e9d1e9695d"
+    },
+    "runtime_reference": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/core4d_pair_runtime_fps50.npz",
+      "sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612"
+    },
+    "source_pair": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/20231030_001_desk001_move_new_fps30.npz",
+      "sha256": "059deaee7c8f56058816559f67f6ac33eec12f768629bd578f6d0249e4400928"
+    },
+    "training_promotion": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/training_asset_manifest.json",
+      "sha256": "9716fe3a4240b550c97c71db089d0ace8ac9e93bacca0700fa6aaf243f9bb145"
+    }
+  },
+  "name": "t14_r6C_k1p0",
+  "parent_experiment": "smalltable5kg_A",
+  "schema": "system1_t14_reference_v1",
+  "t14_solve_dirs": [
+    "logs_system1/t14/r6/table_k1p0_C/person1",
+    "logs_system1/t14/r6/table_k1p0_C/person2"
+  ],
+  "task": "table",
+  "unchanged_vs_original": {
+    "fps": 50,
+    "frames": 687,
+    "object_points_seed42": true,
+    "object_urdf": true,
+    "reward_formulas": true,
+    "robot_urdf": true
+  }
+}

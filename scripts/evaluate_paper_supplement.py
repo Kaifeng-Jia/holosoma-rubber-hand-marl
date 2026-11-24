@@ -36,6 +36,7 @@ p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 p.add_argument('--obs-v1',action='store_true',help='System1 T13 v4: observation v1 (actor 159), noise off; checkpoints trained with --obs-v1; off = unchanged')
 p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
+p.add_argument('--t14-reference',type=Path,default=None,help='System1 T13 v4 section 0: T14 round 6 C reference manifest (table / push; system1/t13v4/t14_reference.py); off = original reference')
 a=p.parse_args()
 if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
 if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
@@ -55,6 +56,7 @@ from holosoma.config_values.marl.g1.kick_experiment import g1_29dof_plan5_kick_b
 from plan5_registered_placement import configure_push_placement,export_runtime_reference
 from holosoma.utils.eval_utils import init_sim_imports
 experiment=None
+T14_REFERENCE=None
 mass_variant=None
 if a.case in ('push','pull','kick'):
     config=dict(push=g1_29dof_plan5_push_baseline,pull=g1_29dof_plan5_pull_baseline,
@@ -68,6 +70,11 @@ else:
     experiment=get_core4d_pair_experiment(dict(chair='chair021',bucket='bucket003',table='smalltable5kg_A')[a.case])
     from holosoma.config_values.marl.g1.v3_reference_variant import with_reference_variant
     experiment=with_reference_variant(experiment,a.reference_variant)
+    if a.t14_reference is not None:  # System1 T13 v4 (off = unchanged)
+        if a.case!='table' or a.reference_variant is not None:raise ValueError('--t14-reference: table (or push) only, no --reference-variant')
+        sys.path.insert(0,str(ROOT))
+        from system1.t13v4.t14_reference import table_experiment
+        experiment,T14_REFERENCE=table_experiment(experiment,a.t14_reference.resolve())
     mass_variant=None
     if a.object_mass_kg is not None:
         sys.path.insert(0,str(ROOT))
@@ -92,6 +99,12 @@ if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
     hand=dict(finger_mode=a.finger_mode,reference=str(a.hand_reference.resolve()),reference_sha256=sha(a.hand_reference))
     config=with_sharpa_pair(config,a.finger_mode,a.hand_reference)
 config,placement_provenance=configure_push_placement(config,a.push_placement_proof,skill=a.case,root=ROOT)
+if a.t14_reference is not None and a.case=='push':  # System1 T13 v4 (off = unchanged): only the A1 motion file changes
+    sys.path.insert(0,str(ROOT))
+    from system1.t13v4.t14_reference import push_config as _t14_push_config
+    config,placement_provenance=_t14_push_config(config,a.t14_reference.resolve(),placement_provenance)
+    T14_REFERENCE=placement_provenance['t14_reference']
+elif a.t14_reference is not None and a.case!='table':raise ValueError('--t14-reference: table or push only')
 if a.controller in ('sonic','sonic_residual','sonic_planner'):
     sys.path.insert(0,str(ROOT))
     from system1.scheme_a import with_sonic_pd
@@ -136,6 +149,8 @@ def main():
         zero_teammate_obs=bool(ablation and ablation['zero_teammate_obs'])
         if state.get('placement_provenance') != placement_provenance:
             raise ValueError('Checkpoint and evaluation placement differ')
+        if a.case=='table' and a.controller=='policy' and (state.get('system1_t14_reference') or {}).get('manifest_sha256')!=(T14_REFERENCE or {}).get('manifest_sha256'):
+            raise ValueError('Checkpoint and evaluation T14 reference differ')  # System1 T13 v4 (both absent = unchanged)
         if state.get('plan5_skill',a.case) != a.case:
             raise ValueError('Checkpoint skill differs from evaluation case')
         if a.controller=='sonic_residual' and not state.get('system1_sonic_residual'):
@@ -204,7 +219,11 @@ def main():
             from system1.t10b.hand_material import set_hand_material
             hand_material=set_hand_material(env,a.hand_friction,a.hand_friction,0.0)
             write_json(out/'hand_material.json',hand_material)
-        runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
+        if a.t14_reference is not None and a.case=='push':
+            from system1.t13v4.t14_reference import push_runtime_check as _t14_runtime_check
+            runtime_reference_check=_t14_runtime_check(env,out,a.t14_reference.resolve())
+        else:
+            runtime_reference_check=export_runtime_reference(env,out,placement_provenance,a.push_placement_proof)
         if a.sim2sim_dump is not None:  # System1 T10 (off = unchanged)
             sys.path.insert(0,str(ROOT))
             from system1.sim2sim.isaac_dump import dump_scene,EpisodeRecorder
@@ -261,6 +280,8 @@ def main():
             T13V4_EVAL['obs_v1_noise_enabled_in_env']=None if st is None else bool(st.noise_enabled)
             if st is not None and st.noise_enabled:raise RuntimeError('observation-v1 noise must be off in evaluation')
             manifest['system1_t13v4']=T13V4_EVAL
+        if T14_REFERENCE is not None:
+            manifest['system1_t14_reference']=T14_REFERENCE
         if hand_material is not None:manifest['system1_hand_material']=dict(static_friction=hand_material['static_friction'],dynamic_friction=hand_material['dynamic_friction'],restitution=hand_material['restitution'],record='hand_material.json')
         if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies),nominal_viser_export='skipped (29-DOF format)')
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation

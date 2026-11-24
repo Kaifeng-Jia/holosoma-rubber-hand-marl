@@ -1,0 +1,176 @@
+{
+ "initial_time_steps": [
+  287,
+  56,
+  219,
+  81,
+  130,
+  173,
+  26,
+  180
+ ],
+ "obs": {
+  "group_shapes": {
+   "actor_obs": [
+    8,
+    2,
+    154
+   ],
+   "teammate_obs": [
+    8,
+    2,
+    5
+   ],
+   "critic_obs": [
+    8,
+    585
+   ]
+  },
+  "term_order": {
+   "actor_obs": [
+    "actions",
+    "base_ang_vel",
+    "dof_pos",
+    "dof_vel",
+    "motion_command",
+    "motion_ref_ori_b"
+   ],
+   "teammate_obs": [
+    "neck_partner_rel_pos_b",
+    "object_rel_pos_b"
+   ],
+   "critic_obs": [
+    "agent_actions",
+    "agent_base_ang_vel_b",
+    "agent_base_lin_vel_b",
+    "agent_body_ori_b",
+    "agent_body_pos_b",
+    "agent_dof_pos",
+    "agent_dof_vel",
+    "agent_motion_ref_ori_b",
+    "agent_motion_ref_pos_b",
+    "shared_motion_command",
+    "shared_object_tracking",
+    "shared_phase"
+   ]
+  },
+  "term_dims": {
+   "actor_obs": {
+    "actions": 29,
+    "base_ang_vel": 3,
+    "dof_pos": 29,
+    "dof_vel": 29,
+    "motion_command": 58,
+    "motion_ref_ori_b": 6
+   },
+   "teammate_obs": {
+    "neck_partner_rel_pos_b": 2,
+    "object_rel_pos_b": 3
+   },
+   "critic_obs": {
+    "agent_actions": 58,
+    "agent_base_ang_vel_b": 6,
+    "agent_base_lin_vel_b": 6,
+    "agent_body_ori_b": 168,
+    "agent_body_pos_b": 84,
+    "agent_dof_pos": 58,
+    "agent_dof_vel": 58,
+    "agent_motion_ref_ori_b": 12,
+    "agent_motion_ref_pos_b": 6,
+    "shared_motion_command": 116,
+    "shared_object_tracking": 12,
+    "shared_phase": 1
+   }
+  },
+  "critic_shared_motion_command": {
+   "width": 116,
+   "equals_both_robots": true,
+   "robot1_block_present": true
+  },
+  "critic_width_from_terms": 585,
+  "obs_v1_max_abs_err": {
+   "ref_ori": 2.6626851101774207e-07,
+   "teammate": 3.78225116892672e-07
+  },
+  "obs_v1_teammate_group_vs_expected": 3.78225116892672e-07,
+  "noise_enabled": false,
+  "noise_expected": false,
+  "clip_fraction": {
+   "partner": 0.0,
+   "object": 0.0
+  }
+ },
+ "per_agent": null,
+ "sync_counts": {
+  "obs:motion_ref_ori_b": {
+   "count_per_3_calls": 13,
+   "sites": {
+    "__init__.py:1150": 1,
+    "paired_a1_reference.py:151": 12
+   }
+  },
+  "obs:neck_partner_rel_pos_b": {
+   "count_per_3_calls": 0,
+   "sites": {}
+  },
+  "obs:object_rel_pos_b": {
+   "count_per_3_calls": 15,
+   "sites": {
+    "object_registry.py:359": 6,
+    "functional.py:995": 3,
+    "object_registry.py:367": 3,
+    "object_registry.py:378": 3
+   }
+  },
+  "obs:critic_both_commands": {
+   "count_per_3_calls": 6,
+   "sites": {
+    "paired_a1_reference.py:151": 6
+   }
+  },
+  "reward:contact_v1": {
+   "count_per_3_calls": 33,
+   "sites": {
+    "object_registry.py:359": 12,
+    "functional.py:995": 6,
+    "object_registry.py:367": 6,
+    "object_registry.py:378": 6,
+    "sensor_base.py:355": 3
+   }
+  },
+  "termination:lost_contact_v1": {
+   "count_per_3_calls": 33,
+   "sites": {
+    "object_registry.py:359": 12,
+    "functional.py:995": 6,
+    "object_registry.py:367": 6,
+    "object_registry.py:378": 6,
+    "sensor_base.py:355": 3
+   }
+  }
+ },
+ "contact_replay": {
+  "frames": 309,
+  "envs": 8,
+  "block": 39,
+  "palm_frame": "wrist_yaw_link",
+  "max_abs_err": {
+   "reward": 7.083134754282128e-07,
+   "d": 1.8707999394074193e-06,
+   "count": 0.0,
+   "lost_mismatch": 0,
+   "terminate_mismatch": 0
+  },
+  "hand_force_link_vs_hand_sensor_max_abs_n": 0.0,
+  "mean_team_reward": 3.251902229191802,
+  "should_fraction": 0.7912621359223301,
+  "hand_force_over_1n_in_should": 0.5102249488752556,
+  "lost_fraction_in_should": 0.4887525562372188,
+  "frames_with_penalty": 0,
+  "frames_terminating": 15,
+  "hand_force_over_1n_in_should_r0": 0.6257668711656442,
+  "should_samples_r0": 489,
+  "hand_force_over_1n_in_should_r1": 0.3946830265848671,
+  "should_samples_r1": 489
+ }
+}

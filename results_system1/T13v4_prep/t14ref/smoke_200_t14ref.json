@@ -1,0 +1,147 @@
+{
+ "d_table_200": {
+  "iterations": 200,
+  "nonfinite": [],
+  "nonfinite_count": 0,
+  "last_iteration": 200,
+  "elapsed_median_s": 5.415653273987118,
+  "reward_first_last": [
+   0.004388211295008659,
+   0.10367844998836517
+  ],
+  "checkpoint": "logs_system1/t13v4/t14/smoke/d_table_200/model_00200.pt",
+  "sha256": "410e11e1dc92350e666d5ad76c0b28c9ee2d0495bd59e307be276b108b13c313",
+  "nonfinite_parameters": [],
+  "status": {
+   "final_checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/t14/smoke/d_table_200/model_00200.pt",
+   "final_iteration": 200,
+   "passed": true
+  },
+  "system1_t14_reference": {
+   "manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+   "manifest_sha256": "7070ff9a7ca836dd63dd9286bdf85b58ba71cd4b9b47497690826512877d5940",
+   "name": "t14_r6C_k1p0",
+   "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612"
+  },
+  "runtime_reference_check": null
+ },
+ "d_push_200": {
+  "iterations": 200,
+  "nonfinite": [],
+  "nonfinite_count": 0,
+  "last_iteration": 200,
+  "elapsed_median_s": 4.9400235545035684,
+  "reward_first_last": [
+   0.10418558120727539,
+   0.09150650352239609
+  ],
+  "checkpoint": "logs_system1/t13v4/t14/smoke/d_push_200/model_00200.pt",
+  "sha256": "7548fcd106c21b8ae6ea5e11eec6f40e37736f7b065ef8adfe0888a0a3760f51",
+  "nonfinite_parameters": [],
+  "status": {
+   "config": "g1_29dof_plan5_push_baseline",
+   "final_checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/t14/smoke/d_push_200/model_00200.pt",
+   "final_iteration": 200,
+   "output_dir": "/home/kevin/duet-system1/logs_system1/t13v4/t14/smoke/d_push_200",
+   "passed": true,
+   "skill": "push"
+  },
+  "system1_t14_reference": {
+   "manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/t14_reference.json",
+   "manifest_sha256": "f29592c152a873cf634b74ceaea703116c607c20a2a92940c5d0352510594996",
+   "motion_file": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/sub6_largetable_033_t14r6C_mj_fps50_w_obj.npz",
+   "motion_sha256": "ec7062d673720a982d723088f286d296f4a4a60ea28b39caa1414c97f72a20f1",
+   "name": "t14_r6C_m1p00"
+  },
+  "runtime_reference_check": {
+   "compared_body_names": [
+    "pelvis",
+    "left_hip_roll_link",
+    "left_knee_link",
+    "left_ankle_roll_link",
+    "right_hip_roll_link",
+    "right_knee_link",
+    "right_ankle_roll_link",
+    "torso_link",
+    "left_shoulder_roll_link",
+    "left_elbow_link",
+    "left_wrist_yaw_link",
+    "right_shoulder_roll_link",
+    "right_elbow_link",
+    "right_wrist_yaw_link"
+   ],
+   "comparison": {
+    "agent_body_ang_vel_w": {
+     "max_abs": 0.0,
+     "tolerance": 0.0001
+    },
+    "agent_body_lin_vel_w": {
+     "max_abs": 1.1920928955078125e-07,
+     "tolerance": 0.0001
+    },
+    "agent_body_pos_w": {
+     "max_abs": 0.0,
+     "tolerance": 2e-06
+    },
+    "agent_body_quat_w": {
+     "max_abs": 0.0,
+     "tolerance": 2e-06
+    },
+    "agent_joint_pos": {
+     "max_abs": 0.0,
+     "tolerance": 2e-06
+    },
+    "agent_joint_vel": {
+     "max_abs": 0.0,
+     "tolerance": 0.0001
+    },
+    "object_lin_vel_w": {
+     "max_abs": 0.0,
+     "tolerance": 0.0001
+    },
+    "object_pos_w": {
+     "max_abs": 0.0,
+     "tolerance": 2e-06
+    },
+    "object_quat_w": {
+     "max_abs": 0.0,
+     "tolerance": 2e-06
+    }
+   },
+   "expected_channels_sha256": "89b69c7283653594e85bfe17260507d15cec8775e53811ace74d251ee77246ff",
+   "file": "actual_reference_channels.npz",
+   "offline_only_body_names": [
+    "left_rubber_hand_link",
+    "right_rubber_hand_link"
+   ],
+   "sha256": "1a2d7924586470df79f5fbb3d897b784841761558720c4ff7b07f0407095a439",
+   "t14_reference": "t14_r6C_m1p00"
+  }
+ },
+ "d_table_pa_200": {
+  "iterations": 200,
+  "nonfinite": [],
+  "nonfinite_count": 0,
+  "last_iteration": 200,
+  "elapsed_median_s": 5.104213127007824,
+  "reward_first_last": [
+   0.004361046943813562,
+   0.12824946641921997
+  ],
+  "checkpoint": "logs_system1/t13v4/t14/smoke/d_table_pa_200/model_00200.pt",
+  "sha256": "51c0a5495bf4cfb50865bd4a132e164279af69d8b1e220b77346e8ffe92bb010",
+  "nonfinite_parameters": [],
+  "status": {
+   "final_checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/t14/smoke/d_table_pa_200/model_00200.pt",
+   "final_iteration": 200,
+   "passed": true
+  },
+  "system1_t14_reference": {
+   "manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+   "manifest_sha256": "7070ff9a7ca836dd63dd9286bdf85b58ba71cd4b9b47497690826512877d5940",
+   "name": "t14_r6C_k1p0",
+   "runtime_reference_sha256": "445ec3a1a83612e0e01e37f316114050684e99078c31009dc2adaa54c453d612"
+  },
+  "runtime_reference_check": null
+ }
+}

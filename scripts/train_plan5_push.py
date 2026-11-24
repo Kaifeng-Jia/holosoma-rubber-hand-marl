@@ -65,6 +65,9 @@ PARSER.add_argument("--torch-threads", type=int, default=None,
 PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
 PARSER.add_argument("--system1-randomization", action="store_true",
                     help="System1 T10b domain randomisation recipe (system1/t10b/randomization.py); off = unchanged")
+PARSER.add_argument("--t14-reference", type=Path, default=None,
+                    help="T13 v4 section 0: T14 round 6 C Push motion manifest (system1/t13v4/t14_reference.py; original A1 loader and "
+                         "registered spacing; requires --push-placement-proof); off = original motion")
 ARGS = PARSER.parse_args()
 if ARGS.from_scratch or ARGS.zero_teammate_obs:
     if ARGS.skill != "pull" or ARGS.fine_tune_from or ARGS.teammate_input_only or ARGS.joint_acceleration_weight is not None:
@@ -186,6 +189,14 @@ CONFIG = replace(
 from plan5_registered_placement import configure_push_placement, export_runtime_reference
 CONFIG, PLACEMENT_PROVENANCE = configure_push_placement(
     CONFIG, ARGS.push_placement_proof, skill=ARGS.skill, root=REPO_ROOT)
+if ARGS.t14_reference is not None:  # System1 T13 v4 section 0 (off = unchanged): only the A1 motion file changes
+    if ARGS.skill != "push":
+        PARSER.error("--t14-reference: Push only")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t13v4.t14_reference import push_config as _t14_push_config
+    CONFIG, PLACEMENT_PROVENANCE = _t14_push_config(CONFIG, ARGS.t14_reference.expanduser().resolve(), PLACEMENT_PROVENANCE)
+    from system1.t13v4.t14_reference import check_labels as _t14_check_labels
+    _t14_check_labels(None if ARGS.contact_v1 is None else ARGS.contact_v1.expanduser().resolve(), ARGS.t14_reference.expanduser().resolve(), "push")
 if PLACEMENT_PROVENANCE is not None:
     EXPECTED_SOURCE_CHECKPOINT_SHA256 = "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
 OBJECT_MASS_VARIANT = None
@@ -434,8 +445,12 @@ def main() -> None:
                           labels_file=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
                           noise_expected=ARGS.obs_v1_noise == "on")
             return
-        runtime_reference_check = export_runtime_reference(
-            env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
+        if ARGS.t14_reference is not None:  # System1 T13 v4: GPU reference vs the CPU loader channels of the T14 motion
+            from system1.t13v4.t14_reference import push_runtime_check as _t14_runtime_check
+            runtime_reference_check = _t14_runtime_check(env, output_dir, ARGS.t14_reference.expanduser().resolve())
+        else:
+            runtime_reference_check = export_runtime_reference(
+                env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
         runtime_object_physics = _runtime_object_physics(env, skill=ARGS.skill)
         if g1_29dof_wbt_w_object.algo.config.init_at_random_ep_len:
             env.episode_length_buf = torch.randint_like(
