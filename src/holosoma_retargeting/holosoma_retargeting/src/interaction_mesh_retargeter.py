@@ -2176,7 +2176,12 @@ class InteractionMeshRetargeter:
                     apply_left = ("left" in key) and foot_sticking[left_key]
                     apply_right = ("right" in key) and foot_sticking[right_key]
                     if apply_left or apply_right:
-                        p_lb = p_WF_t_last_dict[key] - p_WF_dict[key] - self.foot_sticking_tolerance
+                        # system1 T14 round 6: optional reference position from a subclass (attribute absent = previous frame, unchanged)
+                        foot_ref = p_WF_t_last_dict[key]
+                        foot_ref_hook = getattr(self, "foot_sticking_reference", None)
+                        if foot_ref_hook is not None:
+                            foot_ref = foot_ref_hook(key, frame_idx, p_WF_t_last_dict[key])
+                        p_lb = foot_ref - p_WF_dict[key] - self.foot_sticking_tolerance
                         p_ub = p_lb + 2 * self.foot_sticking_tolerance  # symmetric window
 
                         Jxy = J_WF[:2, self.q_a_indices]  # (2 x nq_act)

@@ -2,7 +2,7 @@
 
 World: Z-up, metres, human scale (CORE4D: the raw Y-up capture rotated by CORE4D_TO_OMNI_ROTATION; OMOMO: the OMOMO_new world
 of the palm fit, flat-hand SMPL-X). Object: the captured mesh at its captured pose (CORE4D object_models <name>_m.obj;
-OMOMO the InterMimic largetable.obj). Floor = checker plane at the lowest vertex of the person at that frame. Colours:
+OMOMO, round 6: the OMOMO capture table the hands touch, omomo_table.py; before round 6 the InterMimic largetable.obj). Floor = checker plane at the lowest vertex of the person at that frame. Colours:
 person (0.87, 0.72, 0.62), object (0.76, 0.80, 0.86) as the robot panels' light-blue object, other person not drawn.
 Camera: the robot panel's azimuth and elevation, look-at = the person's two wrist joints' midpoint, distance = the robot
 panel's distance / (human-to-robot scale), so the hand appears at the same size as the robot's.
@@ -70,7 +70,9 @@ class HumanScene:
             _, obj = load_intermimic_data(str(ss.OMOMO_NEW / f"{seq}.pt"))
             self.obj_R = Rotation.from_quat(obj[:, [1, 2, 3, 0]]).as_matrix()
             self.obj_x = obj[:, 4:7]
-            self.mesh = ROOT / "src/holosoma_retargeting/holosoma_retargeting/models/largetable/largetable.obj"
+            import omomo_table as ot  # the table the person touches (OMOMO capture) in the InterMimic object frame
+            self.mesh = self.tmp / f"{task}_capture_table.obj"
+            ot.relation(seq)["mesh"].export(self.mesh)
             self.fps = 30
         self.cache = {}
 

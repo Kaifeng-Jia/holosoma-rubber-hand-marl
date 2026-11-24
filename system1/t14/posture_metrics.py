@@ -10,10 +10,10 @@ Contact frames = the frames inside the solve's anchor contact windows (run_recor
     origins; person: Shoulder -> Elbow -> Wrist joints;
   * elbow position error: |(robot elbow - person elbow) - horizontal part of (robot pelvis - person pelvis)| (the global
     horizontal placement of the robot is removed; heights are compared as they are);
-  * foot slide: robot toe = the front-most vertex of the ankle_roll_link PhysX shapes, horizontal speed (30 Hz differences);
-    support frames by two rules: the solver's own (extract_foot_sticking_sequence_velocity: person toe moves <= 0.01 m per frame,
-    i.e. <= 0.3 m/s) and T14 section 4 (person toe speed < 0.01 m/s); per rule the robot toe speed (mean, p95, max, share
-    > 0.01 m/s) and the person's toe speed p95; plus the solver's per-frame foot xy / height deviation diagnostics.
+  * foot slide (T14 section 4 / CoCarry): support frames = the person's toe speed < 0.01 m/s after Gaussian smoothing (support.py,
+    the same rule the round-6 solver uses); robot toe = the front-most vertex of the ankle_roll_link PhysX shapes; per foot: the
+    largest horizontal displacement of the robot toe from its position at the start of each support segment (drift), the robot
+    toe speed in support frames (p95, max, share > 0.01 m/s); plus the solver's per-frame foot xy / height diagnostics.
 Means are over contact frames; "max diff" = largest |robot - person| over them.
 """
 from __future__ import annotations
@@ -62,7 +62,6 @@ def _ang(a, b):
 
 
 def analyse(qpos_npz, run_record, ffk, names, toe_names):
-    from holosoma_retargeting.src.utils import extract_foot_sticking_sequence_velocity
     z = np.load(qpos_npz)
     q, H = z["qpos"][:, :36].astype(np.float64), z["human_joints"].astype(np.float64)
     rec = json.loads(Path(run_record).read_text())
@@ -89,24 +88,24 @@ def analyse(qpos_npz, run_record, ffk, names, toe_names):
         out[f"elbow_angle_{side}_deg"] = stat(ang_r, ang_h)
         d = np.linalg.norm((el - H[:, hi[f"{S}_Elbow"]]) - hz(p("pelvis") - H[:, hi["Pelvis"]]), axis=1)
         out[f"elbow_position_error_{side}_cm"] = dict(mean=round(100 * float(d[f].mean()), 2), p95=round(100 * float(np.percentile(d[f], 95)), 2)) if f.any() else None
-    stick = extract_foot_sticking_sequence_velocity(H, names, toe_names)  # keys are always L_Toe / R_Toe; threshold 0.01 m per frame
-    for (side, key, tn) in zip(("left", "right"), ("L_Toe", "R_Toe"), toe_names):
+    import support
+    sup = support.support_flags(H[:, [hi[toe_names[0]], hi[toe_names[1]]]])
+    for si, side in enumerate(("left", "right")):
         toe = np.einsum("tij,j->ti", L[f"{side}_ankle_roll_link"][:, :3, :3], ffk.toe[side]) + p(f"{side}_ankle_roll_link")
         v = np.zeros(T)
         v[1:] = np.linalg.norm(np.diff(toe[:, :2], axis=0), axis=1) * 30.0
-        vh = np.zeros(T)
-        vh[1:] = np.linalg.norm(np.diff(H[:, hi[tn], :2], axis=0), axis=1) * 30.0
-        sup_solver = np.array([bool(s_[key]) for s_ in stick])[:T]
-        sup_t14 = vh < 0.01
-        sup_solver[0] = sup_t14[0] = False
-        res = {}
-        for nm, sp in (("solver_rule_0p01m_per_frame", sup_solver), ("t14_rule_person_toe_below_0p01mps", sup_t14)):
-            res[nm] = dict(support_frames=int(sp.sum()), robot_toe_speed_mean_mps=round(float(v[sp].mean()), 4) if sp.any() else None,
-                           robot_toe_speed_p95_mps=round(float(np.percentile(v[sp], 95)), 4) if sp.any() else None,
-                           robot_toe_speed_max_mps=round(float(v[sp].max()), 4) if sp.any() else None,
-                           person_toe_speed_p95_mps=round(float(np.percentile(vh[sp], 95)), 4) if sp.any() else None,
-                           robot_share_above_0p01mps=round(float((v[sp] > 0.01).mean()), 4) if sp.any() else None)
-        out[f"foot_slide_{side}"] = res
+        f_ = np.concatenate([[False], sup[:, si], [False]])
+        e = np.flatnonzero(np.diff(f_.astype(int)))
+        drift = []
+        for a0, b0 in zip(e[0::2], e[1::2]):
+            drift.append(float(np.linalg.norm(toe[a0:b0, :2] - toe[a0, :2], axis=1).max()))
+        sp = sup[:, si]
+        out[f"foot_slide_{side}"] = dict(support_frames=int(sp.sum()), segments=len(drift),
+                                         drift_max_cm=round(100 * max(drift), 3) if drift else None,
+                                         drift_mean_of_segments_cm=round(100 * float(np.mean(drift)), 3) if drift else None,
+                                         robot_toe_speed_p95_mps=round(float(np.percentile(v[sp], 95)), 4) if sp.any() else None,
+                                         robot_toe_speed_max_mps=round(float(v[sp].max()), 4) if sp.any() else None,
+                                         share_above_0p01mps=round(float((v[sp] > 0.01).mean()), 4) if sp.any() else None)
     dest = next(Path(qpos_npz).parent.glob("*_new.npz"), None)
     if dest is not None:
         dz = np.load(dest)

@@ -6,7 +6,9 @@
     mesh); CORE4D 15 Hz frame t <-> reference frame 2t, robot r <-> person r + 1; Push / Pull 30 Hz, robot 1 inherits the
     source (Pull mirrored across the table's local XY plane, hands swapped);
   * target = the person's palm point -> nearest point on the captured object mesh (object frame), moved to the level's object
-    by the level's transform (CORE4D x s, s = s_bar k; Push / Pull the role-isometry translation +-c(m), Pull robot 1 mirrored);
+    by the level's transform (CORE4D x s, s = s_bar k; Push / Pull: the OMOMO capture table the hands touch, moved to the
+    training table by the exact similarity of omomo_table.py (round 6; earlier recomputations used the InterMimic table), then
+    the role-isometry translation +-c(m), Pull robot 1 mirrored);
     n = the mesh face normal at that point, oriented toward the person's palm point (outside the object);
   * robot = the robot palm point (palm point of the simulator hand hull, simulator FK) in the reference's object frame;
   * error vector e = robot - target: distance |e|; normal component e.n (signed: + = outside / hovering, - = inside the object
@@ -66,10 +68,11 @@ def human_omomo(task):
     _, obj = load_intermimic_data(str(ss.OMOMO_NEW / f"{seq}.pt"))
     R = cg.cs.pose_mat(obj[:, 4:7], obj[:, [1, 2, 3, 0]])
     local = np.einsum("tji,thj->thi", R[:, :3, :3], palms - obj[:, None, 4:7])
-    mesh_path = ROOT / "src/holosoma_retargeting/holosoma_retargeting/models/largetable/largetable.obj"
-    target, normal = _targets(trimesh.load(mesh_path, force="mesh"), local)
+    import omomo_table as ot  # the persons touch the OMOMO capture (round 6 check): target on it, moved to the training table
+    cpt, normal = _targets(ot.relation(seq)["mesh"], local)
+    target = ot.to_training(seq, cpt)
     h_sd, _ = ds.human_hand_sd(seq)
-    return dict(flags=h_sd >= cg.CONTACT, target=target, normal=normal, mesh=str(mesh_path))
+    return dict(flags=h_sd >= cg.CONTACT, target=target, normal=normal, mesh="OMOMO capture x obj_scale (omomo_table.py), moved by the similarity k p + o")
 
 
 def _stats(e, n, f):

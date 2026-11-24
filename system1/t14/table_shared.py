@@ -247,6 +247,9 @@ def main():
     ap.add_argument("--landmarks", action="store_true", help="A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh (hand_landmarks.py)")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="B: palm normal toward the inward surface normal at the anchor, in human-contact "
                     "frames (anchor activation); 0 = off; round 4 B uses HandOrientationConfig.palm_direction_weight = 5.0")
+    ap.add_argument("--foot-cocarry", action="store_true", help="T14 round 6: support frames = person toe speed < 0.01 m/s after Gaussian smoothing "
+                    "(support.py), and a support foot is locked at its position when the support segment began (+-1 mm per axis) instead of following "
+                    "the previous frame")
     ap.add_argument("--prior-tau", type=float, default=None, help="T14 round 6: nominal_tracking_tau (prior weight lambda * exp(-frame / tau)); "
                     "default = RetargeterConfig (1e6, i.e. constant); round 6 uses the InteractionMeshRetargeter default 10")
     ap.add_argument("--palm-track-finger-weight", type=float, default=None, help="T14 round 6 C': finger-direction weight of the palm tracking "
@@ -441,6 +444,14 @@ def main():
     foot = extract_foot_sticking_sequence_velocity(human[:n], retargeter.demo_joints, motion_config.toe_names)
     foot[0][motion_config.toe_names[0]] = False
     foot[0][motion_config.toe_names[1]] = False
+    if a.foot_cocarry:
+        import support
+        toes = human[:n][:, [retargeter.demo_joints.index(t) for t in motion_config.toe_names]]
+        sup = support.support_flags(toes)
+        foot = support.as_solver_sequence(sup)
+        retargeter.enable_stance_lock(sup)
+        rec["foot"] = dict(rule="person toe speed < 0.01 m/s after Gaussian smoothing sigma 8 frames; support foot locked at segment start +-1 mm",
+                           support_share=np.round(sup.mean(0), 4).tolist(), segments=[int(np.sum(np.diff(np.concatenate([[0], sup[:, i].astype(int), [0]])) == 1)) for i in (0, 1)])
     q_nom = q_prior[:n].copy()
     q_nom[:, -7:] = shared_mj  # object part of the prior = the locked shared object (not used by the prior indices 0..35)
     print("solving", a.variant, "person", a.person, n, "frames", flush=True)

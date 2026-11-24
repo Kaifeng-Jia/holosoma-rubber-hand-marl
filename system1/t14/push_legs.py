@@ -4,7 +4,7 @@
     mj_geomDistance per candidate pair within 0.3 m) to the stretched training table of that level; per robot;
   * human: per frame and per body part (body_parts.LINK_TO_SMPLX, SMPL-X skinning segments, flat-hand OMOMO SMPL-X mapped
     into the OMOMO_new world by the palm fit), the smallest distance of the part's vertices to the captured table
-    (InterMimic largetable.obj, the human's object, dense surface samples);
+    (round 6: the OMOMO capture table the hands touch, omomo_table.py; round 4 used the InterMimic largetable.obj; dense surface samples);
   * per link: robot minimum (cm, both robots; robot 1 is the copy of robot 0) and the human part minimum (cm);
     flagged when a robot non-hand link comes within 1 cm or its human part within 10 cm (frames listed).
 
@@ -68,7 +68,8 @@ def human_part_distances(task="push"):
     V = ss.omomo_palms.last["vertices_omomo_new"]
     _, obj = load_intermimic_data(str(ss.OMOMO_NEW / f"{seq}.pt"))
     To = cs.pose_mat(obj[:, 4:7], obj[:, [1, 2, 3, 0]])
-    mesh = trimesh.load(ROOT / "src/holosoma_retargeting/holosoma_retargeting/models/largetable/largetable.obj", force="mesh")
+    import omomo_table as ot
+    mesh = ot.relation(seq)["mesh"]  # the table the person touches (OMOMO capture, InterMimic object frame)
     pts, _ = trimesh.sample.sample_surface(mesh, int(mesh.area / 0.003 ** 2), seed=0)
     tree = cKDTree(pts)
     parts = bp.smplx_part_vertices()

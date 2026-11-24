@@ -27,10 +27,12 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
     in the object frame like the interaction-mesh term (base-class hook extra_objective_terms).
     orient_term (T14 round 4 B; None = off): dict(weight, activation=[T, 2], targets_obj=[T, 2, 3] unit vectors in the object
     frame, palm_normal_local={"left": n, "right": n}); see _orient_terms. Round 5 C: palm_world / finger_world [T, 2, 3]
-    (world targets for the palm normal and the finger direction, both with the same weight) instead of targets_obj."""
+    (world targets for the palm normal and the finger direction, both with the same weight) instead of targets_obj.
+    stance_lock (T14 round 6; None = off): [T, 2] support flags (left, right); the foot-sticking constraint then holds a support foot
+    at the position it had when its support segment began (base hook foot_sticking_reference), instead of the previous frame."""
 
     def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, anchor_term: dict | None = None,
-                 orient_term: dict | None = None, **kwargs):
+                 orient_term: dict | None = None, stance_lock=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.palm_offsets = None if palm_offsets is None else {k: np.asarray(v, dtype=float).reshape(3) for k, v in palm_offsets.items()}
         if self.palm_offsets is not None:
@@ -56,6 +58,27 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
                                                arm=np.asarray(arm), normal_local=nl, finger_local=fl / np.linalg.norm(fl)))
         if anchor_term is not None or orient_term is not None:
             self.extra_objective_terms = self._extra_terms
+        self.stance_lock = None
+        if stance_lock is not None:
+            self.enable_stance_lock(stance_lock)
+
+    def enable_stance_lock(self, flags):
+        """round 6: support foot locked at the position it had when its support segment began."""
+        self.stance_lock = np.asarray(flags, bool)  # [T, 2] (left, right)
+        self._stance_flags = self.stance_lock
+        self._stance_anchor = {}
+        self.foot_sticking_reference = self._stance_reference
+
+    def _stance_reference(self, key, frame_idx, p_last):
+        side = 0 if key.lower().startswith("l") or "left" in key.lower() else 1
+        f = self._stance_flags[:, side]
+        start = frame_idx
+        while start > 0 and f[start - 1]:
+            start -= 1
+        k = (key, int(start))  # per constrained foot link (5 sphere links per foot) and segment
+        if k not in self._stance_anchor:  # first call in the segment's first frame: the link where the segment begins
+            self._stance_anchor[k] = np.array(p_last, dtype=float, copy=True)
+        return self._stance_anchor[k]
 
     def _extra_terms(self, q, dqa, frame_idx):
         terms = self._anchor_terms(q, dqa, frame_idx) if self.anchor_term is not None else []

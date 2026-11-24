@@ -30,12 +30,12 @@ for name, rob in P.items():
         for side in ("left", "right"):
             d[f"elbow_pos_err_{side}_mean_cm"] = (x[f"elbow_position_error_{side}_cm"] or {}).get("mean")
             d[f"elbow_pos_err_{side}_p95_cm"] = (x[f"elbow_position_error_{side}_cm"] or {}).get("p95")
-            fs = x[f"foot_slide_{side}"]["t14_rule_person_toe_below_0p01mps"]
-            d[f"foot_{side}_support_frames_t14"] = fs["support_frames"]
-            d[f"foot_{side}_robot_toe_speed_p95_mps_t14"] = fs["robot_toe_speed_p95_mps"]
-            d[f"foot_{side}_person_toe_speed_p95_mps_t14"] = fs["person_toe_speed_p95_mps"]
-            fs2 = x[f"foot_slide_{side}"]["solver_rule_0p01m_per_frame"]
-            d[f"foot_{side}_robot_toe_speed_mean_mps_solver"] = fs2["robot_toe_speed_mean_mps"]
+            fs = x[f"foot_slide_{side}"]
+            d[f"foot_{side}_support_frames"] = fs["support_frames"]
+            d[f"foot_{side}_segments"] = fs["segments"]
+            d[f"foot_{side}_drift_max_cm"] = fs["drift_max_cm"]
+            d[f"foot_{side}_robot_toe_speed_p95_mps"] = fs["robot_toe_speed_p95_mps"]
+            d[f"foot_{side}_share_above_0p01mps"] = fs["share_above_0p01mps"]
         d["solver_foot_xy_deviation_max_cm"] = x.get("solver_foot_xy_deviation_max_cm")
         rows.append(d)
 keys = list(rows[0])
@@ -77,7 +77,7 @@ for ver in VER:
 
 f = lambda v, n=1: "—" if v is None else f"{float(v):.{n}f}"
 print("\n**姿势和人比（接触帧均值，机器人 / 人；最大差）**\n")
-print("| 版本 | 任务 | 档 | 机器人 | 前倾角 ° | 骨盆高 cm | 肘角 左 ° | 肘角 右 ° | 手肘位置误差 左 / 右 cm（均值） | 支撑帧脚尖速度 p95 m/s（机器人 / 人） | 求解器脚 xy 偏差最大 cm |")
+print("| 版本 | 任务 | 档 | 机器人 | 前倾角 ° | 骨盆高 cm | 肘角 左 ° | 肘角 右 ° | 手肘位置误差 左 / 右 cm（均值） | 支撑段内脚尖漂移最大 左 / 右 cm | 支撑帧脚尖速度 p95 左 / 右 m/s |")
 print("|---" * 11 + "|")
 for d in sorted(rows, key=lambda x: (x["task"], str(x["level"]), x["robot"], x["version"])):
     if d["task"] in ("table",) and d["level"] not in (0.8, 1.0, 1.2):
@@ -86,7 +86,7 @@ for d in sorted(rows, key=lambda x: (x["task"], str(x["level"]), x["robot"], x["
           f"{f(d['pelvis_height_cm_robot_mean'])} / {f(d['pelvis_height_cm_person_mean'])}；{f(d['pelvis_height_cm_max_abs_diff'])} | "
           f"{f(d['elbow_angle_left_deg_robot_mean'])} / {f(d['elbow_angle_left_deg_person_mean'])} | {f(d['elbow_angle_right_deg_robot_mean'])} / {f(d['elbow_angle_right_deg_person_mean'])} | "
           f"{f(d['elbow_pos_err_left_mean_cm'])} / {f(d['elbow_pos_err_right_mean_cm'])} | "
-          f"{f(d['foot_left_robot_toe_speed_p95_mps_t14'], 3)}, {f(d['foot_right_robot_toe_speed_p95_mps_t14'], 3)} / {f(d['foot_left_person_toe_speed_p95_mps_t14'], 3)}, {f(d['foot_right_person_toe_speed_p95_mps_t14'], 3)} | {f(d['solver_foot_xy_deviation_max_cm'], 2)} |")
+          f"{f(d['foot_left_drift_max_cm'], 2)} / {f(d['foot_right_drift_max_cm'], 2)} | {f(d['foot_left_robot_toe_speed_p95_mps'], 3)} / {f(d['foot_right_robot_toe_speed_p95_mps'], 3)} |")
 print("\n**趋势（Table 各档；Push、Pull 各档共用一次单台求解，姿势相同）**\n")
 print("| 版本 | 任务 | 机器人 | 档 | r（高） | 前倾角 机器人 / 人 ° | 骨盆高 机器人 / 人 cm | 肘角 机器人 / 人 ° |")
 print("|---" * 8 + "|")

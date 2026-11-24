@@ -30,11 +30,14 @@ def main():
     jobs = [(t, v) for v in ("C", "Cp") for t in ("table", "push", "bin", "chair", "pull")]
     with ThreadPoolExecutor(2) as ex:
         list(ex.map(lambda tv: rp.sh(["bash", "system1/t14/finish_r6.sh", tv[0], tv[1]], f"fin_{tv[0]}_{tv[1]}"), jobs))
-    for v in ("C", "Cp"):
-        rp.sh([SO, "-B", "system1/t14/push_legs.py", "--single", str(S / f"single_push_{v}/push_new_qpos.npz"), "--m", "1.0", "--out", str(OUT / f"push_legs/push_legs_r6{v}.json")], f"push_legs_{v}", 1.5)
+    for name, q in (("r6C", S / "single_push_C/push_new_qpos.npz"), ("r6Cp", S / "single_push_Cp/push_new_qpos.npz"), ("r5C", S5 / "single_push_C/push_new_qpos.npz")):
+        rp.sh([SO, "-B", "system1/t14/push_legs.py", "--single", str(q), "--m", "1.0", "--out", str(OUT / f"push_legs/push_legs_{name}.json")], f"push_legs_{name}", 1.5)
     (OUT / "contact_error_3d").mkdir(parents=True, exist_ok=True)
     for f in (ROOT / "results_system1/T14_retargeting/step5/contact_error_3d").glob("contact_error_3d*.csv"):
         shutil.copy(f, OUT / "contact_error_3d" / f.name)
+    # Push / Pull rows of every earlier round again: the person's target now on the OMOMO capture table (CORE4D rows unchanged)
+    rp.sh([SO, "-B", "system1/t14/recompute_contact_error.py", "--rounds", "round2", "round3", "comparisons", "round4A", "round4B", "round5C",
+           "--tasks", "push", "pull", "--out", str(OUT / "contact_error_3d")], "contact_error_omomo_all_rounds", 1.5)
     rp.sh([SO, "-B", "system1/t14/recompute_contact_error.py", "--rounds", "round6C", "round6Cp", "--out", str(OUT / "contact_error_3d")], "contact_error_r6", 1.5)
     refs = []
     for v in ("C", "Cp"):

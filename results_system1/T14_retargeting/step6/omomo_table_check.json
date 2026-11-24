@@ -1,0 +1,137 @@
+{
+ "rules": "T14 (Kevin 2026-11-24): which table surface do the Push / Pull persons' hands actually touch - the OMOMO capture\n(largetable_cleaned_simplified.obj x obj_scale at the OMOMO object pose, height 0.459 m) or the InterMimic table\n(largetable.obj at the OMOMO_new object pose, height 0.428 m; used by the retargeting scene)?\n\nSame person in both: OMOMO SMPL-X (flat hands) in the OMOMO world; mapped into the OMOMO_new world by the rigid fit of the\n22 body joints (single_shared.omomo_palms; residual < 1e-6 m). Per frame and hand: hand signed distance = largest signed\ndistance of the SMPL-X hand vertices to the mesh surface (+ = inside), and the palm point's signed distance (mean of the 67\npalm-side vertices). Contact frames = frames where either mesh gives hand signed distance >= -1.5 cm (the T14 rule).\nSigned distance: nearest point of dense surface samples (1.5 mm) with the sample's face normal (outward) for the sign.\n",
+ "tasks": {
+  "push": {
+   "sequence": "sub6_largetable_033",
+   "obj_scale": 0.025844017043709755,
+   "capture_height_m": 0.4589,
+   "intermimic_height_m": 0.428,
+   "hands": {
+    "left": {
+     "contact_frames": 147,
+     "contact_frames_capture_rule": 147,
+     "contact_frames_intermimic_rule": 141,
+     "hand_sd_capture": {
+      "median_cm": 2.54,
+      "p10_cm": 2.53,
+      "p90_cm": 2.54,
+      "within_1cm_share": 0.02
+     },
+     "hand_sd_intermimic": {
+      "median_cm": 1.49,
+      "p10_cm": 0.67,
+      "p90_cm": 2.31,
+      "within_1cm_share": 0.095
+     },
+     "palm_sd_capture": {
+      "median_cm": -0.73,
+      "p10_cm": -1.24,
+      "p90_cm": -0.45,
+      "within_1cm_share": 0.884
+     },
+     "palm_sd_intermimic": {
+      "median_cm": -4.64,
+      "p10_cm": -5.33,
+      "p90_cm": -4.33,
+      "within_1cm_share": 0.0
+     }
+    },
+    "right": {
+     "contact_frames": 146,
+     "contact_frames_capture_rule": 146,
+     "contact_frames_intermimic_rule": 140,
+     "hand_sd_capture": {
+      "median_cm": 2.54,
+      "p10_cm": 2.53,
+      "p90_cm": 3.68,
+      "within_1cm_share": 0.021
+     },
+     "hand_sd_intermimic": {
+      "median_cm": 1.77,
+      "p10_cm": 0.61,
+      "p90_cm": 4.6,
+      "within_1cm_share": 0.116
+     },
+     "palm_sd_capture": {
+      "median_cm": -0.92,
+      "p10_cm": -1.57,
+      "p90_cm": -0.67,
+      "within_1cm_share": 0.753
+     },
+     "palm_sd_intermimic": {
+      "median_cm": -4.92,
+      "p10_cm": -5.58,
+      "p90_cm": -4.72,
+      "within_1cm_share": 0.0
+     }
+    }
+   }
+  },
+  "pull": {
+   "sequence": "sub3_largetable_010",
+   "obj_scale": 0.025840822607278824,
+   "capture_height_m": 0.4588,
+   "intermimic_height_m": 0.428,
+   "hands": {
+    "left": {
+     "contact_frames": 152,
+     "contact_frames_capture_rule": 149,
+     "contact_frames_intermimic_rule": 143,
+     "hand_sd_capture": {
+      "median_cm": 4.11,
+      "p10_cm": -0.69,
+      "p90_cm": 5.12,
+      "within_1cm_share": 0.217
+     },
+     "hand_sd_intermimic": {
+      "median_cm": 6.01,
+      "p10_cm": 5.03,
+      "p90_cm": 6.61,
+      "within_1cm_share": 0.0
+     },
+     "palm_sd_capture": {
+      "median_cm": -2.61,
+      "p10_cm": -3.87,
+      "p90_cm": -2.28,
+      "within_1cm_share": 0.0
+     },
+     "palm_sd_intermimic": {
+      "median_cm": -6.85,
+      "p10_cm": -8.17,
+      "p90_cm": -6.57,
+      "within_1cm_share": 0.0
+     }
+    },
+    "right": {
+     "contact_frames": 191,
+     "contact_frames_capture_rule": 181,
+     "contact_frames_intermimic_rule": 189,
+     "hand_sd_capture": {
+      "median_cm": 9.76,
+      "p10_cm": 7.93,
+      "p90_cm": 32.08,
+      "within_1cm_share": 0.0
+     },
+     "hand_sd_intermimic": {
+      "median_cm": 14.1,
+      "p10_cm": 11.9,
+      "p90_cm": 46.02,
+      "within_1cm_share": 0.0
+     },
+     "palm_sd_capture": {
+      "median_cm": -3.41,
+      "p10_cm": -39.42,
+      "p90_cm": -3.26,
+      "within_1cm_share": 0.0
+     },
+     "palm_sd_intermimic": {
+      "median_cm": -7.26,
+      "p10_cm": -41.51,
+      "p90_cm": -7.01,
+      "within_1cm_share": 0.0
+     }
+    }
+   }
+  }
+ }
+}

@@ -5,6 +5,7 @@ Writes <out>/contact_error_3d.csv (per reference x robot x hand) and <out>/conta
 means over the robots' hands).
 
     sonic_s1/bin/python -B system1/t14/recompute_contact_error.py --rounds round2 round3 round3+step2 comparisons round4A round4B --out <dir>
+    [--tasks push pull]   (round 6: the OMOMO rows of every round again, with the person's target on the capture table)
 """
 from __future__ import annotations
 
@@ -64,7 +65,9 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--rounds", nargs="+", required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--tasks", nargs="+", default=None, help="only these tasks (default all); existing rows of other tasks are kept")
     a = ap.parse_args()
+    tasks = set(a.tasks) if a.tasks else None
     import contact_gap as cg
     import dual_stretch as ds
     robot = cg.cs.Robot("physx")
@@ -73,6 +76,8 @@ def main():
     rows, summ = [], []
     for rd in a.rounds:
         for task, level, kind, path, size, fps50 in refs(rd):
+            if tasks is not None and task not in tasks:
+                continue
             if task not in human:
                 human[task] = ce.human_omomo(task) if task in ("push", "pull") else ce.human_core4d(task)
             if kind == "core4d":
@@ -96,7 +101,7 @@ def main():
     for name, data in (("contact_error_3d.csv", rows), ("contact_error_3d_summary.csv", summ)):
         p = a.out / name
         old = list(csv.DictReader(open(p))) if p.exists() else []
-        old = [r for r in old if r["round"] not in a.rounds]  # replace the rounds recomputed now
+        old = [r for r in old if not (r["round"] in a.rounds and (tasks is None or r["task"] in tasks))]  # replace the rounds x tasks recomputed now
         keys = []
         for d in old + data:
             keys += [k for k in d if k not in keys]

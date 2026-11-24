@@ -111,7 +111,7 @@ def scene_object_boxes(scene_xml, body):
     return out
 
 
-def step2_anchor_term_omomo(seq, palms_raw, object_poses_raw, scene_xml, body, weight):
+def step2_anchor_term_omomo(seq, palms_raw, object_poses_raw, scene_xml, body, weight, capture=False):
     """T14 section 1 step 2 for the single-robot solve (same definition as table_shared.step2_anchor_term): contact = any
     SMPL-X hand vertex within 1.5 cm of the captured mesh (30 Hz); per contact window, anchor = median palm point in the
     object frame (raw OMOMO_new world, physical object, no scaling) projected to the nearest point of the scene's collision
@@ -131,6 +131,9 @@ def step2_anchor_term_omomo(seq, palms_raw, object_poses_raw, scene_xml, body, w
     for hi, side in enumerate(("left", "right")):
         for s0, s1 in contact_windows(h_sd[:, hi] >= -0.015):
             med = np.median(local[s0:s1, hi], axis=0)
+            if capture:  # the palm median is relative to the capture table: move it to the training table by the similarity
+                import omomo_table as ot
+                med = ot.to_training(seq, med)
             anc, dist, nrm = surf.nearest(med[None], normals=True)
             anchors[s0:s1, hi] = anc[0]
             normals[s0:s1, hi] = nrm[0]
@@ -153,6 +156,12 @@ def main():
     ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
     ap.add_argument("--landmarks", action="store_true", help="T14 round 4 A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="T14 round 4 B: palm toward the inward surface normal at the anchor (0 = off)")
+    ap.add_argument("--omomo-human-object", choices=("intermimic", "capture"), default="intermimic", help="T14 round 6: the person's table on the "
+                    "human side (interaction-mesh object points, anchors): the InterMimic table (rounds 1-5) or the OMOMO capture the hands touch "
+                    "(omomo_table.py), moved to the training table by the exact similarity")
+    ap.add_argument("--foot-cocarry", action="store_true", help="T14 round 6: support frames = person toe speed < 0.01 m/s after Gaussian smoothing "
+                    "(support.py), and a support foot is locked at its position when the support segment began (+-1 mm per axis) instead of following "
+                    "the previous frame")
     ap.add_argument("--prior-tau", type=float, default=None, help="T14 round 6: nominal_tracking_tau (prior weight lambda * exp(-frame / tau)); "
                     "default = RetargeterConfig (1e6, i.e. constant); round 6 uses the InteractionMeshRetargeter default 10")
     ap.add_argument("--palm-track-finger-weight", type=float, default=None, help="T14 round 6 C': finger-direction weight of the palm tracking "
@@ -231,6 +240,11 @@ def main():
         scene, sim_rec = simify_scene(scene, out / "scene_sim.xml", out / "sim_meshes", f"{constants.OBJECT_NAME}_link")
     constants.SCENE_XML_FILE = str(scene)
     obj_pts, obj_pts_demo, urdf_path = setup_object_data("object_interaction", constants, None, smpl_scale, task_config, False)
+    table_rec = None
+    if a.omomo_human_object == "capture":
+        import omomo_table as ot
+        obj_pts_demo = ot.from_training(seq, obj_pts) * smpl_scale  # the same surface points on the capture table (human side)
+        table_rec = dict(human_side="OMOMO capture", **ot.record(seq))
     offsets = ({k: palm_point(trimesh.load(sim_hands[s], force="mesh").vertices, s) for k, s in (("L_Palm", "left"), ("R_Palm", "right"))}
                if a.variant == "new" else None)
     lm_rec = None
@@ -250,7 +264,8 @@ def main():
     anchor_term, anchor_rec = None, None
     if a.anchor_weight > 0:
         assert a.variant == "new" and a.sim_scene
-        anchor_term, anchor_rec = step2_anchor_term_omomo(seq, palms, object_poses, scene, f"{constants.OBJECT_NAME}_link", a.anchor_weight)
+        anchor_term, anchor_rec = step2_anchor_term_omomo(seq, palms, object_poses, scene, f"{constants.OBJECT_NAME}_link", a.anchor_weight,
+                                                          capture=a.omomo_human_object == "capture")
     orient_term = None
     if a.palm_orient_weight > 0:
         import hand_landmarks as hl
@@ -285,11 +300,20 @@ def main():
     foot = extract_foot_sticking_sequence_velocity(human[:n], retargeter.demo_joints, motion_config.toe_names)
     foot[0][motion_config.toe_names[0]] = False
     foot[0][motion_config.toe_names[1]] = False
+    foot_rec = None
+    if a.foot_cocarry:
+        import support
+        toes = human[:n][:, [retargeter.demo_joints.index(t) for t in motion_config.toe_names]]
+        sup = support.support_flags(toes)
+        foot = support.as_solver_sequence(sup)
+        retargeter.enable_stance_lock(sup)
+        foot_rec = dict(rule="person toe speed < 0.01 m/s after Gaussian smoothing sigma 8 frames; support foot locked at segment start +-1 mm",
+                        support_share=np.round(sup.mean(0), 4).tolist(), segments=[int(np.sum(np.diff(np.concatenate([[0], sup[:, i].astype(int), [0]])) == 1)) for i in (0, 1)])
     q_nom = q1[:n].copy()
     q_nom[:, -7:] = phys_mj[:n]
     import mujoco
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
-    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, landmarks=lm_rec, palm_orient_weight=a.palm_orient_weight, palm_track=track_rec, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
+    rec = dict(task=a.task, variant=a.variant, foot=foot_rec, omomo_table=table_rec, anchor_term=anchor_rec, landmarks=lm_rec, palm_orient_weight=a.palm_orient_weight, palm_track=track_rec, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                smpl_scale=smpl_scale, stage1=str(st1), stage1_sha256=sha(st1), preprocess_vs_stage1_human_joints_max_abs=prep_err,
                palm_fit=fit, robot_palm_offsets_m={k: v.round(6).tolist() for k, v in (offsets or {}).items()}, physx_dump=dump_sha, scene=str(scene),
                left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),
