@@ -1,0 +1,3421 @@
+{
+ "object": "smallbox",
+ "tag": "smallboxc",
+ "solve": "/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxc_C",
+ "rules": "T14 step 7, layer 1: the existing role-isometry check (scripts/reference_geometry_pilot.py source interactions +\nscripts/reference_geometry_round2_*.py correspondence, per-role screen and pair test, frozen thresholds V0) applied to a\nsingle-robot solve of a box-approximated object. Only the correspondence construction is generalised (the original\nconstruct() is written for the Push / Pull tables: a \"tabletop\" part plus legs, stretch axis fixed per task):\n\n  * source = the solve's box (BoxUnion of box_assets' URDF, one part) and robot / object qpos; the source interactions (hand\n    sample distances, stable face windows: >= 5 % of 256 hand samples within 3 cm for >= 0.1 s) and the tie-safe weights are\n    the pilot's and round 2's, unchanged;\n  * target at 1.0 x = the box lengthened along one horizontal box axis k to twice its length (two copies end to end); role 0's\n    region = the low end [lo, lo + w], role 1's = the high end [hi - w, hi] (w = the source length along k); both horizontal\n    axes (box x, box y) are tried; vertical stretching is not;\n  * candidates per role = every proper signed permutation O (parity +1: two robots of the same chirality; mirrored partners\n    are not tried, as in the Push case) whose box dimensions match the region, whose active source faces map onto real\n    exterior faces of the clipped target (no cut walls) with matching corners; fit = weighted Procrustes (round 2);\n  * per-role screen = round 2's audit_role with V0; pair test = both roles pass and the cross-robot convex-proxy clearance\n    is >= -0.01 m (V0 pair_proxy_penetration_m); selection = round 2's rule (passing pairs: smallest joint weighted fit\n    error, ties by ID; none passing: diagnostic, fewest failures).\n\n    sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve logs_system1/t14/step7/solves/single_largeboxc_C --out <dir>\n",
+ "V0": {
+  "version": "round2_v0_before_candidate_checks",
+  "ground_z_m": 0.0,
+  "numeric_tolerance": 1e-08,
+  "normal_error_deg": 0.0001,
+  "fk_origin_error_m": 0.0005,
+  "additional_hand_penetration_m": 0.001,
+  "additional_nonhand_proxy_penetration_m": 0.01,
+  "pair_proxy_penetration_m": 0.01,
+  "additional_foot_ground_penetration_m": 0.01,
+  "additional_region_min_distance_m": 0.01,
+  "region_near_fraction_drop": 0.05,
+  "relative_gravity_deviation_deg": 5.0,
+  "support_speed_m_s": 0.15,
+  "support_height_m": 0.04,
+  "support_min_duration_s": 0.1,
+  "additional_support_speed_m_s": 0.01,
+  "additional_support_drift_m": 0.01,
+  "max_added_root_step_m": 0.02,
+  "max_added_root_rotation_step_rad": 0.02,
+  "additional_root_speed_m_s": 1.0,
+  "additional_root_acceleration_m_s2": 5.0,
+  "fit_tie_tolerance_m": 1e-10,
+  "geometry_distance_cap_m": 0.1,
+  "provenance": "1cm penetration/sliding-increment scales reuse retargeting evaluator tolerances; other values are explicit v0 engineering source-relative screens, not validated paper thresholds. Source support is robot bottom <=4cm, XY speed <=0.15m/s, >=0.1s; no human contact labels available.",
+  "acceptance_scope": "Source-relative sampled/convex-proxy geometry only; not dynamics or exact mesh collision certification",
+  "selection_data": "Independent of 256 fitting samples but 1024 validation samples ARE used for screening; not heldout evaluation"
+ },
+ "box_size_m": [
+  0.238568756,
+  0.355553805,
+  0.152477566
+ ],
+ "axes": {
+  "0": {
+   "target_size_m": [
+    0.477137512,
+    0.355553805,
+    0.152477566
+   ],
+   "target_urdf": "/home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxc/target_axis0.urdf",
+   "attempted_per_role": [
+    24,
+    24
+   ],
+   "accepted_per_role": [
+    4,
+    4
+   ],
+   "attempts": [
+    {
+     "id": "axis0/role0/axes00",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role0/axes01",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role0/axes02",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role0/axes03",
+     "O": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role0/axes04",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes05",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes06",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes07",
+     "O": [
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes08",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes09",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes10",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes11",
+     "O": [
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes12",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes13",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes14",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes15",
+     "O": [
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes16",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes17",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes18",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes19",
+     "O": [
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes20",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes21",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes22",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role0/axes23",
+     "O": [
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes00",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role1/axes01",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role1/axes02",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role1/axes03",
+     "O": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_correspondence_accepted",
+     "rejection_reasons": []
+    },
+    {
+     "id": "axis0/role1/axes04",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes05",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes06",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes07",
+     "O": [
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes08",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes09",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes10",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes11",
+     "O": [
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes12",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes13",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes14",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes15",
+     "O": [
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes16",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes17",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes18",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes19",
+     "O": [
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes20",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes21",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes22",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis0/role1/axes23",
+     "O": [
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    }
+   ],
+   "candidates": {
+    "axis0/role0/axes00": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "left_foot_added_ground_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_foot_added_ground_penetration_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        -1.0,
+        -6.568982418576042e-18,
+        7.050880195491826e-18
+       ],
+       [
+        6.568982418576042e-18,
+        -1.0,
+        3.0232380036665333e-17
+       ],
+       [
+        7.050880195491826e-18,
+        1.119806426238145e-18,
+        1.0
+       ]
+      ],
+      "c": [
+       -0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role0/axes01": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        -1.0,
+        -6.568982418576042e-18,
+        7.050880195491826e-18
+       ],
+       [
+        -6.568982418576042e-18,
+        1.0,
+        -3.0232380036665333e-17
+       ],
+       [
+        -7.050880195491826e-18,
+        -1.119806426238145e-18,
+        -1.0
+       ]
+      ],
+      "c": [
+       -0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role0/axes02": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "additional_nonhand_proxy_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        1.0,
+        6.568982418576042e-18,
+        -7.050880195491826e-18
+       ],
+       [
+        6.568982418576042e-18,
+        -1.0,
+        3.0232380036665333e-17
+       ],
+       [
+        -7.050880195491826e-18,
+        -1.119806426238145e-18,
+        -1.0
+       ]
+      ],
+      "c": [
+       -0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role0/axes03": {
+     "passed": false,
+     "failures": [
+      "additional_nonhand_proxy_penetration_m",
+      "left_foot_added_ground_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_foot_added_ground_penetration_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        1.0,
+        6.568982418576042e-18,
+        -7.050880195491826e-18
+       ],
+       [
+        -6.568982418576042e-18,
+        1.0,
+        -3.0232380036665333e-17
+       ],
+       [
+        7.050880195491826e-18,
+        1.119806426238145e-18,
+        1.0
+       ]
+      ],
+      "c": [
+       -0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role1/axes00": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "additional_nonhand_proxy_penetration_m",
+      "left_foot_added_ground_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_foot_added_ground_penetration_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        -1.0,
+        -6.568982418576042e-18,
+        7.050880195491826e-18
+       ],
+       [
+        6.568982418576042e-18,
+        -1.0,
+        3.0232380036665333e-17
+       ],
+       [
+        7.050880195491826e-18,
+        1.119806426238145e-18,
+        1.0
+       ]
+      ],
+      "c": [
+       0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role1/axes01": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "additional_nonhand_proxy_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        -1.0,
+        -6.568982418576042e-18,
+        7.050880195491826e-18
+       ],
+       [
+        -6.568982418576042e-18,
+        1.0,
+        -3.0232380036665333e-17
+       ],
+       [
+        -7.050880195491826e-18,
+        -1.119806426238145e-18,
+        -1.0
+       ]
+      ],
+      "c": [
+       0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role1/axes02": {
+     "passed": false,
+     "failures": [
+      "relative_gravity_deviation_deg",
+      "root_position_step_added_m",
+      "root_rotation_step_added_rad",
+      "root_speed_added_m_s",
+      "root_acceleration_added_m_s2",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        1.0,
+        6.568982418576042e-18,
+        -7.050880195491826e-18
+       ],
+       [
+        6.568982418576042e-18,
+        -1.0,
+        3.0232380036665333e-17
+       ],
+       [
+        -7.050880195491826e-18,
+        -1.119806426238145e-18,
+        -1.0
+       ]
+      ],
+      "c": [
+       0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    },
+    "axis0/role1/axes03": {
+     "passed": false,
+     "failures": [
+      "left_foot_added_ground_penetration_m",
+      "left_support_added_speed_m_s",
+      "left_support_added_drift_m",
+      "right_foot_added_ground_penetration_m",
+      "right_support_added_speed_m_s",
+      "right_support_added_drift_m"
+     ],
+     "fit": {
+      "Q": [
+       [
+        1.0,
+        6.568982418576042e-18,
+        -7.050880195491826e-18
+       ],
+       [
+        -6.568982418576042e-18,
+        1.0,
+        -3.0232380036665333e-17
+       ],
+       [
+        7.050880195491826e-18,
+        1.119806426238145e-18,
+        1.0
+       ]
+      ],
+      "c": [
+       0.119284378,
+       0.0,
+       0.0
+      ],
+      "weighted_rmse_m": 0.0
+     }
+    }
+   },
+   "pairs": 16,
+   "passing_pairs": 0,
+   "pair_records": [
+    {
+     "id": "axis0/role0/axes00 || axis0/role1/axes00",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes00",
+      "axis0/role1/axes00"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes00",
+      "role_screen_failed:axis0/role1/axes00"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes00 || axis0/role1/axes01",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes00",
+      "axis0/role1/axes01"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes00",
+      "role_screen_failed:axis0/role1/axes01"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes00 || axis0/role1/axes02",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes00",
+      "axis0/role1/axes02"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes00",
+      "role_screen_failed:axis0/role1/axes02"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes00 || axis0/role1/axes03",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes00",
+      "axis0/role1/axes03"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes00",
+      "role_screen_failed:axis0/role1/axes03"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes03": [
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes01 || axis0/role1/axes00",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes01",
+      "axis0/role1/axes00"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes01",
+      "role_screen_failed:axis0/role1/axes00"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes01 || axis0/role1/axes01",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes01",
+      "axis0/role1/axes01"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes01",
+      "role_screen_failed:axis0/role1/axes01"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes01 || axis0/role1/axes02",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes01",
+      "axis0/role1/axes02"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes01",
+      "role_screen_failed:axis0/role1/axes02"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes01 || axis0/role1/axes03",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes01",
+      "axis0/role1/axes03"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes01",
+      "role_screen_failed:axis0/role1/axes03"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes03": [
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes02 || axis0/role1/axes00",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes02",
+      "axis0/role1/axes00"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes02",
+      "role_screen_failed:axis0/role1/axes00"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes02 || axis0/role1/axes01",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes02",
+      "axis0/role1/axes01"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes02",
+      "role_screen_failed:axis0/role1/axes01"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes02 || axis0/role1/axes02",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes02",
+      "axis0/role1/axes02"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes02",
+      "role_screen_failed:axis0/role1/axes02"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes02 || axis0/role1/axes03",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes02",
+      "axis0/role1/axes03"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes02",
+      "role_screen_failed:axis0/role1/axes03"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes03": [
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes03 || axis0/role1/axes00",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes03",
+      "axis0/role1/axes00"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes03",
+      "role_screen_failed:axis0/role1/axes00"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes03": [
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes00": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes03 || axis0/role1/axes01",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes03",
+      "axis0/role1/axes01"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes03",
+      "role_screen_failed:axis0/role1/axes01"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes03": [
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes01": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "additional_nonhand_proxy_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes03 || axis0/role1/axes02",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes03",
+      "axis0/role1/axes02"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes03",
+      "role_screen_failed:axis0/role1/axes02"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes03": [
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes02": [
+       "relative_gravity_deviation_deg",
+       "root_position_step_added_m",
+       "root_rotation_step_added_rad",
+       "root_speed_added_m_s",
+       "root_acceleration_added_m_s2",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    },
+    {
+     "id": "axis0/role0/axes03 || axis0/role1/axes03",
+     "axis": 0,
+     "roles": [
+      "axis0/role0/axes03",
+      "axis0/role1/axes03"
+     ],
+     "joint_weighted_rmse_m": 0.0,
+     "failures": [
+      "role_screen_failed:axis0/role0/axes03",
+      "role_screen_failed:axis0/role1/axes03"
+     ],
+     "passed": false,
+     "role_failures": {
+      "axis0/role0/axes03": [
+       "additional_nonhand_proxy_penetration_m",
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ],
+      "axis0/role1/axes03": [
+       "left_foot_added_ground_penetration_m",
+       "left_support_added_speed_m_s",
+       "left_support_added_drift_m",
+       "right_foot_added_ground_penetration_m",
+       "right_support_added_speed_m_s",
+       "right_support_added_drift_m"
+      ]
+     }
+    }
+   ]
+  },
+  "1": {
+   "target_size_m": [
+    0.238568756,
+    0.71110761,
+    0.152477566
+   ],
+   "target_urdf": "/home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxc/target_axis1.urdf",
+   "attempted_per_role": [
+    24,
+    24
+   ],
+   "accepted_per_role": [
+    0,
+    0
+   ],
+   "attempts": [
+    {
+     "id": "axis1/role0/axes00",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/-1"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes01",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/+1"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes02",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/-1"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes03",
+     "O": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/+1"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes04",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes05",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes06",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes07",
+     "O": [
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes08",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes09",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes10",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes11",
+     "O": [
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes12",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes13",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes14",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes15",
+     "O": [
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes16",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes17",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes18",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes19",
+     "O": [
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes20",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes21",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes22",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role0/axes23",
+     "O": [
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes00",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/+1"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes01",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/-1"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes02",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/+1"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes03",
+     "O": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "missing_real_exterior_face:smallbox_box/axis1/-1"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes04",
+     "O": [
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes05",
+     "O": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes06",
+     "O": [
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes07",
+     "O": [
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes08",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes09",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes10",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes11",
+     "O": [
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       0.0,
+       -1.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes12",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes13",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes14",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes15",
+     "O": [
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes16",
+     "O": [
+      [
+       -0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       -0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes17",
+     "O": [
+      [
+       -0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       -0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       -1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes18",
+     "O": [
+      [
+       0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes19",
+     "O": [
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ],
+      [
+       1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes20",
+     "O": [
+      [
+       -0.0,
+       -0.0,
+       -1.0
+      ],
+      [
+       -0.0,
+       -1.0,
+       -0.0
+      ],
+      [
+       -1.0,
+       -0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes21",
+     "O": [
+      [
+       -0.0,
+       0.0,
+       1.0
+      ],
+      [
+       -0.0,
+       1.0,
+       0.0
+      ],
+      [
+       -1.0,
+       0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes22",
+     "O": [
+      [
+       0.0,
+       -0.0,
+       1.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       1.0,
+       -0.0,
+       0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    },
+    {
+     "id": "axis1/role1/axes23",
+     "O": [
+      [
+       0.0,
+       0.0,
+       -1.0
+      ],
+      [
+       0.0,
+       1.0,
+       -0.0
+      ],
+      [
+       1.0,
+       0.0,
+       -0.0
+      ]
+     ],
+     "status": "geometry_pruned",
+     "rejection_reasons": [
+      "box_metric_dimensions"
+     ]
+    }
+   ],
+   "candidates": {},
+   "pairs": 0,
+   "passing_pairs": 0,
+   "pair_records": []
+  }
+ },
+ "status": "diagnostic_only",
+ "pairs_total": 16,
+ "passing_pairs_total": 0,
+ "selected": {
+  "id": "axis0/role0/axes03 || axis0/role1/axes03",
+  "axis": 0,
+  "roles": [
+   "axis0/role0/axes03",
+   "axis0/role1/axes03"
+  ],
+  "joint_weighted_rmse_m": 0.0,
+  "failures": [
+   "role_screen_failed:axis0/role0/axes03",
+   "role_screen_failed:axis0/role1/axes03"
+  ],
+  "passed": false,
+  "role_failures": {
+   "axis0/role0/axes03": [
+    "additional_nonhand_proxy_penetration_m",
+    "left_foot_added_ground_penetration_m",
+    "left_support_added_speed_m_s",
+    "left_support_added_drift_m",
+    "right_foot_added_ground_penetration_m",
+    "right_support_added_speed_m_s",
+    "right_support_added_drift_m"
+   ],
+   "axis0/role1/axes03": [
+    "left_foot_added_ground_penetration_m",
+    "left_support_added_speed_m_s",
+    "left_support_added_drift_m",
+    "right_foot_added_ground_penetration_m",
+    "right_support_added_speed_m_s",
+    "right_support_added_drift_m"
+   ]
+  }
+ },
+ "selected_roles": [
+  {
+   "id": "axis0/role0/axes03",
+   "Q": [
+    [
+     1.0,
+     6.568982418576042e-18,
+     -7.050880195491826e-18
+    ],
+    [
+     -6.568982418576042e-18,
+     1.0,
+     -3.0232380036665333e-17
+    ],
+    [
+     7.050880195491826e-18,
+     1.119806426238145e-18,
+     1.0
+    ]
+   ],
+   "c": [
+    -0.119284378,
+    0.0,
+    0.0
+   ],
+   "parity": 1
+  },
+  {
+   "id": "axis0/role1/axes03",
+   "Q": [
+    [
+     1.0,
+     6.568982418576042e-18,
+     -7.050880195491826e-18
+    ],
+    [
+     -6.568982418576042e-18,
+     1.0,
+     -3.0232380036665333e-17
+    ],
+    [
+     7.050880195491826e-18,
+     1.119806426238145e-18,
+     1.0
+    ]
+   ],
+   "c": [
+    0.119284378,
+    0.0,
+    0.0
+   ],
+   "parity": 1
+  }
+ ],
+ "source_interaction_windows": {
+  "left_rubber_hand_link": [
+   [
+    "smallbox_box/axis1/-1",
+    13,
+    146
+   ]
+  ],
+  "right_rubber_hand_link": [
+   [
+    "smallbox_box/axis1/+1",
+    15,
+    57
+   ],
+   [
+    "smallbox_box/axis1/+1",
+    78,
+    147
+   ],
+   [
+    "smallbox_box/axis2/+1",
+    144,
+    148
+   ]
+  ]
+ }
+}

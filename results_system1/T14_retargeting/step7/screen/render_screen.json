@@ -1,0 +1,83 @@
+{
+ "rules": "T14 step 7, part 3 item 1: pictures of the screen's typical picks (screen.json \"picks\", 3 per class): the OMOMO person\n(SMPL-X mesh from the stored parameters, flat hands, skin colour) and the captured object (light blue, captured mesh at its\nstored pose), chequered floor at the person's lowest vertex of the sequence. Read only, CPU (MuJoCo EGL, software GL).\n\nCamera (fixed before rendering): side view, azimuth = the episode's mean heading + 90 deg + 30 deg (oblique from the person's\nright-front), elevation -18 deg, look-at = the midpoint of the pelvis joint and the object centre (Gaussian-smoothed over time,\nsigma 10 frames, for the video), distance 3.0 m (class a, walking) / 2.4 m (b, c).\n  * key-frame sheet per class: one row per pick, 5 frames at 0 / 25 / 50 / 75 / 100 % of the episode, 400 x 300 px each,\n    caption = sequence, frame, time, lift; jpg <= 1 MB;\n  * video per pick: the whole sequence, 30 fps, 640 x 480, H.264 (logs only; Drive).\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/objects/render_screen.py --screen results_system1/T14_retargeting/step7/screen/screen.json       --out results_system1/T14_retargeting/step7/screen --video-out exports_system1/T14_videos/step7/screen\n",
+ "sheets": {
+  "a": {
+   "file": "class_a_keyframes.jpg",
+   "bytes": 362002,
+   "jpeg_quality": 90,
+   "picks": [
+    "sub7_largebox_046",
+    "sub7_trashcan_009",
+    "sub1_suitcase_019"
+   ]
+  },
+  "b": {
+   "file": "class_b_keyframes.jpg",
+   "bytes": 374541,
+   "jpeg_quality": 90,
+   "picks": [
+    "sub1_plasticbox_068",
+    "sub14_smalltable_037",
+    "sub7_trashcan_002"
+   ]
+  },
+  "c": {
+   "file": "class_c_keyframes.jpg",
+   "bytes": 393355,
+   "jpeg_quality": 90,
+   "picks": [
+    "sub7_largebox_027",
+    "sub8_smallbox_012",
+    "sub1_plasticbox_045"
+   ]
+  }
+ },
+ "videos": {
+  "sub7_largebox_046": {
+   "file": "exports_system1/T14_videos/step7/screen/class_a_sub7_largebox_046.mp4",
+   "frames": 189,
+   "bytes": 452273,
+   "resumed": true
+  },
+  "sub7_trashcan_009": {
+   "file": "exports_system1/T14_videos/step7/screen/class_a_sub7_trashcan_009.mp4",
+   "frames": 215,
+   "bytes": 500206
+  },
+  "sub1_suitcase_019": {
+   "file": "exports_system1/T14_videos/step7/screen/class_a_sub1_suitcase_019.mp4",
+   "frames": 209,
+   "bytes": 452185
+  },
+  "sub1_plasticbox_068": {
+   "file": "exports_system1/T14_videos/step7/screen/class_b_sub1_plasticbox_068.mp4",
+   "frames": 174,
+   "bytes": 390782
+  },
+  "sub14_smalltable_037": {
+   "file": "exports_system1/T14_videos/step7/screen/class_b_sub14_smalltable_037.mp4",
+   "frames": 178,
+   "bytes": 383941
+  },
+  "sub7_trashcan_002": {
+   "file": "exports_system1/T14_videos/step7/screen/class_b_sub7_trashcan_002.mp4",
+   "frames": 203,
+   "bytes": 403142
+  },
+  "sub7_largebox_027": {
+   "file": "exports_system1/T14_videos/step7/screen/class_c_sub7_largebox_027.mp4",
+   "frames": 184,
+   "bytes": 477437
+  },
+  "sub8_smallbox_012": {
+   "file": "exports_system1/T14_videos/step7/screen/class_c_sub8_smallbox_012.mp4",
+   "frames": 209,
+   "bytes": 525324
+  },
+  "sub1_plasticbox_045": {
+   "file": "exports_system1/T14_videos/step7/screen/class_c_sub1_plasticbox_045.mp4",
+   "frames": 191,
+   "bytes": 554128
+  }
+ }
+}

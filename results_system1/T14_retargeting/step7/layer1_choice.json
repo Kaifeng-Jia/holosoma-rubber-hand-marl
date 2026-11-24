@@ -1,0 +1,266 @@
+{
+ "rules": "T14 step 7, layer 1 choice (Kevin 2026-11-24 part 3 item 2): for classes b and c, one most typical sequence per object, at\nmost 3 objects, objects that a box approximates well first. Rules fixed before any solve:\n\n  * box approximation order: box_assets.quality \"box_surface_within_2cm_share\" (share of the oriented box's surface within\n    2 cm of the captured mesh) of the object's class-c pick sequence, descending; the first 3 objects that have a class member\n    available in OMOMO_new (the retargeting pipeline's person input is OMOMO_new; a sequence missing there cannot be solved)\n    are used for both classes;\n  * most typical per object = the screen's typical-pick distance (screen_omomo.pick: class median, IQR-normalised features,\n    both-hand contact share >= 0.8 (c) / 0.5 (b)), smallest first, among sequences present in OMOMO_new.\n\n    sonic_s1/bin/python -B system1/t14/objects/layer1_choice.py --screen results_system1/T14_retargeting/step7/screen --out <json>\n",
+ "box_quality": {
+  "largebox": {
+   "sequence": "sub7_largebox_027",
+   "extents_m": [
+    0.334,
+    0.3367,
+    0.359
+   ],
+   "hull_over_box_volume": 0.9188,
+   "box_surface_within_2cm_share": 0.885,
+   "box_surface_gap_p95_m": 0.0249
+  },
+  "smallbox": {
+   "sequence": "sub8_smallbox_012",
+   "extents_m": [
+    0.2394,
+    0.3568,
+    0.153
+   ],
+   "hull_over_box_volume": 0.9492,
+   "box_surface_within_2cm_share": 1.0,
+   "box_surface_gap_p95_m": 0.0142
+  },
+  "plasticbox": {
+   "sequence": "sub1_plasticbox_045",
+   "extents_m": [
+    0.3855,
+    0.5554,
+    0.2782
+   ],
+   "hull_over_box_volume": 0.8688,
+   "box_surface_within_2cm_share": 0.4138,
+   "box_surface_gap_p95_m": 0.1002
+  },
+  "suitcase": {
+   "sequence": "sub14_suitcase_016",
+   "extents_m": [
+    0.2678,
+    0.3911,
+    0.5237
+   ],
+   "hull_over_box_volume": 0.8491,
+   "box_surface_within_2cm_share": 0.705,
+   "box_surface_gap_p95_m": 0.0333
+  },
+  "trashcan": {
+   "sequence": "sub6_trashcan_024",
+   "extents_m": [
+    0.212,
+    0.2995,
+    0.3309
+   ],
+   "hull_over_box_volume": 0.7575,
+   "box_surface_within_2cm_share": 0.5015,
+   "box_surface_gap_p95_m": 0.0542
+  },
+  "smalltable": {
+   "sequence": "sub14_smalltable_014",
+   "extents_m": [
+    0.3533,
+    0.3662,
+    0.3488
+   ],
+   "hull_over_box_volume": 0.9684,
+   "box_surface_within_2cm_share": 0.4572,
+   "box_surface_gap_p95_m": 0.1338
+  }
+ },
+ "object_order": [
+  "smallbox",
+  "largebox",
+  "suitcase",
+  "trashcan",
+  "smalltable",
+  "plasticbox"
+ ],
+ "objects": [
+  "smallbox",
+  "largebox",
+  "suitcase"
+ ],
+ "choice": {
+  "b": [
+   {
+    "object": "smallbox",
+    "sequence": "sub10_smallbox_007",
+    "kind": "floor",
+    "start": "10",
+    "stop": "97",
+    "duration_s": "2.9",
+    "travel_m": "1.3228",
+    "max_lift_m": "0.0031",
+    "both_hands_share": "1.0",
+    "left_face": "front",
+    "right_face": "front",
+    "same_side": "True",
+    "object_travel_vs_heading_deg": "5.8",
+    "push_pull": "推",
+    "max_tilt_deg": "0.5",
+    "pelvis_net_m": "1.2079",
+    "class_b": "True",
+    "peak_lift_m": "",
+    "put_down": "",
+    "pelvis_max_from_start_m": "",
+    "travel_vs_heading_deg": "",
+    "grip": "",
+    "steps": "",
+    "class_a": "",
+    "class_c": "",
+    "typical_distance": 0.1436,
+    "skipped_not_in_omomo_new": []
+   },
+   {
+    "object": "largebox",
+    "sequence": "sub3_largebox_024",
+    "kind": "floor",
+    "start": "19",
+    "stop": "131",
+    "duration_s": "3.733",
+    "travel_m": "1.3707",
+    "max_lift_m": "0.0024",
+    "both_hands_share": "1.0",
+    "left_face": "top",
+    "right_face": "top",
+    "same_side": "True",
+    "object_travel_vs_heading_deg": "179.9",
+    "push_pull": "拉",
+    "max_tilt_deg": "0.8",
+    "pelvis_net_m": "1.5765",
+    "class_b": "True",
+    "peak_lift_m": "",
+    "put_down": "",
+    "pelvis_max_from_start_m": "",
+    "travel_vs_heading_deg": "",
+    "grip": "",
+    "steps": "",
+    "class_a": "",
+    "class_c": "",
+    "typical_distance": 0.3068,
+    "skipped_not_in_omomo_new": []
+   },
+   {
+    "object": "suitcase",
+    "sequence": "sub1_suitcase_065",
+    "kind": "floor",
+    "start": "16",
+    "stop": "112",
+    "duration_s": "3.2",
+    "travel_m": "1.3799",
+    "max_lift_m": "0.0044",
+    "both_hands_share": "0.906",
+    "left_face": "top",
+    "right_face": "top",
+    "same_side": "True",
+    "object_travel_vs_heading_deg": "173.6",
+    "push_pull": "拉",
+    "max_tilt_deg": "1.6",
+    "pelvis_net_m": "1.5597",
+    "class_b": "True",
+    "peak_lift_m": "",
+    "put_down": "",
+    "pelvis_max_from_start_m": "",
+    "travel_vs_heading_deg": "",
+    "grip": "",
+    "steps": "",
+    "class_a": "",
+    "class_c": "",
+    "typical_distance": 0.1191,
+    "skipped_not_in_omomo_new": []
+   }
+  ],
+  "c": [
+   {
+    "object": "smallbox",
+    "sequence": "sub7_smallbox_027",
+    "kind": "lift",
+    "start": "27",
+    "stop": "134",
+    "duration_s": "3.567",
+    "travel_m": "0.0151",
+    "max_lift_m": "",
+    "both_hands_share": "1.0",
+    "left_face": "side-left",
+    "right_face": "side-right",
+    "same_side": "",
+    "object_travel_vs_heading_deg": "",
+    "push_pull": "",
+    "max_tilt_deg": "",
+    "pelvis_net_m": "0.0151",
+    "class_b": "",
+    "peak_lift_m": "1.0712",
+    "put_down": "True",
+    "pelvis_max_from_start_m": "0.2086",
+    "travel_vs_heading_deg": "12.2",
+    "grip": "两侧夹住",
+    "steps": "0",
+    "class_a": "False",
+    "class_c": "True",
+    "typical_distance": 0.1721,
+    "skipped_not_in_omomo_new": [
+     "sub8_smallbox_012"
+    ]
+   },
+   {
+    "object": "largebox",
+    "sequence": "sub7_largebox_027",
+    "kind": "lift",
+    "start": "38",
+    "stop": "149",
+    "duration_s": "3.7",
+    "travel_m": "0.011",
+    "max_lift_m": "",
+    "both_hands_share": "1.0",
+    "left_face": "side-left",
+    "right_face": "side-right",
+    "same_side": "",
+    "object_travel_vs_heading_deg": "",
+    "push_pull": "",
+    "max_tilt_deg": "",
+    "pelvis_net_m": "0.011",
+    "class_b": "",
+    "peak_lift_m": "1.0391",
+    "put_down": "True",
+    "pelvis_max_from_start_m": "0.1763",
+    "travel_vs_heading_deg": "143.2",
+    "grip": "两侧夹住",
+    "steps": "0",
+    "class_a": "False",
+    "class_c": "True",
+    "typical_distance": 0.0986,
+    "skipped_not_in_omomo_new": []
+   },
+   {
+    "object": "suitcase",
+    "sequence": "sub14_suitcase_016",
+    "kind": "lift",
+    "start": "7",
+    "stop": "116",
+    "duration_s": "3.633",
+    "travel_m": "0.2431",
+    "max_lift_m": "",
+    "both_hands_share": "1.0",
+    "left_face": "side-left",
+    "right_face": "side-right",
+    "same_side": "",
+    "object_travel_vs_heading_deg": "",
+    "push_pull": "",
+    "max_tilt_deg": "",
+    "pelvis_net_m": "0.2431",
+    "class_b": "",
+    "peak_lift_m": "1.056",
+    "put_down": "True",
+    "pelvis_max_from_start_m": "0.2874",
+    "travel_vs_heading_deg": "35.8",
+    "grip": "两侧夹住",
+    "steps": "3",
+    "class_a": "False",
+    "class_c": "True",
+    "typical_distance": 0.1302,
+    "skipped_not_in_omomo_new": []
+   }
+  ]
+ }
+}

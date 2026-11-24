@@ -1,0 +1,120 @@
+{
+ "started": "2026-11-24 11:38:28",
+ "steps": [
+  {
+   "name": "role_smallboxb",
+   "rc": 0,
+   "seconds": 6.0,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxb_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxb"
+  },
+  {
+   "name": "levels_smallboxb",
+   "rc": 0,
+   "seconds": 37.6,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxb_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxb/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/smallboxb --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_smallboxb",
+   "rc": 0,
+   "seconds": 140.9,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxb_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/smallboxb/levels.json --cls b --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "role_largeboxb",
+   "rc": 0,
+   "seconds": 7.0,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxb_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/largeboxb"
+  },
+  {
+   "name": "levels_largeboxb",
+   "rc": 0,
+   "seconds": 53.9,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxb_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/largeboxb/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/largeboxb --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_largeboxb",
+   "rc": 0,
+   "seconds": 178.3,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxb_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/largeboxb/levels.json --cls b --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "role_suitcaseb",
+   "rc": 0,
+   "seconds": 7.2,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcaseb_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/suitcaseb"
+  },
+  {
+   "name": "levels_suitcaseb",
+   "rc": 0,
+   "seconds": 20.8,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcaseb_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/suitcaseb/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/suitcaseb --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_suitcaseb",
+   "rc": 0,
+   "seconds": 162.3,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcaseb_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/suitcaseb/levels.json --cls b --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "role_smallboxc",
+   "rc": 0,
+   "seconds": 6.5,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxc_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxc"
+  },
+  {
+   "name": "levels_smallboxc",
+   "rc": 0,
+   "seconds": 40.3,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxc_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/smallboxc/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/smallboxc --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_smallboxc",
+   "rc": 0,
+   "seconds": 188.7,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxc_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/smallboxc/levels.json --cls c --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "role_largeboxc",
+   "rc": 0,
+   "seconds": 6.7,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxc_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/largeboxc"
+  },
+  {
+   "name": "levels_largeboxc",
+   "rc": 0,
+   "seconds": 25.3,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxc_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/largeboxc/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/largeboxc --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_largeboxc",
+   "rc": 0,
+   "seconds": 176.0,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxc_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/largeboxc/levels.json --cls c --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "role_suitcasec",
+   "rc": 0,
+   "seconds": 7.0,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/role_check_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcasec_C --out /home/kevin/duet-system1/logs_system1/t14/step7/role/suitcasec"
+  },
+  {
+   "name": "levels_suitcasec",
+   "rc": 0,
+   "seconds": 45.3,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/dual_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcasec_C --role /home/kevin/duet-system1/logs_system1/t14/step7/role/suitcasec/role_check.json --out /home/kevin/duet-system1/logs_system1/t14/step7/levels/suitcasec --refs-out /home/kevin/duet-system1/exports_system1/T14_references/step7"
+  },
+  {
+   "name": "render_suitcasec",
+   "rc": 0,
+   "seconds": 190.5,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcasec_C --levels /home/kevin/duet-system1/logs_system1/t14/step7/levels/suitcasec/levels.json --cls c --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step7/layer1"
+  },
+  {
+   "name": "posture",
+   "rc": 0,
+   "seconds": 1.1,
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/posture_metrics.py --ref smallboxb=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxb_C --ref largeboxb=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxb_C --ref suitcaseb=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcaseb_C --ref smallboxc=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_smallboxc_C --ref largeboxc=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_largeboxc_C --ref suitcasec=/home/kevin/duet-system1/logs_system1/t14/step7/solves/single_suitcasec_C --out /home/kevin/duet-system1/results_system1/T14_retargeting/step7/posture/posture.json"
+  }
+ ],
+ "done": "2026-11-24 12:03:50"
+}
