@@ -1,0 +1,45 @@
+{
+ "object": "largebox",
+ "sequence": "sub7_largebox_046",
+ "frames": [
+  33,
+  149
+ ],
+ "smpl_scale": 0.7301619648933411,
+ "box_size_solver_m": [
+  0.2438,
+  0.2457,
+  0.262
+ ],
+ "levels": {
+  "1.00": {
+   "axis": 1,
+   "sigma": 1.0,
+   "walk_axis_angle_deg": 23.33,
+   "L_m": 0.4915,
+   "pelvis_mismatch_max_m": 1.0331,
+   "pelvis_mismatch_mean_m": 0.3642,
+   "pelvis_mismatch_max_person_scale_m": 1.4149,
+   "pelvis_net_role0_m": 1.1571,
+   "pelvis_net_role1_m": 1.1571,
+   "pelvis_net_role0_person_scale_m": 1.5847,
+   "shared_vs_demo_rotation_max_deg": 20.36,
+   "partner_initial_pelvis_distance_m": 0.4059
+  },
+  "1.50": {
+   "axis": 1,
+   "sigma": 1.0,
+   "walk_axis_angle_deg": 23.33,
+   "L_m": 0.7372,
+   "pelvis_mismatch_max_m": 1.2282,
+   "pelvis_mismatch_mean_m": 0.4394,
+   "pelvis_mismatch_max_person_scale_m": 1.682,
+   "pelvis_net_role0_m": 1.1571,
+   "pelvis_net_role1_m": 1.1571,
+   "pelvis_net_role0_person_scale_m": 1.5847,
+   "shared_vs_demo_rotation_max_deg": 20.36,
+   "partner_initial_pelvis_distance_m": 0.4953
+  }
+ },
+ "rules": "T14 step 9 (Kevin 2026-11-24 18:40, item 3): the \"front-back\" partner of a class-a (carry and walk forward) demonstration;\nthe partner in front walks backwards. Built in the solver's (preprocessed, person-scaled) world, on the clip = the carry\nepisode of the screen (lift episode start .. stop).\n\n* Walking direction = the person's pelvis net horizontal displacement over the clip. Lengthening axis k = the horizontal box\n  axis (box frame at the clip's first frame) closest to it, sign sigma so that +sigma e_k points forward. The target = the box\n  lengthened along k only (width and height kept) to L = m x 2 w (1.0 x = two copies end to end); role 0's region = the\n  source box itself (its end), the target extends forward; target centre c_T = sigma (L / 2 - w / 2) e_k in the box frame;\n  target frame = box frame moved to c_T.\n* Partner region map: T180 = rotation by 180 deg about the target's vertical axis through its centre (role 0's region -> the\n  far end, facing back). In the step-8 notation M0(x) = x - c_T, M1(x) = R180 (x - c_T).\n* Object: role 0's view A(t) = O(t) Trans(c_T); role 1's view B(t) = S D0(t) S^-1 A(0) with S = the 180-deg map at frame 0.\n  Shared P(t): translation = A(t)'s (the demonstration's; both walk the same way), rotation = slerp midpoint of A and B\n  (one-sided tilts removed).\n* Partner person (role 1):\n  - upper body (every joint except Pelvis, hips, knees, ankles, toes) and palms follow the corresponding object locations:\n    x1(t) = P(t) T180 A(t)^-1 x0(t);\n  - legs (Pelvis, hips, knees, ankles, toes) = the demonstration's legs played backwards in time over the clip, turned by\n    180 deg about the vertical (backward walking, CooHOI-style reversed carry), translated horizontally by the least-squares\n    offset that puts the reversed pelvis on the object-attached pelvis (heights unchanged: the feet stay on the ground);\n  - contact flags: role 0's at the same time (the hands follow the object in time); palm targets rotated with the hands;\n  - support: from its own (reversed) toes (role_solve's support rule).\n  Diagnostic (reported, not used): D(t) = reversed-leg pelvis - object-attached pelvis, horizontal.\n"
+}
