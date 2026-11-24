@@ -89,12 +89,66 @@ def omomo_palms(seq):
                        fit_residual_mean_m=float(res.mean()))
 
 
+def scene_object_boxes(scene_xml, body):
+    """trimesh boxes of the collision box geoms of `body` in its frame (no rotation in these scenes)."""
+    import trimesh
+    import xml.etree.ElementTree as ET
+    out = []
+    for b in ET.parse(scene_xml).getroot().iter("body"):
+        if b.get("name") != body:
+            continue
+        for g in b.findall("geom"):
+            if g.get("type") == "box" and not (g.get("contype") == "0" and g.get("conaffinity") == "0"):
+                assert g.get("quat") in (None, "1 0 0 0"), g.attrib
+                T = np.eye(4)
+                T[:3, 3] = [float(x) for x in (g.get("pos") or "0 0 0").split()]
+                out.append(trimesh.creation.box(extents=2 * np.array([float(x) for x in g.get("size").split()]), transform=T))
+    assert out, body
+    return out
+
+
+def step2_anchor_term_omomo(seq, palms_raw, object_poses_raw, scene_xml, body, weight):
+    """T14 section 1 step 2 for the single-robot solve (same definition as table_shared.step2_anchor_term): contact = any
+    SMPL-X hand vertex within 1.5 cm of the captured mesh (30 Hz); per contact window, anchor = median palm point in the
+    object frame (raw OMOMO_new world, physical object, no scaling) projected to the nearest point of the scene's collision
+    boxes; 5-frame smoothstep ramps inside the window; weight = 10."""
+    import dual_stretch as ds
+    from object_surface import UnionSurface
+    from table_shared import contact_windows, smoothstep_window
+    from scipy.spatial.transform import Rotation
+    h_sd, _ = ds.human_hand_sd(seq)
+    T = len(palms_raw)
+    assert len(h_sd) == T and len(object_poses_raw) == T
+    R = Rotation.from_quat(object_poses_raw[:, [1, 2, 3, 0]]).as_matrix()
+    local = np.einsum("tji,thj->thi", R, palms_raw - object_poses_raw[:, None, 4:7])
+    surf = UnionSurface(scene_object_boxes(scene_xml, body))
+    anchors, act = np.zeros((T, 2, 3)), np.zeros((T, 2))
+    rec = dict(weight=weight, ramp_frames=5, surface="scene collision boxes (simulator table at the robot's end)", windows=[])
+    for hi, side in enumerate(("left", "right")):
+        for s0, s1 in contact_windows(h_sd[:, hi] >= -0.015):
+            med = np.median(local[s0:s1, hi], axis=0)
+            anc, dist = surf.nearest(med[None])
+            anchors[s0:s1, hi] = anc[0]
+            act[s0:s1, hi] = smoothstep_window(s1 - s0)
+            rec["windows"].append(dict(hand=side, start=int(s0), stop=int(s1), median_local_m=med.round(5).tolist(), anchor_local_m=anc[0].round(5).tolist(),
+                                       projection_m=round(float(dist[0]), 5)))
+    return dict(keys=("L_Palm", "R_Palm"), weight=weight, anchors=anchors, activation=act), rec
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", choices=tuple(TASKS), required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--max-frames", type=int, default=None, help="smoke only")
+    # T14 round 3 (section 8) switches; defaults = round-2 behaviour
+    ap.add_argument("--variant", choices=("new", "omni_asis"), default="new",
+                    help="omni_asis = OmniRetarget as is (comparison): no palm points, retargeting hand mesh, round-2 scene and prior")
+    ap.add_argument("--sim-scene", action="store_true", help="simulator kinematics and robot collision shapes (sim_scene.py)")
+    ap.add_argument("--prior", choices=("all", "body"), default="all", help="nominal prior on all 36 qpos, or root 7 + legs 12 + waist 3")
+    ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
     a = ap.parse_args()
+    if a.variant == "omni_asis":
+        assert not a.sim_scene and a.prior == "all"
     t0 = time.time()
     out = a.out.resolve()
     out.mkdir(parents=True, exist_ok=False)
@@ -114,7 +168,8 @@ def main():
     import trimesh
 
     robot_config = RobotConfig(robot_type="g1")
-    robot_config = replace(robot_config, nominal_tracking_indices=np.arange(7 + robot_config.ROBOT_DOF, dtype=np.int64))
+    n_prior = 7 + robot_config.ROBOT_DOF if a.prior == "all" else 7 + 12 + 3  # qpos order: root 7, legs 12, waist 3, arms 14
+    robot_config = replace(robot_config, nominal_tracking_indices=np.arange(n_prior, dtype=np.int64))
     motion_config = MotionDataConfig(data_format="smplh", robot_type="g1")
     task_config = TaskConfig(object_name="largetable")
     base = RetargeterConfig(visualize=False, debug=False)
@@ -123,15 +178,22 @@ def main():
     constants = create_task_constants(robot_config, motion_config, task_config, "object_interaction")
     human, object_poses, smpl_scale = load_motion_data("object_interaction", "smplh", OMOMO_NEW, seq, constants, motion_config)
     assert human.shape[1] == 52 and len(constants.DEMO_JOINTS) == 52
-    palms, fit = omomo_palms(seq)
-    human = np.concatenate([human, palms], 1)  # [T, 54, 3]: ..., L_Palm, R_Palm (raw OMOMO_new world, before preprocessing)
-    constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
-    constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
-    sim_hands, dump_sha = write_sim_hand_meshes(out)
+    if a.variant == "new":
+        palms, fit = omomo_palms(seq)
+        human = np.concatenate([human, palms], 1)  # [T, 54, 3]: ..., L_Palm, R_Palm (raw OMOMO_new world, before preprocessing)
+        constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
+        constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
+        sim_hands, dump_sha = write_sim_hand_meshes(out)
+    else:
+        fit, dump_sha = None, None
     # scene as the existing fixed-object path derives it (robot_retarget.py run_fixed_object_size_adaptation)
     src_scene = Path(getattr(constants, "SCENE_XML_FILE", None) or constants.ROBOT_URDF_FILE.replace(".urdf", f"_w_{constants.OBJECT_NAME}.xml"))
     src_scene = src_scene if src_scene.is_absolute() else RT / src_scene
-    scene = patch_hand_meshes(src_scene, out / "scene_simhands.xml", sim_hands)
+    if a.variant == "new":
+        scene = patch_hand_meshes(src_scene, out / "scene_simhands.xml", sim_hands)
+    else:
+        import shutil
+        scene = Path(shutil.copy(src_scene, out / "scene_asis.xml"))
     # the patched scene lives in out/: make its mesh paths absolute
     import xml.etree.ElementTree as ET
     tree = ET.parse(scene)
@@ -144,15 +206,28 @@ def main():
         if f and not Path(f).is_absolute() and comp is None:
             mesh.set("file", str((src_scene.parent / f).resolve()))
     tree.write(scene)
+    sim_rec = None
+    if a.sim_scene:
+        from sim_scene import simify_scene
+        scene, sim_rec = simify_scene(scene, out / "scene_sim.xml", out / "sim_meshes", f"{constants.OBJECT_NAME}_link")
     constants.SCENE_XML_FILE = str(scene)
     obj_pts, obj_pts_demo, urdf_path = setup_object_data("object_interaction", constants, None, smpl_scale, task_config, False)
-    offsets = {k: palm_point(trimesh.load(sim_hands[s], force="mesh").vertices, s) for k, s in (("L_Palm", "left"), ("R_Palm", "right"))}
+    offsets = ({k: palm_point(trimesh.load(sim_hands[s], force="mesh").vertices, s) for k, s in (("L_Palm", "left"), ("R_Palm", "right"))}
+               if a.variant == "new" else None)
     kw = build_retargeter_kwargs_from_config(cfg, constants, urdf_path, "object_interaction")
     kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau
     kw["anchor_nominal_foot_height"] = True
     kw["nominal_foot_height_tolerance"] = FOOT_H_TOL
     kw["scene_xml_path"] = str(scene)
-    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets)
+    anchor_term, anchor_rec = None, None
+    if a.anchor_weight > 0:
+        assert a.variant == "new" and a.sim_scene
+        anchor_term, anchor_rec = step2_anchor_term_omomo(seq, palms, object_poses, scene, f"{constants.OBJECT_NAME}_link", a.anchor_weight)
+    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term)
+    import mujoco
+    jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
+    assert jadr("left_hip_pitch_joint") == 7 and jadr("waist_pitch_joint") == 21 and jadr("left_shoulder_pitch_joint") == 22
+    assert list(retargeter.track_nominal_indices) == list(range(n_prior))
     human, object_poses, _ = preprocess_motion_data(human, retargeter, motion_config.toe_names, scale=smpl_scale, object_poses=object_poses)
     z1 = np.load(st1)
     q1 = z1["qpos"].astype(np.float64)
@@ -168,20 +243,20 @@ def main():
     q_nom[:, -7:] = phys_mj[:n]
     import mujoco
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
-    rec = dict(task=a.task, sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
+    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                smpl_scale=smpl_scale, stage1=str(st1), stage1_sha256=sha(st1), preprocess_vs_stage1_human_joints_max_abs=prep_err,
-               palm_fit=fit, robot_palm_offsets_m={k: v.round(6).tolist() for k, v in offsets.items()}, physx_dump=dump_sha, scene=str(scene),
+               palm_fit=fit, robot_palm_offsets_m={k: v.round(6).tolist() for k, v in (offsets or {}).items()}, physx_dump=dump_sha, scene=str(scene),
                left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),
                interaction_mesh_keys=list(retargeter.laplacian_match_links), object_points=int(len(obj_pts)), frames=n,
                profile=dict(foot_xy_tolerance=FOOT_XY_TOL, elastic_object=ELASTIC_OBJ, elastic_foot=ELASTIC_FOOT, foot_height_tolerance=FOOT_H_TOL,
-                            nominal_indices="0..35", w_nominal=retargeter.w_nominal_tracking_init, manual_joint_limits=False))
+                            nominal_indices=f"0..{n_prior - 1}", w_nominal=retargeter.w_nominal_tracking_init, manual_joint_limits=False))
     print(json.dumps({k: rec[k] for k in ("preprocess_vs_stage1_human_joints_max_abs", "palm_fit", "left_hand_mesh_vertices", "interaction_mesh_keys")}), flush=True)
     assert prep_err < 1e-6, prep_err  # float32 rounding of the stored Stage-1 input
     q, *_ = retargeter.retarget_motion(human_joint_motions=human[:n], object_poses=nominal_mj[:n], object_poses_augmented=phys_mj[:n],
                                        object_points_local_demo=obj_pts_demo, object_points_local=obj_pts, foot_sticking_sequences=foot,
-                                       q_a_init=q_nom[0], q_nominal_list=q_nom, original=False, dest_res_path=str(out / f"{a.task}_new.npz"))
+                                       q_a_init=q_nom[0], q_nominal_list=q_nom, original=False, dest_res_path=str(out / f"{a.task}_{a.variant}.npz"))
     q = np.asarray(q)
-    np.savez(out / f"{a.task}_new_qpos.npz", qpos=q, object_qpos_mj=phys_mj[:n], human_joints=human[:n], fps=30, smpl_scale=smpl_scale)
+    np.savez(out / f"{a.task}_{a.variant}_qpos.npz", qpos=q, object_qpos_mj=phys_mj[:n], human_joints=human[:n], fps=30, smpl_scale=smpl_scale)
     import resource
     rec.update(seconds=round(time.time() - t0, 1), finite=bool(np.isfinite(q).all()), qpos_shape=list(q.shape), object_locked_max_err=float(np.abs(q[:, -7:] - phys_mj[:n]).max()),
                peak_rss_gb=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2, 3))

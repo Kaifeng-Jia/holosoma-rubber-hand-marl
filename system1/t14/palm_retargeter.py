@@ -22,13 +22,36 @@ from holosoma_retargeting.src.interaction_mesh_retargeter import InteractionMesh
 
 
 class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
-    def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, **kwargs):
+    """anchor_term (T14 step 2, CoCarry form; None = off): dict(keys=("L_Palm", "R_Palm"), weight=w, anchors=[T, 2, 3] in the
+    object frame, activation=[T, 2] in [0, 1]); adds sum over hands of w * activation * ||p_palm(q) - anchor||^2, linearised
+    in the object frame like the interaction-mesh term (base-class hook extra_objective_terms)."""
+
+    def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, anchor_term: dict | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.palm_offsets = None if palm_offsets is None else {k: np.asarray(v, dtype=float).reshape(3) for k, v in palm_offsets.items()}
         if self.palm_offsets is not None:
             missing = set(self.palm_offsets) - set(self.laplacian_match_links)
             if missing:
                 raise ValueError(f"palm offsets for keys not in the interaction mesh: {sorted(missing)}")
+        self.anchor_term = anchor_term
+        if anchor_term is not None:
+            if self.palm_offsets is None or not set(anchor_term["keys"]) <= set(self.palm_offsets):
+                raise ValueError("anchor_term needs the palm points")
+            self.extra_objective_terms = self._anchor_terms
+
+    def _anchor_terms(self, q, dqa, frame_idx):
+        import cvxpy as cp
+        a = self.anchor_term
+        act = np.asarray(a["activation"][frame_idx], dtype=float)
+        if not np.any(act > 0):
+            return []
+        keys = {k: self.laplacian_match_links[k] for k, w in zip(a["keys"], act) if w > 0}
+        J, p, _ = self._calc_manipulator_jacobians(q, keys, obj_frame=True)
+        terms = []
+        for hi, k in enumerate(a["keys"]):
+            if act[hi] > 0:
+                terms.append(float(a["weight"]) * float(act[hi]) * cp.sum_squares(J[k] @ dqa + (p[k] - a["anchors"][frame_idx, hi])))
+        return terms
 
     def _calc_manipulator_jacobians(self, q, links, obj_frame=False, point_offsets=None):
         if self.palm_offsets is None or point_offsets is not None or not (set(self.palm_offsets) & set(links)):

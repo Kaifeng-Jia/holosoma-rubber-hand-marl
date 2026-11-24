@@ -2463,6 +2463,11 @@ class InteractionMeshRetargeter:
                 # if a full matrix was supplied, fall back to quad_form
                 obj_terms.append(cp.quad_form(dqa - dqa_smooth, Wsmooth))
 
+        # system1 T14 step 2: optional extra objective terms supplied by a subclass (attribute absent or None = unchanged)
+        extra_objective_terms = getattr(self, "extra_objective_terms", None)
+        if extra_objective_terms is not None:
+            obj_terms.extend(extra_objective_terms(q=q, dqa=dqa, frame_idx=frame_idx))
+
         problem = cp.Problem(cp.Minimize(cp.sum(obj_terms)), constraints)
 
         # -------- Solve with Clarabel --------

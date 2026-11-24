@@ -66,8 +66,15 @@ def urdf_box_meshes(urdf):
 
 
 class ObjectRobotDistance:
-    def __init__(self, object_meshes, robot, margin=0.1, robot_dump="table"):
+    """depth="contact" (rounds 1-2): signed distance of a pair = the deepest mj_collision contact; this is not the minimum
+    separating distance for some box-hull configurations (T14 round 3: 1.19 cm reported where the exact depth is 0.45 cm).
+    depth="exact" (round 3): mj_collision only proposes the candidate pairs (margin); each pair's signed distance is
+    mj_geomDistance, the function of the retargeter's constraint, equal to the Minkowski-difference depth (test_sim_scene)."""
+
+    def __init__(self, object_meshes, robot, margin=0.1, robot_dump="table", depth="contact"):
         import mujoco
+        assert depth in ("contact", "exact")
+        self.depth = depth
         self.mujoco, self.robot = mujoco, robot
         obj = [(None, m) for m in object_meshes]
         rob, _, _ = cs.dump_shapes(robot_dump, "/World/envs/env_0/Robot/")
@@ -109,6 +116,7 @@ class ObjectRobotDistance:
         tl = self.robot.fk(pair[:, :, :3], np.concatenate([pair[:, :, 4:7], pair[:, :, 3:4]], -1), pair[:, :, 7:])
         H = np.full((T, 2, 2), -self.margin)
         P = np.zeros((T, 2))
+        fromto = np.zeros(6)
         for t in range(T):
             self.d.qpos[0:3], self.d.qpos[3:7] = obj_q[t, :3], obj_q[t, 3:7]
             k = 1
@@ -120,14 +128,18 @@ class ObjectRobotDistance:
                     k += 1
             self.mujoco.mj_kinematics(self.m, self.d)
             self.mujoco.mj_collision(self.m, self.d)
-            for i in range(self.d.ncon):
-                c = self.d.contact[i]
-                g = c.geom1 if c.geom1 in self.geom_robot else c.geom2
+            if self.depth == "contact":
+                pairs = [(c.geom1, c.geom2, c.dist) for c in self.d.contact[:self.d.ncon]]
+            else:
+                cand = {(min(c.geom1, c.geom2), max(c.geom1, c.geom2)) for c in self.d.contact[:self.d.ncon]}
+                pairs = [(g1, g2, self.mujoco.mj_geomDistance(self.m, self.d, g1, g2, self.margin, fromto)) for g1, g2 in cand]
+            for g1, g2, dist in pairs:
+                g = g1 if g1 in self.geom_robot else g2
                 r, link = self.geom_robot[g], self.geom_link[g]
-                P[t, r] = max(P[t, r], -c.dist)
+                P[t, r] = max(P[t, r], -dist)
                 for hi, h in enumerate(cs.HANDS):
                     if link == h:
-                        H[t, r, hi] = max(H[t, r, hi], -c.dist)
+                        H[t, r, hi] = max(H[t, r, hi], -dist)
         return H, P
 
 

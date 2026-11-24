@@ -188,6 +188,46 @@ def palm_point(vertices, side):
     return c + (float(np.max(v @ n)) - c @ n) * n
 
 
+# --------------------------------------------------------------------------------------------- step 2
+def smoothstep_window(L, ramp=5):
+    """activation inside one contact window of L frames: smoothstep ramps over the first and last `ramp` frames, 1 between."""
+    j = np.arange(L)
+    x = np.minimum(1.0, np.minimum((j + 1) / ramp, (L - j) / ramp))
+    return x * x * (3.0 - 2.0 * x)
+
+
+def contact_windows(flags):
+    """[(start, stop)] of the runs of True (stop exclusive)."""
+    f = np.concatenate([[False], np.asarray(flags, bool), [False]])
+    e = np.flatnonzero(np.diff(f.astype(int)))
+    return list(zip(e[0::2], e[1::2]))
+
+
+def step2_anchor_term(a, contact, palm_local, fps_src, T, s_shared):
+    """T14 section 1 step 2 (CoCarry form), per hand of this person: contact = the source rule (any hand vertex within 1.5 cm of
+    the raw mesh), 15 Hz flags resampled to 30 Hz (> 0.5); per contact window, anchor = per-coordinate median of the palm point
+    in the object frame over the window, scaled with the object (x s_shared), projected to the nearest point of the
+    simulator's collision surface of this level (sim_scene.object_pieces x k); activation = 1 inside the window with 5-frame
+    smoothstep ramps at both ends, 0 outside; weight = the interaction-mesh weight (10)."""
+    from object_surface import UnionSurface
+    from sim_scene import object_pieces
+    surf = UnionSurface(object_pieces(a.task, a.k))
+    anchors, act = np.zeros((T, 2, 3)), np.zeros((T, 2))
+    rec = dict(weight=a.anchor_weight, ramp_frames=5, surface="simulator collision shape x k", windows=[])
+    for hi, side in enumerate(("left", "right")):
+        c30 = resample_linear(contact[(a.person, side)].astype(float)[:, None], fps_src, OUTPUT_FPS)[:, 0] > 0.5
+        loc30 = resample_linear(palm_local[(a.person, side)], fps_src, OUTPUT_FPS)
+        assert len(c30) == T, (len(c30), T)
+        for s0, s1 in contact_windows(c30):
+            med = np.median(loc30[s0:s1], axis=0) * s_shared
+            anc, dist = surf.nearest(med[None])
+            anchors[s0:s1, hi] = anc[0]
+            act[s0:s1, hi] = smoothstep_window(s1 - s0)
+            rec["windows"].append(dict(hand=side, start=int(s0), stop=int(s1), median_local_m=med.round(5).tolist(), anchor_local_m=anc[0].round(5).tolist(),
+                                       projection_m=round(float(dist[0]), 5)))
+    return dict(keys=("L_Palm", "R_Palm"), weight=a.anchor_weight, anchors=anchors, activation=act), rec
+
+
 # --------------------------------------------------------------------------------------------- main
 def main():
     ap = argparse.ArgumentParser()
@@ -197,6 +237,11 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--max-frames", type=int, default=None, help="smoke only")
     ap.add_argument("--k", type=float, default=1.0, help="T14 step 3 uniform object scale relative to the 1.0x shared table (s_bar)")
+    # T14 round 3 (section 8) switches; defaults = rounds 1-2 behaviour
+    ap.add_argument("--sim-scene", action="store_true", help="simulator kinematics and robot / object collision shapes (sim_scene.py); "
+                    "Bin / Chair object = the 16 PhysX pieces x k")
+    ap.add_argument("--prior", choices=("all", "body"), default="all", help="nominal prior lambda 5 on all 36 qpos, or on root 7 + legs 12 + waist 3")
+    ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
     a = ap.parse_args()
     global SEQ_RAW, CANON, STAGE1, OBJ_KEY
     cfg_t = TASKS[a.task]
@@ -291,7 +336,8 @@ def main():
 
     # constants, scene and retargeter exactly as the two-stage CORE4D run's Stage 2, except the listed changes
     robot_config = RobotConfig(robot_type="g1", robot_urdf_file=str(pair.BASE_G1_URDF.resolve()))
-    robot_config = replace(robot_config, nominal_tracking_indices=np.arange(7 + robot_config.ROBOT_DOF, dtype=np.int64))
+    n_prior = 7 + robot_config.ROBOT_DOF if a.prior == "all" else 7 + 12 + 3  # qpos order: root 7, legs 12, waist 3, arms 14
+    robot_config = replace(robot_config, nominal_tracking_indices=np.arange(n_prior, dtype=np.int64))
     motion_config = MotionDataConfig(data_format="smplx", robot_type="g1")
     task_config = TaskConfig(object_name=seq.object_name)
     base_cfg = RetargeterConfig(visualize=False, debug=False)
@@ -308,6 +354,10 @@ def main():
         assert len(constants.DEMO_JOINTS) == 22 and human.shape[1] == 24, (len(constants.DEMO_JOINTS), human.shape)
         constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
         constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
+    if a.sim_scene:
+        from sim_scene import object_pieces, simify_scene
+        pcs = object_pieces(a.task, a.k) if a.task in ("bin", "chair") else None
+        shared_scene, rec["sim_scene"] = simify_scene(shared_scene, out / "assets" / "shared_scene_sim.xml", out / "assets" / "sim_meshes", seq.object_name, pcs)
     constants.SCENE_XML_FILE = str(shared_scene)
     obj_pts, obj_pts_demo, urdf_path = setup_object_data("object_interaction", constants, None, s_i, task_config, False)
     obj_pts_shared = obj_pts * s_shared
@@ -317,8 +367,15 @@ def main():
     kw["anchor_nominal_foot_height"] = True
     kw["nominal_foot_height_tolerance"] = pair.CORE4D_NOMINAL_FOOT_HEIGHT_TOLERANCE_M
     kw["scene_xml_path"] = str(shared_scene)
-    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets)
+    anchor_term = None
+    if a.anchor_weight > 0:
+        anchor_term, rec["anchor_term"] = step2_anchor_term(a, contact, palm_local, src.fps, len(phys), s_shared)
+    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term)
     import mujoco
+    jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
+    assert jadr("left_hip_pitch_joint") == 7 and jadr("waist_pitch_joint") == 21 and jadr("left_shoulder_pitch_joint") == 22
+    assert list(retargeter.track_nominal_indices) == list(range(n_prior)), retargeter.track_nominal_indices
+    rec["prior"] = dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}", weight=retargeter.w_nominal_tracking_init)
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
     rec["scene"] = dict(path=str(shared_scene), left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),
                         interaction_mesh_keys=list(retargeter.laplacian_match_links), w_nominal_tracking_init=retargeter.w_nominal_tracking_init)

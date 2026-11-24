@@ -107,8 +107,12 @@ class PairCollision:
     """MuJoCo scene of both robots' simulator link shapes on free bodies (poses written to qpos; mocap bodies are static
     and MuJoCo does not collide two static bodies); only cross-robot pairs collide (contype / conaffinity)."""
 
-    def __init__(self, robot, margin=0.5):
+    def __init__(self, robot, margin=0.5, depth="contact"):
+        """depth: "contact" (rounds 1-2) = deepest mj_collision contact; "exact" (round 3) = mj_geomDistance per candidate pair
+        (see eval_core4d_hulls.ObjectRobotDistance)."""
         import mujoco
+        assert depth in ("contact", "exact")
+        self.depth, self.margin = depth, margin
         import tempfile
         shapes, _, _ = cs.dump_shapes("table", "/World/envs/env_0/Robot/")
         self.links = sorted({b for b, _ in shapes})
@@ -138,6 +142,7 @@ class PairCollision:
         q = pair_q
         tl = self.robot.fk(q[:, :, :3], np.concatenate([q[:, :, 4:7], q[:, :, 3:4]], -1), q[:, :, 7:])
         out = np.full(T, np.inf)
+        fromto = np.zeros(6)
         from scipy.spatial.transform import Rotation
         for t in range(T):
             k = 0
@@ -149,8 +154,11 @@ class PairCollision:
                     k += 1
             self.mujoco.mj_kinematics(self.m, self.d)
             self.mujoco.mj_collision(self.m, self.d)
-            if self.d.ncon:
+            if self.d.ncon and self.depth == "contact":
                 out[t] = min(float(self.d.contact[i].dist) for i in range(self.d.ncon))
+            elif self.d.ncon:
+                cand = {(min(c.geom1, c.geom2), max(c.geom1, c.geom2)) for c in self.d.contact[:self.d.ncon]}
+                out[t] = min(self.mujoco.mj_geomDistance(self.m, self.d, g1, g2, self.margin, fromto) for g1, g2 in cand)
         return out
 
 

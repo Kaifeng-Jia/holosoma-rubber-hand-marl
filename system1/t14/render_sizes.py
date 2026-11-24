@@ -14,6 +14,13 @@ frame; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 
 is labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max
 penetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).
 
+Close-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical
+position. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the
+middle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),
+elevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width
+panels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are
+those of the largest level; the look-at point is that robot's hand centroid at each level's own frame.
+
 Video: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over
 its whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.
 
@@ -57,6 +64,8 @@ def main():
     ap.add_argument("--levels", type=Path, required=True, help="json: {contact_frames_30hz: [start, mid, end], levels: [{label, pair, urdf, numbers}]}")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--video-out", type=Path, default=None)
+    ap.add_argument("--closeup", choices=("none", "lift", "mid"), default="none")
+    ap.add_argument("--grid-name", default=None, help="file stem of the grid (default <task>_sizes_grid)")
     a = ap.parse_args()
     assert os.environ.get("MUJOCO_GL") == "egl" and os.environ.get("CUDA_VISIBLE_DEVICES") == ""
     spec = json.loads(a.levels.read_text())
@@ -87,6 +96,7 @@ def main():
 
     def style(s, lookat):
         recs = f.styling(s, lookat)
+        s.robot_geoms = [[r["geom_id"] for r in recs if r["role"] == i] for i in (0, 1)]
         if s.recolor:
             for r in recs:
                 if r["role"] == "object":
@@ -96,13 +106,38 @@ def main():
         ax = d["q"][t, 1, :2] - d["q"][t, 0, :2]
         return float(np.degrees(np.arctan2(ax[1], ax[0]))) - 90.0 + AZ_OFF
 
-    def render(scene, cam, q, o):
+    def render(scene, cam, q, o, opt=None):
         c = mujoco.MjvCamera()
         c.type = mujoco.mjtCamera.mjCAMERA_FREE
         c.lookat[:], c.distance, c.azimuth, c.elevation = cam["lookat"], cam["distance"], cam["azimuth"], cam["elevation"]
         scene.set_pose(q, o)
-        scene.renderer.update_scene(scene.data, camera=c)
+        if opt is None:
+            scene.renderer.update_scene(scene.data, camera=c)
+        else:
+            scene.renderer.update_scene(scene.data, camera=c, scene_option=opt)
         return Image.fromarray(scene.renderer.render())
+
+    # close-up column helpers: robot 0 geoms -> group 4, robot 1 -> group 5 (set in style for close-up grids)
+    CU_EL, CU_MARGIN = -10.0, 0.15
+    opt_show = mujoco.MjvOption()
+    opt_show.geomgroup[4] = opt_show.geomgroup[5] = 1
+    opt_only = [mujoco.MjvOption(), mujoco.MjvOption()]
+    opt_only[0].geomgroup[4], opt_only[0].geomgroup[5] = 1, 0
+    opt_only[1].geomgroup[4], opt_only[1].geomgroup[5] = 0, 1
+    cu_robots = (0,) if a.task in ("push", "pull") else (0, 1)
+    PW = CW // len(cu_robots)
+
+    def cu_frame(d):
+        return int(np.argmax(d["o"][:, 2])) if a.closeup == "lift" else min(frames[1], len(d["q"]) - 1)
+
+    def cu_hands(s, d, t, r):
+        s.set_pose(d["q"][t], d["o"][t])
+        return np.array([s.hand_center(r, side) for side in ("left", "right")])
+
+    def cu_az(d, t, r):
+        w, x, y, z = d["q"][t, r, 3:7]
+        fwd = np.array([1 - 2 * (y * y + z * z), 2 * (x * y + z * w)])  # root x axis, horizontal part
+        return float(np.degrees(np.arctan2(fwd[1], fwd[0]))) + 90.0
 
     # ------------------------------------------------------------------ grid
     cams = []
@@ -113,8 +148,20 @@ def main():
         s.set_pose(big["q"][t], big["o"][t])
         cam = f.camera_for(f.bounds(s), CW, CH, az_at(big, t), EL)
         cams.append(dict(column=name, frame_30hz=int(t), time_s=round(t / 30, 3), **cam))
+    ncol = 3
+    cu_cam = None
+    if a.closeup != "none":
+        ncol = 4
+        s = scene_for(largest, PW, CH)
+        t = cu_frame(big)
+        box = np.array([[x, y, z] for x in (-1, 1) for y in (-1, 1) for z in (-1, 1)]) * CU_MARGIN
+        cu_cam = {}
+        for r in cu_robots:
+            H = cu_hands(s, big, t, r)
+            pts = (H[:, None, :] + box[None]).reshape(-1, 3)
+            cu_cam[r] = dict(column="手部特写", rule=a.closeup, robot=r, **f.camera_for(pts, PW, CH, cu_az(big, t, r), CU_EL))
     styled = set()
-    W = HEADER_W + 3 * CW + 2 * 4
+    W = HEADER_W + ncol * CW + (ncol - 1) * 4
     sheet = Image.new("RGB", (W, len(levels) * (CH + 4)), "white")
     for ri, d in enumerate(data):
         if d["q"] is None:
@@ -131,7 +178,7 @@ def main():
                     line = line[n:]
                     y += 30
             sheet.paste(hdr, (0, ri * (CH + 4)))
-            for ci in range(3):
+            for ci in range(ncol):
                 ph = Image.new("RGB", (CW, CH), (232, 234, 238))
                 dp = ImageDraw.Draw(ph)
                 dp.text((24, CH // 2 - 20), f"{d['L']['label']}：求解失败，无双人参考", font=font, fill=(120, 40, 30))
@@ -141,6 +188,10 @@ def main():
         if ri not in styled:
             style(s, cams[1]["lookat"])
             styled.add(ri)
+            if a.closeup != "none":  # robot r -> geom group 4 + r: both shown in the three columns, one at a time in the close-up
+                for r, gs in enumerate(s.robot_geoms):
+                    for g in gs:
+                        s.model.geom_group[g] = 4 + r
         hdr = Image.new("RGB", (HEADER_W, CH), (245, 247, 250))
         dh = ImageDraw.Draw(hdr)
         dh.text((16, 14), d["L"]["label"], font=font, fill=(20, 35, 55))
@@ -151,21 +202,52 @@ def main():
         sheet.paste(hdr, (0, ri * (CH + 4)))
         for ci, cam in enumerate(cams):
             t = min(cam["frame_30hz"], len(d["q"]) - 1)
-            img = render(s, cam, d["q"][t], d["o"][t])
+            img = render(s, cam, d["q"][t], d["o"][t], opt_show if a.closeup != "none" else None)
             dr = ImageDraw.Draw(img, "RGBA")
             txt = f"{d['L']['label']} · t = {t / 30:.2f} s（{cam['column']}）"
             dr.rounded_rectangle((8, 8, 18 + dr.textlength(txt, font=small), 44), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
             dr.text((16, 12), txt, font=small, fill=(20, 35, 55))
             sheet.paste(img, (HEADER_W + ci * (CW + 4), ri * (CH + 4)))
+        if cu_cam is not None:
+            t = cu_frame(d)
+            sp = scene_for(ri, PW, CH)
+            if ("cu", ri) not in styled:
+                style(sp, cams[1]["lookat"])
+                for r, gs in enumerate(sp.robot_geoms):
+                    for g in gs:
+                        sp.model.geom_group[g] = 4 + r
+                styled.add(("cu", ri))
+            cell = Image.new("RGB", (CW, CH), "white")
+            d["closeup"] = dict(frame_30hz=t)
+            what = "物体最高" if a.closeup == "lift" else "中段"
+            for pi, r in enumerate(cu_robots):
+                H = cu_hands(sp, d, t, r)
+                cam = dict(cu_cam[r], lookat=H.mean(0).tolist())
+                img = render(sp, cam, d["q"][t], d["o"][t], opt_only[r])
+                dr = ImageDraw.Draw(img, "RGBA")
+                txt = f"机器人 {r}" if len(cu_robots) > 1 else "只画机器人 0"
+                dr.rounded_rectangle((8, CH - 44, 18 + dr.textlength(txt, font=small), CH - 8), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
+                dr.text((16, CH - 40), txt, font=small, fill=(20, 35, 55))
+                cell.paste(img, (pi * PW, 0))
+                d["closeup"][f"lookat_r{r}"] = [round(x, 4) for x in cam["lookat"]]
+            dr = ImageDraw.Draw(cell, "RGBA")
+            if len(cu_robots) > 1:
+                dr.line((PW, 0, PW, CH), fill=(255, 255, 255), width=4)
+            txt = f"{d['L']['label']} · t = {t / 30:.2f} s（手部特写，{what}）"
+            dr.rounded_rectangle((8, 8, 18 + dr.textlength(txt, font=small), 44), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
+            dr.text((16, 12), txt, font=small, fill=(20, 35, 55))
+            sheet.paste(cell, (HEADER_W + 3 * (CW + 4), ri * (CH + 4)))
     a.out.mkdir(parents=True, exist_ok=True)
-    p = a.out / f"{a.task}_sizes_grid.jpg"
+    stem = a.grid_name or f"{a.task}_sizes_grid"
+    p = a.out / f"{stem}.jpg"
     qual = 90
     while True:
         sheet.save(p, quality=qual)
         if p.stat().st_size <= 1_000_000 or qual <= 40:
             break
         qual -= 5
-    rec = dict(task=a.task, grid=p.name, bytes=p.stat().st_size, jpeg_quality=qual, cameras=cams,
+    rec = dict(task=a.task, grid=p.name, bytes=p.stat().st_size, jpeg_quality=qual, cameras=cams, closeup_camera=None if cu_cam is None else {f"r{r}": c for r, c in cu_cam.items()},
+               closeup_frames={d["L"]["label"]: d.get("closeup") for d in data},
                levels=[dict(label=L["label"], size=L["size"], failed=L["failed"], numbers=L["numbers"]) if L.get("failed") else
                        dict(label=L["label"], size=L["size"], pair=L["pair"], pair_sha256=sha(ROOT / L["pair"]), urdf=L["urdf"], urdf_sha256=sha(ROOT / L["urdf"]),
                             numbers=L["numbers"]) for L in levels], contact_frames_30hz=frames, helper_sha256=helper_sha,
@@ -212,9 +294,9 @@ def main():
             assert proc.wait() == 0
         vrec = dict(task=a.task, file=str(vp), frames=nframes, fps=30, sha256=sha(vp), bytes=vp.stat().st_size, camera=vcam,
                     levels=[L["label"] for L in levels if not L.get("failed")], rules=__doc__)
-        (a.out / f"{a.task}_sizes_video.json").write_text(json.dumps(vrec, indent=1, ensure_ascii=False) + "\n")
+        (a.out / f"{stem}_video.json").write_text(json.dumps(vrec, indent=1, ensure_ascii=False) + "\n")
         print(json.dumps({k: vrec[k] for k in ("file", "frames", "sha256")}), flush=True)
-    (a.out / f"{a.task}_sizes_grid.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
+    (a.out / f"{stem}.json").write_text(json.dumps(rec, indent=1, ensure_ascii=False) + "\n")
     for s in scenes.values():
         s.renderer.close()
     return 0
