@@ -50,7 +50,8 @@ def pen_summary(P):
 
 
 def core4d_level(task, ctx, pair, obj_q, k):
-    robot, pc, h_sd, speed, human, offs = ctx
+    robot, pc, h_sd, speed, human, offs = ctx[:6]
+    hm_ctx = ctx[6] if len(ctx) > 6 else None
     ev = eh.ObjectRobotDistance(eh.dump_object_meshes(task, k), robot, depth="exact")
     H, P = ev.frames(pair, obj_q)
     T = len(pair)
@@ -61,13 +62,18 @@ def core4d_level(task, ctx, pair, obj_q, k):
     ret["pooled"] = round(float(robo[cond].mean()), 4) if cond.any() else None
     rr = pc.min_distance(pair)
     gap, _ = cg.core4d_arrays(task, robot, offs, human, pair, obj_q, k)
-    return dict(frames=T, condition_frames=int(cond.sum()), contact_retention=ret, **pen_summary(P),
-                robot_robot_min_distance_cm=round(100 * float(rr.min()), 3), robot_robot_intersect_frames=int((rr < 0).sum()),
-                finite=bool(np.isfinite(pair).all()), contact_position_error=gap)
+    res = dict(frames=T, condition_frames=int(cond.sum()), contact_retention=ret, **pen_summary(P),
+               robot_robot_min_distance_cm=round(100 * float(rr.min()), 3), robot_robot_intersect_frames=int((rr < 0).sum()),
+               finite=bool(np.isfinite(pair).all()), contact_position_error=gap)
+    if hm_ctx is not None:
+        import hand_metrics as hm
+        res["hand"] = hm.core4d(task, hm_ctx[0], hm_ctx[1], pair, obj_q, k)
+    return res
 
 
 def omomo_level(task, ctx, q, m, out_dir=None):
-    robot, pc, h_sd, speed, human, offs = ctx
+    robot, pc, h_sd, speed, human, offs = ctx[:6]
+    hm_ctx = ctx[6] if len(ctx) > 6 else None
     src_urdf, axis = ds.TABLE[task]
     tag = f"m{m:.2f}".replace(".", "p")
     udir = out_dir / tag if out_dir is not None else ROOT / f"logs_system1/t14/r3/eval_urdf/{task}_{tag}"
@@ -88,6 +94,9 @@ def omomo_level(task, ctx, q, m, out_dir=None):
     res = dict(m=m, c_m=round(ds.offset_c(m), 7), frames=len(pair), condition_frames=int(cond.sum()), contact_retention=ret, **pen_summary(P),
                robot_robot_min_distance_cm=round(100 * float(rr.min()), 3), robot_robot_intersect_frames=int((rr < 0).sum()),
                finite=bool(np.isfinite(pair).all()), contact_position_error=gap, urdf=str(urdf), urdf_sha256=sha(urdf))
+    if hm_ctx is not None:
+        import hand_metrics as hm
+        res["hand"] = hm.omomo(task, hm_ctx[0], hm_ctx[1], pair, obj_q, urdf)
     if out_dir is not None:
         p = udir / f"{task}_{tag}_pair_fps30.npz"
         np.savez(p, robot_qpos=pair, object_qpos=obj_q, fps=np.int64(30), m=m, c=ds.offset_c(m))
@@ -104,6 +113,7 @@ def main():
     ap.add_argument("--levels", type=float, nargs="*", default=[])
     ap.add_argument("--pairs-out", type=Path, default=None)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--hand-metrics", action="store_true", help="T14 round 4: add hand_metrics.py (like the human / plausible) to every level")
     a = ap.parse_args()
     robot = eh.cs.Robot("physx")
     pc = ds.PairCollision(robot, depth="exact")
@@ -116,6 +126,9 @@ def main():
         h_sd, speed = eh.human_hand_sd(a.task)
         human = cg.human_core4d(a.task)
     ctx = (robot, pc, h_sd, speed, human, offs)
+    if a.hand_metrics:
+        import hand_metrics as hm
+        ctx = ctx + ((hm.RobotHands(), hm.human_omomo(a.task) if omomo else hm.human_core4d(a.task)),)
     res, search = {}, []
     for spec in a.ref:
         name, rest = spec.split("=", 1)

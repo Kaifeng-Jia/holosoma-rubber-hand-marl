@@ -85,6 +85,10 @@ def omomo_palms(seq):
     res = np.linalg.norm(A @ R.T + t - B, axis=1)
     pv = palm_vertex_ids()
     palms = np.stack([V[:, pv[s]].mean(1) for s in ("left", "right")], 1) @ R.T + t
+    import hand_landmarks as hl
+    landmarks = np.concatenate([hl.human_points(Jx, V, side) for side in ("left", "right")], 1) @ R.T + t  # [T, 6, 3]
+    omomo_palms.last = dict(landmarks=landmarks, joints_omomo_new=Jx @ R.T + t,
+                            tips_omomo_new={side: V[:, hl.TIP_VERTEX[side]] @ R.T + t for side in ("left", "right")}, vertices_omomo_new=V @ R.T + t)
     return palms, dict(source_split=src, frames=T, rotation=R.round(8).tolist(), translation=t.round(8).tolist(), fit_residual_max_m=float(res.max()),
                        fit_residual_mean_m=float(res.mean()))
 
@@ -122,17 +126,18 @@ def step2_anchor_term_omomo(seq, palms_raw, object_poses_raw, scene_xml, body, w
     R = Rotation.from_quat(object_poses_raw[:, [1, 2, 3, 0]]).as_matrix()
     local = np.einsum("tji,thj->thi", R, palms_raw - object_poses_raw[:, None, 4:7])
     surf = UnionSurface(scene_object_boxes(scene_xml, body))
-    anchors, act = np.zeros((T, 2, 3)), np.zeros((T, 2))
+    anchors, act, normals = np.zeros((T, 2, 3)), np.zeros((T, 2)), np.zeros((T, 2, 3))
     rec = dict(weight=weight, ramp_frames=5, surface="scene collision boxes (simulator table at the robot's end)", windows=[])
     for hi, side in enumerate(("left", "right")):
         for s0, s1 in contact_windows(h_sd[:, hi] >= -0.015):
             med = np.median(local[s0:s1, hi], axis=0)
-            anc, dist = surf.nearest(med[None])
+            anc, dist, nrm = surf.nearest(med[None], normals=True)
             anchors[s0:s1, hi] = anc[0]
+            normals[s0:s1, hi] = nrm[0]
             act[s0:s1, hi] = smoothstep_window(s1 - s0)
             rec["windows"].append(dict(hand=side, start=int(s0), stop=int(s1), median_local_m=med.round(5).tolist(), anchor_local_m=anc[0].round(5).tolist(),
-                                       projection_m=round(float(dist[0]), 5)))
-    return dict(keys=("L_Palm", "R_Palm"), weight=weight, anchors=anchors, activation=act), rec
+                                       projection_m=round(float(dist[0]), 5), outward_normal=nrm[0].round(4).tolist()))
+    return dict(keys=("L_Palm", "R_Palm"), weight=weight, anchors=anchors, activation=act, normals=normals), rec
 
 
 def main():
@@ -146,6 +151,8 @@ def main():
     ap.add_argument("--sim-scene", action="store_true", help="simulator kinematics and robot collision shapes (sim_scene.py)")
     ap.add_argument("--prior", choices=("all", "body"), default="all", help="nominal prior on all 36 qpos, or root 7 + legs 12 + waist 3")
     ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
+    ap.add_argument("--landmarks", action="store_true", help="T14 round 4 A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh")
+    ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="T14 round 4 B: palm toward the inward surface normal at the anchor (0 = off)")
     a = ap.parse_args()
     if a.variant == "omni_asis":
         assert not a.sim_scene and a.prior == "all"
@@ -181,8 +188,13 @@ def main():
     if a.variant == "new":
         palms, fit = omomo_palms(seq)
         human = np.concatenate([human, palms], 1)  # [T, 54, 3]: ..., L_Palm, R_Palm (raw OMOMO_new world, before preprocessing)
-        constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
-        constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
+        extra = dict(PALM_KEYS)
+        if a.landmarks:
+            import hand_landmarks as hl
+            human = np.concatenate([human, omomo_palms.last["landmarks"]], 1)  # [T, 60, 3]: ..., L_Index1, L_Pinky1, L_MiddleTip, R_...
+            extra |= {k: "left_rubber_hand_link" for k in hl.keys("left")} | {k: "right_rubber_hand_link" for k in hl.keys("right")}
+        constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(extra)
+        constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | extra
         sim_hands, dump_sha = write_sim_hand_meshes(out)
     else:
         fit, dump_sha = None, None
@@ -214,6 +226,15 @@ def main():
     obj_pts, obj_pts_demo, urdf_path = setup_object_data("object_interaction", constants, None, smpl_scale, task_config, False)
     offsets = ({k: palm_point(trimesh.load(sim_hands[s], force="mesh").vertices, s) for k, s in (("L_Palm", "left"), ("R_Palm", "right"))}
                if a.variant == "new" else None)
+    lm_rec = None
+    if a.landmarks:
+        import hand_landmarks as hl
+        lm_rec = {}
+        for side in ("left", "right"):
+            off, lm_rec[side] = hl.robot_offsets(trimesh.load(sim_hands[side], force="mesh").vertices, side)
+            for k, key in zip(hl.LANDMARKS, hl.keys(side)):
+                offsets[key] = off[k]
+            lm_rec[side]["offsets_m"] = {k: np.round(v, 6).tolist() for k, v in off.items()}
     kw = build_retargeter_kwargs_from_config(cfg, constants, urdf_path, "object_interaction")
     kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau
     kw["anchor_nominal_foot_height"] = True
@@ -223,7 +244,12 @@ def main():
     if a.anchor_weight > 0:
         assert a.variant == "new" and a.sim_scene
         anchor_term, anchor_rec = step2_anchor_term_omomo(seq, palms, object_poses, scene, f"{constants.OBJECT_NAME}_link", a.anchor_weight)
-    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term)
+    orient_term = None
+    if a.palm_orient_weight > 0:
+        import hand_landmarks as hl
+        assert anchor_term is not None and a.landmarks
+        orient_term = dict(weight=a.palm_orient_weight, activation=anchor_term["activation"], targets_obj=-anchor_term["normals"], palm_normal_local=hl.PALM_NORMAL_LOCAL)
+    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term, orient_term=orient_term)
     import mujoco
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
     assert jadr("left_hip_pitch_joint") == 7 and jadr("waist_pitch_joint") == 21 and jadr("left_shoulder_pitch_joint") == 22
@@ -243,7 +269,7 @@ def main():
     q_nom[:, -7:] = phys_mj[:n]
     import mujoco
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
-    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
+    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, landmarks=lm_rec, palm_orient_weight=a.palm_orient_weight, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                smpl_scale=smpl_scale, stage1=str(st1), stage1_sha256=sha(st1), preprocess_vs_stage1_human_joints_max_abs=prep_err,
                palm_fit=fit, robot_palm_offsets_m={k: v.round(6).tolist() for k, v in (offsets or {}).items()}, physx_dump=dump_sha, scene=str(scene),
                left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),

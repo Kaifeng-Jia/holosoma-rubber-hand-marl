@@ -24,9 +24,12 @@ from holosoma_retargeting.src.interaction_mesh_retargeter import InteractionMesh
 class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
     """anchor_term (T14 step 2, CoCarry form; None = off): dict(keys=("L_Palm", "R_Palm"), weight=w, anchors=[T, 2, 3] in the
     object frame, activation=[T, 2] in [0, 1]); adds sum over hands of w * activation * ||p_palm(q) - anchor||^2, linearised
-    in the object frame like the interaction-mesh term (base-class hook extra_objective_terms)."""
+    in the object frame like the interaction-mesh term (base-class hook extra_objective_terms).
+    orient_term (T14 round 4 B; None = off): dict(weight, activation=[T, 2], targets_obj=[T, 2, 3] unit vectors in the object
+    frame, palm_normal_local={"left": n, "right": n}); see _orient_terms."""
 
-    def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, anchor_term: dict | None = None, **kwargs):
+    def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, anchor_term: dict | None = None,
+                 orient_term: dict | None = None, **kwargs):
         super().__init__(*args, **kwargs)
         self.palm_offsets = None if palm_offsets is None else {k: np.asarray(v, dtype=float).reshape(3) for k, v in palm_offsets.items()}
         if self.palm_offsets is not None:
@@ -37,7 +40,46 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
         if anchor_term is not None:
             if self.palm_offsets is None or not set(anchor_term["keys"]) <= set(self.palm_offsets):
                 raise ValueError("anchor_term needs the palm points")
-            self.extra_objective_terms = self._anchor_terms
+        self.orient_term = orient_term
+        if orient_term is not None:
+            self._orient_specs = []
+            for side in ("left", "right"):
+                arm = []
+                for suffix in ("shoulder_pitch", "shoulder_roll", "shoulder_yaw", "elbow", "wrist_roll", "wrist_pitch", "wrist_yaw"):
+                    jid = mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_JOINT, f"{side}_{suffix}_joint")
+                    arm.append(int(np.flatnonzero(self.q_a_indices == int(self.robot_model.jnt_qposadr[jid]))[0]))
+                self._orient_specs.append(dict(body_id=mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_BODY, f"{side}_rubber_hand_link"),
+                                               arm=np.asarray(arm), normal_local=np.asarray(orient_term["palm_normal_local"][side], float)))
+        if anchor_term is not None or orient_term is not None:
+            self.extra_objective_terms = self._extra_terms
+
+    def _extra_terms(self, q, dqa, frame_idx):
+        terms = self._anchor_terms(q, dqa, frame_idx) if self.anchor_term is not None else []
+        if self.orient_term is not None:
+            terms += self._orient_terms(q, dqa, frame_idx)
+        return terms
+
+    def _orient_terms(self, q, dqa, frame_idx):
+        """T14 round 4 B: palm normal toward the object surface (inward normal at the anchor), the repo's palm-direction form
+        (HandOrientationConfig): w * act * ||n + (-[n]x J_w[:, arm]) dqa[arm] - n*||^2 with the 7 arm joints of that side;
+        targets are stored in the object frame and rotated with the (locked) object pose of this frame."""
+        import cvxpy as cp
+        o = self.orient_term
+        act = np.asarray(o["activation"][frame_idx], dtype=float)
+        if not np.any(act > 0):
+            return []
+        qw, qx, qy, qz = q[-4:]
+        R_obj = Rotation.from_quat([qx, qy, qz, qw]).as_matrix()
+        terms = []
+        for hi, spec in enumerate(self._orient_specs):
+            if act[hi] <= 0:
+                continue
+            rotation, ang_jac, _ = self._calc_body_orientation_linearization(q, spec["body_id"])
+            n = rotation @ spec["normal_local"]
+            lin = n + (-self._skew(n) @ ang_jac[:, spec["arm"]]) @ dqa[spec["arm"]]
+            target = R_obj @ np.asarray(o["targets_obj"][frame_idx, hi], float)
+            terms.append(float(o["weight"]) * float(act[hi]) * cp.sum_squares(lin - target))
+        return terms
 
     def _anchor_terms(self, q, dqa, frame_idx):
         import cvxpy as cp

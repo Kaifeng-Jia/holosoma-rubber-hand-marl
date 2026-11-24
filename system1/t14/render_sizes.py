@@ -65,6 +65,8 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--video-out", type=Path, default=None)
     ap.add_argument("--closeup", choices=("none", "lift", "mid"), default="none")
+    ap.add_argument("--human-panels", action="store_true", help="round 4: in the close-up column each robot panel is preceded by the person's hand "
+                    "(human_render.py; same frame, same azimuth / elevation, distance / human-to-robot scale)")
     ap.add_argument("--grid-name", default=None, help="file stem of the grid (default <task>_sizes_grid)")
     a = ap.parse_args()
     assert os.environ.get("MUJOCO_GL") == "egl" and os.environ.get("CUDA_VISIBLE_DEVICES") == ""
@@ -125,7 +127,12 @@ def main():
     opt_only[0].geomgroup[4], opt_only[0].geomgroup[5] = 1, 0
     opt_only[1].geomgroup[4], opt_only[1].geomgroup[5] = 0, 1
     cu_robots = (0,) if a.task in ("push", "pull") else (0, 1)
-    PW = CW // len(cu_robots)
+    PW = 360 if a.human_panels else CW // len(cu_robots)
+    CUW = 2 * PW * len(cu_robots) if a.human_panels else CW
+    hs = None
+    if a.human_panels:
+        import human_render
+        hs = human_render.HumanScene(a.task, ROOT / "logs_system1/t14/r4/human_meshes")
 
     def cu_frame(d):
         return int(np.argmax(d["o"][:, 2])) if a.closeup == "lift" else min(frames[1], len(d["q"]) - 1)
@@ -161,7 +168,7 @@ def main():
             pts = (H[:, None, :] + box[None]).reshape(-1, 3)
             cu_cam[r] = dict(column="手部特写", rule=a.closeup, robot=r, **f.camera_for(pts, PW, CH, cu_az(big, t, r), CU_EL))
     styled = set()
-    W = HEADER_W + ncol * CW + (ncol - 1) * 4
+    W = HEADER_W + 3 * CW + (CUW if ncol == 4 else 0) + (ncol - 1) * 4
     sheet = Image.new("RGB", (W, len(levels) * (CH + 4)), "white")
     for ri, d in enumerate(data):
         if d["q"] is None:
@@ -217,9 +224,15 @@ def main():
                     for g in gs:
                         sp.model.geom_group[g] = 4 + r
                 styled.add(("cu", ri))
-            cell = Image.new("RGB", (CW, CH), "white")
+            cell = Image.new("RGB", (CUW, CH), "white")
             d["closeup"] = dict(frame_30hz=t)
             what = "物体最高" if a.closeup == "lift" else "中段"
+            if hs is not None:
+                if a.task in ("push", "pull"):
+                    scales = [float(np.load(d["L"]["values"]["single"])["smpl_scale"])]
+                else:
+                    scales = [float(x) for x in np.load(ROOT / d["L"]["pair"])["human_to_robot_scales"]]
+                d["closeup"]["human_to_robot_scales"] = scales
             for pi, r in enumerate(cu_robots):
                 H = cu_hands(sp, d, t, r)
                 cam = dict(cu_cam[r], lookat=H.mean(0).tolist())
@@ -228,11 +241,21 @@ def main():
                 txt = f"机器人 {r}" if len(cu_robots) > 1 else "只画机器人 0"
                 dr.rounded_rectangle((8, CH - 44, 18 + dr.textlength(txt, font=small), CH - 8), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
                 dr.text((16, CH - 40), txt, font=small, fill=(20, 35, 55))
-                cell.paste(img, (pi * PW, 0))
+                if hs is not None:
+                    person = r if a.task in ("table", "bin", "chair") else 0
+                    himg = hs.render(person, t, cu_cam[r]["azimuth"], cu_cam[r]["elevation"], cu_cam[r]["distance"] / scales[person], PW, CH)
+                    dh2 = ImageDraw.Draw(himg, "RGBA")
+                    htxt = f"人 {person + 1}" if a.task in ("table", "bin", "chair") else "人（源）"
+                    dh2.rounded_rectangle((8, CH - 44, 18 + dh2.textlength(htxt, font=small), CH - 8), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
+                    dh2.text((16, CH - 40), htxt, font=small, fill=(20, 35, 55))
+                    cell.paste(himg, (2 * pi * PW, 0))
+                    cell.paste(img, ((2 * pi + 1) * PW, 0))
+                else:
+                    cell.paste(img, (pi * PW, 0))
                 d["closeup"][f"lookat_r{r}"] = [round(x, 4) for x in cam["lookat"]]
             dr = ImageDraw.Draw(cell, "RGBA")
-            if len(cu_robots) > 1:
-                dr.line((PW, 0, PW, CH), fill=(255, 255, 255), width=4)
+            for xline in range(1, CUW // PW):
+                dr.line((xline * PW, 0, xline * PW, CH), fill=(255, 255, 255), width=4 if (hs is None or xline % 2 == 0) else 2)
             txt = f"{d['L']['label']} · t = {t / 30:.2f} s（手部特写，{what}）"
             dr.rounded_rectangle((8, 8, 18 + dr.textlength(txt, font=small), 44), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
             dr.text((16, 12), txt, font=small, fill=(20, 35, 55))

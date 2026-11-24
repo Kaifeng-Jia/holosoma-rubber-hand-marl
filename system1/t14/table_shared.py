@@ -212,7 +212,7 @@ def step2_anchor_term(a, contact, palm_local, fps_src, T, s_shared):
     from object_surface import UnionSurface
     from sim_scene import object_pieces
     surf = UnionSurface(object_pieces(a.task, a.k))
-    anchors, act = np.zeros((T, 2, 3)), np.zeros((T, 2))
+    anchors, act, normals = np.zeros((T, 2, 3)), np.zeros((T, 2)), np.zeros((T, 2, 3))
     rec = dict(weight=a.anchor_weight, ramp_frames=5, surface="simulator collision shape x k", windows=[])
     for hi, side in enumerate(("left", "right")):
         c30 = resample_linear(contact[(a.person, side)].astype(float)[:, None], fps_src, OUTPUT_FPS)[:, 0] > 0.5
@@ -220,12 +220,13 @@ def step2_anchor_term(a, contact, palm_local, fps_src, T, s_shared):
         assert len(c30) == T, (len(c30), T)
         for s0, s1 in contact_windows(c30):
             med = np.median(loc30[s0:s1], axis=0) * s_shared
-            anc, dist = surf.nearest(med[None])
+            anc, dist, nrm = surf.nearest(med[None], normals=True)
             anchors[s0:s1, hi] = anc[0]
+            normals[s0:s1, hi] = nrm[0]
             act[s0:s1, hi] = smoothstep_window(s1 - s0)
             rec["windows"].append(dict(hand=side, start=int(s0), stop=int(s1), median_local_m=med.round(5).tolist(), anchor_local_m=anc[0].round(5).tolist(),
-                                       projection_m=round(float(dist[0]), 5)))
-    return dict(keys=("L_Palm", "R_Palm"), weight=a.anchor_weight, anchors=anchors, activation=act), rec
+                                       projection_m=round(float(dist[0]), 5), outward_normal=nrm[0].round(4).tolist()))
+    return dict(keys=("L_Palm", "R_Palm"), weight=a.anchor_weight, anchors=anchors, activation=act, normals=normals), rec
 
 
 # --------------------------------------------------------------------------------------------- main
@@ -242,7 +243,13 @@ def main():
                     "Bin / Chair object = the 16 PhysX pieces x k")
     ap.add_argument("--prior", choices=("all", "body"), default="all", help="nominal prior lambda 5 on all 36 qpos, or on root 7 + legs 12 + waist 3")
     ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
+    # T14 round 4 (section 9) switches; defaults = round-3 behaviour
+    ap.add_argument("--landmarks", action="store_true", help="A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh (hand_landmarks.py)")
+    ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="B: palm normal toward the inward surface normal at the anchor, in human-contact "
+                    "frames (anchor activation); 0 = off; round 4 B uses HandOrientationConfig.palm_direction_weight = 5.0")
     a = ap.parse_args()
+    if a.palm_orient_weight > 0:
+        assert a.anchor_weight > 0 and a.landmarks, "B = A + palm orientation; needs the anchor term"
     global SEQ_RAW, CANON, STAGE1, OBJ_KEY
     cfg_t = TASKS[a.task]
     SEQ_RAW, CANON, STAGE1, OBJ_KEY = CORE4D / "CORE4D_Real/human_object_motions" / cfg_t["raw"], cfg_t["canon"], cfg_t["stage1"], cfg_t["obj_key"]
@@ -300,6 +307,14 @@ def main():
         resample_err = float(np.abs(j30 - seq.human_joints[:, pidx]).max())
         p30 = _scale_points_about_ground_anchor(p30, anchor=anchor, scale=s_i, ground_offset_m=pin.ground_offset_m)
         human = np.concatenate([human, p30], axis=1)  # [T, 24, 3]: ..., L_Palm, R_Palm
+        if a.landmarks:
+            import hand_landmarks as hl
+            P = np.load(SEQ_RAW / f"person{a.person}_poses.npz", allow_pickle=True)["arr_0"].item()
+            Jr, Vr = P["joints"].astype(np.float64), P["vertices"].astype(np.float64)
+            lm = np.concatenate([hl.human_points(Jr, Vr, side) for side in ("left", "right")], 1)  # [T15, 6, 3] raw Y-up
+            lm = np.einsum("ij,tkj->tki", CORE4D_TO_OMNI_ROTATION, lm)
+            lm30 = _scale_points_about_ground_anchor(resample_linear(lm, src.fps, OUTPUT_FPS), anchor=anchor, scale=s_i, ground_offset_m=pin.ground_offset_m)
+            human = np.concatenate([human, lm30], axis=1)  # [T, 30, 3]: ..., L_Index1, L_Pinky1, L_MiddleTip, R_...
         # anchors (raw object frame, metres) and the step-3 shift
         raw = trimesh.load(seq.object_mesh_path, force="mesh")
         disp = []
@@ -324,6 +339,15 @@ def main():
         q_prior[:, :2] += shift_xy[:2]
         sim_hands, dump_sha = write_sim_hand_meshes(out)
         offsets = {k: palm_point(trimesh.load(sim_hands[s], force="mesh").vertices, s) for k, s in (("L_Palm", "left"), ("R_Palm", "right"))}
+        if a.landmarks:
+            import hand_landmarks as hl
+            lm_rec = {}
+            for side in ("left", "right"):
+                off, lm_rec[side] = hl.robot_offsets(trimesh.load(sim_hands[side], force="mesh").vertices, side)
+                for k, key in zip(hl.LANDMARKS, hl.keys(side)):
+                    offsets[key] = off[k]
+                lm_rec[side]["offsets_m"] = {k: np.round(v, 6).tolist() for k, v in off.items()}
+            rec["landmarks"] = dict(human=dict(joints=hl.JOINTS["left"] | {"fingers": "25-39"}, tip_vertex=hl.TIP_VERTEX), robot=lm_rec)
         palm_info = dict(palm_vertices_per_hand={k: int(len(v)) for k, v in palm_vertex_ids().items()}, axis_conversion_max_err_m=canon_err,
                          resample_max_err_m=resample_err, anchors=anchors, shift_mean_m=shift.round(6).tolist(), shift_xy_m=shift_xy[:2].round(6).tolist(),
                          robot_palm_offsets_m={k: v.round(6).tolist() for k, v in offsets.items()}, sim_hand_meshes={k: str(v) for k, v in sim_hands.items()},
@@ -351,9 +375,13 @@ def main():
     shared_scene = create_uniformly_scaled_object_scene_xml(assets.scene_xml_path, seq.object_name, s_shared, out / "assets" / "shared_scene.xml")
     if a.variant == "new":
         shared_scene = patch_hand_meshes(shared_scene, out / "assets" / "shared_scene_simhands.xml", sim_hands)
-        assert len(constants.DEMO_JOINTS) == 22 and human.shape[1] == 24, (len(constants.DEMO_JOINTS), human.shape)
-        constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
-        constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | PALM_KEYS
+        extra = dict(PALM_KEYS)
+        if a.landmarks:
+            import hand_landmarks as hl
+            extra |= {k: "left_rubber_hand_link" for k in hl.keys("left")} | {k: "right_rubber_hand_link" for k in hl.keys("right")}
+        assert len(constants.DEMO_JOINTS) == 22 and human.shape[1] == 22 + len(extra), (len(constants.DEMO_JOINTS), human.shape)
+        constants.DEMO_JOINTS = list(constants.DEMO_JOINTS) + list(extra)
+        constants.JOINTS_MAPPING = dict(constants.JOINTS_MAPPING) | extra
     if a.sim_scene:
         from sim_scene import object_pieces, simify_scene
         pcs = object_pieces(a.task, a.k) if a.task in ("bin", "chair") else None
@@ -367,10 +395,16 @@ def main():
     kw["anchor_nominal_foot_height"] = True
     kw["nominal_foot_height_tolerance"] = pair.CORE4D_NOMINAL_FOOT_HEIGHT_TOLERANCE_M
     kw["scene_xml_path"] = str(shared_scene)
-    anchor_term = None
+    anchor_term, orient_term = None, None
     if a.anchor_weight > 0:
         anchor_term, rec["anchor_term"] = step2_anchor_term(a, contact, palm_local, src.fps, len(phys), s_shared)
-    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term)
+    if a.palm_orient_weight > 0:
+        import hand_landmarks as hl
+        orient_term = dict(weight=a.palm_orient_weight, activation=anchor_term["activation"], targets_obj=-anchor_term["normals"],
+                           palm_normal_local=hl.PALM_NORMAL_LOCAL)
+        rec["orient_term"] = dict(weight=a.palm_orient_weight, form="w * act * ||n_palm(q) - n*||^2 (HandOrientationConfig form, 7 arm joints)",
+                                  target="inward object-surface normal at the anchor", activation="anchor activation (5-frame smoothstep in contact windows)")
+    retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term, orient_term=orient_term)
     import mujoco
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
     assert jadr("left_hip_pitch_joint") == 7 and jadr("waist_pitch_joint") == 21 and jadr("left_shoulder_pitch_joint") == 22
