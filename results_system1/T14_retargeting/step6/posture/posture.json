@@ -1,0 +1,5003 @@
+{
+ "rules": "T14 section 11 item 4: posture of a single-robot solve compared with its (scaled) person, in the person's contact frames.\n\nThe person = the solve's own human input (saved human_joints: the person scaled by s and grounded, in the solve world).\nContact frames = the frames inside the solve's anchor contact windows (run_record anchor_term; any hand of that person).\n  * torso tilt: angle between the pelvis -> neck line and the vertical. Robot: pelvis link origin -> back-of-neck point\n    (torso_link (0.003, -0.0005, 0.290) m, the T13 neck point); person: Pelvis -> Neck joint;\n  * pelvis height: robot pelvis link origin z; person Pelvis joint z (scaled; both worlds have the floor at z = 0);\n  * elbow angle (0 = straight): angle between upper arm and forearm. Robot: shoulder_pitch_link -> elbow_link -> rubber_hand_link\n    origins; person: Shoulder -> Elbow -> Wrist joints;\n  * elbow position error: |(robot elbow - person elbow) - horizontal part of (robot pelvis - person pelvis)| (the global\n    horizontal placement of the robot is removed; heights are compared as they are);\n  * foot slide (T14 section 4 / CoCarry): support frames = the person's toe speed < 0.01 m/s after Gaussian smoothing (support.py,\n    the same rule the round-6 solver uses); robot toe = the front-most vertex of the ankle_roll_link PhysX shapes; per foot: the\n    largest horizontal displacement of the robot toe from its position at the start of each support segment (drift), the robot\n    toe speed in support frames (p95, max, share > 0.01 m/s); plus the solver's per-frame foot xy / height diagnostics.\nMeans are over contact frames; \"max diff\" = largest |robot - person| over them.\n",
+ "refs": {
+  "r5C_table_k0.8": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 27.21,
+     "person_mean": 15.15,
+     "max_abs_diff": 14.39
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 74.91,
+     "person_mean": 71.17,
+     "max_abs_diff": 5.13
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 16.84,
+     "person_mean": 35.56,
+     "max_abs_diff": 28.5
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 5.32,
+     "p95": 6.66
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 14.49,
+     "person_mean": 34.54,
+     "max_abs_diff": 23.86
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.92,
+     "p95": 6.65
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 3.65,
+     "drift_mean_of_segments_cm": 1.895,
+     "robot_toe_speed_p95_mps": 0.0423,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.9864
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 2.54,
+     "drift_mean_of_segments_cm": 1.338,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0435,
+     "share_above_0p01mps": 0.9784
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 35.69,
+     "person_mean": 22.64,
+     "max_abs_diff": 15.95
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.18,
+     "person_mean": 72.28,
+     "max_abs_diff": 6.81
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 21.38,
+     "person_mean": 46.08,
+     "max_abs_diff": 32.28
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.12,
+     "p95": 7.83
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 16.42,
+     "person_mean": 36.93,
+     "max_abs_diff": 26.8
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.71,
+     "p95": 7.71
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 2.274,
+     "drift_mean_of_segments_cm": 1.9,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0428,
+     "share_above_0p01mps": 0.9774
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 4.651,
+     "drift_mean_of_segments_cm": 2.98,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0424,
+     "share_above_0p01mps": 0.9889
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_table_k0.9": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 22.35,
+     "person_mean": 15.15,
+     "max_abs_diff": 8.88
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.31,
+     "person_mean": 71.17,
+     "max_abs_diff": 5.57
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 20.77,
+     "person_mean": 35.56,
+     "max_abs_diff": 22.27
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.64,
+     "p95": 4.38
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 18.22,
+     "person_mean": 34.54,
+     "max_abs_diff": 18.83
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.59,
+     "p95": 5.75
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 2.793,
+     "drift_mean_of_segments_cm": 1.547,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0427,
+     "share_above_0p01mps": 0.9864
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 1.38,
+     "drift_mean_of_segments_cm": 1.049,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0432,
+     "share_above_0p01mps": 0.9784
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 33.21,
+     "person_mean": 22.64,
+     "max_abs_diff": 13.08
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.45,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.06
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 30.49,
+     "person_mean": 46.08,
+     "max_abs_diff": 23.61
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.93,
+     "p95": 6.96
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 22.55,
+     "person_mean": 36.93,
+     "max_abs_diff": 20.69
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.02,
+     "p95": 6.84
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 2.154,
+     "drift_mean_of_segments_cm": 1.78,
+     "robot_toe_speed_p95_mps": 0.0423,
+     "robot_toe_speed_max_mps": 0.0431,
+     "share_above_0p01mps": 0.9548
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 4.644,
+     "drift_mean_of_segments_cm": 2.768,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0425,
+     "share_above_0p01mps": 0.9611
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_table_k1.0": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 19.92,
+     "person_mean": 15.15,
+     "max_abs_diff": 6.16
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.81,
+     "person_mean": 71.17,
+     "max_abs_diff": 5.98
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 32.44,
+     "person_mean": 35.56,
+     "max_abs_diff": 8.56
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.61,
+     "p95": 4.63
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 29.28,
+     "person_mean": 34.54,
+     "max_abs_diff": 7.5
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.71,
+     "p95": 5.47
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 2.799,
+     "drift_mean_of_segments_cm": 1.543,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0432,
+     "share_above_0p01mps": 1.0
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 1.984,
+     "drift_mean_of_segments_cm": 1.102,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0436,
+     "share_above_0p01mps": 0.9784
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 31.87,
+     "person_mean": 22.64,
+     "max_abs_diff": 12.5
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.78,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.28
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 45.03,
+     "person_mean": 46.08,
+     "max_abs_diff": 9.32
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.54,
+     "p95": 6.43
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 36.11,
+     "person_mean": 36.93,
+     "max_abs_diff": 13.29
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.7,
+     "p95": 5.99
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 1.979,
+     "drift_mean_of_segments_cm": 1.839,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0427,
+     "share_above_0p01mps": 0.9548
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 4.719,
+     "drift_mean_of_segments_cm": 2.584,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0426,
+     "share_above_0p01mps": 0.9444
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.436
+   }
+  },
+  "r5C_table_k1.1": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 19.2,
+     "person_mean": 15.15,
+     "max_abs_diff": 5.63
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 76.52,
+     "person_mean": 71.17,
+     "max_abs_diff": 6.67
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 50.84,
+     "person_mean": 35.56,
+     "max_abs_diff": 24.26
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 5.56,
+     "p95": 6.16
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 45.58,
+     "person_mean": 34.54,
+     "max_abs_diff": 12.88
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.73,
+     "p95": 6.39
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 2.791,
+     "drift_mean_of_segments_cm": 1.46,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0435,
+     "share_above_0p01mps": 0.9864
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 2.57,
+     "drift_mean_of_segments_cm": 1.228,
+     "robot_toe_speed_p95_mps": 0.0433,
+     "robot_toe_speed_max_mps": 0.0443,
+     "share_above_0p01mps": 0.9712
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 31.5,
+     "person_mean": 22.64,
+     "max_abs_diff": 12.39
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.34,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.93
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 60.31,
+     "person_mean": 46.08,
+     "max_abs_diff": 20.57
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 5.5,
+     "p95": 6.56
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 52.44,
+     "person_mean": 36.93,
+     "max_abs_diff": 21.95
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.6,
+     "p95": 6.92
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 3.643,
+     "drift_mean_of_segments_cm": 2.501,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0427,
+     "share_above_0p01mps": 0.9605
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 5.608,
+     "drift_mean_of_segments_cm": 2.742,
+     "robot_toe_speed_p95_mps": 0.0421,
+     "robot_toe_speed_max_mps": 0.0428,
+     "share_above_0p01mps": 0.9389
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_table_k1.2": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 19.2,
+     "person_mean": 15.15,
+     "max_abs_diff": 5.57
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 76.67,
+     "person_mean": 71.17,
+     "max_abs_diff": 6.85
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 68.64,
+     "person_mean": 35.56,
+     "max_abs_diff": 41.09
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.87,
+     "p95": 9.95
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 63.84,
+     "person_mean": 34.54,
+     "max_abs_diff": 34.09
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.1,
+     "p95": 9.14
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 2.821,
+     "drift_mean_of_segments_cm": 1.471,
+     "robot_toe_speed_p95_mps": 0.0423,
+     "robot_toe_speed_max_mps": 0.0455,
+     "share_above_0p01mps": 0.966
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 2.987,
+     "drift_mean_of_segments_cm": 1.327,
+     "robot_toe_speed_p95_mps": 0.0427,
+     "robot_toe_speed_max_mps": 0.0451,
+     "share_above_0p01mps": 0.964
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 31.39,
+     "person_mean": 22.64,
+     "max_abs_diff": 13.27
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.42,
+     "person_mean": 72.28,
+     "max_abs_diff": 8.08
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 74.37,
+     "person_mean": 46.08,
+     "max_abs_diff": 36.45
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.76,
+     "p95": 9.12
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 66.36,
+     "person_mean": 36.93,
+     "max_abs_diff": 38.27
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.65,
+     "p95": 9.24
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 5.501,
+     "drift_mean_of_segments_cm": 3.234,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.9605
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 6.659,
+     "drift_mean_of_segments_cm": 2.975,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.9556
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_bin_k0.8": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 33.95,
+     "person_mean": 25.12,
+     "max_abs_diff": 10.66
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.76,
+     "person_mean": 75.8,
+     "max_abs_diff": 4.56
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 63.71,
+     "person_mean": 70.47,
+     "max_abs_diff": 16.8
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.23,
+     "p95": 8.52
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 64.26,
+     "person_mean": 66.17,
+     "max_abs_diff": 8.55
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.19,
+     "p95": 7.23
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 2.641,
+     "drift_mean_of_segments_cm": 0.926,
+     "robot_toe_speed_p95_mps": 0.0438,
+     "robot_toe_speed_max_mps": 0.0456,
+     "share_above_0p01mps": 0.9874
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 3.454,
+     "drift_mean_of_segments_cm": 1.085,
+     "robot_toe_speed_p95_mps": 0.0432,
+     "robot_toe_speed_max_mps": 0.0483,
+     "share_above_0p01mps": 0.9803
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 28.55,
+     "person_mean": 24.18,
+     "max_abs_diff": 16.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.83,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.28
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 75.09,
+     "person_mean": 66.96,
+     "max_abs_diff": 19.78
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 5.84,
+     "p95": 7.77
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 65.15,
+     "person_mean": 57.27,
+     "max_abs_diff": 31.91
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.92,
+     "p95": 8.83
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 1.49,
+     "drift_mean_of_segments_cm": 1.189,
+     "robot_toe_speed_p95_mps": 0.0428,
+     "robot_toe_speed_max_mps": 0.0536,
+     "share_above_0p01mps": 0.9038
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 1.958,
+     "drift_mean_of_segments_cm": 1.147,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.046,
+     "share_above_0p01mps": 0.8868
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_bin_k0.9": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 32.36,
+     "person_mean": 25.12,
+     "max_abs_diff": 9.33
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.95,
+     "person_mean": 75.8,
+     "max_abs_diff": 4.7
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 85.85,
+     "person_mean": 70.47,
+     "max_abs_diff": 24.85
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.65,
+     "p95": 10.33
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 80.2,
+     "person_mean": 66.17,
+     "max_abs_diff": 20.07
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.16,
+     "p95": 7.82
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 3.251,
+     "drift_mean_of_segments_cm": 1.143,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0474,
+     "share_above_0p01mps": 0.9937
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 4.78,
+     "drift_mean_of_segments_cm": 1.283,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0454,
+     "share_above_0p01mps": 0.9934
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 26.36,
+     "person_mean": 24.18,
+     "max_abs_diff": 15.22
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.08,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.37
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 88.52,
+     "person_mean": 66.96,
+     "max_abs_diff": 38.43
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.84,
+     "p95": 11.81
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 72.65,
+     "person_mean": 57.27,
+     "max_abs_diff": 44.47
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 10.16,
+     "p95": 13.6
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 1.93,
+     "drift_mean_of_segments_cm": 1.406,
+     "robot_toe_speed_p95_mps": 0.0436,
+     "robot_toe_speed_max_mps": 0.0573,
+     "share_above_0p01mps": 0.9423
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 1.952,
+     "drift_mean_of_segments_cm": 1.303,
+     "robot_toe_speed_p95_mps": 0.0434,
+     "robot_toe_speed_max_mps": 0.0469,
+     "share_above_0p01mps": 0.9182
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_bin_k1.0": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 30.2,
+     "person_mean": 25.12,
+     "max_abs_diff": 8.49
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.11,
+     "person_mean": 75.8,
+     "max_abs_diff": 4.87
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 104.8,
+     "person_mean": 70.47,
+     "max_abs_diff": 43.52
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 10.08,
+     "p95": 13.23
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 92.19,
+     "person_mean": 66.17,
+     "max_abs_diff": 36.23
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 10.2,
+     "p95": 13.2
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 3.629,
+     "drift_mean_of_segments_cm": 1.322,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0464,
+     "share_above_0p01mps": 0.9937
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 5.615,
+     "drift_mean_of_segments_cm": 1.453,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0492,
+     "share_above_0p01mps": 0.9934
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.502
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 23.75,
+     "person_mean": 24.18,
+     "max_abs_diff": 14.6
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.24,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.41
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 90.48,
+     "person_mean": 66.96,
+     "max_abs_diff": 57.12
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 14.3,
+     "p95": 17.31
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 72.76,
+     "person_mean": 57.27,
+     "max_abs_diff": 48.8
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 14.11,
+     "p95": 20.76
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 2.265,
+     "drift_mean_of_segments_cm": 1.586,
+     "robot_toe_speed_p95_mps": 0.0433,
+     "robot_toe_speed_max_mps": 0.0575,
+     "share_above_0p01mps": 0.9231
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 1.743,
+     "drift_mean_of_segments_cm": 1.17,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0472,
+     "share_above_0p01mps": 0.956
+    },
+    "solver_foot_xy_deviation_max_cm": 0.142,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r5C_bin_k1.1": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 28.22,
+     "person_mean": 25.12,
+     "max_abs_diff": 9.41
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.26,
+     "person_mean": 75.8,
+     "max_abs_diff": 5.2
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 113.11,
+     "person_mean": 70.47,
+     "max_abs_diff": 56.35
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 11.55,
+     "p95": 15.54
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 96.5,
+     "person_mean": 66.17,
+     "max_abs_diff": 52.22
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 15.87,
+     "p95": 22.96
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 3.553,
+     "drift_mean_of_segments_cm": 1.214,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0459,
+     "share_above_0p01mps": 1.0
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 5.585,
+     "drift_mean_of_segments_cm": 1.564,
+     "robot_toe_speed_p95_mps": 0.0434,
+     "robot_toe_speed_max_mps": 0.0482,
+     "share_above_0p01mps": 1.0
+    },
+    "solver_foot_xy_deviation_max_cm": 0.146,
+    "solver_foot_height_deviation_max_cm": 0.513
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 22.0,
+     "person_mean": 24.18,
+     "max_abs_diff": 14.93
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.34,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.46
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 90.5,
+     "person_mean": 66.96,
+     "max_abs_diff": 75.83
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 21.3,
+     "p95": 27.94
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 71.91,
+     "person_mean": 57.27,
+     "max_abs_diff": 55.26
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 18.22,
+     "p95": 26.93
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 2.713,
+     "drift_mean_of_segments_cm": 1.814,
+     "robot_toe_speed_p95_mps": 0.0434,
+     "robot_toe_speed_max_mps": 0.0555,
+     "share_above_0p01mps": 0.9231
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 1.754,
+     "drift_mean_of_segments_cm": 1.211,
+     "robot_toe_speed_p95_mps": 0.0427,
+     "robot_toe_speed_max_mps": 0.0467,
+     "share_above_0p01mps": 0.9623
+    },
+    "solver_foot_xy_deviation_max_cm": 0.143,
+    "solver_foot_height_deviation_max_cm": 0.502
+   }
+  },
+  "r5C_bin_k1.2": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 25.17,
+     "person_mean": 25.12,
+     "max_abs_diff": 9.1
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.34,
+     "person_mean": 75.8,
+     "max_abs_diff": 5.2
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 118.3,
+     "person_mean": 70.47,
+     "max_abs_diff": 68.37
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 12.81,
+     "p95": 17.82
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 93.93,
+     "person_mean": 66.17,
+     "max_abs_diff": 59.62
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 25.06,
+     "p95": 37.09
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 3.537,
+     "drift_mean_of_segments_cm": 1.142,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0475,
+     "share_above_0p01mps": 1.0
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 5.064,
+     "drift_mean_of_segments_cm": 1.389,
+     "robot_toe_speed_p95_mps": 0.0427,
+     "robot_toe_speed_max_mps": 0.0499,
+     "share_above_0p01mps": 1.0
+    },
+    "solver_foot_xy_deviation_max_cm": 0.167,
+    "solver_foot_height_deviation_max_cm": 0.528
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 19.23,
+     "person_mean": 24.18,
+     "max_abs_diff": 22.27
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.51,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.67
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 122.88,
+     "person_mean": 66.96,
+     "max_abs_diff": 100.2
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 24.9,
+     "p95": 34.9
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 57.37,
+     "person_mean": 57.27,
+     "max_abs_diff": 66.97
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 20.35,
+     "p95": 28.96
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 3.054,
+     "drift_mean_of_segments_cm": 2.253,
+     "robot_toe_speed_p95_mps": 0.0432,
+     "robot_toe_speed_max_mps": 0.0514,
+     "share_above_0p01mps": 0.9295
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 5.12,
+     "drift_mean_of_segments_cm": 2.179,
+     "robot_toe_speed_p95_mps": 0.0431,
+     "robot_toe_speed_max_mps": 0.0445,
+     "share_above_0p01mps": 0.956
+    },
+    "solver_foot_xy_deviation_max_cm": 0.157,
+    "solver_foot_height_deviation_max_cm": 0.518
+   }
+  },
+  "r5C_chair_k0.8": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 58.7,
+     "person_mean": 44.92,
+     "max_abs_diff": 19.31
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.48,
+     "person_mean": 73.89,
+     "max_abs_diff": 5.27
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 38.28,
+     "person_mean": 54.85,
+     "max_abs_diff": 20.96
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 5.83,
+     "p95": 8.25
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 29.82,
+     "person_mean": 54.25,
+     "max_abs_diff": 35.59
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.45,
+     "p95": 10.25
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 2.005,
+     "drift_mean_of_segments_cm": 0.825,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.9892
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 2.717,
+     "drift_mean_of_segments_cm": 1.23,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0433,
+     "share_above_0p01mps": 0.9882
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 100.22,
+     "person_mean": 95.58,
+     "max_abs_diff": 7.99
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 66.69,
+     "person_mean": 65.89,
+     "max_abs_diff": 3.73
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 119.5,
+     "person_mean": 137.36,
+     "max_abs_diff": 36.93
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.07,
+     "p95": 6.5
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 90.36,
+     "person_mean": 105.2,
+     "max_abs_diff": 30.38
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.71,
+     "p95": 4.3
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 1.109,
+     "drift_mean_of_segments_cm": 0.882,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0435,
+     "share_above_0p01mps": 0.896
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 3.333,
+     "drift_mean_of_segments_cm": 2.083,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0446,
+     "share_above_0p01mps": 0.9052
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_chair_k0.9": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 55.86,
+     "person_mean": 44.92,
+     "max_abs_diff": 14.96
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.61,
+     "person_mean": 73.89,
+     "max_abs_diff": 5.33
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 45.39,
+     "person_mean": 54.85,
+     "max_abs_diff": 13.45
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.95,
+     "p95": 7.55
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 41.97,
+     "person_mean": 54.25,
+     "max_abs_diff": 19.92
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.61,
+     "p95": 8.77
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 1.908,
+     "drift_mean_of_segments_cm": 0.815,
+     "robot_toe_speed_p95_mps": 0.0421,
+     "robot_toe_speed_max_mps": 0.0425,
+     "share_above_0p01mps": 0.9892
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 2.893,
+     "drift_mean_of_segments_cm": 1.275,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0434,
+     "share_above_0p01mps": 0.9882
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 98.01,
+     "person_mean": 95.58,
+     "max_abs_diff": 6.09
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 67.04,
+     "person_mean": 65.89,
+     "max_abs_diff": 4.04
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 123.77,
+     "person_mean": 137.36,
+     "max_abs_diff": 33.09
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 2.66,
+     "p95": 4.15
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 97.3,
+     "person_mean": 105.2,
+     "max_abs_diff": 21.98
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.11,
+     "p95": 4.14
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 1.05,
+     "drift_mean_of_segments_cm": 0.853,
+     "robot_toe_speed_p95_mps": 0.0428,
+     "robot_toe_speed_max_mps": 0.0443,
+     "share_above_0p01mps": 0.856
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 3.3,
+     "drift_mean_of_segments_cm": 2.074,
+     "robot_toe_speed_p95_mps": 0.0428,
+     "robot_toe_speed_max_mps": 0.0442,
+     "share_above_0p01mps": 0.9224
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_chair_k1.0": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 53.83,
+     "person_mean": 44.92,
+     "max_abs_diff": 13.65
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.75,
+     "person_mean": 73.89,
+     "max_abs_diff": 5.38
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.44,
+     "person_mean": 54.85,
+     "max_abs_diff": 6.24
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.86,
+     "p95": 7.38
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 57.34,
+     "person_mean": 54.25,
+     "max_abs_diff": 10.51
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.11,
+     "p95": 7.31
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 1.923,
+     "drift_mean_of_segments_cm": 0.853,
+     "robot_toe_speed_p95_mps": 0.0417,
+     "robot_toe_speed_max_mps": 0.0423,
+     "share_above_0p01mps": 0.9892
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 2.499,
+     "drift_mean_of_segments_cm": 1.184,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0433,
+     "share_above_0p01mps": 1.0
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 95.79,
+     "person_mean": 95.58,
+     "max_abs_diff": 5.79
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 67.85,
+     "person_mean": 65.89,
+     "max_abs_diff": 4.51
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 127.11,
+     "person_mean": 137.36,
+     "max_abs_diff": 27.55
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.57,
+     "p95": 5.94
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 102.01,
+     "person_mean": 105.2,
+     "max_abs_diff": 15.19
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 3.49,
+     "p95": 5.35
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 1.03,
+     "drift_mean_of_segments_cm": 0.827,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0455,
+     "share_above_0p01mps": 0.848
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 3.241,
+     "drift_mean_of_segments_cm": 2.069,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0441,
+     "share_above_0p01mps": 0.9224
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_chair_k1.1": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 52.67,
+     "person_mean": 44.92,
+     "max_abs_diff": 13.13
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.72,
+     "person_mean": 73.89,
+     "max_abs_diff": 6.37
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 60.24,
+     "person_mean": 54.85,
+     "max_abs_diff": 13.18
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.17,
+     "p95": 8.17
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.43,
+     "person_mean": 54.25,
+     "max_abs_diff": 28.23
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.55,
+     "p95": 8.06
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 1.742,
+     "drift_mean_of_segments_cm": 0.84,
+     "robot_toe_speed_p95_mps": 0.0419,
+     "robot_toe_speed_max_mps": 0.0423,
+     "share_above_0p01mps": 1.0
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 2.519,
+     "drift_mean_of_segments_cm": 1.14,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0428,
+     "share_above_0p01mps": 0.9882
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 93.0,
+     "person_mean": 95.58,
+     "max_abs_diff": 10.21
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 68.35,
+     "person_mean": 65.89,
+     "max_abs_diff": 5.0
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 127.25,
+     "person_mean": 137.36,
+     "max_abs_diff": 21.83
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.42,
+     "p95": 9.0
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 106.86,
+     "person_mean": 105.2,
+     "max_abs_diff": 9.66
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.54,
+     "p95": 7.74
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 1.028,
+     "drift_mean_of_segments_cm": 0.77,
+     "robot_toe_speed_p95_mps": 0.0423,
+     "robot_toe_speed_max_mps": 0.0455,
+     "share_above_0p01mps": 0.848
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 3.26,
+     "drift_mean_of_segments_cm": 2.087,
+     "robot_toe_speed_p95_mps": 0.043,
+     "robot_toe_speed_max_mps": 0.0441,
+     "share_above_0p01mps": 0.9483
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_chair_k1.2": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 51.36,
+     "person_mean": 44.92,
+     "max_abs_diff": 11.1
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.8,
+     "person_mean": 73.89,
+     "max_abs_diff": 6.4
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 68.42,
+     "person_mean": 54.85,
+     "max_abs_diff": 25.24
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.15,
+     "p95": 8.35
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 80.76,
+     "person_mean": 54.25,
+     "max_abs_diff": 46.49
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.99,
+     "p95": 9.27
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 1.557,
+     "drift_mean_of_segments_cm": 0.835,
+     "robot_toe_speed_p95_mps": 0.0419,
+     "robot_toe_speed_max_mps": 0.0423,
+     "share_above_0p01mps": 0.9892
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 2.63,
+     "drift_mean_of_segments_cm": 1.249,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0431,
+     "share_above_0p01mps": 0.9882
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 90.9,
+     "person_mean": 95.58,
+     "max_abs_diff": 13.0
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 68.55,
+     "person_mean": 65.89,
+     "max_abs_diff": 5.19
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 126.5,
+     "person_mean": 137.36,
+     "max_abs_diff": 21.52
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.27,
+     "p95": 10.54
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 113.03,
+     "person_mean": 105.2,
+     "max_abs_diff": 18.86
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.68,
+     "p95": 10.51
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 1.357,
+     "drift_mean_of_segments_cm": 0.878,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0455,
+     "share_above_0p01mps": 0.864
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 3.346,
+     "drift_mean_of_segments_cm": 2.123,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0445,
+     "share_above_0p01mps": 0.9224
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_push": {
+   "r0": {
+    "contact_frames": 147,
+    "torso_tilt_deg": {
+     "robot_mean": 71.16,
+     "person_mean": 64.17,
+     "max_abs_diff": 13.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 69.06,
+     "person_mean": 65.32,
+     "max_abs_diff": 6.22
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 69.46,
+     "person_mean": 44.43,
+     "max_abs_diff": 36.96
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 11.42,
+     "p95": 14.09
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 101.96,
+     "person_mean": 39.5,
+     "max_abs_diff": 69.75
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 14.73,
+     "p95": 18.58
+    },
+    "foot_slide_left": {
+     "support_frames": 45,
+     "segments": 2,
+     "drift_max_cm": 1.847,
+     "drift_mean_of_segments_cm": 1.463,
+     "robot_toe_speed_p95_mps": 0.0419,
+     "robot_toe_speed_max_mps": 0.0423,
+     "share_above_0p01mps": 0.9556
+    },
+    "foot_slide_right": {
+     "support_frames": 64,
+     "segments": 2,
+     "drift_max_cm": 2.585,
+     "drift_mean_of_segments_cm": 1.732,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0427,
+     "share_above_0p01mps": 1.0
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r5C_pull": {
+   "r0": {
+    "contact_frames": 171,
+    "torso_tilt_deg": {
+     "robot_mean": 68.41,
+     "person_mean": 59.92,
+     "max_abs_diff": 17.07
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 71.83,
+     "person_mean": 66.89,
+     "max_abs_diff": 9.19
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 67.71,
+     "person_mean": 36.36,
+     "max_abs_diff": 38.9
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 15.22,
+     "p95": 17.87
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 66.34,
+     "person_mean": 33.14,
+     "max_abs_diff": 50.23
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 11.98,
+     "p95": 13.82
+    },
+    "foot_slide_left": {
+     "support_frames": 50,
+     "segments": 2,
+     "drift_max_cm": 1.831,
+     "drift_mean_of_segments_cm": 1.034,
+     "robot_toe_speed_p95_mps": 0.0417,
+     "robot_toe_speed_max_mps": 0.0418,
+     "share_above_0p01mps": 0.98
+    },
+    "foot_slide_right": {
+     "support_frames": 92,
+     "segments": 2,
+     "drift_max_cm": 2.781,
+     "drift_mean_of_segments_cm": 2.353,
+     "robot_toe_speed_p95_mps": 0.0439,
+     "robot_toe_speed_max_mps": 0.0446,
+     "share_above_0p01mps": 0.9783
+    },
+    "solver_foot_xy_deviation_max_cm": 0.141,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_table_k0.8": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 12.48,
+     "person_mean": 15.15,
+     "max_abs_diff": 5.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 63.19,
+     "person_mean": 71.17,
+     "max_abs_diff": 8.68
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 30.62,
+     "person_mean": 35.56,
+     "max_abs_diff": 10.13
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.19,
+     "p95": 9.67
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 30.71,
+     "person_mean": 34.54,
+     "max_abs_diff": 7.11
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.12,
+     "p95": 7.83
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.218,
+     "drift_mean_of_segments_cm": 0.159,
+     "robot_toe_speed_p95_mps": 0.0307,
+     "robot_toe_speed_max_mps": 0.0633,
+     "share_above_0p01mps": 0.2041
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.263,
+     "drift_mean_of_segments_cm": 0.206,
+     "robot_toe_speed_p95_mps": 0.0404,
+     "robot_toe_speed_max_mps": 0.062,
+     "share_above_0p01mps": 0.2446
+    },
+    "solver_foot_xy_deviation_max_cm": 0.211,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 37.06,
+     "person_mean": 22.64,
+     "max_abs_diff": 20.24
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 70.77,
+     "person_mean": 72.28,
+     "max_abs_diff": 6.7
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 42.4,
+     "person_mean": 46.08,
+     "max_abs_diff": 13.5
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.78,
+     "p95": 8.77
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 31.07,
+     "person_mean": 36.93,
+     "max_abs_diff": 18.4
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.4,
+     "p95": 8.17
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.23,
+     "drift_mean_of_segments_cm": 0.168,
+     "robot_toe_speed_p95_mps": 0.028,
+     "robot_toe_speed_max_mps": 0.0636,
+     "share_above_0p01mps": 0.1582
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.22,
+     "drift_mean_of_segments_cm": 0.176,
+     "robot_toe_speed_p95_mps": 0.0313,
+     "robot_toe_speed_max_mps": 0.0585,
+     "share_above_0p01mps": 0.1722
+    },
+    "solver_foot_xy_deviation_max_cm": 0.197,
+    "solver_foot_height_deviation_max_cm": 0.507
+   }
+  },
+  "r6C_table_k0.9": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 14.62,
+     "person_mean": 15.15,
+     "max_abs_diff": 2.32
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 69.38,
+     "person_mean": 71.17,
+     "max_abs_diff": 2.71
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 32.32,
+     "person_mean": 35.56,
+     "max_abs_diff": 9.3
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.74,
+     "p95": 4.19
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 31.01,
+     "person_mean": 34.54,
+     "max_abs_diff": 6.84
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 1.64,
+     "p95": 2.78
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.259,
+     "drift_mean_of_segments_cm": 0.17,
+     "robot_toe_speed_p95_mps": 0.0375,
+     "robot_toe_speed_max_mps": 0.0635,
+     "share_above_0p01mps": 0.2381
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.284,
+     "drift_mean_of_segments_cm": 0.205,
+     "robot_toe_speed_p95_mps": 0.0342,
+     "robot_toe_speed_max_mps": 0.0587,
+     "share_above_0p01mps": 0.2086
+    },
+    "solver_foot_xy_deviation_max_cm": 0.208,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 36.23,
+     "person_mean": 22.64,
+     "max_abs_diff": 18.09
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.66,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.02
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 41.8,
+     "person_mean": 46.08,
+     "max_abs_diff": 13.97
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.51,
+     "p95": 5.9
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 31.65,
+     "person_mean": 36.93,
+     "max_abs_diff": 18.77
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.33,
+     "p95": 5.72
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.253,
+     "drift_mean_of_segments_cm": 0.185,
+     "robot_toe_speed_p95_mps": 0.0167,
+     "robot_toe_speed_max_mps": 0.0416,
+     "share_above_0p01mps": 0.1299
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.207,
+     "drift_mean_of_segments_cm": 0.165,
+     "robot_toe_speed_p95_mps": 0.0275,
+     "robot_toe_speed_max_mps": 0.0572,
+     "share_above_0p01mps": 0.1056
+    },
+    "solver_foot_xy_deviation_max_cm": 0.233,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_table_k1.0": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 14.36,
+     "person_mean": 15.15,
+     "max_abs_diff": 1.88
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 74.66,
+     "person_mean": 71.17,
+     "max_abs_diff": 4.66
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 32.68,
+     "person_mean": 35.56,
+     "max_abs_diff": 11.36
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.65,
+     "p95": 4.21
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 32.12,
+     "person_mean": 34.54,
+     "max_abs_diff": 5.68
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.08,
+     "p95": 4.46
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.267,
+     "drift_mean_of_segments_cm": 0.206,
+     "robot_toe_speed_p95_mps": 0.0389,
+     "robot_toe_speed_max_mps": 0.059,
+     "share_above_0p01mps": 0.2857
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.284,
+     "drift_mean_of_segments_cm": 0.173,
+     "robot_toe_speed_p95_mps": 0.038,
+     "robot_toe_speed_max_mps": 0.0578,
+     "share_above_0p01mps": 0.1439
+    },
+    "solver_foot_xy_deviation_max_cm": 0.206,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 31.76,
+     "person_mean": 22.64,
+     "max_abs_diff": 14.17
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.94,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.31
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 44.92,
+     "person_mean": 46.08,
+     "max_abs_diff": 14.43
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.56,
+     "p95": 5.53
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 34.92,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.1
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.95,
+     "p95": 5.9
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.268,
+     "drift_mean_of_segments_cm": 0.188,
+     "robot_toe_speed_p95_mps": 0.0251,
+     "robot_toe_speed_max_mps": 0.0444,
+     "share_above_0p01mps": 0.1921
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.253,
+     "drift_mean_of_segments_cm": 0.199,
+     "robot_toe_speed_p95_mps": 0.0276,
+     "robot_toe_speed_max_mps": 0.0537,
+     "share_above_0p01mps": 0.1222
+    },
+    "solver_foot_xy_deviation_max_cm": 0.18,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_table_k1.1": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 18.44,
+     "person_mean": 15.15,
+     "max_abs_diff": 6.23
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.76,
+     "person_mean": 71.17,
+     "max_abs_diff": 8.93
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 37.86,
+     "person_mean": 35.56,
+     "max_abs_diff": 20.62
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.86,
+     "p95": 8.03
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 37.34,
+     "person_mean": 34.54,
+     "max_abs_diff": 5.17
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.71,
+     "p95": 8.24
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.233,
+     "drift_mean_of_segments_cm": 0.166,
+     "robot_toe_speed_p95_mps": 0.038,
+     "robot_toe_speed_max_mps": 0.0767,
+     "share_above_0p01mps": 0.3333
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.269,
+     "drift_mean_of_segments_cm": 0.175,
+     "robot_toe_speed_p95_mps": 0.0355,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.1511
+    },
+    "solver_foot_xy_deviation_max_cm": 0.257,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 26.24,
+     "person_mean": 22.64,
+     "max_abs_diff": 14.15
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.65,
+     "person_mean": 72.28,
+     "max_abs_diff": 8.15
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 52.72,
+     "person_mean": 46.08,
+     "max_abs_diff": 15.07
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.76,
+     "p95": 7.38
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 43.51,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.81
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.32,
+     "p95": 8.28
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.265,
+     "drift_mean_of_segments_cm": 0.199,
+     "robot_toe_speed_p95_mps": 0.0322,
+     "robot_toe_speed_max_mps": 0.0502,
+     "share_above_0p01mps": 0.2203
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.296,
+     "drift_mean_of_segments_cm": 0.264,
+     "robot_toe_speed_p95_mps": 0.0245,
+     "robot_toe_speed_max_mps": 0.05,
+     "share_above_0p01mps": 0.0944
+    },
+    "solver_foot_xy_deviation_max_cm": 0.172,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_table_k1.2": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 17.38,
+     "person_mean": 15.15,
+     "max_abs_diff": 6.21
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.62,
+     "person_mean": 71.17,
+     "max_abs_diff": 10.14
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.71,
+     "person_mean": 35.56,
+     "max_abs_diff": 37.06
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.87,
+     "p95": 10.44
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 51.09,
+     "person_mean": 34.54,
+     "max_abs_diff": 20.6
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.4,
+     "p95": 10.43
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.22,
+     "drift_mean_of_segments_cm": 0.164,
+     "robot_toe_speed_p95_mps": 0.0418,
+     "robot_toe_speed_max_mps": 0.0668,
+     "share_above_0p01mps": 0.2449
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.265,
+     "drift_mean_of_segments_cm": 0.183,
+     "robot_toe_speed_p95_mps": 0.037,
+     "robot_toe_speed_max_mps": 0.0515,
+     "share_above_0p01mps": 0.1223
+    },
+    "solver_foot_xy_deviation_max_cm": 0.236,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 24.22,
+     "person_mean": 22.64,
+     "max_abs_diff": 9.96
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.93,
+     "person_mean": 72.28,
+     "max_abs_diff": 8.74
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 65.11,
+     "person_mean": 46.08,
+     "max_abs_diff": 28.36
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.55,
+     "p95": 10.65
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 56.48,
+     "person_mean": 36.93,
+     "max_abs_diff": 33.03
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.02,
+     "p95": 10.43
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.281,
+     "drift_mean_of_segments_cm": 0.178,
+     "robot_toe_speed_p95_mps": 0.0294,
+     "robot_toe_speed_max_mps": 0.0601,
+     "share_above_0p01mps": 0.1751
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.303,
+     "drift_mean_of_segments_cm": 0.272,
+     "robot_toe_speed_p95_mps": 0.0252,
+     "robot_toe_speed_max_mps": 0.0506,
+     "share_above_0p01mps": 0.2167
+    },
+    "solver_foot_xy_deviation_max_cm": 0.2,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6C_bin_k0.8": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 33.04,
+     "person_mean": 25.12,
+     "max_abs_diff": 11.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.22,
+     "person_mean": 75.8,
+     "max_abs_diff": 5.15
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 61.49,
+     "person_mean": 70.47,
+     "max_abs_diff": 20.43
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.69,
+     "p95": 8.81
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 59.51,
+     "person_mean": 66.17,
+     "max_abs_diff": 14.45
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.87,
+     "p95": 7.69
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.288,
+     "drift_mean_of_segments_cm": 0.174,
+     "robot_toe_speed_p95_mps": 0.042,
+     "robot_toe_speed_max_mps": 0.0607,
+     "share_above_0p01mps": 0.2201
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.298,
+     "drift_mean_of_segments_cm": 0.103,
+     "robot_toe_speed_p95_mps": 0.0349,
+     "robot_toe_speed_max_mps": 0.0668,
+     "share_above_0p01mps": 0.1842
+    },
+    "solver_foot_xy_deviation_max_cm": 0.21,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 29.1,
+     "person_mean": 24.18,
+     "max_abs_diff": 17.71
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.98,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.37
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 66.94,
+     "person_mean": 66.96,
+     "max_abs_diff": 25.59
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.01,
+     "p95": 8.68
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 63.13,
+     "person_mean": 57.27,
+     "max_abs_diff": 34.1
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.79,
+     "p95": 10.58
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.285,
+     "drift_mean_of_segments_cm": 0.2,
+     "robot_toe_speed_p95_mps": 0.0428,
+     "robot_toe_speed_max_mps": 0.0639,
+     "share_above_0p01mps": 0.2756
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.338,
+     "drift_mean_of_segments_cm": 0.209,
+     "robot_toe_speed_p95_mps": 0.0242,
+     "robot_toe_speed_max_mps": 0.049,
+     "share_above_0p01mps": 0.1258
+    },
+    "solver_foot_xy_deviation_max_cm": 0.204,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6C_bin_k0.9": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 24.42,
+     "person_mean": 25.12,
+     "max_abs_diff": 7.44
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.95,
+     "person_mean": 75.8,
+     "max_abs_diff": 6.05
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 70.7,
+     "person_mean": 70.47,
+     "max_abs_diff": 21.38
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 10.31,
+     "p95": 12.2
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 65.9,
+     "person_mean": 66.17,
+     "max_abs_diff": 16.52
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.43,
+     "p95": 10.6
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.261,
+     "drift_mean_of_segments_cm": 0.135,
+     "robot_toe_speed_p95_mps": 0.0353,
+     "robot_toe_speed_max_mps": 0.0606,
+     "share_above_0p01mps": 0.2264
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.302,
+     "drift_mean_of_segments_cm": 0.148,
+     "robot_toe_speed_p95_mps": 0.0346,
+     "robot_toe_speed_max_mps": 0.0599,
+     "share_above_0p01mps": 0.1776
+    },
+    "solver_foot_xy_deviation_max_cm": 0.232,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 26.24,
+     "person_mean": 24.18,
+     "max_abs_diff": 17.97
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.63,
+     "person_mean": 72.75,
+     "max_abs_diff": 8.34
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 74.93,
+     "person_mean": 66.96,
+     "max_abs_diff": 26.3
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.92,
+     "p95": 13.96
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 69.47,
+     "person_mean": 57.27,
+     "max_abs_diff": 52.26
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 11.37,
+     "p95": 15.43
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.248,
+     "drift_mean_of_segments_cm": 0.162,
+     "robot_toe_speed_p95_mps": 0.0338,
+     "robot_toe_speed_max_mps": 0.0477,
+     "share_above_0p01mps": 0.0833
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.347,
+     "drift_mean_of_segments_cm": 0.203,
+     "robot_toe_speed_p95_mps": 0.0277,
+     "robot_toe_speed_max_mps": 0.0457,
+     "share_above_0p01mps": 0.2138
+    },
+    "solver_foot_xy_deviation_max_cm": 0.2,
+    "solver_foot_height_deviation_max_cm": 0.725
+   }
+  },
+  "r6C_bin_k1.0": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 19.32,
+     "person_mean": 25.12,
+     "max_abs_diff": 15.71
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.27,
+     "person_mean": 75.8,
+     "max_abs_diff": 6.63
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 88.68,
+     "person_mean": 70.47,
+     "max_abs_diff": 43.1
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 12.29,
+     "p95": 16.7
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 77.61,
+     "person_mean": 66.17,
+     "max_abs_diff": 24.78
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 12.89,
+     "p95": 14.7
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.257,
+     "drift_mean_of_segments_cm": 0.154,
+     "robot_toe_speed_p95_mps": 0.0411,
+     "robot_toe_speed_max_mps": 0.0628,
+     "share_above_0p01mps": 0.239
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.273,
+     "drift_mean_of_segments_cm": 0.164,
+     "robot_toe_speed_p95_mps": 0.0419,
+     "robot_toe_speed_max_mps": 0.0548,
+     "share_above_0p01mps": 0.2171
+    },
+    "solver_foot_xy_deviation_max_cm": 0.269,
+    "solver_foot_height_deviation_max_cm": 0.709
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 21.5,
+     "person_mean": 24.18,
+     "max_abs_diff": 14.72
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.93,
+     "person_mean": 72.75,
+     "max_abs_diff": 8.71
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 74.9,
+     "person_mean": 66.96,
+     "max_abs_diff": 47.62
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 14.21,
+     "p95": 17.52
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.55,
+     "person_mean": 57.27,
+     "max_abs_diff": 56.25
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 15.51,
+     "p95": 21.77
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.301,
+     "drift_mean_of_segments_cm": 0.169,
+     "robot_toe_speed_p95_mps": 0.0405,
+     "robot_toe_speed_max_mps": 0.0615,
+     "share_above_0p01mps": 0.2244
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.333,
+     "drift_mean_of_segments_cm": 0.231,
+     "robot_toe_speed_p95_mps": 0.0328,
+     "robot_toe_speed_max_mps": 0.0558,
+     "share_above_0p01mps": 0.1635
+    },
+    "solver_foot_xy_deviation_max_cm": 0.19,
+    "solver_foot_height_deviation_max_cm": 0.732
+   }
+  },
+  "r6C_bin_k1.1": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 16.84,
+     "person_mean": 25.12,
+     "max_abs_diff": 17.8
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.52,
+     "person_mean": 75.8,
+     "max_abs_diff": 7.03
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 101.66,
+     "person_mean": 70.47,
+     "max_abs_diff": 53.38
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 12.89,
+     "p95": 20.39
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 87.79,
+     "person_mean": 66.17,
+     "max_abs_diff": 32.47
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 19.19,
+     "p95": 23.86
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.257,
+     "drift_mean_of_segments_cm": 0.143,
+     "robot_toe_speed_p95_mps": 0.0547,
+     "robot_toe_speed_max_mps": 0.0663,
+     "share_above_0p01mps": 0.2138
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.346,
+     "drift_mean_of_segments_cm": 0.164,
+     "robot_toe_speed_p95_mps": 0.046,
+     "robot_toe_speed_max_mps": 0.0624,
+     "share_above_0p01mps": 0.1974
+    },
+    "solver_foot_xy_deviation_max_cm": 0.253,
+    "solver_foot_height_deviation_max_cm": 0.736
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 18.83,
+     "person_mean": 24.18,
+     "max_abs_diff": 17.35
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.07,
+     "person_mean": 72.75,
+     "max_abs_diff": 8.97
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 73.31,
+     "person_mean": 66.96,
+     "max_abs_diff": 64.65
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 19.45,
+     "p95": 25.03
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.77,
+     "person_mean": 57.27,
+     "max_abs_diff": 57.8
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 20.11,
+     "p95": 29.83
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.285,
+     "drift_mean_of_segments_cm": 0.161,
+     "robot_toe_speed_p95_mps": 0.0422,
+     "robot_toe_speed_max_mps": 0.0764,
+     "share_above_0p01mps": 0.1731
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.321,
+     "drift_mean_of_segments_cm": 0.18,
+     "robot_toe_speed_p95_mps": 0.0284,
+     "robot_toe_speed_max_mps": 0.0667,
+     "share_above_0p01mps": 0.195
+    },
+    "solver_foot_xy_deviation_max_cm": 0.224,
+    "solver_foot_height_deviation_max_cm": 0.76
+   }
+  },
+  "r6C_bin_k1.2": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 15.16,
+     "person_mean": 25.12,
+     "max_abs_diff": 20.15
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.62,
+     "person_mean": 75.8,
+     "max_abs_diff": 7.18
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 111.82,
+     "person_mean": 70.47,
+     "max_abs_diff": 57.26
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 14.35,
+     "p95": 22.76
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 91.37,
+     "person_mean": 66.17,
+     "max_abs_diff": 41.53
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 25.9,
+     "p95": 36.71
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.222,
+     "drift_mean_of_segments_cm": 0.161,
+     "robot_toe_speed_p95_mps": 0.0513,
+     "robot_toe_speed_max_mps": 0.0715,
+     "share_above_0p01mps": 0.2956
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.366,
+     "drift_mean_of_segments_cm": 0.195,
+     "robot_toe_speed_p95_mps": 0.042,
+     "robot_toe_speed_max_mps": 0.0532,
+     "share_above_0p01mps": 0.2368
+    },
+    "solver_foot_xy_deviation_max_cm": 0.23,
+    "solver_foot_height_deviation_max_cm": 0.764
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 16.41,
+     "person_mean": 24.18,
+     "max_abs_diff": 25.61
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.39,
+     "person_mean": 72.75,
+     "max_abs_diff": 9.47
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 67.74,
+     "person_mean": 66.96,
+     "max_abs_diff": 91.2
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 23.91,
+     "p95": 31.35
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 59.06,
+     "person_mean": 57.27,
+     "max_abs_diff": 53.75
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 24.05,
+     "p95": 36.13
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.337,
+     "drift_mean_of_segments_cm": 0.19,
+     "robot_toe_speed_p95_mps": 0.0433,
+     "robot_toe_speed_max_mps": 0.0738,
+     "share_above_0p01mps": 0.2308
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.286,
+     "drift_mean_of_segments_cm": 0.178,
+     "robot_toe_speed_p95_mps": 0.0365,
+     "robot_toe_speed_max_mps": 0.0581,
+     "share_above_0p01mps": 0.2704
+    },
+    "solver_foot_xy_deviation_max_cm": 0.214,
+    "solver_foot_height_deviation_max_cm": 0.897
+   }
+  },
+  "r6C_chair_k0.8": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 52.62,
+     "person_mean": 44.92,
+     "max_abs_diff": 16.67
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 70.05,
+     "person_mean": 73.89,
+     "max_abs_diff": 7.54
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 55.21,
+     "person_mean": 54.85,
+     "max_abs_diff": 6.39
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.39,
+     "p95": 8.14
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 48.78,
+     "person_mean": 54.25,
+     "max_abs_diff": 13.25
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.72,
+     "p95": 8.36
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.125,
+     "drift_mean_of_segments_cm": 0.115,
+     "robot_toe_speed_p95_mps": 0.0369,
+     "robot_toe_speed_max_mps": 0.0534,
+     "share_above_0p01mps": 0.2043
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.279,
+     "drift_mean_of_segments_cm": 0.143,
+     "robot_toe_speed_p95_mps": 0.0374,
+     "robot_toe_speed_max_mps": 0.0569,
+     "share_above_0p01mps": 0.2
+    },
+    "solver_foot_xy_deviation_max_cm": 0.211,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 102.45,
+     "person_mean": 95.58,
+     "max_abs_diff": 14.86
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 63.19,
+     "person_mean": 65.89,
+     "max_abs_diff": 5.83
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 131.4,
+     "person_mean": 137.36,
+     "max_abs_diff": 17.18
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.77,
+     "p95": 6.14
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 100.68,
+     "person_mean": 105.2,
+     "max_abs_diff": 19.57
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.56,
+     "p95": 6.91
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.22,
+     "drift_mean_of_segments_cm": 0.213,
+     "robot_toe_speed_p95_mps": 0.0427,
+     "robot_toe_speed_max_mps": 0.0637,
+     "share_above_0p01mps": 0.12
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.095,
+     "drift_mean_of_segments_cm": 0.078,
+     "robot_toe_speed_p95_mps": 0.0159,
+     "robot_toe_speed_max_mps": 0.043,
+     "share_above_0p01mps": 0.0776
+    },
+    "solver_foot_xy_deviation_max_cm": 0.198,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_chair_k0.9": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 49.24,
+     "person_mean": 44.92,
+     "max_abs_diff": 12.84
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 72.97,
+     "person_mean": 73.89,
+     "max_abs_diff": 3.72
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.44,
+     "person_mean": 54.85,
+     "max_abs_diff": 9.18
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 2.22,
+     "p95": 3.84
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 51.29,
+     "person_mean": 54.25,
+     "max_abs_diff": 7.24
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.61,
+     "p95": 3.51
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.192,
+     "drift_mean_of_segments_cm": 0.133,
+     "robot_toe_speed_p95_mps": 0.0367,
+     "robot_toe_speed_max_mps": 0.0468,
+     "share_above_0p01mps": 0.1935
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.206,
+     "drift_mean_of_segments_cm": 0.108,
+     "robot_toe_speed_p95_mps": 0.0277,
+     "robot_toe_speed_max_mps": 0.0676,
+     "share_above_0p01mps": 0.2353
+    },
+    "solver_foot_xy_deviation_max_cm": 0.228,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 102.71,
+     "person_mean": 95.58,
+     "max_abs_diff": 12.84
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 67.06,
+     "person_mean": 65.89,
+     "max_abs_diff": 3.02
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 129.83,
+     "person_mean": 137.36,
+     "max_abs_diff": 18.43
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 2.59,
+     "p95": 4.67
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 101.38,
+     "person_mean": 105.2,
+     "max_abs_diff": 15.1
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.56,
+     "p95": 4.74
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.231,
+     "drift_mean_of_segments_cm": 0.218,
+     "robot_toe_speed_p95_mps": 0.0429,
+     "robot_toe_speed_max_mps": 0.0835,
+     "share_above_0p01mps": 0.232
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.198,
+     "drift_mean_of_segments_cm": 0.146,
+     "robot_toe_speed_p95_mps": 0.0263,
+     "robot_toe_speed_max_mps": 0.0589,
+     "share_above_0p01mps": 0.0948
+    },
+    "solver_foot_xy_deviation_max_cm": 0.281,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_chair_k1.0": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 45.51,
+     "person_mean": 44.92,
+     "max_abs_diff": 11.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.3,
+     "person_mean": 73.89,
+     "max_abs_diff": 3.7
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 52.46,
+     "person_mean": 54.85,
+     "max_abs_diff": 8.62
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.84,
+     "p95": 5.28
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 54.08,
+     "person_mean": 54.25,
+     "max_abs_diff": 5.88
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.57,
+     "p95": 5.9
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.217,
+     "drift_mean_of_segments_cm": 0.135,
+     "robot_toe_speed_p95_mps": 0.028,
+     "robot_toe_speed_max_mps": 0.0484,
+     "share_above_0p01mps": 0.172
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.172,
+     "drift_mean_of_segments_cm": 0.136,
+     "robot_toe_speed_p95_mps": 0.0352,
+     "robot_toe_speed_max_mps": 0.0495,
+     "share_above_0p01mps": 0.2824
+    },
+    "solver_foot_xy_deviation_max_cm": 0.178,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 97.36,
+     "person_mean": 95.58,
+     "max_abs_diff": 5.17
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 68.67,
+     "person_mean": 65.89,
+     "max_abs_diff": 4.74
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 128.14,
+     "person_mean": 137.36,
+     "max_abs_diff": 21.12
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.7,
+     "p95": 5.95
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 100.92,
+     "person_mean": 105.2,
+     "max_abs_diff": 12.7
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 3.81,
+     "p95": 5.46
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.246,
+     "drift_mean_of_segments_cm": 0.212,
+     "robot_toe_speed_p95_mps": 0.0385,
+     "robot_toe_speed_max_mps": 0.0691,
+     "share_above_0p01mps": 0.16
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.2,
+     "drift_mean_of_segments_cm": 0.139,
+     "robot_toe_speed_p95_mps": 0.0226,
+     "robot_toe_speed_max_mps": 0.0579,
+     "share_above_0p01mps": 0.1034
+    },
+    "solver_foot_xy_deviation_max_cm": 0.203,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6C_chair_k1.1": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 42.23,
+     "person_mean": 44.92,
+     "max_abs_diff": 11.21
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.51,
+     "person_mean": 73.89,
+     "max_abs_diff": 5.9
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.04,
+     "person_mean": 54.85,
+     "max_abs_diff": 8.6
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.8,
+     "p95": 8.01
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 58.34,
+     "person_mean": 54.25,
+     "max_abs_diff": 11.78
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 8.1,
+     "p95": 10.01
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.207,
+     "drift_mean_of_segments_cm": 0.127,
+     "robot_toe_speed_p95_mps": 0.0267,
+     "robot_toe_speed_max_mps": 0.0651,
+     "share_above_0p01mps": 0.1398
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.235,
+     "drift_mean_of_segments_cm": 0.152,
+     "robot_toe_speed_p95_mps": 0.0327,
+     "robot_toe_speed_max_mps": 0.0551,
+     "share_above_0p01mps": 0.2235
+    },
+    "solver_foot_xy_deviation_max_cm": 0.216,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 92.19,
+     "person_mean": 95.58,
+     "max_abs_diff": 8.64
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 70.04,
+     "person_mean": 65.89,
+     "max_abs_diff": 6.17
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 125.65,
+     "person_mean": 137.36,
+     "max_abs_diff": 21.47
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.04,
+     "p95": 9.5
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 101.74,
+     "person_mean": 105.2,
+     "max_abs_diff": 10.84
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.61,
+     "p95": 8.41
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.25,
+     "drift_mean_of_segments_cm": 0.234,
+     "robot_toe_speed_p95_mps": 0.0363,
+     "robot_toe_speed_max_mps": 0.0717,
+     "share_above_0p01mps": 0.144
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.138,
+     "drift_mean_of_segments_cm": 0.121,
+     "robot_toe_speed_p95_mps": 0.0272,
+     "robot_toe_speed_max_mps": 0.0401,
+     "share_above_0p01mps": 0.1121
+    },
+    "solver_foot_xy_deviation_max_cm": 0.242,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6C_chair_k1.2": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 39.72,
+     "person_mean": 44.92,
+     "max_abs_diff": 14.51
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.14,
+     "person_mean": 73.89,
+     "max_abs_diff": 7.77
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.66,
+     "person_mean": 54.85,
+     "max_abs_diff": 6.07
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.35,
+     "p95": 11.98
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 63.11,
+     "person_mean": 54.25,
+     "max_abs_diff": 25.0
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 11.06,
+     "p95": 13.12
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.206,
+     "drift_mean_of_segments_cm": 0.124,
+     "robot_toe_speed_p95_mps": 0.0315,
+     "robot_toe_speed_max_mps": 0.0437,
+     "share_above_0p01mps": 0.172
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.236,
+     "drift_mean_of_segments_cm": 0.15,
+     "robot_toe_speed_p95_mps": 0.031,
+     "robot_toe_speed_max_mps": 0.045,
+     "share_above_0p01mps": 0.1882
+    },
+    "solver_foot_xy_deviation_max_cm": 0.174,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 87.53,
+     "person_mean": 95.58,
+     "max_abs_diff": 16.39
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 71.34,
+     "person_mean": 65.89,
+     "max_abs_diff": 7.52
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 122.86,
+     "person_mean": 137.36,
+     "max_abs_diff": 25.14
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 11.17,
+     "p95": 12.39
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 102.96,
+     "person_mean": 105.2,
+     "max_abs_diff": 8.2
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.66,
+     "p95": 12.1
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.277,
+     "drift_mean_of_segments_cm": 0.222,
+     "robot_toe_speed_p95_mps": 0.0308,
+     "robot_toe_speed_max_mps": 0.0681,
+     "share_above_0p01mps": 0.128
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.099,
+     "drift_mean_of_segments_cm": 0.064,
+     "robot_toe_speed_p95_mps": 0.0064,
+     "robot_toe_speed_max_mps": 0.0374,
+     "share_above_0p01mps": 0.0172
+    },
+    "solver_foot_xy_deviation_max_cm": 0.212,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6C_push": {
+   "r0": {
+    "contact_frames": 147,
+    "torso_tilt_deg": {
+     "robot_mean": 51.78,
+     "person_mean": 64.17,
+     "max_abs_diff": 17.08
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 68.76,
+     "person_mean": 65.32,
+     "max_abs_diff": 6.74
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 72.12,
+     "person_mean": 44.43,
+     "max_abs_diff": 37.05
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 17.57,
+     "p95": 19.34
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.75,
+     "person_mean": 39.5,
+     "max_abs_diff": 38.12
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 17.81,
+     "p95": 21.35
+    },
+    "foot_slide_left": {
+     "support_frames": 45,
+     "segments": 2,
+     "drift_max_cm": 0.164,
+     "drift_mean_of_segments_cm": 0.141,
+     "robot_toe_speed_p95_mps": 0.0307,
+     "robot_toe_speed_max_mps": 0.0541,
+     "share_above_0p01mps": 0.2444
+    },
+    "foot_slide_right": {
+     "support_frames": 64,
+     "segments": 2,
+     "drift_max_cm": 0.264,
+     "drift_mean_of_segments_cm": 0.231,
+     "robot_toe_speed_p95_mps": 0.0573,
+     "robot_toe_speed_max_mps": 0.0663,
+     "share_above_0p01mps": 0.1719
+    },
+    "solver_foot_xy_deviation_max_cm": 0.21,
+    "solver_foot_height_deviation_max_cm": 0.502
+   }
+  },
+  "r6C_pull": {
+   "r0": {
+    "contact_frames": 171,
+    "torso_tilt_deg": {
+     "robot_mean": 66.22,
+     "person_mean": 59.92,
+     "max_abs_diff": 17.08
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.55,
+     "person_mean": 66.89,
+     "max_abs_diff": 10.43
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 34.74,
+     "person_mean": 36.36,
+     "max_abs_diff": 19.16
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 13.06,
+     "p95": 15.33
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 31.06,
+     "person_mean": 33.14,
+     "max_abs_diff": 16.97
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 13.36,
+     "p95": 15.21
+    },
+    "foot_slide_left": {
+     "support_frames": 50,
+     "segments": 2,
+     "drift_max_cm": 0.214,
+     "drift_mean_of_segments_cm": 0.116,
+     "robot_toe_speed_p95_mps": 0.0397,
+     "robot_toe_speed_max_mps": 0.0504,
+     "share_above_0p01mps": 0.22
+    },
+    "foot_slide_right": {
+     "support_frames": 92,
+     "segments": 2,
+     "drift_max_cm": 0.275,
+     "drift_mean_of_segments_cm": 0.236,
+     "robot_toe_speed_p95_mps": 0.0341,
+     "robot_toe_speed_max_mps": 0.062,
+     "share_above_0p01mps": 0.2283
+    },
+    "solver_foot_xy_deviation_max_cm": 0.209,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_table_k0.8": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 12.48,
+     "person_mean": 15.15,
+     "max_abs_diff": 5.13
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 63.18,
+     "person_mean": 71.17,
+     "max_abs_diff": 8.71
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 30.53,
+     "person_mean": 35.56,
+     "max_abs_diff": 10.03
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.2,
+     "p95": 9.68
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 30.46,
+     "person_mean": 34.54,
+     "max_abs_diff": 7.3
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.13,
+     "p95": 7.84
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.192,
+     "drift_mean_of_segments_cm": 0.153,
+     "robot_toe_speed_p95_mps": 0.0342,
+     "robot_toe_speed_max_mps": 0.0596,
+     "share_above_0p01mps": 0.2177
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.263,
+     "drift_mean_of_segments_cm": 0.208,
+     "robot_toe_speed_p95_mps": 0.0418,
+     "robot_toe_speed_max_mps": 0.0608,
+     "share_above_0p01mps": 0.259
+    },
+    "solver_foot_xy_deviation_max_cm": 0.208,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 37.05,
+     "person_mean": 22.64,
+     "max_abs_diff": 20.23
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 70.77,
+     "person_mean": 72.28,
+     "max_abs_diff": 6.71
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 42.36,
+     "person_mean": 46.08,
+     "max_abs_diff": 14.47
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.77,
+     "p95": 8.74
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 30.95,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.01
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.4,
+     "p95": 8.18
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.23,
+     "drift_mean_of_segments_cm": 0.17,
+     "robot_toe_speed_p95_mps": 0.0284,
+     "robot_toe_speed_max_mps": 0.0636,
+     "share_above_0p01mps": 0.1582
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.227,
+     "drift_mean_of_segments_cm": 0.201,
+     "robot_toe_speed_p95_mps": 0.0312,
+     "robot_toe_speed_max_mps": 0.0585,
+     "share_above_0p01mps": 0.1889
+    },
+    "solver_foot_xy_deviation_max_cm": 0.197,
+    "solver_foot_height_deviation_max_cm": 0.507
+   }
+  },
+  "r6Cp_table_k0.9": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 14.64,
+     "person_mean": 15.15,
+     "max_abs_diff": 2.33
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 69.38,
+     "person_mean": 71.17,
+     "max_abs_diff": 2.67
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 32.56,
+     "person_mean": 35.56,
+     "max_abs_diff": 8.24
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.74,
+     "p95": 4.2
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 30.85,
+     "person_mean": 34.54,
+     "max_abs_diff": 6.94
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 1.65,
+     "p95": 2.78
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.258,
+     "drift_mean_of_segments_cm": 0.176,
+     "robot_toe_speed_p95_mps": 0.0384,
+     "robot_toe_speed_max_mps": 0.0668,
+     "share_above_0p01mps": 0.2449
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.282,
+     "drift_mean_of_segments_cm": 0.207,
+     "robot_toe_speed_p95_mps": 0.0351,
+     "robot_toe_speed_max_mps": 0.0587,
+     "share_above_0p01mps": 0.1583
+    },
+    "solver_foot_xy_deviation_max_cm": 0.222,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 36.2,
+     "person_mean": 22.64,
+     "max_abs_diff": 18.1
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.67,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.03
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 41.77,
+     "person_mean": 46.08,
+     "max_abs_diff": 14.65
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.51,
+     "p95": 5.9
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 31.6,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.2
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.33,
+     "p95": 5.71
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.253,
+     "drift_mean_of_segments_cm": 0.158,
+     "robot_toe_speed_p95_mps": 0.0125,
+     "robot_toe_speed_max_mps": 0.0416,
+     "share_above_0p01mps": 0.113
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.206,
+     "drift_mean_of_segments_cm": 0.155,
+     "robot_toe_speed_p95_mps": 0.0272,
+     "robot_toe_speed_max_mps": 0.0574,
+     "share_above_0p01mps": 0.1167
+    },
+    "solver_foot_xy_deviation_max_cm": 0.233,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_table_k1.0": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 14.39,
+     "person_mean": 15.15,
+     "max_abs_diff": 1.91
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 74.67,
+     "person_mean": 71.17,
+     "max_abs_diff": 4.6
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 33.33,
+     "person_mean": 35.56,
+     "max_abs_diff": 11.06
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.71,
+     "p95": 4.08
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 32.01,
+     "person_mean": 34.54,
+     "max_abs_diff": 5.68
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.1,
+     "p95": 4.47
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.258,
+     "drift_mean_of_segments_cm": 0.198,
+     "robot_toe_speed_p95_mps": 0.0364,
+     "robot_toe_speed_max_mps": 0.056,
+     "share_above_0p01mps": 0.2993
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.285,
+     "drift_mean_of_segments_cm": 0.175,
+     "robot_toe_speed_p95_mps": 0.039,
+     "robot_toe_speed_max_mps": 0.0583,
+     "share_above_0p01mps": 0.1439
+    },
+    "solver_foot_xy_deviation_max_cm": 0.196,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 31.76,
+     "person_mean": 22.64,
+     "max_abs_diff": 13.72
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.95,
+     "person_mean": 72.28,
+     "max_abs_diff": 7.31
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 45.02,
+     "person_mean": 46.08,
+     "max_abs_diff": 14.84
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.56,
+     "p95": 5.53
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 35.05,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.39
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.94,
+     "p95": 5.92
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.268,
+     "drift_mean_of_segments_cm": 0.161,
+     "robot_toe_speed_p95_mps": 0.0238,
+     "robot_toe_speed_max_mps": 0.0443,
+     "share_above_0p01mps": 0.1638
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.275,
+     "drift_mean_of_segments_cm": 0.202,
+     "robot_toe_speed_p95_mps": 0.0276,
+     "robot_toe_speed_max_mps": 0.0512,
+     "share_above_0p01mps": 0.1167
+    },
+    "solver_foot_xy_deviation_max_cm": 0.172,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6Cp_table_k1.1": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 18.53,
+     "person_mean": 15.15,
+     "max_abs_diff": 5.8
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.77,
+     "person_mean": 71.17,
+     "max_abs_diff": 8.96
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 38.89,
+     "person_mean": 35.56,
+     "max_abs_diff": 19.7
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.89,
+     "p95": 7.94
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 37.2,
+     "person_mean": 34.54,
+     "max_abs_diff": 4.79
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.73,
+     "p95": 8.25
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.232,
+     "drift_mean_of_segments_cm": 0.162,
+     "robot_toe_speed_p95_mps": 0.0354,
+     "robot_toe_speed_max_mps": 0.0747,
+     "share_above_0p01mps": 0.3469
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.269,
+     "drift_mean_of_segments_cm": 0.174,
+     "robot_toe_speed_p95_mps": 0.035,
+     "robot_toe_speed_max_mps": 0.0433,
+     "share_above_0p01mps": 0.1439
+    },
+    "solver_foot_xy_deviation_max_cm": 0.251,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 26.31,
+     "person_mean": 22.64,
+     "max_abs_diff": 13.94
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.66,
+     "person_mean": 72.28,
+     "max_abs_diff": 8.15
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 52.97,
+     "person_mean": 46.08,
+     "max_abs_diff": 14.88
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.76,
+     "p95": 7.42
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 43.79,
+     "person_mean": 36.93,
+     "max_abs_diff": 19.23
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.31,
+     "p95": 8.29
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.265,
+     "drift_mean_of_segments_cm": 0.189,
+     "robot_toe_speed_p95_mps": 0.0312,
+     "robot_toe_speed_max_mps": 0.0508,
+     "share_above_0p01mps": 0.2542
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.296,
+     "drift_mean_of_segments_cm": 0.251,
+     "robot_toe_speed_p95_mps": 0.0238,
+     "robot_toe_speed_max_mps": 0.05,
+     "share_above_0p01mps": 0.1
+    },
+    "solver_foot_xy_deviation_max_cm": 0.175,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_table_k1.2": {
+   "r0": {
+    "contact_frames": 237,
+    "torso_tilt_deg": {
+     "robot_mean": 17.59,
+     "person_mean": 15.15,
+     "max_abs_diff": 4.51
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.62,
+     "person_mean": 71.17,
+     "max_abs_diff": 10.16
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 55.36,
+     "person_mean": 35.56,
+     "max_abs_diff": 35.04
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.02,
+     "p95": 10.56
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 50.71,
+     "person_mean": 34.54,
+     "max_abs_diff": 20.31
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.37,
+     "p95": 10.5
+    },
+    "foot_slide_left": {
+     "support_frames": 147,
+     "segments": 5,
+     "drift_max_cm": 0.221,
+     "drift_mean_of_segments_cm": 0.158,
+     "robot_toe_speed_p95_mps": 0.0426,
+     "robot_toe_speed_max_mps": 0.0699,
+     "share_above_0p01mps": 0.2585
+    },
+    "foot_slide_right": {
+     "support_frames": 139,
+     "segments": 5,
+     "drift_max_cm": 0.265,
+     "drift_mean_of_segments_cm": 0.183,
+     "robot_toe_speed_p95_mps": 0.0354,
+     "robot_toe_speed_max_mps": 0.0538,
+     "share_above_0p01mps": 0.1223
+    },
+    "solver_foot_xy_deviation_max_cm": 0.236,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 294,
+    "torso_tilt_deg": {
+     "robot_mean": 24.11,
+     "person_mean": 22.64,
+     "max_abs_diff": 7.93
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.93,
+     "person_mean": 72.28,
+     "max_abs_diff": 8.6
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 65.95,
+     "person_mean": 46.08,
+     "max_abs_diff": 28.66
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.55,
+     "p95": 10.41
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 56.72,
+     "person_mean": 36.93,
+     "max_abs_diff": 32.43
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.01,
+     "p95": 10.47
+    },
+    "foot_slide_left": {
+     "support_frames": 177,
+     "segments": 3,
+     "drift_max_cm": 0.281,
+     "drift_mean_of_segments_cm": 0.179,
+     "robot_toe_speed_p95_mps": 0.0319,
+     "robot_toe_speed_max_mps": 0.0601,
+     "share_above_0p01mps": 0.1751
+    },
+    "foot_slide_right": {
+     "support_frames": 180,
+     "segments": 3,
+     "drift_max_cm": 0.302,
+     "drift_mean_of_segments_cm": 0.268,
+     "robot_toe_speed_p95_mps": 0.0254,
+     "robot_toe_speed_max_mps": 0.0506,
+     "share_above_0p01mps": 0.2333
+    },
+    "solver_foot_xy_deviation_max_cm": 0.214,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_bin_k0.8": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 32.86,
+     "person_mean": 25.12,
+     "max_abs_diff": 10.99
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.23,
+     "person_mean": 75.8,
+     "max_abs_diff": 5.14
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 62.38,
+     "person_mean": 70.47,
+     "max_abs_diff": 19.52
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 7.73,
+     "p95": 8.84
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 60.15,
+     "person_mean": 66.17,
+     "max_abs_diff": 12.69
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.89,
+     "p95": 7.69
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.288,
+     "drift_mean_of_segments_cm": 0.167,
+     "robot_toe_speed_p95_mps": 0.0425,
+     "robot_toe_speed_max_mps": 0.0607,
+     "share_above_0p01mps": 0.2138
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.3,
+     "drift_mean_of_segments_cm": 0.118,
+     "robot_toe_speed_p95_mps": 0.0349,
+     "robot_toe_speed_max_mps": 0.0713,
+     "share_above_0p01mps": 0.1974
+    },
+    "solver_foot_xy_deviation_max_cm": 0.217,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 28.77,
+     "person_mean": 24.18,
+     "max_abs_diff": 17.6
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 78.96,
+     "person_mean": 72.75,
+     "max_abs_diff": 7.29
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 66.88,
+     "person_mean": 66.96,
+     "max_abs_diff": 20.14
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.89,
+     "p95": 8.54
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 62.5,
+     "person_mean": 57.27,
+     "max_abs_diff": 32.68
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 7.66,
+     "p95": 10.24
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.29,
+     "drift_mean_of_segments_cm": 0.2,
+     "robot_toe_speed_p95_mps": 0.0406,
+     "robot_toe_speed_max_mps": 0.0595,
+     "share_above_0p01mps": 0.2756
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.333,
+     "drift_mean_of_segments_cm": 0.23,
+     "robot_toe_speed_p95_mps": 0.03,
+     "robot_toe_speed_max_mps": 0.0528,
+     "share_above_0p01mps": 0.1132
+    },
+    "solver_foot_xy_deviation_max_cm": 0.216,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6Cp_bin_k0.9": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 24.32,
+     "person_mean": 25.12,
+     "max_abs_diff": 6.14
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.95,
+     "person_mean": 75.8,
+     "max_abs_diff": 6.09
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 71.56,
+     "person_mean": 70.47,
+     "max_abs_diff": 23.29
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 10.27,
+     "p95": 12.12
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 66.23,
+     "person_mean": 66.17,
+     "max_abs_diff": 14.48
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.44,
+     "p95": 10.51
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.259,
+     "drift_mean_of_segments_cm": 0.139,
+     "robot_toe_speed_p95_mps": 0.0389,
+     "robot_toe_speed_max_mps": 0.0609,
+     "share_above_0p01mps": 0.2138
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.302,
+     "drift_mean_of_segments_cm": 0.159,
+     "robot_toe_speed_p95_mps": 0.0357,
+     "robot_toe_speed_max_mps": 0.0731,
+     "share_above_0p01mps": 0.1776
+    },
+    "solver_foot_xy_deviation_max_cm": 0.264,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 25.71,
+     "person_mean": 24.18,
+     "max_abs_diff": 17.15
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.63,
+     "person_mean": 72.75,
+     "max_abs_diff": 8.4
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 74.32,
+     "person_mean": 66.96,
+     "max_abs_diff": 26.63
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.8,
+     "p95": 13.3
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.58,
+     "person_mean": 57.27,
+     "max_abs_diff": 50.38
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 11.2,
+     "p95": 15.2
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.331,
+     "drift_mean_of_segments_cm": 0.209,
+     "robot_toe_speed_p95_mps": 0.0246,
+     "robot_toe_speed_max_mps": 0.0609,
+     "share_above_0p01mps": 0.0962
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.345,
+     "drift_mean_of_segments_cm": 0.196,
+     "robot_toe_speed_p95_mps": 0.0335,
+     "robot_toe_speed_max_mps": 0.0709,
+     "share_above_0p01mps": 0.2327
+    },
+    "solver_foot_xy_deviation_max_cm": 0.222,
+    "solver_foot_height_deviation_max_cm": 0.725
+   }
+  },
+  "r6Cp_bin_k1.0": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 19.24,
+     "person_mean": 25.12,
+     "max_abs_diff": 14.6
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.27,
+     "person_mean": 75.8,
+     "max_abs_diff": 6.6
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 88.44,
+     "person_mean": 70.47,
+     "max_abs_diff": 42.91
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 12.12,
+     "p95": 16.62
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 77.99,
+     "person_mean": 66.17,
+     "max_abs_diff": 24.8
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 12.81,
+     "p95": 14.59
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.257,
+     "drift_mean_of_segments_cm": 0.155,
+     "robot_toe_speed_p95_mps": 0.0424,
+     "robot_toe_speed_max_mps": 0.0642,
+     "share_above_0p01mps": 0.2516
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.278,
+     "drift_mean_of_segments_cm": 0.162,
+     "robot_toe_speed_p95_mps": 0.0412,
+     "robot_toe_speed_max_mps": 0.0578,
+     "share_above_0p01mps": 0.1711
+    },
+    "solver_foot_xy_deviation_max_cm": 0.269,
+    "solver_foot_height_deviation_max_cm": 0.711
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 21.18,
+     "person_mean": 24.18,
+     "max_abs_diff": 14.79
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.92,
+     "person_mean": 72.75,
+     "max_abs_diff": 8.75
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 73.8,
+     "person_mean": 66.96,
+     "max_abs_diff": 47.75
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 14.13,
+     "p95": 17.14
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 67.89,
+     "person_mean": 57.27,
+     "max_abs_diff": 54.66
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 15.34,
+     "p95": 21.57
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.306,
+     "drift_mean_of_segments_cm": 0.171,
+     "robot_toe_speed_p95_mps": 0.0387,
+     "robot_toe_speed_max_mps": 0.0606,
+     "share_above_0p01mps": 0.2628
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.329,
+     "drift_mean_of_segments_cm": 0.206,
+     "robot_toe_speed_p95_mps": 0.0301,
+     "robot_toe_speed_max_mps": 0.0677,
+     "share_above_0p01mps": 0.2327
+    },
+    "solver_foot_xy_deviation_max_cm": 0.212,
+    "solver_foot_height_deviation_max_cm": 0.729
+   }
+  },
+  "r6Cp_bin_k1.1": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 16.95,
+     "person_mean": 25.12,
+     "max_abs_diff": 16.89
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.55,
+     "person_mean": 75.8,
+     "max_abs_diff": 7.04
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 102.64,
+     "person_mean": 70.47,
+     "max_abs_diff": 52.65
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 13.01,
+     "p95": 20.27
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 90.03,
+     "person_mean": 66.17,
+     "max_abs_diff": 33.25
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 17.53,
+     "p95": 20.6
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.215,
+     "drift_mean_of_segments_cm": 0.134,
+     "robot_toe_speed_p95_mps": 0.0433,
+     "robot_toe_speed_max_mps": 0.0662,
+     "share_above_0p01mps": 0.2201
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.345,
+     "drift_mean_of_segments_cm": 0.141,
+     "robot_toe_speed_p95_mps": 0.0455,
+     "robot_toe_speed_max_mps": 0.0593,
+     "share_above_0p01mps": 0.2105
+    },
+    "solver_foot_xy_deviation_max_cm": 0.253,
+    "solver_foot_height_deviation_max_cm": 0.736
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 18.75,
+     "person_mean": 24.18,
+     "max_abs_diff": 18.76
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.07,
+     "person_mean": 72.75,
+     "max_abs_diff": 9.16
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 72.29,
+     "person_mean": 66.96,
+     "max_abs_diff": 64.68
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 19.24,
+     "p95": 25.62
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.45,
+     "person_mean": 57.27,
+     "max_abs_diff": 54.71
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 19.36,
+     "p95": 28.46
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.297,
+     "drift_mean_of_segments_cm": 0.172,
+     "robot_toe_speed_p95_mps": 0.0423,
+     "robot_toe_speed_max_mps": 0.0687,
+     "share_above_0p01mps": 0.2885
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.316,
+     "drift_mean_of_segments_cm": 0.235,
+     "robot_toe_speed_p95_mps": 0.0302,
+     "robot_toe_speed_max_mps": 0.0637,
+     "share_above_0p01mps": 0.1887
+    },
+    "solver_foot_xy_deviation_max_cm": 0.237,
+    "solver_foot_height_deviation_max_cm": 0.761
+   }
+  },
+  "r6Cp_bin_k1.2": {
+   "r0": {
+    "contact_frames": 78,
+    "torso_tilt_deg": {
+     "robot_mean": 15.35,
+     "person_mean": 25.12,
+     "max_abs_diff": 19.22
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 81.67,
+     "person_mean": 75.8,
+     "max_abs_diff": 7.19
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 113.18,
+     "person_mean": 70.47,
+     "max_abs_diff": 58.21
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 14.31,
+     "p95": 22.43
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 95.01,
+     "person_mean": 66.17,
+     "max_abs_diff": 41.46
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 24.33,
+     "p95": 33.07
+    },
+    "foot_slide_left": {
+     "support_frames": 159,
+     "segments": 11,
+     "drift_max_cm": 0.218,
+     "drift_mean_of_segments_cm": 0.128,
+     "robot_toe_speed_p95_mps": 0.0561,
+     "robot_toe_speed_max_mps": 0.0714,
+     "share_above_0p01mps": 0.239
+    },
+    "foot_slide_right": {
+     "support_frames": 152,
+     "segments": 7,
+     "drift_max_cm": 0.472,
+     "drift_mean_of_segments_cm": 0.205,
+     "robot_toe_speed_p95_mps": 0.0443,
+     "robot_toe_speed_max_mps": 0.0753,
+     "share_above_0p01mps": 0.2368
+    },
+    "solver_foot_xy_deviation_max_cm": 0.277,
+    "solver_foot_height_deviation_max_cm": 0.749
+   },
+   "r1": {
+    "contact_frames": 226,
+    "torso_tilt_deg": {
+     "robot_mean": 16.48,
+     "person_mean": 24.18,
+     "max_abs_diff": 25.15
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 80.41,
+     "person_mean": 72.75,
+     "max_abs_diff": 9.61
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 68.33,
+     "person_mean": 66.96,
+     "max_abs_diff": 91.94
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 23.85,
+     "p95": 31.94
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 60.34,
+     "person_mean": 57.27,
+     "max_abs_diff": 54.24
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 23.92,
+     "p95": 36.07
+    },
+    "foot_slide_left": {
+     "support_frames": 156,
+     "segments": 2,
+     "drift_max_cm": 0.363,
+     "drift_mean_of_segments_cm": 0.257,
+     "robot_toe_speed_p95_mps": 0.0582,
+     "robot_toe_speed_max_mps": 0.1036,
+     "share_above_0p01mps": 0.2949
+    },
+    "foot_slide_right": {
+     "support_frames": 159,
+     "segments": 3,
+     "drift_max_cm": 0.321,
+     "drift_mean_of_segments_cm": 0.184,
+     "robot_toe_speed_p95_mps": 0.0351,
+     "robot_toe_speed_max_mps": 0.0751,
+     "share_above_0p01mps": 0.2893
+    },
+    "solver_foot_xy_deviation_max_cm": 0.329,
+    "solver_foot_height_deviation_max_cm": 0.881
+   }
+  },
+  "r6Cp_chair_k0.8": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 52.32,
+     "person_mean": 44.92,
+     "max_abs_diff": 15.93
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 69.96,
+     "person_mean": 73.89,
+     "max_abs_diff": 7.56
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 54.88,
+     "person_mean": 54.85,
+     "max_abs_diff": 6.12
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.35,
+     "p95": 8.09
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 48.77,
+     "person_mean": 54.25,
+     "max_abs_diff": 12.21
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 5.63,
+     "p95": 8.01
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.131,
+     "drift_mean_of_segments_cm": 0.111,
+     "robot_toe_speed_p95_mps": 0.0337,
+     "robot_toe_speed_max_mps": 0.0457,
+     "share_above_0p01mps": 0.2366
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.278,
+     "drift_mean_of_segments_cm": 0.16,
+     "robot_toe_speed_p95_mps": 0.0363,
+     "robot_toe_speed_max_mps": 0.0573,
+     "share_above_0p01mps": 0.2471
+    },
+    "solver_foot_xy_deviation_max_cm": 0.211,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 103.2,
+     "person_mean": 95.58,
+     "max_abs_diff": 14.03
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 63.52,
+     "person_mean": 65.89,
+     "max_abs_diff": 5.2
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 130.91,
+     "person_mean": 137.36,
+     "max_abs_diff": 17.03
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.6,
+     "p95": 5.85
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 100.71,
+     "person_mean": 105.2,
+     "max_abs_diff": 19.09
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.33,
+     "p95": 6.57
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.233,
+     "drift_mean_of_segments_cm": 0.224,
+     "robot_toe_speed_p95_mps": 0.0548,
+     "robot_toe_speed_max_mps": 0.0637,
+     "share_above_0p01mps": 0.208
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.14,
+     "drift_mean_of_segments_cm": 0.122,
+     "robot_toe_speed_p95_mps": 0.0111,
+     "robot_toe_speed_max_mps": 0.0427,
+     "share_above_0p01mps": 0.069
+    },
+    "solver_foot_xy_deviation_max_cm": 0.2,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_chair_k0.9": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 49.08,
+     "person_mean": 44.92,
+     "max_abs_diff": 12.82
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 72.93,
+     "person_mean": 73.89,
+     "max_abs_diff": 3.75
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.2,
+     "person_mean": 54.85,
+     "max_abs_diff": 8.94
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 2.22,
+     "p95": 3.79
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 51.02,
+     "person_mean": 54.25,
+     "max_abs_diff": 7.19
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.5,
+     "p95": 3.22
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.192,
+     "drift_mean_of_segments_cm": 0.132,
+     "robot_toe_speed_p95_mps": 0.0345,
+     "robot_toe_speed_max_mps": 0.0477,
+     "share_above_0p01mps": 0.2151
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.215,
+     "drift_mean_of_segments_cm": 0.121,
+     "robot_toe_speed_p95_mps": 0.0286,
+     "robot_toe_speed_max_mps": 0.0675,
+     "share_above_0p01mps": 0.2471
+    },
+    "solver_foot_xy_deviation_max_cm": 0.213,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 103.08,
+     "person_mean": 95.58,
+     "max_abs_diff": 12.28
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 67.25,
+     "person_mean": 65.89,
+     "max_abs_diff": 3.05
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 129.58,
+     "person_mean": 137.36,
+     "max_abs_diff": 16.97
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 2.56,
+     "p95": 4.64
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 101.2,
+     "person_mean": 105.2,
+     "max_abs_diff": 14.13
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 2.25,
+     "p95": 4.05
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.243,
+     "drift_mean_of_segments_cm": 0.237,
+     "robot_toe_speed_p95_mps": 0.0463,
+     "robot_toe_speed_max_mps": 0.0681,
+     "share_above_0p01mps": 0.336
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.198,
+     "drift_mean_of_segments_cm": 0.171,
+     "robot_toe_speed_p95_mps": 0.0098,
+     "robot_toe_speed_max_mps": 0.0586,
+     "share_above_0p01mps": 0.0517
+    },
+    "solver_foot_xy_deviation_max_cm": 0.21,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  },
+  "r6Cp_chair_k1.0": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 45.28,
+     "person_mean": 44.92,
+     "max_abs_diff": 10.11
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.26,
+     "person_mean": 73.89,
+     "max_abs_diff": 3.66
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 52.17,
+     "person_mean": 54.85,
+     "max_abs_diff": 8.56
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 3.86,
+     "p95": 5.26
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 53.56,
+     "person_mean": 54.25,
+     "max_abs_diff": 6.67
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 4.46,
+     "p95": 5.79
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.204,
+     "drift_mean_of_segments_cm": 0.128,
+     "robot_toe_speed_p95_mps": 0.0312,
+     "robot_toe_speed_max_mps": 0.0449,
+     "share_above_0p01mps": 0.1613
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.185,
+     "drift_mean_of_segments_cm": 0.141,
+     "robot_toe_speed_p95_mps": 0.0374,
+     "robot_toe_speed_max_mps": 0.0527,
+     "share_above_0p01mps": 0.3059
+    },
+    "solver_foot_xy_deviation_max_cm": 0.17,
+    "solver_foot_height_deviation_max_cm": 0.5
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 98.13,
+     "person_mean": 95.58,
+     "max_abs_diff": 5.64
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 69.03,
+     "person_mean": 65.89,
+     "max_abs_diff": 5.1
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 128.15,
+     "person_mean": 137.36,
+     "max_abs_diff": 20.68
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 4.89,
+     "p95": 6.18
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 100.85,
+     "person_mean": 105.2,
+     "max_abs_diff": 11.71
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 3.63,
+     "p95": 4.95
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.233,
+     "drift_mean_of_segments_cm": 0.222,
+     "robot_toe_speed_p95_mps": 0.0389,
+     "robot_toe_speed_max_mps": 0.0694,
+     "share_above_0p01mps": 0.216
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.2,
+     "drift_mean_of_segments_cm": 0.165,
+     "robot_toe_speed_p95_mps": 0.0117,
+     "robot_toe_speed_max_mps": 0.0579,
+     "share_above_0p01mps": 0.069
+    },
+    "solver_foot_xy_deviation_max_cm": 0.201,
+    "solver_foot_height_deviation_max_cm": 0.503
+   }
+  },
+  "r6Cp_chair_k1.1": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 41.95,
+     "person_mean": 44.92,
+     "max_abs_diff": 12.42
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 77.5,
+     "person_mean": 73.89,
+     "max_abs_diff": 5.84
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 52.76,
+     "person_mean": 54.85,
+     "max_abs_diff": 8.39
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 6.84,
+     "p95": 7.87
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 57.88,
+     "person_mean": 54.25,
+     "max_abs_diff": 16.75
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 8.09,
+     "p95": 9.92
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.207,
+     "drift_mean_of_segments_cm": 0.124,
+     "robot_toe_speed_p95_mps": 0.0269,
+     "robot_toe_speed_max_mps": 0.0662,
+     "share_above_0p01mps": 0.1398
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.236,
+     "drift_mean_of_segments_cm": 0.142,
+     "robot_toe_speed_p95_mps": 0.0333,
+     "robot_toe_speed_max_mps": 0.0407,
+     "share_above_0p01mps": 0.2588
+    },
+    "solver_foot_xy_deviation_max_cm": 0.219,
+    "solver_foot_height_deviation_max_cm": 0.502
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 92.74,
+     "person_mean": 95.58,
+     "max_abs_diff": 7.42
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 70.28,
+     "person_mean": 65.89,
+     "max_abs_diff": 6.17
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 125.72,
+     "person_mean": 137.36,
+     "max_abs_diff": 21.92
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 8.15,
+     "p95": 9.53
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 101.81,
+     "person_mean": 105.2,
+     "max_abs_diff": 9.77
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 6.5,
+     "p95": 8.14
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.24,
+     "drift_mean_of_segments_cm": 0.221,
+     "robot_toe_speed_p95_mps": 0.0299,
+     "robot_toe_speed_max_mps": 0.0515,
+     "share_above_0p01mps": 0.168
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.174,
+     "drift_mean_of_segments_cm": 0.152,
+     "robot_toe_speed_p95_mps": 0.0254,
+     "robot_toe_speed_max_mps": 0.0377,
+     "share_above_0p01mps": 0.1466
+    },
+    "solver_foot_xy_deviation_max_cm": 0.162,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6Cp_chair_k1.2": {
+   "r0": {
+    "contact_frames": 88,
+    "torso_tilt_deg": {
+     "robot_mean": 39.77,
+     "person_mean": 44.92,
+     "max_abs_diff": 16.91
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 79.21,
+     "person_mean": 73.89,
+     "max_abs_diff": 7.81
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 53.8,
+     "person_mean": 54.85,
+     "max_abs_diff": 6.42
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 9.34,
+     "p95": 11.93
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 62.76,
+     "person_mean": 54.25,
+     "max_abs_diff": 25.5
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 11.14,
+     "p95": 13.31
+    },
+    "foot_slide_left": {
+     "support_frames": 93,
+     "segments": 5,
+     "drift_max_cm": 0.206,
+     "drift_mean_of_segments_cm": 0.122,
+     "robot_toe_speed_p95_mps": 0.0311,
+     "robot_toe_speed_max_mps": 0.0437,
+     "share_above_0p01mps": 0.172
+    },
+    "foot_slide_right": {
+     "support_frames": 85,
+     "segments": 3,
+     "drift_max_cm": 0.237,
+     "drift_mean_of_segments_cm": 0.141,
+     "robot_toe_speed_p95_mps": 0.0329,
+     "robot_toe_speed_max_mps": 0.0471,
+     "share_above_0p01mps": 0.2235
+    },
+    "solver_foot_xy_deviation_max_cm": 0.174,
+    "solver_foot_height_deviation_max_cm": 0.501
+   },
+   "r1": {
+    "contact_frames": 85,
+    "torso_tilt_deg": {
+     "robot_mean": 88.06,
+     "person_mean": 95.58,
+     "max_abs_diff": 14.52
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 71.55,
+     "person_mean": 65.89,
+     "max_abs_diff": 7.59
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 123.16,
+     "person_mean": 137.36,
+     "max_abs_diff": 25.41
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 11.16,
+     "p95": 12.37
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 103.14,
+     "person_mean": 105.2,
+     "max_abs_diff": 8.23
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 9.59,
+     "p95": 11.89
+    },
+    "foot_slide_left": {
+     "support_frames": 125,
+     "segments": 2,
+     "drift_max_cm": 0.274,
+     "drift_mean_of_segments_cm": 0.273,
+     "robot_toe_speed_p95_mps": 0.0388,
+     "robot_toe_speed_max_mps": 0.0593,
+     "share_above_0p01mps": 0.184
+    },
+    "foot_slide_right": {
+     "support_frames": 116,
+     "segments": 2,
+     "drift_max_cm": 0.187,
+     "drift_mean_of_segments_cm": 0.105,
+     "robot_toe_speed_p95_mps": 0.0241,
+     "robot_toe_speed_max_mps": 0.0388,
+     "share_above_0p01mps": 0.1034
+    },
+    "solver_foot_xy_deviation_max_cm": 0.188,
+    "solver_foot_height_deviation_max_cm": 0.501
+   }
+  },
+  "r6Cp_push": {
+   "r0": {
+    "contact_frames": 147,
+    "torso_tilt_deg": {
+     "robot_mean": 53.05,
+     "person_mean": 64.17,
+     "max_abs_diff": 15.63
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 68.51,
+     "person_mean": 65.32,
+     "max_abs_diff": 6.92
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 71.67,
+     "person_mean": 44.43,
+     "max_abs_diff": 35.58
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 16.72,
+     "p95": 18.24
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 68.4,
+     "person_mean": 39.5,
+     "max_abs_diff": 40.5
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 16.54,
+     "p95": 20.38
+    },
+    "foot_slide_left": {
+     "support_frames": 45,
+     "segments": 2,
+     "drift_max_cm": 0.167,
+     "drift_mean_of_segments_cm": 0.146,
+     "robot_toe_speed_p95_mps": 0.0336,
+     "robot_toe_speed_max_mps": 0.0467,
+     "share_above_0p01mps": 0.2
+    },
+    "foot_slide_right": {
+     "support_frames": 64,
+     "segments": 2,
+     "drift_max_cm": 0.267,
+     "drift_mean_of_segments_cm": 0.233,
+     "robot_toe_speed_p95_mps": 0.0589,
+     "robot_toe_speed_max_mps": 0.0663,
+     "share_above_0p01mps": 0.1875
+    },
+    "solver_foot_xy_deviation_max_cm": 0.211,
+    "solver_foot_height_deviation_max_cm": 0.503
+   }
+  },
+  "r6Cp_pull": {
+   "r0": {
+    "contact_frames": 171,
+    "torso_tilt_deg": {
+     "robot_mean": 65.78,
+     "person_mean": 59.92,
+     "max_abs_diff": 17.16
+    },
+    "pelvis_height_cm": {
+     "robot_mean": 75.54,
+     "person_mean": 66.89,
+     "max_abs_diff": 10.47
+    },
+    "elbow_angle_left_deg": {
+     "robot_mean": 34.36,
+     "person_mean": 36.36,
+     "max_abs_diff": 19.98
+    },
+    "elbow_position_error_left_cm": {
+     "mean": 13.2,
+     "p95": 15.36
+    },
+    "elbow_angle_right_deg": {
+     "robot_mean": 30.09,
+     "person_mean": 33.14,
+     "max_abs_diff": 16.97
+    },
+    "elbow_position_error_right_cm": {
+     "mean": 13.46,
+     "p95": 15.24
+    },
+    "foot_slide_left": {
+     "support_frames": 50,
+     "segments": 2,
+     "drift_max_cm": 0.212,
+     "drift_mean_of_segments_cm": 0.114,
+     "robot_toe_speed_p95_mps": 0.0405,
+     "robot_toe_speed_max_mps": 0.0472,
+     "share_above_0p01mps": 0.22
+    },
+    "foot_slide_right": {
+     "support_frames": 92,
+     "segments": 2,
+     "drift_max_cm": 0.277,
+     "drift_mean_of_segments_cm": 0.237,
+     "robot_toe_speed_p95_mps": 0.0334,
+     "robot_toe_speed_max_mps": 0.062,
+     "share_above_0p01mps": 0.2283
+    },
+    "solver_foot_xy_deviation_max_cm": 0.209,
+    "solver_foot_height_deviation_max_cm": 0.5
+   }
+  }
+ }
+}

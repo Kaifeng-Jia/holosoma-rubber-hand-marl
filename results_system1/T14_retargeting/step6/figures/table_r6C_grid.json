@@ -1,0 +1,247 @@
+{
+ "task": "table",
+ "grid": "table_r6C_grid.jpg",
+ "bytes": 991023,
+ "jpeg_quality": 80,
+ "cameras": [
+  {
+   "column": "接触开始",
+   "frame_30hz": 0,
+   "time_s": 0.0,
+   "lookat": [
+    0.48808513342544,
+    0.23878815603495868,
+    0.6700309299912319
+   ],
+   "distance": 2.21815987636747,
+   "azimuth": 29.32053106441886,
+   "elevation": -25.0
+  },
+  {
+   "column": "中段",
+   "frame_30hz": 164,
+   "time_s": 5.467,
+   "lookat": [
+    0.3173100896605417,
+    0.07764284876731714,
+    0.6673775899109488
+   ],
+   "distance": 2.09392843534693,
+   "azimuth": 19.128260017529485,
+   "elevation": -25.0
+  },
+  {
+   "column": "接触结束",
+   "frame_30hz": 330,
+   "time_s": 11.0,
+   "lookat": [
+    -0.46556418547985345,
+    -1.3964583327976836,
+    0.6496914924302529
+   ],
+   "distance": 2.225563198266339,
+   "azimuth": 28.530763119978417,
+   "elevation": -25.0
+  }
+ ],
+ "closeup_camera": {
+  "r0": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 0,
+   "lookat": [
+    -0.23092045339808742,
+    -1.0425612365773298,
+    0.7755493066457757
+   ],
+   "distance": 1.1283868051658608,
+   "azimuth": 168.77887375834808,
+   "elevation": -10.0
+  },
+  "r1": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 1,
+   "lookat": [
+    -0.1403691432944158,
+    -0.31793889067297076,
+    0.7820231353908731
+   ],
+   "distance": 1.1522876006406886,
+   "azimuth": -12.088928796817726,
+   "elevation": -10.0
+  }
+ },
+ "closeup_frames": {
+  "k = 0.8": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    0.0267,
+    -0.6055,
+    0.56
+   ],
+   "lookat_r1": [
+    0.097,
+    -0.0588,
+    0.5776
+   ]
+  },
+  "k = 0.9": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.0387,
+    -0.7161,
+    0.6197
+   ],
+   "lookat_r1": [
+    0.037,
+    -0.1234,
+    0.6346
+   ]
+  },
+  "k = 1.0": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.1034,
+    -0.8249,
+    0.6764
+   ],
+   "lookat_r1": [
+    -0.0248,
+    -0.1893,
+    0.6842
+   ]
+  },
+  "k = 1.1": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.1674,
+    -0.9334,
+    0.7267
+   ],
+   "lookat_r1": [
+    -0.0829,
+    -0.2541,
+    0.7326
+   ]
+  },
+  "k = 1.2": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.2309,
+    -1.0426,
+    0.7755
+   ],
+   "lookat_r1": [
+    -0.1404,
+    -0.3179,
+    0.782
+   ]
+  }
+ },
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r6/table_k0p8_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "2d45539bf276288cc965ea509b56ee7c15aae0065bb287245faff6e30a1cd5c5",
+   "urdf": "exports_system1/T14_references/r6/table_k0p8_C/table_k0p8.urdf",
+   "urdf_sha256": "c729ffa58d1d5c99745960fef75661bb9cc2f7e09e90802274d6020718724da4",
+   "numbers": [
+    "接触保持率 0.619",
+    "最大穿透 0.12 cm",
+    "求解成功：是",
+    "机器人最小间隙 27.5 cm",
+    "接触位置误差 1.5 / 1.6 cm"
+   ]
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r6/table_k0p9_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "944cf99a743f572f8fc4a394a005b5dd8efc27682d521c99c33f23b80c32f3ad",
+   "urdf": "exports_system1/T14_references/r6/table_k0p9_C/table_k0p9.urdf",
+   "urdf_sha256": "b9a176db2f67d9d2b661aa1f2e737beef835438f94560ae4d53b89351fc6e3af",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.12 cm",
+    "求解成功：是",
+    "机器人最小间隙 27.7 cm",
+    "接触位置误差 1.6 / 1.3 cm"
+   ]
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r6/table_k1p0_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "059deaee7c8f56058816559f67f6ac33eec12f768629bd578f6d0249e4400928",
+   "urdf": "exports_system1/T14_references/r6/table_k1p0_C/table_k1p0.urdf",
+   "urdf_sha256": "41e0204ed6ff5ad757123e4038bf506cdc23113480faf213461f1d91bb822f3b",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.14 cm",
+    "求解成功：是",
+    "机器人最小间隙 28.8 cm",
+    "接触位置误差 1.6 / 1.1 cm"
+   ]
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/r6/table_k1p1_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "a6bf73da100c644d3a7ee3392e202db39953bfa045e9f81866ab964f7cab2b1b",
+   "urdf": "exports_system1/T14_references/r6/table_k1p1_C/table_k1p1.urdf",
+   "urdf_sha256": "b56ec77502f67d3b4af207e82337fb94f60a93355c9fdf6ce074d38e52ee22f7",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.18 cm",
+    "求解成功：是",
+    "机器人最小间隙 29.4 cm",
+    "接触位置误差 2.0 / 1.9 cm"
+   ]
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/r6/table_k1p2_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "aa7d63ba8acb8b4cbdff963f8fd9118bae84cc10ab98706e4d490ed4bcad09e9",
+   "urdf": "exports_system1/T14_references/r6/table_k1p2_C/table_k1p2.urdf",
+   "urdf_sha256": "69b7bbea2b6e3dc2cc44dd3702ec03bbd63b250c8b8834bf5c4c3b929125719a",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.21 cm",
+    "求解成功：是",
+    "机器人最小间隙 33.2 cm",
+    "接触位置误差 3.2 / 3.2 cm"
+   ]
+  }
+ ],
+ "contact_frames_30hz": [
+  0,
+  164,
+  330
+ ],
+ "helper_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "preset": "g1_native_execution",
+ "rules": "T14 items 1-2: size-level grid figure and video per task (kinematic references, not policy replays). Render only, CPU.\n\nLevels: Table / Bin / Chair k = 0.8 ... 1.2 (two-person, uniform scale); Push / Pull m = a, 1.0, 1.5, 2.0 (single person,\nstretched table). Each level = a 30 Hz two-robot reference (robot_qpos [T, 2, 36] wxyz) + object pose + that level's object\nURDF.\n\nColumns (same for every level): contact start, middle, end = first / middle / last source frame in which any hand of the\nperson(s) touches the object (any SMPL-X hand vertex within 1.5 cm, the stop-1 rule), as 30 Hz reference frames.\n\nGrid: one row per level, one column per moment, full view (both robots and the whole object). The camera of a column is\nthe same for every row, fitted (U5 camera_for, 7 % border) to the robot and object mesh bounds of the LARGEST level at that\nframe; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 deg + 30 deg, elevation -25 deg. Each cell\nis labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max\npenetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).\n\nClose-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical\nposition. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the\nmiddle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),\nelevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width\npanels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are\nthose of the largest level; the look-at point is that robot's hand centroid at each level's own frame.\n\nVideo: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over\nits whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_sizes.py --task table --levels levels.json --out results_system1/T14_retargeting/step2_sizes/figures --video-out exports_system1/T14_videos\n"
+}

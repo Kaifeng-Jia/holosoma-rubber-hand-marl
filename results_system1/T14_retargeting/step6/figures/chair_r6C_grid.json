@@ -1,0 +1,247 @@
+{
+ "task": "chair",
+ "grid": "chair_r6C_grid.jpg",
+ "bytes": 944673,
+ "jpeg_quality": 75,
+ "cameras": [
+  {
+   "column": "接触开始",
+   "frame_30hz": 110,
+   "time_s": 3.667,
+   "lookat": [
+    -0.15227603907495196,
+    0.7001473814882201,
+    0.5118825715632516
+   ],
+   "distance": 2.0558823907983546,
+   "azimuth": -235.19527239956744,
+   "elevation": -25.0
+  },
+  {
+   "column": "中段",
+   "frame_30hz": 154,
+   "time_s": 5.133,
+   "lookat": [
+    -0.16431560983023724,
+    0.46776781669160217,
+    0.6358570916737311
+   ],
+   "distance": 2.06913577271111,
+   "azimuth": -231.7246930758921,
+   "elevation": -25.0
+  },
+  {
+   "column": "接触结束",
+   "frame_30hz": 198,
+   "time_s": 6.6,
+   "lookat": [
+    -0.15325254890980083,
+    0.1366099522772936,
+    0.6756945751963735
+   ],
+   "distance": 2.2561346167877656,
+   "azimuth": 102.45260529249526,
+   "elevation": -25.0
+  }
+ ],
+ "closeup_camera": {
+  "r0": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 0,
+   "lookat": [
+    0.2092920526299828,
+    0.3951307829796613,
+    0.7445468993546027
+   ],
+   "distance": 1.3696971830949298,
+   "azimuth": -55.32438853565819,
+   "elevation": -10.0
+  },
+  "r1": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 1,
+   "lookat": [
+    -0.34591451763075526,
+    0.26172565696355693,
+    0.6373880520708046
+   ],
+   "distance": 1.0599883426341958,
+   "azimuth": 59.438373132000734,
+   "elevation": -10.0
+  }
+ },
+ "closeup_frames": {
+  "k = 0.8": {
+   "frame_30hz": 160,
+   "human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+   ],
+   "lookat_r0": [
+    0.1777,
+    0.5116,
+    0.557
+   ],
+   "lookat_r1": [
+    -0.2989,
+    0.414,
+    0.454
+   ]
+  },
+  "k = 0.9": {
+   "frame_30hz": 160,
+   "human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+   ],
+   "lookat_r0": [
+    0.1899,
+    0.4833,
+    0.6097
+   ],
+   "lookat_r1": [
+    -0.3143,
+    0.374,
+    0.5016
+   ]
+  },
+  "k = 1.0": {
+   "frame_30hz": 160,
+   "human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+   ],
+   "lookat_r0": [
+    0.2007,
+    0.4542,
+    0.6605
+   ],
+   "lookat_r1": [
+    -0.3244,
+    0.3359,
+    0.5474
+   ]
+  },
+  "k = 1.1": {
+   "frame_30hz": 160,
+   "human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+   ],
+   "lookat_r0": [
+    0.2106,
+    0.426,
+    0.7095
+   ],
+   "lookat_r1": [
+    -0.3363,
+    0.3001,
+    0.5924
+   ]
+  },
+  "k = 1.2": {
+   "frame_30hz": 160,
+   "human_to_robot_scales": [
+    0.7616803111061523,
+    0.7267058142765197
+   ],
+   "lookat_r0": [
+    0.2093,
+    0.3951,
+    0.7445
+   ],
+   "lookat_r1": [
+    -0.3459,
+    0.2617,
+    0.6374
+   ]
+  }
+ },
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r6/chair_k0p8_C/chair_new_fps30.npz",
+   "pair_sha256": "43caaa43e0b712f8333d58dc1d5aa6bf23f0cb94746dc00abc86cca63eb76920",
+   "urdf": "exports_system1/T14_references/r6/chair_k0p8_C/chair_k0p8.urdf",
+   "urdf_sha256": "9e6bfe06ac00e807a6812d9f9ce473ded04c23f1b7bb861ac72f2a354e038df8",
+   "numbers": [
+    "接触保持率 0.863",
+    "最大穿透 0.18 cm",
+    "求解成功：是",
+    "机器人最小间隙 7.1 cm",
+    "接触位置误差 1.1 / 1.4 cm"
+   ]
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r6/chair_k0p9_C/chair_new_fps30.npz",
+   "pair_sha256": "fad50f982382c16b53887e3a82e34b0c7ca36354252d1d4abef6c3629dd1e05d",
+   "urdf": "exports_system1/T14_references/r6/chair_k0p9_C/chair_k0p9.urdf",
+   "urdf_sha256": "abeb2755afc0b58f9afd87b0b8e620af0d3cb72686cde6382fe715df6fa62de7",
+   "numbers": [
+    "接触保持率 0.873",
+    "最大穿透 0.14 cm",
+    "求解成功：是",
+    "机器人最小间隙 7.1 cm",
+    "接触位置误差 1.3 / 1.4 cm"
+   ]
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r6/chair_k1p0_C/chair_new_fps30.npz",
+   "pair_sha256": "28befbbe704d1e7daca262fde02e916004154f27bce5ed06df20ba7b796b4d05",
+   "urdf": "exports_system1/T14_references/r6/chair_k1p0_C/chair_k1p0.urdf",
+   "urdf_sha256": "de1619ccd2b390df4aaa85d6dd8b9918a88e45a71fb63fb2e21833b158b08b20",
+   "numbers": [
+    "接触保持率 0.892",
+    "最大穿透 0.17 cm",
+    "求解成功：是",
+    "机器人最小间隙 8.5 cm",
+    "接触位置误差 1.9 / 1.5 cm"
+   ]
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/r6/chair_k1p1_C/chair_new_fps30.npz",
+   "pair_sha256": "6218d6a2d56576cbdedea8a3fdd18fded4efe9962c390471f4e81741667cc855",
+   "urdf": "exports_system1/T14_references/r6/chair_k1p1_C/chair_k1p1.urdf",
+   "urdf_sha256": "30a2a04bc80c65c7f350bf80d8698ed532deaa7c52bde54e1763d2132bd91a50",
+   "numbers": [
+    "接触保持率 0.902",
+    "最大穿透 0.16 cm",
+    "求解成功：是",
+    "机器人最小间隙 8.5 cm",
+    "接触位置误差 2.4 / 1.8 cm"
+   ]
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/r6/chair_k1p2_C/chair_new_fps30.npz",
+   "pair_sha256": "19cf2870917bc078f751fe681c40bfe6b7251ff1fc8c84476c6dbff42ad8fd43",
+   "urdf": "exports_system1/T14_references/r6/chair_k1p2_C/chair_k1p2.urdf",
+   "urdf_sha256": "48514a5733ac66b5752ae6d3e50aa716467ccf298789cbd0925f2f29d8ff28a1",
+   "numbers": [
+    "接触保持率 0.922",
+    "最大穿透 0.19 cm",
+    "求解成功：是",
+    "机器人最小间隙 8.7 cm",
+    "接触位置误差 3.1 / 2.2 cm"
+   ]
+  }
+ ],
+ "contact_frames_30hz": [
+  110,
+  154,
+  198
+ ],
+ "helper_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "preset": "g1_native_execution",
+ "rules": "T14 items 1-2: size-level grid figure and video per task (kinematic references, not policy replays). Render only, CPU.\n\nLevels: Table / Bin / Chair k = 0.8 ... 1.2 (two-person, uniform scale); Push / Pull m = a, 1.0, 1.5, 2.0 (single person,\nstretched table). Each level = a 30 Hz two-robot reference (robot_qpos [T, 2, 36] wxyz) + object pose + that level's object\nURDF.\n\nColumns (same for every level): contact start, middle, end = first / middle / last source frame in which any hand of the\nperson(s) touches the object (any SMPL-X hand vertex within 1.5 cm, the stop-1 rule), as 30 Hz reference frames.\n\nGrid: one row per level, one column per moment, full view (both robots and the whole object). The camera of a column is\nthe same for every row, fitted (U5 camera_for, 7 % border) to the robot and object mesh bounds of the LARGEST level at that\nframe; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 deg + 30 deg, elevation -25 deg. Each cell\nis labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max\npenetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).\n\nClose-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical\nposition. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the\nmiddle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),\nelevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width\npanels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are\nthose of the largest level; the look-at point is that robot's hand centroid at each level's own frame.\n\nVideo: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over\nits whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_sizes.py --task table --levels levels.json --out results_system1/T14_retargeting/step2_sizes/figures --video-out exports_system1/T14_videos\n"
+}

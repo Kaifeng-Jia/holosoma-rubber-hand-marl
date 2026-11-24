@@ -116,11 +116,13 @@ def main():
     (OUT / "a_levels.json").write_text(json.dumps(a_levels, indent=1) + "\n")
     legs = []
     for v, src in (("A", ROOT / "results_system1/T14_retargeting/step4"), ("B", ROOT / "results_system1/T14_retargeting/step4"),
-                   ("round3", ROOT / "results_system1/T14_retargeting/step4"), ("C", STEP4), ("r6C", OUT), ("r6Cp", OUT)):
+                   ("round3", ROOT / "results_system1/T14_retargeting/step4"), ("r5C", OUT), ("r6C", OUT), ("r6Cp", OUT)):
         j = load(src / "push_legs" / f"push_legs_{v}.json")
         if j:
+            # human side: step 4 files used the InterMimic table; round 6 (r5C recomputed, r6C, r6Cp) the OMOMO capture table the hands touch
+            ht = "OMOMO capture" if src == OUT else "InterMimic largetable.obj"
             for L in j["links"]:
-                legs.append(dict(version={"C": "round5C", "r6C": "round6C", "r6Cp": "round6Cp"}.get(v, v), link=L["link"], human_part=L["human_part"], robot_min_r0_cm=L["robot_min_cm"].get("r0"), robot_min_r1_cm=L["robot_min_cm"].get("r1"),
+                legs.append(dict(version={"r5C": "round5C", "r6C": "round6C", "r6Cp": "round6Cp"}.get(v, v), human_table=ht, link=L["link"], human_part=L["human_part"], robot_min_r0_cm=L["robot_min_cm"].get("r0"), robot_min_r1_cm=L["robot_min_cm"].get("r1"),
                                  robot_min_frame_r0=L["robot_min_frame"].get("r0"), human_min_cm=L["human_min_cm"], human_min_frame=L["human_min_frame"]))
     if legs:
         write("push_legs.csv", legs)
@@ -128,7 +130,7 @@ def main():
     rec.mkdir(exist_ok=True)
     for rr in sorted(S.glob("*/person*/run_record.json")) + sorted(S.glob("single*/run_record.json")):
         shutil.copy(rr, rec / ("solve__" + "__".join(rr.relative_to(S).parts[:-1]) + ".json"))
-    for cr in sorted((ROOT / "exports_system1/T14_references/r4").glob("*/combine_record.json")):
+    for cr in sorted((ROOT / "exports_system1/T14_references/r6").glob("*/combine_record.json")):
         shutil.copy(cr, rec / f"combine__{cr.parent.name}.json")
     for f in [S / "pipeline.json", S / "jobs.txt", S / "run.log"] + sorted((S / "levels").glob("*.json")):
         if f.exists():

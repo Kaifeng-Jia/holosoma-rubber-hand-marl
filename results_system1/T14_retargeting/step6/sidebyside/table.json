@@ -1,0 +1,280 @@
+{
+ "rules": "T14 section 10 item 5: draw the palm normal (red) and finger direction (blue) arrows that the hand metrics use, on the\nperson's hands and the robot's hands, side by side (same frame, same azimuth / elevation; human distance / human-to-robot\nscale), for a few contact frames, and print the per-frame angles the metric computes for those frames.\n\nArrows start at the palm point (person: mean of the 67 palm-side SMPL-X vertices; robot: palm point of the simulator hand\nhull); length 10 cm on the robot, 10 cm / scale on the person. Directions are the metric's (hand_landmarks.human_directions /\nrobot_directions) mapped to world.\n\n    sonic_s1/bin/python -B system1/t14/verify_hand_axes.py --task push --ref A=<single qpos npz>@1.0 --ref B=... --out <jpg>\n    sonic_s1/bin/python -B system1/t14/verify_hand_axes.py --task table --ref A=<pair npz>@1.0 ... --out <jpg>\n",
+ "frames": [
+  33,
+  165,
+  297
+ ],
+ "report": [
+  {
+   "ref": "第5轮C",
+   "frame": 33,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.5,
+     "finger_deg": 13.4
+    },
+    "right": {
+     "palm_deg": 3.7,
+     "finger_deg": 21.3
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 33,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.9,
+     "finger_deg": 13.0
+    },
+    "right": {
+     "palm_deg": 4.1,
+     "finger_deg": 21.0
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 33,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.8,
+     "finger_deg": 12.7
+    },
+    "right": {
+     "palm_deg": 4.2,
+     "finger_deg": 21.6
+    }
+   }
+  },
+  {
+   "ref": "第5轮C",
+   "frame": 33,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 4.4,
+     "finger_deg": 21.3
+    },
+    "right": {
+     "palm_deg": 4.3,
+     "finger_deg": 19.1
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 33,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 4.7,
+     "finger_deg": 21.1
+    },
+    "right": {
+     "palm_deg": 4.2,
+     "finger_deg": 18.8
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 33,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 4.7,
+     "finger_deg": 21.0
+    },
+    "right": {
+     "palm_deg": 4.1,
+     "finger_deg": 18.4
+    }
+   }
+  },
+  {
+   "ref": "第5轮C",
+   "frame": 165,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.3,
+     "finger_deg": 28.1
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 33.8
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 165,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.3,
+     "finger_deg": 28.1
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 33.8
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 165,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.4,
+     "finger_deg": 28.2
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 33.8
+    }
+   }
+  },
+  {
+   "ref": "第5轮C",
+   "frame": 165,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.2,
+     "finger_deg": 33.2
+    },
+    "right": {
+     "palm_deg": 3.2,
+     "finger_deg": 29.4
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 165,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.2,
+     "finger_deg": 33.2
+    },
+    "right": {
+     "palm_deg": 3.2,
+     "finger_deg": 29.4
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 165,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.2,
+     "finger_deg": 33.3
+    },
+    "right": {
+     "palm_deg": 3.3,
+     "finger_deg": 29.4
+    }
+   }
+  },
+  {
+   "ref": "第5轮C",
+   "frame": 297,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.2,
+     "finger_deg": 24.7
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 31.9
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 297,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.2,
+     "finger_deg": 24.7
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 31.9
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 297,
+   "robot": 0,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.3,
+     "finger_deg": 24.8
+    },
+    "right": {
+     "palm_deg": 3.5,
+     "finger_deg": 31.9
+    }
+   }
+  },
+  {
+   "ref": "第5轮C",
+   "frame": 297,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.1,
+     "finger_deg": 35.0
+    },
+    "right": {
+     "palm_deg": 2.9,
+     "finger_deg": 25.7
+    }
+   }
+  },
+  {
+   "ref": "第6轮C",
+   "frame": 297,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.1,
+     "finger_deg": 35.1
+    },
+    "right": {
+     "palm_deg": 2.9,
+     "finger_deg": 25.6
+    }
+   }
+  },
+  {
+   "ref": "第6轮C'",
+   "frame": 297,
+   "robot": 1,
+   "angles_vs_person": {
+    "left": {
+     "palm_deg": 3.1,
+     "finger_deg": 35.1
+    },
+    "right": {
+     "palm_deg": 3.0,
+     "finger_deg": 25.6
+    }
+   }
+  }
+ ]
+}

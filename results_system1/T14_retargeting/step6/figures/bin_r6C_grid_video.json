@@ -1,0 +1,26 @@
+{
+ "task": "bin",
+ "file": "exports_system1/T14_videos/r6_C/bin_sizes.mp4",
+ "frames": 1495,
+ "fps": 30,
+ "sha256": "ccc52ed431fe783fa6ad05b46abeef8746aa5f440bce80aaae5c5ac1a6edfa24",
+ "bytes": 5952790,
+ "camera": {
+  "lookat": [
+   -0.02203887644660607,
+   -1.1418838552548163,
+   0.7296299459894545
+  ],
+  "distance": 4.465345217302659,
+  "azimuth": -8.15344091245494,
+  "elevation": -25.0
+ },
+ "levels": [
+  "k = 0.8",
+  "k = 0.9",
+  "k = 1.0（原尺寸桶）",
+  "k = 1.1",
+  "k = 1.2"
+ ],
+ "rules": "T14 items 1-2: size-level grid figure and video per task (kinematic references, not policy replays). Render only, CPU.\n\nLevels: Table / Bin / Chair k = 0.8 ... 1.2 (two-person, uniform scale); Push / Pull m = a, 1.0, 1.5, 2.0 (single person,\nstretched table). Each level = a 30 Hz two-robot reference (robot_qpos [T, 2, 36] wxyz) + object pose + that level's object\nURDF.\n\nColumns (same for every level): contact start, middle, end = first / middle / last source frame in which any hand of the\nperson(s) touches the object (any SMPL-X hand vertex within 1.5 cm, the stop-1 rule), as 30 Hz reference frames.\n\nGrid: one row per level, one column per moment, full view (both robots and the whole object). The camera of a column is\nthe same for every row, fitted (U5 camera_for, 7 % border) to the robot and object mesh bounds of the LARGEST level at that\nframe; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 deg + 30 deg, elevation -25 deg. Each cell\nis labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max\npenetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).\n\nClose-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical\nposition. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the\nmiddle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),\nelevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width\npanels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are\nthose of the largest level; the look-at point is that robot's hand centroid at each level's own frame.\n\nVideo: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over\nits whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_sizes.py --task table --levels levels.json --out results_system1/T14_retargeting/step2_sizes/figures --video-out exports_system1/T14_videos\n"
+}

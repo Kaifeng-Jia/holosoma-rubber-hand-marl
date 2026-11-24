@@ -34,7 +34,9 @@ for name, rob in P.items():
             d[f"foot_{side}_support_frames"] = fs["support_frames"]
             d[f"foot_{side}_segments"] = fs["segments"]
             d[f"foot_{side}_drift_max_cm"] = fs["drift_max_cm"]
+            d[f"foot_{side}_drift_mean_of_segments_cm"] = fs["drift_mean_of_segments_cm"]
             d[f"foot_{side}_robot_toe_speed_p95_mps"] = fs["robot_toe_speed_p95_mps"]
+            d[f"foot_{side}_robot_toe_speed_max_mps"] = fs["robot_toe_speed_max_mps"]
             d[f"foot_{side}_share_above_0p01mps"] = fs["share_above_0p01mps"]
         d["solver_foot_xy_deviation_max_cm"] = x.get("solver_foot_xy_deviation_max_cm")
         rows.append(d)
@@ -50,7 +52,7 @@ for d in rows:
     if t == "table" and d["level"] != "single":
         r_h = R["table"]["persons"][f"person{int(d['robot'][1]) + 1}"]["r"]["height"] * d["level"]
     elif t in ("push", "pull"):
-        r_h = R[t]["persons"]["person"]["r_vs_intermimic"]["height"]
+        r_h = R[t]["persons"]["person"]["r_vs_capture"]["height"]  # the table the person touches (omomo_table_check.json)
     else:
         continue
     trend.append(dict(version=d["version"], task=t, level=d["level"], robot=d["robot"], r_height=round(r_h, 3),
@@ -93,3 +95,17 @@ print("|---" * 8 + "|")
 for x in trend:
     print(f"| {VER[x['version']]} | {x['task']} | {x['robot']} | {x['level']} | {x['r_height']} | {f(x['tilt_robot'])} / {f(x['tilt_person'])} | {f(x['pelvis_robot_cm'])} / {f(x['pelvis_person_cm'])} | {f(x['elbow_robot'])} / {f(x['elbow_person'])} |")
 print("\n**Table 单调性（k 增大即 r 增大：前倾角不增、骨盆不降）**：" + "；".join(f"{VER[k.split('_')[0]]} {k.split('_')[1]}：前倾{'是' if v['tilt_nonincreasing'] else '否'}、骨盆{'是' if v['pelvis_nondecreasing'] else '否'}" for k, v in mono.items()))
+
+print("\n**脚滑（第 4 节口径：支撑帧 = 人脚尖速度 < 0.01 m/s，平滑后；每个任务所有档、两台机器人、两只脚合在一起）**\n")
+print("| 任务 | 版本 | 支撑段数 | 段内漂移最大 cm（最大 / 各段均值） | 支撑帧脚尖速度 p95 m/s（各脚中位 / 最大） | 支撑帧脚尖速度最大 m/s | 支撑帧速度 > 0.01 m/s 占比（各脚均值） |")
+print("|---" * 7 + "|")
+for t in ("table", "bin", "chair", "push", "pull"):
+    for ver in VER:
+        g = [d for d in rows if d["task"] == t and d["version"] == ver]
+        if not g:
+            continue
+        val = lambda k: [d[f"foot_{s_}_{k}"] for d in g for s_ in ("left", "right") if d[f"foot_{s_}_{k}"] is not None]
+        dm, dmean, p95, vmax, sh = val("drift_max_cm"), val("drift_mean_of_segments_cm"), val("robot_toe_speed_p95_mps"), val("robot_toe_speed_max_mps"), val("share_above_0p01mps")
+        nseg = sum(d[f"foot_{s_}_segments"] for d in g for s_ in ("left", "right"))
+        print(f"| {t} | {VER[ver]} | {nseg} | {f(max(dm), 2) if dm else '—'} / {f(sum(dmean) / len(dmean), 2) if dmean else '—'} | "
+              f"{f(sorted(p95)[len(p95) // 2], 3) if p95 else '—'} / {f(max(p95), 3) if p95 else '—'} | {f(max(vmax), 3) if vmax else '—'} | {f(sum(sh) / len(sh), 2) if sh else '—'} |")
