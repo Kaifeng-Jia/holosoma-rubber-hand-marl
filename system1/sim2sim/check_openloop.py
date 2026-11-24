@@ -22,7 +22,8 @@ sys.path.insert(0, str(ROOT))
 from system1.sim2sim.mj_env import PairEnv  # noqa: E402
 
 RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
-            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
+            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"),
+            cout_table=("table", "C-out"), cout_bucket=("bucket", "C-out"), cout_pull=("pull", "C-out"))  # T13 C1: only with --runs
 T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
 STEPS = 50
 
@@ -67,7 +68,8 @@ def main():
     import matplotlib.pyplot as plt
     fig, axes = plt.subplots(1, 3, figsize=(12, 3.4))
     colors = dict(d_table="#eb6834", cin_table="#1baf7a", d_bucket="#b5461a", cin_bucket="#0e6e4c",
-                  d_push="#eb6834", d_pull="#b5461a", d_kick="#f2a37a", d_chair="#7a2e0f", cin_pull="#1baf7a")
+                  d_push="#eb6834", d_pull="#b5461a", d_kick="#f2a37a", d_chair="#7a2e0f", cin_pull="#1baf7a",
+                  cout_table="#2a78d6", cout_bucket="#164a8c", cout_pull="#6aa8ee")
     for run in runs:
         rr = [x for x in rows if x["run"] == run]
         t = [x["time_s"] for x in rr]

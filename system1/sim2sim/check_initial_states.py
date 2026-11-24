@@ -35,9 +35,13 @@ def qangle(a, b):
     return 2 * np.arccos(min(1.0, d))
 
 
-def isaac_dirs(tasks):
+def isaac_dirs(tasks, scheme=None):
     """(task, level) -> Isaac final evaluation directory with the <state>.initial.json files: T10 Table / Bin = the C-in seed-721
-    finals; T10s tasks = the D seed-721 finals (the initial state depends only on the state file and the reset)."""
+    finals; T10s tasks = the D seed-721 finals (the initial state depends only on the state file and the reset); scheme given
+    (T13 C1: C-out) = that scheme's seed-721 finals."""
+    if scheme is not None:
+        from system1.sim2sim.mj_eval import final_row
+        return {(t, l): ROOT / final_row(scheme, t, 721, l)["eval_dir"] for t in tasks for l in (2, 8)}
     if tuple(tasks) == ("table", "bucket"):
         return {k: ROOT / "logs_system1/post_train/final" / v for k, v in ISAAC.items()}
     from system1.sim2sim.mj_eval import final_row
@@ -48,10 +52,11 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--tasks", default="table,bucket")
+    ap.add_argument("--scheme", default=None, help="T13 C1: compare with this scheme's finals (C-out) and its own Isaac export; off = unchanged")
     a = ap.parse_args()
     tasks = a.tasks.split(",")
     rows, files = [], []
-    for (task, lvl), idir in isaac_dirs(tasks).items():
+    for (task, lvl), idir in isaac_dirs(tasks, a.scheme).items():
         name = idir.name
         launch = json.loads((idir.parent / (name + ".launch.json")).read_text())
         argv = launch["argv"]
@@ -59,7 +64,8 @@ def main():
         summ = json.loads((idir / "summary.json").read_text())
         assert sha(states_path) == summ["states_sha256"]
         files.append(dict(task=task, level=lvl, states=str(states_path), states_sha256=summ["states_sha256"], isaac_eval_dir=str(idir.relative_to(ROOT))))
-        env = PairEnv(ROOT / DUMP.get(task, f"logs_system1/t10/isaac/d_{task}/dump"), task)
+        dump_dir = DUMP.get(task, f"logs_system1/t10/isaac/d_{task}/dump") if a.scheme is None else f"logs_system1/t10/isaac/cout_{task}/dump"
+        env = PairEnv(ROOT / dump_dir, task)
         for init in json.loads(states_path.read_text())["states"]:
             env.reset(init)
             st = env.state()

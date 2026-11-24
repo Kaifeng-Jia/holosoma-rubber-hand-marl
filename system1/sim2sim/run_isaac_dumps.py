@@ -31,6 +31,12 @@ LAUNCH = dict(
     d_chair=ROOT / "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm2.launch.json",
     cin_pull=ROOT / "logs_system1/post_train/final/cin_pull_m20kg_seed721_joint8000_pm2.launch.json",
 )
+# T13 C1 (C-out sim2sim): the C-out seed-721 finals of T03 c2_main; only with --only (the default list above is unchanged)
+COUT_LAUNCH = dict(
+    cout_table=ROOT / "logs_system1/post_train/final/cout_table_m5kg_seed721_fresh12000_pm2.launch.json",
+    cout_bucket=ROOT / "logs_system1/post_train/final/cout_bucket_m1kg_seed721_fresh12000_pm2.launch.json",
+    cout_pull=ROOT / "logs_system1/post_train/final/cout_pull_m20kg_seed721_joint8000_pm2.launch.json",
+)
 SLOTS = ("16-23", "24-31")
 NY = ZoneInfo("America/New_York")
 
@@ -44,7 +50,7 @@ def sha(p):
 
 
 def argv_for(name):
-    L = json.loads(LAUNCH[name].read_text())
+    L = json.loads({**LAUNCH, **COUT_LAUNCH}[name].read_text())
     argv = list(L["argv"])
     if argv[0] == "taskset":
         argv = argv[3:]
@@ -72,7 +78,7 @@ def main():
             (OUT / name).mkdir(parents=True, exist_ok=True)
             ck = argv[argv.index("--checkpoint") + 1]
             st = argv[argv.index("--states") + 1]
-            rec = dict(name=name, argv=["taskset", "-c", slot, *argv], started=now(), source_launch=str(LAUNCH[name]), checkpoint_sha256=sha(ck),
+            rec = dict(name=name, argv=["taskset", "-c", slot, *argv], started=now(), source_launch=str({**LAUNCH, **COUT_LAUNCH}[name]), checkpoint_sha256=sha(ck),
                        states_sha256=sha(st), git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"), git_diff=git("diff"))
             log = (OUT / name / "stdout.log").open("w")
             p = subprocess.Popen(rec["argv"], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)

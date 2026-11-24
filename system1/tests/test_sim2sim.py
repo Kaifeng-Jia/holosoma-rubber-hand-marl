@@ -74,3 +74,29 @@ def test_controllers_step():
     assert target.shape == (2, 29) and np.isfinite(target).all() and info["sonic_tokenizer"].shape == (2, 1761)
     env.physics_step(target)
     assert np.isfinite(env.state()["root"]).all()
+
+
+@pytest.mark.skipif(not (ROOT / "exports_system1/t10/onnx/cout_table_seed721.onnx").exists(), reason="C-out ONNX export missing")
+def test_cout_controller_step():
+    """T13 C1: C-out = SONIC on the unmodified reference + paper-D scale * clip(a) on SONIC's output target; last action = raw a.
+    Runs on the C-out Isaac export when present, else on the C-in export (same scheme-C PD path)."""
+    from system1.sim2sim.mj_env import PairEnv
+    from system1.sim2sim.sonic_mj import COutController
+    cout = ROOT / "logs_system1/t10/isaac/cout_table/dump"
+    env = PairEnv(cout if (cout / "scene.json").exists() else CIN, "table")
+    ctrl = COutController(env, ROOT / "exports_system1/t10/onnx/cout_table_seed721.onnx", env.ss.control["action_scales"])
+    states = json.loads(Path("/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/table_states.json").read_text())["states"]
+    env.reset(states[0])
+    ctrl.reset()
+    st = env.state()
+    target, info = ctrl.step(st)
+    assert target.shape == (2, 29) and np.isfinite(target).all() and info["sonic_tokenizer"].shape == (2, 1761)
+    # q* - SONIC target = scale * clip(a): recompute SONIC alone on the same inputs from a fresh history
+    ctrl.sonic.reset()
+    _, target_s, _ = ctrl.sonic.act(*ctrl.sonic_inputs_out(st, 0))
+    a = info["actions"]
+    a_c = a if env.clip_a is None else np.clip(a, -env.clip_a, env.clip_a)
+    assert np.allclose(target - target_s[:, ctrl.sonic.s2h], a_c * np.asarray(env.ss.control["action_scales"]), atol=1e-6)
+    assert np.array_equal(ctrl.last, a)  # the actor's last-action input is the raw a (as D)
+    env.physics_step(target)
+    assert np.isfinite(env.state()["root"]).all()

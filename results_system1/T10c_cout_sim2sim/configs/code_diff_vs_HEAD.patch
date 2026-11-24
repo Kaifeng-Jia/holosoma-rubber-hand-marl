@@ -1,0 +1,521 @@
+diff --git a/system1/sim2sim/check_initial_states.py b/system1/sim2sim/check_initial_states.py
+index f9a6349..508df76 100644
+--- a/system1/sim2sim/check_initial_states.py
++++ b/system1/sim2sim/check_initial_states.py
+@@ -35,9 +35,13 @@ def qangle(a, b):
+     return 2 * np.arccos(min(1.0, d))
+ 
+ 
+-def isaac_dirs(tasks):
++def isaac_dirs(tasks, scheme=None):
+     """(task, level) -> Isaac final evaluation directory with the <state>.initial.json files: T10 Table / Bin = the C-in seed-721
+-    finals; T10s tasks = the D seed-721 finals (the initial state depends only on the state file and the reset)."""
++    finals; T10s tasks = the D seed-721 finals (the initial state depends only on the state file and the reset); scheme given
++    (T13 C1: C-out) = that scheme's seed-721 finals."""
++    if scheme is not None:
++        from system1.sim2sim.mj_eval import final_row
++        return {(t, l): ROOT / final_row(scheme, t, 721, l)["eval_dir"] for t in tasks for l in (2, 8)}
+     if tuple(tasks) == ("table", "bucket"):
+         return {k: ROOT / "logs_system1/post_train/final" / v for k, v in ISAAC.items()}
+     from system1.sim2sim.mj_eval import final_row
+@@ -48,10 +52,11 @@ def main():
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--out", type=Path, required=True)
+     ap.add_argument("--tasks", default="table,bucket")
++    ap.add_argument("--scheme", default=None, help="T13 C1: compare with this scheme's finals (C-out) and its own Isaac export; off = unchanged")
+     a = ap.parse_args()
+     tasks = a.tasks.split(",")
+     rows, files = [], []
+-    for (task, lvl), idir in isaac_dirs(tasks).items():
++    for (task, lvl), idir in isaac_dirs(tasks, a.scheme).items():
+         name = idir.name
+         launch = json.loads((idir.parent / (name + ".launch.json")).read_text())
+         argv = launch["argv"]
+@@ -59,7 +64,8 @@ def main():
+         summ = json.loads((idir / "summary.json").read_text())
+         assert sha(states_path) == summ["states_sha256"]
+         files.append(dict(task=task, level=lvl, states=str(states_path), states_sha256=summ["states_sha256"], isaac_eval_dir=str(idir.relative_to(ROOT))))
+-        env = PairEnv(ROOT / DUMP.get(task, f"logs_system1/t10/isaac/d_{task}/dump"), task)
++        dump_dir = DUMP.get(task, f"logs_system1/t10/isaac/d_{task}/dump") if a.scheme is None else f"logs_system1/t10/isaac/cout_{task}/dump"
++        env = PairEnv(ROOT / dump_dir, task)
+         for init in json.loads(states_path.read_text())["states"]:
+             env.reset(init)
+             st = env.state()
+diff --git a/system1/sim2sim/check_observations.py b/system1/sim2sim/check_observations.py
+index 2d3eac7..f4cb464 100644
+--- a/system1/sim2sim/check_observations.py
++++ b/system1/sim2sim/check_observations.py
+@@ -5,6 +5,9 @@ Bin, seed 721; system1/sim2sim/run_isaac_dumps.py), the Isaac state the observat
+ Isaac recorded. Also compared: MuJoCo forward kinematics of all 32 Isaac bodies (the torso pose enters the observation), and for
+ C-in SONIC's two inputs (930-D proprioception history, 1761-D tokenizer) built by sonic_mj from the same states, the recorded C-in
+ actions and SONIC's recorded previous action. Threshold 1e-4 (task book).
++T13 C1 (--runs cout_table,cout_bucket,cout_pull; not in the default list): C-out SONIC inputs are built from the unmodified
++reference (sonic_mj.COutController.sonic_inputs_out), and q* = SONIC's ONNX target + paper-D scale * clip(a) is compared step by
++step with the PD target Isaac recorded (q* check; a = the action Isaac recorded and, separately, the actor ONNX's action).
+ 
+     sim2sim_s1/bin/python -B system1/sim2sim/check_observations.py --out results_system1/T10_sim2sim/consistency
+ """
+@@ -25,7 +28,8 @@ from system1.sim2sim.mj_env import PairEnv  # noqa: E402
+ from system1.sim2sim.sonic_mj import SonicOnnx  # noqa: E402
+ 
+ RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
+-            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
++            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"),
++            cout_table=("table", "C-out"), cout_bucket=("bucket", "C-out"), cout_pull=("pull", "C-out"))
+ T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
+ NAMES = ([f"actions_{i}" for i in range(29)] + [f"base_ang_vel_{i}" for i in range(3)] + [f"dof_pos_{i}" for i in range(29)] + [f"dof_vel_{i}" for i in range(29)]
+          + [f"motion_command_jpos_{i}" for i in range(29)] + [f"motion_command_jvel_{i}" for i in range(29)] + [f"motion_ref_ori_b_{i}" for i in range(6)]
+@@ -48,8 +52,14 @@ def main():
+         K = z["actor_obs"].shape[0]
+         err = np.zeros((K, 2, 158))
+         fk_pos, fk_ang = 0.0, 0.0
+-        sonic = SonicOnnx(env.dof_names) if scheme == "C-in" else None
++        sonic = SonicOnnx(env.dof_names) if scheme in ("C-in", "C-out") else None
+         s_err_a, s_err_t, s_err_act = 0.0, 0.0, 0.0
++        q_err_rec, q_err_onnx, sonic_target_err = 0.0, 0.0, 0.0
++        if scheme == "C-out":
++            from system1.sim2sim.sonic_mj import ActorOnnx, COutController
++            cout = COutController.__new__(COutController)
++            cout.env, cout.sonic, cout.scale_d = env, sonic, np.array(env.ss.control["action_scales"])
++            act_onnx_c = ActorOnnx(ROOT / "exports_system1/t10/onnx" / f"cout_{task}_seed721.onnx")
+         sc_d = np.array(env.ss.control["action_scales"])
+         lo, hi = np.array(env.ss.control["dof_pos_lower"]), np.array(env.ss.control["dof_pos_upper"])
+         for k in range(K):
+@@ -68,7 +78,21 @@ def main():
+             mine = np.concatenate([actor, mate], axis=1)
+             isaac = np.concatenate([z["actor_obs"][k, 0], z["teammate_obs"][k, 0]], axis=1)
+             err[k] = np.abs(mine - isaac)
+-            if sonic is not None:
++            if scheme == "C-out":
++                if k == 0:
++                    sonic.reset()
++                else:
++                    sonic.last_action = torch.as_tensor(np.clip(z["sonic_action"][k - 1], -sonic.clip, sonic.clip), dtype=torch.float32)
++                act, target_s, sobs = sonic.act(*cout.sonic_inputs_out(st, k))
++                s_err_a = max(s_err_a, float(np.abs(sobs["sonic_actor_obs"] - z["sonic_actor_obs"][k]).max()))
++                s_err_t = max(s_err_t, float(np.abs(sobs["sonic_tokenizer"] - z["sonic_tokenizer"][k]).max()))
++                s_err_act = max(s_err_act, float(np.abs(act - z["sonic_action"][k]).max()))
++                th = target_s[:, sonic.s2h].astype(np.float64)
++                sonic_target_err = max(sonic_target_err, float(np.abs(target_s - z["sonic_target_s"][k]).max()))
++                pd_rec = z["pd_target"][k, 0].reshape(2, 29).astype(np.float64)
++                q_err_rec = max(q_err_rec, float(np.abs(th + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max()))
++                q_err_onnx = max(q_err_onnx, float(np.abs(th + cout.residual(act_onnx_c(mine)) - pd_rec).max()))
++            elif sonic is not None:
+                 from system1.sim2sim.sonic_mj import CInController
+                 cin = CInController.__new__(CInController)
+                 cin.env, cin.sonic, cin.scale_d, cin.lo, cin.hi = env, sonic, sc_d, lo, hi
+@@ -93,6 +117,9 @@ def main():
+         summary[run] = dict(steps=int(K), obs_max_abs_diff=float(mx.max()), obs_worst_dims=[NAMES[i] for i in np.argsort(-mx)[:5]],
+                             obs_passed=bool(mx.max() < TOL), fk_body_pos_max_m=fk_pos, fk_body_ori_max_rad=fk_ang,
+                             actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs=a_err)
++        if scheme == "C-out":
++            summary[run].update(sonic_target_onnx_vs_isaac_max_abs_rad=sonic_target_err, q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad=q_err_rec,
++                                q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad=q_err_onnx, q_star_passed=bool(q_err_rec < TOL))
+         if sonic is not None:
+             summary[run].update(sonic_actor_obs_max_abs_diff=s_err_a, sonic_tokenizer_max_abs_diff=s_err_t, sonic_inputs_passed=bool(max(s_err_a, s_err_t) < TOL),
+                                 sonic_action_onnx_vs_isaac_max_abs_diff=s_err_act)
+diff --git a/system1/sim2sim/check_openloop.py b/system1/sim2sim/check_openloop.py
+index dbc358a..6b58f8e 100644
+--- a/system1/sim2sim/check_openloop.py
++++ b/system1/sim2sim/check_openloop.py
+@@ -22,7 +22,8 @@ sys.path.insert(0, str(ROOT))
+ from system1.sim2sim.mj_env import PairEnv  # noqa: E402
+ 
+ RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
+-            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
++            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"),
++            cout_table=("table", "C-out"), cout_bucket=("bucket", "C-out"), cout_pull=("pull", "C-out"))  # T13 C1: only with --runs
+ T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
+ STEPS = 50
+ 
+@@ -67,7 +68,8 @@ def main():
+     import matplotlib.pyplot as plt
+     fig, axes = plt.subplots(1, 3, figsize=(12, 3.4))
+     colors = dict(d_table="#eb6834", cin_table="#1baf7a", d_bucket="#b5461a", cin_bucket="#0e6e4c",
+-                  d_push="#eb6834", d_pull="#b5461a", d_kick="#f2a37a", d_chair="#7a2e0f", cin_pull="#1baf7a")
++                  d_push="#eb6834", d_pull="#b5461a", d_kick="#f2a37a", d_chair="#7a2e0f", cin_pull="#1baf7a",
++                  cout_table="#2a78d6", cout_bucket="#164a8c", cout_pull="#6aa8ee")
+     for run in runs:
+         rr = [x for x in rows if x["run"] == run]
+         t = [x["time_s"] for x in rr]
+diff --git a/system1/sim2sim/mj_eval.py b/system1/sim2sim/mj_eval.py
+index e971b12..7e3cdc9 100644
+--- a/system1/sim2sim/mj_eval.py
++++ b/system1/sim2sim/mj_eval.py
+@@ -9,6 +9,8 @@ error > 0.8, object position error > 0.25 m, object orientation error > 0.8 rad)
+   --scheme C-in  C-in actor (ONNX) + official SONIC ONNX; --pd isaac: the Isaac C-in PD (our gains, SONIC hip_pitch);
+                  --pd official: the official deployment kp / kd (gear_sonic_deploy policy_parameters.hpp, computed by its formulas)
+                  and the official sim2sim motor effort limits (gear_sonic mujoco_sim g1_29dof_sonic_model12.yaml), by joint name.
++  --scheme C-out (T13 C1) C-out actor (ONNX) + official SONIC ONNX (sonic_mj.COutController), the Isaac PD of the C-out export
++                 (logs_system1/t10/isaac/cout_<task>), the state files of the C-out finals (T03 c2_main, sha256 checked).
+ 
+     sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme D --seed 721 --level 2 --out <dir>
+ """
+@@ -30,7 +32,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
+ from paper_evaluation_utils import metrics  # noqa: E402
+ 
+ from system1.sim2sim.mj_env import PairEnv  # noqa: E402
+-from system1.sim2sim.sonic_mj import CInController, DController  # noqa: E402
++from system1.sim2sim.sonic_mj import CInController, COutController, DController  # noqa: E402
+ 
+ DEPLOY = Path("/home/kevin/third_party/GR00T-WholeBodyControl/gear_sonic_deploy/src/g1/g1_deploy_onnx_ref/include/policy_parameters.hpp")
+ SIMCFG = Path("/home/kevin/third_party/GR00T-WholeBodyControl/gear_sonic/utils/mujoco_sim/wbc_configs/g1_29dof_sonic_model12.yaml")
+@@ -81,7 +83,7 @@ def checkpoint_for(scheme, task, seed):
+ 
+ 
+ def states_for(task, level, scheme="C-in", seed=721):
+-    if task in ("table", "bucket"):  # T10 (unchanged): the C-in seed-721 finals
++    if task in ("table", "bucket") and scheme != "C-out":  # T10 (unchanged): the C-in seed-721 finals
+         name = {("table", 2): "cin_table_m5kg_seed721_fresh12000_pm2", ("table", 8): "cin_table_m5kg_seed721_fresh12000_pm8",
+                 ("bucket", 2): "cin_bucket_m1kg_seed721_fresh12000_pm2", ("bucket", 8): "cin_bucket_m1kg_seed721_fresh12000_pm8"}[(task, level)]
+         argv = json.loads((ROOT / "logs_system1/post_train/final" / (name + ".launch.json")).read_text())["argv"]
+@@ -137,7 +139,7 @@ def run_episode(env, ctrl, init, save=None):
+ def main():
+     ap = argparse.ArgumentParser()
+     ap.add_argument("--task", choices=("table", "bucket", "chair", "push", "pull", "kick"), required=True)
+-    ap.add_argument("--scheme", choices=("D", "C-in"), required=True)
++    ap.add_argument("--scheme", choices=("D", "C-in", "C-out"), required=True)
+     ap.add_argument("--seed", type=int, required=True)
+     ap.add_argument("--level", type=int, choices=(2, 8), required=True)
+     ap.add_argument("--pd", choices=("isaac", "official"), default="isaac")
+@@ -151,7 +153,7 @@ def main():
+     if a.out.exists():
+         raise FileExistsError(a.out)
+     a.out.mkdir(parents=True)
+-    dump = ROOT / "logs_system1/t10/isaac" / (("d_" if a.scheme == "D" else "cin_") + a.task) / "dump"
++    dump = ROOT / "logs_system1/t10/isaac" / (dict(D="d_", **{"C-in": "cin_", "C-out": "cout_"})[a.scheme] + a.task) / "dump"
+     env = PairEnv(dump, a.task)
+     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"
+     onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx" if a.onnx is None else a.onnx.resolve()
+@@ -160,6 +162,11 @@ def main():
+         if a.pd != "isaac":
+             raise ValueError("D runs with its paper setting only")
+         ctrl = DController(env, onnx)
++    elif a.scheme == "C-out":
++        if a.pd != "isaac":
++            raise ValueError("C-out runs with the Isaac PD of its export only (T13 C1)")
++        ctrl = COutController(env, onnx, env.ss.control["action_scales"])
++        pd_note = "isaac (C-out export)"
+     else:
+         c = env.ss.control
+         ctrl = CInController(env, onnx, c["action_scales"], (c["dof_pos_lower"], c["dof_pos_upper"]))
+@@ -179,7 +186,7 @@ def main():
+                     isaac_dump=str(dump.relative_to(ROOT)), scene_json_sha256=sha(dump / "scene.json"), convexes_sha256=sha(dump / "collision_convexes.npz"),
+                     kp=env.kp.tolist(), kd=env.kd.tolist(), torque_limits=env.tau_lim.tolist(), sim_dt=float(env.model.opt.timestep), decimation=4,
+                     sonic_encoder_sha256=sha(ctrl.sonic.enc._model_path) if False else None, command=[sys.executable, *sys.argv])
+-    if a.scheme == "C-in":
++    if a.scheme in ("C-in", "C-out"):
+         from system1.sim2sim.sonic_mj import HF
+         manifest.update(sonic_encoder=str(HF / "model_encoder.onnx"), sonic_encoder_sha256=sha(HF / "model_encoder.onnx"),
+                         sonic_decoder=str(HF / "model_decoder.onnx"), sonic_decoder_sha256=sha(HF / "model_decoder.onnx"))
+diff --git a/system1/sim2sim/run_isaac_dumps.py b/system1/sim2sim/run_isaac_dumps.py
+index 2104248..f5f160c 100644
+--- a/system1/sim2sim/run_isaac_dumps.py
++++ b/system1/sim2sim/run_isaac_dumps.py
+@@ -31,6 +31,12 @@ LAUNCH = dict(
+     d_chair=ROOT / "logs_system1/post_train/d_final_5070/D_chair_paper_seed721/it12000_pm2.launch.json",
+     cin_pull=ROOT / "logs_system1/post_train/final/cin_pull_m20kg_seed721_joint8000_pm2.launch.json",
+ )
++# T13 C1 (C-out sim2sim): the C-out seed-721 finals of T03 c2_main; only with --only (the default list above is unchanged)
++COUT_LAUNCH = dict(
++    cout_table=ROOT / "logs_system1/post_train/final/cout_table_m5kg_seed721_fresh12000_pm2.launch.json",
++    cout_bucket=ROOT / "logs_system1/post_train/final/cout_bucket_m1kg_seed721_fresh12000_pm2.launch.json",
++    cout_pull=ROOT / "logs_system1/post_train/final/cout_pull_m20kg_seed721_joint8000_pm2.launch.json",
++)
+ SLOTS = ("16-23", "24-31")
+ NY = ZoneInfo("America/New_York")
+ 
+@@ -44,7 +50,7 @@ def sha(p):
+ 
+ 
+ def argv_for(name):
+-    L = json.loads(LAUNCH[name].read_text())
++    L = json.loads({**LAUNCH, **COUT_LAUNCH}[name].read_text())
+     argv = list(L["argv"])
+     if argv[0] == "taskset":
+         argv = argv[3:]
+@@ -72,7 +78,7 @@ def main():
+             (OUT / name).mkdir(parents=True, exist_ok=True)
+             ck = argv[argv.index("--checkpoint") + 1]
+             st = argv[argv.index("--states") + 1]
+-            rec = dict(name=name, argv=["taskset", "-c", slot, *argv], started=now(), source_launch=str(LAUNCH[name]), checkpoint_sha256=sha(ck),
++            rec = dict(name=name, argv=["taskset", "-c", slot, *argv], started=now(), source_launch=str({**LAUNCH, **COUT_LAUNCH}[name]), checkpoint_sha256=sha(ck),
+                        states_sha256=sha(st), git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"), git_diff=git("diff"))
+             log = (OUT / name / "stdout.log").open("w")
+             p = subprocess.Popen(rec["argv"], cwd=ROOT, stdout=log, stderr=subprocess.STDOUT)
+diff --git a/system1/sim2sim/run_mj_evals.py b/system1/sim2sim/run_mj_evals.py
+index ffa6b73..1d11616 100644
+--- a/system1/sim2sim/run_mj_evals.py
++++ b/system1/sim2sim/run_mj_evals.py
+@@ -25,8 +25,11 @@ def now():
+     return datetime.now(NY).isoformat(timespec="seconds")
+ 
+ 
+-def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket")):
++def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket"), cout_tasks=()):
+     out = []
++    for task in cout_tasks:  # T13 C1: C-out seed 721 (the only C-out finals), +/-2 and +/-8, Isaac PD of the C-out export
++        for lvl in (2, 8):
++            out.append(("C-out", task, 721, lvl, "isaac"))
+     for task in dict.fromkeys(list(d_tasks) + list(cin_tasks)):
+         for seed in (721, 722, 723):
+             for lvl in (2, 8):
+@@ -35,7 +38,7 @@ def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket")):
+                 if task in cin_tasks:
+                     out.append(("C-in", task, seed, lvl, "isaac"))
+                     out.append(("C-in", task, seed, lvl, "official"))
+-    out.sort(key=lambda j: (j[0] == "D", j))  # C-in (slower) first
++    out.sort(key=lambda j: (j[0] == "D", j))  # C-in / C-out (slower) first
+     return out
+ 
+ 
+@@ -46,10 +49,11 @@ def main():
+     ap.add_argument("--first-core", type=int, default=0)
+     ap.add_argument("--d-tasks", default="table,bucket")
+     ap.add_argument("--cin-tasks", default="table,bucket")
++    ap.add_argument("--cout-tasks", default="", help="T13 C1 (C-out); empty = unchanged")
+     a = ap.parse_args()
+     a.out.mkdir(parents=True, exist_ok=True)
+     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
+-    todo = jobs(tuple(x for x in a.d_tasks.split(",") if x), tuple(x for x in a.cin_tasks.split(",") if x))
++    todo = jobs(tuple(x for x in a.d_tasks.split(",") if x), tuple(x for x in a.cin_tasks.split(",") if x), tuple(x for x in a.cout_tasks.split(",") if x))
+     free = list(range(a.first_core, a.first_core + a.jobs))
+     running = {}
+     env = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")
+diff --git a/system1/sim2sim/sonic_mj.py b/system1/sim2sim/sonic_mj.py
+index ecc069a..ea4a66b 100644
+--- a/system1/sim2sim/sonic_mj.py
++++ b/system1/sim2sim/sonic_mj.py
+@@ -150,3 +150,37 @@ class CInController:
+         action, target_s, sobs = self.sonic.act(*self.sonic_inputs(st, a_used, self.env.t))
+         self.last = a_used.copy()
+         return target_s[:, self.sonic.s2h].astype(np.float64), dict(obs=np.concatenate([actor, mate], axis=1), actions=a, sonic_action=action, **sobs)
++
++
++class COutController(CInController):
++    """T13 C1: scheme C 'out' exactly as system1/scheme_c.py kind "out": SONIC receives the unmodified reference (as scheme A);
++    q* = SONIC's output joint target (holosoma order) + paper-D action scale * a_c, a_c = a clipped as D's action term
++    (clip_actions / action_clip_value of the dumped control config, env.clip_a); the PD gets q* verbatim (SONIC PD of the
++    C-out Isaac export); the actor's last-action input is the policy's own raw a (action_manager.policy_action = a, as D);
++    SONIC's own last-action input stays its own previous output (SonicOnnx.last_action)."""
++    kind = "C-out"
++
++    def __init__(self, env, actor_onnx, d_action_scales):
++        self.env, self.actor = env, ActorOnnx(actor_onnx)
++        self.scale_d = np.asarray(d_action_scales, dtype=np.float64)
++        self.lo = self.hi = None  # no reference clamp in C-out
++        self.sonic = SonicOnnx(env.dof_names)
++
++    def sonic_inputs_out(self, st, t):
++        jp, jv, rq = self.window(t)
++        root = st["root"]
++        q = root[:, [6, 3, 4, 5]]
++        wb = np.stack([sc.quat_apply(sc.quat_conj(torch.tensor(q[i:i + 1])), torch.tensor(root[i:i + 1, 10:13]))[0].numpy() for i in range(2)])
++        return q, wb, st["dof_pos"][:, self.sonic.h2s], st["dof_vel"][:, self.sonic.h2s], jp[..., self.sonic.h2s], jv[..., self.sonic.h2s], rq
++
++    def residual(self, a):
++        a_c = a if self.env.clip_a is None else np.clip(a, -self.env.clip_a, self.env.clip_a)
++        return a_c * self.scale_d
++
++    def step(self, st):
++        actor, mate = self.env.observation(self.last, st=st)
++        a = self.actor(np.concatenate([actor, mate], axis=1))
++        action, target_s, sobs = self.sonic.act(*self.sonic_inputs_out(st, self.env.t))
++        q_star = target_s[:, self.sonic.s2h].astype(np.float64) + self.residual(a)
++        self.last = a.copy()
++        return q_star, dict(obs=np.concatenate([actor, mate], axis=1), actions=a, sonic_action=action, **sobs)
+diff --git a/system1/tests/test_sim2sim.py b/system1/tests/test_sim2sim.py
+index 0f0ca74..973f0ff 100644
+--- a/system1/tests/test_sim2sim.py
++++ b/system1/tests/test_sim2sim.py
+@@ -74,3 +74,29 @@ def test_controllers_step():
+     assert target.shape == (2, 29) and np.isfinite(target).all() and info["sonic_tokenizer"].shape == (2, 1761)
+     env.physics_step(target)
+     assert np.isfinite(env.state()["root"]).all()
++
++
++@pytest.mark.skipif(not (ROOT / "exports_system1/t10/onnx/cout_table_seed721.onnx").exists(), reason="C-out ONNX export missing")
++def test_cout_controller_step():
++    """T13 C1: C-out = SONIC on the unmodified reference + paper-D scale * clip(a) on SONIC's output target; last action = raw a.
++    Runs on the C-out Isaac export when present, else on the C-in export (same scheme-C PD path)."""
++    from system1.sim2sim.mj_env import PairEnv
++    from system1.sim2sim.sonic_mj import COutController
++    cout = ROOT / "logs_system1/t10/isaac/cout_table/dump"
++    env = PairEnv(cout if (cout / "scene.json").exists() else CIN, "table")
++    ctrl = COutController(env, ROOT / "exports_system1/t10/onnx/cout_table_seed721.onnx", env.ss.control["action_scales"])
++    states = json.loads(Path("/home/kevin/holosoma-core4d-base/logs/PaperSupplement20260929/unified_evaluation_20261003/table_states.json").read_text())["states"]
++    env.reset(states[0])
++    ctrl.reset()
++    st = env.state()
++    target, info = ctrl.step(st)
++    assert target.shape == (2, 29) and np.isfinite(target).all() and info["sonic_tokenizer"].shape == (2, 1761)
++    # q* - SONIC target = scale * clip(a): recompute SONIC alone on the same inputs from a fresh history
++    ctrl.sonic.reset()
++    _, target_s, _ = ctrl.sonic.act(*ctrl.sonic_inputs_out(st, 0))
++    a = info["actions"]
++    a_c = a if env.clip_a is None else np.clip(a, -env.clip_a, env.clip_a)
++    assert np.allclose(target - target_s[:, ctrl.sonic.s2h], a_c * np.asarray(env.ss.control["action_scales"]), atol=1e-6)
++    assert np.array_equal(ctrl.last, a)  # the actor's last-action input is the raw a (as D)
++    env.physics_step(target)
++    assert np.isfinite(env.state()["root"]).all()
+diff --git a/system1/sim2sim/package_t10c.py b/system1/sim2sim/package_t10c.py
+new file mode 100644
+index 0000000..051dc6f
+--- /dev/null
++++ b/system1/sim2sim/package_t10c.py
+@@ -0,0 +1,155 @@
++#!/usr/bin/env python3
++"""T13 C1 return pack (results_system1/T10c_cout_sim2sim/): C-out (seed 721) MuJoCo closed loop next to the C-out Isaac
++laptop-5070 finals (T03 c2_main), per episode and per task x level. Facts only. CPU, read only.
++
++Per episode, both simulators:
++  completed (all reference steps without joint_bad_tracking), executed steps, termination terms;
++  termination causes: MuJoCo = the evaluator's last termination record (robot r torso gravity-z error > 0.8, object position error
++  > 0.25 m, object orientation error > 0.8 rad; several can hold); Isaac = recomputed from the saved trajectory (object state of the
++  last row against the reference frame the termination used, i.e. the previous row's reference): object_position / object_orientation;
++  a terminated Isaac episode with neither object criterion is labelled robot_tilt_inferred (torso tilt is not in the trajectory);
++  failure class = (first cause, reference phase at termination); object divergence step = first step with object position error >
++  0.1 m (system1/t10b/phases.divergence_step) and the reference phase there (phases.label_frames on the reference object).
++
++    sim2sim_s1/bin/python -B system1/sim2sim/package_t10c.py --evals logs_system1/t10c/mj_eval --out results_system1/T10c_cout_sim2sim
++"""
++from __future__ import annotations
++
++import argparse
++import collections
++import csv
++import gzip
++import json
++import statistics
++import sys
++from pathlib import Path
++
++import numpy as np
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(ROOT))
++from system1.sim2sim.failure_t10s import causes  # noqa: E402
++from system1.sim2sim.package_t10 import save_csv, sha  # noqa: E402
++from system1.t10b.phases import NAME_ZH, divergence_step, label_frames, quat_angle_xyzw  # noqa: E402
++
++ISAAC_RUNS = ("cout_table:table", "cout_bucket:bucket", "cout_pull:pull")
++
++
++def isaac_rows():
++    out = {}
++    for r in csv.DictReader((ROOT / "results_system1/T03/c2_main/per_seed_summary.csv").open()):
++        if r["variant"] == "C-out" and int(r["training_seed"]) == 721:
++            out[(r["task"], int(r["perturbation_level_cm"]))] = r
++    return out
++
++
++def episode_facts(e, traj_path, labels_cache, key, mujoco):
++    z = np.load(traj_path)
++    if key not in labels_cache:
++        labels_cache[key] = label_frames(z["reference_object_pos_w"], z["reference_object_quat_xyzw"])
++    labels = labels_cache[key]
++    if e["completed_reference"]:
++        c = []
++    elif mujoco:
++        c = causes(e.get("last_termination") or {})
++    else:
++        ep = float(np.linalg.norm(z["object_pos_w"][-1] - z["reference_object_pos_w"][-2]))
++        eo = float(quat_angle_xyzw(z["object_quat_xyzw"][-1], z["reference_object_quat_xyzw"][-2]))
++        c = (["object_position"] if ep > 0.25 else []) + (["object_orientation"] if eo > 0.8 else [])
++        c = c or ["robot_tilt_inferred"]
++    k = divergence_step(z["object_pos_w"], z["reference_object_pos_w"], 0.1)
++    pt = labels[min(e["steps"] - 1, len(labels) - 1)]
++    return dict(termination_causes="+".join(c), failure_class=(f"{c[0]}@{pt}" if c else ""), object_divergence_step_0p1m=k,
++                phase_at_divergence=(labels[min(k, len(labels) - 1)] if k is not None else None), phase_at_termination=pt if c else None)
++
++
++def main():
++    ap = argparse.ArgumentParser()
++    ap.add_argument("--evals", type=Path, required=True)
++    ap.add_argument("--out", type=Path, required=True)
++    a = ap.parse_args()
++    out, evals = a.out.resolve(), a.evals.resolve()
++    (out / "configs").mkdir(parents=True, exist_ok=True)
++    isa = isaac_rows()
++    eps, summ, prov, missing, labels = [], [], dict(runs=[]), [], {}
++    for d in sorted(p for p in evals.iterdir() if p.is_dir()):
++        s = json.loads((d / "summary.json").read_text()) if (d / "summary.json").exists() else None
++        ex = d.with_name(d.name + ".exit.json")
++        if not s or not s.get("complete") or len(s["episodes"]) != 51 or not ex.exists() or json.loads(ex.read_text())["returncode"] != 0:
++            missing.append(d.name)
++            continue
++        task, lvl = s["task"], int(s["level"])
++        ir = isa[(task, lvl)]
++        idir = ROOT / ir["eval_dir"]
++        isum = json.loads((idir / "summary.json").read_text())
++        assert isum["checkpoint_sha256"] == s["checkpoint_sha256"] == ir["checkpoint_sha256"], "checkpoint differs from the Isaac final"
++        assert isum["states_sha256"] == s["states_sha256"] == ir["states_sha256"], "state file differs from the Isaac final"
++        per_sim = {}
++        for sim, episodes in (("mujoco", s["episodes"]), ("isaac_5070", isum["episodes"])):
++            rows = []
++            for e in episodes:
++                tp = Path(e["trajectory"]) if sim == "mujoco" else idir / Path(e["trajectory"]).name
++                f = episode_facts(e, tp, labels, task, sim == "mujoco")
++                row = dict(simulator=sim, task=task, scheme="C-out", training_seed=721, perturbation_level_cm=lvl, state_id=e["state_id"],
++                           is_nominal=e["kind"] == "nominal", completed_reference=e["completed_reference"], executed_steps=e["steps"],
++                           reference_horizon_steps=e["horizon_steps"], progress=e["progress"], termination_terms=json.dumps(e["terminal_terms"], sort_keys=True),
++                           object_pos_rmse_cm=e["object_rmse_3d_m"] * 100, **f)
++                if sim == "mujoco":
++                    lt = e["last_termination"]
++                    row.update(last_object_pos_err_m=lt["object_pos_err"], last_object_ori_err_rad=lt["object_ori_err"],
++                               last_torso_gravity_z_err_max=max(lt["gravity_z_err"]))
++                rows.append(row)
++            eps += rows
++            per = [r for r in rows if not r["is_nominal"]]
++            fail = [r for r in per if not r["completed_reference"]]
++            nom = [r for r in rows if r["is_nominal"]][0]
++            cc = collections.Counter(x for r in fail for x in r["termination_causes"].split("+") if x)
++            fc = collections.Counter(r["failure_class"] for r in fail)
++            div = [r["object_divergence_step_0p1m"] for r in fail if r["object_divergence_step_0p1m"] is not None]
++            ts = [r["executed_steps"] for r in fail]
++            per_sim[sim] = dict(n_completed=sum(r["completed_reference"] for r in per), nominal_completed=nom["completed_reference"], nominal_steps=nom["executed_steps"],
++                                steps_mean_all50=statistics.mean(r["executed_steps"] for r in per),
++                                termination_step_median=statistics.median(ts) if ts else None, termination_step_min=min(ts) if ts else None,
++                                termination_step_max=max(ts) if ts else None, n_terminated_before_step_50=sum(t < 50 for t in ts),
++                                causes=json.dumps(dict(cc), sort_keys=True), failure_classes=json.dumps(dict(fc.most_common()), ensure_ascii=False),
++                                object_divergence_step_median=statistics.median(div) if div else None)
++        assert per_sim["isaac_5070"]["n_completed"] == int(ir["n_completed"]), "Isaac recount differs from T03 c2_main"
++        row = dict(task=task, scheme="C-out", training_seed=721, perturbation_level_cm=lvl, n_episodes=50, reference_horizon_steps=s["episodes"][0]["horizon_steps"])
++        for sim in ("isaac_5070", "mujoco"):
++            row.update({f"{sim}_{k}": v for k, v in per_sim[sim].items()})
++        row.update(difference_mujoco_minus_isaac=per_sim["mujoco"]["n_completed"] - per_sim["isaac_5070"]["n_completed"],
++                   checkpoint_sha256=s["checkpoint_sha256"], states_sha256=s["states_sha256"], onnx_sha256=s["onnx_sha256"],
++                   isaac_eval_dir=ir["eval_dir"], mujoco_eval_dir=str(d.relative_to(ROOT)), mujoco_wall_s=round(s["wall_s"], 1))
++        summ.append(row)
++        for f in (d / "run_manifest.json", d.with_name(d.name + ".launch.json"), ex):
++            (out / "configs" / f"mujoco__{d.name}__{f.name.replace(d.name + '.', '')}.gz").write_bytes(gzip.compress(f.read_bytes(), mtime=0))
++        prov["runs"].append(dict(name=d.name, summary_sha256=sha(d / "summary.json"), onnx=s["onnx"], onnx_sha256=s["onnx_sha256"], checkpoint_sha256=s["checkpoint_sha256"],
++                                 states=s["states"], states_sha256=s["states_sha256"], scene_json_sha256=s["scene_json_sha256"], convexes_sha256=s["convexes_sha256"],
++                                 isaac_final_summary_sha256=sha(idir / "summary.json")))
++    summ.sort(key=lambda r: (r["task"], r["perturbation_level_cm"]))
++    save_csv(out / "isaac_vs_mujoco.csv", summ)
++    save_csv(out / "episodes.csv", eps)
++    (out / "phase_labels_zh.json").write_text(json.dumps(NAME_ZH, ensure_ascii=False, indent=1) + "\n")
++    from system1.sim2sim.mj_env import SceneSpec, build_model
++    for spec in ISAAC_RUNS:
++        run, task = spec.split(":")
++        base = ROOT / "logs_system1/t10/isaac" / run
++        for f in (base / "launch.json", base / "exit.json", base / "dump/scene.json"):
++            (out / "configs" / f"isaac__{run}__{f.name}.gz").write_bytes(gzip.compress(f.read_bytes(), mtime=0))
++        prov[f"isaac_{run}"] = dict(scene_json_sha256=sha(base / "dump/scene.json"), convexes_sha256=sha(base / "dump/collision_convexes.npz"),
++                                    record_sha256=sha(base / "dump/nominal.sim2sim.npz"), eval_summary_sha256=sha(base / "eval/summary.json"),
++                                    runtime_reference_sha256=sha(base / "dump/runtime_reference.npz") if (base / "dump/runtime_reference.npz").exists() else None)
++        _, mj, _ = build_model(SceneSpec(base / "dump"), task)
++        p = out / "configs" / f"mjcf_{run}.xml"
++        p.write_text(mj.to_xml())
++        prov[f"mjcf_{run}_sha256"] = sha(p)
++    urdf = ROOT / "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf"
++    prov.update(robot_urdf=dict(path=str(urdf.relative_to(ROOT)), sha256=sha(urdf)), missing=missing, n_runs=len(summ), n_episode_rows=len(eps))
++    (out / "provenance.json").write_text(json.dumps(prov, indent=1) + "\n")
++    print("runs", len(summ), "episode rows", len(eps), "missing", missing)
++    for r in summ:
++        print(r["task"], r["perturbation_level_cm"], "isaac", r["isaac_5070_n_completed"], "mujoco", r["mujoco_n_completed"])
++
++
++if __name__ == "__main__":
++    main()

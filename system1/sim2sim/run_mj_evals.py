@@ -25,8 +25,11 @@ def now():
     return datetime.now(NY).isoformat(timespec="seconds")
 
 
-def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket")):
+def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket"), cout_tasks=()):
     out = []
+    for task in cout_tasks:  # T13 C1: C-out seed 721 (the only C-out finals), +/-2 and +/-8, Isaac PD of the C-out export
+        for lvl in (2, 8):
+            out.append(("C-out", task, 721, lvl, "isaac"))
     for task in dict.fromkeys(list(d_tasks) + list(cin_tasks)):
         for seed in (721, 722, 723):
             for lvl in (2, 8):
@@ -35,7 +38,7 @@ def jobs(d_tasks=("table", "bucket"), cin_tasks=("table", "bucket")):
                 if task in cin_tasks:
                     out.append(("C-in", task, seed, lvl, "isaac"))
                     out.append(("C-in", task, seed, lvl, "official"))
-    out.sort(key=lambda j: (j[0] == "D", j))  # C-in (slower) first
+    out.sort(key=lambda j: (j[0] == "D", j))  # C-in / C-out (slower) first
     return out
 
 
@@ -46,10 +49,11 @@ def main():
     ap.add_argument("--first-core", type=int, default=0)
     ap.add_argument("--d-tasks", default="table,bucket")
     ap.add_argument("--cin-tasks", default="table,bucket")
+    ap.add_argument("--cout-tasks", default="", help="T13 C1 (C-out); empty = unchanged")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
-    todo = jobs(tuple(x for x in a.d_tasks.split(",") if x), tuple(x for x in a.cin_tasks.split(",") if x))
+    todo = jobs(tuple(x for x in a.d_tasks.split(",") if x), tuple(x for x in a.cin_tasks.split(",") if x), tuple(x for x in a.cout_tasks.split(",") if x))
     free = list(range(a.first_core, a.first_core + a.jobs))
     running = {}
     env = dict(os.environ, OMP_NUM_THREADS="1", MKL_NUM_THREADS="1", OPENBLAS_NUM_THREADS="1")

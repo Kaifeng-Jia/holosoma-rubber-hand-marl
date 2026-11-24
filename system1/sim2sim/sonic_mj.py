@@ -150,3 +150,37 @@ class CInController:
         action, target_s, sobs = self.sonic.act(*self.sonic_inputs(st, a_used, self.env.t))
         self.last = a_used.copy()
         return target_s[:, self.sonic.s2h].astype(np.float64), dict(obs=np.concatenate([actor, mate], axis=1), actions=a, sonic_action=action, **sobs)
+
+
+class COutController(CInController):
+    """T13 C1: scheme C 'out' exactly as system1/scheme_c.py kind "out": SONIC receives the unmodified reference (as scheme A);
+    q* = SONIC's output joint target (holosoma order) + paper-D action scale * a_c, a_c = a clipped as D's action term
+    (clip_actions / action_clip_value of the dumped control config, env.clip_a); the PD gets q* verbatim (SONIC PD of the
+    C-out Isaac export); the actor's last-action input is the policy's own raw a (action_manager.policy_action = a, as D);
+    SONIC's own last-action input stays its own previous output (SonicOnnx.last_action)."""
+    kind = "C-out"
+
+    def __init__(self, env, actor_onnx, d_action_scales):
+        self.env, self.actor = env, ActorOnnx(actor_onnx)
+        self.scale_d = np.asarray(d_action_scales, dtype=np.float64)
+        self.lo = self.hi = None  # no reference clamp in C-out
+        self.sonic = SonicOnnx(env.dof_names)
+
+    def sonic_inputs_out(self, st, t):
+        jp, jv, rq = self.window(t)
+        root = st["root"]
+        q = root[:, [6, 3, 4, 5]]
+        wb = np.stack([sc.quat_apply(sc.quat_conj(torch.tensor(q[i:i + 1])), torch.tensor(root[i:i + 1, 10:13]))[0].numpy() for i in range(2)])
+        return q, wb, st["dof_pos"][:, self.sonic.h2s], st["dof_vel"][:, self.sonic.h2s], jp[..., self.sonic.h2s], jv[..., self.sonic.h2s], rq
+
+    def residual(self, a):
+        a_c = a if self.env.clip_a is None else np.clip(a, -self.env.clip_a, self.env.clip_a)
+        return a_c * self.scale_d
+
+    def step(self, st):
+        actor, mate = self.env.observation(self.last, st=st)
+        a = self.actor(np.concatenate([actor, mate], axis=1))
+        action, target_s, sobs = self.sonic.act(*self.sonic_inputs_out(st, self.env.t))
+        q_star = target_s[:, self.sonic.s2h].astype(np.float64) + self.residual(a)
+        self.last = a.copy()
+        return q_star, dict(obs=np.concatenate([actor, mate], axis=1), actions=a, sonic_action=action, **sobs)

@@ -5,6 +5,9 @@ Bin, seed 721; system1/sim2sim/run_isaac_dumps.py), the Isaac state the observat
 Isaac recorded. Also compared: MuJoCo forward kinematics of all 32 Isaac bodies (the torso pose enters the observation), and for
 C-in SONIC's two inputs (930-D proprioception history, 1761-D tokenizer) built by sonic_mj from the same states, the recorded C-in
 actions and SONIC's recorded previous action. Threshold 1e-4 (task book).
+T13 C1 (--runs cout_table,cout_bucket,cout_pull; not in the default list): C-out SONIC inputs are built from the unmodified
+reference (sonic_mj.COutController.sonic_inputs_out), and q* = SONIC's ONNX target + paper-D scale * clip(a) is compared step by
+step with the PD target Isaac recorded (q* check; a = the action Isaac recorded and, separately, the actor ONNX's action).
 
     sim2sim_s1/bin/python -B system1/sim2sim/check_observations.py --out results_system1/T10_sim2sim/consistency
 """
@@ -25,7 +28,8 @@ from system1.sim2sim.mj_env import PairEnv  # noqa: E402
 from system1.sim2sim.sonic_mj import SonicOnnx  # noqa: E402
 
 RUNS = dict(d_table=("table", "D"), cin_table=("table", "C-in"), d_bucket=("bucket", "D"), cin_bucket=("bucket", "C-in"),
-            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"))
+            d_push=("push", "D"), d_pull=("pull", "D"), d_kick=("kick", "D"), d_chair=("chair", "D"), cin_pull=("pull", "C-in"),
+            cout_table=("table", "C-out"), cout_bucket=("bucket", "C-out"), cout_pull=("pull", "C-out"))
 T10_RUNS = "d_table,cin_table,d_bucket,cin_bucket"
 NAMES = ([f"actions_{i}" for i in range(29)] + [f"base_ang_vel_{i}" for i in range(3)] + [f"dof_pos_{i}" for i in range(29)] + [f"dof_vel_{i}" for i in range(29)]
          + [f"motion_command_jpos_{i}" for i in range(29)] + [f"motion_command_jvel_{i}" for i in range(29)] + [f"motion_ref_ori_b_{i}" for i in range(6)]
@@ -48,8 +52,14 @@ def main():
         K = z["actor_obs"].shape[0]
         err = np.zeros((K, 2, 158))
         fk_pos, fk_ang = 0.0, 0.0
-        sonic = SonicOnnx(env.dof_names) if scheme == "C-in" else None
+        sonic = SonicOnnx(env.dof_names) if scheme in ("C-in", "C-out") else None
         s_err_a, s_err_t, s_err_act = 0.0, 0.0, 0.0
+        q_err_rec, q_err_onnx, sonic_target_err = 0.0, 0.0, 0.0
+        if scheme == "C-out":
+            from system1.sim2sim.sonic_mj import ActorOnnx, COutController
+            cout = COutController.__new__(COutController)
+            cout.env, cout.sonic, cout.scale_d = env, sonic, np.array(env.ss.control["action_scales"])
+            act_onnx_c = ActorOnnx(ROOT / "exports_system1/t10/onnx" / f"cout_{task}_seed721.onnx")
         sc_d = np.array(env.ss.control["action_scales"])
         lo, hi = np.array(env.ss.control["dof_pos_lower"]), np.array(env.ss.control["dof_pos_upper"])
         for k in range(K):
@@ -68,7 +78,21 @@ def main():
             mine = np.concatenate([actor, mate], axis=1)
             isaac = np.concatenate([z["actor_obs"][k, 0], z["teammate_obs"][k, 0]], axis=1)
             err[k] = np.abs(mine - isaac)
-            if sonic is not None:
+            if scheme == "C-out":
+                if k == 0:
+                    sonic.reset()
+                else:
+                    sonic.last_action = torch.as_tensor(np.clip(z["sonic_action"][k - 1], -sonic.clip, sonic.clip), dtype=torch.float32)
+                act, target_s, sobs = sonic.act(*cout.sonic_inputs_out(st, k))
+                s_err_a = max(s_err_a, float(np.abs(sobs["sonic_actor_obs"] - z["sonic_actor_obs"][k]).max()))
+                s_err_t = max(s_err_t, float(np.abs(sobs["sonic_tokenizer"] - z["sonic_tokenizer"][k]).max()))
+                s_err_act = max(s_err_act, float(np.abs(act - z["sonic_action"][k]).max()))
+                th = target_s[:, sonic.s2h].astype(np.float64)
+                sonic_target_err = max(sonic_target_err, float(np.abs(target_s - z["sonic_target_s"][k]).max()))
+                pd_rec = z["pd_target"][k, 0].reshape(2, 29).astype(np.float64)
+                q_err_rec = max(q_err_rec, float(np.abs(th + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max()))
+                q_err_onnx = max(q_err_onnx, float(np.abs(th + cout.residual(act_onnx_c(mine)) - pd_rec).max()))
+            elif sonic is not None:
                 from system1.sim2sim.sonic_mj import CInController
                 cin = CInController.__new__(CInController)
                 cin.env, cin.sonic, cin.scale_d, cin.lo, cin.hi = env, sonic, sc_d, lo, hi
@@ -93,6 +117,9 @@ def main():
         summary[run] = dict(steps=int(K), obs_max_abs_diff=float(mx.max()), obs_worst_dims=[NAMES[i] for i in np.argsort(-mx)[:5]],
                             obs_passed=bool(mx.max() < TOL), fk_body_pos_max_m=fk_pos, fk_body_ori_max_rad=fk_ang,
                             actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs=a_err)
+        if scheme == "C-out":
+            summary[run].update(sonic_target_onnx_vs_isaac_max_abs_rad=sonic_target_err, q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad=q_err_rec,
+                                q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad=q_err_onnx, q_star_passed=bool(q_err_rec < TOL))
         if sonic is not None:
             summary[run].update(sonic_actor_obs_max_abs_diff=s_err_a, sonic_tokenizer_max_abs_diff=s_err_t, sonic_inputs_passed=bool(max(s_err_a, s_err_t) < TOL),
                                 sonic_action_onnx_vs_isaac_max_abs_diff=s_err_act)

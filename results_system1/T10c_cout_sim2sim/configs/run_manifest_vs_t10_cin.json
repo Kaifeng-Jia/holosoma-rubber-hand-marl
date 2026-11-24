@@ -1,0 +1,260 @@
+{
+ "note": "C-out (T13 C1) MuJoCo run manifest vs the T10 / T10s C-in run manifest of the same task, +/-2, seed 721, PD isaac",
+ "tasks": {
+  "table": {
+   "identical": [
+    "convexes_sha256",
+    "decimation",
+    "kd",
+    "kp",
+    "level",
+    "pd",
+    "seed",
+    "sim_dt",
+    "sonic_decoder",
+    "sonic_decoder_sha256",
+    "sonic_encoder",
+    "sonic_encoder_sha256",
+    "states",
+    "states_sha256",
+    "task",
+    "torque_limits"
+   ],
+   "differing": {
+    "checkpoint_sha256": {
+     "cout": "6b86e1d57d1deb48e4148085dd4e6b077b3c6f6305ea16ce9bf3e0c430dcd140",
+     "cin_t10": "ccaaaed8d20f1826f9ce98540ac7237322b5608d0a97199fb8677bba243e4cde"
+    },
+    "command": {
+     "cout": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "table",
+      "--scheme",
+      "C-out",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10c/mj_eval/cout_table_seed721_pm2_pdisaac"
+     ],
+     "cin_t10": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "table",
+      "--scheme",
+      "C-in",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10/mj_eval/cin_table_seed721_pm2_pdisaac"
+     ]
+    },
+    "isaac_dump": {
+     "cout": "logs_system1/t10/isaac/cout_table/dump",
+     "cin_t10": "logs_system1/t10/isaac/cin_table/dump"
+    },
+    "onnx": {
+     "cout": "/home/kevin/duet-system1/exports_system1/t10/onnx/cout_table_seed721.onnx",
+     "cin_t10": "/home/kevin/duet-system1/exports_system1/t10/onnx/cin_table_seed721.onnx"
+    },
+    "onnx_sha256": {
+     "cout": "a24b038c0f85e9d0a9b698238e12eded063bc49a573a6fe9478e8425bd149641",
+     "cin_t10": "22f60ba3e4cbe24d5f4bad5bc8549f06c98b431bbc031871e6a8fd9852ae8abf"
+    },
+    "pd_note": {
+     "cout": "isaac (C-out export)",
+     "cin_t10": "isaac"
+    },
+    "scene_json_sha256": {
+     "cout": "aa8db9543b0e27acb7c3a79d2163b1377fd04ac90a070881a957a5ba4c8a7e20",
+     "cin_t10": "bf0ce1c7801c058166ece3db9b371f2975bcc9edc35c918b1fca2c9965d6525e"
+    },
+    "scheme": {
+     "cout": "C-out",
+     "cin_t10": "C-in"
+    }
+   },
+   "cin_manifest": "logs_system1/t10/mj_eval/cin_table_seed721_pm2_pdisaac/run_manifest.json"
+  },
+  "bucket": {
+   "identical": [
+    "convexes_sha256",
+    "decimation",
+    "kd",
+    "kp",
+    "level",
+    "pd",
+    "seed",
+    "sim_dt",
+    "sonic_decoder",
+    "sonic_decoder_sha256",
+    "sonic_encoder",
+    "sonic_encoder_sha256",
+    "states",
+    "states_sha256",
+    "task",
+    "torque_limits"
+   ],
+   "differing": {
+    "checkpoint_sha256": {
+     "cout": "66b5252306c0528caba2fd2557ae16c90e0e0bcc1b1ea87f57858dc1d3623be9",
+     "cin_t10": "c4c2fec56b6e282e24cbef8c1380e36247dd8b2f12a80141112f488b5f0d3528"
+    },
+    "command": {
+     "cout": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "bucket",
+      "--scheme",
+      "C-out",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10c/mj_eval/cout_bucket_seed721_pm2_pdisaac"
+     ],
+     "cin_t10": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "bucket",
+      "--scheme",
+      "C-in",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10/mj_eval/cin_bucket_seed721_pm2_pdisaac"
+     ]
+    },
+    "isaac_dump": {
+     "cout": "logs_system1/t10/isaac/cout_bucket/dump",
+     "cin_t10": "logs_system1/t10/isaac/cin_bucket/dump"
+    },
+    "onnx": {
+     "cout": "/home/kevin/duet-system1/exports_system1/t10/onnx/cout_bucket_seed721.onnx",
+     "cin_t10": "/home/kevin/duet-system1/exports_system1/t10/onnx/cin_bucket_seed721.onnx"
+    },
+    "onnx_sha256": {
+     "cout": "32b60e12be77f4a688f93939407ecffad18da773ad21ef07d5a9ac6555d2c7d5",
+     "cin_t10": "f6bf40d6528bcceadcfceed01b0d800e8a7209328088f7b34eaf078ddc3fb87e"
+    },
+    "pd_note": {
+     "cout": "isaac (C-out export)",
+     "cin_t10": "isaac"
+    },
+    "scene_json_sha256": {
+     "cout": "bb8bf6cf483cb67683435136c6e39ba400249254ac46d08a1779060498af5066",
+     "cin_t10": "11f2e971507bd62f4b31c2a20bca6f6403b430166a63a5fd6040e7df9bfbf333"
+    },
+    "scheme": {
+     "cout": "C-out",
+     "cin_t10": "C-in"
+    }
+   },
+   "cin_manifest": "logs_system1/t10/mj_eval/cin_bucket_seed721_pm2_pdisaac/run_manifest.json"
+  },
+  "pull": {
+   "identical": [
+    "convexes_sha256",
+    "decimation",
+    "kd",
+    "kp",
+    "level",
+    "pd",
+    "seed",
+    "sim_dt",
+    "sonic_decoder",
+    "sonic_decoder_sha256",
+    "sonic_encoder",
+    "sonic_encoder_sha256",
+    "states",
+    "states_sha256",
+    "task",
+    "torque_limits"
+   ],
+   "differing": {
+    "checkpoint_sha256": {
+     "cout": "64dc72ba15681509d5ff60caf29d12b6e3e7bfb0c7fb4435ad3684aa0087283b",
+     "cin_t10": "d0fd59e84970236ae67e395141c61ed6960e855a953cbf33ecafd277c60ad306"
+    },
+    "command": {
+     "cout": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "pull",
+      "--scheme",
+      "C-out",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10c/mj_eval/cout_pull_seed721_pm2_pdisaac"
+     ],
+     "cin_t10": [
+      "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python",
+      "system1/sim2sim/mj_eval.py",
+      "--task",
+      "pull",
+      "--scheme",
+      "C-in",
+      "--seed",
+      "721",
+      "--level",
+      "2",
+      "--pd",
+      "isaac",
+      "--out",
+      "logs_system1/t10/mj_eval_other/cin_pull_seed721_pm2_pdisaac"
+     ]
+    },
+    "isaac_dump": {
+     "cout": "logs_system1/t10/isaac/cout_pull/dump",
+     "cin_t10": "logs_system1/t10/isaac/cin_pull/dump"
+    },
+    "onnx": {
+     "cout": "/home/kevin/duet-system1/exports_system1/t10/onnx/cout_pull_seed721.onnx",
+     "cin_t10": "/home/kevin/duet-system1/exports_system1/t10/onnx/cin_pull_seed721.onnx"
+    },
+    "onnx_sha256": {
+     "cout": "61c80c235b2fde2592ebba274df6cb52b982a09223e7acab5eecc7b370516539",
+     "cin_t10": "d094ef21e2e2d62e4473c451f1e360a728d2dd09fc56ab0838d092dc49b75772"
+    },
+    "pd_note": {
+     "cout": "isaac (C-out export)",
+     "cin_t10": "isaac"
+    },
+    "scene_json_sha256": {
+     "cout": "a0fea2917606cbddf7085e3581fe2146a92d08f77ee4e540524c6c2d39c153b3",
+     "cin_t10": "23861571797776351e25c343d9170b9a8ba89944598908b162ec69e29dec2616"
+    },
+    "scheme": {
+     "cout": "C-out",
+     "cin_t10": "C-in"
+    }
+   },
+   "cin_manifest": "logs_system1/t10/mj_eval_other/cin_pull_seed721_pm2_pdisaac/run_manifest.json"
+  }
+ }
+}

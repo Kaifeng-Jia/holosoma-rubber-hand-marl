@@ -1,0 +1,21 @@
+# T13 C1 (C-out MuJoCo sim2sim), 2026-11-23, America/New_York; repository /home/kevin/duet-system1, branch system1-sonic
+# S = /home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python (MuJoCo 3.3.7, CPU); Isaac = hssim_s1 (argv of the C-out finals)
+# 1. ONNX export + checks (21:3x)
+PYTHONPATH=src/holosoma OMP_NUM_THREADS=2 $S -B system1/sim2sim/onnx_check.py --out results_system1/T10c_cout_sim2sim/consistency --onnx-dir exports_system1/t10/onnx \
+  --extra-checkpoint C-out,table,721,cout_table_seed721,exports_system1/train/cout_table_m5kg_seed721_fresh12000/model_12000.pt \
+  --extra-checkpoint C-out,bucket,721,cout_bucket_seed721,exports_system1/train/cout_bucket_m1kg_seed721_fresh12000/model_12000.pt \
+  --extra-checkpoint C-out,pull,721,cout_pull_seed721,exports_system1/train/cout_pull_m20kg_seed721_joint8000/model_08050.pt
+# smoke tests (existing T10 tests + C-out controller)
+PYTHONPATH=src/holosoma $S -B -m pytest -q system1/tests/test_sim2sim.py          # 5 passed
+# 2. Isaac nominal exports on the RTX 5070, in tmux t10c_dump, one at a time (21:36:52-21:40:42)
+python3 system1/sim2sim/run_isaac_dumps.py --only cout_table,cout_bucket,cout_pull --slots 16-23
+# 3. consistency checks (21:45:28-21:46:40)
+PYTHONPATH=src/holosoma OMP_NUM_THREADS=1 $S -B system1/sim2sim/check_initial_states.py --out results_system1/T10c_cout_sim2sim/consistency --tasks table,bucket,pull --scheme C-out
+PYTHONPATH=src/holosoma OMP_NUM_THREADS=1 $S -B system1/sim2sim/check_observations.py --out results_system1/T10c_cout_sim2sim/consistency --runs cout_table,cout_bucket,cout_pull
+PYTHONPATH=src/holosoma OMP_NUM_THREADS=1 $S -B system1/sim2sim/check_openloop.py --out results_system1/T10c_cout_sim2sim/consistency --runs cout_table,cout_bucket,cout_pull
+# 4. closed loop, tmux t10c_mj (3 jobs) and t10c_mjp (1 job) (21:39:41-21:50:54)
+python3 system1/sim2sim/run_mj_evals.py --out logs_system1/t10c/mj_eval --jobs 3 --first-core 0 --d-tasks '' --cin-tasks '' --cout-tasks table,bucket
+python3 system1/sim2sim/run_mj_evals.py --out logs_system1/t10c/mj_eval --jobs 1 --first-core 2 --d-tasks '' --cin-tasks '' --cout-tasks pull
+#    each job: taskset -c <core> $S -B system1/sim2sim/mj_eval.py --task <task> --scheme C-out --seed 721 --level <2|8> --pd isaac --out logs_system1/t10c/mj_eval/<name>
+# 5. package
+PYTHONPATH=src/holosoma OMP_NUM_THREADS=2 $S -B system1/sim2sim/package_t10c.py --evals logs_system1/t10c/mj_eval --out results_system1/T10c_cout_sim2sim

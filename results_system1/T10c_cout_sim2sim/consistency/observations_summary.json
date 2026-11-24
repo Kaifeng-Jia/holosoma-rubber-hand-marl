@@ -1,0 +1,71 @@
+{
+ "cout_table": {
+  "steps": 687,
+  "obs_max_abs_diff": 8.775722899045241e-07,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_1",
+   "base_ang_vel_2",
+   "motion_ref_ori_b_4",
+   "motion_ref_ori_b_5"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 6.434236299313056e-07,
+  "fk_body_ori_max_rad": 0.0014302817228345583,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 3.0994415283203125e-06,
+  "sonic_target_onnx_vs_isaac_max_abs_rad": 2.7418136596679688e-06,
+  "q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad": 2.746974502088051e-06,
+  "q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad": 2.7775031412602402e-06,
+  "q_star_passed": true,
+  "sonic_actor_obs_max_abs_diff": 4.76837158203125e-07,
+  "sonic_tokenizer_max_abs_diff": 2.5331974029541016e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 6.318092346191406e-06
+ },
+ "cout_bucket": {
+  "steps": 399,
+  "obs_max_abs_diff": 1.467668561350166e-06,
+  "obs_worst_dims": [
+   "base_ang_vel_2",
+   "base_ang_vel_1",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_4"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 9.64562822058923e-07,
+  "fk_body_ori_max_rad": 0.0012870199978548126,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 5.7220458984375e-06,
+  "sonic_target_onnx_vs_isaac_max_abs_rad": 2.9802322387695312e-06,
+  "q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad": 3.0009393157115483e-06,
+  "q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad": 3.366916729419245e-06,
+  "q_star_passed": true,
+  "sonic_actor_obs_max_abs_diff": 5.066394805908203e-07,
+  "sonic_tokenizer_max_abs_diff": 2.384185791015625e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 9.5367431640625e-06
+ },
+ "cout_pull": {
+  "steps": 316,
+  "obs_max_abs_diff": 8.061478022815954e-07,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_2",
+   "motion_ref_ori_b_1",
+   "motion_ref_ori_b_4",
+   "teammate_relative_position_b_x",
+   "motion_ref_ori_b_5"
+  ],
+  "obs_passed": true,
+  "fk_body_pos_max_m": 6.379472985429402e-07,
+  "fk_body_ori_max_rad": 0.0013969447303140718,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 3.814697265625e-06,
+  "sonic_target_onnx_vs_isaac_max_abs_rad": 2.2649765014648438e-06,
+  "q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad": 2.233597925282993e-06,
+  "q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad": 2.4950103636456333e-06,
+  "q_star_passed": true,
+  "sonic_actor_obs_max_abs_diff": 5.960464477539062e-07,
+  "sonic_tokenizer_max_abs_diff": 2.0116567611694336e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 8.58306884765625e-06
+ }
+}

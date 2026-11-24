@@ -9,6 +9,8 @@ error > 0.8, object position error > 0.25 m, object orientation error > 0.8 rad)
   --scheme C-in  C-in actor (ONNX) + official SONIC ONNX; --pd isaac: the Isaac C-in PD (our gains, SONIC hip_pitch);
                  --pd official: the official deployment kp / kd (gear_sonic_deploy policy_parameters.hpp, computed by its formulas)
                  and the official sim2sim motor effort limits (gear_sonic mujoco_sim g1_29dof_sonic_model12.yaml), by joint name.
+  --scheme C-out (T13 C1) C-out actor (ONNX) + official SONIC ONNX (sonic_mj.COutController), the Isaac PD of the C-out export
+                 (logs_system1/t10/isaac/cout_<task>), the state files of the C-out finals (T03 c2_main, sha256 checked).
 
     sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme D --seed 721 --level 2 --out <dir>
 """
@@ -30,7 +32,7 @@ sys.path.insert(0, str(ROOT / "scripts"))
 from paper_evaluation_utils import metrics  # noqa: E402
 
 from system1.sim2sim.mj_env import PairEnv  # noqa: E402
-from system1.sim2sim.sonic_mj import CInController, DController  # noqa: E402
+from system1.sim2sim.sonic_mj import CInController, COutController, DController  # noqa: E402
 
 DEPLOY = Path("/home/kevin/third_party/GR00T-WholeBodyControl/gear_sonic_deploy/src/g1/g1_deploy_onnx_ref/include/policy_parameters.hpp")
 SIMCFG = Path("/home/kevin/third_party/GR00T-WholeBodyControl/gear_sonic/utils/mujoco_sim/wbc_configs/g1_29dof_sonic_model12.yaml")
@@ -81,7 +83,7 @@ def checkpoint_for(scheme, task, seed):
 
 
 def states_for(task, level, scheme="C-in", seed=721):
-    if task in ("table", "bucket"):  # T10 (unchanged): the C-in seed-721 finals
+    if task in ("table", "bucket") and scheme != "C-out":  # T10 (unchanged): the C-in seed-721 finals
         name = {("table", 2): "cin_table_m5kg_seed721_fresh12000_pm2", ("table", 8): "cin_table_m5kg_seed721_fresh12000_pm8",
                 ("bucket", 2): "cin_bucket_m1kg_seed721_fresh12000_pm2", ("bucket", 8): "cin_bucket_m1kg_seed721_fresh12000_pm8"}[(task, level)]
         argv = json.loads((ROOT / "logs_system1/post_train/final" / (name + ".launch.json")).read_text())["argv"]
@@ -137,7 +139,7 @@ def run_episode(env, ctrl, init, save=None):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", choices=("table", "bucket", "chair", "push", "pull", "kick"), required=True)
-    ap.add_argument("--scheme", choices=("D", "C-in"), required=True)
+    ap.add_argument("--scheme", choices=("D", "C-in", "C-out"), required=True)
     ap.add_argument("--seed", type=int, required=True)
     ap.add_argument("--level", type=int, choices=(2, 8), required=True)
     ap.add_argument("--pd", choices=("isaac", "official"), default="isaac")
@@ -151,7 +153,7 @@ def main():
     if a.out.exists():
         raise FileExistsError(a.out)
     a.out.mkdir(parents=True)
-    dump = ROOT / "logs_system1/t10/isaac" / (("d_" if a.scheme == "D" else "cin_") + a.task) / "dump"
+    dump = ROOT / "logs_system1/t10/isaac" / (dict(D="d_", **{"C-in": "cin_", "C-out": "cout_"})[a.scheme] + a.task) / "dump"
     env = PairEnv(dump, a.task)
     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"
     onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx" if a.onnx is None else a.onnx.resolve()
@@ -160,6 +162,11 @@ def main():
         if a.pd != "isaac":
             raise ValueError("D runs with its paper setting only")
         ctrl = DController(env, onnx)
+    elif a.scheme == "C-out":
+        if a.pd != "isaac":
+            raise ValueError("C-out runs with the Isaac PD of its export only (T13 C1)")
+        ctrl = COutController(env, onnx, env.ss.control["action_scales"])
+        pd_note = "isaac (C-out export)"
     else:
         c = env.ss.control
         ctrl = CInController(env, onnx, c["action_scales"], (c["dof_pos_lower"], c["dof_pos_upper"]))
@@ -179,7 +186,7 @@ def main():
                     isaac_dump=str(dump.relative_to(ROOT)), scene_json_sha256=sha(dump / "scene.json"), convexes_sha256=sha(dump / "collision_convexes.npz"),
                     kp=env.kp.tolist(), kd=env.kd.tolist(), torque_limits=env.tau_lim.tolist(), sim_dt=float(env.model.opt.timestep), decimation=4,
                     sonic_encoder_sha256=sha(ctrl.sonic.enc._model_path) if False else None, command=[sys.executable, *sys.argv])
-    if a.scheme == "C-in":
+    if a.scheme in ("C-in", "C-out"):
         from system1.sim2sim.sonic_mj import HF
         manifest.update(sonic_encoder=str(HF / "model_encoder.onnx"), sonic_encoder_sha256=sha(HF / "model_encoder.onnx"),
                         sonic_decoder=str(HF / "model_decoder.onnx"), sonic_decoder_sha256=sha(HF / "model_decoder.onnx"))
