@@ -26,7 +26,8 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
     object frame, activation=[T, 2] in [0, 1]); adds sum over hands of w * activation * ||p_palm(q) - anchor||^2, linearised
     in the object frame like the interaction-mesh term (base-class hook extra_objective_terms).
     orient_term (T14 round 4 B; None = off): dict(weight, activation=[T, 2], targets_obj=[T, 2, 3] unit vectors in the object
-    frame, palm_normal_local={"left": n, "right": n}); see _orient_terms."""
+    frame, palm_normal_local={"left": n, "right": n}); see _orient_terms. Round 5 C: palm_world / finger_world [T, 2, 3]
+    (world targets for the palm normal and the finger direction, both with the same weight) instead of targets_obj."""
 
     def __init__(self, *args, palm_offsets: dict[str, np.ndarray] | None = None, anchor_term: dict | None = None,
                  orient_term: dict | None = None, **kwargs):
@@ -48,8 +49,11 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
                 for suffix in ("shoulder_pitch", "shoulder_roll", "shoulder_yaw", "elbow", "wrist_roll", "wrist_pitch", "wrist_yaw"):
                     jid = mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_JOINT, f"{side}_{suffix}_joint")
                     arm.append(int(np.flatnonzero(self.q_a_indices == int(self.robot_model.jnt_qposadr[jid]))[0]))
+                nl = np.asarray(orient_term["palm_normal_local"][side], float)
+                nl = nl / np.linalg.norm(nl)
+                fl = np.array([1.0, 0.0, 0.0]) - nl[0] * nl  # = _init_hand_orientation's palm_basis finger column
                 self._orient_specs.append(dict(body_id=mujoco.mj_name2id(self.robot_model, mujoco.mjtObj.mjOBJ_BODY, f"{side}_rubber_hand_link"),
-                                               arm=np.asarray(arm), normal_local=np.asarray(orient_term["palm_normal_local"][side], float)))
+                                               arm=np.asarray(arm), normal_local=nl, finger_local=fl / np.linalg.norm(fl)))
         if anchor_term is not None or orient_term is not None:
             self.extra_objective_terms = self._extra_terms
 
@@ -75,8 +79,16 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
             if act[hi] <= 0:
                 continue
             rotation, ang_jac, _ = self._calc_body_orientation_linearization(q, spec["body_id"])
+            Ja = ang_jac[:, spec["arm"]]
             n = rotation @ spec["normal_local"]
-            lin = n + (-self._skew(n) @ ang_jac[:, spec["arm"]]) @ dqa[spec["arm"]]
+            lin = n + (-self._skew(n) @ Ja) @ dqa[spec["arm"]]
+            if "palm_world" in o:  # round 5 C: track the person's palm frame (palm normal and finger direction, world)
+                f = rotation @ spec["finger_local"]
+                lin_f = f + (-self._skew(f) @ Ja) @ dqa[spec["arm"]]
+                w = float(o["weight"]) * float(act[hi])
+                terms.append(w * cp.sum_squares(lin - np.asarray(o["palm_world"][frame_idx, hi], float)))
+                terms.append(w * cp.sum_squares(lin_f - np.asarray(o["finger_world"][frame_idx, hi], float)))
+                continue
             target = R_obj @ np.asarray(o["targets_obj"][frame_idx, hi], float)
             terms.append(float(o["weight"]) * float(act[hi]) * cp.sum_squares(lin - target))
         return terms

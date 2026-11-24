@@ -65,6 +65,8 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--video-out", type=Path, default=None)
     ap.add_argument("--closeup", choices=("none", "lift", "mid"), default="none")
+    ap.add_argument("--axes-arrows", action="store_true", help="round 5: draw the palm normal (red) and finger direction (blue) of every hand "
+                    "in the close-up panels (the hand metrics' vectors; robot 10 cm, person 10 cm / scale)")
     ap.add_argument("--human-panels", action="store_true", help="round 4: in the close-up column each robot panel is preceded by the person's hand "
                     "(human_render.py; same frame, same azimuth / elevation, distance / human-to-robot scale)")
     ap.add_argument("--grid-name", default=None, help="file stem of the grid (default <task>_sizes_grid)")
@@ -108,7 +110,7 @@ def main():
         ax = d["q"][t, 1, :2] - d["q"][t, 0, :2]
         return float(np.degrees(np.arctan2(ax[1], ax[0]))) - 90.0 + AZ_OFF
 
-    def render(scene, cam, q, o, opt=None):
+    def render(scene, cam, q, o, opt=None, arrows=None):
         c = mujoco.MjvCamera()
         c.type = mujoco.mjtCamera.mjCAMERA_FREE
         c.lookat[:], c.distance, c.azimuth, c.elevation = cam["lookat"], cam["distance"], cam["azimuth"], cam["elevation"]
@@ -117,7 +119,29 @@ def main():
             scene.renderer.update_scene(scene.data, camera=c)
         else:
             scene.renderer.update_scene(scene.data, camera=c, scene_option=opt)
+        if arrows:
+            import human_render as _hr
+            _hr.add_arrows(scene.renderer.scene, arrows)
         return Image.fromarray(scene.renderer.render())
+
+    axes_robot = None
+    if a.axes_arrows:
+        sys.path.insert(0, str(ROOT / "system1/t14"))
+        sys.path.insert(0, str(ROOT / "system1/t12v2"))
+        import contact_gap as _cg
+        import hand_landmarks as _hl
+        import human_render as _hr
+        _rob, _offs = _cg.cs.Robot("physx"), _cg.palm_offsets()
+
+        def axes_robot(qpair, r):
+            tl = _rob.fk(qpair[None, r, :3], qpair[None, r, [4, 5, 6, 3]], qpair[None, r, 7:])
+            out = []
+            for side in ("left", "right"):
+                M = tl[f"{side}_rubber_hand_link"][0]
+                pp = M[:3, :3] @ _offs[side] + M[:3, 3]
+                rd = _hl.robot_directions(M[:3, :3], side)
+                out += [(pp, pp + 0.10 * rd["palm_normal"], _hr.RED), (pp, pp + 0.10 * rd["finger"], _hr.BLUE)]
+            return out
 
     # close-up column helpers: robot 0 geoms -> group 4, robot 1 -> group 5 (set in style for close-up grids)
     CU_EL, CU_MARGIN = -10.0, 0.15
@@ -236,14 +260,19 @@ def main():
             for pi, r in enumerate(cu_robots):
                 H = cu_hands(sp, d, t, r)
                 cam = dict(cu_cam[r], lookat=H.mean(0).tolist())
-                img = render(sp, cam, d["q"][t], d["o"][t], opt_only[r])
+                img = render(sp, cam, d["q"][t], d["o"][t], opt_only[r], arrows=axes_robot(d["q"][t], r) if axes_robot else None)
                 dr = ImageDraw.Draw(img, "RGBA")
                 txt = f"机器人 {r}" if len(cu_robots) > 1 else "只画机器人 0"
                 dr.rounded_rectangle((8, CH - 44, 18 + dr.textlength(txt, font=small), CH - 8), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))
                 dr.text((16, CH - 40), txt, font=small, fill=(20, 35, 55))
                 if hs is not None:
                     person = r if a.task in ("table", "bin", "chair") else 0
-                    himg = hs.render(person, t, cu_cam[r]["azimuth"], cu_cam[r]["elevation"], cu_cam[r]["distance"] / scales[person], PW, CH)
+                    harrows = None
+                    if axes_robot:
+                        hp_, hd_ = hs.axes(person, t)
+                        L_ = 0.10 / scales[person]
+                        harrows = [(hp_[i], hp_[i] + L_ * hd_["palm_normal"][i], _hr.RED) for i in range(2)] + [(hp_[i], hp_[i] + L_ * hd_["finger"][i], _hr.BLUE) for i in range(2)]
+                    himg = hs.render(person, t, cu_cam[r]["azimuth"], cu_cam[r]["elevation"], cu_cam[r]["distance"] / scales[person], PW, CH, arrows=harrows)
                     dh2 = ImageDraw.Draw(himg, "RGBA")
                     htxt = f"人 {person + 1}" if a.task in ("table", "bin", "chair") else "人（源）"
                     dh2.rounded_rectangle((8, CH - 44, 18 + dh2.textlength(htxt, font=small), CH - 8), radius=8, fill=(255, 255, 255, 220), outline=(150, 160, 170, 255))

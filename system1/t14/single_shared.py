@@ -153,6 +153,7 @@ def main():
     ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
     ap.add_argument("--landmarks", action="store_true", help="T14 round 4 A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="T14 round 4 B: palm toward the inward surface normal at the anchor (0 = off)")
+    ap.add_argument("--palm-track-weight", type=float, default=0.0, help="T14 round 5 C: palm frame tracks the person's (build_pt_wrist_palm_orientation_targets)")
     a = ap.parse_args()
     if a.variant == "omni_asis":
         assert not a.sim_scene and a.prior == "all"
@@ -184,6 +185,8 @@ def main():
                   elastic_constraints=replace(base.elastic_constraints, enable=True, object_collision_weight=ELASTIC_OBJ, foot_kinematics_weight=ELASTIC_FOOT))
     constants = create_task_constants(robot_config, motion_config, task_config, "object_interaction")
     human, object_poses, smpl_scale = load_motion_data("object_interaction", "smplh", OMOMO_NEW, seq, constants, motion_config)
+    human_names52 = list(constants.DEMO_JOINTS)
+    human_raw52 = human.copy()
     assert human.shape[1] == 52 and len(constants.DEMO_JOINTS) == 52
     if a.variant == "new":
         palms, fit = omomo_palms(seq)
@@ -249,6 +252,18 @@ def main():
         import hand_landmarks as hl
         assert anchor_term is not None and a.landmarks
         orient_term = dict(weight=a.palm_orient_weight, activation=anchor_term["activation"], targets_obj=-anchor_term["normals"], palm_normal_local=hl.PALM_NORMAL_LOCAL)
+    track_rec = None
+    if a.palm_track_weight > 0:
+        import hand_landmarks as hl
+        from holosoma_retargeting.src.utils import build_pt_wrist_palm_orientation_targets, load_intermimic_wrist_quaternions
+        assert not (a.landmarks or a.palm_orient_weight > 0), "C replaces A and B"
+        wq = load_intermimic_wrist_quaternions(OMOMO_NEW / f"{seq}.pt")
+        palm_rot, cal_err = build_pt_wrist_palm_orientation_targets(human_raw52, wq, human_names52)
+        orient_term = dict(weight=a.palm_track_weight, activation=np.ones((len(palm_rot), 2)), palm_world=palm_rot[..., :, 2], finger_world=palm_rot[..., :, 0],
+                           palm_normal_local=hl.PALM_NORMAL_LOCAL)
+        track_rec = dict(weight=a.palm_track_weight, calibration_p90_deg=np.round(cal_err, 6).tolist(),
+                         source="build_pt_wrist_palm_orientation_targets(raw OMOMO_new joints, InterMimic wrist quaternions), default max calibration error 1 deg",
+                         mapping="robot target = palm_rot @ palm_basis.T: palm normal -> palm_rot[:, 2], finger -> palm_rot[:, 0]")
     retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term, orient_term=orient_term)
     import mujoco
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
@@ -269,7 +284,7 @@ def main():
     q_nom[:, -7:] = phys_mj[:n]
     import mujoco
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
-    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, landmarks=lm_rec, palm_orient_weight=a.palm_orient_weight, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
+    rec = dict(task=a.task, variant=a.variant, anchor_term=anchor_rec, landmarks=lm_rec, palm_orient_weight=a.palm_orient_weight, palm_track=track_rec, sim_scene=sim_rec, prior=dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}"), sequence=seq, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                smpl_scale=smpl_scale, stage1=str(st1), stage1_sha256=sha(st1), preprocess_vs_stage1_human_joints_max_abs=prep_err,
                palm_fit=fit, robot_palm_offsets_m={k: v.round(6).tolist() for k, v in (offsets or {}).items()}, physx_dump=dump_sha, scene=str(scene),
                left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),

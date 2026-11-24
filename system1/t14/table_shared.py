@@ -247,7 +247,11 @@ def main():
     ap.add_argument("--landmarks", action="store_true", help="A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh (hand_landmarks.py)")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="B: palm normal toward the inward surface normal at the anchor, in human-contact "
                     "frames (anchor activation); 0 = off; round 4 B uses HandOrientationConfig.palm_direction_weight = 5.0")
+    ap.add_argument("--palm-track-weight", type=float, default=0.0, help="T14 round 5 C: palm normal and finger direction track the "
+                    "person's palm frame (build_core4d_a1_palm_orientation_targets, mapped like _map_pt_palm_orientations_to_robot_links), "
+                    "every frame, HandOrientationConfig form; 0 = off; C uses palm_direction_weight = 5.0")
     a = ap.parse_args()
+    assert not (a.palm_track_weight > 0 and (a.landmarks or a.palm_orient_weight > 0)), "C replaces A and B"
     if a.palm_orient_weight > 0:
         assert a.anchor_weight > 0 and a.landmarks, "B = A + palm orientation; needs the anchor term"
     global SEQ_RAW, CANON, STAGE1, OBJ_KEY
@@ -404,6 +408,17 @@ def main():
                            palm_normal_local=hl.PALM_NORMAL_LOCAL)
         rec["orient_term"] = dict(weight=a.palm_orient_weight, form="w * act * ||n_palm(q) - n*||^2 (HandOrientationConfig form, 7 arm joints)",
                                   target="inward object-surface normal at the anchor", activation="anchor activation (5-frame smoothstep in contact windows)")
+    if a.palm_track_weight > 0:
+        import hand_landmarks as hl
+        from holosoma_retargeting.data_utils.core4d_retarget import build_core4d_a1_palm_orientation_targets
+        palm_rot, cal_err = build_core4d_a1_palm_orientation_targets(pin.human_joints_full, pin.wrist_quat_xyzw)  # [T, 2, 3, 3], columns forward / across / palm normal
+        assert len(palm_rot) == len(phys)
+        orient_term = dict(weight=a.palm_track_weight, activation=np.ones((len(phys), 2)), palm_world=palm_rot[..., :, 2], finger_world=palm_rot[..., :, 0],
+                           palm_normal_local=hl.PALM_NORMAL_LOCAL)
+        rec["palm_track"] = dict(weight=a.palm_track_weight, calibration_p90_deg=np.round(cal_err, 6).tolist(),
+                                 source="build_core4d_a1_palm_orientation_targets(pin.human_joints_full, pin.wrist_quat_xyzw), default max calibration error 1 deg",
+                                 mapping="robot target = palm_rot @ palm_basis.T (_map_pt_palm_orientations_to_robot_links): palm normal -> palm_rot[:, 2], finger -> palm_rot[:, 0]",
+                                 form="w ||n(q) - n*||^2 + w ||d(q) - d*||^2 every frame, 7 arm joints")
     retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term, orient_term=orient_term)
     import mujoco
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])

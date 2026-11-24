@@ -21,6 +21,21 @@ sys.path.insert(0, str(ROOT / "src/holosoma_retargeting"))
 SKIN, OBJ = (0.87, 0.72, 0.62, 1.0), (0.76, 0.80, 0.86, 1.0)
 
 
+RED, BLUE = (0.9, 0.1, 0.1, 1.0), (0.1, 0.3, 0.95, 1.0)
+
+
+def add_arrows(scene, arrows, width=0.006):
+    """append arrow geoms (p0, p1, rgba) to an MjvScene after update_scene."""
+    import mujoco
+    for p0, p1, rgba in arrows:
+        if scene.ngeom >= scene.maxgeom:
+            break
+        g = scene.geoms[scene.ngeom]
+        mujoco.mjv_initGeom(g, mujoco.mjtGeom.mjGEOM_ARROW, np.zeros(3), np.zeros(3), np.zeros(9), np.asarray(rgba, np.float32))
+        mujoco.mjv_connector(g, mujoco.mjtGeom.mjGEOM_ARROW, width, np.asarray(p0, float), np.asarray(p1, float))
+        scene.ngeom += 1
+
+
 class HumanScene:
     def __init__(self, task, tmp):
         from hand_landmarks import SMPLX_NEUTRAL
@@ -32,11 +47,12 @@ class HumanScene:
             from holosoma_retargeting.data_utils.core4d_adapter import CORE4D_TO_OMNI_ROTATION as C
             seq = ts.CORE4D / "CORE4D_Real/human_object_motions" / ts.TASKS[task]["raw"]
             To = np.load(seq / "smooth_objposes.npy")
-            self.V, self.W = [], []
+            self.V, self.W, self.J = [], [], []
             for p in (1, 2):
                 P = np.load(seq / f"person{p}_poses.npz", allow_pickle=True)["arr_0"].item()
                 self.V.append(np.einsum("ij,tvj->tvi", C, P["vertices"].astype(np.float64)))
-                self.W.append(np.einsum("ij,tvj->tvi", C, P["joints"][:, [20, 21]].astype(np.float64)))
+                self.J.append(np.einsum("ij,tvj->tvi", C, P["joints"].astype(np.float64)))
+                self.W.append(self.J[-1][:, [20, 21]])
             self.obj_R = np.einsum("ij,tjk->tik", C, To[:, :3, :3])
             self.obj_x = np.einsum("ij,tj->ti", C, To[:, :3, 3])
             self.mesh = next((ts.CORE4D / "CORE4D_Real/object_models").rglob(f"{ts.TASKS[task]['obj_key'].split('_', 1)[1]}_m.obj"))
@@ -49,7 +65,8 @@ class HumanScene:
             seq = ds.SEQ[task]
             ss.omomo_palms(seq)
             self.V = [ss.omomo_palms.last["vertices_omomo_new"]]
-            self.W = [ss.omomo_palms.last["joints_omomo_new"][:, [20, 21]]]
+            self.J = [ss.omomo_palms.last["joints_omomo_new"]]
+            self.W = [self.J[0][:, [20, 21]]]
             _, obj = load_intermimic_data(str(ss.OMOMO_NEW / f"{seq}.pt"))
             self.obj_R = Rotation.from_quat(obj[:, [1, 2, 3, 0]]).as_matrix()
             self.obj_x = obj[:, 4:7]
@@ -63,7 +80,22 @@ class HumanScene:
     def wrist_mid(self, person, t30):
         return self.W[person][min(self.frame(t30), len(self.W[person]) - 1)].mean(0)
 
-    def render(self, person, t30, azimuth, elevation, distance, w, h):
+    def axes(self, person, t30):
+        """palm points [2, 3] and {palm_normal, finger}: [2, 3] (hand_landmarks.human_directions) of the person at frame t30."""
+        from hand_landmarks import human_directions
+        from table_shared import palm_vertex_ids
+        t = min(self.frame(t30), len(self.V[person]) - 1)
+        V, J = self.V[person][t], self.J[person][t]
+        pv = palm_vertex_ids()
+        palms = np.stack([V[pv[s]].mean(0) for s in ("left", "right")])
+        d = {k: np.zeros((2, 3)) for k in ("palm_normal", "finger")}
+        for hi, side in enumerate(("left", "right")):
+            dd = human_directions(J[None], V[None], side)
+            for k in d:
+                d[k][hi] = dd[k][0]
+        return palms, d
+
+    def render(self, person, t30, azimuth, elevation, distance, w, h, arrows=None):
         import mujoco
         from PIL import Image
         from scipy.spatial.transform import Rotation
@@ -95,6 +127,8 @@ class HumanScene:
         cam.lookat[:] = self.wrist_mid(person, t30)
         cam.distance, cam.azimuth, cam.elevation = distance, azimuth, elevation
         r.update_scene(d, camera=cam)
+        if arrows:
+            add_arrows(r.scene, arrows)
         return Image.fromarray(r.render())
 
     def close(self):

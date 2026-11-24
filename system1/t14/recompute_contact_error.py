@@ -45,13 +45,13 @@ def refs(round_):
             a = json.loads((ROOT / "results_system1/T14_retargeting/step3/a_levels.json").read_text())["round3"]
             for t in ("push", "pull"):
                 out += [(t, m, "single", ROOT / f"logs_system1/t14/r3/single_{t}/{t}_new_qpos.npz", m, False) for m in (a[t], 1.0, 1.5, 2.0)]
-    elif round_ in ("round4A", "round4B"):
-        V = round_[-1]
-        out += [(t, k, "core4d", REF / f"r4/{t}_{kk(k)}_{V}" / PAIR[t].format("new"), float(k), False) for t in PAIR for k in KS]
+    elif round_ in ("round4A", "round4B", "round5C"):
+        V, rn = round_[-1], round_[5]
+        out += [(t, k, "core4d", REF / f"r{rn}/{t}_{kk(k)}_{V}" / PAIR[t].format("new"), float(k), False) for t in PAIR for k in KS]
         for t in ("push", "pull"):
-            ev = ROOT / f"results_system1/T14_retargeting/step4/{t}/eval_r4_{V}.json"
+            ev = ROOT / f"results_system1/T14_retargeting/step{rn}/{t}/eval_r{rn}_{V}.json"
             a = json.loads(ev.read_text())["a"] if ev.exists() else None
-            out += [(t, m, "single", ROOT / f"logs_system1/t14/r4/single_{t}_{V}/{t}_new_qpos.npz", m, False) for m in ([a] if a else []) + [1.0, 1.5, 2.0]]
+            out += [(t, m, "single", ROOT / f"logs_system1/t14/r{rn}/single_{t}_{V}/{t}_new_qpos.npz", m, False) for m in ([a] if a else []) + [1.0, 1.5, 2.0]]
     elif round_ == "comparisons":
         for t in PAIR:
             out += [(t, "current", "core4d", CUR[t], 1.0, False), (t, "omni_asis", "core4d", REF / f"r3/asis_{t}_k1p0" / PAIR[t].format("omni_asis"), 1.0, False)]
