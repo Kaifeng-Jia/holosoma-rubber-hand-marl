@@ -19,6 +19,7 @@ from holosoma.config_types.algo import PPOConfig
 PLAN5_MAPPO_CHECKPOINT_VERSION = "plan5_shared_actor_mappo_v1"
 PLAN5_ACTOR_FIRST_WEIGHT = "actor_module.module.0.weight"
 PLAN5_LEGACY_ACTOR_OBS_DIM = 154
+PLAN5_PPO_CRITIC_OBS_DIM = 527  # System1 T13 v4: patched by system1/t13v4/mappo_v1.py; default = legacy
 
 
 @dataclass(frozen=True)
@@ -87,7 +88,7 @@ class Plan5PPO:
         self.storage.register_agent("actions_log_prob", (1,))
         self.storage.register_agent("action_mean", (self.layout.action_dim,))
         self.storage.register_agent("action_sigma", (self.layout.action_dim,))
-        self.storage.register_team("critic_obs", (527,))
+        self.storage.register_team("critic_obs", (PLAN5_PPO_CRITIC_OBS_DIM,))
         self.storage.register_team("rewards", (1,))
         self.storage.register_team("dones", (1,), dtype=torch.bool)
         self.storage.register_team("timeouts", (1,), dtype=torch.bool)
@@ -387,7 +388,7 @@ class Plan5PPO:
                 "version": PLAN5_MAPPO_CHECKPOINT_VERSION,
                 "num_agents": self.layout.num_agents,
                 "actor_obs_dim": self.layout.actor_obs_dim,
-                "critic_obs_dim": 527,
+                "critic_obs_dim": PLAN5_PPO_CRITIC_OBS_DIM,
                 "action_dim": self.layout.action_dim,
                 "source_sha256": self.models.source_sha256,
             },
@@ -406,7 +407,7 @@ class Plan5PPO:
             "version": PLAN5_MAPPO_CHECKPOINT_VERSION,
             "num_agents": self.layout.num_agents,
             "actor_obs_dim": self.layout.actor_obs_dim,
-            "critic_obs_dim": 527,
+            "critic_obs_dim": PLAN5_PPO_CRITIC_OBS_DIM,
             "action_dim": self.layout.action_dim,
             "source_sha256": self.models.source_sha256,
         }

@@ -16,6 +16,7 @@ from holosoma.managers.terrain import TerrainManager
 from holosoma.simulator.base_simulator.base_simulator import BaseSimulator
 from holosoma.utils.helpers import get_class
 from holosoma.utils.safe_torch_import import torch
+from holosoma.utils.system1_speedup import ENABLED as S1_SPEEDUP
 from holosoma.utils.torch_utils import to_torch
 
 
@@ -233,9 +234,14 @@ class BaseTask:
         """Reset some environments and handle video recording callbacks."""
 
         # Call episode end for environments that are being reset
-        for env_id in env_ids:
+        if S1_SPEEDUP:  # System1 T13 v4 speed-up: no per-env loop without the hook
             if hasattr(self.simulator, "on_episode_end"):
-                self.simulator.on_episode_end(env_id.item())
+                for env_id in env_ids:
+                    self.simulator.on_episode_end(env_id.item())
+        else:
+            for env_id in env_ids:
+                if hasattr(self.simulator, "on_episode_end"):
+                    self.simulator.on_episode_end(env_id.item())
 
         # Reset observation history BEFORE state changes (must happen first to clear history buffers)
         self.observation_manager.reset(env_ids)
@@ -266,9 +272,14 @@ class BaseTask:
         self.reset_manager.reset_scene(env_ids)
 
         # Call episode start for environments that have been reset
-        for env_id in env_ids:
+        if S1_SPEEDUP:  # System1 T13 v4 speed-up: no per-env loop without the hook
             if hasattr(self.simulator, "on_episode_start"):
-                self.simulator.on_episode_start(env_id.item())
+                for env_id in env_ids:
+                    self.simulator.on_episode_start(env_id.item())
+        else:
+            for env_id in env_ids:
+                if hasattr(self.simulator, "on_episode_start"):
+                    self.simulator.on_episode_start(env_id.item())
 
     def _reset_envs_idx_impl(self, env_ids, target_states=None, target_buf=None):
         """Template implementation of environment reset.

@@ -459,8 +459,9 @@ class IsaacSim(BaseSimulator):
             self._object = RigidObject(object_cfg)
             self.scene.rigid_objects[object_name] = self._object
 
+            link_contact = getattr(self.simulator_config, "enable_object_link_contact", False)  # System1 T13 v4
             if (self.simulator_config.enable_object_contact_diagnostics
-                    or self.simulator_config.enable_object_hand_contact):
+                    or self.simulator_config.enable_object_hand_contact or link_contact):
                 full_contact_diagnostics = self.simulator_config.enable_object_contact_diagnostics
                 object_contact_body_names = [
                     prim.GetPath().pathString.rsplit("/", 1)[-1]
@@ -497,6 +498,19 @@ class IsaacSim(BaseSimulator):
                         ContactSensorCfg(
                             **common_object_contact_sensor_kwargs,
                             # Explicit filters avoid broad Robot/.* aggregation.
+                            filter_prim_paths_expr=[
+                                f"{robot_prim_path}/{body_name}"
+                                for robot_prim_path in self._robot_prim_path_expressions()
+                                for body_name in robot_contact_body_names
+                            ],
+                        )
+                    )
+                    self.scene.sensors["object_robot_contact_sensor"] = self.object_robot_contact_sensor
+                elif link_contact:
+                    # System1 T13 v4: the same explicit per-body filters, current sample only (no pose / points)
+                    self.object_robot_contact_sensor = ContactSensor(
+                        ContactSensorCfg(
+                            **common_object_contact_sensor_kwargs,
                             filter_prim_paths_expr=[
                                 f"{robot_prim_path}/{body_name}"
                                 for robot_prim_path in self._robot_prim_path_expressions()

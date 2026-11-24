@@ -1,0 +1,187 @@
+{
+ "task": "table",
+ "runtime": "exports_system1/T14_references/r3/table_k1p0_a10/core4d_pair_runtime_fps50.npz",
+ "runtime_sha256": "7797afac696107d935cfdd0cb75ff7568ba28979528bacd314f39febf9989382",
+ "frames": 687,
+ "source_fps": 15,
+ "human": {
+  "sequence": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/human_object_motions/20231030/001",
+  "object_key": "core4d_desk001"
+ },
+ "object_collision": "T10 PhysX pieces of the Table training object x 1.0",
+ "should_contact_fraction": {
+  "r0_L": 0.5619,
+  "r0_R": 0.5721,
+  "r1_L": 0.6885,
+  "r1_R": 0.706
+ },
+ "palm_to_surface_in_contact_m": {
+  "median": 0.009911055562866738,
+  "p95": 0.03228454779271861
+ },
+ "human_far_fraction": {
+  "pelvis": 1.0,
+  "left_hip_roll_link": 0.81,
+  "left_hip_yaw_link": 0.81,
+  "left_knee_link": 1.0,
+  "left_ankle_roll_link": 0.7722,
+  "right_hip_roll_link": 0.8828,
+  "right_hip_yaw_link": 0.8828,
+  "right_knee_link": 0.9971,
+  "right_ankle_roll_link": 0.6266,
+  "torso_link": 1.0,
+  "head_link": 1.0,
+  "left_shoulder_yaw_link": 1.0,
+  "left_elbow_link": 0.7278,
+  "left_wrist_roll_link": 0.7278,
+  "left_wrist_pitch_link": 0.7278,
+  "left_wrist_yaw_link": 0.7278,
+  "right_shoulder_yaw_link": 1.0,
+  "right_elbow_link": 0.4541,
+  "right_wrist_roll_link": 0.4541,
+  "right_wrist_pitch_link": 0.4541,
+  "right_wrist_yaw_link": 0.4541
+ },
+ "link_segments": {
+  "pelvis": {
+   "part": "pelvis",
+   "smplx_joints": [
+    0
+   ]
+  },
+  "left_hip_roll_link": {
+   "part": "left thigh",
+   "smplx_joints": [
+    1
+   ]
+  },
+  "left_hip_yaw_link": {
+   "part": "left thigh",
+   "smplx_joints": [
+    1
+   ]
+  },
+  "left_knee_link": {
+   "part": "left shank",
+   "smplx_joints": [
+    4
+   ]
+  },
+  "left_ankle_roll_link": {
+   "part": "left foot",
+   "smplx_joints": [
+    7,
+    10
+   ]
+  },
+  "right_hip_roll_link": {
+   "part": "right thigh",
+   "smplx_joints": [
+    2
+   ]
+  },
+  "right_hip_yaw_link": {
+   "part": "right thigh",
+   "smplx_joints": [
+    2
+   ]
+  },
+  "right_knee_link": {
+   "part": "right shank",
+   "smplx_joints": [
+    5
+   ]
+  },
+  "right_ankle_roll_link": {
+   "part": "right foot",
+   "smplx_joints": [
+    8,
+    11
+   ]
+  },
+  "torso_link": {
+   "part": "trunk",
+   "smplx_joints": [
+    3,
+    6,
+    9,
+    13,
+    14
+   ]
+  },
+  "head_link": {
+   "part": "head and neck",
+   "smplx_joints": [
+    12,
+    15,
+    22,
+    23,
+    24
+   ]
+  },
+  "left_shoulder_yaw_link": {
+   "part": "left upper arm",
+   "smplx_joints": [
+    16
+   ]
+  },
+  "left_elbow_link": {
+   "part": "left forearm",
+   "smplx_joints": [
+    18
+   ]
+  },
+  "left_wrist_roll_link": {
+   "part": "left forearm",
+   "smplx_joints": [
+    18
+   ]
+  },
+  "left_wrist_pitch_link": {
+   "part": "left forearm",
+   "smplx_joints": [
+    18
+   ]
+  },
+  "left_wrist_yaw_link": {
+   "part": "left forearm",
+   "smplx_joints": [
+    18
+   ]
+  },
+  "right_shoulder_yaw_link": {
+   "part": "right upper arm",
+   "smplx_joints": [
+    17
+   ]
+  },
+  "right_elbow_link": {
+   "part": "right forearm",
+   "smplx_joints": [
+    19
+   ]
+  },
+  "right_wrist_roll_link": {
+   "part": "right forearm",
+   "smplx_joints": [
+    19
+   ]
+  },
+  "right_wrist_pitch_link": {
+   "part": "right forearm",
+   "smplx_joints": [
+    19
+   ]
+  },
+  "right_wrist_yaw_link": {
+   "part": "right forearm",
+   "smplx_joints": [
+    19
+   ]
+  }
+ },
+ "body_parts_source": "system1/t14/body_parts.py",
+ "out": "logs_system1/t13v4/labels/table_r3_k1p0_a10_labels.npz",
+ "out_sha256": "3a2740aef6d39e7b644fdd130f417868829885ac5e89bd5ed2e44d5e70f2a1cb",
+ "rules": "T13 v4 section 2: per-frame contact labels for the contact items (managers/reward/terms/contact_v1.py).\n\nRules (T13 v4, Kevin 2026-11-23):\n  * should_contact: per robot and hand, from the original human data frame by frame: any SMPL-X hand vertex within 1.5 cm\n    of the object surface (signed distance >= -1.5 cm, the T12 / T14 stop-1 rule). Runtime frame f (50 Hz, t = f / 50) <-> the\n    nearest source frame (CORE4D 15 Hz, OMOMO 30 Hz). CORE4D: robot r <-> person r + 1. Push (OMOMO single person): both\n    robots inherit the source labels (role isometry = translation, no left / right swap).\n  * contact_point: the reference robot's palm point (the rubber-hand palm point of T14 on the simulator hand hull, simulator\n    URDF FK of the runtime reference) projected to the simulator collision surface of the object, in the object frame.\n  * human_far: per robot and non-hand link, the corresponding human body part (LINK_SEGMENTS: SMPL-X skinning segments,\n    from the retargeting keypoint correspondence) is farther than 0.1 m from the captured object surface.\nRead only; CPU.\n\n    sonic_s1/bin/python -B system1/t13v4/contact_labels.py --task table --runtime <core4d_pair_runtime_fps50.npz> --out <npz>\n    sonic_s1/bin/python -B system1/t13v4/contact_labels.py --task push --runtime <single fps50 npz> --out <npz>\n"
+}

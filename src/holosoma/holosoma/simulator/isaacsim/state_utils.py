@@ -2,6 +2,8 @@
 
 import torch
 
+from holosoma.utils.system1_speedup import ENABLED as S1_SPEEDUP
+
 
 def fullstate_wxyz_to_xyzw(tensor_wxyz: torch.Tensor) -> torch.Tensor:
     """Convert quaternion from wxyz to xyzw format.
@@ -24,7 +26,10 @@ def fullstate_wxyz_to_xyzw(tensor_wxyz: torch.Tensor) -> torch.Tensor:
     >>> # Quaternion at indices 3:7 is now [0.0, 0.0, 0.707, 0.707] (xyzw format)
     """
     converted = tensor_wxyz.clone()
-    converted[:, 3:7] = tensor_wxyz[:, [4, 5, 6, 3]]  # [w,x,y,z] -> [x,y,z,w]
+    if S1_SPEEDUP:  # slices instead of a list index (System1 T13 v4 speed-up: no host index tensor), same values
+        converted[:, 3:7] = torch.cat((tensor_wxyz[:, 4:7], tensor_wxyz[:, 3:4]), dim=1)
+    else:
+        converted[:, 3:7] = tensor_wxyz[:, [4, 5, 6, 3]]  # [w,x,y,z] -> [x,y,z,w]
     return converted
 
 
@@ -49,5 +54,8 @@ def fullstate_xyzw_to_wxyz(tensor_xyzw: torch.Tensor) -> torch.Tensor:
     >>> # Quaternion at indices 3:7 is now [0.707, 0.0, 0.0, 0.707] (wxyz format)
     """
     converted = tensor_xyzw.clone()
-    converted[:, 3:7] = tensor_xyzw[:, [6, 3, 4, 5]]  # [x,y,z,w] -> [w,x,y,z]
+    if S1_SPEEDUP:  # System1 T13 v4 speed-up (see fullstate_wxyz_to_xyzw)
+        converted[:, 3:7] = torch.cat((tensor_xyzw[:, 6:7], tensor_xyzw[:, 3:6]), dim=1)
+    else:
+        converted[:, 3:7] = tensor_xyzw[:, [6, 3, 4, 5]]  # [x,y,z,w] -> [w,x,y,z]
     return converted

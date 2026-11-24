@@ -55,6 +55,14 @@ PARSER.add_argument("--c-train-diag", action="store_true",
                     help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
+# System1 T13 v4 (all default off = unchanged)
+PARSER.add_argument("--obs-v1", action="store_true", help="T13 v4 observation v1 (actor 159) with noise v1 in training")
+PARSER.add_argument("--critic-v1", action="store_true", help="T13 v4 critic fix: both robots' reference commands (critic 585)")
+PARSER.add_argument("--contact-v1", type=Path, default=None, help="T13 v4 contact items: per-frame label file (system1/t13v4/contact_labels.py)")
+PARSER.add_argument("--obs-v1-noise", choices=("on", "off"), default="on", help="T13 v4 noise v1 + actor training noise (on = training)")
+PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
+PARSER.add_argument("--system1-randomization", action="store_true",
+                    help="System1 T10b domain randomisation recipe (system1/t10b/randomization.py); off = unchanged")
 ARGS = PARSER.parse_args()
 if ARGS.from_scratch or ARGS.zero_teammate_obs:
     if ARGS.skill != "pull" or ARGS.fine_tune_from or ARGS.teammate_input_only or ARGS.joint_acceleration_weight is not None:
@@ -192,6 +200,21 @@ if ARGS.sonic_residual:
     sys.path.insert(0, str(REPO_ROOT))
     from system1.scheme_a import with_sonic_pd
     CONFIG = with_sonic_pd(CONFIG)  # hip_pitch PD -> SONIC, action scales frozen (F2)
+RANDOMIZATION = None
+if ARGS.system1_randomization:  # System1 T10b recipe on the Plan5 path (T13 v4 common setting; off = unchanged)
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t10b.randomization import randomization_config
+    _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
+    CONFIG = replace(CONFIG, randomization=_rand_cfg)
+T13V4 = None
+if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None:  # System1 T13 v4 (off = unchanged)
+    if ARGS.sonic_residual or ARGS.from_scratch or ARGS.zero_teammate_obs:
+        PARSER.error("T13 v4 switches: D only (C-out path: separate switch)")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t13v4.config_v1 import apply_t13v4
+    CONFIG, T13V4 = apply_t13v4(CONFIG, obs_v1=ARGS.obs_v1, critic_v1=ARGS.critic_v1,
+                                contact_labels=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
+                                noise=ARGS.obs_v1_noise == "on")
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -353,6 +376,13 @@ def _runtime_object_physics(env, *, skill: str) -> dict[str, dict[str, object]]:
             ).expand_as(tensors["material_static_dynamic_restitution"]),
         ),
     }
+    if RANDOMIZATION is not None:  # System1 T10b recipe on Plan5 (T13 v4): object physics drawn per env inside the ranges;
+        # the randomisation's own s1_readback_check validated every drawn quantity; here: mass ratio vs the frozen value
+        lo, hi = RANDOMIZATION["object_mass_scale"]
+        ratio = tensors["mass_kg"].reshape(-1) / EXPECTED_OBJECT_MASS_KG
+        if not bool(((ratio >= lo - 1.0e-6) & (ratio <= hi + 1.0e-6)).all()):
+            raise RuntimeError(f"Plan 5 randomised object mass outside [{lo}, {hi}] x {EXPECTED_OBJECT_MASS_KG}")
+        checks = {}
     for name, (actual, expected) in checks.items():
         if not torch.allclose(actual, expected, rtol=1.0e-5, atol=1.0e-6):
             raise RuntimeError(
@@ -393,6 +423,12 @@ def main() -> None:
             env = SonicResidualEnv(env, env.device, tf32=ARGS.sonic_tf32, infer_block=None if ARGS.sonic_tf32 else 128,
                                    kind=ARGS.sonic_residual_kind, train_diag=ARGS.c_train_diag)
         observations = env.reset_all()
+        if ARGS.t13v4_check is not None:  # System1 T13 v4 checks instead of training
+            from system1.t13v4.isaac_checks import run as _t13v4_checks
+            _t13v4_checks(env, observations, out=ARGS.t13v4_check.expanduser().resolve(),
+                          labels_file=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
+                          noise_expected=ARGS.obs_v1_noise == "on")
+            return
         runtime_reference_check = export_runtime_reference(
             env, output_dir, PLACEMENT_PROVENANCE, ARGS.push_placement_proof)
         runtime_object_physics = _runtime_object_physics(env, skill=ARGS.skill)
@@ -423,12 +459,24 @@ def main() -> None:
         initialization_kwargs = {"from_scratch": ARGS.from_scratch}
         if EXPECTED_SOURCE_CHECKPOINT_SHA256 is not None:
             initialization_kwargs["expected_sha256"] = EXPECTED_SOURCE_CHECKPOINT_SHA256
-        models = initialize_plan5_model_bundle(
-            SOURCE_CHECKPOINT,
-            ppo_config,
-            device=env.device,
-            **initialization_kwargs,
-        )
+        layout_kwargs = {}
+        if T13V4 is not None and (ARGS.obs_v1 or ARGS.critic_v1):
+            from holosoma.agents.mappo.batch_layout import HomogeneousAgentBatchLayout
+            from system1.t13v4.mappo_v1 import initialize_plan5_v1_model_bundle, patch_dims
+            T13V4["mappo_dims"] = patch_dims(teammate=5 if ARGS.obs_v1 else 4, critic=585 if ARGS.critic_v1 else 527)
+            if ARGS.obs_v1:
+                models = initialize_plan5_v1_model_bundle(SOURCE_CHECKPOINT, ppo_config, critic=T13V4["mappo_dims"]["critic_obs"],
+                                                          device=env.device, expected_sha256=initialization_kwargs.get("expected_sha256"))
+            else:
+                models = initialize_plan5_model_bundle(SOURCE_CHECKPOINT, ppo_config, device=env.device, **initialization_kwargs)
+            layout_kwargs["layout"] = HomogeneousAgentBatchLayout(actor_obs_dim=T13V4["mappo_dims"]["actor_input"])
+        else:
+            models = initialize_plan5_model_bundle(
+                SOURCE_CHECKPOINT,
+                ppo_config,
+                device=env.device,
+                **initialization_kwargs,
+            )
         learner = Plan5PPO(
             models,
             ppo_config,
@@ -437,6 +485,7 @@ def main() -> None:
             device=env.device,
             from_scratch=ARGS.from_scratch,
             zero_teammate_obs=ARGS.zero_teammate_obs,
+            **layout_kwargs,
         )
         start_iteration = 0
         smooth_ramp_start_iteration = 0 if SMOOTH_FINETUNE else None
@@ -535,8 +584,10 @@ def main() -> None:
             "runtime_object_physics": runtime_object_physics,
             "reward_terms": list(env.reward_manager.active_terms),
             "termination_terms": list(env.termination_manager.active_terms),
-            "actor_obs_dim": 158,
-            "critic_obs_dim": 527,
+            "actor_obs_dim": 158 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["actor_input"],
+            "critic_obs_dim": 527 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["critic_obs"],
+            "system1_t13v4": T13V4,
+            "system1_randomization": None if RANDOMIZATION is None else dict(ranges=RANDOMIZATION),
             "action_dim_per_agent": 29,
             "actor_learning_rate": ppo_config.actor_learning_rate,
             "max_actor_learning_rate": ppo_config.max_actor_learning_rate,

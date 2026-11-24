@@ -526,6 +526,10 @@ class SimulatorInitConfig:
     or enable the heavier full-body contact-position diagnostic sensors.
     """
 
+    enable_object_link_contact: bool = False
+    """System1 T13 v4 contact items: object vs every robot rigid body (both robots), current-sample forces only (no pose,
+    no contact points, history 1), exposed as object_robot_contact_sensor. Off = the sensor graph is unchanged."""
+
     object_hand_contact_bodies: list[str] | None = None
     """System1 T06/T07: robot rigid bodies counted as "hand" by the object/hand contact sensor, left hand bodies first,
     then right (the Sharpa links). None = the rubber hands (left_rubber_hand_link, right_rubber_hand_link), unchanged."""

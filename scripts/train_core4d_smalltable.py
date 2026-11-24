@@ -59,7 +59,19 @@ PARSER.add_argument("--finger-mode", choices=("locked", "track", "learn"), defau
                     help="System1 T06/T07: G1 + Sharpa hands (system1/hand); default off = the rubber-hand robot, unchanged")
 PARSER.add_argument("--hand-reference", type=Path, default=None,
                     help="System1 T06/T07: 73-joint runtime reference (system1/hand/sharpa_reference.py); required with --finger-mode")
+# System1 T13 v4 section 2 (all default off = unchanged)
+PARSER.add_argument("--obs-v1", action="store_true", help="T13 v4 observation v1 (actor 159) with noise v1 in training")
+PARSER.add_argument("--critic-v1", action="store_true", help="T13 v4 critic fix: both robots' reference commands (critic 585)")
+PARSER.add_argument("--contact-v1", type=Path, default=None, help="T13 v4 contact items: per-frame label file (system1/t13v4/contact_labels.py)")
+PARSER.add_argument("--obs-v1-noise", choices=("on", "off"), default="on", help="T13 v4 noise v1 + actor training noise (on = training)")
+PARSER.add_argument("--t13v4-profile", type=Path, default=None, help="T13 v4 section 4 A: per-iteration section timings (jsonl); adds CUDA syncs")
+PARSER.add_argument("--t13v4-sync-scan", type=Path, default=None, help="T13 v4 section 4 A: one extra rollout with sync debug mode before training (json)")
+PARSER.add_argument("--t13v4-trace", type=Path, default=None, help="T13 v4 section 4 A: per-iteration rollout tensors for same-seed comparisons")
+PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
+PARSER.add_argument("--per-agent-reward", action="store_true", help="T13 v4 D-Table-PA: per-robot rewards / values / GAE")
 ARGS = PARSER.parse_args()
+if ARGS.per_agent_reward and not (ARGS.obs_v1 and ARGS.critic_v1):
+    PARSER.error("--per-agent-reward (D-Table-PA) goes with --obs-v1 --critic-v1")
 if (ARGS.finger_mode is None) != (ARGS.hand_reference is None):
     PARSER.error("--finger-mode and --hand-reference go together")
 if ARGS.finger_mode is not None and (ARGS.sonic_residual or ARGS.experiment not in ("bucket003", "smalltable5kg_A")):
@@ -215,6 +227,15 @@ if ARGS.system1_randomization:  # System1 T10b (off = unchanged)
     from system1.t10b.randomization import randomization_config
     _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
     CONFIG = replace(CONFIG, randomization=_rand_cfg)
+T13V4 = None
+if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None or ARGS.per_agent_reward:  # System1 T13 v4 (off = unchanged)
+    if ARGS.finger_mode is not None or ARGS.sonic_residual:
+        PARSER.error("T13 v4 switches: D with the rubber hands only (C-out path: separate switch)")
+    sys.path.insert(0, str(REPO_ROOT))
+    from system1.t13v4.config_v1 import apply_t13v4
+    CONFIG, T13V4 = apply_t13v4(CONFIG, obs_v1=ARGS.obs_v1, critic_v1=ARGS.critic_v1,
+                                contact_labels=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
+                                per_agent=ARGS.per_agent_reward, noise=ARGS.obs_v1_noise == "on")
 SIMULATION_APP = init_sim_imports(CONFIG)
 
 import torch  # noqa: E402
@@ -470,6 +491,12 @@ def main() -> int:
                                    kind=ARGS.sonic_residual_kind, train_diag=ARGS.c_train_diag)
         observations = env.reset_all()
         physics = _object_physics(env)
+        if ARGS.t13v4_check is not None:  # System1 T13 v4 checks instead of training
+            from system1.t13v4.isaac_checks import run as _t13v4_checks
+            _t13v4_checks(env, observations, out=ARGS.t13v4_check.expanduser().resolve(),
+                          labels_file=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
+                          noise_expected=ARGS.obs_v1_noise == "on")
+            return
         physics_hz, control_hz = _simulation_rates(env)
         ppo_config = replace(
             CONFIG.algo.config,
@@ -480,7 +507,15 @@ def main() -> int:
         if ARGS.sonic_residual and ARGS.sonic_residual_kind == "in":
             from system1.scheme_c import C_IN_PPO_OVERRIDES
             ppo_config = replace(ppo_config, **C_IN_PPO_OVERRIDES)  # T03 C v2: C-in init std 0.3, entropy 0
-        if HAND is None:
+        if ARGS.per_agent_reward:
+            from system1.t13v4.per_agent_ppo import per_agent_ppo_config
+            ppo_config = per_agent_ppo_config(ppo_config)
+        if HAND is None and T13V4 is not None and (ARGS.obs_v1 or ARGS.critic_v1):
+            from system1.t13v4.mappo_v1 import initialize_core4d_v1_model_bundle, patch_dims
+            T13V4["mappo_dims"] = patch_dims(teammate=5 if ARGS.obs_v1 else 4, critic=585 if ARGS.critic_v1 else 527)
+            models = initialize_core4d_v1_model_bundle(ppo_config, teammate=T13V4["mappo_dims"]["teammate_obs"],
+                                                       critic=T13V4["mappo_dims"]["critic_obs"], device=env.device)
+        elif HAND is None:
             models = initialize_core4d_smalltable_model_bundle(
                 ppo_config,
                 device=env.device,
@@ -490,7 +525,10 @@ def main() -> int:
             HAND["mappo_dims"] = patch_core4d_dims(ARGS.finger_mode)
             models = initialize_hand_model_bundle(ppo_config, finger_mode=ARGS.finger_mode, device=env.device)
             hand_diag = HandTrainDiag(env)
-        learner = Core4DSmallTablePPO(
+        _learner_class = Core4DSmallTablePPO
+        if ARGS.per_agent_reward:
+            from system1.t13v4.per_agent_ppo import Core4DPerAgentPPO as _learner_class
+        learner = _learner_class(
             models,
             ppo_config,
             num_envs=env.num_envs,
@@ -557,11 +595,12 @@ def main() -> int:
             "save_interval": ARGS.save_interval,
             "actor_observation_groups": {
                 "actor_obs": 154 if HAND is None else 154 + 88,
-                "teammate_obs": 4,
+                "teammate_obs": 4 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["teammate_obs"],
             },
-            "actor_input_dim": 158 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTOR_OBS_DIM"],
+            "actor_input_dim": (158 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["actor_input"]) if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTOR_OBS_DIM"],
             "action_dim_per_agent": 29 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTION_DIM"],
-            "critic_input_dim": 527 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_CRITIC_OBS_DIM"],
+            "critic_input_dim": (527 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["critic_obs"]) if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_CRITIC_OBS_DIM"],
+            "system1_t13v4": T13V4,
             "shared_actor": True,
             "runtime_reference": str(RUNTIME_REFERENCE_PATH.relative_to(REPO_ROOT)),
             "runtime_reference_sha256": runtime_reference_sha256,
@@ -642,6 +681,15 @@ def main() -> int:
         if bucket_term is not None:
             bucket_term.get_iteration_diagnostics(reset=True)
         final_iteration = start_iteration + ARGS.iterations
+        t13v4_timer = t13v4_trace = None
+        if ARGS.t13v4_sync_scan is not None or ARGS.t13v4_profile is not None or ARGS.t13v4_trace is not None:  # System1 T13 v4 4 A
+            from system1.t13v4.profiling import SectionTimer, Trace, sync_scan
+            if ARGS.t13v4_sync_scan is not None:
+                observations, _ = sync_scan(env, learner, observations, ARGS.t13v4_sync_scan.expanduser().resolve())
+            if ARGS.t13v4_profile is not None:
+                t13v4_timer = SectionTimer(env, learner, ARGS.t13v4_profile.expanduser().resolve())
+            if ARGS.t13v4_trace is not None:
+                t13v4_trace = Trace(ARGS.t13v4_trace.expanduser().resolve())
         for iteration in range(start_iteration + 1, final_iteration + 1):
             started = time.perf_counter()
             if episode_telemetry is not None:
@@ -717,6 +765,10 @@ def main() -> int:
                 record["system1_hand_train_diag"] = hand_diag.summary(models.actor)
             _append_jsonl(metrics_path, record)
             print(json.dumps(record, sort_keys=True), flush=True)
+            if t13v4_timer is not None:
+                t13v4_timer.end_iteration(iteration)
+            if t13v4_trace is not None:
+                t13v4_trace.record(learner, iteration, record)
 
             if iteration % ARGS.save_interval == 0 or iteration == final_iteration:
                 _save_checkpoint_atomic(

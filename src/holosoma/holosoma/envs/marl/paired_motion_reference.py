@@ -8,6 +8,8 @@ from typing import Sequence
 import numpy as np
 import torch
 
+from holosoma.utils.system1_speedup import ENABLED as S1_SPEEDUP
+
 from holosoma.utils.file_cache import cached_open
 from holosoma.utils.path import resolve_data_file_path
 
@@ -233,6 +235,8 @@ class PairedMotionReference:
         """Return synchronized robot and shared-object channels at frame indices."""
         if time_steps.ndim != 1:
             raise ValueError("time_steps must be one-dimensional")
-        if torch.any(time_steps < 0) or torch.any(time_steps >= self.num_frames):
+        if S1_SPEEDUP:  # System1 T13 v4 speed-up: device-side assert (no GPU->CPU sync); out-of-range frames still raise
+            torch._assert_async(((time_steps >= 0) & (time_steps < self.num_frames)).all(), "time_steps contains an out-of-range frame")
+        elif torch.any(time_steps < 0) or torch.any(time_steps >= self.num_frames):
             raise IndexError("time_steps contains an out-of-range frame")
         return {key: getattr(self, key)[time_steps] for key in self._SAMPLE_KEYS}

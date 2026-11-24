@@ -10,6 +10,11 @@ import torch
 from holosoma.agents.mappo.batch_layout import HomogeneousAgentBatchLayout
 from holosoma.agents.mappo.initialization import Plan5ModelBundle
 
+# System1 T13 v4: observation sizes as module constants (patched by system1/t13v4/mappo_v1.py; defaults = legacy sizes)
+PLAN5_RUNNER_ACTOR_OBS_DIM = 154
+PLAN5_RUNNER_TEAMMATE_OBS_DIM = 4
+PLAN5_RUNNER_CRITIC_OBS_DIM = 527
+
 
 @dataclass
 class Plan5PolicyDecision:
@@ -56,16 +61,16 @@ class Plan5PolicyRunner:
         critic_obs = observations["critic_obs"]
         num_envs = actor_obs.shape[0]
 
-        expected_actor = (num_envs, self.layout.num_agents, 154)
-        expected_teammate = (num_envs, self.layout.num_agents, 4)
+        expected_actor = (num_envs, self.layout.num_agents, PLAN5_RUNNER_ACTOR_OBS_DIM)
+        expected_teammate = (num_envs, self.layout.num_agents, PLAN5_RUNNER_TEAMMATE_OBS_DIM)
         if actor_obs.shape != expected_actor:
             raise ValueError(f"actor_obs must have shape {expected_actor}, got {tuple(actor_obs.shape)}")
         if teammate_obs.shape != expected_teammate:
             raise ValueError(
                 f"teammate_obs must have shape {expected_teammate}, got {tuple(teammate_obs.shape)}"
             )
-        if critic_obs.shape != (num_envs, 527):
-            raise ValueError(f"critic_obs must have shape ({num_envs}, 527), got {tuple(critic_obs.shape)}")
+        if critic_obs.shape != (num_envs, PLAN5_RUNNER_CRITIC_OBS_DIM):
+            raise ValueError(f"critic_obs must have shape ({num_envs}, {PLAN5_RUNNER_CRITIC_OBS_DIM}), got {tuple(critic_obs.shape)}")
 
         combined_actor_obs = torch.cat((actor_obs, teammate_obs), dim=-1)
         flat_actor_obs = self.layout.flatten_actor_observations(combined_actor_obs)
