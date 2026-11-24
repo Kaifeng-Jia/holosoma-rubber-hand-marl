@@ -1,0 +1,980 @@
+{
+ "task": "table",
+ "contact_frames_30hz": [
+  0,
+  164,
+  330
+ ],
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r5/table_k0p8_C/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r5/table_k0p8_C/table_k0p8.urdf",
+   "numbers": [
+    "接触保持率 0.116",
+    "最大穿透 0.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 14.5 cm",
+    "接触位置误差 1.2 / 1.2 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 0.1465,
+     "r1": 0.0859,
+     "pooled": 0.1162
+    },
+    "max_penetration_cm": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "frames_penetrating": {
+     "r0": 0.0,
+     "r1": 0.0
+    },
+    "robot_robot_min_distance_cm": 14.536,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 0.86,
+      "p95_cm": 1.17
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.5,
+      "p95_cm": 1.66
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.18,
+      "p95_cm": 1.63
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.38,
+      "p95_cm": 2.28
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 1.08,
+      "p95_cm": 1.51
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 1.23,
+      "p95_cm": 1.82
+     }
+    },
+    "hand": {
+     "r0_left": {
+      "palm_normal_angle": {
+       "frames": 116,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 116,
+       "mean_deg": 26.1,
+       "p95_deg": 27.9
+      },
+      "long_axis_angle": {
+       "frames": 116,
+       "mean_deg": 0.8,
+       "p95_deg": 1.0
+      },
+      "palm_surface_angle": {
+       "frames": 116,
+       "mean_deg": 64.2,
+       "p95_deg": 68.4
+      },
+      "near_limit_any": 0.2107,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.2107,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 511.2,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 0
+     },
+     "r0_right": {
+      "palm_normal_angle": {
+       "frames": 118,
+       "mean_deg": 3.4,
+       "p95_deg": 3.5
+      },
+      "finger_angle": {
+       "frames": 118,
+       "mean_deg": 31.5,
+       "p95_deg": 33.8
+      },
+      "long_axis_angle": {
+       "frames": 118,
+       "mean_deg": 0.7,
+       "p95_deg": 0.8
+      },
+      "palm_surface_angle": {
+       "frames": 118,
+       "mean_deg": 53.8,
+       "p95_deg": 56.2
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 111.4,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 0
+     },
+     "r1_left": {
+      "palm_normal_angle": {
+       "frames": 142,
+       "mean_deg": 2.9,
+       "p95_deg": 3.0
+      },
+      "finger_angle": {
+       "frames": 142,
+       "mean_deg": 30.0,
+       "p95_deg": 34.7
+      },
+      "long_axis_angle": {
+       "frames": 142,
+       "mean_deg": 0.2,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 142,
+       "mean_deg": 66.8,
+       "p95_deg": 90.5
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 143.4,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_right": {
+      "palm_normal_angle": {
+       "frames": 146,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 146,
+       "mean_deg": 24.8,
+       "p95_deg": 29.2
+      },
+      "long_axis_angle": {
+       "frames": 146,
+       "mean_deg": 0.4,
+       "p95_deg": 0.5
+      },
+      "palm_surface_angle": {
+       "frames": 146,
+       "mean_deg": 60.5,
+       "p95_deg": 65.6
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 106.8,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     }
+    },
+    "path": "exports_system1/T14_references/r5/table_k0p8_C/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "80a6a3c70ffb75f9e0829a6306614c248510f920677a2e5d3783929f0156efa6",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r5/table_k0p9_C/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r5/table_k0p9_C/table_k0p9.urdf",
+   "numbers": [
+    "接触保持率 0.866",
+    "最大穿透 0.10 cm",
+    "求解成功：是",
+    "机器人最小间隙 21.5 cm",
+    "接触位置误差 1.2 / 1.0 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 0.7323,
+     "r1": 1.0,
+     "pooled": 0.8662
+    },
+    "max_penetration_cm": {
+     "r0": 0.1,
+     "r1": 0.0
+    },
+    "frames_penetrating": {
+     "r0": 0.5375,
+     "r1": 0.0
+    },
+    "robot_robot_min_distance_cm": 21.502,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 1.02,
+      "p95_cm": 1.51
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.46,
+      "p95_cm": 1.75
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.24,
+      "p95_cm": 1.72
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.06,
+      "p95_cm": 1.91
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 0.87,
+      "p95_cm": 1.13
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 0.96,
+      "p95_cm": 1.42
+     }
+    },
+    "hand": {
+     "r0_left": {
+      "palm_normal_angle": {
+       "frames": 116,
+       "mean_deg": 3.3,
+       "p95_deg": 3.4
+      },
+      "finger_angle": {
+       "frames": 116,
+       "mean_deg": 26.3,
+       "p95_deg": 28.2
+      },
+      "long_axis_angle": {
+       "frames": 116,
+       "mean_deg": 0.4,
+       "p95_deg": 0.5
+      },
+      "palm_surface_angle": {
+       "frames": 116,
+       "mean_deg": 62.9,
+       "p95_deg": 68.1
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 339.7,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 0
+     },
+     "r0_right": {
+      "palm_normal_angle": {
+       "frames": 118,
+       "mean_deg": 3.5,
+       "p95_deg": 3.6
+      },
+      "finger_angle": {
+       "frames": 118,
+       "mean_deg": 31.6,
+       "p95_deg": 33.9
+      },
+      "long_axis_angle": {
+       "frames": 118,
+       "mean_deg": 0.3,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 118,
+       "mean_deg": 53.8,
+       "p95_deg": 56.2
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 95.3,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 0
+     },
+     "r1_left": {
+      "palm_normal_angle": {
+       "frames": 142,
+       "mean_deg": 2.9,
+       "p95_deg": 3.0
+      },
+      "finger_angle": {
+       "frames": 142,
+       "mean_deg": 30.1,
+       "p95_deg": 34.7
+      },
+      "long_axis_angle": {
+       "frames": 142,
+       "mean_deg": 0.1,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 142,
+       "mean_deg": 61.7,
+       "p95_deg": 66.2
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 172.1,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_right": {
+      "palm_normal_angle": {
+       "frames": 146,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 146,
+       "mean_deg": 24.9,
+       "p95_deg": 29.3
+      },
+      "long_axis_angle": {
+       "frames": 146,
+       "mean_deg": 0.1,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 146,
+       "mean_deg": 61.9,
+       "p95_deg": 78.0
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 123.1,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     }
+    },
+    "path": "exports_system1/T14_references/r5/table_k0p9_C/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "27d6e4be9af30cb4f696245d1b9abefccfbf41930644b48b2b14577555147636",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r5/table_k1p0_C/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r5/table_k1p0_C/table_k1p0.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.12 cm",
+    "求解成功：是",
+    "机器人最小间隙 26.3 cm",
+    "接触位置误差 1.5 / 1.1 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 1.0,
+     "r1": 1.0,
+     "pooled": 1.0
+    },
+    "max_penetration_cm": {
+     "r0": 0.12,
+     "r1": 0.1
+    },
+    "frames_penetrating": {
+     "r0": 0.5593,
+     "r1": 0.632
+    },
+    "robot_robot_min_distance_cm": 26.333,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 1.9,
+      "p95_cm": 2.23
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.14,
+      "p95_cm": 1.43
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 1.52,
+      "p95_cm": 2.15
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.03,
+      "p95_cm": 1.58
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 1.11,
+      "p95_cm": 1.55
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 1.07,
+      "p95_cm": 1.56
+     }
+    },
+    "hand": {
+     "r0_left": {
+      "palm_normal_angle": {
+       "frames": 116,
+       "mean_deg": 3.3,
+       "p95_deg": 3.4
+      },
+      "finger_angle": {
+       "frames": 116,
+       "mean_deg": 26.3,
+       "p95_deg": 28.2
+      },
+      "long_axis_angle": {
+       "frames": 116,
+       "mean_deg": 0.2,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 116,
+       "mean_deg": 62.9,
+       "p95_deg": 68.2
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 205.2,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 0
+     },
+     "r0_right": {
+      "palm_normal_angle": {
+       "frames": 118,
+       "mean_deg": 3.5,
+       "p95_deg": 3.6
+      },
+      "finger_angle": {
+       "frames": 118,
+       "mean_deg": 31.6,
+       "p95_deg": 33.9
+      },
+      "long_axis_angle": {
+       "frames": 118,
+       "mean_deg": 0.0,
+       "p95_deg": 0.1
+      },
+      "palm_surface_angle": {
+       "frames": 118,
+       "mean_deg": 50.6,
+       "p95_deg": 57.0
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 88.2,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_left": {
+      "palm_normal_angle": {
+       "frames": 142,
+       "mean_deg": 3.0,
+       "p95_deg": 3.0
+      },
+      "finger_angle": {
+       "frames": 142,
+       "mean_deg": 30.1,
+       "p95_deg": 34.7
+      },
+      "long_axis_angle": {
+       "frames": 142,
+       "mean_deg": 0.1,
+       "p95_deg": 0.1
+      },
+      "palm_surface_angle": {
+       "frames": 142,
+       "mean_deg": 63.8,
+       "p95_deg": 90.6
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 201.1,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_right": {
+      "palm_normal_angle": {
+       "frames": 146,
+       "mean_deg": 3.3,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 146,
+       "mean_deg": 24.9,
+       "p95_deg": 29.3
+      },
+      "long_axis_angle": {
+       "frames": 146,
+       "mean_deg": 0.1,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 146,
+       "mean_deg": 60.5,
+       "p95_deg": 65.5
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 146.4,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     }
+    },
+    "path": "exports_system1/T14_references/r5/table_k1p0_C/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "6ed92e10fc404ac96d34652a55ddc628494697c5b133eb530deed5ad9c892df9",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/r5/table_k1p1_C/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r5/table_k1p1_C/table_k1p1.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.15 cm",
+    "求解成功：是",
+    "机器人最小间隙 29.7 cm",
+    "接触位置误差 2.3 / 2.0 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 1.0,
+     "r1": 1.0,
+     "pooled": 1.0
+    },
+    "max_penetration_cm": {
+     "r0": 0.148,
+     "r1": 0.104
+    },
+    "frames_penetrating": {
+     "r0": 0.5811,
+     "r1": 0.7918
+    },
+    "robot_robot_min_distance_cm": 29.693,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 2.71,
+      "p95_cm": 3.12
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 1.99,
+      "p95_cm": 2.38
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 2.34,
+      "p95_cm": 3.04
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 1.87,
+      "p95_cm": 2.45
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 2.22,
+      "p95_cm": 2.89
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 2.05,
+      "p95_cm": 2.8
+     }
+    },
+    "hand": {
+     "r0_left": {
+      "palm_normal_angle": {
+       "frames": 116,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 116,
+       "mean_deg": 26.2,
+       "p95_deg": 28.1
+      },
+      "long_axis_angle": {
+       "frames": 116,
+       "mean_deg": 0.2,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 116,
+       "mean_deg": 63.0,
+       "p95_deg": 68.3
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 140.7,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 97
+     },
+     "r0_right": {
+      "palm_normal_angle": {
+       "frames": 118,
+       "mean_deg": 3.5,
+       "p95_deg": 3.6
+      },
+      "finger_angle": {
+       "frames": 118,
+       "mean_deg": 31.6,
+       "p95_deg": 33.8
+      },
+      "long_axis_angle": {
+       "frames": 118,
+       "mean_deg": 0.1,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 118,
+       "mean_deg": 38.8,
+       "p95_deg": 49.2
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 95.1,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_left": {
+      "palm_normal_angle": {
+       "frames": 142,
+       "mean_deg": 3.0,
+       "p95_deg": 3.0
+      },
+      "finger_angle": {
+       "frames": 142,
+       "mean_deg": 30.1,
+       "p95_deg": 34.7
+      },
+      "long_axis_angle": {
+       "frames": 142,
+       "mean_deg": 0.2,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 142,
+       "mean_deg": 76.6,
+       "p95_deg": 92.6
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 229.7,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_right": {
+      "palm_normal_angle": {
+       "frames": 146,
+       "mean_deg": 3.3,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 146,
+       "mean_deg": 24.9,
+       "p95_deg": 29.3
+      },
+      "long_axis_angle": {
+       "frames": 146,
+       "mean_deg": 0.2,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 146,
+       "mean_deg": 41.6,
+       "p95_deg": 62.1
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 173.1,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     }
+    },
+    "path": "exports_system1/T14_references/r5/table_k1p1_C/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "212a42d0283860651ce9f5841e68dc5d38a055a0492988c76ec27873c8f6f0db",
+    "success": true
+   }
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/r5/table_k1p2_C/20231030_001_desk001_move_new_fps30.npz",
+   "urdf": "exports_system1/T14_references/r5/table_k1p2_C/table_k1p2.urdf",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.18 cm",
+    "求解成功：是",
+    "机器人最小间隙 33.3 cm",
+    "接触位置误差 3.6 / 2.9 cm"
+   ],
+   "values": {
+    "frames": 413,
+    "condition_frames": 396,
+    "contact_retention": {
+     "r0": 1.0,
+     "r1": 1.0,
+     "pooled": 1.0
+    },
+    "max_penetration_cm": {
+     "r0": 0.177,
+     "r1": 0.116
+    },
+    "frames_penetrating": {
+     "r0": 0.5908,
+     "r1": 0.799
+    },
+    "robot_robot_min_distance_cm": 33.334,
+    "robot_robot_intersect_frames": 0,
+    "finite": true,
+    "contact_position_error": {
+     "r0_left": {
+      "frames": 116,
+      "mean_cm": 3.88,
+      "p95_cm": 4.64
+     },
+     "r0_right": {
+      "frames": 118,
+      "mean_cm": 3.41,
+      "p95_cm": 4.09
+     },
+     "r0": {
+      "frames": 234,
+      "mean_cm": 3.64,
+      "p95_cm": 4.57
+     },
+     "r1_left": {
+      "frames": 142,
+      "mean_cm": 2.7,
+      "p95_cm": 3.64
+     },
+     "r1_right": {
+      "frames": 146,
+      "mean_cm": 3.11,
+      "p95_cm": 3.57
+     },
+     "r1": {
+      "frames": 288,
+      "mean_cm": 2.9,
+      "p95_cm": 3.62
+     }
+    },
+    "hand": {
+     "r0_left": {
+      "palm_normal_angle": {
+       "frames": 116,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 116,
+       "mean_deg": 26.2,
+       "p95_deg": 28.1
+      },
+      "long_axis_angle": {
+       "frames": 116,
+       "mean_deg": 0.3,
+       "p95_deg": 0.5
+      },
+      "palm_surface_angle": {
+       "frames": 116,
+       "mean_deg": 43.1,
+       "p95_deg": 63.6
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 135.4,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 97
+     },
+     "r0_right": {
+      "palm_normal_angle": {
+       "frames": 118,
+       "mean_deg": 3.5,
+       "p95_deg": 3.6
+      },
+      "finger_angle": {
+       "frames": 118,
+       "mean_deg": 31.6,
+       "p95_deg": 33.8
+      },
+      "long_axis_angle": {
+       "frames": 118,
+       "mean_deg": 0.2,
+       "p95_deg": 0.2
+      },
+      "palm_surface_angle": {
+       "frames": 118,
+       "mean_deg": 38.3,
+       "p95_deg": 40.4
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 135.3,
+      "speed_peak_joint": "wrist_pitch",
+      "speed_peak_frame": 95
+     },
+     "r1_left": {
+      "palm_normal_angle": {
+       "frames": 142,
+       "mean_deg": 2.9,
+       "p95_deg": 3.0
+      },
+      "finger_angle": {
+       "frames": 142,
+       "mean_deg": 30.1,
+       "p95_deg": 34.7
+      },
+      "long_axis_angle": {
+       "frames": 142,
+       "mean_deg": 0.2,
+       "p95_deg": 0.4
+      },
+      "palm_surface_angle": {
+       "frames": 142,
+       "mean_deg": 60.0,
+       "p95_deg": 94.1
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 255.7,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     },
+     "r1_right": {
+      "palm_normal_angle": {
+       "frames": 146,
+       "mean_deg": 3.2,
+       "p95_deg": 3.3
+      },
+      "finger_angle": {
+       "frames": 146,
+       "mean_deg": 24.9,
+       "p95_deg": 29.3
+      },
+      "long_axis_angle": {
+       "frames": 146,
+       "mean_deg": 0.3,
+       "p95_deg": 0.5
+      },
+      "palm_surface_angle": {
+       "frames": 146,
+       "mean_deg": 36.6,
+       "p95_deg": 56.6
+      },
+      "near_limit_any": 0.0,
+      "near_limit_per_joint": {
+       "wrist_roll": 0.0,
+       "wrist_pitch": 0.0,
+       "wrist_yaw": 0.0
+      },
+      "speed_peak_dps": 182.7,
+      "speed_peak_joint": "wrist_roll",
+      "speed_peak_frame": 0
+     }
+    },
+    "path": "exports_system1/T14_references/r5/table_k1p2_C/20231030_001_desk001_move_new_fps30.npz",
+    "sha256": "7ee8a1c1ee71daa73f6de6de3eccfcec6b8f8b41ff6a042ee6edfa76a805a66d",
+    "success": true
+   }
+  }
+ ]
+}

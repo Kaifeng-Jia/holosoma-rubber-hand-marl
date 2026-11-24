@@ -1,0 +1,14 @@
+T14 (Kevin 2026-11-24): contact-position error as a 3-D distance; replaces the surface-only version of contact_gap.py
+(which compared the two points' projections onto the surface and could not see a hand hovering above it).
+
+  * frames: every frame in which the person's hand touches the object (any SMPL-X hand vertex within 1.5 cm of the captured
+    mesh); CORE4D 15 Hz frame t <-> reference frame 2t, robot r <-> person r + 1; Push / Pull 30 Hz, robot 1 inherits the
+    source (Pull mirrored across the table's local XY plane, hands swapped);
+  * target = the person's palm point -> nearest point on the captured object mesh (object frame), moved to the level's object
+    by the level's transform (CORE4D x s, s = s_bar k; Push / Pull the role-isometry translation +-c(m), Pull robot 1 mirrored);
+    n = the mesh face normal at that point, oriented toward the person's palm point (outside the object);
+  * robot = the robot palm point (palm point of the simulator hand hull, simulator FK) in the reference's object frame;
+  * error vector e = robot - target: distance |e|; normal component e.n (signed: + = outside / hovering, - = inside the object
+    surface); tangential component |e - (e.n) n|.
+Per robot and hand over the contact frames: mean and 95th percentile of the distance, of the tangential component and of
+|normal|, and the mean signed normal component (cm).

@@ -1,0 +1,247 @@
+{
+ "task": "table",
+ "grid": "table_r5C_grid.jpg",
+ "bytes": 999012,
+ "jpeg_quality": 80,
+ "cameras": [
+  {
+   "column": "接触开始",
+   "frame_30hz": 0,
+   "time_s": 0.0,
+   "lookat": [
+    0.4960342402617026,
+    0.24623043211319687,
+    0.6698484427484204
+   ],
+   "distance": 2.2207531735863264,
+   "azimuth": 28.31602832725106,
+   "elevation": -25.0
+  },
+  {
+   "column": "中段",
+   "frame_30hz": 164,
+   "time_s": 5.467,
+   "lookat": [
+    0.3179106833328226,
+    0.07799391612044548,
+    0.6535135652199527
+   ],
+   "distance": 2.025487593625387,
+   "azimuth": 18.86653719489172,
+   "elevation": -25.0
+  },
+  {
+   "column": "接触结束",
+   "frame_30hz": 330,
+   "time_s": 11.0,
+   "lookat": [
+    -0.461461960260502,
+    -1.3776695292082892,
+    0.6333516297838714
+   ],
+   "distance": 2.209120338907742,
+   "azimuth": 27.611280960635227,
+   "elevation": -25.0
+  }
+ ],
+ "closeup_camera": {
+  "r0": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 0,
+   "lookat": [
+    -0.23022128799023245,
+    -1.0396240553766605,
+    0.7734144720223208
+   ],
+   "distance": 1.1040501340448319,
+   "azimuth": 171.45699770172922,
+   "elevation": -10.0
+  },
+  "r1": {
+   "column": "手部特写",
+   "rule": "lift",
+   "robot": 1,
+   "lookat": [
+    -0.13868865843261757,
+    -0.3118165105874454,
+    0.7795383828036442
+   ],
+   "distance": 1.2620870921644511,
+   "azimuth": -17.29083759312425,
+   "elevation": -10.0
+  }
+ },
+ "closeup_frames": {
+  "k = 0.8": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    0.0262,
+    -0.6125,
+    0.6287
+   ],
+   "lookat_r1": [
+    0.0921,
+    -0.0576,
+    0.6319
+   ]
+  },
+  "k = 0.9": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.0391,
+    -0.719,
+    0.6497
+   ],
+   "lookat_r1": [
+    0.0345,
+    -0.1228,
+    0.6518
+   ]
+  },
+  "k = 1.0": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.104,
+    -0.8253,
+    0.6784
+   ],
+   "lookat_r1": [
+    -0.0244,
+    -0.1888,
+    0.6832
+   ]
+  },
+  "k = 1.1": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.1668,
+    -0.9323,
+    0.7227
+   ],
+   "lookat_r1": [
+    -0.0823,
+    -0.2516,
+    0.7297
+   ]
+  },
+  "k = 1.2": {
+   "frame_30hz": 228,
+   "human_to_robot_scales": [
+    0.7477371848535067,
+    0.7347195863845842
+   ],
+   "lookat_r0": [
+    -0.2302,
+    -1.0396,
+    0.7734
+   ],
+   "lookat_r1": [
+    -0.1387,
+    -0.3118,
+    0.7795
+   ]
+  }
+ },
+ "levels": [
+  {
+   "label": "k = 0.8",
+   "size": 0.8,
+   "pair": "exports_system1/T14_references/r5/table_k0p8_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "80a6a3c70ffb75f9e0829a6306614c248510f920677a2e5d3783929f0156efa6",
+   "urdf": "exports_system1/T14_references/r5/table_k0p8_C/table_k0p8.urdf",
+   "urdf_sha256": "c729ffa58d1d5c99745960fef75661bb9cc2f7e09e90802274d6020718724da4",
+   "numbers": [
+    "接触保持率 0.116",
+    "最大穿透 0.00 cm",
+    "求解成功：是",
+    "机器人最小间隙 14.5 cm",
+    "接触位置误差 1.2 / 1.2 cm"
+   ]
+  },
+  {
+   "label": "k = 0.9",
+   "size": 0.9,
+   "pair": "exports_system1/T14_references/r5/table_k0p9_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "27d6e4be9af30cb4f696245d1b9abefccfbf41930644b48b2b14577555147636",
+   "urdf": "exports_system1/T14_references/r5/table_k0p9_C/table_k0p9.urdf",
+   "urdf_sha256": "b9a176db2f67d9d2b661aa1f2e737beef835438f94560ae4d53b89351fc6e3af",
+   "numbers": [
+    "接触保持率 0.866",
+    "最大穿透 0.10 cm",
+    "求解成功：是",
+    "机器人最小间隙 21.5 cm",
+    "接触位置误差 1.2 / 1.0 cm"
+   ]
+  },
+  {
+   "label": "k = 1.0",
+   "size": 1.0,
+   "pair": "exports_system1/T14_references/r5/table_k1p0_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "6ed92e10fc404ac96d34652a55ddc628494697c5b133eb530deed5ad9c892df9",
+   "urdf": "exports_system1/T14_references/r5/table_k1p0_C/table_k1p0.urdf",
+   "urdf_sha256": "41e0204ed6ff5ad757123e4038bf506cdc23113480faf213461f1d91bb822f3b",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.12 cm",
+    "求解成功：是",
+    "机器人最小间隙 26.3 cm",
+    "接触位置误差 1.5 / 1.1 cm"
+   ]
+  },
+  {
+   "label": "k = 1.1",
+   "size": 1.1,
+   "pair": "exports_system1/T14_references/r5/table_k1p1_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "212a42d0283860651ce9f5841e68dc5d38a055a0492988c76ec27873c8f6f0db",
+   "urdf": "exports_system1/T14_references/r5/table_k1p1_C/table_k1p1.urdf",
+   "urdf_sha256": "b56ec77502f67d3b4af207e82337fb94f60a93355c9fdf6ce074d38e52ee22f7",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.15 cm",
+    "求解成功：是",
+    "机器人最小间隙 29.7 cm",
+    "接触位置误差 2.3 / 2.0 cm"
+   ]
+  },
+  {
+   "label": "k = 1.2",
+   "size": 1.2,
+   "pair": "exports_system1/T14_references/r5/table_k1p2_C/20231030_001_desk001_move_new_fps30.npz",
+   "pair_sha256": "7ee8a1c1ee71daa73f6de6de3eccfcec6b8f8b41ff6a042ee6edfa76a805a66d",
+   "urdf": "exports_system1/T14_references/r5/table_k1p2_C/table_k1p2.urdf",
+   "urdf_sha256": "69b7bbea2b6e3dc2cc44dd3702ec03bbd63b250c8b8834bf5c4c3b929125719a",
+   "numbers": [
+    "接触保持率 1.000",
+    "最大穿透 0.18 cm",
+    "求解成功：是",
+    "机器人最小间隙 33.3 cm",
+    "接触位置误差 3.6 / 2.9 cm"
+   ]
+  }
+ ],
+ "contact_frames_30hz": [
+  0,
+  164,
+  330
+ ],
+ "helper_sha256": "7d3da5c60fd08b0b7f35b046928796cabb988bfc8964b2a7e527d67cf2938e51",
+ "preset": "g1_native_execution",
+ "rules": "T14 items 1-2: size-level grid figure and video per task (kinematic references, not policy replays). Render only, CPU.\n\nLevels: Table / Bin / Chair k = 0.8 ... 1.2 (two-person, uniform scale); Push / Pull m = a, 1.0, 1.5, 2.0 (single person,\nstretched table). Each level = a 30 Hz two-robot reference (robot_qpos [T, 2, 36] wxyz) + object pose + that level's object\nURDF.\n\nColumns (same for every level): contact start, middle, end = first / middle / last source frame in which any hand of the\nperson(s) touches the object (any SMPL-X hand vertex within 1.5 cm, the stop-1 rule), as 30 Hz reference frames.\n\nGrid: one row per level, one column per moment, full view (both robots and the whole object). The camera of a column is\nthe same for every row, fitted (U5 camera_for, 7 % border) to the robot and object mesh bounds of the LARGEST level at that\nframe; azimuth = the horizontal robot-0 -> robot-1 direction at that frame - 90 deg + 30 deg, elevation -25 deg. Each cell\nis labelled with the level and the time; a header column per row gives that level's numbers (contact retention, max\npenetration, solve success, smallest robot-robot distance). U5 / Fig. 4 style (preset g1_native_execution).\n\nClose-up column (round 3, --closeup; default none = rounds 1-2 layout): one more column per level showing the hands' vertical\nposition. Frame: CORE4D (--closeup lift) the frame at which the object origin is highest; Push / Pull (--closeup mid) the\nmiddle contact frame. View: each robot in profile, the camera looking along that robot's own lateral axis (root yaw + 90 deg),\nelevation -10 deg, fitted to its two rubber-hand link origins +- 0.15 m, the other robot hidden; CORE4D: two half-width\npanels (robot 0, robot 1); Push / Pull: robot 0 only (robot 1 is its copy / mirror). Distance, azimuth and elevation are\nthose of the largest level; the look-at point is that robot's hand centroid at each level's own frame.\n\nVideo: the levels one after another (each the whole reference at 30 fps), one fixed camera fitted to the largest level over\nits whole motion (every 10th frame), same azimuth rule at frame 0; label = task, level, time.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/render_sizes.py --task table --levels levels.json --out results_system1/T14_retargeting/step2_sizes/figures --video-out exports_system1/T14_videos\n"
+}
