@@ -117,7 +117,10 @@ def main():
     if warm:
         main_argv += ["--resume", str(d / "train_warmup" / f"model_{warm:05d}.pt")]
     stages.append(dict(name="train", argv=main_argv))
-    plan = dict(run=a.run, task=run["task"], num_envs=a.num_envs, gpu=a.gpu, rules=R, warmup_iterations=warm, stages=stages,
+    counting = dict(decision="Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+                    warmup_iterations=warm, counted_iteration="checkpoint file number - warmup_iterations",
+                    applies_to="validation points, stop rule, maximum iterations, final checkpoint")
+    plan = dict(run=a.run, task=run["task"], num_envs=a.num_envs, gpu=a.gpu, rules=R, iteration_counting=counting, warmup_iterations=warm, stages=stages,
                 validation_states=f"{STATES}/{run['task']}_validation_states.json", validation_flags=VAL_FLAGS[run["task"]])
     if a.dry_run:
         print(json.dumps(plan, indent=1))
@@ -195,10 +198,12 @@ def main():
     allck = sorted(set(ckpts(d / "train")) | set(ckpts(d / "train_resume1") if (d / "train_resume1").exists() else set()))
     state["status"] = state["status"] if state["status"] != "running" else ("stopped by rule" if state["stopped"] else "finished")
     state["final_checkpoint_iteration"] = allck[-1] if allck else None
+    state["final_checkpoint_counted_iteration"] = allck[-1] - warm if allck else None
     state["ended"] = now()
     save()
     (d / "decision.json").write_text(json.dumps(dict(run=a.run, status=state["status"], stopped_by_rule=state["stopped"],
                                                      final_checkpoint_iteration=state["final_checkpoint_iteration"],
+                                                     final_checkpoint_counted_iteration=state["final_checkpoint_counted_iteration"], iteration_counting=counting,
                                                      validation_curve=dict(sorted(state["curve"].items())), ended=state["ended"]), indent=1))
     return 0
 

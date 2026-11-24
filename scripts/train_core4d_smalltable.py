@@ -778,6 +778,9 @@ def main() -> int:
                 record.update({name: float(value.item()) for name, value in raw_reward_diagnostics.items()})
             if episode_telemetry is not None:
                 record.update(episode_telemetry.summary())
+            if ARGS.contact_v1 is not None:  # System1 T13 v4: per-robot contact diagnostics of this iteration (one copy per iteration)
+                from holosoma.managers.reward.terms.contact_v1 import contact_v1_iteration_diagnostics
+                record.update(contact_v1_iteration_diagnostics(env))
             numeric = [value for value in record.values() if isinstance(value, (int, float))]
             if not all(torch.isfinite(torch.tensor(value)) for value in numeric):
                 raise RuntimeError(f"Non-finite metric at iteration {iteration}")

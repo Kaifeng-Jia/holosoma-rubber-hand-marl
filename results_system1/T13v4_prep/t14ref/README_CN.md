@@ -182,3 +182,42 @@
 5. **T13 第 0 节第 6 条（出差保险）：**这次没有处理。查到的情况：tmux 里没有 `claude remote-control` 会话；`sleep.target` 和 `suspend.target` 没有屏蔽，屏蔽需要 sudo。
 6. **MuJoCo 端观测 v1、Pull 镜像标签：**和第二轮一样，没有做。
 
+
+## 8. Kevin 2026-11-24 的决定之后（13:15 起）
+
+**决定：**
+- 回放受力低不挡开卡；
+- Push 第 0 帧穿透 0.1 cm（扰动后 ≤ 0.3 cm）接受；
+- 训练轮数从 critic 预热之后数，三个 run 同一口径；
+- 卡由 Kevin 在 AutoDL 租好后给登录信息。
+
+### 8.1 训练中记录每台机器人的接触诊断（第 5 节第 5 条）
+
+- **实现：**`contact_v1.py` 在 GPU 上逐步累加，训练脚本每轮读一次（一次拷贝），写进 `metrics.jsonl` 的 `ContactV1/` 字段。
+  - 只在 `--contact-v1` 时生效；累加不改变奖励和终止的值。
+- **每台机器人的字段（都是这一轮的值）：**
+  - 应接触的手步数；
+  - 其中手–物体力 > 1 N 的比例；
+  - 其中丢接触的比例；
+  - 丢接触终止信号次数：这台的某只手连续丢接触达到 25 步；
+  - 不该碰部位惩罚：被罚的步数占比、平均被罚连杆数；
+  - 平均接触奖励。
+- **改前改后同种子对比**（256 个环境，3 轮，Table 和 Push 各一次；`records/contact_diag_before_after.json`）：
+  - Table：132 个指标值、15 个 trace 数组逐位相同；
+  - Push：63 个指标值逐位相同；
+  - 改后多出上面的 `ContactV1/` 字段。
+  - 第一次改前对照时，我在它跑完前就改了文件，那次作废，移到 `_to_delete/t13v4_diag_contaminated/`，按原文件重跑。
+- **这 3 轮里的值（只说明字段能用，不评价）：**
+
+  | 任务 | 机器人 | 应接触时力 > 1 N | 丢接触 |
+  |---|---|---|---|
+  | Table | r0 / r1 | 13.6% / 16.6% | 87% / 84% |
+  | Push | r0 / r1 | 44.0% / 45.5% | 55% / 55% |
+
+### 8.2 轮数口径写进运行记录
+
+- `cloud_runs.py` 的 `launch.json` 和 `decision.json` 加 `iteration_counting`：
+  - Kevin 的决定原文；
+  - 预热轮数：d_push 2048 个环境时 50、4096 时 25；d_table、d_table_pa 为 0；
+  - "计数轮数 = checkpoint 编号 − 预热轮数"，用于验证点、停止规则、最多轮数和最终 checkpoint。
+- `decision.json` 另记 `final_checkpoint_counted_iteration`。

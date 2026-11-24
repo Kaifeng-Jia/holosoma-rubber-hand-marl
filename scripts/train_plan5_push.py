@@ -742,6 +742,9 @@ def main() -> None:
                 raise RuntimeError(f"Non-finite reward term at iteration {iteration}: {reward_terms}")
             if telemetry is not None:
                 metrics.update(telemetry.summary())
+            if ARGS.contact_v1 is not None:  # System1 T13 v4: per-robot contact diagnostics of this iteration (one copy per iteration)
+                from holosoma.managers.reward.terms.contact_v1 import contact_v1_iteration_diagnostics
+                metrics.update(contact_v1_iteration_diagnostics(env))
             if ARGS.c_train_diag and iteration % env.train_diag.every == 0:
                 metrics["system1_c_train_diag"] = env.train_diag.summary(models.actor)
             _append_jsonl(metrics_path, metrics)

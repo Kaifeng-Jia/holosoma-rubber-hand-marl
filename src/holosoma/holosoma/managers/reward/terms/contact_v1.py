@@ -85,6 +85,10 @@ class ContactV1Labels:
         self.link_filter = torch.tensor([[idx[(r, n)] for n in self.link_names] for r in (0, 1)], device=dev)
         self.sensor = sensor
         self.num_filters = len(filters)
+        # iteration diagnostics (T13 v4 section 5 item 5): accumulated on the device, read once per training iteration
+        z = lambda: torch.zeros(2, device=dev, dtype=torch.float64)  # noqa: E731
+        self.stats = dict(robot_steps=z(), should_hand_steps=z(), should_force_over_1n=z(), lost_hand_steps=z(),
+                          lost_termination_signals=z(), penalty_robot_steps=z(), penalty_link_count=z(), reward_sum=z())
 
     @staticmethod
     def of(env: Any, labels_file: str) -> "ContactV1Labels":
@@ -138,6 +142,13 @@ class EefContactExpV1(RewardTermBase):
         self.last_hand.copy_(hand)
         self.last_count.copy_(count)
         self.last_robot.copy_(robot)
+        st = ContactV1Labels.of(env, labels_file).stats  # diagnostics only (no effect on the returned value)
+        st["robot_steps"] += float(robot.shape[0])
+        st["should_hand_steps"] += m["should"].sum(dim=(0, 2))
+        st["should_force_over_1n"] += (m["should"] & (m["f_hand"] > c["undesired_force_n"])).sum(dim=(0, 2))
+        st["penalty_robot_steps"] += (count > 0).sum(dim=0)
+        st["penalty_link_count"] += count.sum(dim=0)
+        st["reward_sum"] += robot.sum(dim=0)
         return robot if per_agent else robot.mean(dim=-1)
 
 
@@ -160,7 +171,35 @@ class LostContactV1(TerminationTermBase):
         lost = m["should"] & ((m["d"] > c["lost_distance_m"]) | (m["f_hand"] < c["lost_force_n"])) & started
         self.counter = torch.where(lost, self.counter + 1, torch.zeros_like(self.counter))
         self.last_lost.copy_(lost)
+        st = ContactV1Labels.of(env, labels_file).stats  # diagnostics only
+        st["lost_hand_steps"] += lost.sum(dim=(0, 2))
+        st["lost_termination_signals"] += (self.counter == c["lost_steps"]).any(dim=-1).sum(dim=0)
         return (self.counter >= c["lost_steps"]).flatten(1).any(dim=1)
 
 
-__all__ = ["CONTACT_V1", "ContactV1Labels", "EefContactExpV1", "LostContactV1"]
+def contact_v1_iteration_diagnostics(env: Any, reset: bool = True) -> dict[str, float]:
+    """Per robot, since the last call (one GPU->CPU copy per training iteration): share of should-contact hand steps with
+    hand-object force > 1 N, share lost (d > 0.2 m or F < 1 N), lost-contact termination signals (a hand of that robot
+    reaching 25 consecutive lost steps), share of robot steps with the undesired-contact penalty and mean penalised links,
+    mean per-robot contact reward."""
+    cache = getattr(env, "_system1_contact_v1", None)
+    if cache is None:
+        return {}
+    st = {k: v.detach().cpu().tolist() for k, v in cache.stats.items()}
+    out = {}
+    for r in (0, 1):
+        sh, steps = st["should_hand_steps"][r], st["robot_steps"][r]
+        out[f"ContactV1/r{r}_should_hand_steps"] = sh
+        out[f"ContactV1/r{r}_force_over_1n_in_should"] = st["should_force_over_1n"][r] / sh if sh else None
+        out[f"ContactV1/r{r}_lost_in_should"] = st["lost_hand_steps"][r] / sh if sh else None
+        out[f"ContactV1/r{r}_lost_termination_signals"] = st["lost_termination_signals"][r]
+        out[f"ContactV1/r{r}_penalty_step_share"] = st["penalty_robot_steps"][r] / steps if steps else None
+        out[f"ContactV1/r{r}_penalty_links_mean"] = st["penalty_link_count"][r] / steps if steps else None
+        out[f"ContactV1/r{r}_reward_mean"] = st["reward_sum"][r] / steps if steps else None
+    if reset:
+        for v in cache.stats.values():
+            v.zero_()
+    return out
+
+
+__all__ = ["CONTACT_V1", "ContactV1Labels", "EefContactExpV1", "LostContactV1", "contact_v1_iteration_diagnostics"]
