@@ -9,8 +9,8 @@ Per robot (actor, 159 = 154 legacy actor block + 5 below):
     clipped to +-2 m by the group config.
 Neck point = a fixed point on torso_link (NECK_POINT_TORSO_M, system1 T13 v4 config). Noise v1 (only when the term's
 ``noise`` param is True; training on, validation / evaluation off): per-episode offsets and per-step uniform noise on the
-neck point and the object point, per robot and independent between robots; per-episode heading bias per robot. All numbers
-live in NOISE_V1. Every operation is batched over environments; nothing is moved to the CPU.
+neck point (per robot, independent between robots) and on the object point (one draw per environment, shared by both robots:
+Kevin 2026-11-24); per-episode heading bias per robot. All numbers live in NOISE_V1. Every operation is batched over environments; nothing is moved to the CPU.
 """
 
 from __future__ import annotations
@@ -31,7 +31,7 @@ NECK_POINT_TORSO_M = (0.003, -0.0005, 0.2898)
 NOISE_V1 = dict(
     neck_episode_offset_m=0.03,   # uniform +-, per axis, per episode, per robot
     neck_step_m=0.01,             # uniform +-, per axis, per step, per robot
-    object_episode_offset_m=0.02,
+    object_episode_offset_m=0.02,  # object point: one draw per environment, shared by both robots
     object_step_m=0.01,
     heading_bias_deg=5.0,         # uniform +-, per episode, per robot
 )
@@ -50,10 +50,10 @@ class ObsV1State:
         E, A, dev = env.num_envs, env.num_agents, env.device
         self.env = env
         self.neck_offset = torch.zeros(E, A, 3, device=dev)
-        self.object_offset = torch.zeros(E, A, 3, device=dev)
+        self.object_offset = torch.zeros(E, 1, 3, device=dev)  # one object-point draw per environment, shared by the robots
         self.heading_bias = torch.zeros(E, A, device=dev)
         self.neck_step = torch.zeros(E, A, 3, device=dev)
-        self.object_step = torch.zeros(E, A, 3, device=dev)
+        self.object_step = torch.zeros(E, 1, 3, device=dev)
         self.noise_enabled: bool | None = None
         self.owner: Any = None
         self.initialized = False
@@ -88,7 +88,7 @@ class ObsV1State:
             env_ids = torch.arange(self.env.num_envs, device=self.env.device)
         n, A, dev = env_ids.numel(), self.env.num_agents, self.env.device
         self.neck_offset[env_ids] = _uniform((n, A, 3), NOISE_V1["neck_episode_offset_m"], dev)
-        self.object_offset[env_ids] = _uniform((n, A, 3), NOISE_V1["object_episode_offset_m"], dev)
+        self.object_offset[env_ids] = _uniform((n, 1, 3), NOISE_V1["object_episode_offset_m"], dev)
         self.heading_bias[env_ids] = _uniform((n, A), math.radians(NOISE_V1["heading_bias_deg"]), dev)
 
     def advance(self, term: Any) -> None:
@@ -101,7 +101,7 @@ class ObsV1State:
         if self.noise_enabled:
             E, A, dev = self.env.num_envs, self.env.num_agents, self.env.device
             self.neck_step = _uniform((E, A, 3), NOISE_V1["neck_step_m"], dev)
-            self.object_step = _uniform((E, A, 3), NOISE_V1["object_step_m"], dev)
+            self.object_step = _uniform((E, 1, 3), NOISE_V1["object_step_m"], dev)
 
     # ------------------------------------------------------------------------------------------- geometry
     def torso_pose(self) -> tuple[torch.Tensor, torch.Tensor]:

@@ -60,6 +60,8 @@ PARSER.add_argument("--obs-v1", action="store_true", help="T13 v4 observation v1
 PARSER.add_argument("--critic-v1", action="store_true", help="T13 v4 critic fix: both robots' reference commands (critic 585)")
 PARSER.add_argument("--contact-v1", type=Path, default=None, help="T13 v4 contact items: per-frame label file (system1/t13v4/contact_labels.py)")
 PARSER.add_argument("--obs-v1-noise", choices=("on", "off"), default="on", help="T13 v4 noise v1 + actor training noise (on = training)")
+PARSER.add_argument("--torch-threads", type=int, default=None,
+                    help="T13 v4 section 4 B cloud speed test: torch.set_num_threads(N) (default: PyTorch's own default, unchanged)")
 PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
 PARSER.add_argument("--system1-randomization", action="store_true",
                     help="System1 T10b domain randomisation recipe (system1/t10b/randomization.py); off = unchanged")
@@ -216,6 +218,9 @@ if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None:  # System1 T13 
                                 contact_labels=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
                                 noise=ARGS.obs_v1_noise == "on")
 SIMULATION_APP = init_sim_imports(CONFIG)
+if ARGS.torch_threads is not None:  # T13 v4 4 B (off = unchanged)
+    import torch as _torch_threads
+    _torch_threads.set_num_threads(ARGS.torch_threads)
 
 import torch  # noqa: E402
 
@@ -587,6 +592,8 @@ def main() -> None:
             "actor_obs_dim": 158 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["actor_input"],
             "critic_obs_dim": 527 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["critic_obs"],
             "system1_t13v4": T13V4,
+            "torch_threads": dict(requested=ARGS.torch_threads, actual=torch.get_num_threads(),
+                                  env={k: os.environ.get(k) for k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")}),
             "system1_randomization": None if RANDOMIZATION is None else dict(ranges=RANDOMIZATION),
             "action_dim_per_agent": 29,
             "actor_learning_rate": ppo_config.actor_learning_rate,

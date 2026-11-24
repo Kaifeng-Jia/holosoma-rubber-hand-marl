@@ -124,6 +124,11 @@ def test_obs():
         x = t.double().numpy().ravel()
         stats[name] = dict(min=float(x.min()), max=float(x.max()), mean=float(x.mean()), std=float(x.std()), uniform_std=half / math.sqrt(3))
         assert x.min() >= -half and x.max() <= half and abs(x.std() - half / math.sqrt(3)) < 0.03 * half and abs(x.mean()) < 0.03 * half, (name, stats[name])
+    # object-point noise: one draw per environment, identical for the two robots; neck / heading independent per robot
+    assert st.object_offset.shape == (env.num_envs, 1, 3) and st.object_step.shape == (env.num_envs, 1, 3)
+    stats["object_noise_shared_by_robots"] = True
+    stats["neck_offset_robot_correlation"] = float(np.corrcoef(st.neck_offset[:, 0, 0].numpy(), st.neck_offset[:, 1, 0].numpy())[0, 1])
+    assert abs(stats["neck_offset_robot_correlation"]) < 0.1
     off0, bias0, step0 = st.neck_offset.clone(), st.heading_bias.clone(), st.neck_step.clone()
     t_ori(env)  # next step
     assert torch.equal(off0, st.neck_offset) and torch.equal(bias0, st.heading_bias) and not torch.equal(step0, st.neck_step)

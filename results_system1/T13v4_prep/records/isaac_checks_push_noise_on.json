@@ -80,7 +80,7 @@
   "critic_width_from_terms": 585,
   "obs_v1_max_abs_err": {
    "ref_ori": 3.1771098596422576e-07,
-   "teammate": 4.725810957562082e-07
+   "teammate": 6.808586840434394e-07
   },
   "obs_v1_teammate_group_vs_expected": null,
   "noise_enabled": true,
@@ -105,20 +105,20 @@
     "within_range": true
    },
    "object_offset": {
-    "n": 48,
+    "n": 24,
     "min": -0.018271664157509804,
     "max": 0.01886814273893833,
-    "mean": -0.0016618994074330355,
-    "std": 0.011152790267697919,
+    "mean": -0.0019152038391136255,
+    "std": 0.012076817279787044,
     "uniform_std": 0.011547005383792516,
     "within_range": true
    },
    "object_step": {
-    "n": 48,
-    "min": -0.009888454340398312,
+    "n": 24,
+    "min": -0.008999492973089218,
     "max": 0.009712441824376583,
-    "mean": -0.0004681044683820801,
-    "std": 0.005781875195382093,
+    "mean": -0.0010742573152432062,
+    "std": 0.005372122017330695,
     "uniform_std": 0.005773502691896258,
     "within_range": true
    },
@@ -130,20 +130,66 @@
     "std": 0.0453621291161702,
     "uniform_std": 0.05038331567317272,
     "within_range": true
-   }
+   },
+   "object_noise_shape": [
+    8,
+    1,
+    3
+   ]
   },
   "clip_fraction": {
    "partner": 0.0,
    "object": 0.0
   }
  },
+ "per_agent": null,
  "sync_counts": {
-  "obs:motion_ref_ori_b": 13,
-  "obs:neck_partner_rel_pos_b": 3,
-  "obs:object_rel_pos_b": 18,
-  "obs:critic_both_commands": 6,
-  "reward:contact_v1": 39,
-  "termination:lost_contact_v1": 39
+  "obs:motion_ref_ori_b": {
+   "count_per_3_calls": 13,
+   "sites": {
+    "__init__.py:1150": 1,
+    "paired_a1_reference.py:151": 12
+   }
+  },
+  "obs:neck_partner_rel_pos_b": {
+   "count_per_3_calls": 0,
+   "sites": {}
+  },
+  "obs:object_rel_pos_b": {
+   "count_per_3_calls": 15,
+   "sites": {
+    "object_registry.py:359": 6,
+    "functional.py:995": 3,
+    "object_registry.py:367": 3,
+    "object_registry.py:378": 3
+   }
+  },
+  "obs:critic_both_commands": {
+   "count_per_3_calls": 6,
+   "sites": {
+    "paired_a1_reference.py:151": 6
+   }
+  },
+  "reward:contact_v1": {
+   "count_per_3_calls": 33,
+   "sites": {
+    "object_registry.py:359": 12,
+    "functional.py:995": 6,
+    "object_registry.py:367": 6,
+    "object_registry.py:378": 6,
+    "sensor_base.py:355": 3
+   }
+  },
+  "termination:lost_contact_v1": {
+   "count_per_3_calls": 33,
+   "sites": {
+    "object_registry.py:359": 12,
+    "functional.py:995": 6,
+    "object_registry.py:367": 6,
+    "object_registry.py:378": 6,
+    "sensor_base.py:355": 3
+   }
+  }
  },
  "contact_replay": {
   "frames": 309,
@@ -163,6 +209,10 @@
   "hand_force_over_1n_in_should": 0.7975460122699386,
   "lost_fraction_in_should": 0.20245398773006135,
   "frames_with_penalty": 0,
-  "frames_terminating": 0
+  "frames_terminating": 0,
+  "hand_force_over_1n_in_should_r0": 0.7893660531697342,
+  "should_samples_r0": 489,
+  "hand_force_over_1n_in_should_r1": 0.8057259713701431,
+  "should_samples_r1": 489
  }
 }

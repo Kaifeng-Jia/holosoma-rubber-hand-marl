@@ -1,0 +1,37 @@
+{
+ "threads_table_2": {
+  "torch_threads": {
+   "actual": 4,
+   "env": {
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": "32"
+   },
+   "requested": 4
+  },
+  "status": {
+   "final_checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/smoke/threads_table_2/model_00002.pt",
+   "final_iteration": 2,
+   "passed": true
+  }
+ },
+ "threads_push_2": {
+  "torch_threads": {
+   "actual": 16,
+   "env": {
+    "MKL_NUM_THREADS": null,
+    "OMP_NUM_THREADS": null,
+    "OPENBLAS_NUM_THREADS": "32"
+   },
+   "requested": null
+  },
+  "status": {
+   "config": "g1_29dof_plan5_push_baseline",
+   "final_checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/smoke/threads_push_2/model_00002.pt",
+   "final_iteration": 2,
+   "output_dir": "/home/kevin/duet-system1/logs_system1/t13v4/smoke/threads_push_2",
+   "passed": true,
+   "skill": "push"
+  }
+ }
+}

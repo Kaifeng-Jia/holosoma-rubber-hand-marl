@@ -67,6 +67,8 @@ PARSER.add_argument("--obs-v1-noise", choices=("on", "off"), default="on", help=
 PARSER.add_argument("--t13v4-profile", type=Path, default=None, help="T13 v4 section 4 A: per-iteration section timings (jsonl); adds CUDA syncs")
 PARSER.add_argument("--t13v4-sync-scan", type=Path, default=None, help="T13 v4 section 4 A: one extra rollout with sync debug mode before training (json)")
 PARSER.add_argument("--t13v4-trace", type=Path, default=None, help="T13 v4 section 4 A: per-iteration rollout tensors for same-seed comparisons")
+PARSER.add_argument("--torch-threads", type=int, default=None,
+                    help="T13 v4 section 4 B cloud speed test: torch.set_num_threads(N) (default: PyTorch's own default, unchanged)")
 PARSER.add_argument("--t13v4-check", type=Path, default=None, help="T13 v4 section 2.4: run the in-simulator checks into this directory instead of training")
 PARSER.add_argument("--per-agent-reward", action="store_true", help="T13 v4 D-Table-PA: per-robot rewards / values / GAE")
 ARGS = PARSER.parse_args()
@@ -237,6 +239,9 @@ if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None or ARGS.per_agen
                                 contact_labels=None if ARGS.contact_v1 is None else str(ARGS.contact_v1.expanduser().resolve()),
                                 per_agent=ARGS.per_agent_reward, noise=ARGS.obs_v1_noise == "on")
 SIMULATION_APP = init_sim_imports(CONFIG)
+if ARGS.torch_threads is not None:  # T13 v4 4 B (off = unchanged)
+    import torch as _torch_threads
+    _torch_threads.set_num_threads(ARGS.torch_threads)
 
 import torch  # noqa: E402
 
@@ -601,6 +606,8 @@ def main() -> int:
             "action_dim_per_agent": 29 if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_ACTION_DIM"],
             "critic_input_dim": (527 if not (T13V4 and "mappo_dims" in T13V4) else T13V4["mappo_dims"]["critic_obs"]) if HAND is None else HAND["mappo_dims"]["CORE4D_SMALLTABLE_CRITIC_OBS_DIM"],
             "system1_t13v4": T13V4,
+            "torch_threads": dict(requested=ARGS.torch_threads, actual=torch.get_num_threads(),
+                                  env={k: os.environ.get(k) for k in ("OMP_NUM_THREADS", "MKL_NUM_THREADS", "OPENBLAS_NUM_THREADS")}),
             "shared_actor": True,
             "runtime_reference": str(RUNTIME_REFERENCE_PATH.relative_to(REPO_ROOT)),
             "runtime_reference_sha256": runtime_reference_sha256,

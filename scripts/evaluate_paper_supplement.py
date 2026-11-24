@@ -34,7 +34,10 @@ p.add_argument('--hand-reference',type=Path,default=None,help='System1 T06/T07: 
 p.add_argument('--hand-friction',type=float,default=None,help='System1 T10b friction margin: static = dynamic friction of the rubber-hand collision shapes of both robots (restitution 0), set with the PhysX tensor API after the environment is built; off = unchanged')
 p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim: write the PhysX scene (collision convexes, masses, joints, materials, solver, PD constants) to this directory and record per step observations / actions / PD targets / substep torques / body poses (and SONIC inputs) per episode; off = unchanged')
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
+p.add_argument('--obs-v1',action='store_true',help='System1 T13 v4: observation v1 (actor 159), noise off; checkpoints trained with --obs-v1; off = unchanged')
+p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
 a=p.parse_args()
+if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
 if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
 if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
 if a.finger_mode=='learn' and a.controller in ('sonic','sonic_planner'):p.error('A/B with hands: --finger-mode track (geometric grip) or locked')
@@ -77,6 +80,11 @@ else:
                        simulator=replace(config.simulator,config=replace(config.simulator.config,enable_object_hand_contact=True)))
 config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observation,
                training=replace(config.training,num_envs=1,seed=241003,headless=True))
+T13V4_EVAL=None
+if a.obs_v1 or a.critic_v1:  # System1 T13 v4 (off = unchanged): observation v1 with noise off (validation / evaluation)
+    from holosoma.config_values.marl.g1.observation_v1 import observation_v1
+    config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False))
+    T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
 hand=None
 if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
     sys.path.insert(0,str(ROOT))
@@ -110,6 +118,13 @@ def main():
             checkpoint=_sc.DEFAULT_CHECKPOINT;state={'iter':None,'plan5_skill':a.case,'placement_provenance':placement_provenance}
         else:
             checkpoint=a.checkpoint.resolve();state=torch.load(checkpoint,map_location=dev,weights_only=False)
+        if T13V4_EVAL is not None:  # MAPPO sizes before any checkpoint contract check
+            sys.path.insert(0,str(ROOT))
+            from system1.t13v4.mappo_v1 import patch_dims
+            T13V4_EVAL['mappo_dims']=patch_dims(teammate=T13V4_EVAL['teammate'],critic=T13V4_EVAL['critic'])
+            meta=state.get('core4d_smalltable_mappo')
+            if isinstance(meta,dict) and 'system1_t13v4_return_model' in meta:  # D-Table-PA: per-agent returns (training only)
+                state=dict(state);meta=dict(meta);T13V4_EVAL['return_model']=meta.pop('system1_t13v4_return_model');state['core4d_smalltable_mappo']=meta
         ablation=state.get('v3_ablation')
         if hand is not None and a.controller=='policy':  # hand MAPPO sizes before any checkpoint contract check
             from system1.hand.hand_mappo import patch_core4d_dims
@@ -136,13 +151,22 @@ def main():
                 if sha(ROOT/'src/holosoma'/path)!=expected:raise ValueError('Asset hash mismatch: '+path)
         elif a.controller not in ('sonic','sonic_planner'):
             c=state['plan5_mappo']
-            if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=[2,158,527,29]:raise ValueError('Plan5 shape contract')
+            want=[2,158,527,29] if T13V4_EVAL is None else [2,154+T13V4_EVAL['teammate'],T13V4_EVAL['critic'],29]
+            if [c['num_agents'],c['actor_obs_dim'],c['critic_obs_dim'],c['action_dim']]!=want:raise ValueError('Plan5 shape contract')
         models=None
         if hand is not None and a.controller=='policy':
             if state.get('system1_finger_mode')!=a.finger_mode:raise ValueError('checkpoint finger mode differs from --finger-mode')
         if a.controller not in ('sonic','sonic_planner') and hand is not None:
             from system1.hand.hand_mappo import initialize_hand_model_bundle
             models=initialize_hand_model_bundle(config.algo.config,finger_mode=a.finger_mode,device=dev)
+            models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
+            models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
+            models.actor.eval();models.actor_obs_normalizer.eval()
+            def forbidden(*args,**kwargs):raise RuntimeError('Critic invoked during actor-only evaluation')
+            models.critic.evaluate=forbidden
+        elif a.controller not in ('sonic','sonic_planner') and T13V4_EVAL is not None:
+            from system1.t13v4.mappo_v1 import initialize_core4d_v1_model_bundle
+            models=initialize_core4d_v1_model_bundle(config.algo.config,teammate=T13V4_EVAL['teammate'],critic=T13V4_EVAL['critic'],device=dev)
             models.actor.load_state_dict(state['actor_model_state_dict'],strict=True)
             models.actor_obs_normalizer.load_state_dict(state['actor_obs_normalizer_state_dict'],strict=True)
             models.actor.eval();models.actor_obs_normalizer.eval()
@@ -232,6 +256,11 @@ def main():
                       error_alignment='Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset',
                       training_contract=state.get('core4d_smalltable_mappo',state.get('plan5_mappo')))
         if mass_variant is not None:manifest['system1_object_mass_variant']=mass_variant
+        if T13V4_EVAL is not None:  # System1 T13 v4: observation v1, noise off (v1 internal noise state must be off)
+            st=getattr(env,'_system1_obs_v1',None)
+            T13V4_EVAL['obs_v1_noise_enabled_in_env']=None if st is None else bool(st.noise_enabled)
+            if st is not None and st.noise_enabled:raise RuntimeError('observation-v1 noise must be off in evaluation')
+            manifest['system1_t13v4']=T13V4_EVAL
         if hand_material is not None:manifest['system1_hand_material']=dict(static_friction=hand_material['static_friction'],dynamic_friction=hand_material['dynamic_friction'],restitution=hand_material['restitution'],record='hand_material.json')
         if hand is not None:manifest['system1_hand']=dict(hand,num_dof=int(env.num_dof),object_hand_contact_bodies=list(config.simulator.config.object_hand_contact_bodies),nominal_viser_export='skipped (29-DOF format)')
         manifest['gpu_name']=torch.cuda.get_device_name(torch.device(dev)) if str(dev).startswith('cuda') else 'cpu'  # System1: GPU model of every evaluation

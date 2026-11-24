@@ -13,6 +13,7 @@ from __future__ import annotations
 
 import json
 import math
+import os
 import warnings
 from pathlib import Path
 
@@ -108,6 +109,7 @@ def check_obs(env, observations, noise_expected: bool) -> dict:
             x = _np(t).ravel()
             stats[name] = dict(n=int(x.size), min=float(x.min()), max=float(x.max()), mean=float(x.mean()), std=float(x.std()), uniform_std=half / math.sqrt(3),
                                within_range=bool(x.min() >= -half and x.max() <= half))
+        stats["object_noise_shape"] = list(st.object_offset.shape)  # [E, 1, 3]: one draw per environment, shared by the robots
         res["noise_samples"] = stats
     res["clip_fraction"] = dict(partner=float(st.partner_clipped) / max(float(st.samples), 1.0), object=float(st.object_clipped) / max(float(st.samples), 1.0))
     return res
@@ -190,6 +192,12 @@ def replay_contact(env, labels_file: str, *, stride_envs: bool = True) -> dict:
                    hand_force_over_1n_in_should=float(np.mean([fh_ > 1 for x in rows for fh_, s in zip(np.ravel(x["f_hand_n"]), np.ravel(x["should"])) if s])) if any(np.ravel(x["should"]).any() for x in rows) else None,
                    lost_fraction_in_should=float(np.mean([l for x in rows for l, s in zip(np.ravel(x["lost"]), np.ravel(x["should"])) if s])) if rows else None,
                    frames_with_penalty=int(sum(1 for x in rows if np.sum(x["penalty_count"]) > 0)), frames_terminating=int(sum(1 for x in rows if x["terminate"])))
+    # internal diagnostic (Kevin 2026-11-24; to be read once the training references are fixed): per robot, in the frames where
+    # contact is expected, the share of (frame, hand) samples with hand-object force > 1 N
+    for r in (0, 1):
+        sel = [(f_, s_) for x in rows for f_, s_ in zip(np.asarray(x["f_hand_n"])[r], np.asarray(x["should"])[r]) if s_]
+        summary[f"hand_force_over_1n_in_should_r{r}"] = float(np.mean([f_ > 1.0 for f_, _ in sel])) if sel else None
+        summary[f"should_samples_r{r}"] = len(sel)
     return dict(summary=summary, rows=rows)
 
 
@@ -267,7 +275,9 @@ def check_per_agent(env) -> dict | None:
 
 def run(env, observations, *, out: Path, labels_file: str | None, noise_expected: bool) -> dict:
     out.mkdir(parents=True, exist_ok=True)
-    res = dict(obs=check_obs(env, observations, noise_expected))
+    c = env.command_manager.get_state("paired_motion_command")
+    res = dict(initial_time_steps=_np(c.time_steps).astype(int).tolist())  # reference frames after reset_all (sampled at reset)
+    res["obs"] = check_obs(env, observations, noise_expected)
     res["per_agent"] = check_per_agent(env)
     res["sync_counts"] = count_syncs(env, labels_file)
     if labels_file is not None:
@@ -276,6 +286,13 @@ def run(env, observations, *, out: Path, labels_file: str | None, noise_expected
         with open(out / "contact_replay_rows.jsonl", "w") as f:
             for row in rep["rows"]:
                 f.write(json.dumps(row) + "\n")
+        # history test: S1_T13V4_REPLAY_PASSES=N replays the whole reference again N-1 times in the same process
+        for k in range(2, int(os.environ.get("S1_T13V4_REPLAY_PASSES", "1")) + 1):
+            rep_k = replay_contact(env, labels_file)
+            res[f"contact_replay_pass{k}"] = rep_k["summary"]
+            with open(out / f"contact_replay_rows_pass{k}.jsonl", "w") as f:
+                for row in rep_k["rows"]:
+                    f.write(json.dumps(row) + "\n")
     (out / "isaac_checks.json").write_text(json.dumps(res, indent=1, default=float) + "\n")
     print(json.dumps(res, indent=1, default=float), flush=True)
     return res

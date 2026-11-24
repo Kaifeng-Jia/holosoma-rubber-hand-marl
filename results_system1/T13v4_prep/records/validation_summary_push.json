@@ -1,0 +1,284 @@
+{
+  "reference_variant": null,
+  "reference_variant_sha256": null,
+  "case": "push",
+  "model_id": "t13v4_validation_test__d_push_smoke",
+  "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/smoke/d_push_200/model_00200.pt",
+  "checkpoint_sha256": "8bb894b6bac7f30e290f6f4529bb44e46f8e6b64c661fc771ac8447d1cbab7db",
+  "v3_ablation": null,
+  "checkpoint_iteration": 200,
+  "states_sha256": "1799ea1eec1a3ff097d46e08e6492694d6455490ccf9f2de26586e079fef895d",
+  "reference_frames": 309,
+  "horizon_control_steps": 309,
+  "dt": 0.02,
+  "inference": "actor_mean_only_critic_forbidden",
+  "observation_noise": false,
+  "physics": {
+    "mass": [
+      [
+        20.0
+      ]
+    ],
+    "material": [
+      [
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ],
+        [
+          0.5,
+          0.5,
+          0.0
+        ]
+      ]
+    ],
+    "inertia_row_major": [
+      [
+        0.6277497410774231,
+        0.0,
+        0.0,
+        0.0,
+        4.360414981842041,
+        0.0,
+        0.0,
+        0.0,
+        3.9504892826080322
+      ]
+    ],
+    "com_pose_xyzw": [
+      [
+        0.0,
+        0.015111745335161686,
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ]
+  },
+  "robot_urdf": "g1/main_mesh_collision_rubberhand.urdf",
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+  "placement_provenance": {
+    "proof_sha256": "f28a5c095bb17901858cf47e01b4b02e5867edbdf8d12423012024ef7eaaf4a1",
+    "lateral_spacing_m": 0.8780471999999999,
+    "original_diagnostic_status": "diagnostic_only",
+    "loader": "original_PairedA1Reference",
+    "hooks": [
+      "setup_terms",
+      "reset_terms",
+      "step_terms"
+    ],
+    "offline_runtime_used": false
+  },
+  "runtime_reference_check": {
+    "file": "actual_reference_channels.npz",
+    "sha256": "af12047ebf3e6f8f246832a987391ec9aab5f9a5921f510a476a7b72720d7270",
+    "expected_channels_sha256": "a810913a69ab48b510c9aa8cce6381c73c7da2210abd7f898525f4fdc28aaeec",
+    "comparison": {
+      "agent_joint_pos": {
+        "max_abs": 0.0,
+        "tolerance": 2e-06
+      },
+      "agent_joint_vel": {
+        "max_abs": 0.0,
+        "tolerance": 0.0001
+      },
+      "agent_body_pos_w": {
+        "max_abs": 0.0,
+        "tolerance": 2e-06
+      },
+      "agent_body_quat_w": {
+        "max_abs": 0.0,
+        "tolerance": 2e-06
+      },
+      "agent_body_lin_vel_w": {
+        "max_abs": 1.1920928955078125e-07,
+        "tolerance": 0.0001
+      },
+      "agent_body_ang_vel_w": {
+        "max_abs": 0.0,
+        "tolerance": 0.0001
+      },
+      "object_pos_w": {
+        "max_abs": 0.0,
+        "tolerance": 2e-06
+      },
+      "object_quat_w": {
+        "max_abs": 0.0,
+        "tolerance": 2e-06
+      },
+      "object_lin_vel_w": {
+        "max_abs": 0.0,
+        "tolerance": 0.0001
+      }
+    },
+    "quaternion_order": "xyzw",
+    "compared_body_names": [
+      "pelvis",
+      "left_hip_roll_link",
+      "left_knee_link",
+      "left_ankle_roll_link",
+      "right_hip_roll_link",
+      "right_knee_link",
+      "right_ankle_roll_link",
+      "torso_link",
+      "left_shoulder_roll_link",
+      "left_elbow_link",
+      "left_wrist_yaw_link",
+      "right_shoulder_roll_link",
+      "right_elbow_link",
+      "right_wrist_yaw_link"
+    ],
+    "offline_only_body_names": [
+      "left_rubber_hand_link",
+      "right_rubber_hand_link"
+    ],
+    "body_mapping_note": "Offline fixed-hand frames are not runtime command bodies; no wrist-for-hand substitution"
+  },
+  "endpoint_rule": "Execute each reference frame once; stop at clip end before the next wrapped state",
+  "error_alignment": "Post-physics at k*dt vs reference frame min(k,N-1); terminal state captured before autoreset",
+  "training_contract": {
+    "version": "plan5_shared_actor_mappo_v1",
+    "num_agents": 2,
+    "actor_obs_dim": 159,
+    "critic_obs_dim": 585,
+    "action_dim": 29,
+    "source_sha256": "11ef1fe7a4b340a47218f040e7675af4073067c5ce931e169818f903150e3224"
+  },
+  "system1_t13v4": {
+    "obs_v1": true,
+    "critic_v1": true,
+    "noise": false,
+    "teammate": 5,
+    "critic": 585,
+    "mappo_dims": {
+      "actor_obs": 154,
+      "teammate_obs": 5,
+      "actor_input": 159,
+      "critic_obs": 585
+    },
+    "obs_v1_noise_enabled_in_env": false
+  },
+  "gpu_name": "NVIDIA GeForce RTX 5070 Laptop GPU",
+  "episodes": [
+    {
+      "model_id": "t13v4_validation_test__d_push_smoke",
+      "case": "push",
+      "state_id": "nominal",
+      "kind": "nominal",
+      "steps": 309,
+      "horizon_steps": 309,
+      "completed_reference": true,
+      "progress": 1.0,
+      "terminal_terms": {
+        "timeout": false,
+        "joint_bad_tracking": false
+      },
+      "reward_sum_common": 33.56525705754757,
+      "object_rmse_3d_m": 0.07270267605781555,
+      "object_rmse_xy_m": 0.07242715358734131,
+      "height_rmse_m": 0.006323495879769325,
+      "height_bias_m": -0.0009559211903251708,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/validation/push/nominal.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_validation_test__d_push_smoke",
+      "case": "push",
+      "state_id": "perturbed_000",
+      "kind": "perturbed",
+      "steps": 309,
+      "horizon_steps": 309,
+      "completed_reference": true,
+      "progress": 1.0,
+      "terminal_terms": {
+        "timeout": false,
+        "joint_bad_tracking": false
+      },
+      "reward_sum_common": 32.95344881899655,
+      "object_rmse_3d_m": 0.093719981610775,
+      "object_rmse_xy_m": 0.09359360486268997,
+      "height_rmse_m": 0.004865510854870081,
+      "height_bias_m": -0.0021591302938759327,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/validation/push/perturbed_000.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_validation_test__d_push_smoke",
+      "case": "push",
+      "state_id": "perturbed_001",
+      "kind": "perturbed",
+      "steps": 309,
+      "horizon_steps": 309,
+      "completed_reference": true,
+      "progress": 1.0,
+      "terminal_terms": {
+        "timeout": false,
+        "joint_bad_tracking": false
+      },
+      "reward_sum_common": 31.799160888418555,
+      "object_rmse_3d_m": 0.074274443089962,
+      "object_rmse_xy_m": 0.07408269494771957,
+      "height_rmse_m": 0.005333583801984787,
+      "height_bias_m": -0.0019426284125074744,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/validation/push/perturbed_001.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_validation_test__d_push_smoke",
+      "case": "push",
+      "state_id": "perturbed_002",
+      "kind": "perturbed",
+      "steps": 309,
+      "horizon_steps": 309,
+      "completed_reference": true,
+      "progress": 1.0,
+      "terminal_terms": {
+        "timeout": false,
+        "joint_bad_tracking": false
+      },
+      "reward_sum_common": 32.78261022642255,
+      "object_rmse_3d_m": 0.11085328459739685,
+      "object_rmse_xy_m": 0.11071014404296875,
+      "height_rmse_m": 0.005631440319120884,
+      "height_bias_m": -0.0013598576188087463,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/validation/push/perturbed_002.trajectory.npz"
+    },
+    {
+      "model_id": "t13v4_validation_test__d_push_smoke",
+      "case": "push",
+      "state_id": "perturbed_003",
+      "kind": "perturbed",
+      "steps": 309,
+      "horizon_steps": 309,
+      "completed_reference": true,
+      "progress": 1.0,
+      "terminal_terms": {
+        "timeout": false,
+        "joint_bad_tracking": false
+      },
+      "reward_sum_common": 32.57499545253813,
+      "object_rmse_3d_m": 0.1265822947025299,
+      "object_rmse_xy_m": 0.12646906077861786,
+      "height_rmse_m": 0.005353096406906843,
+      "height_bias_m": -0.002573798643425107,
+      "trajectory": "/home/kevin/duet-system1/logs_system1/t13v4/validation/push/perturbed_003.trajectory.npz"
+    }
+  ],
+  "complete": true,
+  "episode_count": 5
+}
