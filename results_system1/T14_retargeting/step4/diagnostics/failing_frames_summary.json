@@ -1,0 +1,1036 @@
+{
+ "rules": "T14 round 4, section 三 diagnostics (CPU, read only). Same geometry and measures as eval_r3 (exact distances).\n\n  fail-frames  For each reference: every CoCarry condition frame (person's hand within 0.10 m of the captured mesh and the\n               object faster than 0.03 m/s) in which the robot hand is not retained (hand signed distance < -0.02 m):\n               robot, hand, robot hand gap (cm, exact hull distance), human hand gap (cm; \"真接触\" <= 1.5 cm, \"靠近\"\n               1.5-10 cm), phase of the object motion at that source frame:\n                 抬起 v_z > +0.05 m/s; 放下 v_z < -0.05 m/s; 转动 angular speed > 30 deg/s (and |v_z| <= 0.05); 搬运 otherwise.\n  k08          Table: why the contact-position error (tangential distance of the two surface projections, human-contact\n               frames only) is small while retention is low: per robot / hand in human-contact frames the palm point's\n               distance to the surface (normal distance, which the contact-position error ignores), and how many failing\n               retention frames are \"靠近\" frames (not counted by the contact-position error).\n  a1           Old Bin / Chair references before and after the A1 wrist post-process: max penetration (exact, simulator\n               geometry of the 1.0x training object), per robot, with the link, frame, and the frames where A1 changed it.\n\n    sonic_s1/bin/python -B system1/t14/diag_r4.py fail-frames --out <dir>\n",
+ "refs": {
+  "0.8": "/home/kevin/duet-system1/exports_system1/T14_references/r3/table_k0p8_a10/20231030_001_desk001_move_new_fps30.npz",
+  "0.9": "/home/kevin/duet-system1/exports_system1/T14_references/r3/table_k0p9_a10/20231030_001_desk001_move_new_fps30.npz",
+  "1.0": "/home/kevin/duet-system1/exports_system1/T14_references/r3/chair_k1p0_a10/chair_new_fps30.npz",
+  "1.1": "/home/kevin/duet-system1/exports_system1/T14_references/r3/chair_k1p1_a10/chair_new_fps30.npz",
+  "1.2": "/home/kevin/duet-system1/exports_system1/T14_references/r3/chair_k1p2_a10/chair_new_fps30.npz"
+ },
+ "summary": {
+  "bin_k0.8": {
+   "condition_frames": 213,
+   "failing": 17,
+   "retention": 0.9202,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 2,
+     "condition": 28,
+     "真接触": 1,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 2,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 6.44,
+     "robot_gap_cm_max": 9.37,
+     "frames_s": [
+      5.47,
+      5.53
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 1,
+     "condition": 30,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 1
+     },
+     "robot_gap_cm_median": 3.11,
+     "robot_gap_cm_max": 3.11,
+     "frames_s": [
+      5.67,
+      5.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 12,
+     "condition": 82,
+     "真接触": 0,
+     "靠近": 12,
+     "phase": {
+      "抬起": 10,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 7.48,
+     "robot_gap_cm_max": 7.87,
+     "frames_s": [
+      3.6,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 2,
+     "condition": 73,
+     "真接触": 1,
+     "靠近": 1,
+     "phase": {
+      "抬起": 2,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 8.28,
+     "robot_gap_cm_max": 10.0,
+     "frames_s": [
+      4.2,
+      4.27
+     ]
+    }
+   ]
+  },
+  "bin_k0.9": {
+   "condition_frames": 213,
+   "failing": 18,
+   "retention": 0.9155,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 2,
+     "condition": 28,
+     "真接触": 1,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 2,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.76,
+     "robot_gap_cm_max": 7.5,
+     "frames_s": [
+      5.47,
+      5.53
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 1,
+     "condition": 30,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 1
+     },
+     "robot_gap_cm_median": 3.59,
+     "robot_gap_cm_max": 3.59,
+     "frames_s": [
+      5.67,
+      5.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 11,
+     "condition": 82,
+     "真接触": 0,
+     "靠近": 11,
+     "phase": {
+      "抬起": 9,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 6.21,
+     "robot_gap_cm_max": 6.9,
+     "frames_s": [
+      3.6,
+      4.27
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 4,
+     "condition": 73,
+     "真接触": 1,
+     "靠近": 3,
+     "phase": {
+      "抬起": 4,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.45,
+     "robot_gap_cm_max": 9.83,
+     "frames_s": [
+      4.2,
+      4.47
+     ]
+    }
+   ]
+  },
+  "bin_k1.0": {
+   "condition_frames": 213,
+   "failing": 20,
+   "retention": 0.9061,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 1,
+     "condition": 28,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 1,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 5.7,
+     "robot_gap_cm_max": 5.7,
+     "frames_s": [
+      5.53,
+      5.53
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 30,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 2
+     },
+     "robot_gap_cm_median": 4.23,
+     "robot_gap_cm_max": 6.05,
+     "frames_s": [
+      5.6,
+      5.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 12,
+     "condition": 82,
+     "真接触": 0,
+     "靠近": 12,
+     "phase": {
+      "抬起": 10,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.62,
+     "robot_gap_cm_max": 6.23,
+     "frames_s": [
+      3.6,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 5,
+     "condition": 73,
+     "真接触": 1,
+     "靠近": 4,
+     "phase": {
+      "抬起": 5,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 3.51,
+     "robot_gap_cm_max": 8.98,
+     "frames_s": [
+      4.2,
+      4.53
+     ]
+    }
+   ]
+  },
+  "bin_k1.1": {
+   "condition_frames": 213,
+   "failing": 22,
+   "retention": 0.8967,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 1,
+     "condition": 28,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 1,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.55,
+     "robot_gap_cm_max": 4.55,
+     "frames_s": [
+      5.53,
+      5.53
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 30,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 2
+     },
+     "robot_gap_cm_median": 4.23,
+     "robot_gap_cm_max": 4.76,
+     "frames_s": [
+      5.6,
+      5.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 12,
+     "condition": 82,
+     "真接触": 0,
+     "靠近": 12,
+     "phase": {
+      "抬起": 10,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.73,
+     "robot_gap_cm_max": 7.38,
+     "frames_s": [
+      3.6,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 7,
+     "condition": 73,
+     "真接触": 3,
+     "靠近": 4,
+     "phase": {
+      "抬起": 6,
+      "搬运": 0,
+      "转动": 1,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.25,
+     "robot_gap_cm_max": 8.3,
+     "frames_s": [
+      4.2,
+      4.67
+     ]
+    }
+   ]
+  },
+  "bin_k1.2": {
+   "condition_frames": 213,
+   "failing": 20,
+   "retention": 0.9061,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 5,
+     "condition": 28,
+     "真接触": 4,
+     "靠近": 1,
+     "phase": {
+      "抬起": 2,
+      "搬运": 0,
+      "转动": 3,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 2.99,
+     "robot_gap_cm_max": 9.83,
+     "frames_s": [
+      5.27,
+      5.53
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 30,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 2
+     },
+     "robot_gap_cm_median": 3.9,
+     "robot_gap_cm_max": 4.06,
+     "frames_s": [
+      5.6,
+      5.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 11,
+     "condition": 82,
+     "真接触": 0,
+     "靠近": 11,
+     "phase": {
+      "抬起": 9,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 5.67,
+     "robot_gap_cm_max": 9.74,
+     "frames_s": [
+      3.6,
+      4.27
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 2,
+     "condition": 73,
+     "真接触": 1,
+     "靠近": 1,
+     "phase": {
+      "抬起": 2,
+      "搬运": 0,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 7.64,
+     "robot_gap_cm_max": 9.29,
+     "frames_s": [
+      4.2,
+      4.27
+     ]
+    }
+   ]
+  },
+  "chair_k0.8": {
+   "condition_frames": 102,
+   "failing": 21,
+   "retention": 0.7941,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 12,
+     "condition": 12,
+     "真接触": 6,
+     "靠近": 6,
+     "phase": {
+      "抬起": 11,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.86,
+     "robot_gap_cm_max": 10.0,
+     "frames_s": [
+      3.67,
+      5.0
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 31,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 9.33,
+     "robot_gap_cm_max": 10.0,
+     "frames_s": [
+      3.6,
+      3.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 3,
+     "condition": 32,
+     "真接触": 0,
+     "靠近": 3,
+     "phase": {
+      "抬起": 1,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.05,
+     "robot_gap_cm_max": 6.19,
+     "frames_s": [
+      3.47,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 4,
+     "condition": 27,
+     "真接触": 0,
+     "靠近": 4,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 2
+     },
+     "robot_gap_cm_median": 5.83,
+     "robot_gap_cm_max": 10.0,
+     "frames_s": [
+      3.4,
+      5.8
+     ]
+    }
+   ]
+  },
+  "chair_k0.9": {
+   "condition_frames": 102,
+   "failing": 12,
+   "retention": 0.8824,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 4,
+     "condition": 12,
+     "真接触": 0,
+     "靠近": 4,
+     "phase": {
+      "抬起": 3,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 3.66,
+     "robot_gap_cm_max": 8.12,
+     "frames_s": [
+      3.67,
+      5.0
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 31,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 8.4,
+     "robot_gap_cm_max": 10.0,
+     "frames_s": [
+      3.6,
+      3.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 2,
+     "condition": 32,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 1,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.6,
+     "robot_gap_cm_max": 4.74,
+     "frames_s": [
+      3.47,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 4,
+     "condition": 27,
+     "真接触": 0,
+     "靠近": 4,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 2
+     },
+     "robot_gap_cm_median": 4.1,
+     "robot_gap_cm_max": 6.68,
+     "frames_s": [
+      3.4,
+      5.8
+     ]
+    }
+   ]
+  },
+  "chair_k1.0": {
+   "condition_frames": 102,
+   "failing": 10,
+   "retention": 0.902,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 3,
+     "condition": 12,
+     "真接触": 0,
+     "靠近": 3,
+     "phase": {
+      "抬起": 2,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 5.35,
+     "robot_gap_cm_max": 6.7,
+     "frames_s": [
+      3.67,
+      5.0
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 31,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 7.18,
+     "robot_gap_cm_max": 8.89,
+     "frames_s": [
+      3.6,
+      3.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 2,
+     "condition": 32,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 1,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.39,
+     "robot_gap_cm_max": 4.7,
+     "frames_s": [
+      3.47,
+      4.33
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 3,
+     "condition": 27,
+     "真接触": 0,
+     "靠近": 3,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 1
+     },
+     "robot_gap_cm_median": 4.22,
+     "robot_gap_cm_max": 4.82,
+     "frames_s": [
+      3.4,
+      5.8
+     ]
+    }
+   ]
+  },
+  "chair_k1.1": {
+   "condition_frames": 102,
+   "failing": 8,
+   "retention": 0.9216,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 3,
+     "condition": 12,
+     "真接触": 0,
+     "靠近": 3,
+     "phase": {
+      "抬起": 2,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 7.03,
+     "robot_gap_cm_max": 8.08,
+     "frames_s": [
+      3.67,
+      5.0
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 31,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 6.62,
+     "robot_gap_cm_max": 8.07,
+     "frames_s": [
+      3.6,
+      3.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 1,
+     "condition": 32,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.3,
+     "robot_gap_cm_max": 4.3,
+     "frames_s": [
+      3.47,
+      3.47
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 2,
+     "condition": 27,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 1
+     },
+     "robot_gap_cm_median": 4.58,
+     "robot_gap_cm_max": 5.62,
+     "frames_s": [
+      3.4,
+      5.8
+     ]
+    }
+   ]
+  },
+  "chair_k1.2": {
+   "condition_frames": 102,
+   "failing": 10,
+   "retention": 0.902,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 5,
+     "condition": 12,
+     "真接触": 1,
+     "靠近": 4,
+     "phase": {
+      "抬起": 4,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 5.88,
+     "robot_gap_cm_max": 9.07,
+     "frames_s": [
+      3.67,
+      5.0
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 2,
+     "condition": 31,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 6.46,
+     "robot_gap_cm_max": 7.74,
+     "frames_s": [
+      3.6,
+      3.67
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 1,
+     "condition": 32,
+     "真接触": 0,
+     "靠近": 1,
+     "phase": {
+      "抬起": 0,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 4.4,
+     "robot_gap_cm_max": 4.4,
+     "frames_s": [
+      3.47,
+      3.47
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 2,
+     "condition": 27,
+     "真接触": 0,
+     "靠近": 2,
+     "phase": {
+      "抬起": 0,
+      "搬运": 1,
+      "转动": 0,
+      "放下": 1
+     },
+     "robot_gap_cm_median": 4.0,
+     "robot_gap_cm_max": 4.97,
+     "frames_s": [
+      3.4,
+      5.8
+     ]
+    }
+   ]
+  },
+  "table_k0.8": {
+   "condition_frames": 396,
+   "failing": 216,
+   "retention": 0.4545,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "left",
+     "failing": 3,
+     "condition": 99,
+     "真接触": 3,
+     "靠近": 0,
+     "phase": {
+      "抬起": 0,
+      "搬运": 3,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 2.27,
+     "robot_gap_cm_max": 3.32,
+     "frames_s": [
+      5.93,
+      6.47
+     ]
+    },
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 98,
+     "condition": 99,
+     "真接触": 98,
+     "靠近": 0,
+     "phase": {
+      "抬起": 14,
+      "搬运": 73,
+      "转动": 0,
+      "放下": 11
+     },
+     "robot_gap_cm_median": 3.2,
+     "robot_gap_cm_max": 3.85,
+     "frames_s": [
+      3.73,
+      10.27
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 92,
+     "condition": 99,
+     "真接触": 92,
+     "靠近": 0,
+     "phase": {
+      "抬起": 14,
+      "搬运": 68,
+      "转动": 0,
+      "放下": 10
+     },
+     "robot_gap_cm_median": 2.89,
+     "robot_gap_cm_max": 3.57,
+     "frames_s": [
+      3.73,
+      10.13
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 23,
+     "condition": 99,
+     "真接触": 23,
+     "靠近": 0,
+     "phase": {
+      "抬起": 9,
+      "搬运": 14,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 2.25,
+     "robot_gap_cm_max": 3.11,
+     "frames_s": [
+      3.73,
+      6.8
+     ]
+    }
+   ]
+  },
+  "table_k0.9": {
+   "condition_frames": 396,
+   "failing": 108,
+   "retention": 0.7273,
+   "by": [
+    {
+     "robot": 0,
+     "hand": "right",
+     "failing": 96,
+     "condition": 99,
+     "真接触": 96,
+     "靠近": 0,
+     "phase": {
+      "抬起": 14,
+      "搬运": 71,
+      "转动": 0,
+      "放下": 11
+     },
+     "robot_gap_cm_median": 2.41,
+     "robot_gap_cm_max": 2.8,
+     "frames_s": [
+      3.73,
+      10.13
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "left",
+     "failing": 10,
+     "condition": 99,
+     "真接触": 10,
+     "靠近": 0,
+     "phase": {
+      "抬起": 0,
+      "搬运": 10,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 2.1,
+     "robot_gap_cm_max": 2.47,
+     "frames_s": [
+      6.27,
+      8.4
+     ]
+    },
+    {
+     "robot": 1,
+     "hand": "right",
+     "failing": 2,
+     "condition": 99,
+     "真接触": 2,
+     "靠近": 0,
+     "phase": {
+      "抬起": 0,
+      "搬运": 2,
+      "转动": 0,
+      "放下": 0
+     },
+     "robot_gap_cm_median": 2.08,
+     "robot_gap_cm_max": 2.12,
+     "frames_s": [
+      5.13,
+      5.2
+     ]
+    }
+   ]
+  }
+ }
+}

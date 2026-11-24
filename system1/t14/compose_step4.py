@@ -33,7 +33,7 @@ def level_name(name):
     if "_k" in name:
         return "k = " + name.split("_k")[-1]
     if "_m" in name:
-        return "m = " + name.split("_m")[-1]
+        return f"m = {float(name.split('_m')[-1]):.2f}"
     return "1.0"
 
 

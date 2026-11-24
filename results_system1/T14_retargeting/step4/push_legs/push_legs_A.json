@@ -1,0 +1,462 @@
+{
+ "rules": "T14 round 4 (section 9 item 5): Push leg check. For a Push single-robot reference, made into the two-robot pair at m:\n  * robot: per frame and per simulator link except the two rubber hands, the smallest exact distance (PhysX link shapes,\n    mj_geomDistance per candidate pair within 0.3 m) to the stretched training table of that level; per robot;\n  * human: per frame and per body part (body_parts.LINK_TO_SMPLX, SMPL-X skinning segments, flat-hand OMOMO SMPL-X mapped\n    into the OMOMO_new world by the palm fit), the smallest distance of the part's vertices to the captured table\n    (InterMimic largetable.obj, the human's object, dense surface samples);\n  * per link: robot minimum (cm, both robots; robot 1 is the copy of robot 0) and the human part minimum (cm);\n    flagged when a robot non-hand link comes within 1 cm or its human part within 10 cm (frames listed).\n\n    sonic_s1/bin/python -B system1/t14/push_legs.py --single <push qpos npz> --m 1.0 --out <json>\n",
+ "single": "/home/kevin/duet-system1/logs_system1/t14/r4/single_push_A/push_new_qpos.npz",
+ "m": 1.0,
+ "urdf": "/home/kevin/duet-system1/logs_system1/t14/r4/push_legs_urdf/table_m1.urdf",
+ "frames": 186,
+ "links": [
+  {
+   "link": "pelvis",
+   "human_part": "pelvis",
+   "robot_min_cm": {
+    "r0": 25.63,
+    "r1": 25.63
+   },
+   "robot_min_frame": {
+    "r0": 172,
+    "r1": 172
+   },
+   "human_min_cm": 42.2,
+   "human_min_frame": 170
+  },
+  {
+   "link": "left_hip_roll_link",
+   "human_part": "left thigh",
+   "robot_min_cm": {
+    "r0": 13.62,
+    "r1": 13.62
+   },
+   "robot_min_frame": {
+    "r0": 172,
+    "r1": 172
+   },
+   "human_min_cm": 17.63,
+   "human_min_frame": 43
+  },
+  {
+   "link": "left_hip_yaw_link",
+   "human_part": "left thigh",
+   "robot_min_cm": {
+    "r0": 9.1,
+    "r1": 9.1
+   },
+   "robot_min_frame": {
+    "r0": 170,
+    "r1": 170
+   },
+   "human_min_cm": 17.63,
+   "human_min_frame": 43
+  },
+  {
+   "link": "left_knee_link",
+   "human_part": "left shank",
+   "robot_min_cm": {
+    "r0": 8.91,
+    "r1": 7.9
+   },
+   "robot_min_frame": {
+    "r0": 84,
+    "r1": 46
+   },
+   "human_min_cm": 16.95,
+   "human_min_frame": 43
+  },
+  {
+   "link": "left_ankle_roll_link",
+   "human_part": "left foot",
+   "robot_min_cm": {
+    "r0": 25.16,
+    "r1": 10.84
+   },
+   "robot_min_frame": {
+    "r0": 114,
+    "r1": 63
+   },
+   "human_min_cm": 9.16,
+   "human_min_frame": 114
+  },
+  {
+   "link": "right_hip_roll_link",
+   "human_part": "right thigh",
+   "robot_min_cm": {
+    "r0": 13.65,
+    "r1": 13.65
+   },
+   "robot_min_frame": {
+    "r0": 172,
+    "r1": 172
+   },
+   "human_min_cm": 21.47,
+   "human_min_frame": 82
+  },
+  {
+   "link": "right_hip_yaw_link",
+   "human_part": "right thigh",
+   "robot_min_cm": {
+    "r0": 9.56,
+    "r1": 9.56
+   },
+   "robot_min_frame": {
+    "r0": 170,
+    "r1": 170
+   },
+   "human_min_cm": 21.47,
+   "human_min_frame": 82
+  },
+  {
+   "link": "right_knee_link",
+   "human_part": "right shank",
+   "robot_min_cm": {
+    "r0": 9.28,
+    "r1": 9.28
+   },
+   "robot_min_frame": {
+    "r0": 48,
+    "r1": 48
+   },
+   "human_min_cm": 18.44,
+   "human_min_frame": 81
+  },
+  {
+   "link": "right_ankle_roll_link",
+   "human_part": "right foot",
+   "robot_min_cm": {
+    "r0": 10.93,
+    "r1": 23.3
+   },
+   "robot_min_frame": {
+    "r0": 102,
+    "r1": 77
+   },
+   "human_min_cm": 7.84,
+   "human_min_frame": 126
+  },
+  {
+   "link": "torso_link",
+   "human_part": "trunk",
+   "robot_min_cm": {
+    "r0": 23.91,
+    "r1": 23.91
+   },
+   "robot_min_frame": {
+    "r0": 85,
+    "r1": 85
+   },
+   "human_min_cm": 54.19,
+   "human_min_frame": 26
+  },
+  {
+   "link": "head_link",
+   "human_part": "head and neck",
+   "robot_min_cm": {
+    "r0": 28.82,
+    "r1": 28.82
+   },
+   "robot_min_frame": {
+    "r0": 85,
+    "r1": 85
+   },
+   "human_min_cm": 47.64,
+   "human_min_frame": 16
+  },
+  {
+   "link": "left_shoulder_yaw_link",
+   "human_part": "left upper arm",
+   "robot_min_cm": {
+    "r0": 13.73,
+    "r1": 14.46
+   },
+   "robot_min_frame": {
+    "r0": 47,
+    "r1": 49
+   },
+   "human_min_cm": 34.06,
+   "human_min_frame": 48
+  },
+  {
+   "link": "left_elbow_link",
+   "human_part": "left forearm",
+   "robot_min_cm": {
+    "r0": 5.9,
+    "r1": 6.67
+   },
+   "robot_min_frame": {
+    "r0": 47,
+    "r1": 47
+   },
+   "human_min_cm": 8.74,
+   "human_min_frame": 48
+  },
+  {
+   "link": "left_wrist_roll_link",
+   "human_part": "left forearm",
+   "robot_min_cm": {
+    "r0": 1.0,
+    "r1": 1.02
+   },
+   "robot_min_frame": {
+    "r0": 47,
+    "r1": 47
+   },
+   "human_min_cm": 8.74,
+   "human_min_frame": 48
+  },
+  {
+   "link": "left_wrist_pitch_link",
+   "human_part": "left forearm",
+   "robot_min_cm": {
+    "r0": 0.03,
+    "r1": 0.03
+   },
+   "robot_min_frame": {
+    "r0": 49,
+    "r1": 49
+   },
+   "human_min_cm": 8.74,
+   "human_min_frame": 48
+  },
+  {
+   "link": "left_wrist_yaw_link",
+   "human_part": "left forearm",
+   "robot_min_cm": {
+    "r0": -0.13,
+    "r1": -0.13
+   },
+   "robot_min_frame": {
+    "r0": 46,
+    "r1": 46
+   },
+   "human_min_cm": 8.74,
+   "human_min_frame": 48
+  },
+  {
+   "link": "right_shoulder_yaw_link",
+   "human_part": "right upper arm",
+   "robot_min_cm": {
+    "r0": 12.71,
+    "r1": 12.71
+   },
+   "robot_min_frame": {
+    "r0": 86,
+    "r1": 86
+   },
+   "human_min_cm": 34.26,
+   "human_min_frame": 85
+  },
+  {
+   "link": "right_elbow_link",
+   "human_part": "right forearm",
+   "robot_min_cm": {
+    "r0": 7.69,
+    "r1": 7.69
+   },
+   "robot_min_frame": {
+    "r0": 86,
+    "r1": 86
+   },
+   "human_min_cm": 10.06,
+   "human_min_frame": 85
+  },
+  {
+   "link": "right_wrist_roll_link",
+   "human_part": "right forearm",
+   "robot_min_cm": {
+    "r0": 6.12,
+    "r1": 6.12
+   },
+   "robot_min_frame": {
+    "r0": 60,
+    "r1": 60
+   },
+   "human_min_cm": 10.06,
+   "human_min_frame": 85
+  },
+  {
+   "link": "right_wrist_pitch_link",
+   "human_part": "right forearm",
+   "robot_min_cm": {
+    "r0": 4.17,
+    "r1": 4.17
+   },
+   "robot_min_frame": {
+    "r0": 12,
+    "r1": 12
+   },
+   "human_min_cm": 10.06,
+   "human_min_frame": 85
+  },
+  {
+   "link": "right_wrist_yaw_link",
+   "human_part": "right forearm",
+   "robot_min_cm": {
+    "r0": 2.75,
+    "r1": 2.75
+   },
+   "robot_min_frame": {
+    "r0": 12,
+    "r1": 12
+   },
+   "human_min_cm": 10.06,
+   "human_min_frame": 85
+  }
+ ],
+ "flagged": [
+  {
+   "kind": "human part within 10 cm",
+   "link": "left_ankle_roll_link",
+   "human_part": "left foot",
+   "frames": [
+    38,
+    114
+   ],
+   "count": 6,
+   "human_min_cm": 9.16,
+   "robot_min_cm_same_frames": {
+    "r0": 25.16,
+    "r1": 10.84
+   }
+  },
+  {
+   "kind": "human part within 10 cm",
+   "link": "right_ankle_roll_link",
+   "human_part": "right foot",
+   "frames": [
+    100,
+    128
+   ],
+   "count": 8,
+   "human_min_cm": 7.84,
+   "robot_min_cm_same_frames": {
+    "r0": 10.93,
+    "r1": 25.84
+   }
+  },
+  {
+   "kind": "human part within 10 cm",
+   "link": "left_elbow_link",
+   "human_part": "left forearm",
+   "frames": [
+    17,
+    75
+   ],
+   "count": 59,
+   "human_min_cm": 8.74,
+   "robot_min_cm_same_frames": {
+    "r0": 5.9,
+    "r1": 6.67
+   }
+  },
+  {
+   "kind": "robot link within 1 cm",
+   "robot": 0,
+   "link": "left_wrist_roll_link",
+   "human_part": "left forearm",
+   "frames": [
+    47,
+    47
+   ],
+   "count": 1,
+   "robot_min_cm": 1.0,
+   "human_part_min_cm_same_frames": 8.79
+  },
+  {
+   "kind": "human part within 10 cm",
+   "link": "left_wrist_roll_link",
+   "human_part": "left forearm",
+   "frames": [
+    17,
+    75
+   ],
+   "count": 59,
+   "human_min_cm": 8.74,
+   "robot_min_cm_same_frames": {
+    "r0": 1.0,
+    "r1": 1.02
+   }
+  },
+  {
+   "kind": "robot link within 1 cm",
+   "robot": 0,
+   "link": "left_wrist_pitch_link",
+   "human_part": "left forearm",
+   "frames": [
+    44,
+    139
+   ],
+   "count": 32,
+   "robot_min_cm": 0.03,
+   "human_part_min_cm_same_frames": 8.74
+  },
+  {
+   "kind": "robot link within 1 cm",
+   "robot": 1,
+   "link": "left_wrist_pitch_link",
+   "human_part": "left forearm",
+   "frames": [
+    44,
+    139
+   ],
+   "count": 32,
+   "robot_min_cm": 0.03,
+   "human_part_min_cm_same_frames": 8.74
+  },
+  {
+   "kind": "human part within 10 cm",
+   "link": "left_wrist_pitch_link",
+   "human_part": "left forearm",
+   "frames": [
+    17,
+    75
+   ],
+   "count": 59,
+   "human_min_cm": 8.74,
+   "robot_min_cm_same_frames": {
+    "r0": 0.03,
+    "r1": 0.03
+   }
+  },
+  {
+   "kind": "robot link within 1 cm",
+   "robot": 0,
+   "link": "left_wrist_yaw_link",
+   "human_part": "left forearm",
+   "frames": [
+    42,
+    146
+   ],
+   "count": 79,
+   "robot_min_cm": -0.13,
+   "human_part_min_cm_same_frames": 8.74
+  },
+  {
+   "kind": "robot link within 1 cm",
+   "robot": 1,
+   "link": "left_wrist_yaw_link",
+   "human_part": "left forearm",
+   "frames": [
+    42,
+    146
+   ],
+   "count": 79,
+   "robot_min_cm": -0.13,
+   "human_part_min_cm_same_frames": 8.74
+  },
+  {
+   "kind": "human part within 10 cm",
+   "link": "left_wrist_yaw_link",
+   "human_part": "left forearm",
+   "frames": [
+    17,
+    75
+   ],
+   "count": 59,
+   "human_min_cm": 8.74,
+   "robot_min_cm_same_frames": {
+    "r0": -0.13,
+    "r1": -0.13
+   }
+  }
+ ],
+ "margin_m": 0.3,
+ "note": "distances >= 30 cm are reported as 30 cm (candidate margin)"
+}

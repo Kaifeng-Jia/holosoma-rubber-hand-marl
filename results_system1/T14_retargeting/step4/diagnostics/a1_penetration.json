@@ -1,0 +1,91 @@
+{
+ "rules": "T14 round 4, section \u4e09 diagnostics (CPU, read only). Same geometry and measures as eval_r3 (exact distances).\n\n  fail-frames  For each reference: every CoCarry condition frame (person's hand within 0.10 m of the captured mesh and the\n               object faster than 0.03 m/s) in which the robot hand is not retained (hand signed distance < -0.02 m):\n               robot, hand, robot hand gap (cm, exact hull distance), human hand gap (cm; \"\u771f\u63a5\u89e6\" <= 1.5 cm, \"\u9760\u8fd1\"\n               1.5-10 cm), phase of the object motion at that source frame:\n                 \u62ac\u8d77 v_z > +0.05 m/s; \u653e\u4e0b v_z < -0.05 m/s; \u8f6c\u52a8 angular speed > 30 deg/s (and |v_z| <= 0.05); \u642c\u8fd0 otherwise.\n  k08          Table: why the contact-position error (tangential distance of the two surface projections, human-contact\n               frames only) is small while retention is low: per robot / hand in human-contact frames the palm point's\n               distance to the surface (normal distance, which the contact-position error ignores), and how many failing\n               retention frames are \"\u9760\u8fd1\" frames (not counted by the contact-position error).\n  a1           Old Bin / Chair references before and after the A1 wrist post-process: max penetration (exact, simulator\n               geometry of the 1.0x training object), per robot, with the link, frame, and the frames where A1 changed it.\n\n    sonic_s1/bin/python -B system1/t14/diag_r4.py fail-frames --out <dir>\n",
+ "results": {
+  "bin": {
+   "pre": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/two_stage/core4d_pair_reference.npz",
+   "post": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/bucket003_20231020_071_20260918/a1_wrist_only/core4d_pair_reference.npz",
+   "post_equals_current": true,
+   "pre_sha256": "089d3a36a39442e055f01a8111d6145475c062928c28727062f951887020ceec",
+   "post_sha256": "ea1e73c80d98ac15602871a543bf1aa6ca221a7039fc8ba98b25b3b09cc094af",
+   "qpos_indices_changed_by_a1": [
+    26,
+    27,
+    28,
+    33,
+    34,
+    35
+   ],
+   "pre_a1": {
+    "r0": {
+     "depth_cm": 2.259,
+     "frame": 90,
+     "time_s": 3.0,
+     "link": "right_wrist_pitch_link"
+    },
+    "r1": {
+     "depth_cm": 1.908,
+     "frame": 235,
+     "time_s": 7.83,
+     "link": "right_wrist_roll_link"
+    }
+   },
+   "post_a1": {
+    "r0": {
+     "depth_cm": 4.602,
+     "frame": 102,
+     "time_s": 3.4,
+     "link": "left_rubber_hand_link"
+    },
+    "r1": {
+     "depth_cm": 10.537,
+     "frame": 137,
+     "time_s": 4.57,
+     "link": "right_rubber_hand_link"
+    }
+   }
+  },
+  "chair": {
+   "pre": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_preview/core4d_pair_reference.npz",
+   "post": "/home/kevin/holosoma-core4d-base/logs/Core4DPreviews/chair021_20231020_074_baseline_20260908/shared_small_a1_preview_tol6/core4d_pair_reference.npz",
+   "post_equals_current": true,
+   "pre_sha256": "d8e945b4ec08cc9d22d6493942cf05ed787cd42b87b5e18ac4e6d7d6423dd586",
+   "post_sha256": "1e1999a179655abaf577f78fa6eeea5a7ecd4b1e8ae86a1144118b4dca54679b",
+   "qpos_indices_changed_by_a1": [
+    26,
+    27,
+    28,
+    33,
+    34,
+    35
+   ],
+   "pre_a1": {
+    "r0": {
+     "depth_cm": 0.868,
+     "frame": 141,
+     "time_s": 4.7,
+     "link": "right_rubber_hand_link"
+    },
+    "r1": {
+     "depth_cm": 3.115,
+     "frame": 177,
+     "time_s": 5.9,
+     "link": "left_rubber_hand_link"
+    }
+   },
+   "post_a1": {
+    "r0": {
+     "depth_cm": 5.235,
+     "frame": 126,
+     "time_s": 4.2,
+     "link": "right_rubber_hand_link"
+    },
+    "r1": {
+     "depth_cm": 6.522,
+     "frame": 172,
+     "time_s": 5.73,
+     "link": "left_rubber_hand_link"
+    }
+   }
+  }
+ }
+}

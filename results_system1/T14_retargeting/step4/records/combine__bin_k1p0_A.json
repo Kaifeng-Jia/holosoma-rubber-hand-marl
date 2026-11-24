@@ -1,0 +1,22 @@
+{
+ "pair": "exports_system1/T14_references/r4/bin_k1p0_A/bin_new_fps30.npz",
+ "pair_sha256": "bcc35f89decf0c87fb84ec85e7905213a99567b5600642a0fd0d2851aba2ecdb",
+ "runtime": "exports_system1/T14_references/r4/bin_k1p0_A/core4d_pair_runtime_fps50.npz",
+ "runtime_sha256": "0ef5684e622eae6cfc969e2c43c7c6cbff6512243cba45471e61d48a14b1e046",
+ "command": [
+  "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python",
+  "-B",
+  "/home/kevin/duet-system1/scripts/synthesize_core4d_smalltable_runtime_reference.py",
+  "--source",
+  "exports_system1/T14_references/r4/bin_k1p0_A/bin_new_fps30.npz",
+  "--expected-source-sha256",
+  "bcc35f89decf0c87fb84ec85e7905213a99567b5600642a0fd0d2851aba2ecdb",
+  "--source-manifest",
+  "exports_system1/T14_references/r4/bin_k1p0_A/source_manifest.json",
+  "--output",
+  "exports_system1/T14_references/r4/bin_k1p0_A/core4d_pair_runtime_fps50.npz",
+  "--manifest",
+  "exports_system1/T14_references/r4/bin_k1p0_A/core4d_pair_runtime_fps50.manifest.json"
+ ],
+ "object_track_vs_current_reference_max_abs": 1.1102230246251565e-16
+}

@@ -1,0 +1,105 @@
+{
+ "rules": "T14 round 4, section 三 diagnostics (CPU, read only). Same geometry and measures as eval_r3 (exact distances).\n\n  fail-frames  For each reference: every CoCarry condition frame (person's hand within 0.10 m of the captured mesh and the\n               object faster than 0.03 m/s) in which the robot hand is not retained (hand signed distance < -0.02 m):\n               robot, hand, robot hand gap (cm, exact hull distance), human hand gap (cm; \"真接触\" <= 1.5 cm, \"靠近\"\n               1.5-10 cm), phase of the object motion at that source frame:\n                 抬起 v_z > +0.05 m/s; 放下 v_z < -0.05 m/s; 转动 angular speed > 30 deg/s (and |v_z| <= 0.05); 搬运 otherwise.\n  k08          Table: why the contact-position error (tangential distance of the two surface projections, human-contact\n               frames only) is small while retention is low: per robot / hand in human-contact frames the palm point's\n               distance to the surface (normal distance, which the contact-position error ignores), and how many failing\n               retention frames are \"靠近\" frames (not counted by the contact-position error).\n  a1           Old Bin / Chair references before and after the A1 wrist post-process: max penetration (exact, simulator\n               geometry of the 1.0x training object), per robot, with the link, frame, and the frames where A1 changed it.\n\n    sonic_s1/bin/python -B system1/t14/diag_r4.py fail-frames --out <dir>\n",
+ "results": {
+  "k0.8": {
+   "path": "/home/kevin/duet-system1/exports_system1/T14_references/r3/table_k0p8_a10/20231030_001_desk001_move_new_fps30.npz",
+   "retention": 0.4545,
+   "hands": {
+    "r0_left": {
+     "human_contact_frames": 116,
+     "palm_to_surface_cm_median_in_contact": 7.26,
+     "palm_to_surface_cm_p90_in_contact": 7.85,
+     "contact_position_error_mean_cm": 1.42,
+     "retention_condition_frames": 99,
+     "failing_frames": 3,
+     "failing_in_human_contact": 3,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": 2.27
+    },
+    "r0_right": {
+     "human_contact_frames": 118,
+     "palm_to_surface_cm_median_in_contact": 7.38,
+     "palm_to_surface_cm_p90_in_contact": 8.21,
+     "contact_position_error_mean_cm": 1.5,
+     "retention_condition_frames": 99,
+     "failing_frames": 98,
+     "failing_in_human_contact": 98,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": 3.2
+    },
+    "r1_left": {
+     "human_contact_frames": 142,
+     "palm_to_surface_cm_median_in_contact": 8.0,
+     "palm_to_surface_cm_p90_in_contact": 9.56,
+     "contact_position_error_mean_cm": 1.39,
+     "retention_condition_frames": 99,
+     "failing_frames": 92,
+     "failing_in_human_contact": 92,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": 2.89
+    },
+    "r1_right": {
+     "human_contact_frames": 146,
+     "palm_to_surface_cm_median_in_contact": 7.03,
+     "palm_to_surface_cm_p90_in_contact": 9.12,
+     "contact_position_error_mean_cm": 0.96,
+     "retention_condition_frames": 99,
+     "failing_frames": 23,
+     "failing_in_human_contact": 23,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": 2.25
+    }
+   }
+  },
+  "k1.0": {
+   "path": "/home/kevin/duet-system1/exports_system1/T14_references/r3/table_k1p0_a10/20231030_001_desk001_move_new_fps30.npz",
+   "retention": 1.0,
+   "hands": {
+    "r0_left": {
+     "human_contact_frames": 116,
+     "palm_to_surface_cm_median_in_contact": 0.82,
+     "palm_to_surface_cm_p90_in_contact": 1.22,
+     "contact_position_error_mean_cm": 1.42,
+     "retention_condition_frames": 99,
+     "failing_frames": 0,
+     "failing_in_human_contact": 0,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": null
+    },
+    "r0_right": {
+     "human_contact_frames": 118,
+     "palm_to_surface_cm_median_in_contact": 0.92,
+     "palm_to_surface_cm_p90_in_contact": 1.35,
+     "contact_position_error_mean_cm": 1.63,
+     "retention_condition_frames": 99,
+     "failing_frames": 0,
+     "failing_in_human_contact": 0,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": null
+    },
+    "r1_left": {
+     "human_contact_frames": 142,
+     "palm_to_surface_cm_median_in_contact": 1.41,
+     "palm_to_surface_cm_p90_in_contact": 3.16,
+     "contact_position_error_mean_cm": 1.11,
+     "retention_condition_frames": 99,
+     "failing_frames": 0,
+     "failing_in_human_contact": 0,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": null
+    },
+    "r1_right": {
+     "human_contact_frames": 146,
+     "palm_to_surface_cm_median_in_contact": 0.78,
+     "palm_to_surface_cm_p90_in_contact": 2.3,
+     "contact_position_error_mean_cm": 0.99,
+     "retention_condition_frames": 99,
+     "failing_frames": 0,
+     "failing_in_human_contact": 0,
+     "failing_in_approach": 0,
+     "robot_hand_gap_cm_median_failing": null
+    }
+   }
+  }
+ }
+}
