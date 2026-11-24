@@ -70,7 +70,7 @@ def test_palm_point_position_and_jacobian():
     expect = r.robot_data.xpos[bid] + r.robot_data.xmat[bid].reshape(3, 3) @ off
     assert np.allclose(p["L_Palm"], expect, atol=1e-12)
     # finite difference along a few joint coordinates (indices into q_a = q[q_a_indices])
-    for j in (10, 20, 25):
+    for j in range(7, len(r.q_a_indices)):  # every hinge column (round 3: mujoco 4.0 zeroed them through an enum test)
         qi = r.q_a_indices[j]
         eps = 1e-6
         qp, qm = q.copy(), q.copy()

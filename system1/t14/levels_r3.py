@@ -64,7 +64,7 @@ def main():
         for m in lv:
             r = refs[f"{a.prefix}_m{m:.2f}"]
             name = f"a = {m:.2f}" if m == ev["a"] else f"m = {m:.1f}"
-            levels.append(dict(label=f"{name}（桌长 {1.4 * m:.2f} m）", size=float(m), pair=str(Path(r["pair"]).relative_to(ROOT)), urdf=str(Path(r["urdf"]).relative_to(ROOT)),
+            levels.append(dict(label=f"{name}（桌长 {1.4 * m:.2f} m）", size=float(m), pair=str(Path(r["pair"]).resolve().relative_to(ROOT)), urdf=str(Path(r["urdf"]).resolve().relative_to(ROOT)),
                                numbers=numbers(r, ok), values=r))
     else:
         import eval_core4d_hulls as eh
@@ -82,7 +82,7 @@ def main():
             recs = [json.loads(x.read_text()) for x in rp]
             ok = all(x["finite"] and x["object_locked_max_err"] == 0.0 for x in recs)
             r = refs[f"{a.prefix}_k{k}"]
-            out = a.refs_dir / f"{a.task}_{kk}{a.solve_tag}"
+            out = (a.refs_dir / f"{a.task}_{kk}{a.solve_tag}").resolve()
             levels.append(dict(label=label, size=float(k), pair=str(Path(r["path"]).resolve().relative_to(ROOT)),
                                urdf=str((out / f"{a.task}_{kk}.urdf").relative_to(ROOT)), numbers=numbers(r, ok), values=dict(r, success=ok)))
     a.out.parent.mkdir(parents=True, exist_ok=True)
