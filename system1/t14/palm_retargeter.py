@@ -86,8 +86,9 @@ class PalmInteractionMeshRetargeter(InteractionMeshRetargeter):
                 f = rotation @ spec["finger_local"]
                 lin_f = f + (-self._skew(f) @ Ja) @ dqa[spec["arm"]]
                 w = float(o["weight"]) * float(act[hi])
+                wf = (float(o["finger_weight"]) if o.get("finger_weight") is not None else float(o["weight"])) * float(act[hi])
                 terms.append(w * cp.sum_squares(lin - np.asarray(o["palm_world"][frame_idx, hi], float)))
-                terms.append(w * cp.sum_squares(lin_f - np.asarray(o["finger_world"][frame_idx, hi], float)))
+                terms.append(wf * cp.sum_squares(lin_f - np.asarray(o["finger_world"][frame_idx, hi], float)))
                 continue
             target = R_obj @ np.asarray(o["targets_obj"][frame_idx, hi], float)
             terms.append(float(o["weight"]) * float(act[hi]) * cp.sum_squares(lin - target))

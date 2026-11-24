@@ -1,0 +1,226 @@
+{
+ "rules": "T14 section 11 item 1: r = training object size / (size of the object the person used x s), per task, person and axis.\n\n  * s = the person's human-to-robot scale used by the retargeting (CORE4D: human_to_robot_scale of\n    prepare_core4d_person_retarget_input; OMOMO: smpl_scale = robot height / person height);\n  * the person's object = the captured mesh at the size the person interacted with (CORE4D object_models <name>_m.obj;\n    OMOMO: the OMOMO capture largetable_cleaned_simplified.obj x obj_scale, and, for reference, the InterMimic largetable.obj\n    that the OMOMO_new motion and the retargeting scene use);\n  * the training object = the simulator collision shape of the 1.0x training object (Table / Bin / Chair: the T10 PhysX pieces;\n    Push / Pull: the training-table URDF boxes);\n  * axes in the object frame: height = the local axis closest to the world vertical at the first frame; length = the longer\n    and width = the shorter of the other two (Push / Pull: length = the stretch axis);\n  * also: the table-top / object-top height above the floor the person stands on (first frame; floor = the lowest SMPL-X\n    vertex), x s, next to the training object's height.\n",
+ "tasks": {
+  "table": {
+   "object": {
+    "person_object": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/desk/desk001_m.obj",
+    "person_object_dims_m": {
+     "height": 0.7305,
+     "width": 0.5986,
+     "length": 0.799
+    },
+    "training_object": "T10 PhysX pieces x 1.0",
+    "training_dims_m": {
+     "height": 0.5411,
+     "width": 0.4437,
+     "length": 0.5922
+    },
+    "axes_local": {
+     "height": 1,
+     "width": 0,
+     "length": 2
+    }
+   },
+   "persons": {
+    "person1": {
+     "s": 0.74774,
+     "r": {
+      "height": 0.9906,
+      "width": 0.9913,
+      "length": 0.9912
+     },
+     "object_top_above_floor_m": 0.7082,
+     "object_top_above_floor_x_s_m": 0.5295,
+     "training_height_m": 0.5411
+    },
+    "person2": {
+     "s": 0.73472,
+     "r": {
+      "height": 1.0082,
+      "width": 1.0089,
+      "length": 1.0088
+     },
+     "object_top_above_floor_m": 0.8193,
+     "object_top_above_floor_x_s_m": 0.602,
+     "training_height_m": 0.5411
+    }
+   }
+  },
+  "chair": {
+   "object": {
+    "person_object": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair021_m.obj",
+    "person_object_dims_m": {
+     "height": 0.5119,
+     "width": 0.5375,
+     "length": 0.7693
+    },
+    "training_object": "T10 PhysX pieces x 1.0",
+    "training_dims_m": {
+     "height": 0.3904,
+     "width": 0.4077,
+     "length": 0.5812
+    },
+    "axes_local": {
+     "height": 2,
+     "width": 0,
+     "length": 1
+    }
+   },
+   "persons": {
+    "person1": {
+     "s": 0.76168,
+     "r": {
+      "height": 1.0011,
+      "width": 0.9958,
+      "length": 0.9918
+     },
+     "object_top_above_floor_m": 0.474,
+     "object_top_above_floor_x_s_m": 0.361,
+     "training_height_m": 0.3904
+    },
+    "person2": {
+     "s": 0.72671,
+     "r": {
+      "height": 1.0493,
+      "width": 1.0437,
+      "length": 1.0396
+     },
+     "object_top_above_floor_m": 0.5732,
+     "object_top_above_floor_x_s_m": 0.4166,
+     "training_height_m": 0.3904
+    }
+   }
+  },
+  "bin": {
+   "object": {
+    "person_object": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/bucket/bucket003_m.obj",
+    "person_object_dims_m": {
+     "height": 0.7628,
+     "width": 0.4658,
+     "length": 0.5408
+    },
+    "training_object": "T10 PhysX pieces x 1.0",
+    "training_dims_m": {
+     "height": 0.7744,
+     "width": 0.4739,
+     "length": 0.5548
+    },
+    "axes_local": {
+     "height": 1,
+     "width": 2,
+     "length": 0
+    }
+   },
+   "persons": {
+    "person1": {
+     "s": 0.76147,
+     "r": {
+      "height": 1.3331,
+      "width": 1.3361,
+      "length": 1.3472
+     },
+     "object_top_above_floor_m": 0.7593,
+     "object_top_above_floor_x_s_m": 0.5782,
+     "training_height_m": 0.7744
+    },
+    "person2": {
+     "s": 0.72229,
+     "r": {
+      "height": 1.4055,
+      "width": 1.4086,
+      "length": 1.4203
+     },
+     "object_top_above_floor_m": 0.8491,
+     "object_top_above_floor_x_s_m": 0.6133,
+     "training_height_m": 0.7744
+    }
+   }
+  },
+  "push": {
+   "object": {
+    "person_object_capture_dims_m": {
+     "height": 0.4589,
+     "width": 0.5596,
+     "length": 0.5596
+    },
+    "person_object_intermimic_dims_m": {
+     "height": 0.428,
+     "width": 0.522,
+     "length": 0.522
+    },
+    "training_object": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_training.urdf",
+    "training_dims_m": {
+     "height": 0.428,
+     "width": 0.522,
+     "length": 1.4
+    },
+    "axes_local": {
+     "height": 1,
+     "width": 2,
+     "length": 0
+    }
+   },
+   "persons": {
+    "person": {
+     "s": 0.74907,
+     "r_vs_capture": {
+      "height": 1.2451,
+      "width": 1.2451,
+      "length": 3.3398
+     },
+     "r_vs_intermimic": {
+      "height": 1.335,
+      "width": 1.335,
+      "length": 3.5808
+     },
+     "object_top_above_floor_m": 0.4321,
+     "object_top_above_floor_x_s_m": 0.3237,
+     "training_height_m": 0.428
+    }
+   }
+  },
+  "pull": {
+   "object": {
+    "person_object_capture_dims_m": {
+     "height": 0.4588,
+     "width": 0.5595,
+     "length": 0.5595
+    },
+    "person_object_intermimic_dims_m": {
+     "height": 0.428,
+     "width": 0.522,
+     "length": 0.522
+    },
+    "training_object": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/objects_widetable_plan5_pull_training.urdf",
+    "training_dims_m": {
+     "height": 0.428,
+     "width": 0.522,
+     "length": 1.4
+    },
+    "axes_local": {
+     "height": 1,
+     "width": 0,
+     "length": 2
+    }
+   },
+   "persons": {
+    "person": {
+     "s": 0.68003,
+     "r_vs_capture": {
+      "height": 1.3717,
+      "width": 1.3717,
+      "length": 3.6793
+     },
+     "r_vs_intermimic": {
+      "height": 1.4705,
+      "width": 1.4705,
+      "length": 3.9443
+     },
+     "object_top_above_floor_m": 0.438,
+     "object_top_above_floor_x_s_m": 0.2978,
+     "training_height_m": 0.428
+    }
+   }
+  }
+ }
+}

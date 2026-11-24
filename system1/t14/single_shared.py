@@ -153,6 +153,10 @@ def main():
     ap.add_argument("--anchor-weight", type=float, default=0.0, help="T14 step 2 CoCarry anchor term weight (0 = off)")
     ap.add_argument("--landmarks", action="store_true", help="T14 round 4 A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="T14 round 4 B: palm toward the inward surface normal at the anchor (0 = off)")
+    ap.add_argument("--prior-tau", type=float, default=None, help="T14 round 6: nominal_tracking_tau (prior weight lambda * exp(-frame / tau)); "
+                    "default = RetargeterConfig (1e6, i.e. constant); round 6 uses the InteractionMeshRetargeter default 10")
+    ap.add_argument("--palm-track-finger-weight", type=float, default=None, help="T14 round 6 C': finger-direction weight of the palm tracking "
+                    "(default = --palm-track-weight)")
     ap.add_argument("--palm-track-weight", type=float, default=0.0, help="T14 round 5 C: palm frame tracks the person's (build_pt_wrist_palm_orientation_targets)")
     a = ap.parse_args()
     if a.variant == "omni_asis":
@@ -239,7 +243,7 @@ def main():
                 offsets[key] = off[k]
             lm_rec[side]["offsets_m"] = {k: np.round(v, 6).tolist() for k, v in off.items()}
     kw = build_retargeter_kwargs_from_config(cfg, constants, urdf_path, "object_interaction")
-    kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau
+    kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau if a.prior_tau is None else a.prior_tau
     kw["anchor_nominal_foot_height"] = True
     kw["nominal_foot_height_tolerance"] = FOOT_H_TOL
     kw["scene_xml_path"] = str(scene)
@@ -260,10 +264,11 @@ def main():
         wq = load_intermimic_wrist_quaternions(OMOMO_NEW / f"{seq}.pt")
         palm_rot, cal_err = build_pt_wrist_palm_orientation_targets(human_raw52, wq, human_names52)
         orient_term = dict(weight=a.palm_track_weight, activation=np.ones((len(palm_rot), 2)), palm_world=palm_rot[..., :, 2], finger_world=palm_rot[..., :, 0],
-                           palm_normal_local=hl.PALM_NORMAL_LOCAL)
+                           palm_normal_local=hl.PALM_NORMAL_LOCAL, finger_weight=a.palm_track_finger_weight)
         track_rec = dict(weight=a.palm_track_weight, calibration_p90_deg=np.round(cal_err, 6).tolist(),
                          source="build_pt_wrist_palm_orientation_targets(raw OMOMO_new joints, InterMimic wrist quaternions), default max calibration error 1 deg",
-                         mapping="robot target = palm_rot @ palm_basis.T: palm normal -> palm_rot[:, 2], finger -> palm_rot[:, 0]")
+                         mapping="robot target = palm_rot @ palm_basis.T: palm normal -> palm_rot[:, 2], finger -> palm_rot[:, 0]",
+                         finger_weight=a.palm_track_finger_weight if a.palm_track_finger_weight is not None else a.palm_track_weight, prior_tau=a.prior_tau)
     retargeter = PalmInteractionMeshRetargeter(**kw, palm_offsets=offsets, anchor_term=anchor_term, orient_term=orient_term)
     import mujoco
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])

@@ -247,6 +247,10 @@ def main():
     ap.add_argument("--landmarks", action="store_true", help="A: Index1 / Pinky1 / middle fingertip per hand in the interaction mesh (hand_landmarks.py)")
     ap.add_argument("--palm-orient-weight", type=float, default=0.0, help="B: palm normal toward the inward surface normal at the anchor, in human-contact "
                     "frames (anchor activation); 0 = off; round 4 B uses HandOrientationConfig.palm_direction_weight = 5.0")
+    ap.add_argument("--prior-tau", type=float, default=None, help="T14 round 6: nominal_tracking_tau (prior weight lambda * exp(-frame / tau)); "
+                    "default = RetargeterConfig (1e6, i.e. constant); round 6 uses the InteractionMeshRetargeter default 10")
+    ap.add_argument("--palm-track-finger-weight", type=float, default=None, help="T14 round 6 C': finger-direction weight of the palm tracking "
+                    "(default = --palm-track-weight)")
     ap.add_argument("--palm-track-weight", type=float, default=0.0, help="T14 round 5 C: palm normal and finger direction track the "
                     "person's palm frame (build_core4d_a1_palm_orientation_targets, mapped like _map_pt_palm_orientations_to_robot_links), "
                     "every frame, HandOrientationConfig form; 0 = off; C uses palm_direction_weight = 5.0")
@@ -395,7 +399,7 @@ def main():
     obj_pts_shared = obj_pts * s_shared
     rec["object_points"] = dict(count=int(len(obj_pts)), demo_over_raw=float(np.median(np.linalg.norm(obj_pts_demo, axis=1) / np.maximum(np.linalg.norm(obj_pts, axis=1), 1e-9))))
     kw = build_retargeter_kwargs_from_config(cfg, constants, urdf_path, "object_interaction")
-    kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau
+    kw["nominal_tracking_tau"] = cfg.nominal_tracking_tau if a.prior_tau is None else a.prior_tau
     kw["anchor_nominal_foot_height"] = True
     kw["nominal_foot_height_tolerance"] = pair.CORE4D_NOMINAL_FOOT_HEIGHT_TOLERANCE_M
     kw["scene_xml_path"] = str(shared_scene)
@@ -414,7 +418,7 @@ def main():
         palm_rot, cal_err = build_core4d_a1_palm_orientation_targets(pin.human_joints_full, pin.wrist_quat_xyzw)  # [T, 2, 3, 3], columns forward / across / palm normal
         assert len(palm_rot) == len(phys)
         orient_term = dict(weight=a.palm_track_weight, activation=np.ones((len(phys), 2)), palm_world=palm_rot[..., :, 2], finger_world=palm_rot[..., :, 0],
-                           palm_normal_local=hl.PALM_NORMAL_LOCAL)
+                           palm_normal_local=hl.PALM_NORMAL_LOCAL, finger_weight=a.palm_track_finger_weight)
         rec["palm_track"] = dict(weight=a.palm_track_weight, calibration_p90_deg=np.round(cal_err, 6).tolist(),
                                  source="build_core4d_a1_palm_orientation_targets(pin.human_joints_full, pin.wrist_quat_xyzw), default max calibration error 1 deg",
                                  mapping="robot target = palm_rot @ palm_basis.T (_map_pt_palm_orientations_to_robot_links): palm normal -> palm_rot[:, 2], finger -> palm_rot[:, 0]",
@@ -424,7 +428,9 @@ def main():
     jadr = lambda n: int(retargeter.robot_model.jnt_qposadr[mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_JOINT, n)])
     assert jadr("left_hip_pitch_joint") == 7 and jadr("waist_pitch_joint") == 21 and jadr("left_shoulder_pitch_joint") == 22
     assert list(retargeter.track_nominal_indices) == list(range(n_prior)), retargeter.track_nominal_indices
-    rec["prior"] = dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}", weight=retargeter.w_nominal_tracking_init)
+    rec["prior"] = dict(scope=a.prior, qpos_indices=f"0..{n_prior - 1}", weight=retargeter.w_nominal_tracking_init, tau=retargeter.nominal_tracking_tau)
+    if a.palm_track_weight > 0:
+        rec["palm_track"]["finger_weight"] = a.palm_track_finger_weight if a.palm_track_finger_weight is not None else a.palm_track_weight
     gid = mujoco.mj_name2id(retargeter.robot_model, mujoco.mjtObj.mjOBJ_GEOM, "left_rubber_hand_link")
     rec["scene"] = dict(path=str(shared_scene), left_hand_mesh_vertices=int(retargeter.robot_model.mesh_vertnum[retargeter.robot_model.geom_dataid[gid]]),
                         interaction_mesh_keys=list(retargeter.laplacian_match_links), w_nominal_tracking_init=retargeter.w_nominal_tracking_init)

@@ -67,8 +67,11 @@ def main():
     ap.add_argument("--task", required=True, choices=("push", "pull", "table", "bin", "chair"))
     ap.add_argument("--ref", action="append", required=True, help="name=path@size (CORE4D pair npz / OMOMO single qpos npz)")
     ap.add_argument("--frames", type=int, nargs="*", default=None, help="30 Hz frames (default: start / middle / end of contact)")
+    ap.add_argument("--wide", action="store_true", help="round 6: frame the torso and both whole arms (look-at = mean of pelvis, "
+                    "neck and hands; distance 1.6 m on the robot, 1.6 m / scale on the person)")
     ap.add_argument("--out", type=Path, required=True)
     a = ap.parse_args()
+    DIST = 1.6 if a.wide else 0.75
     assert os.environ.get("MUJOCO_GL") == "egl"
     import mujoco
     from PIL import Image, ImageDraw, ImageFont
@@ -133,12 +136,18 @@ def main():
             palms, d = human_axes(hs, p, t)
             sc = r0["scales"][p if not omomo else 0]
             L = 0.10 / sc
-            img = hs.render(p, t, az, el, 0.75 / sc, W, H)
+            if a.wide:
+                tt = min(hs.frame(t), len(hs.J[p]) - 1)
+                Jp = hs.J[p][tt]
+                h_look = np.mean([Jp[0], Jp[12], *palms], axis=0)
+            else:
+                h_look = palms.mean(0)
+            img = hs.render(p, t, az, el, DIST / sc, W, H)
             # re-render with arrows (HumanScene caches the renderer)
             m, dd, rr = hs.cache[(p, min(hs.frame(t), len(hs.V[p]) - 1), W, H)]
             cam = mujoco.MjvCamera()
             cam.type = mujoco.mjtCamera.mjCAMERA_FREE
-            cam.lookat[:], cam.distance, cam.azimuth, cam.elevation = palms.mean(0), 0.75 / sc, az, el
+            cam.lookat[:], cam.distance, cam.azimuth, cam.elevation = h_look, DIST / sc, az, el
             rr.update_scene(dd, camera=cam)
             add_arrows(rr.scene, [(palms[i], palms[i] + L * d["palm_normal"][i], RED) for i in range(2)] + [(palms[i], palms[i] + L * d["finger"][i], BLUE) for i in range(2)])
             img = Image.fromarray(rr.render())
@@ -161,7 +170,12 @@ def main():
                     arrows += [(pp, pp + 0.10 * rd["palm_normal"], RED), (pp, pp + 0.10 * rd["finger"], BLUE)]
                 cam = mujoco.MjvCamera()
                 cam.type = mujoco.mjtCamera.mjCAMERA_FREE
-                cam.lookat[:], cam.distance, cam.azimuth, cam.elevation = np.mean(rp, 0), 0.75, az, el
+                if a.wide:
+                    neck = tl["torso_link"][0][:3, :3] @ np.array([0.003, -0.0005, 0.290]) + tl["torso_link"][0][:3, 3]
+                    r_look = np.mean([tl["pelvis"][0][:3, 3], neck, *rp], axis=0)
+                else:
+                    r_look = np.mean(rp, 0)
+                cam.lookat[:], cam.distance, cam.azimuth, cam.elevation = r_look, DIST, az, el
                 opt = mujoco.MjvOption()
                 s.renderer.update_scene(s.data, camera=cam, scene_option=opt)
                 add_arrows(s.renderer.scene, arrows)
