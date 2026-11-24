@@ -1,0 +1,165 @@
+{
+ "time": "2026-11-24 18:31",
+ "runs": {
+  "d_table": {
+   "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_table",
+   "exists": true,
+   "launch": {
+    "run": "d_table",
+    "num_envs": 4096,
+    "rules": {
+     "save": 500,
+     "val": 1000,
+     "stop_after": 4000,
+     "patience": 2000,
+     "max_it": 10000,
+     "earliest_stop": 6000
+    },
+    "warmup_iterations": 0,
+    "started": "2026-11-24T18:21:21-05:00",
+    "git_head": "bcff097094aaa93ecf4392f236dea5ec50f042f4"
+   },
+   "state": {
+    "curve": {},
+    "stopped": null,
+    "crashes": [],
+    "resumed": null,
+    "status": "running",
+    "train_pid": 7397,
+    "train_started": "2026-11-24T18:21:21-05:00"
+   },
+   "decision": null,
+   "curve": null,
+   "metrics_dir": "train",
+   "iteration": 82,
+   "s_per_it": 6.270074384985492,
+   "nonfinite_keys_last50": [],
+   "contact_v1_mean_last50": {
+    "ContactV1/r0_force_over_1n_in_should": 0.2873044699996495,
+    "ContactV1/r0_lost_in_should": 0.7233474929154642,
+    "ContactV1/r0_lost_termination_signals": 422.24,
+    "ContactV1/r0_penalty_links_mean": 0.07539896647135418,
+    "ContactV1/r0_penalty_step_share": 0.06888509114583334,
+    "ContactV1/r0_reward_mean": 1.9170033645629883,
+    "ContactV1/r0_should_hand_steps": 98503.22,
+    "ContactV1/r1_force_over_1n_in_should": 0.3153955746220501,
+    "ContactV1/r1_lost_in_should": 0.6988980394728037,
+    "ContactV1/r1_lost_termination_signals": 561.92,
+    "ContactV1/r1_penalty_links_mean": 0.11880452473958336,
+    "ContactV1/r1_penalty_step_share": 0.10590779622395832,
+    "ContactV1/r1_reward_mean": 2.096727735499541,
+    "ContactV1/r1_should_hand_steps": 128869.54
+   },
+   "reward_mean_last": 0.09413283318281174,
+   "train_alive": true,
+   "gpu": "0, 9793 MiB, 24564 MiB, 59 %"
+  },
+  "d_push": {
+   "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_push",
+   "exists": true,
+   "launch": {
+    "run": "d_push",
+    "num_envs": 4096,
+    "rules": {
+     "save": 500,
+     "val": 1000,
+     "stop_after": 4000,
+     "patience": 2000,
+     "max_it": 10000,
+     "earliest_stop": 6000
+    },
+    "warmup_iterations": 25,
+    "started": "2026-11-24T18:21:28-05:00",
+    "git_head": "bcff097094aaa93ecf4392f236dea5ec50f042f4"
+   },
+   "state": {
+    "curve": {},
+    "stopped": null,
+    "crashes": [],
+    "resumed": null,
+    "status": "running",
+    "warmup_returncode": 0,
+    "train_pid": 8692,
+    "train_started": "2026-11-24T18:25:59-05:00"
+   },
+   "decision": null,
+   "curve": null,
+   "metrics_dir": "train",
+   "iteration": 65,
+   "s_per_it": 5.599887888994999,
+   "nonfinite_keys_last50": [],
+   "contact_v1_mean_last50": {
+    "ContactV1/r0_force_over_1n_in_should": 0.520682520053864,
+    "ContactV1/r0_lost_in_should": 0.4745026622657912,
+    "ContactV1/r0_lost_termination_signals": 564.65,
+    "ContactV1/r0_penalty_links_mean": 0.049402465820312505,
+    "ContactV1/r0_penalty_step_share": 0.04845531287560097,
+    "ContactV1/r0_reward_mean": 2.4158871608605748,
+    "ContactV1/r0_should_hand_steps": 146251.15,
+    "ContactV1/r1_force_over_1n_in_should": 0.5376694148195067,
+    "ContactV1/r1_lost_in_should": 0.4615567317888386,
+    "ContactV1/r1_lost_termination_signals": 474.65,
+    "ContactV1/r1_penalty_links_mean": 0.03586860539362981,
+    "ContactV1/r1_penalty_step_share": 0.03524529559795672,
+    "ContactV1/r1_reward_mean": 2.472400486689347,
+    "ContactV1/r1_should_hand_steps": 146251.15
+   },
+   "reward_mean_last": 0.10072992742061615,
+   "train_alive": true,
+   "gpu": "0, 9061 MiB, 24564 MiB, 32 %"
+  },
+  "d_table_pa": {
+   "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_table_pa",
+   "exists": true,
+   "launch": {
+    "run": "d_table_pa",
+    "num_envs": 4096,
+    "rules": {
+     "save": 500,
+     "val": 1000,
+     "stop_after": 4000,
+     "patience": 2000,
+     "max_it": 10000,
+     "earliest_stop": 6000
+    },
+    "warmup_iterations": 0,
+    "started": "2026-11-24T18:21:38-05:00",
+    "git_head": "bcff097094aaa93ecf4392f236dea5ec50f042f4"
+   },
+   "state": {
+    "curve": {},
+    "stopped": null,
+    "crashes": [],
+    "resumed": null,
+    "status": "running",
+    "train_pid": 8096,
+    "train_started": "2026-11-24T18:21:38-05:00"
+   },
+   "decision": null,
+   "curve": null,
+   "metrics_dir": "train",
+   "iteration": 85,
+   "s_per_it": 5.750968438573182,
+   "nonfinite_keys_last50": [],
+   "contact_v1_mean_last50": {
+    "ContactV1/r0_force_over_1n_in_should": 0.38702476860858825,
+    "ContactV1/r0_lost_in_should": 0.6262747815308652,
+    "ContactV1/r0_lost_termination_signals": 344.96,
+    "ContactV1/r0_penalty_links_mean": 0.058923136393229145,
+    "ContactV1/r0_penalty_step_share": 0.05473124186197917,
+    "ContactV1/r0_reward_mean": 2.0052701174219454,
+    "ContactV1/r0_should_hand_steps": 96936.56,
+    "ContactV1/r1_force_over_1n_in_should": 0.4035388791005292,
+    "ContactV1/r1_lost_in_should": 0.617987829458598,
+    "ContactV1/r1_lost_termination_signals": 480.12,
+    "ContactV1/r1_penalty_links_mean": 0.07024922688802084,
+    "ContactV1/r1_penalty_step_share": 0.06301574707031252,
+    "ContactV1/r1_reward_mean": 2.247171979943911,
+    "ContactV1/r1_should_hand_steps": 127137.98
+   },
+   "reward_mean_last": 0.11401176452636719,
+   "train_alive": true,
+   "gpu": "0, 9797 MiB, 24564 MiB, 56 %"
+  }
+ }
+}
