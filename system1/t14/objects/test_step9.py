@@ -137,6 +137,40 @@ def test_walk_scopy_lift_and_put_down():
     assert np.allclose((legs[10, feet, :2] - legs[9, feet, :2]).mean(0), 0) and np.allclose((legs[50, feet, :2] - legs[49, feet, :2]).mean(0), 0)
 
 
+def test_full_scopy_whole_body():
+    """step 9e: outside the walking segment the WHOLE partner (upper body too) is the S copy + d_pre / d_post of step 9d, the
+    person map Gp is Trans(d) S there and G inside the walk; the legs and the walking segment equal step 9d's; Gp = G for 9d;
+    r1_source rebuilds the partner's legs from the demonstration's at every frame (reversed walk, S copies outside)."""
+    H, O = straight_carry(T=61)
+    rng = np.random.default_rng(2)
+    H = H + rng.normal(scale=0.01, size=H.shape)
+    walk = dict(w0=10, w1=50)
+    size = np.array([0.3, 0.4, 0.3])
+    C = fb.build(H, NAMES, O, size, 1.0, turn="world", legs="full_scopy", walk=walk)
+    C9d = fb.build(H, NAMES, O, size, 1.0, turn="world", legs="walk_scopy", walk=walk)
+    S = C["S"]
+    Sx = H @ S[:3, :3].T + S[:3, 3]
+    dp, dq = np.r_[C["pre_offset"], 0.0], np.r_[C["post_offset"], 0.0]
+    assert np.allclose(C["pre_offset"], C9d["pre_offset"]) and np.allclose(C["post_offset"], C9d["post_offset"])
+    assert np.allclose(C["human1"][:10], Sx[:10] + dp) and np.allclose(C["human1"][50:], Sx[50:] + dq)
+    assert np.allclose(C["human1"][10:50], C9d["human1"][10:50])  # walking segment unchanged (reversed legs, object-attached upper body)
+    il = [NAMES.index(n) for n in fb.LOWER]
+    assert np.allclose(C["human1"][:, il], C9d["human1"][:, il])  # legs as step 9d everywhere
+    T_ = lambda d: fb.affine(np.eye(3), d)  # noqa: E731
+    assert np.allclose(C["Gp"][:10], T_(dp) @ S) and np.allclose(C["Gp"][50:], T_(dq) @ S) and np.allclose(C["Gp"][10:50], C["G"][10:50])
+    assert np.allclose(C9d["Gp"], C9d["G"]) and np.allclose(C["G"], C9d["G"])
+    # the S copy holds its own box Gp O as the demonstration holds O (whole-body relation kept)
+    for t in (0, 5, 55):
+        rel0 = (H[t] - O[t][:3, 3]) @ O[t][:3, :3]
+        G1 = C["Gp"][t] @ O[t]
+        rel1 = (C["human1"][t] - G1[:3, 3]) @ G1[:3, :3]
+        assert np.allclose(rel0, rel1)
+    for CC in (C, C9d, fb.build(H, NAMES, O, size, 1.0, turn="world", legs="walk", walk=walk), fb.build(H, NAMES, O, size, 1.0)):
+        rs = CC["r1_source"]
+        rebuilt = np.einsum("tij,tkj->tki", rs["R"], H[rs["frame"]][:, il]) + rs["t"][:, None]
+        assert np.allclose(rebuilt, CC["human1"][:, il]), CC["legs"]
+
+
 def test_added_drift():
     T = 20
     rob, src = np.zeros((T, 3)), np.zeros((T, 3))

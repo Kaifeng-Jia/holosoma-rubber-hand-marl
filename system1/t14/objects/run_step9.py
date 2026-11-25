@@ -21,6 +21,8 @@ clip at 1.0 and at its smallest level without intersection on the same grid (1.0
     sonic_s1/bin/python -B system1/t14/objects/run_step9.py --parallel 6 --deadline 08:15
 Step 9c (Kevin 2026-11-25 01:52): --step step9c --fb-turn world --fb-legs walk --source-root logs_system1/t14/step9b/src
 --no-extension (the three main clips only; the source solves of step 9b are reused: same clips, same source mode).
+Step 9e (Kevin 2026-11-25 15:10): --step step9e --fb-turn world --fb-legs full_scopy --fb-human-frame target --skip-failed-up
+--all-main --r1-source construction --source-root logs_system1/t14/step9b/src logs_system1/t14/step9d/src.
 """
 import argparse
 import csv
@@ -58,6 +60,8 @@ SOLVE_EXTRA = []
 SRC_ROOT = None
 EXTENSION = True
 SKIP_FAILED_UP = False
+ALL_MAIN = False
+EVAL_EXTRA = []
 
 
 def now():
@@ -131,8 +135,9 @@ class Clip:
         self.frames = f"{row['start']}:{row['stop']}"
         self.tag = MAIN.get(self.seq, self.seq)
         self.d = L / self.tag
-        reuse = (SRC_ROOT / self.tag) if SRC_ROOT is not None else None  # reuse a finished source solve; else solve it under L/src
-        self.src = reuse if (reuse is not None and (reuse / "run_record.json").exists()) else L / "src" / self.tag
+        # reuse a finished source solve (first root that has it); else solve it under L/src
+        reuse = [r / self.tag for r in (SRC_ROOT or []) if (r / self.tag / "run_record.json").exists()]
+        self.src = reuse[0] if reuse else L / "src" / self.tag
         self.main = self.seq in MAIN
         self.evals = {}
         self.sm = log["summary"].setdefault(self.tag, dict(object=self.obj, sequence=self.seq, frames=self.frames, main=self.main))
@@ -175,7 +180,7 @@ class Clip:
     def eval_job(self, m):
         d = self.d / tagm(m)
         return ([SO, "-B", "system1/t14/objects/step9_eval.py", "--cand-dir", d, "--source", self.src, "--gates", self.d / f"gates_{tagm(m)}.json",
-                 "--out", d / "eval.json", "--pair-out", EXP / f"{self.tag}_{tagm(m)}" / "pair_fps30.npz"], f"eval_{self.tag}_{tagm(m)}", 2.5, d / "eval.log")
+                 "--out", d / "eval.json", "--pair-out", EXP / f"{self.tag}_{tagm(m)}" / "pair_fps30.npz", *EVAL_EXTRA], f"eval_{self.tag}_{tagm(m)}", 2.5, d / "eval.log")
 
     def levels(self, ms):
         """solve + evaluate the levels (concurrently); returns {m: eval or None}."""
@@ -253,7 +258,8 @@ class Clip:
         self.sm["min_free"] = min((m for m in self.evals if self.inter(m) is False), default=None)
         save()
         decide.update(self)
-        self.render(rep, a, free)
+        if self.main or not ALL_MAIN:  # step 9e (--all-main): pictures + video of the three debug clips only
+            self.render(rep, a, free)
         self.done = True
 
     def run_ext(self):
@@ -313,6 +319,8 @@ class Decide:
 
     def early(self, clip):
         """after 1.0 / 1.25 / 1.5: a main clip already applicable there decides the extension (later levels only add)."""
+        if ALL_MAIN:
+            return
         if any((clip.evals.get(m) or {}).get("applicable") for m in (1.0, 1.25, 1.5)):
             with lock:
                 if not self.yes:
@@ -322,6 +330,8 @@ class Decide:
                 self.ev.set()
 
     def update(self, clip):
+        if ALL_MAIN:
+            return
         with lock:
             if clip.tag in self.counted:
                 return
@@ -392,8 +402,11 @@ def main():
     ap.add_argument("--render-only", nargs="*", default=None, help="tags of main clips: pictures + video only (after the driver)")
     ap.add_argument("--step", default="step9b", help="output name: logs_system1/t14/<step>, exports, results_system1/T14_retargeting/<step>")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy"), default="all")
-    ap.add_argument("--source-root", type=Path, default=None, help="reuse the source solves under this directory")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy"), default="all")
+    ap.add_argument("--source-root", type=Path, nargs="*", default=None, help="reuse the source solves under these directories (first that has the clip)")
+    ap.add_argument("--all-main", action="store_true", help="step 9e: every straight clip (the 22) runs the main protocol (a, 1.0, 1.25, 1.5, "
+                    "first free above 1.5), all at once, no extension gate; pictures + video for the three debug clips only")
+    ap.add_argument("--r1-source", choices=("reversed", "construction"), default="reversed", help="step9_eval.py --r1-source (step 9e: construction)")
     ap.add_argument("--no-extension", action="store_true")
     ap.add_argument("--search-up", nargs="*", default=None, help="tags: continue the up-search from --search-from (step 9c)")
     ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own", help="role_solve --fb-human-frame (step 9c run 2: target)")
@@ -401,7 +414,7 @@ def main():
                     "when 1.5 failed while 1.0 or 1.25 intersect (step 9c run 2)")
     ap.add_argument("--search-from", type=float, default=1.55)
     a = ap.parse_args()
-    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION, SOLVE_EXTRA, SKIP_FAILED_UP
+    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION, SOLVE_EXTRA, SKIP_FAILED_UP, ALL_MAIN, EVAL_EXTRA
     SOLVE_EXTRA = ["--fb-human-frame", a.fb_human_frame] if a.fb_human_frame != "own" else []
     SKIP_FAILED_UP = a.skip_failed_up
     L = ROOT / f"logs_system1/t14/{a.step}"
@@ -409,11 +422,13 @@ def main():
     VID = ROOT / f"exports_system1/T14_videos/{a.step.replace('step9b', 'step9')}"
     FIG = ROOT / f"results_system1/T14_retargeting/{a.step}/figures"
     FB_ARGS = ["--fb-turn", a.fb_turn, "--fb-legs", a.fb_legs]
-    SRC_ROOT = (ROOT / a.source_root) if a.source_root and not a.source_root.is_absolute() else a.source_root
+    SRC_ROOT = None if a.source_root is None else [r if r.is_absolute() else ROOT / r for r in a.source_root]
     EXTENSION = not a.no_extension
+    ALL_MAIN = a.all_main
+    EVAL_EXTRA = ["--r1-source", a.r1_source] if a.r1_source != "reversed" else []
     L.mkdir(parents=True, exist_ok=True)
-    log.update(step=a.step, fb_args=FB_ARGS, solve_extra=SOLVE_EXTRA, skip_failed_up=SKIP_FAILED_UP, source_root=None if SRC_ROOT is None else str(SRC_ROOT),
-               extension_enabled=EXTENSION)
+    log.update(step=a.step, fb_args=FB_ARGS, solve_extra=SOLVE_EXTRA, eval_extra=EVAL_EXTRA, skip_failed_up=SKIP_FAILED_UP,
+               source_root=None if SRC_ROOT is None else [str(r) for r in SRC_ROOT], extension_enabled=EXTENSION, all_main=ALL_MAIN)
     slots = threading.BoundedSemaphore(a.parallel)
     if a.render_only is not None:
         DEADLINE = now().replace(hour=23, minute=59)
@@ -429,6 +444,16 @@ def main():
     assert len(main_rows) == 3 and len(rows) == 22, (len(main_rows), len(rows))
     log["clips"] = [dict(object=r["object"], sequence=r["sequence"], frames=f"{r['start']}:{r['stop']}", main=r["sequence"] in MAIN) for r in rows]
     save()
+    if ALL_MAIN:  # step 9e: the frozen construction on all 22 straight clips at once, main protocol for each
+        ts = [threading.Thread(target=Clip(r).run_main) for r in main_rows + ext_rows]
+        for t in ts:
+            t.start()
+        for t in ts:
+            t.join()
+        log["done"] = now().isoformat(timespec="seconds")
+        save()
+        print("STEP9_ALL_MAIN_DONE", flush=True)
+        return
     ts = [threading.Thread(target=Clip(r).run_main) for r in main_rows]
     for t in ts:
         t.start()

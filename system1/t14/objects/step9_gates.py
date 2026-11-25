@@ -11,7 +11,8 @@ Per level m (target = the box lengthened along the walking axis to m x 2 w):
   * diagnostic (reported, not a gate): reversed-leg pelvis - object-attached pelvis (frontback.diag), the walking axis and its
     angle to the box axis, the partner's initial pelvis distance; step 9c also the legs-to-own-box distance (frontback.leg_box)
     and the walking segment.
-Step 9c: --fb-turn world --fb-legs walk (frontback.py options; defaults = step 9b).
+Step 9c: --fb-turn world --fb-legs walk (frontback.py options; defaults = step 9b); 9d walk_scopy, 9e full_scopy.
+Every gates file also holds r1_source (frontback.build): per partner frame the source frame and the rigid map of its legs.
 Writes <out>/gates_m<tag>.json per level and <out>/diag.json.
 
     hsretargeting_s1/bin/python -B system1/t14/objects/step9_gates.py --object smallbox --sequence sub4_smallbox_047 --frames 36:172 \
@@ -51,9 +52,11 @@ def gates(h0, names, O, size, s, m, turn="box", legs="all", walk=None):
                 partner_min_pelvis_distance_m=round(float(np.linalg.norm(p1[:, :2] - p0[:, :2], axis=1).min()), 4),
                 shared_vs_demo_rotation_max_deg=round(max(tilt), 2), leg_offset_m=np.round(C["leg_offset"], 4).tolist(), turn=turn, legs=legs, walk=walk,
                 leg_box=fb.leg_box(h0, names, O, size, C)[0], box_tilt_frame0_deg=round(float(np.degrees(np.arccos(np.clip(O[0][2, 2], -1, 1)))), 3))
+    rs = C["r1_source"]  # per partner frame: source frame and rigid map of the legs (step9_eval.py --r1-source construction)
     return dict(m=m, gravity_deg=round(g, 4), gravity_passed=g <= pt.V0_GRAVITY_DEG + 1e-10, main_motion=mm,
                 passed=bool(g <= pt.V0_GRAVITY_DEG + 1e-10 and mm["passed"]), improper=False, S=np.round(C["S"], 6).tolist(),
-                candidate=C["cand"], diag=diag)
+                candidate=C["cand"], diag=diag,
+                r1_source=dict(frame=[int(x) for x in rs["frame"]], R=np.asarray(rs["R"]).tolist(), t=np.asarray(rs["t"]).tolist()))
 
 
 def main():
@@ -66,12 +69,12 @@ def main():
     ap.add_argument("--levels", required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy"), default="all")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy"), default="all")
     a = ap.parse_args()
     fr = tuple(int(x) for x in a.frames.split(":"))
     h0, names, nom, size, s = load_role0(a.object, a.sequence, fr)
     walk = None
-    if a.fb_legs in ("walk", "walk_scopy"):
+    if a.fb_legs in ("walk", "walk_scopy", "full_scopy"):
         import frontback as fb
         import omomo_motion as om
         walk = fb.walking_segment(om.load_sequences({a.object})[a.sequence], *fr)

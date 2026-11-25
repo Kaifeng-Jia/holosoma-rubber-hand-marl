@@ -7,7 +7,9 @@ retention >= 0.99; Section 4's penetration criterion has no baseline and is not 
     windows = each role's own person's support segments of round 6 (support.py on the solve's saved human joints). Source robot
     of role 0 = the source solve at the same frame; of role 1 = the source solve played backwards in time (the partner's legs
     are the demonstration's legs reversed and turned about the vertical: a rigid motion, the same feet). The step-8 window
-    values are kept as information (old_window_*).
+    values are kept as information (old_window_*). --r1-source construction (step 9e): role 1's source at frame t = the
+    source solve at the construction's source frame, moved by the same rigid map (gates r1_source), so that it matches
+    constructions that reverse only the walking segment (the whole-clip-reversed value is kept as information).
   * main motion (Kevin 2026-11-25: the screen's class-a threshold): pelvis net horizontal displacement over the clip / s > 1.0 m,
     for the two persons (pre-solve gate, step9_gates.py) and for the two solved robots (root position of each solve); in step
     9c's words the robots' displacement (solver scale) > 1.0 m x s, the same test; both scales are recorded.
@@ -33,7 +35,7 @@ ORDER = ["V0 gravity", "V0 support drift r0", "V0 support drift r1", "V0 non-han
 A_PELVIS_NET_M = 1.0
 
 
-def evaluate(cand_dir, source_dir, gates):
+def evaluate(cand_dir, source_dir, gates, r1_source="reversed"):
     import support
     from holosoma_retargeting.config_types.data_type import SMPLH_DEMO_JOINTS
     res = se.evaluate(cand_dir, source_dir, gates)
@@ -55,17 +57,28 @@ def evaluate(cand_dir, source_dir, gates):
         rf = se.feet(fk, q)
         vals, win = [], {}
         for k, side in enumerate(("left", "right")):
-            src = sfeet[f"{side}_foot_position_m"][:T]
-            if r == 1:
-                src = src[::-1]
+            src0 = sfeet[f"{side}_foot_position_m"][:T]
+            src = src0[::-1] if r == 1 else src0
+            alt = None
+            if r == 1 and r1_source == "construction":  # the source frame and rigid map that built the partner's legs at each frame
+                rs = gates["r1_source"]
+                fr, R_, t_ = np.asarray(rs["frame"]), np.asarray(rs["R"]), np.asarray(rs["t"])
+                assert len(fr) == T, (len(fr), T)
+                alt = rj.added_drift(rf[f"{side}_foot_position_m"], src, flags[:T, k])[0]  # the earlier (whole clip reversed) source
+                src = np.einsum("tij,tj->ti", R_, src0[fr]) + t_
             v, nw, nf = rj.added_drift(rf[f"{side}_foot_position_m"], src, flags[:T, k])
             vals.append(v)
             win[side] = dict(windows=nw, frames=nf, value_m=None if v is None else round(v, 5))
+            if alt is not None:
+                win[side]["reversed_source_value_m"] = round(alt, 5)
         fin = [v for v in vals if v is not None]
         val = max(fin) if fin else None
         ok = val is None or val <= rj.LIMIT + 1e-10
         drift[f"r{r}"] = dict(value_m=None if val is None else round(val, 5), limit=rj.LIMIT, passed=bool(ok), per_foot=win,
-                              old_window_value_m=res["V0"][f"support_drift_r{r}"]["value_m"])
+                              old_window_value_m=res["V0"][f"support_drift_r{r}"]["value_m"],
+                              source=("source solve, whole clip reversed" if r == 1 and r1_source == "reversed" else
+                                      "source solve at the construction's source frame, moved by its rigid map (gates r1_source)" if r == 1 else
+                                      "source solve, same frame"))
         if not ok:
             failed.append(f"V0 support drift r{r}")
         robots_net[f"r{r}"] = round(float(np.linalg.norm(q[-1, :2] - q[0, :2])) / float(rec["smpl_scale"]), 4)
@@ -90,8 +103,12 @@ def main():
     ap.add_argument("--gates", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--pair-out", type=Path, default=None)
+    ap.add_argument("--r1-source", choices=("reversed", "construction"), default="reversed",
+                    help="support-drift source of the partner: 'reversed' = the source solve played backwards over the whole clip "
+                         "(steps 9b-9d); 'construction' = at each frame the source frame and rigid map that built the partner's legs "
+                         "(gates r1_source; step 9e: walking segment reversed, lift / put down S copies at the same frame)")
     a = ap.parse_args()
-    res = evaluate(a.cand_dir, a.source, json.loads(a.gates.read_text()))
+    res = evaluate(a.cand_dir, a.source, json.loads(a.gates.read_text()), a.r1_source)
     if a.pair_out is not None:
         p = se.write_pair(a.cand_dir, a.pair_out)
         res.update(pair=str(p), pair_sha256=se.sha(p))
