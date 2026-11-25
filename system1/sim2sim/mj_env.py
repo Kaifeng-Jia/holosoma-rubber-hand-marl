@@ -253,6 +253,7 @@ class PairEnv:
         from holosoma.envs.marl.paired_motion_reference import PairedMotionReference
         self.ss = SceneSpec(dump_dir)
         self.task = task
+        self.obs_v1 = False  # T13 v4 switch (mj_eval --obs-v1); off = unchanged
         self.model, self.spec, self.info = build_model(self.ss, task)
         self.data = mujoco.MjData(self.model)
         m = self.model
@@ -408,7 +409,28 @@ class PairEnv:
         mate = np.concatenate([quat_rotate_inverse(heading, rp_w, w_last=True).numpy()[:, :2],
                                quat_rotate_inverse(heading, rv_w, w_last=True).numpy()[:, :2]], axis=-1)
         mate = np.clip(mate, -1.0, 1.0)
+        if self.obs_v1:  # T13 v4 (off = unchanged): teammate v1 = partner neck (2) + object (3), own torso-heading frame, noise off
+            mate = self._teammate_v1(st)
         return actor, mate
+
+    def _teammate_v1(self, st):
+        """holosoma.managers.observation.terms.marl_v1 NeckPartnerRelPosBV1 / ObjectRelPosBV1 with noise off: neck point =
+        NECK_POINT_TORSO_M on torso_link; heading = torso_link yaw only; partner term clipped +-PARTNER_CLIP_M (horizontal 2),
+        object term (object root origin minus own neck) clipped +-OBJECT_CLIP_M (3). Group term order: neck..., object..."""
+        from holosoma.managers.observation.terms.marl_v1 import NECK_POINT_TORSO_M, OBJECT_CLIP_M, PARTNER_CLIP_M
+        from holosoma.utils.rotations import quat_apply, quat_rotate_inverse
+        T = lambda x: torch.tensor(np.asarray(x), dtype=torch.float64)  # noqa: E731
+        k = self.body_list.index("torso_link")
+        pos = T(st["body_pos"][:, k])
+        quat = T(st["body_quat_xyzw"][:, k])
+        neck = pos + quat_apply(quat, T(NECK_POINT_TORSO_M).expand(2, 3), w_last=True)
+        x, y, z, w = quat.unbind(-1)
+        half = 0.5 * torch.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
+        zero = torch.zeros_like(half)
+        heading = torch.stack((zero, zero, torch.sin(half), torch.cos(half)), dim=-1)
+        partner = quat_rotate_inverse(heading, neck.flip(0) - neck, w_last=True)[:, :2].numpy()
+        obj = quat_rotate_inverse(heading, T(st["obj_pos"]).expand(2, 3) - neck, w_last=True).numpy()
+        return np.concatenate([np.clip(partner, -PARTNER_CLIP_M, PARTNER_CLIP_M), np.clip(obj, -OBJECT_CLIP_M, OBJECT_CLIP_M)], axis=-1)
 
     # -- termination (JointBadTrackingZOnly: robot orientation by torso gravity z, object position / orientation)
     def termination(self, st=None, t=None):

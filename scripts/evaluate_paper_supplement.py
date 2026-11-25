@@ -35,10 +35,12 @@ p.add_argument('--hand-friction',type=float,default=None,help='System1 T10b fric
 p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim: write the PhysX scene (collision convexes, masses, joints, materials, solver, PD constants) to this directory and record per step observations / actions / PD targets / substep torques / body poses (and SONIC inputs) per episode; off = unchanged')
 p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
 p.add_argument('--obs-v1',action='store_true',help='System1 T13 v4: observation v1 (actor 159), noise off; checkpoints trained with --obs-v1; off = unchanged')
+p.add_argument('--obs-v1-noise',choices=('off','on'),default='off',help='System1 T13 v4 section 5: observation-v1 training noise in the evaluation (with --obs-v1); off = unchanged (noise off)')
 p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
 p.add_argument('--t14-reference',type=Path,default=None,help='System1 T13 v4 section 0: T14 round 6 C reference manifest (table / push; system1/t13v4/t14_reference.py); off = original reference')
 a=p.parse_args()
 if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
+if a.obs_v1_noise=='on' and not a.obs_v1:p.error('--obs-v1-noise on needs --obs-v1')
 if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
 if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
 if a.finger_mode=='learn' and a.controller in ('sonic','sonic_planner'):p.error('A/B with hands: --finger-mode track (geometric grip) or locked')
@@ -90,8 +92,9 @@ config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observat
 T13V4_EVAL=None
 if a.obs_v1 or a.critic_v1:  # System1 T13 v4 (off = unchanged): observation v1 with noise off (validation / evaluation)
     from holosoma.config_values.marl.g1.observation_v1 import observation_v1
-    config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False))
-    T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
+    _noise=a.obs_v1_noise=='on'  # T13 v4 section 5: the 'noise on' evaluation group; default off = unchanged
+    config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise))
+    T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
 hand=None
 if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
     sys.path.insert(0,str(ROOT))
@@ -267,7 +270,7 @@ def main():
             return 0
         manifest=dict(reference_variant=None if a.reference_variant is None else str(a.reference_variant),reference_variant_sha256=None if a.reference_variant is None else sha(a.reference_variant),case=a.case,model_id=a.model_id,checkpoint=str(checkpoint),checkpoint_sha256=sha(checkpoint),
                       v3_ablation=ablation,checkpoint_iteration=state['iter'],states_sha256=sha(a.states),reference_frames=n,
-                      horizon_control_steps=n,dt=env.dt,inference='actor_mean_only_critic_forbidden',observation_noise=False,
+                      horizon_control_steps=n,dt=env.dt,inference='actor_mean_only_critic_forbidden',observation_noise=bool(T13V4_EVAL and T13V4_EVAL['noise']),
                       physics=physics,robot_urdf=config.robot.asset.urdf_file,object_urdf=config.robot.object.object_urdf_path,
                       placement_provenance=placement_provenance,
                       runtime_reference_check=runtime_reference_check,
@@ -278,7 +281,7 @@ def main():
         if T13V4_EVAL is not None:  # System1 T13 v4: observation v1, noise off (v1 internal noise state must be off)
             st=getattr(env,'_system1_obs_v1',None)
             T13V4_EVAL['obs_v1_noise_enabled_in_env']=None if st is None else bool(st.noise_enabled)
-            if st is not None and st.noise_enabled:raise RuntimeError('observation-v1 noise must be off in evaluation')
+            if st is not None and bool(st.noise_enabled)!=bool(T13V4_EVAL['noise']):raise RuntimeError('observation-v1 noise state differs from --obs-v1-noise')
             manifest['system1_t13v4']=T13V4_EVAL
         if T14_REFERENCE is not None:
             manifest['system1_t14_reference']=T14_REFERENCE

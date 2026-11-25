@@ -76,11 +76,14 @@ def algo_config(task):
 
 
 def extra_checkpoints(specs):
-    """--extra-checkpoint SCHEME,TASK,SEED,NAME,PATH (T10b: a pilot's final checkpoint); NAME is the ONNX file stem."""
+    """--extra-checkpoint SCHEME,TASK,SEED,NAME,PATH[,v1] (T10b: a pilot's final checkpoint); NAME is the ONNX file stem.
+    T13 v4: a sixth field "v1" = a checkpoint trained with observation v1 (actor input 154 + teammate 5 = 159)."""
     out = []
     for s in specs:
-        scheme, task, seed, name, path = s.split(",")
-        out.append(dict(scheme=scheme, task=task, seed=int(seed), name=name, checkpoint=str(Path(path).resolve()), checkpoint_sha256=sha(path)))
+        f = s.split(",")
+        scheme, task, seed, name, path = f[:5]
+        v1 = len(f) > 5 and f[5] == "v1"
+        out.append(dict(scheme=scheme, task=task, seed=int(seed), name=name, checkpoint=str(Path(path).resolve()), checkpoint_sha256=sha(path), obs_v1=v1))
     return out
 
 
@@ -88,7 +91,14 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
     import onnxruntime as ort
     from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
     for c in (checkpoints(tasks) if cks is None else cks):
-        m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
+        if c.get("obs_v1"):  # T13 v4 (off = unchanged): the evaluator's v1 bundle (teammate 5, critic 585)
+            sys.path.insert(0, str(ROOT))
+            from system1.t13v4.mappo_v1 import initialize_core4d_v1_model_bundle
+            m = initialize_core4d_v1_model_bundle(algo_config(c["task"]), teammate=5, critic=585, device="cpu")
+            dim = 159
+        else:
+            m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
+            dim = 158
         ck = torch.load(c["checkpoint"], map_location="cpu", weights_only=False)
         m.actor.load_state_dict(ck["actor_model_state_dict"], strict=True)
         m.actor_obs_normalizer.load_state_dict(ck["actor_obs_normalizer_state_dict"], strict=True)
@@ -98,12 +108,12 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
         name = c.get("name") or f"{c['scheme'].replace('-', '').lower()}_{c['task']}_seed{c['seed']}"
         path = Path(onnx_dir) / f"{name}.onnx"
         path.parent.mkdir(parents=True, exist_ok=True)
-        torch.onnx.export(wrap, torch.zeros(1, 158), str(path), input_names=["obs"], output_names=["action"],
+        torch.onnx.export(wrap, torch.zeros(1, dim), str(path), input_names=["obs"], output_names=["action"],
                           dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}}, opset_version=17, dynamo=False)
         rng = np.random.default_rng(0)
         mean = m.actor_obs_normalizer._mean.numpy()
         std = m.actor_obs_normalizer._std.numpy()
-        x = np.concatenate([rng.standard_normal((500, 158)), mean + std * rng.standard_normal((500, 158))]).astype(np.float32)
+        x = np.concatenate([rng.standard_normal((500, dim)), mean + std * rng.standard_normal((500, dim))]).astype(np.float32)
         with torch.no_grad():  # the evaluator path: normaliser(update=False) then act_inference
             ref = m.actor.act_inference({"actor_obs": m.actor_obs_normalizer(torch.from_numpy(x), update=False)}).numpy()
         sess = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
@@ -112,14 +122,14 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
         # float64 control (same graph, double precision): separates conversion errors from float32 rounding
         w64 = ActorOnnx(m.actor, m.actor_obs_normalizer).double().eval()
         p64 = Path(onnx_dir) / f"{name}_float64_check.onnx"
-        torch.onnx.export(w64, torch.zeros(1, 158, dtype=torch.float64), str(p64), input_names=["obs"], output_names=["action"],
+        torch.onnx.export(w64, torch.zeros(1, dim, dtype=torch.float64), str(p64), input_names=["obs"], output_names=["action"],
                           dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}}, opset_version=17, dynamo=False)
         with torch.no_grad():
             ref64 = w64(torch.from_numpy(x.astype(np.float64))).numpy()
         from onnx.reference import ReferenceEvaluator  # onnxruntime CPU has no float64 Elu; the ONNX reference evaluator runs the graph
         got64 = ReferenceEvaluator(str(p64)).run(None, {"obs": x.astype(np.float64)})[0]
         half = len(x) // 2
-        rows_out.append(dict(item="actor", name=name, scheme=c["scheme"], task=c["task"], seed=c["seed"], n=len(x), max_abs_diff=err, tol=TOL,
+        rows_out.append(dict(item="actor", name=name, scheme=c["scheme"], task=c["task"], seed=c["seed"], n=len(x), **({"input_dim": dim} if c.get("obs_v1") else {}), max_abs_diff=err, tol=TOL,
                              passed=err < TOL, max_abs_diff_N01_half=float(np.abs(got - ref)[:half].max()),
                              max_abs_diff_normaliser_half=float(np.abs(got - ref)[half:].max()), max_abs_action=float(np.abs(ref).max()),
                              max_rel_diff=float((np.abs(got - ref) / np.maximum(np.abs(ref), 1e-3)).max()),

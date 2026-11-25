@@ -147,6 +147,9 @@ def main():
     ap.add_argument("--limit", type=int, default=0)
     ap.add_argument("--onnx", type=Path, default=None, help="T10b: actor ONNX of another checkpoint (default: the T10 export of the final)")
     ap.add_argument("--checkpoint", type=Path, default=None, help="T10b: the checkpoint that ONNX was exported from (recorded; required with --onnx)")
+    ap.add_argument("--dump", type=Path, default=None, help="T13 v4: Isaac scene export of this run (default: the T10 export of --scheme / --task)")
+    ap.add_argument("--states", type=Path, default=None, help="T13 v4: frozen state file of this run's Isaac finals (default: the T10 / T03 one)")
+    ap.add_argument("--obs-v1", action="store_true", help="T13 v4: observation v1 (teammate 5, noise off; D only); off = unchanged")
     a = ap.parse_args()
     if (a.onnx is None) != (a.checkpoint is None):
         raise ValueError("--onnx and --checkpoint go together")
@@ -154,7 +157,12 @@ def main():
         raise FileExistsError(a.out)
     a.out.mkdir(parents=True)
     dump = ROOT / "logs_system1/t10/isaac" / (dict(D="d_", **{"C-in": "cin_", "C-out": "cout_"})[a.scheme] + a.task) / "dump"
+    if a.dump is not None:
+        dump = a.dump.resolve()
+    if a.obs_v1 and a.scheme != "D":
+        raise ValueError("--obs-v1: D only")
     env = PairEnv(dump, a.task)
+    env.obs_v1 = a.obs_v1
     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"
     onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx" if a.onnx is None else a.onnx.resolve()
     pd_note = "isaac"
@@ -178,7 +186,7 @@ def main():
             for r in range(2):
                 env.model.actuator_ctrlrange[env.act[r]] = np.stack([-env.tau_lim, env.tau_lim], axis=1)
             pd_note = "official deploy kp/kd (policy_parameters.hpp formulas) + official sim2sim motor effort limits"
-    states_path = states_for(a.task, a.level, a.scheme, a.seed)
+    states_path = states_for(a.task, a.level, a.scheme, a.seed) if a.states is None else a.states.resolve()
     states = json.loads(states_path.read_text())["states"][: a.limit or None]
     manifest = dict(task=a.task, scheme=a.scheme, seed=a.seed, level=a.level, pd=a.pd, pd_note=pd_note, onnx=str(onnx), onnx_sha256=sha(onnx),
                     checkpoint_sha256=checkpoint_for(a.scheme, a.task, a.seed) if a.checkpoint is None else sha(a.checkpoint),
@@ -186,6 +194,8 @@ def main():
                     isaac_dump=str(dump.relative_to(ROOT)), scene_json_sha256=sha(dump / "scene.json"), convexes_sha256=sha(dump / "collision_convexes.npz"),
                     kp=env.kp.tolist(), kd=env.kd.tolist(), torque_limits=env.tau_lim.tolist(), sim_dt=float(env.model.opt.timestep), decimation=4,
                     sonic_encoder_sha256=sha(ctrl.sonic.enc._model_path) if False else None, command=[sys.executable, *sys.argv])
+    if a.obs_v1:
+        manifest["obs_v1"] = dict(teammate=5, noise=False, actor_input=159)
     if a.scheme in ("C-in", "C-out"):
         from system1.sim2sim.sonic_mj import HF
         manifest.update(sonic_encoder=str(HF / "model_encoder.onnx"), sonic_encoder_sha256=sha(HF / "model_encoder.onnx"),
