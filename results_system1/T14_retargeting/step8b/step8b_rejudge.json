@@ -1,0 +1,54 @@
+{
+ "rules": "T14 step 9 part A (Kevin 2026-11-24 18:40, step-8 decision 1): re-judge every solved step-8 candidate with the support-drift\nwindows of round 6. Recompute only, no new solve.\n\nUnchanged: the V0 support-drift quantity and its frozen limit (reference_geometry_round2_checks: per foot, the horizontal\ndisplacement of the ankle_roll_link origin from the start of each support window, robot minus source robot, frame by frame;\nlargest value <= V0 additional_support_drift_m = 0.01 m) and every other item of the step-8 verdict (shared_eval.py).\nChanged: the windows. Old (step 8) = the source robot's V0 support windows (foot bottom <= 4 cm, foot speed <= 0.15 m/s,\n>= 0.1 s). New = the person's support segments of round 6 (support.py: per foot, toe speed < 0.01 m/s after Gaussian smoothing,\nsigma 8 frames; the definition the support lock uses), of each role's own person (role 1 = the S-mapped person; for a mirrored\nS its left foot is the source's right foot), read from the role solve's saved human joints.\nSource robot of role 1 = the source robot moved by S (drift unchanged; mirrored S swaps the feet).\n\n    sonic_s1/bin/python -B system1/t14/objects/step8_rejudge.py --out results_system1/T14_retargeting/step9/step8_rejudge.csv\n",
+ "summary": {
+  "smallboxb": {
+   "solved": 4,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "largeboxb": {
+   "solved": 0,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "suitcaseb": {
+   "solved": 4,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "smallboxc": {
+   "solved": 8,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "largeboxc": {
+   "solved": 8,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "suitcasec": {
+   "solved": 8,
+   "old_applicable": [],
+   "new_applicable": []
+  },
+  "push": {
+   "solved": 23,
+   "old_applicable": [],
+   "new_applicable": [
+    9,
+    15,
+    27,
+    31,
+    41,
+    43
+   ]
+  },
+  "pull": {
+   "solved": 2,
+   "old_applicable": [],
+   "new_applicable": [
+    5
+   ]
+  }
+ }
+}

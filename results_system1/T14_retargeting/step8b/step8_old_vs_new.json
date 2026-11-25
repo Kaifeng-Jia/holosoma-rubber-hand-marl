@@ -1,0 +1,90 @@
+{
+ "rules": "T14 step 8 rerun: old solves (step 8, person-side frame = own object) vs new solves (step 8 rerun, --human-frame target),\nboth judged with the round-6 support windows (step 9 re-judge rule). Per candidate: verdict, failed items, the numbers behind\nthem, the robot-person pelvis distance (mean, per role) and the frame flag of step8_frame_check. Per sequence: applicable\ncandidates and the existing selection rule among them (smallest joint weighted fit error, ties by ID; run_step8.py).\n\n    python3 system1/t14/objects/step8b_compare.py --old results_system1/T14_retargeting/step9/step8_rejudge.csv         --new results_system1/T14_retargeting/step8b/step8b_rejudge.csv --out results_system1/T14_retargeting/step8b\n",
+ "summary": {
+  "smallboxb": {
+   "solved_old": 4,
+   "solved_new": 4,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "largeboxb": {
+   "solved_old": 0,
+   "solved_new": 0,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "suitcaseb": {
+   "solved_old": 4,
+   "solved_new": 4,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "smallboxc": {
+   "solved_old": 8,
+   "solved_new": 8,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "largeboxc": {
+   "solved_old": 8,
+   "solved_new": 8,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "suitcasec": {
+   "solved_old": 8,
+   "solved_new": 8,
+   "applicable_old": [],
+   "selected_old": null,
+   "applicable_new": [],
+   "selected_new": null,
+   "selection_changed": false
+  },
+  "push": {
+   "solved_old": 23,
+   "solved_new": 23,
+   "applicable_old": [
+    "c27"
+   ],
+   "selected_old": "c27",
+   "applicable_new": [
+    "c09",
+    "c15",
+    "c27",
+    "c31",
+    "c41",
+    "c43"
+   ],
+   "selected_new": "c09",
+   "selection_changed": true
+  },
+  "pull": {
+   "solved_old": 2,
+   "solved_new": 2,
+   "applicable_old": [
+    "c05"
+   ],
+   "selected_old": "c05",
+   "applicable_new": [
+    "c05"
+   ],
+   "selected_new": "c05",
+   "selection_changed": false
+  }
+ }
+}
