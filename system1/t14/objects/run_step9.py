@@ -19,6 +19,8 @@ clip at 1.0 and at its smallest level without intersection on the same grid (1.0
 ... <= 3.0). Record: logs_system1/t14/step9b/driver.json.
 
     sonic_s1/bin/python -B system1/t14/objects/run_step9.py --parallel 6 --deadline 08:15
+Step 9c (Kevin 2026-11-25 01:52): --step step9c --fb-turn world --fb-legs walk --source-root logs_system1/t14/step9b/src
+--no-extension (the three main clips only; the source solves of step 9b are reused: same clips, same source mode).
 """
 import argparse
 import csv
@@ -51,6 +53,9 @@ lock = threading.Lock()
 slots = None
 DEADLINE = None
 LOGFILE = "driver.json"
+FB_ARGS = []
+SRC_ROOT = None
+EXTENSION = True
 
 
 def now():
@@ -124,7 +129,7 @@ class Clip:
         self.frames = f"{row['start']}:{row['stop']}"
         self.tag = MAIN.get(self.seq, self.seq)
         self.d = L / self.tag
-        self.src = L / "src" / self.tag
+        self.src = (SRC_ROOT or (L / "src")) / self.tag
         self.main = self.seq in MAIN
         self.evals = {}
         self.sm = log["summary"].setdefault(self.tag, dict(object=self.obj, sequence=self.seq, frames=self.frames, main=self.main))
@@ -144,7 +149,7 @@ class Clip:
         if all((self.d / f"gates_{tagm(m)}.json").exists() for m in GRID):
             return True
         rc = run([HS, "-B", "system1/t14/objects/step9_gates.py", "--object", self.obj, "--sequence", self.seq, "--frames", self.frames,
-                  "--levels", ",".join(f"{m:.2f}" for m in GRID), "--out", self.d], f"gates_{self.tag}", 1.5, self.d / "gates.log")
+                  "--levels", ",".join(f"{m:.2f}" for m in GRID), "--out", self.d, *FB_ARGS], f"gates_{self.tag}", 1.5, self.d / "gates.log")
         return rc == 0
 
     def solve_jobs(self, m):
@@ -158,7 +163,7 @@ class Clip:
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 (d / f"r{r}").rename(dst)
             cmd = [HS, "-B", "system1/t14/objects/role_solve.py", "--family", "box", "--object", self.obj, "--sequence", self.seq, "--mode", "role",
-                   "--construction", "frontback", "--role", r, "--m", m, "--frames", self.frames, "--tag", self.tag, "--out", d / f"r{r}"]
+                   "--construction", "frontback", "--role", r, "--m", m, "--frames", self.frames, "--tag", self.tag, "--out", d / f"r{r}", *FB_ARGS]
             if r == 0:
                 cmd += ["--source", self.src]
             jobs.append((cmd, f"solve_{self.tag}_{tagm(m)}_r{r}", 2.0, d / f"r{r}.log"))
@@ -357,7 +362,22 @@ def main():
     ap.add_argument("--parallel", type=int, default=6)
     ap.add_argument("--deadline", default="08:15", help="HH:MM America/New_York today: no new worker after it")
     ap.add_argument("--render-only", nargs="*", default=None, help="tags of main clips: pictures + video only (after the driver)")
+    ap.add_argument("--step", default="step9b", help="output name: logs_system1/t14/<step>, exports, results_system1/T14_retargeting/<step>")
+    ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
+    ap.add_argument("--fb-legs", choices=("all", "walk"), default="all")
+    ap.add_argument("--source-root", type=Path, default=None, help="reuse the source solves under this directory")
+    ap.add_argument("--no-extension", action="store_true")
     a = ap.parse_args()
+    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION
+    L = ROOT / f"logs_system1/t14/{a.step}"
+    EXP = ROOT / f"exports_system1/T14_references/{a.step.replace('step9b', 'step9')}"
+    VID = ROOT / f"exports_system1/T14_videos/{a.step.replace('step9b', 'step9')}"
+    FIG = ROOT / f"results_system1/T14_retargeting/{a.step}/figures"
+    FB_ARGS = ["--fb-turn", a.fb_turn, "--fb-legs", a.fb_legs]
+    SRC_ROOT = (ROOT / a.source_root) if a.source_root and not a.source_root.is_absolute() else a.source_root
+    EXTENSION = not a.no_extension
+    L.mkdir(parents=True, exist_ok=True)
+    log.update(step=a.step, fb_args=FB_ARGS, source_root=None if SRC_ROOT is None else str(SRC_ROOT), extension_enabled=EXTENSION)
     slots = threading.BoundedSemaphore(a.parallel)
     if a.render_only is not None:
         DEADLINE = now().replace(hour=23, minute=59)
@@ -376,7 +396,7 @@ def main():
         t.start()
     decide.ev.wait()
     ets = []
-    if decide.yes:
+    if decide.yes and EXTENSION:
         ets = [threading.Thread(target=Clip(r).run_ext) for r in ext_rows]
         for t in ets:
             t.start()

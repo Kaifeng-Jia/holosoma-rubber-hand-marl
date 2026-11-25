@@ -9,7 +9,8 @@ retention >= 0.99; Section 4's penetration criterion has no baseline and is not 
     are the demonstration's legs reversed and turned about the vertical: a rigid motion, the same feet). The step-8 window
     values are kept as information (old_window_*).
   * main motion (Kevin 2026-11-25: the screen's class-a threshold): pelvis net horizontal displacement over the clip / s > 1.0 m,
-    for the two persons (pre-solve gate, step9_gates.py) and for the two solved robots (root position of each solve).
+    for the two persons (pre-solve gate, step9_gates.py) and for the two solved robots (root position of each solve); in step
+    9c's words the robots' displacement (solver scale) > 1.0 m x s, the same test; both scales are recorded.
 Writes the evaluation json and (optionally) the pair npz in the step-7 format.
 
     sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir <level dir with r0/ r1/> --source <source solve> \
@@ -68,8 +69,11 @@ def evaluate(cand_dir, source_dir, gates):
         if not ok:
             failed.append(f"V0 support drift r{r}")
         robots_net[f"r{r}"] = round(float(np.linalg.norm(q[-1, :2] - q[0, :2])) / float(rec["smpl_scale"]), 4)
-    mm = dict(gates["main_motion"], robot_r0_m=robots_net["r0"], robot_r1_m=robots_net["r1"])
-    mm["robots_passed"] = bool(all(v > A_PELVIS_NET_M for v in robots_net.values()))
+        robots_net[f"solver_r{r}"] = round(float(np.linalg.norm(q[-1, :2] - q[0, :2])), 4)
+        s_ = float(rec["smpl_scale"])
+    mm = dict(gates["main_motion"], robot_r0_m=robots_net["r0"], robot_r1_m=robots_net["r1"], robot_r0_solver_m=robots_net["solver_r0"],
+              robot_r1_solver_m=robots_net["solver_r1"], robot_limit_solver_m=round(A_PELVIS_NET_M * s_, 4), smpl_scale=s_)
+    mm["robots_passed"] = bool(robots_net["r0"] > A_PELVIS_NET_M and robots_net["r1"] > A_PELVIS_NET_M)
     mm["persons_passed"] = bool(gates["main_motion"]["passed"])
     mm["passed"] = mm["robots_passed"] and mm["persons_passed"]
     if not mm["passed"]:

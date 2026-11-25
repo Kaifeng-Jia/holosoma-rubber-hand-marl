@@ -73,6 +73,51 @@ def test_region_maps_both_directions():
         assert C["sigma"] == (-1.0 if flip else 1.0)
 
 
+def test_world_turn_is_upright():
+    """step 9c: a box tilted at frame 0 -> the box-axis turn tilts S (2 x tilt), the world-vertical turn does not; the hand
+    targets (M0, M1) are the same box symmetry for both; G(0) = S for the world turn."""
+    import partner as pt
+    H, O = straight_carry()
+    tilt = np.radians(6.0)
+    Rx = np.array([[1, 0, 0], [0, np.cos(tilt), -np.sin(tilt)], [0, np.sin(tilt), np.cos(tilt)]])
+    O = O @ pt.affine(Rx, np.zeros(3))
+    Cb = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0, turn="box")
+    Cw = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0, turn="world")
+    assert np.isclose(pt.gravity_deg(Cb["S"]), 12.0, atol=1e-6)
+    assert np.isclose(pt.gravity_deg(Cw["S"]), 0.0, atol=1e-9)
+    assert np.allclose(Cb["M0"], Cw["M0"]) and np.allclose(Cb["M1"], Cw["M1"])
+    assert np.allclose(Cw["G"][0], Cw["S"])
+    c = Cw["A"][0][:3, 3]
+    assert np.allclose(Cw["S"][:3, :3] @ c + Cw["S"][:3, 3], c)  # the turn axis passes through the target centre (fixed point)
+
+
+def test_walk_legs_hold_and_reverse():
+    H, O = straight_carry(T=61)
+    walk = dict(w0=10, w1=50)
+    C = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0, legs="walk", walk=walk)
+    src = C["leg_source_frame"]
+    assert (src[:10] == 49).all() and (src[50:] == 10).all() and src[10] == 49 and src[49] == 10 and (np.diff(src[10:50]) == -1).all()
+    il = [NAMES.index(n) for n in fb.LOWER]
+    legs = C["human1"][:, il]
+    assert np.allclose(legs[:10], legs[10]) and np.allclose(legs[50:], legs[49])  # standing still before / after the walk
+    assert C["legs"] == "walk"
+
+
+def test_swing_segments():
+    """two feet, each one 0.3 m step at 0.6 m/s (15 frames) and one 3-frame shuffle of 3 cm (too short a displacement)."""
+    T = 120
+    toe = np.zeros((T, 2, 3))
+    toe[30:45, 0, 0] = np.linspace(0, 0.3, 15)
+    toe[45:, 0, 0] = 0.3
+    toe[60:75, 1, 0] = np.linspace(0, 0.3, 15)
+    toe[75:, 1, 0] = 0.3
+    toe[90:93, 1, 0] += np.linspace(0, 0.03, 3)
+    toe[93:, 1, 0] += 0.03
+    sw = fb.swing_segments(toe, 20, 110)
+    assert [d["foot"] for d in sw] == ["left", "right"], sw
+    assert 8 <= sw[0]["start"] <= 12 and 23 <= sw[0]["stop"] <= 28 and 38 <= sw[1]["start"] <= 42, sw
+
+
 def test_added_drift():
     T = 20
     rob, src = np.zeros((T, 3)), np.zeros((T, 3))

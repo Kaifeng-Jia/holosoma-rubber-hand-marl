@@ -159,6 +159,8 @@ def main():
     ap.add_argument("--max-frames", type=int, default=None)
     ap.add_argument("--frames", default=None, help="step 9: A:B, solve frames A..B-1 only")
     ap.add_argument("--construction", choices=("partner", "frontback"), default="partner", help="step 9: frontback (role mode, box family)")
+    ap.add_argument("--fb-turn", choices=("box", "world"), default="box", help="step 9c: frontback partner turn about the world vertical")
+    ap.add_argument("--fb-legs", choices=("all", "walk"), default="all", help="step 9c: reverse only the walking segment")
     a = ap.parse_args()
     if a.construction == "frontback" and not (a.mode == "role" and a.family == "box"):
         raise SystemExit("--construction frontback is for role mode, box family")
@@ -246,7 +248,11 @@ def main():
         names54 = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
         h0_, p0_, _ = preprocess_motion_data(np.concatenate([human, palms], 1), _NS(demo_joints=names54), motion_config.toe_names, scale=s, object_poses=raw_poses)
         O_ = pt.mj_to_mat(convert_object_poses_to_mujoco_order(create_grounded_nominal_object_poses(p0_, s)))
-        FB = fbm.build(h0_, names54, O_, src_size, a.m)
+        fa_, fb_e = (int(x) for x in a.frames.split(":")) if a.frames else (0, len(human))
+        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs == "walk" else None
+        if a.fb_legs == "walk" and walk is None:
+            raise SystemExit("no swing segment in the clip")
+        FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk)
         cand = FB["cand"]
         axis, L1 = int(cand["axis"]), float(cand["L1"])
         Lm = a.m * L1
@@ -432,7 +438,8 @@ def main():
                foot=dict(rule="person toe speed < 0.01 m/s after Gaussian sigma 8; support foot locked at segment start +-1 mm", support_share=np.round(sup.mean(0), 4).tolist()),
                sim_scene=sim_rec, physx_dump=dump_sha, scene=str(scene), robot_palm_offsets_m={k: np.round(x, 6).tolist() for k, x in offsets.items()},
                invalid_object_pose_frames=invalid, frames=n, clip_start=clip_start, clip_frames=a.frames, construction=a.construction,
-               frontback=None if FB is None else dict(walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"], leg_offset_m=FB["leg_offset"].tolist(),
+               frontback=None if FB is None else dict(turn=FB["turn"], legs=FB["legs"], walk=FB["walk"], walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"],
+                                                     leg_offset_m=FB["leg_offset"].tolist(), gravity_deg_S=pt.gravity_deg(FB["S"]),
                                                      M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s)),
                python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                seconds=round(time.time() - t0, 1), stage2_seconds=round(time.time() - t2, 1), finite=bool(np.isfinite(q).all()), qpos_shape=list(q.shape),
