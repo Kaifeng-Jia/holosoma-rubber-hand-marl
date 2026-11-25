@@ -165,6 +165,10 @@ def main():
                     help="frontback, Stage 2: 'target' = the person-side object frame of the interaction mesh is the role's own object "
                          "frame carried by its region map (own_r M_r^-1, points M_r demo), so that it differs from the robot-side "
                          "(shared target) frame by a translation and the small one-sided rotation only; 'own' = as steps 8 / 9b / 9c run 1")
+    ap.add_argument("--human-frame", choices=("own", "target"), default="own",
+                    help="step 8 rerun: the same fix for every role-mode construction (partner and frontback): person-side frame = "
+                         "the person-side object pose x (M_r F)^-1, points (M_r F) applied to the person-side points (F = the table mirror "
+                         "of an improper role 1, else identity); world points unchanged. 'own' = the earlier behaviour")
     a = ap.parse_args()
     if a.construction == "frontback" and not (a.mode == "role" and a.family == "box"):
         raise SystemExit("--construction frontback is for role mode, box family")
@@ -426,11 +430,15 @@ def main():
     ret.enable_stance_lock(sup)
     t2 = time.time()
     nom2, demo2 = nom_r, demo_r
-    if FB is not None and a.fb_human_frame == "target":  # the same world points, local coordinates in the role's copy of the target
-        nom2 = pt.mat_to_mj(own_r @ np.linalg.inv(Mr))
-        demo2 = demo_r @ Mr[:3, :3].T + Mr[:3, 3]
+    human_frame = "target" if (a.human_frame == "target" or (FB is not None and a.fb_human_frame == "target")) else "own"
+    if a.mode == "role" and human_frame == "target":  # the same world points, local coordinates in the role's copy of the target
+        Meff = Mr @ pt.affine(F, np.zeros(3))
+        assert np.linalg.det(Meff[:3, :3]) > 0
+        Nr = pt.mj_to_mat(nom_r)
+        nom2 = pt.mat_to_mj(Nr @ np.linalg.inv(Meff))
+        demo2 = demo_r @ Meff[:3, :3].T + Meff[:3, 3]
         assert np.allclose(np.einsum("tij,pj->tpi", pt.mj_to_mat(nom2)[:, :3, :3], demo2) + pt.mj_to_mat(nom2)[:, None, :3, 3],
-                           np.einsum("tij,pj->tpi", own_r[:, :3, :3], demo_r) + own_r[:, None, :3, 3], atol=1e-7)
+                           np.einsum("tij,pj->tpi", Nr[:, :3, :3], demo_r) + Nr[:, None, :3, 3], atol=1e-7)
     q, *_ = ret.retarget_motion(human_joint_motions=human_r[:n], object_poses=nom2[:n], object_poses_augmented=shared_mj[:n], object_points_local_demo=demo2,
                                 object_points_local=robot_pts, foot_sticking_sequences=support.as_solver_sequence(sup), q_a_init=q_nom[0], q_nominal_list=q_nom,
                                 original=False, dest_res_path=str(out / f"{a.tag}_new.npz"))
@@ -448,6 +456,7 @@ def main():
                foot=dict(rule="person toe speed < 0.01 m/s after Gaussian sigma 8; support foot locked at segment start +-1 mm", support_share=np.round(sup.mean(0), 4).tolist()),
                sim_scene=sim_rec, physx_dump=dump_sha, scene=str(scene), robot_palm_offsets_m={k: np.round(x, 6).tolist() for k, x in offsets.items()},
                invalid_object_pose_frames=invalid, frames=n, clip_start=clip_start, clip_frames=a.frames, construction=a.construction,
+               human_frame=human_frame if a.mode == "role" else None,
                frontback=None if FB is None else dict(human_frame=a.fb_human_frame, turn=FB["turn"], legs=FB["legs"], walk=FB["walk"], walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"],
                                                      leg_offset_m=FB["leg_offset"].tolist(), gravity_deg_S=pt.gravity_deg(FB["S"]),
                                                      M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s)),
