@@ -1,0 +1,35 @@
+{
+ "run": "d_table_pa",
+ "status": "stopped by rule",
+ "stopped_by_rule": {
+  "time": "2026-11-25T08:30:14-05:00",
+  "at_validation_iteration": 7000,
+  "curve": {
+   "1000": 19,
+   "2000": 23,
+   "3000": 5,
+   "4000": 33,
+   "5000": 49,
+   "6000": 37,
+   "7000": 49
+  }
+ },
+ "final_checkpoint_iteration": 7500,
+ "final_checkpoint_counted_iteration": 7500,
+ "iteration_counting": {
+  "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+  "warmup_iterations": 0,
+  "counted_iteration": "checkpoint file number - warmup_iterations",
+  "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+ },
+ "validation_curve": {
+  "1000": 19,
+  "2000": 23,
+  "3000": 5,
+  "4000": 33,
+  "5000": 49,
+  "6000": 37,
+  "7000": 49
+ },
+ "ended": "2026-11-25T08:32:14-05:00"
+}
