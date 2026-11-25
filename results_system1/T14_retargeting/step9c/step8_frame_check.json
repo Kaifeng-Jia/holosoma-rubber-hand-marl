@@ -1,0 +1,56 @@
+{
+ "rules": "T14 step 9c finding: which step-8 role solves had the person-side interaction-mesh frame rotated against the robot-side\n(shared target) frame? Read only.\n\nrole_solve.py (step 8) gives the Stage-2 interaction mesh the role's own object as the person-side frame (role 0: O; role 1:\nS O F) and the shared target P as the robot-side frame. At frame 0 the own frame is P M_r F (F = the table mirror of an improper\nrole 1, else identity), so the two frames differ by the linear part Q_r F of the role's region map. The mesh's Laplacian\ncoordinates are translation-invariant but not rotation-invariant: when Q_r F != I the person's relation to its own object is\nimposed, unrotated, on the robot's relation to its target region. Per solved step-8 candidate (level 1.0) and role: whether\nQ_r F = I, the rotation angle of the proper part of Q_r, and the mean horizontal distance robot pelvis - the role's person pelvis\n(information; on the table family the robot is moved to the training table, so that distance is not a clean signal there).\n\n    sonic_s1/bin/python -B system1/t14/objects/step8_frame_check.py --out results_system1/T14_retargeting/step9c/step8_frame_check.csv\n",
+ "summary": {
+  "largeboxc": {
+   "solved": 8,
+   "affected": 7,
+   "unaffected": [
+    "c15"
+   ]
+  },
+  "pull": {
+   "solved": 2,
+   "affected": 1,
+   "unaffected": [
+    "c05"
+   ]
+  },
+  "push": {
+   "solved": 23,
+   "affected": 22,
+   "unaffected": [
+    "c27"
+   ]
+  },
+  "smallboxb": {
+   "solved": 4,
+   "affected": 3,
+   "unaffected": [
+    "c15"
+   ]
+  },
+  "smallboxc": {
+   "solved": 8,
+   "affected": 7,
+   "unaffected": [
+    "c15"
+   ]
+  },
+  "suitcaseb": {
+   "solved": 4,
+   "affected": 3,
+   "unaffected": [
+    "c15"
+   ]
+  },
+  "suitcasec": {
+   "solved": 8,
+   "affected": 7,
+   "unaffected": [
+    "c15"
+   ]
+  }
+ },
+ "solved": 57,
+ "affected": 50
+}

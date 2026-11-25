@@ -1,0 +1,313 @@
+{
+ "rules": "T14 step 9c: which partner links make the V0 non-hand penetration fail? Diagnostic only (read only, CPU).\n\nFor a level directory (r0/ r1/ solves): the V0 round-2 CollisionProxy (the evaluation's engine) of each robot vs the shared\ntarget; per robot: frames with non-hand proxy penetration (clearance < 0), the deepest value, the frame ranges, and the robot\nlinks of the witnesses counted over those frames (scripts/reference_geometry_round2_checks.CollisionProxy witnesses).\nThe walking segment of the level's gates file is given for reference.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_nonhand.py --levels <tag>=<level dir>@<gates json> ... --out <json>\n",
+ "levels": {
+  "largeboxa_m1p00": {
+   "level_dir": "logs_system1/t14/step9c2/largeboxa/m1p00",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0112,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 46,
+     "deepest_m": 0.0606,
+     "deepest_frame": 109,
+     "ranges": [
+      [
+       0,
+       1
+      ],
+      [
+       4,
+       27
+      ],
+      [
+       105,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       17
+      ],
+      [
+       "torso_link",
+       13
+      ],
+      [
+       "right_knee_link",
+       5
+      ],
+      [
+       "head_link",
+       5
+      ],
+      [
+       "left_hip_yaw_link",
+       3
+      ],
+      [
+       "left_ankle_roll_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "largeboxa_m1p50": {
+   "level_dir": "logs_system1/t14/step9c2/largeboxa/m1p50",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0124,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 47,
+     "deepest_m": 0.0532,
+     "deepest_frame": 122,
+     "ranges": [
+      [
+       0,
+       2
+      ],
+      [
+       6,
+       29
+      ],
+      [
+       105,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       15
+      ],
+      [
+       "right_hip_yaw_link",
+       10
+      ],
+      [
+       "head_link",
+       7
+      ],
+      [
+       "right_knee_link",
+       6
+      ],
+      [
+       "left_ankle_roll_link",
+       3
+      ],
+      [
+       "left_hip_yaw_link",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p25": {
+   "level_dir": "logs_system1/t14/step9c2/suitcasea/m1p25",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 7,
+     "deepest_m": 0.0336,
+     "deepest_frame": 0,
+     "ranges": [
+      [
+       0,
+       6
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       7
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p50": {
+   "level_dir": "logs_system1/t14/step9c2/suitcasea/m1p50",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 4,
+     "deepest_m": 0.0332,
+     "deepest_frame": 0,
+     "ranges": [
+      [
+       0,
+       3
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       4
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p70": {
+   "level_dir": "logs_system1/t14/step9c2/smallboxa/m1p70",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0211,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 94,
+     "deepest_m": 0.0334,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       6,
+       10
+      ],
+      [
+       23,
+       106
+      ],
+      [
+       120,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       8
+      ],
+      [
+       "right_hip_yaw_link",
+       5
+      ]
+     ]
+    }
+   }
+  }
+ }
+}

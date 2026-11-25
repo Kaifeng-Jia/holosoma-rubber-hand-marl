@@ -1,0 +1,184 @@
+{
+ "tag": "smallboxa",
+ "role_status": "一前一后 1.00 倍：不适用（支撑脚漂移 r1、非手部位穿透 r0、非手部位穿透 r1、两机间隙、接触保持率）",
+ "applicable": false,
+ "selected": null,
+ "a": null,
+ "first_free_level_above_1": null,
+ "report_levels": [
+  1.0,
+  1.25
+ ],
+ "levels": {
+  "1.00": {
+   "m": 1.0,
+   "pair": "/home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p00/pair_fps30.npz",
+   "urdf": "/home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p00/r0/assets_target/smallbox.urdf",
+   "length_along_axis_m": 0.35295440777749826,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 0.9111,
+    "pooled": 0.9556
+   },
+   "max_penetration_cm": {
+    "r0": 0.232,
+    "r1": 1.208
+   },
+   "robot_robot_min_distance_cm": -13.654,
+   "robot_robot_intersect_frames": 136,
+   "foot_slide": {
+    "r0_left": {
+     "support_frames": 16,
+     "segments": 1,
+     "drift_max_cm": 0.135,
+     "drift_mean_of_segments_cm": 0.135,
+     "robot_toe_speed_p95_mps": 0.0301,
+     "robot_toe_speed_max_mps": 0.0324,
+     "share_above_0p01mps": 0.25
+    },
+    "r0_right": {
+     "support_frames": 9,
+     "segments": 2,
+     "drift_max_cm": 0.087,
+     "drift_mean_of_segments_cm": 0.061,
+     "robot_toe_speed_p95_mps": 0.0336,
+     "robot_toe_speed_max_mps": 0.0374,
+     "share_above_0p01mps": 0.4444
+    },
+    "r1_left": {
+     "support_frames": 13,
+     "segments": 2,
+     "drift_max_cm": 0.476,
+     "drift_mean_of_segments_cm": 0.244,
+     "robot_toe_speed_p95_mps": 0.1784,
+     "robot_toe_speed_max_mps": 0.2518,
+     "share_above_0p01mps": 0.7692
+    },
+    "r1_right": {
+     "support_frames": 14,
+     "segments": 1,
+     "drift_max_cm": 0.274,
+     "drift_mean_of_segments_cm": 0.274,
+     "robot_toe_speed_p95_mps": 0.0643,
+     "robot_toe_speed_max_mps": 0.0675,
+     "share_above_0p01mps": 0.5
+    }
+   },
+   "contact_position_error_3d": {
+    "r0": {
+     "distance": {
+      "frames": 272,
+      "mean_cm": 6.35,
+      "p95_cm": 13.25
+     },
+     "normal_signed_mean_cm": 1.66
+    },
+    "r1": {
+     "distance": {
+      "frames": 272,
+      "mean_cm": 19.07,
+      "p95_cm": 35.43
+     },
+     "normal_signed_mean_cm": -11.35
+    }
+   },
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ]
+  },
+  "1.25": {
+   "m": 1.25,
+   "pair": "/home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p25/pair_fps30.npz",
+   "urdf": "/home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p25/r0/assets_target/smallbox.urdf",
+   "length_along_axis_m": 0.4411930097218728,
+   "contact_retention": {
+    "r0": 1.0,
+    "r1": 0.8037,
+    "pooled": 0.9019
+   },
+   "max_penetration_cm": {
+    "r0": 0.232,
+    "r1": 1.431
+   },
+   "robot_robot_min_distance_cm": -13.474,
+   "robot_robot_intersect_frames": 54,
+   "foot_slide": {
+    "r0_left": {
+     "support_frames": 16,
+     "segments": 1,
+     "drift_max_cm": 0.142,
+     "drift_mean_of_segments_cm": 0.142,
+     "robot_toe_speed_p95_mps": 0.0292,
+     "robot_toe_speed_max_mps": 0.0293,
+     "share_above_0p01mps": 0.25
+    },
+    "r0_right": {
+     "support_frames": 9,
+     "segments": 2,
+     "drift_max_cm": 0.08,
+     "drift_mean_of_segments_cm": 0.056,
+     "robot_toe_speed_p95_mps": 0.0342,
+     "robot_toe_speed_max_mps": 0.0379,
+     "share_above_0p01mps": 0.3333
+    },
+    "r1_left": {
+     "support_frames": 13,
+     "segments": 2,
+     "drift_max_cm": 6.098,
+     "drift_mean_of_segments_cm": 3.154,
+     "robot_toe_speed_p95_mps": 0.6196,
+     "robot_toe_speed_max_mps": 0.6279,
+     "share_above_0p01mps": 0.9231
+    },
+    "r1_right": {
+     "support_frames": 14,
+     "segments": 1,
+     "drift_max_cm": 0.236,
+     "drift_mean_of_segments_cm": 0.236,
+     "robot_toe_speed_p95_mps": 0.0488,
+     "robot_toe_speed_max_mps": 0.0546,
+     "share_above_0p01mps": 0.2857
+    }
+   },
+   "contact_position_error_3d": {
+    "r0": {
+     "distance": {
+      "frames": 272,
+      "mean_cm": 6.32,
+      "p95_cm": 13.26
+     },
+     "normal_signed_mean_cm": 1.62
+    },
+    "r1": {
+     "distance": {
+      "frames": 272,
+      "mean_cm": 24.11,
+      "p95_cm": 36.44
+     },
+     "normal_signed_mean_cm": -15.81
+    }
+   },
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ]
+  }
+ },
+ "source_box_m": [
+  0.17647720388874913,
+  0.2630149157216109,
+  0.11279270176482907
+ ],
+ "solve_r0": "/home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p00/r0",
+ "clip_start": 36,
+ "side_level": 1.0
+}

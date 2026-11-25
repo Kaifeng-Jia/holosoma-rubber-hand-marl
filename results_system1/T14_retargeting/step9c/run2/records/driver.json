@@ -1,0 +1,759 @@
+{
+ "started": "2026-11-25T02:43:08-05:00",
+ "steps": [
+  {
+   "name": "gates_smallboxa",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/step9_gates.py --object smallbox --sequence sub4_smallbox_047 --frames 36:172 --levels 0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00,1.25,1.50,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.00,2.05,2.10,2.15,2.20,2.25,2.30,2.35,2.40,2.45,2.50,2.55,2.60,2.65,2.70,2.75,2.80,2.85,2.90,2.95,3.00 --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa --fb-turn world --fb-legs walk",
+   "started": "02:43:08",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "02:43:15"
+  },
+  {
+   "name": "gates_suitcasea",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/step9_gates.py --object suitcase --sequence sub8_suitcase_006 --frames 65:193 --levels 0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00,1.25,1.50,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.00,2.05,2.10,2.15,2.20,2.25,2.30,2.35,2.40,2.45,2.50,2.55,2.60,2.65,2.70,2.75,2.80,2.85,2.90,2.95,3.00 --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea --fb-turn world --fb-legs walk",
+   "started": "02:43:11",
+   "avail_gb": 21.4,
+   "rc": 0,
+   "done": "02:43:18"
+  },
+  {
+   "name": "gates_largeboxa",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/step9_gates.py --object largebox --sequence sub7_largebox_045 --frames 60:185 --levels 0.55,0.60,0.65,0.70,0.75,0.80,0.85,0.90,0.95,1.00,1.25,1.50,1.55,1.60,1.65,1.70,1.75,1.80,1.85,1.90,1.95,2.00,2.05,2.10,2.15,2.20,2.25,2.30,2.35,2.40,2.45,2.50,2.55,2.60,2.65,2.70,2.75,2.80,2.85,2.90,2.95,3.00 --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa --fb-turn world --fb-legs walk",
+   "started": "02:43:14",
+   "avail_gb": 20.3,
+   "rc": 0,
+   "done": "02:43:21"
+  },
+  {
+   "name": "solve_smallboxa_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.0 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p00/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:43:17",
+   "avail_gb": 20.2,
+   "rc": 0,
+   "done": "02:44:54"
+  },
+  {
+   "name": "solve_smallboxa_m1p25_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.25 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p25/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:43:20",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "02:44:59"
+  },
+  {
+   "name": "solve_smallboxa_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.0 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p00/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:43:23",
+   "avail_gb": 20.1,
+   "rc": 0,
+   "done": "02:46:18"
+  },
+  {
+   "name": "solve_smallboxa_m1p25_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.25 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p25/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:43:26",
+   "avail_gb": 18.8,
+   "rc": 0,
+   "done": "02:46:17"
+  },
+  {
+   "name": "solve_smallboxa_m1p50_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.5 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p50/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:43:29",
+   "avail_gb": 17.3,
+   "rc": 0,
+   "done": "02:45:12"
+  },
+  {
+   "name": "solve_smallboxa_m1p50_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.5 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p50/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:43:32",
+   "avail_gb": 15.7,
+   "rc": 0,
+   "done": "02:46:28"
+  },
+  {
+   "name": "solve_suitcasea_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 0 --m 1.0 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p00/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea",
+   "started": "02:44:54",
+   "avail_gb": 14.7,
+   "rc": 0,
+   "done": "02:46:30"
+  },
+  {
+   "name": "solve_suitcasea_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 1 --m 1.0 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p00/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:44:59",
+   "avail_gb": 15.0,
+   "rc": 0,
+   "done": "02:47:38"
+  },
+  {
+   "name": "solve_suitcasea_m1p25_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 0 --m 1.25 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p25/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea",
+   "started": "02:45:12",
+   "avail_gb": 14.5,
+   "rc": 0,
+   "done": "02:46:48"
+  },
+  {
+   "name": "solve_suitcasea_m1p25_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 1 --m 1.25 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p25/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:46:17",
+   "avail_gb": 14.8,
+   "rc": 0,
+   "done": "02:48:56"
+  },
+  {
+   "name": "solve_suitcasea_m1p50_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 0 --m 1.5 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p50/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea",
+   "started": "02:46:20",
+   "avail_gb": 15.4,
+   "rc": 0,
+   "done": "02:47:57"
+  },
+  {
+   "name": "solve_suitcasea_m1p50_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object suitcase --sequence sub8_suitcase_006 --mode role --construction frontback --role 1 --m 1.5 --frames 65:193 --tag suitcasea --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p50/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:46:28",
+   "avail_gb": 15.1,
+   "rc": 0,
+   "done": "02:49:12"
+  },
+  {
+   "name": "solve_largeboxa_m1p00_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 0 --m 1.0 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p00/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa",
+   "started": "02:46:31",
+   "avail_gb": 15.3,
+   "rc": 0,
+   "done": "02:48:05"
+  },
+  {
+   "name": "solve_largeboxa_m1p00_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 1 --m 1.0 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p00/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:46:48",
+   "avail_gb": 14.6,
+   "rc": 0,
+   "done": "02:49:42"
+  },
+  {
+   "name": "solve_largeboxa_m1p25_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 0 --m 1.25 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p25/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa",
+   "started": "02:47:38",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "02:49:09"
+  },
+  {
+   "name": "solve_largeboxa_m1p25_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 1 --m 1.25 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p25/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:47:57",
+   "avail_gb": 14.7,
+   "rc": 0,
+   "done": "02:50:51"
+  },
+  {
+   "name": "solve_largeboxa_m1p50_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 0 --m 1.5 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p50/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa",
+   "started": "02:48:05",
+   "avail_gb": 14.6,
+   "rc": 0,
+   "done": "02:49:38"
+  },
+  {
+   "name": "solve_largeboxa_m1p50_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 1 --m 1.5 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p50/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:48:56",
+   "avail_gb": 14.9,
+   "rc": 0,
+   "done": "02:51:45"
+  },
+  {
+   "name": "eval_smallboxa_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p00/pair_fps30.npz",
+   "started": "02:49:09",
+   "avail_gb": 14.6,
+   "rc": 0,
+   "done": "02:49:20"
+  },
+  {
+   "name": "eval_smallboxa_m1p25",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p25 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p25.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p25/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p25/pair_fps30.npz",
+   "started": "02:49:12",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "02:49:23"
+  },
+  {
+   "name": "eval_smallboxa_m1p50",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p50 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p50.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p50/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p50/pair_fps30.npz",
+   "started": "02:49:20",
+   "avail_gb": 14.6,
+   "rc": 0,
+   "done": "02:49:31"
+  },
+  {
+   "name": "eval_suitcasea_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/suitcasea_m1p00/pair_fps30.npz",
+   "started": "02:49:23",
+   "avail_gb": 15.5,
+   "rc": 0,
+   "done": "02:49:35"
+  },
+  {
+   "name": "eval_suitcasea_m1p25",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p25 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/gates_m1p25.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p25/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/suitcasea_m1p25/pair_fps30.npz",
+   "started": "02:49:31",
+   "avail_gb": 14.5,
+   "rc": 0,
+   "done": "02:49:43"
+  },
+  {
+   "name": "eval_suitcasea_m1p50",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p50 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/suitcasea --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/gates_m1p50.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p50/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/suitcasea_m1p50/pair_fps30.npz",
+   "started": "02:49:35",
+   "avail_gb": 15.6,
+   "rc": 0,
+   "done": "02:49:46"
+  },
+  {
+   "name": "solve_smallboxa_m1p55_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.55 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p55/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:49:38",
+   "avail_gb": 15.8,
+   "rc": 0,
+   "done": "02:51:25"
+  },
+  {
+   "name": "solve_smallboxa_m1p55_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.55 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p55/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:49:42",
+   "avail_gb": 15.3,
+   "rc": 0,
+   "done": "02:52:38"
+  },
+  {
+   "name": "render_suitcasea",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/m1p00/r0 --levels /home/kevin/duet-system1/logs_system1/t14/step9c2/suitcasea/levels.json --cls a --clip-start 65 --side-level 1.0 --out /home/kevin/duet-system1/results_system1/T14_retargeting/step9c2/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step9c2",
+   "started": "02:49:46",
+   "avail_gb": 16.4,
+   "rc": 0,
+   "done": "02:51:49"
+  },
+  {
+   "name": "eval_largeboxa_m1p00",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p00 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/gates_m1p00.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p00/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/largeboxa_m1p00/pair_fps30.npz",
+   "started": "02:51:45",
+   "avail_gb": 15.6,
+   "rc": 0,
+   "done": "02:51:56"
+  },
+  {
+   "name": "eval_largeboxa_m1p50",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p50 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/gates_m1p50.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p50/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/largeboxa_m1p50/pair_fps30.npz",
+   "started": "02:51:48",
+   "avail_gb": 15.3,
+   "rc": 0,
+   "done": "02:51:58"
+  },
+  {
+   "name": "eval_largeboxa_m1p25",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p25 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/gates_m1p25.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p25/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/largeboxa_m1p25/pair_fps30.npz",
+   "started": "02:51:51",
+   "avail_gb": 19.6,
+   "rc": 0,
+   "done": "02:52:01"
+  },
+  {
+   "name": "solve_largeboxa_m0p95_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 0 --m 0.95 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m0p95/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/largeboxa",
+   "started": "02:52:01",
+   "avail_gb": 20.4,
+   "rc": 0,
+   "done": "02:53:28"
+  },
+  {
+   "name": "solve_largeboxa_m0p95_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object largebox --sequence sub7_largebox_045 --mode role --construction frontback --role 1 --m 0.95 --frames 60:185 --tag largeboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m0p95/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:52:04",
+   "avail_gb": 19.6,
+   "rc": 1,
+   "done": "02:53:21"
+  },
+  {
+   "name": "eval_smallboxa_m1p55",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p55 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p55.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p55/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p55/pair_fps30.npz",
+   "started": "02:52:38",
+   "avail_gb": 19.4,
+   "rc": 0,
+   "done": "02:52:48"
+  },
+  {
+   "name": "solve_smallboxa_m1p60_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.6 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p60/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:52:48",
+   "avail_gb": 19.2,
+   "rc": 0,
+   "done": "02:54:26"
+  },
+  {
+   "name": "solve_smallboxa_m1p60_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.6 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p60/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:52:51",
+   "avail_gb": 18.4,
+   "rc": 0,
+   "done": "02:55:44"
+  },
+  {
+   "name": "render_largeboxa",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/m1p00/r0 --levels /home/kevin/duet-system1/logs_system1/t14/step9c2/largeboxa/levels.json --cls a --clip-start 60 --side-level 1.0 --out /home/kevin/duet-system1/results_system1/T14_retargeting/step9c2/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step9c2",
+   "started": "02:53:28",
+   "avail_gb": 19.5,
+   "rc": 0,
+   "done": "02:55:11"
+  },
+  {
+   "name": "eval_smallboxa_m1p60",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p60 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p60.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p60/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p60/pair_fps30.npz",
+   "started": "02:55:44",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "02:55:54"
+  },
+  {
+   "name": "solve_smallboxa_m1p65_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.65 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p65/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:55:54",
+   "avail_gb": 22.1,
+   "rc": 0,
+   "done": "02:57:25"
+  },
+  {
+   "name": "solve_smallboxa_m1p65_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.65 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p65/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:55:57",
+   "avail_gb": 21.2,
+   "rc": 0,
+   "done": "02:58:38"
+  },
+  {
+   "name": "eval_smallboxa_m1p65",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p65 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p65.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p65/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p65/pair_fps30.npz",
+   "started": "02:58:38",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "02:58:48"
+  },
+  {
+   "name": "solve_smallboxa_m1p70_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.7 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p70/r0 --fb-turn world --fb-legs walk --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:58:48",
+   "avail_gb": 22.2,
+   "rc": 0,
+   "done": "03:00:18"
+  },
+  {
+   "name": "solve_smallboxa_m1p70_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.7 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p70/r1 --fb-turn world --fb-legs walk --fb-human-frame target",
+   "started": "02:58:51",
+   "avail_gb": 21.3,
+   "rc": 0,
+   "done": "03:01:30"
+  },
+  {
+   "name": "eval_smallboxa_m1p70",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p70 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/gates_m1p70.json --out /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p70/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c2/smallboxa_m1p70/pair_fps30.npz",
+   "started": "03:01:30",
+   "avail_gb": 22.4,
+   "rc": 0,
+   "done": "03:01:39"
+  },
+  {
+   "name": "render_smallboxa",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/m1p00/r0 --levels /home/kevin/duet-system1/logs_system1/t14/step9c2/smallboxa/levels.json --cls a --clip-start 36 --side-level 1.0 --out /home/kevin/duet-system1/results_system1/T14_retargeting/step9c2/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step9c2",
+   "started": "03:01:39",
+   "avail_gb": 22.2,
+   "rc": 0,
+   "done": "03:04:03"
+  }
+ ],
+ "summary": {
+  "largeboxa": {
+   "object": "largebox",
+   "sequence": "sub7_largebox_045",
+   "frames": "60:185",
+   "main": true,
+   "levels": {
+    "1.00": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r1"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 8.766
+    },
+    "1.25": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r1"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 19.274
+    },
+    "1.50": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r1"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 30.677
+    },
+    "0.95": null
+   },
+   "a": 1.0,
+   "first_free_above_1p5": null,
+   "report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_levels": [],
+   "min_free": 1.0,
+   "render_rc": 0
+  },
+  "smallboxa": {
+   "object": "smallbox",
+   "sequence": "sub4_smallbox_047",
+   "frames": "36:172",
+   "main": true,
+   "levels": {
+    "1.00": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 27,
+     "rr_cm": -12.916
+    },
+    "1.25": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 20,
+     "rr_cm": -11.122
+    },
+    "1.50": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 7,
+     "rr_cm": -7.493
+    },
+    "1.55": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 5,
+     "rr_cm": -6.371
+    },
+    "1.60": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 5,
+     "rr_cm": -2.906
+    },
+    "1.65": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 3,
+     "rr_cm": -1.313
+    },
+    "1.70": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 0.039
+    }
+   },
+   "a": null,
+   "first_free_above_1p5": 1.7,
+   "report_levels": [
+    1.0,
+    1.25,
+    1.5,
+    1.7
+   ],
+   "applicable_levels": [],
+   "min_free": 1.7,
+   "render_rc": 0
+  },
+  "suitcasea": {
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_006",
+   "frames": "65:193",
+   "main": true,
+   "levels": {
+    "1.00": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 2,
+     "rr_cm": -1.573
+    },
+    "1.25": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r1"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 7.111
+    },
+    "1.50": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r1"
+     ],
+     "intersect_frames": 0,
+     "rr_cm": 16.471
+    }
+   },
+   "a": null,
+   "first_free_above_1p5": null,
+   "report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_levels": [],
+   "min_free": 1.25,
+   "render_rc": 0
+  }
+ },
+ "step": "step9c2",
+ "fb_args": [
+  "--fb-turn",
+  "world",
+  "--fb-legs",
+  "walk"
+ ],
+ "solve_extra": [
+  "--fb-human-frame",
+  "target"
+ ],
+ "skip_failed_up": true,
+ "source_root": "/home/kevin/duet-system1/logs_system1/t14/step9b/src",
+ "extension_enabled": false,
+ "parallel": 6,
+ "deadline": "2026-11-25T09:30:00-05:00",
+ "grid": [
+  0.55,
+  0.6,
+  0.65,
+  0.7,
+  0.75,
+  0.8,
+  0.85,
+  0.9,
+  0.95,
+  1.0,
+  1.25,
+  1.5,
+  1.55,
+  1.6,
+  1.65,
+  1.7,
+  1.75,
+  1.8,
+  1.85,
+  1.9,
+  1.95,
+  2.0,
+  2.05,
+  2.1,
+  2.15,
+  2.2,
+  2.25,
+  2.3,
+  2.35,
+  2.4,
+  2.45,
+  2.5,
+  2.55,
+  2.6,
+  2.65,
+  2.7,
+  2.75,
+  2.8,
+  2.85,
+  2.9,
+  2.95,
+  3.0
+ ],
+ "clips": [
+  {
+   "object": "largebox",
+   "sequence": "sub3_largebox_030",
+   "frames": "34:169",
+   "main": false
+  },
+  {
+   "object": "largebox",
+   "sequence": "sub7_largebox_045",
+   "frames": "60:185",
+   "main": true
+  },
+  {
+   "object": "largebox",
+   "sequence": "sub3_largebox_003",
+   "frames": "32:154",
+   "main": false
+  },
+  {
+   "object": "largebox",
+   "sequence": "sub3_largebox_029",
+   "frames": "44:181",
+   "main": false
+  },
+  {
+   "object": "largebox",
+   "sequence": "sub10_largebox_086",
+   "frames": "22:111",
+   "main": false
+  },
+  {
+   "object": "smallbox",
+   "sequence": "sub8_smallbox_045",
+   "frames": "26:115",
+   "main": false
+  },
+  {
+   "object": "smallbox",
+   "sequence": "sub4_smallbox_047",
+   "frames": "36:172",
+   "main": true
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_006",
+   "frames": "65:193",
+   "main": true
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_031",
+   "frames": "92:180",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_032",
+   "frames": "86:178",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_034",
+   "frames": "77:177",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_006",
+   "frames": "45:133",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_042",
+   "frames": "29:183",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub17_suitcase_019",
+   "frames": "120:223",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub17_suitcase_017",
+   "frames": "96:208",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub15_suitcase_051",
+   "frames": "53:158",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_036",
+   "frames": "90:177",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_043",
+   "frames": "35:196",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_020",
+   "frames": "103:163",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub17_suitcase_007",
+   "frames": "16:113",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub5_suitcase_046",
+   "frames": "51:208",
+   "main": false
+  },
+  {
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_039",
+   "frames": "78:171",
+   "main": false
+  }
+ ],
+ "extension_decision": {
+  "run": false,
+  "time": "2026-11-25T03:01:39-05:00",
+  "rule": "at least one main clip applicable at one of its reported levels"
+ },
+ "done": "2026-11-25T03:04:03-05:00"
+}

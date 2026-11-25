@@ -1,0 +1,256 @@
+{
+ "started": "2026-11-25T02:12:06-05:00",
+ "steps": [
+  {
+   "name": "solve_smallboxa_m1p55_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.55 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p55/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:12:06",
+   "avail_gb": 16.3,
+   "rc": 0,
+   "done": "02:13:51"
+  },
+  {
+   "name": "solve_smallboxa_m1p55_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.55 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p55/r1 --fb-turn world --fb-legs walk",
+   "started": "02:12:09",
+   "avail_gb": 14.7,
+   "rc": 0,
+   "done": "02:15:27"
+  },
+  {
+   "name": "eval_smallboxa_m1p55",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p55 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p55.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p55/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p55/pair_fps30.npz",
+   "started": "02:15:27",
+   "avail_gb": 20.8,
+   "rc": 0,
+   "done": "02:15:37"
+  },
+  {
+   "name": "solve_smallboxa_m1p60_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.6 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p60/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:15:37",
+   "avail_gb": 22.2,
+   "rc": 0,
+   "done": "02:17:15"
+  },
+  {
+   "name": "solve_smallboxa_m1p60_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.6 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p60/r1 --fb-turn world --fb-legs walk",
+   "started": "02:15:40",
+   "avail_gb": 21.0,
+   "rc": 0,
+   "done": "02:19:07"
+  },
+  {
+   "name": "eval_smallboxa_m1p60",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p60 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p60.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p60/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p60/pair_fps30.npz",
+   "started": "02:19:07",
+   "avail_gb": 20.8,
+   "rc": 0,
+   "done": "02:19:17"
+  },
+  {
+   "name": "solve_smallboxa_m1p65_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.65 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p65/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:19:17",
+   "avail_gb": 20.8,
+   "rc": 0,
+   "done": "02:20:53"
+  },
+  {
+   "name": "solve_smallboxa_m1p65_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.65 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p65/r1 --fb-turn world --fb-legs walk",
+   "started": "02:19:20",
+   "avail_gb": 21.3,
+   "rc": 0,
+   "done": "02:22:45"
+  },
+  {
+   "name": "eval_smallboxa_m1p65",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p65 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p65.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p65/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p65/pair_fps30.npz",
+   "started": "02:22:45",
+   "avail_gb": 22.1,
+   "rc": 0,
+   "done": "02:22:55"
+  },
+  {
+   "name": "solve_smallboxa_m1p70_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.7 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p70/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:22:55",
+   "avail_gb": 21.3,
+   "rc": 0,
+   "done": "02:24:32"
+  },
+  {
+   "name": "solve_smallboxa_m1p70_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.7 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p70/r1 --fb-turn world --fb-legs walk",
+   "started": "02:22:58",
+   "avail_gb": 19.5,
+   "rc": 0,
+   "done": "02:26:15"
+  },
+  {
+   "name": "eval_smallboxa_m1p70",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p70 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p70.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p70/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p70/pair_fps30.npz",
+   "started": "02:26:15",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "02:26:26"
+  },
+  {
+   "name": "solve_smallboxa_m1p75_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.75 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p75/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:26:26",
+   "avail_gb": 21.7,
+   "rc": 0,
+   "done": "02:28:02"
+  },
+  {
+   "name": "solve_smallboxa_m1p75_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.75 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p75/r1 --fb-turn world --fb-legs walk",
+   "started": "02:26:29",
+   "avail_gb": 19.9,
+   "rc": 0,
+   "done": "02:29:43"
+  },
+  {
+   "name": "eval_smallboxa_m1p75",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p75 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p75.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p75/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p75/pair_fps30.npz",
+   "started": "02:29:43",
+   "avail_gb": 20.7,
+   "rc": 0,
+   "done": "02:29:54"
+  },
+  {
+   "name": "solve_smallboxa_m1p80_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.8 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p80/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:29:54",
+   "avail_gb": 21.3,
+   "rc": 0,
+   "done": "02:31:30"
+  },
+  {
+   "name": "solve_smallboxa_m1p80_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.8 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p80/r1 --fb-turn world --fb-legs walk",
+   "started": "02:29:57",
+   "avail_gb": 20.0,
+   "rc": 0,
+   "done": "02:33:09"
+  },
+  {
+   "name": "eval_smallboxa_m1p80",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p80 --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa --gates /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/gates_m1p80.json --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p80/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9c/smallboxa_m1p80/pair_fps30.npz",
+   "started": "02:33:09",
+   "avail_gb": 20.8,
+   "rc": 0,
+   "done": "02:33:19"
+  },
+  {
+   "name": "solve_smallboxa_m1p85_r0",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 0 --m 1.85 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p85/r0 --fb-turn world --fb-legs walk --source /home/kevin/duet-system1/logs_system1/t14/step9b/src/smallboxa",
+   "started": "02:33:19",
+   "avail_gb": 20.6,
+   "rc": 0,
+   "done": "02:35:02"
+  },
+  {
+   "name": "solve_smallboxa_m1p85_r1",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub4_smallbox_047 --mode role --construction frontback --role 1 --m 1.85 --frames 36:172 --tag smallboxa --out /home/kevin/duet-system1/logs_system1/t14/step9c/smallboxa/m1p85/r1 --fb-turn world --fb-legs walk",
+   "started": "02:33:22",
+   "avail_gb": 21.1,
+   "rc": 1,
+   "done": "02:36:37"
+  }
+ ],
+ "summary": {
+  "smallboxa": {
+   "object": "smallbox",
+   "sequence": "sub4_smallbox_047",
+   "frames": "36:172",
+   "main": true,
+   "levels": {
+    "1.55": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 12,
+     "rr_cm": -9.597
+    },
+    "1.60": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance",
+      "section-4 contact retention >= 0.99"
+     ],
+     "intersect_frames": 20,
+     "rr_cm": -9.02
+    },
+    "1.65": {
+     "applicable": false,
+     "failed": [
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance",
+      "section-4 contact retention >= 0.99"
+     ],
+     "intersect_frames": 20,
+     "rr_cm": -13.307
+    },
+    "1.70": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 12,
+     "rr_cm": -8.946
+    },
+    "1.75": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance",
+      "section-4 contact retention >= 0.99"
+     ],
+     "intersect_frames": 10,
+     "rr_cm": -7.802
+    },
+    "1.80": {
+     "applicable": false,
+     "failed": [
+      "V0 support drift r1",
+      "V0 non-hand penetration r0",
+      "V0 non-hand penetration r1",
+      "V0 robot-robot clearance"
+     ],
+     "intersect_frames": 5,
+     "rr_cm": -6.097
+    },
+    "1.85": null
+   },
+   "search_from": 1.55,
+   "first_free_above_1p5": null,
+   "min_free": null
+  }
+ },
+ "step": "step9c",
+ "fb_args": [
+  "--fb-turn",
+  "world",
+  "--fb-legs",
+  "walk"
+ ],
+ "source_root": "/home/kevin/duet-system1/logs_system1/t14/step9b/src",
+ "extension_enabled": true
+}

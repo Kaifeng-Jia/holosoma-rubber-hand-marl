@@ -1,0 +1,495 @@
+{
+ "rules": "T14 step 9c: where do the two robots intersect? Diagnostic only (read only, CPU). For a pair npz (step9_eval --pair-out):\nper frame the exact smallest cross-robot distance (dual_stretch.PairCollision, depth \"exact\", the evaluation's quantity) and\nthe two links of the closest geom pair; summary per level: intersecting frames, their ranges, and the link pairs counted over\nthe intersecting frames. The walking segment of the level's gates file is given for reference.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_intersect.py --pairs <tag>=<pair npz>[@<gates json>] ... --out <json>\n",
+ "levels": {
+  "largeboxa_m1p00": {
+   "pair": "exports_system1/T14_references/step9c/largeboxa_m1p00/pair_fps30.npz",
+   "frames": 125,
+   "intersect_frames": 25,
+   "min_distance_cm": -9.76,
+   "intersect_ranges": [
+    [
+     0,
+     0
+    ],
+    [
+     43,
+     45
+    ],
+    [
+     56,
+     66
+    ],
+    [
+     86,
+     91
+    ],
+    [
+     121,
+     124
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_left_knee_link / r1_right_knee_link",
+     14
+    ],
+    [
+     "r0_right_knee_link / r1_left_knee_link",
+     2
+    ],
+    [
+     "r0_left_knee_link / r1_right_ankle_roll_link",
+     2
+    ],
+    [
+     "r0_torso_link / r1_left_hip_roll_link",
+     2
+    ],
+    [
+     "r0_head_link / r1_left_hip_roll_link",
+     2
+    ],
+    [
+     "r0_head_link / r1_right_shoulder_yaw_link",
+     1
+    ],
+    [
+     "r0_right_hip_yaw_link / r1_left_knee_link",
+     1
+    ],
+    [
+     "r0_left_hip_yaw_link / r1_right_knee_link",
+     1
+    ]
+   ],
+   "walk": [
+    15,
+    109
+   ],
+   "distance_cm_every5": [
+    -1.7,
+    5.4,
+    2.9,
+    18.4,
+    20.7,
+    19.3,
+    18.9,
+    19.4,
+    8.1,
+    -1.4,
+    10.8,
+    2.0,
+    -8.6,
+    -6.0,
+    3.7,
+    0.8,
+    5.2,
+    0.1,
+    -3.9,
+    7.4,
+    13.9,
+    9.9,
+    3.9,
+    8.2,
+    8.5
+   ]
+  },
+  "largeboxa_m1p70": {
+   "pair": "exports_system1/T14_references/step9c/largeboxa_m1p70/pair_fps30.npz",
+   "frames": 125,
+   "intersect_frames": 6,
+   "min_distance_cm": -5.647,
+   "intersect_ranges": [
+    [
+     119,
+     124
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_right_elbow_link / r1_right_wrist_pitch_link",
+     2
+    ],
+    [
+     "r0_left_knee_link / r1_left_shoulder_yaw_link",
+     1
+    ],
+    [
+     "r0_left_knee_link / r1_torso_link",
+     1
+    ],
+    [
+     "r0_left_wrist_yaw_link / r1_right_shoulder_yaw_link",
+     1
+    ],
+    [
+     "r0_left_wrist_yaw_link / r1_head_link",
+     1
+    ]
+   ],
+   "walk": [
+    15,
+    109
+   ],
+   "distance_cm_every5": [
+    24.6,
+    36.0,
+    36.5,
+    50.0,
+    50.0,
+    50.0,
+    50.0,
+    50.0,
+    50.0,
+    42.6,
+    49.9,
+    42.7,
+    37.4,
+    36.5,
+    34.9,
+    16.2,
+    27.7,
+    33.7,
+    29.3,
+    37.3,
+    44.7,
+    38.7,
+    33.0,
+    15.9,
+    -4.5
+   ]
+  },
+  "smallboxa_m1p00": {
+   "pair": "exports_system1/T14_references/step9c/smallboxa_m1p00/pair_fps30.npz",
+   "frames": 136,
+   "intersect_frames": 136,
+   "min_distance_cm": -13.654,
+   "intersect_ranges": [
+    [
+     0,
+     135
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_left_rubber_hand_link / r1_pelvis",
+     26
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_torso_link",
+     23
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_right_rubber_hand_link",
+     18
+    ],
+    [
+     "r0_head_link / r1_torso_link",
+     16
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_left_rubber_hand_link",
+     13
+    ],
+    [
+     "r0_torso_link / r1_torso_link",
+     11
+    ],
+    [
+     "r0_left_shoulder_yaw_link / r1_torso_link",
+     5
+    ],
+    [
+     "r0_right_knee_link / r1_left_knee_link",
+     4
+    ]
+   ],
+   "walk": [
+    19,
+    121
+   ],
+   "distance_cm_every5": [
+    -10.3,
+    -3.9,
+    -1.2,
+    -6.7,
+    -3.4,
+    -4.4,
+    -4.4,
+    -2.1,
+    -2.0,
+    -3.6,
+    -1.4,
+    -3.1,
+    -2.5,
+    -2.0,
+    -6.2,
+    -2.0,
+    -4.5,
+    -2.1,
+    -3.6,
+    -2.6,
+    -4.2,
+    -1.7,
+    -2.2,
+    -9.2,
+    -8.7,
+    -5.7,
+    -7.8,
+    -8.6
+   ]
+  },
+  "smallboxa_m1p60": {
+   "pair": "exports_system1/T14_references/step9c/smallboxa_m1p60/pair_fps30.npz",
+   "frames": 136,
+   "intersect_frames": 20,
+   "min_distance_cm": -9.02,
+   "intersect_ranges": [
+    [
+     0,
+     0
+    ],
+    [
+     8,
+     17
+    ],
+    [
+     124,
+     126
+    ],
+    [
+     130,
+     135
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_head_link / r1_torso_link",
+     4
+    ],
+    [
+     "r0_torso_link / r1_head_link",
+     4
+    ],
+    [
+     "r0_left_shoulder_yaw_link / r1_torso_link",
+     4
+    ],
+    [
+     "r0_torso_link / r1_torso_link",
+     2
+    ],
+    [
+     "r0_head_link / r1_head_link",
+     2
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_left_hip_roll_link",
+     2
+    ],
+    [
+     "r0_left_wrist_yaw_link / r1_left_hip_roll_link",
+     1
+    ],
+    [
+     "r0_left_hip_yaw_link / r1_torso_link",
+     1
+    ]
+   ],
+   "walk": [
+    19,
+    121
+   ],
+   "distance_cm_every5": [
+    -7.7,
+    8.7,
+    -0.2,
+    -1.2,
+    3.6,
+    10.7,
+    13.8,
+    13.3,
+    14.8,
+    12.1,
+    15.3,
+    8.5,
+    13.4,
+    7.5,
+    4.8,
+    5.1,
+    3.4,
+    10.4,
+    12.4,
+    12.7,
+    11.7,
+    12.2,
+    9.8,
+    7.1,
+    3.8,
+    -1.5,
+    -4.9,
+    -8.5
+   ]
+  },
+  "suitcasea_m1p00": {
+   "pair": "exports_system1/T14_references/step9c/suitcasea_m1p00/pair_fps30.npz",
+   "frames": 128,
+   "intersect_frames": 111,
+   "min_distance_cm": -9.229,
+   "intersect_ranges": [
+    [
+     11,
+     19
+    ],
+    [
+     26,
+     127
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_left_rubber_hand_link / r1_torso_link",
+     63
+    ],
+    [
+     "r0_left_knee_link / r1_right_knee_link",
+     11
+    ],
+    [
+     "r0_torso_link / r1_torso_link",
+     11
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_right_hip_roll_link",
+     9
+    ],
+    [
+     "r0_right_wrist_yaw_link / r1_right_hip_yaw_link",
+     5
+    ],
+    [
+     "r0_left_wrist_pitch_link / r1_pelvis",
+     4
+    ],
+    [
+     "r0_right_rubber_hand_link / r1_right_hip_yaw_link",
+     3
+    ],
+    [
+     "r0_right_rubber_hand_link / r1_right_hip_roll_link",
+     2
+    ]
+   ],
+   "walk": [
+    31,
+    105
+   ],
+   "distance_cm_every5": [
+    5.2,
+    4.9,
+    1.0,
+    -1.2,
+    1.1,
+    5.7,
+    -9.0,
+    -7.1,
+    -7.5,
+    -7.9,
+    -7.5,
+    -6.8,
+    -7.2,
+    -9.2,
+    -6.1,
+    -4.8,
+    -7.7,
+    -7.0,
+    -6.0,
+    -5.7,
+    -4.1,
+    -7.7,
+    -5.4,
+    -5.9,
+    -5.6,
+    -7.0
+   ]
+  },
+  "suitcasea_m1p50": {
+   "pair": "exports_system1/T14_references/step9c/suitcasea_m1p50/pair_fps30.npz",
+   "frames": 128,
+   "intersect_frames": 22,
+   "min_distance_cm": -5.268,
+   "intersect_ranges": [
+    [
+     57,
+     58
+    ],
+    [
+     93,
+     95
+    ],
+    [
+     98,
+     101
+    ],
+    [
+     103,
+     104
+    ],
+    [
+     117,
+     127
+    ]
+   ],
+   "link_pairs": [
+    [
+     "r0_left_rubber_hand_link / r1_right_knee_link",
+     11
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_left_hip_roll_link",
+     7
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_right_hip_roll_link",
+     2
+    ],
+    [
+     "r0_left_rubber_hand_link / r1_left_hip_yaw_link",
+     2
+    ]
+   ],
+   "walk": [
+    31,
+    105
+   ],
+   "distance_cm_every5": [
+    21.4,
+    20.9,
+    15.1,
+    12.8,
+    17.6,
+    21.2,
+    8.4,
+    12.0,
+    13.9,
+    15.9,
+    11.8,
+    2.7,
+    8.2,
+    9.2,
+    12.5,
+    13.3,
+    8.9,
+    6.7,
+    5.4,
+    -0.4,
+    -0.8,
+    0.6,
+    3.8,
+    0.5,
+    -4.4,
+    -5.3
+   ]
+  }
+ }
+}

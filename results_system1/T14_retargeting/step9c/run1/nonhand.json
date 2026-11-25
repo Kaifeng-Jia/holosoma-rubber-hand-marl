@@ -1,0 +1,429 @@
+{
+ "rules": "T14 step 9c: which partner links make the V0 non-hand penetration fail? Diagnostic only (read only, CPU).\n\nFor a level directory (r0/ r1/ solves): the V0 round-2 CollisionProxy (the evaluation's engine) of each robot vs the shared\ntarget; per robot: frames with non-hand proxy penetration (clearance < 0), the deepest value, the frame ranges, and the robot\nlinks of the witnesses counted over those frames (scripts/reference_geometry_round2_checks.CollisionProxy witnesses).\nThe walking segment of the level's gates file is given for reference.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_nonhand.py --levels <tag>=<level dir>@<gates json> ... --out <json>\n",
+ "levels": {
+  "largeboxa_m1p00": {
+   "level_dir": "logs_system1/t14/step9c/largeboxa/m1p00",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0112,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 125,
+     "deepest_m": 0.0866,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       0,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       60
+      ],
+      [
+       "pelvis",
+       33
+      ],
+      [
+       "left_hip_yaw_link",
+       16
+      ],
+      [
+       "left_knee_link",
+       7
+      ],
+      [
+       "left_hip_roll_link",
+       5
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "largeboxa_m1p90": {
+   "level_dir": "logs_system1/t14/step9c/largeboxa/m1p90",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0114,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 125,
+     "deepest_m": 0.0838,
+     "deepest_frame": 111,
+     "ranges": [
+      [
+       0,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       61
+      ],
+      [
+       "pelvis",
+       22
+      ],
+      [
+       "left_hip_yaw_link",
+       16
+      ],
+      [
+       "right_hip_yaw_link",
+       10
+      ],
+      [
+       "left_hip_roll_link",
+       8
+      ],
+      [
+       "right_knee_link",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p00": {
+   "level_dir": "logs_system1/t14/step9c/suitcasea/m1p00",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 128,
+     "deepest_m": 0.0717,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       0,
+       127
+      ]
+     ],
+     "links": [
+      [
+       "pelvis",
+       40
+      ],
+      [
+       "right_hip_yaw_link",
+       39
+      ],
+      [
+       "torso_link",
+       34
+      ],
+      [
+       "right_elbow_link",
+       6
+      ],
+      [
+       "left_elbow_link",
+       5
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p55": {
+   "level_dir": "logs_system1/t14/step9c/suitcasea/m1p55",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 128,
+     "deepest_m": 0.0738,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       0,
+       127
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       39
+      ],
+      [
+       "left_elbow_link",
+       33
+      ],
+      [
+       "right_hip_roll_link",
+       16
+      ],
+      [
+       "torso_link",
+       13
+      ],
+      [
+       "left_hip_roll_link",
+       11
+      ],
+      [
+       "left_hip_yaw_link",
+       9
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p00": {
+   "level_dir": "logs_system1/t14/step9c/smallboxa/m1p00",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 13,
+     "deepest_m": 0.0154,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       11,
+       13
+      ],
+      [
+       33,
+       39
+      ],
+      [
+       122,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       7
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 135,
+     "deepest_m": 0.0736,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       1,
+       135
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       96
+      ],
+      [
+       "left_hip_yaw_link",
+       11
+      ],
+      [
+       "right_knee_link",
+       9
+      ],
+      [
+       "left_knee_link",
+       6
+      ],
+      [
+       "pelvis",
+       5
+      ],
+      [
+       "right_hip_yaw_link",
+       4
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p80": {
+   "level_dir": "logs_system1/t14/step9c/smallboxa/m1p80",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0203,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 135,
+     "deepest_m": 0.0765,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       0,
+       131
+      ],
+      [
+       133,
+       135
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       62
+      ],
+      [
+       "right_elbow_link",
+       26
+      ],
+      [
+       "pelvis",
+       17
+      ],
+      [
+       "right_knee_link",
+       14
+      ],
+      [
+       "right_hip_yaw_link",
+       7
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ]
+     ]
+    }
+   }
+  }
+ }
+}
