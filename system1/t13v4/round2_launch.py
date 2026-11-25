@@ -73,13 +73,15 @@ def one(run, h, rec, local_head, sonic_sha, launch):
             save()
         return ok
     env = f"source {S1}/s1_env.sh; cd {S1}/duet-system1"
-    rc, out, err = ssh(h["ssh"], f"{env}; git fetch -q origin && git checkout -q system1-sonic && git pull -q --ff-only origin system1-sonic; git rev-parse HEAD")
+    pull = "git fetch -q origin && git checkout -q system1-sonic && git pull -q --ff-only origin system1-sonic"
+    rc, out, err = ssh(h["ssh"], f"{env}; ({pull}) || (sleep 10; git -c http.version=HTTP/1.1 fetch -q origin && git checkout -q system1-sonic && "
+                                 f"git -c http.version=HTTP/1.1 pull -q --ff-only origin system1-sonic); git rev-parse HEAD")  # one HTTP/1.1 retry (try 1: curl 16 HTTP2)
     head = out.splitlines()[-1] if out else ""
     if not step("code", rc == 0 and head == local_head, cloud_head=head, local_head=local_head, rc=rc, err=err):
         return
     py = ("import hashlib,sys;sys.path.insert(0,'.');from system1 import sonic_controller as sc;p=sc.DEFAULT_CHECKPOINT;"
           "print(p);print(hashlib.sha256(open(p,'rb').read()).hexdigest() if p.exists() else 'MISSING')")
-    rc, out, err = ssh(h["ssh"], f"{env}; python3 -c {shlex.quote(py)}")
+    rc, out, err = ssh(h["ssh"], f"{env}; $S1_PY -c {shlex.quote(py)}")  # the cloud's hssim_s1 (system python3 has no torch)
     lines = out.splitlines()
     if not step("sonic_weights", rc == 0 and len(lines) >= 2 and lines[-1] == sonic_sha, path=lines[0] if lines else None,
                 cloud_sha256=lines[-1] if lines else None, local_sha256=sonic_sha, rc=rc, err=err):
