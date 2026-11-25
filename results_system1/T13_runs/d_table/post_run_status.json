@@ -1,0 +1,210 @@
+{
+ "run": "d_table",
+ "started": "2026-11-25T08:40:22-05:00",
+ "steps": [
+  {
+   "step": "copyback",
+   "cmd": "bash system1/t13v4/copyback.sh d_table",
+   "started": "2026-11-25T08:40:22-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T09:19:03-05:00",
+   "passed": true,
+   "detail": {
+    "copyback": "sha256 match 780 files 2026-11-25T09:19:03-05:00",
+    "final_checkpoint": "model_07500.pt",
+    "exists": true
+   }
+  },
+  {
+   "step": "finals_off",
+   "cmd": "python3 system1/t13v4/run_finals_isaac.py --run d_table",
+   "started": "2026-11-25T09:19:03-05:00",
+   "gpu_lock_acquired": "2026-11-25T09:51:42-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:45:05-05:00",
+   "passed": true,
+   "detail": [
+    {
+     "name": "d_table_pm2",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-25T10:43:32-05:00"
+    },
+    {
+     "name": "d_table_pm8",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-25T10:45:05-05:00"
+    }
+   ]
+  },
+  {
+   "step": "dump",
+   "cmd": "python3 system1/t13v4/run_isaac_dump.py d_table",
+   "started": "2026-11-25T10:45:05-05:00",
+   "gpu_lock_acquired": "2026-11-25T10:45:56-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:46:48-05:00",
+   "passed": true,
+   "detail": {
+    "rc": 0,
+    "files": [
+     "scene.json",
+     "collision_convexes.npz",
+     "runtime_reference.npz",
+     "nominal.sim2sim.npz"
+    ]
+   }
+  },
+  {
+   "step": "finals_on",
+   "cmd": "python3 system1/t13v4/run_finals_isaac.py --run d_table --noise on",
+   "started": "2026-11-25T10:46:48-05:00",
+   "gpu_lock_acquired": "2026-11-25T11:44:14-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T12:38:24-05:00",
+   "passed": true,
+   "detail": [
+    {
+     "name": "d_table_pm2_noise_on",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-25T12:37:40-05:00"
+    },
+    {
+     "name": "d_table_pm8_noise_on",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-25T12:38:24-05:00"
+    }
+   ]
+  },
+  {
+   "step": "onnx",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/onnx_check.py --out logs_system1/t13v4/sim2sim/onnx_d_table --onnx-dir exports_system1/t13v4/onnx --extra-checkpoint D,table,721,d_table_t13v4,logs_system1/t13v4/runs/d_table/train/model_07500.pt,v1",
+   "started": "2026-11-25T10:46:48-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:46:52-05:00",
+   "passed": true,
+   "detail": {
+    "float64_graph_vs_torch": 4.574118861455645e-14,
+    "float32": 1.71661376953125e-05
+   }
+  },
+  {
+   "step": "checks",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/t13v4/check_sim2sim_v1.py --run d_table --task table --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/d_table_t13v4.onnx --out logs_system1/t13v4/sim2sim/checks_d_table",
+   "started": "2026-11-25T10:46:52-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:47:02-05:00",
+   "passed": true,
+   "detail": {
+    "initial_n": 102,
+    "initial_max": {
+     "joint_pos_max_abs_rad": 0.0,
+     "joint_vel_max_abs": 0.0,
+     "root_pos_max_abs_m": 2.975166302210397e-08,
+     "root_ori_max_angle_rad": 7.884953353001448e-08,
+     "root_lin_vel_max_abs": 7.442744698327175e-09,
+     "root_ang_vel_max_abs": 5.95273772496796e-08,
+     "object_pos_max_abs_m": 0.0,
+     "object_ori_angle_rad": 0.0
+    },
+    "obs_max": 1.1926669607476015e-06
+   }
+  },
+  {
+   "step": "mujoco_pm2",
+   "cmd": "taskset -c 0-3 /home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme D --seed 721 --level 2 --dump logs_system1/t13v4/isaac_dump/d_table/dump --states system1/t13v4/states_t14r6C/table_pm2_states.json --obs-v1 --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/d_table_t13v4.onnx --checkpoint logs_system1/t13v4/runs/d_table/train/model_07500.pt --out /home/kevin/duet-system1/logs_system1/t13v4/mj_finals/d_table_pm2",
+   "started": "2026-11-25T10:47:02-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:48:20-05:00",
+   "passed": true,
+   "detail": {
+    "complete": [
+     true,
+     true
+    ]
+   }
+  },
+  {
+   "step": "mujoco_pm8",
+   "cmd": "taskset -c 4-7 /home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme D --seed 721 --level 8 --dump logs_system1/t13v4/isaac_dump/d_table/dump --states system1/t13v4/states_t14r6C/table_pm8_states.json --obs-v1 --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/d_table_t13v4.onnx --checkpoint logs_system1/t13v4/runs/d_table/train/model_07500.pt --out /home/kevin/duet-system1/logs_system1/t13v4/mj_finals/d_table_pm8",
+   "started": "2026-11-25T10:47:02-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:48:17-05:00"
+  },
+  {
+   "step": "videos",
+   "cmd": "bash system1/t13v4/run_videos.sh d_table exports_system1/T13_videos/d_table 2",
+   "started": "2026-11-25T10:48:20-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T10:57:37-05:00",
+   "passed": true,
+   "detail": [
+    "nominal close rc 0 2026-11-25T10:51:19-05:00",
+    "nominal full rc 0 2026-11-25T10:51:24-05:00",
+    "nominal hands rc 0 2026-11-25T10:54:28-05:00",
+    "perturbed_000 full rc 0 2026-11-25T10:54:34-05:00",
+    "perturbed_000 close rc 0 2026-11-25T10:57:28-05:00",
+    "perturbed_000 hands rc 0 2026-11-25T10:57:37-05:00"
+   ]
+  },
+  {
+   "step": "contact",
+   "cmd": "taskset -c 0-15 /home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python -B system1/t13v4/contact_stats_t13.py --run d_table --workers 6",
+   "started": "2026-11-25T12:38:24-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T12:41:24-05:00",
+   "passed": true,
+   "detail": "contact_summary.csv"
+  },
+  {
+   "step": "package",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t13v4/package_run.py --run d_table",
+   "started": "2026-11-25T12:41:24-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T12:41:25-05:00",
+   "passed": true,
+   "detail": {
+    "isaac_noise_off_pm2": "44/50",
+    "isaac_noise_off_pm8": "46/50",
+    "isaac_noise_on_pm2": "44/50",
+    "isaac_noise_on_pm8": "46/50",
+    "mujoco_noise_off_pm2": "34/50",
+    "mujoco_noise_off_pm8": "31/50"
+   }
+  },
+  {
+   "step": "drive",
+   "cmd": "python3 system1/transfer/drive_upload.py --task T13_runs/d_table exports_system1/T13_videos/d_table/d_table_seed721_pm2_nominal_close.mp4 exports_system1/T13_videos/d_table/d_table_seed721_pm2_nominal_full.mp4 exports_system1/T13_videos/d_table/d_table_seed721_pm2_nominal_hands.mp4 exports_system1/T13_videos/d_table/d_table_seed721_pm2_perturbed_000_close.mp4 exports_system1/T13_videos/d_table/d_table_seed721_pm2_perturbed_000_full.mp4 exports_system1/T13_videos/d_table/d_table_seed721_pm2_perturbed_000_hands.mp4",
+   "started": "2026-11-25T12:41:25-05:00",
+   "rc": 0,
+   "ended": "2026-11-25T12:41:37-05:00",
+   "passed": true,
+   "detail": "6 videos"
+  }
+ ],
+ "state": "done (README_CN.md by hand; numbers in summary.csv)",
+ "ended": "2026-11-25T12:41:37-05:00",
+ "results": {
+  "isaac_noise_off_pm2": "44/50",
+  "isaac_noise_off_pm8": "46/50",
+  "isaac_noise_on_pm2": "44/50",
+  "isaac_noise_on_pm8": "46/50",
+  "mujoco_noise_off_pm2": "34/50",
+  "mujoco_noise_off_pm8": "31/50"
+ }
+}
