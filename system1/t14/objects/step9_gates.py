@@ -34,6 +34,64 @@ def level_tag(m):
     return f"m{m:.2f}".replace(".", "p")
 
 
+def prediag_9f(C, h0, names, O, size, s):
+    """step 9f pre-solve diagnostics (Kevin 2026-11-25 17:10 item 6), solver scale (m) unless noted:
+    * time scale of each segment (partner frames / source frames);
+    * partner palms vs their contact points on the shared target: contact point = the demonstration palm's position in its own
+      box at tau(t), carried to the far end of the shared target (P(t) M1); frames where that demonstration palm is within 5 cm of
+      its box (palm-point proxy of the contact flag); per segment: frames, mean / max distance; also the partner palm's signed
+      distance to the shared target box;
+    * partner feet (ankles, toes) vs the shared target box (size L x w x h at P(t)) and vs its own box: smallest signed distance
+      per segment and frames inside;
+    * pelvis jumps: largest frame-to-frame partner pelvis displacement (and frame), next to the demonstration's; the steps at the
+      segment boundaries w0, w1."""
+    import frontback as fb
+    T = len(O)
+    tau = C["tau"]
+    w0, w1 = int(C["walk"]["w0"]), int(C["walk"]["w1"])
+    ph = lambda t: "lift" if t < w0 else ("walk" if t < w1 else "put_down")  # noqa: E731
+    tsize = np.array(size, float)
+    tsize[C["k"]] = C["Lm"]
+    far = C["P"] @ C["M1"]
+    Ow = fb.poses_at(O, tau)
+    hw = fb.lerp_at(h0, tau)
+    out = dict(segments=C["warp_segments"], offset_d_m=C["offset_d"], tau_first_last=[round(float(tau[0]), 3), round(float(tau[-1]), 3)],
+               own_box_vs_far_end_m=dict(mean=round(float(C["own_vs_far_end_m"].mean()), 4), max=round(float(C["own_vs_far_end_m"].max()), 4)))
+    hands = {}
+    for hn in ("L_Palm", "R_Palm"):
+        j = names.index(hn)
+        dist, sd_t, flag = np.full(T, np.nan), np.full(T, np.nan), np.zeros(T, bool)
+        for t in range(T):
+            flag[t] = fb.box_sd(hw[t, j][None], Ow[t], size)[0] <= 0.05
+            loc = (hw[t, j] - Ow[t][:3, 3]) @ Ow[t][:3, :3]  # demonstration palm in its own box at tau
+            cp = far[t][:3, :3] @ loc + far[t][:3, 3]
+            dist[t] = np.linalg.norm(C["human1"][t, j] - cp)
+            sd_t[t] = fb.box_sd(C["human1"][t, j][None], C["P"][t], tsize)[0]
+        seg = {}
+        for p_ in ("lift", "walk", "put_down"):
+            sel = [t for t in range(T) if ph(t) == p_ and flag[t]]
+            seg[p_] = dict(frames=len(sel), dist_mean=round(float(dist[sel].mean()), 4) if sel else None, dist_max=round(float(dist[sel].max()), 4) if sel else None,
+                           sd_to_shared_box_min=round(float(sd_t[sel].min()), 4) if sel else None, sd_to_shared_box_max=round(float(sd_t[sel].max()), 4) if sel else None)
+        hands[hn] = seg
+    out["palms_vs_contact_points"] = hands
+    fj = [names.index(n) for n in ("L_Ankle", "L_Toe", "R_Ankle", "R_Toe")]
+    sd_sh = np.array([fb.box_sd(C["human1"][t, fj], C["P"][t], tsize).min() for t in range(T)])
+    sd_own = np.array([fb.box_sd(C["human1"][t, fj], C["own1"][t], size).min() for t in range(T)])
+    feet = {}
+    for p_ in ("lift", "walk", "put_down"):
+        sel = [t for t in range(T) if ph(t) == p_]
+        feet[p_] = dict(frames=len(sel), min_to_shared_box=round(float(sd_sh[sel].min()), 4) if sel else None, inside_shared=int((sd_sh[sel] < 0).sum()) if sel else 0,
+                        min_to_own_box=round(float(sd_own[sel].min()), 4) if sel else None, inside_own=int((sd_own[sel] < 0).sum()) if sel else 0)
+    out["feet_vs_boxes"] = feet
+    ip = names.index("Pelvis")
+    st1 = np.linalg.norm(np.diff(C["human1"][:, ip], axis=0), axis=1)
+    st0 = np.linalg.norm(np.diff(h0[:, ip], axis=0), axis=1)
+    out["pelvis_steps"] = dict(partner_max_m=round(float(st1.max()), 4), partner_max_at_frame=int(st1.argmax()) + 1, demo_max_m=round(float(st0.max()), 4),
+                               at_w0=None if not 0 < w0 < T else round(float(st1[w0 - 1]), 4), at_w1=None if not 0 < w1 < T else round(float(st1[w1 - 1]), 4),
+                               partner_max_person_scale_m=round(float(st1.max()) / s, 4))
+    return out
+
+
 def gates(h0, names, O, size, s, m, turn="box", legs="all", walk=None):
     import frontback as fb
     import partner as pt
@@ -52,11 +110,14 @@ def gates(h0, names, O, size, s, m, turn="box", legs="all", walk=None):
                 partner_min_pelvis_distance_m=round(float(np.linalg.norm(p1[:, :2] - p0[:, :2], axis=1).min()), 4),
                 shared_vs_demo_rotation_max_deg=round(max(tilt), 2), leg_offset_m=np.round(C["leg_offset"], 4).tolist(), turn=turn, legs=legs, walk=walk,
                 leg_box=fb.leg_box(h0, names, O, size, C)[0], box_tilt_frame0_deg=round(float(np.degrees(np.arccos(np.clip(O[0][2, 2], -1, 1)))), 3))
+    if legs == "reverse_warp":
+        diag["prediag_9f"] = prediag_9f(C, h0, names, O, size, s)
     rs = C["r1_source"]  # per partner frame: source frame and rigid map of the legs (step9_eval.py --r1-source construction)
     return dict(m=m, gravity_deg=round(g, 4), gravity_passed=g <= pt.V0_GRAVITY_DEG + 1e-10, main_motion=mm,
                 passed=bool(g <= pt.V0_GRAVITY_DEG + 1e-10 and mm["passed"]), improper=False, S=np.round(C["S"], 6).tolist(),
                 candidate=C["cand"], diag=diag,
-                r1_source=dict(frame=[int(x) for x in rs["frame"]], R=np.asarray(rs["R"]).tolist(), t=np.asarray(rs["t"]).tolist()))
+                r1_source=dict(frame=[int(x) if float(x).is_integer() else round(float(x), 6) for x in rs["frame"]], R=np.asarray(rs["R"]).tolist(),
+                               t=np.asarray(rs["t"]).tolist()))
 
 
 def main():
@@ -69,12 +130,12 @@ def main():
     ap.add_argument("--levels", required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy"), default="all")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp"), default="all")
     a = ap.parse_args()
     fr = tuple(int(x) for x in a.frames.split(":"))
     h0, names, nom, size, s = load_role0(a.object, a.sequence, fr)
     walk = None
-    if a.fb_legs in ("walk", "walk_scopy", "full_scopy"):
+    if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp"):
         import frontback as fb
         import omomo_motion as om
         walk = fb.walking_segment(om.load_sequences({a.object})[a.sequence], *fr)

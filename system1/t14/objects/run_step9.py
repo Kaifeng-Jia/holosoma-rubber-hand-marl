@@ -402,7 +402,7 @@ def main():
     ap.add_argument("--render-only", nargs="*", default=None, help="tags of main clips: pictures + video only (after the driver)")
     ap.add_argument("--step", default="step9b", help="output name: logs_system1/t14/<step>, exports, results_system1/T14_retargeting/<step>")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy"), default="all")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp"), default="all")
     ap.add_argument("--source-root", type=Path, nargs="*", default=None, help="reuse the source solves under these directories (first that has the clip)")
     ap.add_argument("--all-main", action="store_true", help="step 9e: every straight clip (the 22) runs the main protocol (a, 1.0, 1.25, 1.5, "
                     "first free above 1.5), all at once, no extension gate; pictures + video for the three debug clips only")

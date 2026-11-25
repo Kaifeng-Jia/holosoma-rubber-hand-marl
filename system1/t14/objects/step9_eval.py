@@ -62,10 +62,17 @@ def evaluate(cand_dir, source_dir, gates, r1_source="reversed"):
             alt = None
             if r == 1 and r1_source == "construction":  # the source frame and rigid map that built the partner's legs at each frame
                 rs = gates["r1_source"]
-                fr, R_, t_ = np.asarray(rs["frame"]), np.asarray(rs["R"]), np.asarray(rs["t"])
+                fr, R_, t_ = np.asarray(rs["frame"], float), np.asarray(rs["R"]), np.asarray(rs["t"])
                 assert len(fr) == T, (len(fr), T)
                 alt = rj.added_drift(rf[f"{side}_foot_position_m"], src, flags[:T, k])[0]  # the earlier (whole clip reversed) source
-                src = np.einsum("tij,tj->ti", R_, src0[fr]) + t_
+                if np.allclose(fr, np.round(fr)):
+                    srcf = src0[np.round(fr).astype(int)]
+                else:  # step 9f: fractional source times (time-aligned reversal): linear interpolation of the source feet
+                    i0 = np.clip(np.floor(fr).astype(int), 0, len(src0) - 1)
+                    i1 = np.clip(i0 + 1, 0, len(src0) - 1)
+                    f_ = (fr - i0)[:, None]
+                    srcf = src0[i0] * (1 - f_) + src0[i1] * f_
+                src = np.einsum("tij,tj->ti", R_, srcf) + t_
             v, nw, nf = rj.added_drift(rf[f"{side}_foot_position_m"], src, flags[:T, k])
             vals.append(v)
             win[side] = dict(windows=nw, frames=nf, value_m=None if v is None else round(v, 5))

@@ -51,6 +51,16 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 person map Gp(t) = G(t) inside the walking segment, Trans(d_pre) S before it, Trans(d_post) S after it; own
                 object Gp O, palm targets rotated by Gp (role_solve), so that in lift / put down the S copy holds its own box as
                 the demonstration holds the source box. For every other option Gp = G.
+  legs="reverse_warp"  (step 9f, Kevin 2026-11-25 17:10; turn="world" only) the partner = the WHOLE demonstration played
+                backwards in time (every joint, palms included; one source, no splicing), turned by S, plus ONE constant horizontal
+                offset d. Time alignment: demonstration segments lift [0, w0), walk [w0, w1), put down [w1, T); the reversed
+                put-down / walk / lift are each stretched or compressed linearly onto the demonstration's lift / walk / put-down
+                frames: partner frame t <- demonstration time tau(t) (fractional; segment end frames map onto end frames;
+                positions interpolated linearly, rotations by slerp; an empty source segment holds its boundary frame).
+                Partner's own box own1(t) = Trans(d) S O(tau(t)); role 1's object view B(t) = S A(tau(t)) T_w^-1 (rotation),
+                shared P(t): translation = A(t)'s, rotation = slerp midpoint of A(t) and B(t) (as step 9c). d = least-squares
+                horizontal offset putting own1 on the far end of the shared target: mean_t (P(t) M1 - S O(tau(t))) origin, xy.
+                Hand targets: the region maps M0 / M1 of the box's own symmetry (as step 9c). Gp = own1 O^-1 (own box = Gp O).
 Every variant also returns r1_source: per partner frame t the source frame and the rigid map (R, t) that carried the
 demonstration's legs there (reversed / held legs: R180 and the least-squares offset; S copies: S and d_pre / d_post), for
 the support-drift source of the partner (step9_eval.py --r1-source construction).
@@ -113,6 +123,64 @@ def walking_segment(v, s, e):
     return dict(w0=min(d["start"] for d in sw), w1=max(d["stop"] for d in sw), swings=sw)
 
 
+def warp_tau(T, w0, w1):
+    """step 9f: partner frame t -> demonstration time tau(t) (float). Partner segments [0, w0) / [w0, w1) / [w1, T) take the
+    demonstration's reversed put-down [T-1 .. w1] / reversed walk [w1-1 .. w0] / reversed lift [w0-1 .. 0], each mapped linearly
+    end frame onto end frame (one partner frame: the middle of the source range; empty source range: its boundary frame held)."""
+    tau = np.zeros(T)
+    segs = []
+    for (a0, a1), (hi, lo), name in (((0, w0), (T - 1, w1), "lift <- reversed put down"), ((w0, w1), (w1 - 1, w0), "walk <- reversed walk"),
+                                     ((w1, T), (w0 - 1, 0), "put down <- reversed lift")):
+        La, Lb = a1 - a0, hi - lo + 1
+        if La <= 0:
+            segs.append(dict(segment=name, partner_frames=0, source_frames=max(Lb, 0), scale=None))
+            continue
+        if Lb <= 0:  # no source frames (e.g. no lift in the demonstration): hold the boundary frame
+            tau[a0:a1] = min(max(lo, 0), T - 1) if name.startswith("put") else max(min(hi, T - 1), 0)
+            segs.append(dict(segment=name, partner_frames=La, source_frames=0, scale=None, note="source segment empty: boundary frame held"))
+            continue
+        tau[a0:a1] = (hi + lo) / 2.0 if La == 1 else hi - np.arange(La) * (hi - lo) / (La - 1)
+        segs.append(dict(segment=name, partner_frames=La, source_frames=Lb, scale=round(La / Lb, 4),
+                         note="partner frames / source frames (>1 stretched, <1 compressed)"))
+    return tau, segs
+
+
+def lerp_at(X, tau):
+    """X [T, ...] at fractional times tau [K] (linear)."""
+    X = np.asarray(X, float)
+    i0 = np.clip(np.floor(tau).astype(int), 0, len(X) - 1)
+    i1 = np.clip(i0 + 1, 0, len(X) - 1)
+    f = (tau - i0).reshape(-1, *([1] * (X.ndim - 1)))
+    return X[i0] * (1 - f) + X[i1] * f
+
+
+def slerp_at(Rm, tau):
+    """rotation matrices Rm [T, ..., 3, 3] at fractional times tau [K] (slerp per element)."""
+    Rm = np.asarray(Rm, float)
+    T = len(Rm)
+    i0 = np.clip(np.floor(tau).astype(int), 0, T - 1)
+    i1 = np.clip(i0 + 1, 0, T - 1)
+    f = tau - i0
+    out = np.empty((len(tau),) + Rm.shape[1:])
+    flat = Rm.reshape(T, -1, 3, 3)
+    for k in range(len(tau)):
+        for j in range(flat.shape[1]):
+            if i0[k] == i1[k] or f[k] == 0:
+                out.reshape(len(tau), -1, 3, 3)[k, j] = flat[i0[k], j]
+            else:
+                r = Rotation.from_matrix(np.stack([flat[i0[k], j], flat[i1[k], j]]))
+                out.reshape(len(tau), -1, 3, 3)[k, j] = Slerp([0.0, 1.0], r)([f[k]]).as_matrix()[0]
+    return out
+
+
+def poses_at(M, tau):
+    """4x4 poses M [T, 4, 4] at fractional times (translation linear, rotation slerp)."""
+    out = np.tile(np.eye(4), (len(tau), 1, 1))
+    out[:, :3, :3] = slerp_at(M[:, :3, :3], tau)
+    out[:, :3, 3] = lerp_at(M[:, :3, 3], tau)
+    return out
+
+
 def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
     """human0 [T, J, 3] role 0 (solver world), names [J], O [T, 4, 4] own object (box frame) poses, size [3] box (solver units),
     m level. Returns dict with P, A, cand (Q0, c0, Q1, c1, axis, L1, Lm), human1, rot1 [T, 3, 3] (hands' rotation), D, k, sigma.
@@ -136,6 +204,10 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
     else:
         T180 = affine(R180, np.zeros(3))
         S = A[0] @ T180 @ np.linalg.inv(A[0])
+    if legs == "reverse_warp":
+        if turn != "world":
+            raise ValueError("legs='reverse_warp' is defined with turn='world'")
+        return _reverse_warp(human0, names, O, size, m, walk, A, S, T180, k, sigma, ang, wd, w, e, L1, Lm, cT, Rt, R180, pel)
     D0 = O @ np.linalg.inv(O[0])
     B = S @ D0 @ np.linalg.inv(S) @ A[0]
     P = A.copy()
@@ -196,6 +268,41 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
                 r1_source=dict(frame=src_frame, R=src_R, t=src_t),
                 walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=off, turn=turn, legs=legs, walk=walk, leg_source_frame=idx,
                 pre_offset=None if d_pre is None else d_pre.tolist(), post_offset=None if d_post is None else d_post.tolist())
+
+
+def _reverse_warp(human0, names, O, size, m, walk, A, S, T180, k, sigma, ang, wd, w, e, L1, Lm, cT, Rt, R180, pel):
+    """step 9f construction (legs="reverse_warp"); see the module docstring."""
+    T = len(O)
+    w0, w1 = int(walk["w0"]), int(walk["w1"])
+    tau, segs = warp_tau(T, w0, w1)
+    Ow = poses_at(O, tau)  # demonstration box at tau(t)
+    Aw = poses_at(A, tau)
+    Rs = S[:3, :3]
+    B = A.copy()
+    B[:, :3, :3] = np.einsum("ij,tjk,kl->til", Rs, Aw[:, :3, :3], T180[:3, :3].T)  # role 1's object view in role 0's convention
+    P = A.copy()
+    for t in range(T):
+        P[t, :3, :3] = Slerp([0.0, 1.0], Rotation.from_matrix(np.stack([A[t, :3, :3], B[t, :3, :3]])))([0.5]).as_matrix()[0]
+    Q0, Q1 = Rt.T, R180 @ Rt.T
+    cand = dict(Q0=Q0.tolist(), c0=(-w / 2 * e).tolist(), Q1=Q1.tolist(), c1=(w / 2 * e).tolist(), axis=k, L1=L1, parity0=1, parity1=1,
+                id=f"front-back axis{k} sigma{sigma:+.0f}")
+    M0 = affine(Q0, -Rt.T @ cT)
+    M1 = affine(Q1, -Q1 @ cT)
+    SO = S @ Ow  # the S copy of the demonstration's box at tau(t)
+    far = P @ M1  # the far end of the shared target as a box pose
+    d = (far[:, :2, 3] - SO[:, :2, 3]).mean(0)  # one constant horizontal offset (least squares)
+    Md = affine(np.eye(3), np.r_[d, 0.0]) @ S
+    own1 = Md @ Ow
+    human1 = lerp_at(human0, tau) @ Rs.T + Md[:3, 3]
+    Gp = own1 @ np.linalg.inv(O)
+    G_att = P @ T180 @ np.linalg.inv(A)  # step-9c object-attached map, diagnostic only
+    pel_att = np.einsum("tij,tj->ti", G_att[:, :3, :3], pel) + G_att[:, :3, 3]
+    D = human1[:, names.index("Pelvis"), :2] - pel_att[:, :2]
+    return dict(P=P, A=A, B=B, S=S, G=Gp, Gp=Gp, cand=cand, M0=M0, M1=M1, human1=human1, rot1=np.repeat(Rs[None], T, 0), D=D, k=k, sigma=sigma,
+                walk_axis_angle_deg=ang, walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=d, turn="world", legs="reverse_warp", walk=walk,
+                leg_source_frame=tau, pre_offset=None, post_offset=None, tau=tau, warp_segments=segs, own1=own1, offset_d=d.tolist(),
+                own_vs_far_end_m=np.linalg.norm(own1[:, :3, 3] - far[:, :3, 3], axis=1),
+                r1_source=dict(frame=tau, R=np.repeat(Rs[None], T, 0), t=np.repeat(Md[:3, 3][None], T, 0)))
 
 
 def box_sd(p, M, size):

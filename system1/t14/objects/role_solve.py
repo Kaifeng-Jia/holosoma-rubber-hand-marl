@@ -160,8 +160,9 @@ def main():
     ap.add_argument("--frames", default=None, help="step 9: A:B, solve frames A..B-1 only")
     ap.add_argument("--construction", choices=("partner", "frontback"), default="partner", help="step 9: frontback (role mode, box family)")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box", help="step 9c: frontback partner turn about the world vertical")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy"), default="all",
-                    help="step 9c: reverse only the walking segment; 9d: + S-copy legs in lift / put down; 9e: + the whole S copy there")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp"), default="all",
+                    help="step 9c: reverse only the walking segment; 9d: + S-copy legs in lift / put down; 9e: + the whole S copy there; "
+                         "9f: the whole demonstration reversed, its three segments time-aligned (frontback.py)")
     ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own",
                     help="frontback, Stage 2: 'target' = the person-side object frame of the interaction mesh is the role's own object "
                          "frame carried by its region map (own_r M_r^-1, points M_r demo), so that it differs from the robot-side "
@@ -258,8 +259,8 @@ def main():
         h0_, p0_, _ = preprocess_motion_data(np.concatenate([human, palms], 1), _NS(demo_joints=names54), motion_config.toe_names, scale=s, object_poses=raw_poses)
         O_ = pt.mj_to_mat(convert_object_poses_to_mujoco_order(create_grounded_nominal_object_poses(p0_, s)))
         fa_, fb_e = (int(x) for x in a.frames.split(":")) if a.frames else (0, len(human))
-        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy", "full_scopy") else None
-        if a.fb_legs in ("walk", "walk_scopy", "full_scopy") and walk is None:
+        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp") else None
+        if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp") and walk is None:
             raise SystemExit("no swing segment in the clip")
         FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk)
         cand = FB["cand"]
@@ -329,6 +330,15 @@ def main():
         human_r, nom_r = human0, own_nom_mj
         pw, fw = palm_rot[..., :, 2], palm_rot[..., :, 0]
         own_r = O
+    elif FB is not None and FB["legs"] == "reverse_warp":  # step 9f: everything of the partner at the demonstration time tau(t)
+        tau_ = FB["tau"]
+        human_r = FB["human1"]
+        own_r = FB["own1"]  # Trans(d) S O(tau): built on the same nominal poses (O == O_, asserted above)
+        nom_r = pt.mat_to_mj(own_r)
+        pr_w = fbm.slerp_at(palm_rot, tau_)
+        Rs_ = FB["S"][:3, :3]
+        pw = np.einsum("ij,thj->thi", Rs_, pr_w[..., :, 2])
+        fw = np.einsum("ij,thj->thi", Rs_, pr_w[..., :, 0])
     elif FB is not None:  # front-back partner: constructed person, own object G O, palm targets rotated by G
         G = FB["Gp"]  # the person map: = FB["G"] except --fb-legs full_scopy (lift / put down: Trans(d) S, the S copy's own box)
         human_r = FB["human1"]
@@ -349,6 +359,9 @@ def main():
         pw = (palm_rot[..., :, 2] @ Rs.T)[:, hidx]
         fw = (palm_rot[..., :, 0] @ Rs.T)[:, hidx]
     h_sd_r = h_sd[:, hidx]
+    WARP = FB is not None and a.role == 1 and FB["legs"] == "reverse_warp"
+    if WARP:  # step 9f: the partner's hand-box distances (contact flags, retention condition) at tau(t)
+        h_sd_r = fbm.lerp_at(h_sd, FB["tau"])[:, hidx]
     # ---------------------------------------------------------------- interaction-mesh object points
     obj_pts, _demo_unused, _ = setup_object_data("object_interaction", constants, None, s, task_config, False)
     Mr = C["M0"] if a.role == 0 else C["M1"]
@@ -363,6 +376,8 @@ def main():
     from scipy.spatial.transform import Rotation
     Rraw = Rotation.from_quat(raw_poses[:, [1, 2, 3, 0]]).as_matrix()
     local_raw = np.einsum("tji,thj->thi", Rraw, palms - raw_poses[:, None, 4:7])
+    if WARP:  # step 9f: palm positions in the raw box frame at tau(t) (anchor medians of the partner's contact windows)
+        local_raw = fbm.lerp_at(local_raw, FB["tau"])
     unit = s if a.family == "box" else 1.0
     surf = UnionSurface(scene_object_boxes(scene, f"{name}_link"))
     anchors, act, normals = np.zeros((T, 2, 3)), np.zeros((T, 2)), np.zeros((T, 2, 3))
@@ -460,7 +475,8 @@ def main():
                human_frame=human_frame if a.mode == "role" else None,
                frontback=None if FB is None else dict(human_frame=a.fb_human_frame, turn=FB["turn"], legs=FB["legs"], walk=FB["walk"], walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"],
                                                      leg_offset_m=FB["leg_offset"].tolist(), gravity_deg_S=pt.gravity_deg(FB["S"]),
-                                                     M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s)),
+                                                     M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s),
+                                                     **({"warp_segments": FB["warp_segments"], "offset_d_m": FB["offset_d"]} if FB["legs"] == "reverse_warp" else {})),
                python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                seconds=round(time.time() - t0, 1), stage2_seconds=round(time.time() - t2, 1), finite=bool(np.isfinite(q).all()), qpos_shape=list(q.shape),
                object_locked_max_err=float(np.abs(q[:, -7:] - shared_mj[:n]).max()), peak_rss_gb=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2, 3),

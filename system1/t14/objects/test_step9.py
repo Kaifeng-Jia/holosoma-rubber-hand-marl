@@ -3,6 +3,7 @@ import sys
 from pathlib import Path
 
 import numpy as np
+from scipy.spatial.transform import Rotation
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import frontback as fb  # noqa: E402
@@ -169,6 +170,52 @@ def test_full_scopy_whole_body():
         rs = CC["r1_source"]
         rebuilt = np.einsum("tij,tkj->tki", rs["R"], H[rs["frame"]][:, il]) + rs["t"][:, None]
         assert np.allclose(rebuilt, CC["human1"][:, il]), CC["legs"]
+
+
+def test_reverse_warp_time_map():
+    """step 9f: tau maps the reversed put-down / walk / lift end-to-end onto lift / walk / put-down; integer tau reproduces frames."""
+    tau, segs = fb.warp_tau(61, 10, 50)
+    assert tau[0] == 60 and np.isclose(tau[9], 50) and np.isclose(tau[10], 49) and np.isclose(tau[49], 10) and np.isclose(tau[50], 9) and tau[60] == 0
+    assert (np.diff(tau) < 0).all()
+    assert [g["scale"] for g in segs] == [round(10 / 11, 4), 1.0, round(11 / 10, 4)]
+    tau2, segs2 = fb.warp_tau(30, 0, 25)  # no lift: the put-down part holds the demonstration's first frame
+    assert np.allclose(tau2[25:], 0) and segs2[0]["partner_frames"] == 0
+    X = np.random.default_rng(3).normal(size=(61, 4, 3))
+    assert np.allclose(fb.lerp_at(X, np.array([3.0, 7.0])), X[[3, 7]])
+    R = Rotation.random(61, random_state=4).as_matrix()
+    assert np.allclose(fb.slerp_at(R, np.array([5.0, 5.5]))[0], R[5])
+
+
+def test_reverse_warp_whole_body():
+    """step 9f: the partner is S applied to the demonstration at tau(t) plus ONE constant horizontal offset (every joint), its own
+    box moves with it (relation person / own box = the demonstration's at tau), the offset is the least-squares fit of the own box
+    onto the far end of the shared target, and r1_source rebuilds the legs."""
+    H, O = straight_carry(T=61)
+    rng = np.random.default_rng(5)
+    H = H + rng.normal(scale=0.01, size=H.shape)
+    walk = dict(w0=10, w1=50)
+    size = np.array([0.3, 0.4, 0.3])
+    C = fb.build(H, NAMES, O, size, 1.25, turn="world", legs="reverse_warp", walk=walk)
+    S, tau = C["S"], C["tau"]
+    d = np.r_[C["offset_d"], 0.0]
+    exp = fb.lerp_at(H, tau) @ S[:3, :3].T + S[:3, 3] + d
+    assert np.allclose(C["human1"], exp)
+    off = C["human1"] - (fb.lerp_at(H, tau) @ S[:3, :3].T)  # the same translation at every frame and joint
+    assert np.allclose(off, off[0, 0])
+    for t in (0, 9, 10, 30, 50, 60):
+        Ow = fb.poses_at(O, tau[t:t + 1])[0]
+        rel0 = (fb.lerp_at(H, tau[t:t + 1])[0] - Ow[:3, 3]) @ Ow[:3, :3]
+        rel1 = (C["human1"][t] - C["own1"][t][:3, 3]) @ C["own1"][t][:3, :3]
+        assert np.allclose(rel0, rel1)
+    far = C["P"] @ C["M1"]
+    assert np.allclose((far[:, :2, 3] - C["own1"][:, :2, 3]).mean(0), 0, atol=1e-9)  # least squares: zero mean residual
+    assert np.allclose(C["Gp"] @ O, C["own1"])
+    il = [NAMES.index(n) for n in fb.LOWER]
+    rs = C["r1_source"]
+    rebuilt = np.einsum("tij,tkj->tki", rs["R"], fb.lerp_at(H, rs["frame"])[:, il]) + rs["t"][:, None]
+    assert np.allclose(rebuilt, C["human1"][:, il])
+    # the straight symmetric carry: reversed and time-aligned partner's box rotation equals the demonstration's (no one-sided tilt)
+    assert np.allclose(C["P"][:, :3, :3], C["A"][:, :3, :3], atol=1e-9)
 
 
 def test_added_drift():
