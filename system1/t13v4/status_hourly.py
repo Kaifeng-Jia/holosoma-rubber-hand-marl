@@ -139,6 +139,21 @@ def main():
     lines += [row(n, r) for n, r in res.items()]
     gpus = {n: r.get("gpu") for n, r in res.items() if "error" not in r}
     lines += ["", "GPU：" + "；".join(f"{n} {g}" for n, g in gpus.items())]
+    # section 5 / 6: local post-run pipeline per run (system1/t13v4/post_run.py), and the round-1 release line
+    post = []
+    for name in runs:
+        ps = ROOT / "results_system1/T13_runs" / name / "post_run_status.json"
+        if ps.exists():
+            st = json.loads(ps.read_text())
+            post.append(f"{name} {st.get('state')}" + (f"（{'，'.join(f'{k} {v}' for k, v in st['results'].items())}）" if st.get("results") else ""))
+        elif (ROOT / "results_system1/T13_runs" / name / "summary.csv").exists():
+            post.append(f"{name} 本机评测已完成（见 results_system1/T13_runs/{name}/）")
+    if post:
+        lines += ["", "本机评测：" + "；".join(post)]
+    ok = [name for name in runs if "sha256 match" in ((ROOT / "logs_system1/t13v4/copyback" / name / "copyback.txt").read_text()
+                                                       if (ROOT / "logs_system1/t13v4/copyback" / name / "copyback.txt").exists() else "")]
+    if runs and len(ok) == len(runs):
+        lines += ["", "第一轮三个 run 都已结束、拷回并逐个核对 sha256：第一轮的卡可以释放。"]
     text = "\n".join(lines) + "\n"
     a.out.parent.mkdir(parents=True, exist_ok=True)
     old = a.out.read_text() if a.out.exists() else ""
