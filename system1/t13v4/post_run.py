@@ -33,7 +33,7 @@ from zoneinfo import ZoneInfo
 
 ROOT = Path(__file__).resolve().parents[2]
 NY = ZoneInfo("America/New_York")
-CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table"}
+CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 SO = "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python"
 SIM = "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python"
 HS = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
@@ -49,6 +49,7 @@ class Pipe:
         import os
         self.dry = dry  # --verify-existing: run no command, evaluate every check on the existing outputs (smoke test)
         self.run, self.task = run, CASE[run]
+        self.scheme = "C-out" if run.startswith("c_out_") else "D"  # round 2 (task book section 8 item 2)
         self.L = ROOT / "logs_system1/t13v4/post_run" / run
         self.L.mkdir(parents=True, exist_ok=True)
         self.out = ROOT / "results_system1/T13_runs" / run
@@ -148,21 +149,24 @@ class Pipe:
         # 5 onnx
         onnx = ROOT / "exports_system1/t13v4/onnx" / f"{r}_t13v4.onnx"
         rec = self.sh("onnx", [SIM, "-B", "system1/sim2sim/onnx_check.py", "--out", f"logs_system1/t13v4/sim2sim/onnx_{r}", "--onnx-dir", "exports_system1/t13v4/onnx",
-                               "--extra-checkpoint", f"D,{t},{seed},{r}_t13v4,{ck.relative_to(ROOT)},v1"], env=CPU)
+                               "--extra-checkpoint", f"{self.scheme},{t},{seed},{r}_t13v4,{ck.relative_to(ROOT)},v1"], env=CPU)
         rows = list(csv.DictReader(open(ROOT / f"logs_system1/t13v4/sim2sim/onnx_{r}/onnx_check.csv")))
         f64 = max(float(x["float64_onnx_vs_torch"]) for x in rows)
         self.check(rec, rec["rc"] == 0 and onnx.exists() and f64 <= 1e-10, dict(float64_graph_vs_torch=f64, float32=max(float(x["max_abs_diff"]) for x in rows)))
         # 6 MuJoCo checks
-        rec = self.sh("checks", [SIM, "-B", "system1/t13v4/check_sim2sim_v1.py", "--run", r, "--task", t, "--onnx", onnx, "--out", f"logs_system1/t13v4/sim2sim/checks_{r}"], env=CPU)
+        rec = self.sh("checks", [SIM, "-B", "system1/t13v4/check_sim2sim_v1.py", "--run", r, "--task", t, "--onnx", onnx, "--out", f"logs_system1/t13v4/sim2sim/checks_{r}",
+                                 *(["--scheme", "C-out"] if self.scheme == "C-out" else [])], env=CPU)
         s = json.loads((ROOT / f"logs_system1/t13v4/sim2sim/checks_{r}/summary.json").read_text())
-        self.check(rec, s["initial_states"]["all_passed"] and s["observations"]["obs_passed"] and s["initial_states"]["n_states"] == 102,
-                   dict(initial_n=s["initial_states"]["n_states"], initial_max=s["initial_states"]["max"], obs_max=s["observations"]["obs_max_abs_diff"]))
+        cout_ok = self.scheme != "C-out" or (s["cout"]["sonic_inputs_passed"] and s["cout"]["q_star_passed"])  # round 2: SONIC inputs and q* (T10c thresholds)
+        self.check(rec, s["initial_states"]["all_passed"] and s["observations"]["obs_passed"] and s["initial_states"]["n_states"] == 102 and cout_ok,
+                   dict(initial_n=s["initial_states"]["n_states"], initial_max=s["initial_states"]["max"], obs_max=s["observations"]["obs_max_abs_diff"],
+                        **({"cout": s["cout"]} if self.scheme == "C-out" else {})))
         # 7 MuJoCo closed loop
         mj = ROOT / "logs_system1/t13v4/mj_finals"
         recs = []
         ts = []
         for lv, cores in ((2, "0-3"), (8, "4-7")):
-            cmd = ["taskset", "-c", cores, SIM, "-B", "system1/sim2sim/mj_eval.py", "--task", t, "--scheme", "D", "--seed", seed, "--level", lv,
+            cmd = ["taskset", "-c", cores, SIM, "-B", "system1/sim2sim/mj_eval.py", "--task", t, "--scheme", self.scheme, "--seed", seed, "--level", lv,
                    "--dump", dd.relative_to(ROOT), "--states", f"system1/t13v4/states_t14r6C/{t}_pm{lv}_states.json", "--obs-v1", "--onnx", onnx,
                    "--checkpoint", ck.relative_to(ROOT), "--out", mj / f"{r}_pm{lv}"]
             ts.append(threading.Thread(target=lambda c=cmd, lv=lv: recs.append(self.sh(f"mujoco_pm{lv}", c, env=dict(CPU, OMP_NUM_THREADS="1")))))

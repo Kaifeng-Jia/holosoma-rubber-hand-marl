@@ -149,7 +149,7 @@ def main():
     ap.add_argument("--checkpoint", type=Path, default=None, help="T10b: the checkpoint that ONNX was exported from (recorded; required with --onnx)")
     ap.add_argument("--dump", type=Path, default=None, help="T13 v4: Isaac scene export of this run (default: the T10 export of --scheme / --task)")
     ap.add_argument("--states", type=Path, default=None, help="T13 v4: frozen state file of this run's Isaac finals (default: the T10 / T03 one)")
-    ap.add_argument("--obs-v1", action="store_true", help="T13 v4: observation v1 (teammate 5, noise off; D only); off = unchanged")
+    ap.add_argument("--obs-v1", action="store_true", help="T13 v4: observation v1 (teammate 5, noise off; D, and C-out for round 2); off = unchanged")
     a = ap.parse_args()
     if (a.onnx is None) != (a.checkpoint is None):
         raise ValueError("--onnx and --checkpoint go together")
@@ -159,8 +159,8 @@ def main():
     dump = ROOT / "logs_system1/t10/isaac" / (dict(D="d_", **{"C-in": "cin_", "C-out": "cout_"})[a.scheme] + a.task) / "dump"
     if a.dump is not None:
         dump = a.dump.resolve()
-    if a.obs_v1 and a.scheme != "D":
-        raise ValueError("--obs-v1: D only")
+    if a.obs_v1 and a.scheme not in ("D", "C-out"):  # T13 v4 round 2: C-out-Table / C-out-Push (C-out controller reads env.observation)
+        raise ValueError("--obs-v1: D or C-out only")
     env = PairEnv(dump, a.task)
     env.obs_v1 = a.obs_v1
     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"

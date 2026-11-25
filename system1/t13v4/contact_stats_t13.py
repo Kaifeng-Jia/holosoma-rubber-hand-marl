@@ -26,7 +26,7 @@ ROOT = Path(__file__).resolve().parents[2]
 sys.path.insert(0, str(ROOT))
 import system1.t12v2.contact_stats as cs  # noqa: E402
 
-CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table"}
+CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 
 
 def jobs(run):

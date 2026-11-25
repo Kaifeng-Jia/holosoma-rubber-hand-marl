@@ -8,6 +8,7 @@
   comparison.csv completions next to the paper D of the same task (T03 d_final_5070, seeds 721-723; original reference,
                  original observation, no randomization; its test states differ: new reference, states regenerated); Table (no T03
                  row): paper D Table Isaac / MuJoCo from T10 (isaac_vs_mujoco.csv) and the T10b pilot (D Table + randomization);
+                 round 2 (c_out_*): also T03 C-out of the same task and the round-1 D run of the same configuration;
   training_diag.csv / .json  internal diagnostics from the copied-back training metrics (train/metrics.jsonl): per robot, the
                  hand-force-in-should share, lost-contact termination signals (term 2) and penalty step share (term 3); last 50
                  iterations and whole run;
@@ -40,7 +41,7 @@ sys.path.insert(0, str(ROOT))
 from system1.sim2sim.failure_t10s import causes as mj_causes  # noqa: E402
 from system1.t10b.phases import termination_errors, termination_reason  # noqa: E402
 
-CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table"}
+CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 
 
 def sha(p):
@@ -149,6 +150,19 @@ def main():
                 comp.append(dict(source=f"T10b pilot D Table + randomization ({'Isaac' if r['simulator'] == 'isaac' else 'MuJoCo'}; T10b retrain/finals)",
                                  training_seed=721, level_cm=r["level_cm"], n_completed=r["n_completed"], n_episodes=r["n_episodes"], checkpoint_iteration=14000,
                                  states_sha256=r["states_sha256"], note="original reference / observation; different test states"))
+    if a.run.startswith("c_out_"):  # round 2: T03 C-out of the same task (original reference / observation, no randomization), and round-1 D
+        for r in csv.DictReader(open(ROOT / "results_system1/T03/c2_main/per_seed_summary.csv")):
+            if r["task"] == task and r["variant"] == "C-out":
+                comp.append(dict(source="T03 C-out (c2_main, Isaac; original reference / observation, no randomization)", training_seed=r["training_seed"],
+                                 level_cm=r["perturbation_level_cm"], n_completed=r["n_completed"], n_episodes=r["n_episodes"],
+                                 checkpoint_iteration=r["checkpoint_iteration"], states_sha256=r["states_sha256"], note="different test states"))
+        d1 = {"table": "d_table", "push": "d_push"}[task]
+        f1 = ROOT / "results_system1/T13_runs" / d1 / "summary.csv"
+        if f1.exists():
+            for r in csv.DictReader(open(f1)):
+                comp.append(dict(source=f"T13 v4 round 1 {d1} ({r['simulator']}, noise {r['noise']}; same configuration, structure D)", training_seed=721,
+                                 level_cm=r["level_cm"], n_completed=r.get("n_completed"), n_episodes=r.get("n_perturbed"), checkpoint_iteration=None,
+                                 states_sha256=r.get("states_sha256"), note="same test states"))
     for s in summ:
         if "n_completed" in s:
             comp.append(dict(source=f"T13 v4 {a.run} ({'Isaac' if s['simulator'] == 'isaac' else 'MuJoCo'}, noise {s['noise']})", training_seed=721,

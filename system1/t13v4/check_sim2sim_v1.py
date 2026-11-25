@@ -77,19 +77,34 @@ def main():
     ap.add_argument("--task", required=True)
     ap.add_argument("--onnx", type=Path, required=True)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--scheme", choices=("D", "C-out"), default="D",
+                    help="round 2 C-out: also SONIC's inputs (unmodified reference, its own last action) and q* = SONIC target + D scale * "
+                         "clip(a) step by step against the Isaac record (as T10c check_observations.py --runs cout_*); D = unchanged")
+    ap.add_argument("--base", type=Path, default=None, help="Isaac export directory (default logs_system1/t13v4/isaac_dump/<run>)")
+    ap.add_argument("--no-initial", action="store_true", help="test: skip the initial-state check (needs the run's Isaac finals)")
     a = ap.parse_args()
     a.out.mkdir(parents=True, exist_ok=True)
-    base = ROOT / "logs_system1/t13v4/isaac_dump" / a.run
+    base = ROOT / "logs_system1/t13v4/isaac_dump" / a.run if a.base is None else a.base.resolve()
     env = PairEnv(base / "dump", a.task)
     env.obs_v1 = True
     # 1. initial states
     irows, files = [], []
-    initial_states(env, a.run, irows, files)
-    with (a.out / "initial_states.csv").open("w", newline="") as f:
-        w = csv.DictWriter(f, fieldnames=list(irows[0]))
-        w.writeheader()
-        w.writerows(irows)
-    imax = {k: max(x[k] for x in irows) for k in irows[0] if k.endswith(("_rad", "_m", "_abs"))}
+    if not a.no_initial:
+        initial_states(env, a.run, irows, files)
+        with (a.out / "initial_states.csv").open("w", newline="") as f:
+            w = csv.DictWriter(f, fieldnames=list(irows[0]))
+            w.writeheader()
+            w.writerows(irows)
+    imax = {k: max(x[k] for x in irows) for k in irows[0] if k.endswith(("_rad", "_m", "_abs"))} if irows else {}
+    cout = sonic = None
+    s_err = dict(actor_obs=0.0, tokenizer=0.0, action=0.0, target=0.0, q_rec=0.0, q_onnx=0.0)
+    if a.scheme == "C-out":
+        import torch
+        from system1.sim2sim.sonic_mj import ActorOnnx as _A, COutController, SonicOnnx
+        sonic = SonicOnnx(env.dof_names)
+        cout = COutController.__new__(COutController)
+        cout.env, cout.sonic, cout.scale_d = env, sonic, np.array(env.ss.control["action_scales"])
+        act_c = _A(a.onnx)
     # 2. observation v1
     z = np.load(base / "dump/nominal.sim2sim.npz")
     tr = np.load(base / "eval/nominal.trajectory.npz")
@@ -109,10 +124,26 @@ def main():
         fk_pos = max(fk_pos, float(np.abs(st["body_pos"] - z["body_pos_w"][k, 0]).max()))
         dq = np.abs(np.sum(st["body_quat_xyzw"] * z["body_quat_w_xyzw"][k, 0], axis=-1))
         fk_ang = max(fk_ang, float((2 * np.arccos(np.clip(dq, -1, 1))).max()))
-        last = z["actions"][k - 1, 0].reshape(2, 29) if k > 0 else np.zeros((2, 29))
+        lk = "actions" if a.scheme == "D" else "policy_action"  # scheme C: the env's last-action input (as T10c check_observations.py)
+        last = z[lk][k - 1, 0].reshape(2, 29) if k > 0 else np.zeros((2, 29))
         env.t = k
         actor, mate = env.observation(last, st=st)
         err[k] = np.abs(np.concatenate([actor, mate], axis=1) - np.concatenate([z["actor_obs"][k, 0], z["teammate_obs"][k, 0]], axis=1))
+        if cout is not None:  # as system1/sim2sim/check_observations.py (T10c, C-out)
+            if k == 0:
+                sonic.reset()
+            else:
+                sonic.last_action = torch.as_tensor(np.clip(z["sonic_action"][k - 1], -sonic.clip, sonic.clip), dtype=torch.float32)
+            act, target_s, sobs = sonic.act(*cout.sonic_inputs_out(st, k))
+            s_err["actor_obs"] = max(s_err["actor_obs"], float(np.abs(sobs["sonic_actor_obs"] - z["sonic_actor_obs"][k]).max()))
+            s_err["tokenizer"] = max(s_err["tokenizer"], float(np.abs(sobs["sonic_tokenizer"] - z["sonic_tokenizer"][k]).max()))
+            s_err["action"] = max(s_err["action"], float(np.abs(act - z["sonic_action"][k]).max()))
+            s_err["target"] = max(s_err["target"], float(np.abs(target_s - z["sonic_target_s"][k]).max()))
+            th = target_s[:, sonic.s2h].astype(np.float64)
+            pd_rec = z["pd_target"][k, 0].reshape(2, 29).astype(np.float64)
+            s_err["q_rec"] = max(s_err["q_rec"], float(np.abs(th + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max()))
+            mine = np.concatenate([actor, mate], axis=1)
+            s_err["q_onnx"] = max(s_err["q_onnx"], float(np.abs(th + cout.residual(act_c(mine)) - pd_rec).max()))
     from system1.sim2sim.sonic_mj import ActorOnnx
     obs_rec = np.concatenate([z["actor_obs"][:, 0], z["teammate_obs"][:, 0]], axis=-1).reshape(-1, 159)
     a_err = float(np.abs(ActorOnnx(a.onnx)(obs_rec) - z["actions"][:, 0].reshape(-1, 29)).max())
@@ -131,6 +162,14 @@ def main():
                    inputs=dict(dump=str((base / "dump").relative_to(ROOT)), scene_json_sha256=sha(base / "dump/scene.json"),
                                record_sha256=sha(base / "dump/nominal.sim2sim.npz"), trajectory_sha256=sha(base / "eval/nominal.trajectory.npz"),
                                onnx=str(a.onnx), onnx_sha256=sha(a.onnx)))
+    if cout is not None:
+        summary["cout"] = dict(sonic_actor_obs_max_abs_diff=s_err["actor_obs"], sonic_tokenizer_max_abs_diff=s_err["tokenizer"],
+                               sonic_inputs_passed=bool(max(s_err["actor_obs"], s_err["tokenizer"]) < TOL), sonic_action_onnx_vs_isaac_max_abs_diff=s_err["action"],
+                               sonic_target_onnx_vs_isaac_max_abs_rad=s_err["target"], q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad=s_err["q_rec"],
+                               q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad=s_err["q_onnx"], q_star_passed=bool(s_err["q_rec"] < TOL),
+                               threshold=TOL)
+    if a.no_initial:
+        summary["initial_states"]["note"] = "skipped (--no-initial, test)"
     (a.out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
     print(json.dumps(dict(initial=summary["initial_states"]["all_passed"], n=len(irows), imax=imax, obs=summary["observations"]), indent=1))
 

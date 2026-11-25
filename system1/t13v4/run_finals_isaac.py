@@ -30,7 +30,7 @@ NY = ZoneInfo("America/New_York")
 PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
 SLOTS = ("16-23", "24-31")
 STATES = ROOT / "system1/t13v4/states_t14r6C"
-CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table"}
+CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 
 
 def now():
