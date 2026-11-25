@@ -34,8 +34,9 @@ def solve_status(d):
         lines = [x for x in lg.read_text(errors="replace").splitlines() if x.strip()]
         errs = [x.strip() for x in lines if "Error" in x]
         if errs:
-            last = [x for x in lines if "/1" in x and "cost=" in x]
-            at = last[-1].split("|")[-1].split("[")[0].strip() if last else "?"
+            import re
+            prog = re.findall(r"\|\s*(\d+/\d+)\s*\[", lg.read_text(errors="replace"))  # tqdm progress "N/M [" (any total)
+            at = prog[-1] if prog else "?"
             stage = "第一阶段" if sum("Starting motion retargeting" in x for x in lines) <= 1 else "第二阶段"
             out.append(f"r{r} 求解失败（{stage} {errs[-1][:60]}，停在第 {at} 帧）")
         else:

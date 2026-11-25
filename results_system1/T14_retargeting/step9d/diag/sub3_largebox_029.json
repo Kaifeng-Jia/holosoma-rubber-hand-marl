@@ -1,0 +1,4384 @@
+{
+ "object": "largebox",
+ "sequence": "sub3_largebox_029",
+ "frames": [
+  44,
+  181
+ ],
+ "smpl_scale": 0.6800251603126526,
+ "box_size_solver_m": [
+  0.2272,
+  0.229,
+  0.2442
+ ],
+ "levels": {
+  "0.55": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.2499,
+    "pelvis_mismatch_max_m": 0.4508,
+    "pelvis_mismatch_mean_m": 0.2551,
+    "pelvis_mismatch_max_person_scale_m": 0.6629,
+    "partner_initial_pelvis_distance_m": 0.6434,
+    "partner_min_pelvis_distance_m": 0.505,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.3413,
+     -0.1115
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": -0.0111,
+      "min_frame": 128,
+      "frames_inside": 5,
+      "first5_m": [
+       0.035,
+       0.038,
+       0.049,
+       0.066,
+       0.065
+      ],
+      "last5_m": [
+       0.03,
+       0.037,
+       0.044,
+       0.041,
+       0.035
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.60": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.2726,
+    "pelvis_mismatch_max_m": 0.4639,
+    "pelvis_mismatch_mean_m": 0.2619,
+    "pelvis_mismatch_max_person_scale_m": 0.6822,
+    "partner_initial_pelvis_distance_m": 0.6638,
+    "partner_min_pelvis_distance_m": 0.5259,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.3601,
+     -0.1206
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": -0.0029,
+      "min_frame": 129,
+      "frames_inside": 3,
+      "first5_m": [
+       0.047,
+       0.048,
+       0.056,
+       0.07,
+       0.077
+      ],
+      "last5_m": [
+       0.029,
+       0.036,
+       0.043,
+       0.044,
+       0.038
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.65": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.2954,
+    "pelvis_mismatch_max_m": 0.4771,
+    "pelvis_mismatch_mean_m": 0.2688,
+    "pelvis_mismatch_max_person_scale_m": 0.7015,
+    "partner_initial_pelvis_distance_m": 0.6843,
+    "partner_min_pelvis_distance_m": 0.5468,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.3789,
+     -0.1296
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0052,
+      "min_frame": 129,
+      "frames_inside": 0,
+      "first5_m": [
+       0.06,
+       0.059,
+       0.064,
+       0.077,
+       0.09
+      ],
+      "last5_m": [
+       0.029,
+       0.036,
+       0.043,
+       0.048,
+       0.043
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.70": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.3181,
+    "pelvis_mismatch_max_m": 0.4903,
+    "pelvis_mismatch_mean_m": 0.2757,
+    "pelvis_mismatch_max_person_scale_m": 0.721,
+    "partner_initial_pelvis_distance_m": 0.7047,
+    "partner_min_pelvis_distance_m": 0.5677,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.3978,
+     -0.1387
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0136,
+      "min_frame": 129,
+      "frames_inside": 0,
+      "first5_m": [
+       0.072,
+       0.071,
+       0.074,
+       0.084,
+       0.101
+      ],
+      "last5_m": [
+       0.031,
+       0.038,
+       0.044,
+       0.05,
+       0.05
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.75": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.3408,
+    "pelvis_mismatch_max_m": 0.5036,
+    "pelvis_mismatch_mean_m": 0.2827,
+    "pelvis_mismatch_max_person_scale_m": 0.7405,
+    "partner_initial_pelvis_distance_m": 0.7252,
+    "partner_min_pelvis_distance_m": 0.5886,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.4166,
+     -0.1478
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0221,
+      "min_frame": 129,
+      "frames_inside": 0,
+      "first5_m": [
+       0.085,
+       0.082,
+       0.084,
+       0.093,
+       0.108
+      ],
+      "last5_m": [
+       0.035,
+       0.041,
+       0.048,
+       0.053,
+       0.057
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.80": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.3635,
+    "pelvis_mismatch_max_m": 0.5169,
+    "pelvis_mismatch_mean_m": 0.2898,
+    "pelvis_mismatch_max_person_scale_m": 0.7601,
+    "partner_initial_pelvis_distance_m": 0.7458,
+    "partner_min_pelvis_distance_m": 0.6095,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.4354,
+     -0.1569
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0305,
+      "min_frame": 129,
+      "frames_inside": 0,
+      "first5_m": [
+       0.098,
+       0.095,
+       0.095,
+       0.102,
+       0.115
+      ],
+      "last5_m": [
+       0.04,
+       0.046,
+       0.052,
+       0.058,
+       0.063
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.85": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.3862,
+    "pelvis_mismatch_max_m": 0.5303,
+    "pelvis_mismatch_mean_m": 0.2969,
+    "pelvis_mismatch_max_person_scale_m": 0.7798,
+    "partner_initial_pelvis_distance_m": 0.7663,
+    "partner_min_pelvis_distance_m": 0.6304,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.4543,
+     -0.166
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.039,
+      "min_frame": 129,
+      "frames_inside": 0,
+      "first5_m": [
+       0.111,
+       0.107,
+       0.106,
+       0.112,
+       0.124
+      ],
+      "last5_m": [
+       0.046,
+       0.052,
+       0.058,
+       0.063,
+       0.068
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.90": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.4089,
+    "pelvis_mismatch_max_m": 0.5437,
+    "pelvis_mismatch_mean_m": 0.304,
+    "pelvis_mismatch_max_person_scale_m": 0.7995,
+    "partner_initial_pelvis_distance_m": 0.7869,
+    "partner_min_pelvis_distance_m": 0.6513,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.4731,
+     -0.175
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0472,
+      "min_frame": 130,
+      "frames_inside": 0,
+      "first5_m": [
+       0.123,
+       0.119,
+       0.118,
+       0.122,
+       0.133
+      ],
+      "last5_m": [
+       0.053,
+       0.059,
+       0.064,
+       0.07,
+       0.074
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "0.95": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.4317,
+    "pelvis_mismatch_max_m": 0.5572,
+    "pelvis_mismatch_mean_m": 0.3112,
+    "pelvis_mismatch_max_person_scale_m": 0.8193,
+    "partner_initial_pelvis_distance_m": 0.8074,
+    "partner_min_pelvis_distance_m": 0.6722,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.4919,
+     -0.1841
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0555,
+      "min_frame": 130,
+      "frames_inside": 0,
+      "first5_m": [
+       0.136,
+       0.131,
+       0.129,
+       0.133,
+       0.142
+      ],
+      "last5_m": [
+       0.06,
+       0.066,
+       0.072,
+       0.077,
+       0.081
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.00": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.4544,
+    "pelvis_mismatch_max_m": 0.5707,
+    "pelvis_mismatch_mean_m": 0.3184,
+    "pelvis_mismatch_max_person_scale_m": 0.8392,
+    "partner_initial_pelvis_distance_m": 0.828,
+    "partner_min_pelvis_distance_m": 0.693,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.5107,
+     -0.1932
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.0638,
+      "min_frame": 130,
+      "frames_inside": 0,
+      "first5_m": [
+       0.149,
+       0.144,
+       0.141,
+       0.144,
+       0.152
+      ],
+      "last5_m": [
+       0.068,
+       0.073,
+       0.079,
+       0.084,
+       0.088
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.25": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.568,
+    "pelvis_mismatch_max_m": 0.6387,
+    "pelvis_mismatch_mean_m": 0.3551,
+    "pelvis_mismatch_max_person_scale_m": 0.9392,
+    "partner_initial_pelvis_distance_m": 0.9312,
+    "partner_min_pelvis_distance_m": 0.7975,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.6049,
+     -0.2386
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1053,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.213,
+       0.206,
+       0.201,
+       0.2,
+       0.205
+      ],
+      "last5_m": [
+       0.108,
+       0.113,
+       0.12,
+       0.125,
+       0.129
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.50": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.6816,
+    "pelvis_mismatch_max_m": 0.7074,
+    "pelvis_mismatch_mean_m": 0.3925,
+    "pelvis_mismatch_max_person_scale_m": 1.0402,
+    "partner_initial_pelvis_distance_m": 1.0347,
+    "partner_min_pelvis_distance_m": 0.902,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.699,
+     -0.284
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1465,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.277,
+       0.269,
+       0.262,
+       0.259,
+       0.261
+      ],
+      "last5_m": [
+       0.149,
+       0.155,
+       0.163,
+       0.17,
+       0.174
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.55": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.7043,
+    "pelvis_mismatch_max_m": 0.7212,
+    "pelvis_mismatch_mean_m": 0.4,
+    "pelvis_mismatch_max_person_scale_m": 1.0605,
+    "partner_initial_pelvis_distance_m": 1.0554,
+    "partner_min_pelvis_distance_m": 0.9229,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.7178,
+     -0.2931
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1548,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.289,
+       0.281,
+       0.274,
+       0.271,
+       0.273
+      ],
+      "last5_m": [
+       0.157,
+       0.163,
+       0.172,
+       0.179,
+       0.183
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.60": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.727,
+    "pelvis_mismatch_max_m": 0.735,
+    "pelvis_mismatch_mean_m": 0.4076,
+    "pelvis_mismatch_max_person_scale_m": 1.0809,
+    "partner_initial_pelvis_distance_m": 1.0761,
+    "partner_min_pelvis_distance_m": 0.9438,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.7367,
+     -0.3022
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1631,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.302,
+       0.294,
+       0.286,
+       0.283,
+       0.285
+      ],
+      "last5_m": [
+       0.165,
+       0.172,
+       0.18,
+       0.188,
+       0.192
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.65": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.7497,
+    "pelvis_mismatch_max_m": 0.7488,
+    "pelvis_mismatch_mean_m": 0.4152,
+    "pelvis_mismatch_max_person_scale_m": 1.1012,
+    "partner_initial_pelvis_distance_m": 1.0968,
+    "partner_min_pelvis_distance_m": 0.9647,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.7555,
+     -0.3112
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1714,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.315,
+       0.306,
+       0.298,
+       0.295,
+       0.296
+      ],
+      "last5_m": [
+       0.173,
+       0.18,
+       0.189,
+       0.197,
+       0.201
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.70": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.7725,
+    "pelvis_mismatch_max_m": 0.7627,
+    "pelvis_mismatch_mean_m": 0.4228,
+    "pelvis_mismatch_max_person_scale_m": 1.1216,
+    "partner_initial_pelvis_distance_m": 1.1176,
+    "partner_min_pelvis_distance_m": 0.9856,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.7743,
+     -0.3203
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1797,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.328,
+       0.319,
+       0.311,
+       0.307,
+       0.308
+      ],
+      "last5_m": [
+       0.182,
+       0.189,
+       0.198,
+       0.207,
+       0.211
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.75": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.7952,
+    "pelvis_mismatch_max_m": 0.7766,
+    "pelvis_mismatch_mean_m": 0.4305,
+    "pelvis_mismatch_max_person_scale_m": 1.142,
+    "partner_initial_pelvis_distance_m": 1.1383,
+    "partner_min_pelvis_distance_m": 1.0065,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.7932,
+     -0.3294
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.188,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.341,
+       0.332,
+       0.323,
+       0.319,
+       0.32
+      ],
+      "last5_m": [
+       0.19,
+       0.197,
+       0.207,
+       0.216,
+       0.221
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.80": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.8179,
+    "pelvis_mismatch_max_m": 0.7904,
+    "pelvis_mismatch_mean_m": 0.4381,
+    "pelvis_mismatch_max_person_scale_m": 1.1624,
+    "partner_initial_pelvis_distance_m": 1.159,
+    "partner_min_pelvis_distance_m": 1.0274,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.812,
+     -0.3385
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.1964,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.355,
+       0.345,
+       0.335,
+       0.331,
+       0.331
+      ],
+      "last5_m": [
+       0.198,
+       0.206,
+       0.217,
+       0.226,
+       0.23
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.85": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.8406,
+    "pelvis_mismatch_max_m": 0.8043,
+    "pelvis_mismatch_mean_m": 0.4458,
+    "pelvis_mismatch_max_person_scale_m": 1.1828,
+    "partner_initial_pelvis_distance_m": 1.1798,
+    "partner_min_pelvis_distance_m": 1.0483,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.8308,
+     -0.3476
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2048,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.368,
+       0.357,
+       0.348,
+       0.343,
+       0.343
+      ],
+      "last5_m": [
+       0.207,
+       0.215,
+       0.226,
+       0.235,
+       0.24
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.90": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.8633,
+    "pelvis_mismatch_max_m": 0.8182,
+    "pelvis_mismatch_mean_m": 0.4535,
+    "pelvis_mismatch_max_person_scale_m": 1.2033,
+    "partner_initial_pelvis_distance_m": 1.2006,
+    "partner_min_pelvis_distance_m": 1.0692,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.8496,
+     -0.3566
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2133,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.381,
+       0.37,
+       0.361,
+       0.356,
+       0.355
+      ],
+      "last5_m": [
+       0.215,
+       0.224,
+       0.235,
+       0.245,
+       0.25
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "1.95": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.8861,
+    "pelvis_mismatch_max_m": 0.8322,
+    "pelvis_mismatch_mean_m": 0.4612,
+    "pelvis_mismatch_max_person_scale_m": 1.2237,
+    "partner_initial_pelvis_distance_m": 1.2213,
+    "partner_min_pelvis_distance_m": 1.0901,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.8685,
+     -0.3657
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2218,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.395,
+       0.384,
+       0.373,
+       0.368,
+       0.368
+      ],
+      "last5_m": [
+       0.224,
+       0.232,
+       0.244,
+       0.254,
+       0.26
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.00": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.9088,
+    "pelvis_mismatch_max_m": 0.8461,
+    "pelvis_mismatch_mean_m": 0.4689,
+    "pelvis_mismatch_max_person_scale_m": 1.2442,
+    "partner_initial_pelvis_distance_m": 1.2421,
+    "partner_min_pelvis_distance_m": 1.111,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.8873,
+     -0.3748
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2304,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.408,
+       0.397,
+       0.386,
+       0.381,
+       0.38
+      ],
+      "last5_m": [
+       0.233,
+       0.241,
+       0.254,
+       0.264,
+       0.269
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.05": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.9315,
+    "pelvis_mismatch_max_m": 0.86,
+    "pelvis_mismatch_mean_m": 0.4767,
+    "pelvis_mismatch_max_person_scale_m": 1.2647,
+    "partner_initial_pelvis_distance_m": 1.2629,
+    "partner_min_pelvis_distance_m": 1.1319,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.9061,
+     -0.3839
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.239,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.422,
+       0.41,
+       0.399,
+       0.393,
+       0.392
+      ],
+      "last5_m": [
+       0.241,
+       0.25,
+       0.263,
+       0.274,
+       0.279
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.10": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.9542,
+    "pelvis_mismatch_max_m": 0.874,
+    "pelvis_mismatch_mean_m": 0.4844,
+    "pelvis_mismatch_max_person_scale_m": 1.2852,
+    "partner_initial_pelvis_distance_m": 1.2836,
+    "partner_min_pelvis_distance_m": 1.1528,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.925,
+     -0.393
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2476,
+      "min_frame": 131,
+      "frames_inside": 0,
+      "first5_m": [
+       0.435,
+       0.423,
+       0.412,
+       0.406,
+       0.405
+      ],
+      "last5_m": [
+       0.25,
+       0.259,
+       0.272,
+       0.284,
+       0.289
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.15": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.9769,
+    "pelvis_mismatch_max_m": 0.888,
+    "pelvis_mismatch_mean_m": 0.4922,
+    "pelvis_mismatch_max_person_scale_m": 1.3058,
+    "partner_initial_pelvis_distance_m": 1.3044,
+    "partner_min_pelvis_distance_m": 1.1737,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.9438,
+     -0.402
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2562,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.449,
+       0.436,
+       0.425,
+       0.419,
+       0.417
+      ],
+      "last5_m": [
+       0.259,
+       0.268,
+       0.282,
+       0.294,
+       0.299
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.20": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 0.9997,
+    "pelvis_mismatch_max_m": 0.9019,
+    "pelvis_mismatch_mean_m": 0.5,
+    "pelvis_mismatch_max_person_scale_m": 1.3263,
+    "partner_initial_pelvis_distance_m": 1.3252,
+    "partner_min_pelvis_distance_m": 1.1946,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.9626,
+     -0.4111
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2646,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.463,
+       0.45,
+       0.438,
+       0.431,
+       0.43
+      ],
+      "last5_m": [
+       0.267,
+       0.277,
+       0.291,
+       0.303,
+       0.309
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.25": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.0224,
+    "pelvis_mismatch_max_m": 0.9159,
+    "pelvis_mismatch_mean_m": 0.5078,
+    "pelvis_mismatch_max_person_scale_m": 1.3469,
+    "partner_initial_pelvis_distance_m": 1.346,
+    "partner_min_pelvis_distance_m": 1.2155,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     0.9814,
+     -0.4202
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2731,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.476,
+       0.463,
+       0.451,
+       0.444,
+       0.442
+      ],
+      "last5_m": [
+       0.276,
+       0.286,
+       0.301,
+       0.313,
+       0.319
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.30": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.0451,
+    "pelvis_mismatch_max_m": 0.9299,
+    "pelvis_mismatch_mean_m": 0.5156,
+    "pelvis_mismatch_max_person_scale_m": 1.3675,
+    "partner_initial_pelvis_distance_m": 1.3668,
+    "partner_min_pelvis_distance_m": 1.2364,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0003,
+     -0.4293
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2816,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.49,
+       0.476,
+       0.464,
+       0.457,
+       0.455
+      ],
+      "last5_m": [
+       0.285,
+       0.295,
+       0.31,
+       0.323,
+       0.329
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.35": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.0678,
+    "pelvis_mismatch_max_m": 0.9439,
+    "pelvis_mismatch_mean_m": 0.5234,
+    "pelvis_mismatch_max_person_scale_m": 1.3881,
+    "partner_initial_pelvis_distance_m": 1.3876,
+    "partner_min_pelvis_distance_m": 1.2573,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0191,
+     -0.4384
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2902,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.504,
+       0.49,
+       0.477,
+       0.47,
+       0.468
+      ],
+      "last5_m": [
+       0.294,
+       0.305,
+       0.32,
+       0.333,
+       0.339
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.40": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.0905,
+    "pelvis_mismatch_max_m": 0.9579,
+    "pelvis_mismatch_mean_m": 0.5312,
+    "pelvis_mismatch_max_person_scale_m": 1.4087,
+    "partner_initial_pelvis_distance_m": 1.4084,
+    "partner_min_pelvis_distance_m": 1.2782,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0379,
+     -0.4474
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.2988,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.518,
+       0.503,
+       0.49,
+       0.483,
+       0.48
+      ],
+      "last5_m": [
+       0.303,
+       0.314,
+       0.329,
+       0.343,
+       0.349
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.45": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.1132,
+    "pelvis_mismatch_max_m": 0.9719,
+    "pelvis_mismatch_mean_m": 0.5391,
+    "pelvis_mismatch_max_person_scale_m": 1.4293,
+    "partner_initial_pelvis_distance_m": 1.4292,
+    "partner_min_pelvis_distance_m": 1.2991,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0567,
+     -0.4565
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3074,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.531,
+       0.517,
+       0.503,
+       0.496,
+       0.493
+      ],
+      "last5_m": [
+       0.312,
+       0.323,
+       0.339,
+       0.353,
+       0.359
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.50": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.136,
+    "pelvis_mismatch_max_m": 0.986,
+    "pelvis_mismatch_mean_m": 0.5469,
+    "pelvis_mismatch_max_person_scale_m": 1.4499,
+    "partner_initial_pelvis_distance_m": 1.45,
+    "partner_min_pelvis_distance_m": 1.32,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0756,
+     -0.4656
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.316,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.545,
+       0.53,
+       0.517,
+       0.509,
+       0.506
+      ],
+      "last5_m": [
+       0.32,
+       0.332,
+       0.349,
+       0.363,
+       0.37
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.55": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.1587,
+    "pelvis_mismatch_max_m": 1.0,
+    "pelvis_mismatch_mean_m": 0.5548,
+    "pelvis_mismatch_max_person_scale_m": 1.4705,
+    "partner_initial_pelvis_distance_m": 1.4708,
+    "partner_min_pelvis_distance_m": 1.3409,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.0944,
+     -0.4747
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3247,
+      "min_frame": 127,
+      "frames_inside": 0,
+      "first5_m": [
+       0.559,
+       0.544,
+       0.53,
+       0.522,
+       0.519
+      ],
+      "last5_m": [
+       0.329,
+       0.341,
+       0.358,
+       0.373,
+       0.38
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.60": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.1814,
+    "pelvis_mismatch_max_m": 1.014,
+    "pelvis_mismatch_mean_m": 0.5627,
+    "pelvis_mismatch_max_person_scale_m": 1.4912,
+    "partner_initial_pelvis_distance_m": 1.4916,
+    "partner_min_pelvis_distance_m": 1.3618,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.1132,
+     -0.4838
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3252,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.573,
+       0.557,
+       0.543,
+       0.535,
+       0.532
+      ],
+      "last5_m": [
+       0.338,
+       0.35,
+       0.368,
+       0.383,
+       0.39
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.65": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.2041,
+    "pelvis_mismatch_max_m": 1.0281,
+    "pelvis_mismatch_mean_m": 0.5706,
+    "pelvis_mismatch_max_person_scale_m": 1.5118,
+    "partner_initial_pelvis_distance_m": 1.5124,
+    "partner_min_pelvis_distance_m": 1.3827,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.1321,
+     -0.4928
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3255,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.587,
+       0.571,
+       0.556,
+       0.548,
+       0.544
+      ],
+      "last5_m": [
+       0.347,
+       0.36,
+       0.378,
+       0.393,
+       0.4
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.70": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.2268,
+    "pelvis_mismatch_max_m": 1.0421,
+    "pelvis_mismatch_mean_m": 0.5785,
+    "pelvis_mismatch_max_person_scale_m": 1.5325,
+    "partner_initial_pelvis_distance_m": 1.5332,
+    "partner_min_pelvis_distance_m": 1.4036,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.1509,
+     -0.5019
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3259,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.601,
+       0.584,
+       0.57,
+       0.561,
+       0.557
+      ],
+      "last5_m": [
+       0.356,
+       0.369,
+       0.387,
+       0.403,
+       0.41
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.75": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.2496,
+    "pelvis_mismatch_max_m": 1.0562,
+    "pelvis_mismatch_mean_m": 0.5864,
+    "pelvis_mismatch_max_person_scale_m": 1.5532,
+    "partner_initial_pelvis_distance_m": 1.554,
+    "partner_min_pelvis_distance_m": 1.4245,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.1697,
+     -0.511
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3264,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.615,
+       0.598,
+       0.583,
+       0.574,
+       0.57
+      ],
+      "last5_m": [
+       0.365,
+       0.378,
+       0.397,
+       0.413,
+       0.42
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.80": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.2723,
+    "pelvis_mismatch_max_m": 1.0702,
+    "pelvis_mismatch_mean_m": 0.5943,
+    "pelvis_mismatch_max_person_scale_m": 1.5738,
+    "partner_initial_pelvis_distance_m": 1.5748,
+    "partner_min_pelvis_distance_m": 1.4454,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.1885,
+     -0.5201
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3268,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.628,
+       0.611,
+       0.596,
+       0.587,
+       0.583
+      ],
+      "last5_m": [
+       0.374,
+       0.387,
+       0.407,
+       0.423,
+       0.431
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.85": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.295,
+    "pelvis_mismatch_max_m": 1.0843,
+    "pelvis_mismatch_mean_m": 0.6022,
+    "pelvis_mismatch_max_person_scale_m": 1.5945,
+    "partner_initial_pelvis_distance_m": 1.5957,
+    "partner_min_pelvis_distance_m": 1.4663,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.2074,
+     -0.5292
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3272,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.642,
+       0.625,
+       0.61,
+       0.6,
+       0.596
+      ],
+      "last5_m": [
+       0.383,
+       0.397,
+       0.416,
+       0.433,
+       0.441
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.90": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.3177,
+    "pelvis_mismatch_max_m": 1.0984,
+    "pelvis_mismatch_mean_m": 0.6102,
+    "pelvis_mismatch_max_person_scale_m": 1.6152,
+    "partner_initial_pelvis_distance_m": 1.6165,
+    "partner_min_pelvis_distance_m": 1.4872,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.2262,
+     -0.5382
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3277,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.656,
+       0.639,
+       0.623,
+       0.613,
+       0.609
+      ],
+      "last5_m": [
+       0.392,
+       0.406,
+       0.426,
+       0.443,
+       0.451
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "2.95": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.3404,
+    "pelvis_mismatch_max_m": 1.1125,
+    "pelvis_mismatch_mean_m": 0.6181,
+    "pelvis_mismatch_max_person_scale_m": 1.6359,
+    "partner_initial_pelvis_distance_m": 1.6373,
+    "partner_min_pelvis_distance_m": 1.5081,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.245,
+     -0.5473
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3281,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.67,
+       0.652,
+       0.636,
+       0.627,
+       0.622
+      ],
+      "last5_m": [
+       0.401,
+       0.415,
+       0.436,
+       0.453,
+       0.461
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  },
+  "3.00": {
+   "gravity_deg": 0.0,
+   "main_motion": {
+    "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+    "limit_m": 1.0,
+    "person_r0_m": 2.2653,
+    "person_r1_m": 2.2924,
+    "person_r0_solver_m": 1.5405,
+    "person_r1_solver_m": 1.5589,
+    "limit_solver_m": 0.68,
+    "passed": true
+   },
+   "passed": true,
+   "diag": {
+    "axis": 0,
+    "sigma": -1.0,
+    "walk_axis_angle_deg": 39.33,
+    "L_m": 1.3632,
+    "pelvis_mismatch_max_m": 1.1265,
+    "pelvis_mismatch_mean_m": 0.6261,
+    "pelvis_mismatch_max_person_scale_m": 1.6566,
+    "partner_initial_pelvis_distance_m": 1.6581,
+    "partner_min_pelvis_distance_m": 1.5291,
+    "shared_vs_demo_rotation_max_deg": 9.33,
+    "leg_offset_m": [
+     1.2639,
+     -0.5564
+    ],
+    "turn": "world",
+    "legs": "walk_scopy",
+    "walk": {
+     "w0": 23,
+     "w1": 121,
+     "swings": [
+      {
+       "foot": "left",
+       "start": 23,
+       "stop": 40
+      },
+      {
+       "foot": "right",
+       "start": 44,
+       "stop": 66
+      },
+      {
+       "foot": "left",
+       "start": 66,
+       "stop": 86
+      },
+      {
+       "foot": "right",
+       "start": 85,
+       "stop": 106
+      },
+      {
+       "foot": "left",
+       "start": 106,
+       "stop": 121
+      }
+     ]
+    },
+    "leg_box": {
+     "partner": {
+      "min_m": 0.3286,
+      "min_frame": 66,
+      "frames_inside": 0,
+      "first5_m": [
+       0.684,
+       0.666,
+       0.65,
+       0.64,
+       0.635
+      ],
+      "last5_m": [
+       0.41,
+       0.424,
+       0.445,
+       0.463,
+       0.471
+      ]
+     },
+     "demo": {
+      "min_m": 0.1291,
+      "min_frame": 136,
+      "frames_inside": 0,
+      "first5_m": [
+       0.152,
+       0.149,
+       0.146,
+       0.146,
+       0.148
+      ],
+      "last5_m": [
+       0.147,
+       0.141,
+       0.135,
+       0.131,
+       0.129
+      ]
+     }
+    },
+    "box_tilt_frame0_deg": 6.116
+   }
+  }
+ }
+}

@@ -1,0 +1,3443 @@
+{
+ "rules": "T14 step 9c: which partner links make the V0 non-hand penetration fail? Diagnostic only (read only, CPU).\n\nFor a level directory (r0/ r1/ solves): the V0 round-2 CollisionProxy (the evaluation's engine) of each robot vs the shared\ntarget; per robot: frames with non-hand proxy penetration (clearance < 0), the deepest value, the frame ranges, and the robot\nlinks of the witnesses counted over those frames (scripts/reference_geometry_round2_checks.CollisionProxy witnesses).\nThe walking segment of the level's gates file is given for reference.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_nonhand.py --levels <tag>=<level dir>@<gates json> ... --out <json>\n",
+ "levels": {
+  "largeboxa_m1p25": {
+   "level_dir": "logs_system1/t14/step9d/largeboxa/m1p25",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0125,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 40,
+     "deepest_m": 0.0568,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       0,
+       3
+      ],
+      [
+       5,
+       14
+      ],
+      [
+       17,
+       22
+      ],
+      [
+       105,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_knee_link",
+       14
+      ],
+      [
+       "torso_link",
+       6
+      ],
+      [
+       "right_hip_yaw_link",
+       5
+      ],
+      [
+       "left_knee_link",
+       4
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ],
+      [
+       "head_link",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "largeboxa_m1p50": {
+   "level_dir": "logs_system1/t14/step9d/largeboxa/m1p50",
+   "frames": 125,
+   "walk": [
+    15,
+    109
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0124,
+     "deepest_frame": 110,
+     "ranges": [
+      [
+       109,
+       110
+      ],
+      [
+       116,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_pitch_link",
+       9
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 50,
+     "deepest_m": 0.0503,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       0,
+       29
+      ],
+      [
+       105,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "right_knee_link",
+       15
+      ],
+      [
+       "torso_link",
+       14
+      ],
+      [
+       "left_knee_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       6
+      ],
+      [
+       "right_hip_yaw_link",
+       5
+      ],
+      [
+       "left_hip_roll_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p00",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 13,
+     "deepest_m": 0.0154,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       11,
+       13
+      ],
+      [
+       33,
+       39
+      ],
+      [
+       122,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       7
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 86,
+     "deepest_m": 0.0333,
+     "deepest_frame": 58,
+     "ranges": [
+      [
+       11,
+       14
+      ],
+      [
+       24,
+       91
+      ],
+      [
+       95,
+       104
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       130,
+       132
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       75
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ],
+      [
+       "left_wrist_yaw_link",
+       3
+      ],
+      [
+       "left_wrist_pitch_link",
+       3
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p25": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p25",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 21,
+     "deepest_m": 0.0159,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       9,
+       13
+      ],
+      [
+       21,
+       26
+      ],
+      [
+       33,
+       39
+      ],
+      [
+       122,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       8
+      ],
+      [
+       "torso_link",
+       7
+      ],
+      [
+       "left_hip_yaw_link",
+       3
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 84,
+     "deepest_m": 0.0324,
+     "deepest_frame": 58,
+     "ranges": [
+      [
+       11,
+       11
+      ],
+      [
+       24,
+       91
+      ],
+      [
+       95,
+       105
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       77
+      ],
+      [
+       "left_hip_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p50": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p50",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 30,
+     "deepest_m": 0.0212,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       39
+      ],
+      [
+       122,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       7
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 86,
+     "deepest_m": 0.0326,
+     "deepest_frame": 63,
+     "ranges": [
+      [
+       24,
+       105
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       80
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p55": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p55",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 30,
+     "deepest_m": 0.0212,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       122,
+       122
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.0327,
+     "deepest_frame": 63,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p60": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p60",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 30,
+     "deepest_m": 0.0212,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       122,
+       122
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.0329,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p65": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p65",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 30,
+     "deepest_m": 0.0211,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       122,
+       122
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.033,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p70": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p70",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0211,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.0322,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p75": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p75",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0209,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.0344,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "smallboxa_m1p80": {
+   "level_dir": "logs_system1/t14/step9d/smallboxa/m1p80",
+   "frames": 136,
+   "walk": [
+    19,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0203,
+     "deepest_frame": 12,
+     "ranges": [
+      [
+       7,
+       26
+      ],
+      [
+       33,
+       40
+      ],
+      [
+       124,
+       124
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       19
+      ],
+      [
+       "torso_link",
+       8
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 87,
+     "deepest_m": 0.0346,
+     "deepest_frame": 62,
+     "ranges": [
+      [
+       24,
+       106
+      ],
+      [
+       120,
+       120
+      ],
+      [
+       123,
+       123
+      ],
+      [
+       130,
+       131
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_wrist_yaw_link",
+       2
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub10_largebox_086_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub10_largebox_086/m1p00",
+   "frames": 89,
+   "walk": [
+    0,
+    80
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 25,
+     "deepest_m": 0.0375,
+     "deepest_frame": 10,
+     "ranges": [
+      [
+       4,
+       13
+      ],
+      [
+       26,
+       40
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_roll_link",
+       13
+      ],
+      [
+       "left_hip_yaw_link",
+       10
+      ],
+      [
+       "right_wrist_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 51,
+     "deepest_m": 0.0756,
+     "deepest_frame": 73,
+     "ranges": [
+      [
+       0,
+       35
+      ],
+      [
+       68,
+       82
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       21
+      ],
+      [
+       "left_hip_yaw_link",
+       15
+      ],
+      [
+       "right_hip_yaw_link",
+       9
+      ],
+      [
+       "right_hip_roll_link",
+       3
+      ],
+      [
+       "left_knee_link",
+       2
+      ],
+      [
+       "right_knee_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub10_largebox_086_m1p50": {
+   "level_dir": "logs_system1/t14/step9d/sub10_largebox_086/m1p50",
+   "frames": 89,
+   "walk": [
+    0,
+    80
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 26,
+     "deepest_m": 0.0378,
+     "deepest_frame": 10,
+     "ranges": [
+      [
+       3,
+       13
+      ],
+      [
+       26,
+       40
+      ]
+     ],
+     "links": [
+      [
+       "right_wrist_roll_link",
+       13
+      ],
+      [
+       "left_hip_yaw_link",
+       11
+      ],
+      [
+       "right_wrist_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 45,
+     "deepest_m": 0.0699,
+     "deepest_frame": 4,
+     "ranges": [
+      [
+       0,
+       33
+      ],
+      [
+       76,
+       85
+      ],
+      [
+       88,
+       88
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       23
+      ],
+      [
+       "torso_link",
+       14
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ],
+      [
+       "right_hip_roll_link",
+       2
+      ],
+      [
+       "pelvis",
+       1
+      ],
+      [
+       "right_knee_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub15_suitcase_051_m0p90": {
+   "level_dir": "logs_system1/t14/step9d/sub15_suitcase_051/m0p90",
+   "frames": 105,
+   "walk": [
+    25,
+    93
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 51,
+     "deepest_m": 0.0801,
+     "deepest_frame": 16,
+     "ranges": [
+      [
+       10,
+       23
+      ],
+      [
+       30,
+       51
+      ],
+      [
+       79,
+       93
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       51
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 57,
+     "deepest_m": 0.0714,
+     "deepest_frame": 16,
+     "ranges": [
+      [
+       0,
+       42
+      ],
+      [
+       89,
+       92
+      ],
+      [
+       95,
+       104
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       22
+      ],
+      [
+       "right_hip_yaw_link",
+       17
+      ],
+      [
+       "left_hip_roll_link",
+       5
+      ],
+      [
+       "right_hip_roll_link",
+       4
+      ],
+      [
+       "left_knee_link",
+       3
+      ],
+      [
+       "right_knee_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub15_suitcase_051_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub15_suitcase_051/m1p00",
+   "frames": 105,
+   "walk": [
+    25,
+    93
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 52,
+     "deepest_m": 0.0723,
+     "deepest_frame": 86,
+     "ranges": [
+      [
+       10,
+       23
+      ],
+      [
+       30,
+       51
+      ],
+      [
+       78,
+       93
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       51
+      ],
+      [
+       "right_hip_roll_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 57,
+     "deepest_m": 0.0738,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       0,
+       43
+      ],
+      [
+       89,
+       92
+      ],
+      [
+       96,
+       104
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       23
+      ],
+      [
+       "right_hip_yaw_link",
+       18
+      ],
+      [
+       "left_hip_roll_link",
+       5
+      ],
+      [
+       "right_hip_roll_link",
+       5
+      ],
+      [
+       "torso_link",
+       4
+      ],
+      [
+       "left_knee_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub17_suitcase_007_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub17_suitcase_007/m1p00",
+   "frames": 97,
+   "walk": [
+    17,
+    87
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 76,
+     "deepest_m": 0.0561,
+     "deepest_frame": 15,
+     "ranges": [
+      [
+       0,
+       54
+      ],
+      [
+       69,
+       71
+      ],
+      [
+       76,
+       78
+      ],
+      [
+       82,
+       96
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_pitch_link",
+       28
+      ],
+      [
+       "left_hip_yaw_link",
+       20
+      ],
+      [
+       "right_wrist_pitch_link",
+       15
+      ],
+      [
+       "right_hip_yaw_link",
+       13
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 94,
+     "deepest_m": 0.0806,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       3,
+       96
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       35
+      ],
+      [
+       "right_hip_yaw_link",
+       33
+      ],
+      [
+       "torso_link",
+       15
+      ],
+      [
+       "left_wrist_pitch_link",
+       11
+      ]
+     ]
+    }
+   }
+  },
+  "sub17_suitcase_007_m1p25": {
+   "level_dir": "logs_system1/t14/step9d/sub17_suitcase_007/m1p25",
+   "frames": 97,
+   "walk": [
+    17,
+    87
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 69,
+     "deepest_m": 0.0543,
+     "deepest_frame": 15,
+     "ranges": [
+      [
+       0,
+       52
+      ],
+      [
+       69,
+       69
+      ],
+      [
+       82,
+       96
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_pitch_link",
+       28
+      ],
+      [
+       "left_hip_yaw_link",
+       18
+      ],
+      [
+       "right_wrist_pitch_link",
+       15
+      ],
+      [
+       "right_hip_yaw_link",
+       8
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 94,
+     "deepest_m": 0.0802,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       3,
+       96
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       36
+      ],
+      [
+       "right_hip_yaw_link",
+       30
+      ],
+      [
+       "torso_link",
+       14
+      ],
+      [
+       "left_wrist_pitch_link",
+       12
+      ],
+      [
+       "right_hip_roll_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub17_suitcase_017_m0p90": {
+   "level_dir": "logs_system1/t14/step9d/sub17_suitcase_017/m0p90",
+   "frames": 112,
+   "walk": [
+    5,
+    79
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 112,
+     "deepest_m": 0.064,
+     "deepest_frame": 5,
+     "ranges": [
+      [
+       0,
+       111
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       77
+      ],
+      [
+       "left_wrist_yaw_link",
+       10
+      ],
+      [
+       "left_wrist_roll_link",
+       9
+      ],
+      [
+       "right_hip_yaw_link",
+       7
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ],
+      [
+       "left_hip_roll_link",
+       4
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 112,
+     "deepest_m": 0.0655,
+     "deepest_frame": 9,
+     "ranges": [
+      [
+       0,
+       111
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       81
+      ],
+      [
+       "left_knee_link",
+       17
+      ],
+      [
+       "left_hip_yaw_link",
+       9
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ],
+      [
+       "left_wrist_pitch_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub17_suitcase_017_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub17_suitcase_017/m1p00",
+   "frames": 112,
+   "walk": [
+    5,
+    79
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 112,
+     "deepest_m": 0.0639,
+     "deepest_frame": 5,
+     "ranges": [
+      [
+       0,
+       111
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       76
+      ],
+      [
+       "left_wrist_yaw_link",
+       11
+      ],
+      [
+       "left_wrist_roll_link",
+       10
+      ],
+      [
+       "right_hip_yaw_link",
+       7
+      ],
+      [
+       "left_hip_yaw_link",
+       4
+      ],
+      [
+       "left_hip_roll_link",
+       3
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 112,
+     "deepest_m": 0.0695,
+     "deepest_frame": 9,
+     "ranges": [
+      [
+       0,
+       111
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       80
+      ],
+      [
+       "left_knee_link",
+       15
+      ],
+      [
+       "left_hip_yaw_link",
+       9
+      ],
+      [
+       "right_hip_yaw_link",
+       3
+      ],
+      [
+       "left_wrist_pitch_link",
+       3
+      ],
+      [
+       "left_shoulder_yaw_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_031_m0p55": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_031/m0p55",
+   "frames": 88,
+   "walk": [
+    14,
+    72
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 14,
+     "deepest_m": 0.0157,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       13
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       13
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 20,
+     "deepest_m": 0.0362,
+     "deepest_frame": 10,
+     "ranges": [
+      [
+       0,
+       13
+      ],
+      [
+       82,
+       87
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       18
+      ],
+      [
+       "head_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_031_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_031/m1p00",
+   "frames": 88,
+   "walk": [
+    14,
+    72
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 13,
+     "deepest_m": 0.0159,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       12
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       12
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0506,
+     "deepest_frame": 4,
+     "ranges": [
+      [
+       0,
+       13
+      ],
+      [
+       32,
+       46
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       29
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_032_m0p60": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_032/m0p60",
+   "frames": 92,
+   "walk": [
+    13,
+    85
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0217,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 13,
+     "deepest_m": 0.0318,
+     "deepest_frame": 2,
+     "ranges": [
+      [
+       0,
+       12
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       11
+      ],
+      [
+       "torso_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_032_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_032/m1p00",
+   "frames": 92,
+   "walk": [
+    13,
+    85
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.021,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 13,
+     "deepest_m": 0.0315,
+     "deepest_frame": 2,
+     "ranges": [
+      [
+       0,
+       12
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       11
+      ],
+      [
+       "torso_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_034_m0p95": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_034/m0p95",
+   "frames": 100,
+   "walk": [
+    14,
+    90
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 8,
+     "deepest_m": 0.0213,
+     "deepest_frame": 85,
+     "ranges": [
+      [
+       0,
+       5
+      ],
+      [
+       85,
+       86
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       6
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "right_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 31,
+     "deepest_m": 0.0537,
+     "deepest_frame": 94,
+     "ranges": [
+      [
+       0,
+       12
+      ],
+      [
+       82,
+       99
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       25
+      ],
+      [
+       "torso_link",
+       6
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_034_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_034/m1p00",
+   "frames": 100,
+   "walk": [
+    14,
+    90
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 9,
+     "deepest_m": 0.0215,
+     "deepest_frame": 85,
+     "ranges": [
+      [
+       0,
+       5
+      ],
+      [
+       84,
+       86
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       6
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 31,
+     "deepest_m": 0.0542,
+     "deepest_frame": 94,
+     "ranges": [
+      [
+       0,
+       12
+      ],
+      [
+       82,
+       99
+      ]
+     ],
+     "links": [
+      [
+       "head_link",
+       25
+      ],
+      [
+       "torso_link",
+       6
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_036_m0p55": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_036/m0p55",
+   "frames": 87,
+   "walk": [
+    12,
+    74
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0188,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       10
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ],
+      [
+       "head_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 15,
+     "deepest_m": 0.0377,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       9
+      ],
+      [
+       11,
+       11
+      ],
+      [
+       83,
+       86
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       13
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_036_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_036/m1p00",
+   "frames": 87,
+   "walk": [
+    12,
+    74
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0188,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       10
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       10
+      ],
+      [
+       "head_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 9,
+     "deepest_m": 0.0208,
+     "deepest_frame": 5,
+     "ranges": [
+      [
+       0,
+       8
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_039_m0p95": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_039/m0p95",
+   "frames": 93,
+   "walk": [
+    13,
+    83
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0169,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       2,
+       10
+      ],
+      [
+       74,
+       75
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0635,
+     "deepest_frame": 78,
+     "ranges": [
+      [
+       0,
+       19
+      ],
+      [
+       74,
+       82
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       17
+      ],
+      [
+       "torso_link",
+       12
+      ]
+     ]
+    }
+   }
+  },
+  "sub1_suitcase_039_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub1_suitcase_039/m1p00",
+   "frames": 93,
+   "walk": [
+    13,
+    83
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 11,
+     "deepest_m": 0.0168,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       2,
+       10
+      ],
+      [
+       74,
+       75
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       9
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 29,
+     "deepest_m": 0.0676,
+     "deepest_frame": 79,
+     "ranges": [
+      [
+       0,
+       19
+      ],
+      [
+       74,
+       82
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       17
+      ],
+      [
+       "torso_link",
+       12
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_003_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_003/m1p00",
+   "frames": 122,
+   "walk": [
+    18,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 47,
+     "deepest_m": 0.0131,
+     "deepest_frame": 69,
+     "ranges": [
+      [
+       18,
+       23
+      ],
+      [
+       25,
+       32
+      ],
+      [
+       34,
+       41
+      ],
+      [
+       48,
+       48
+      ],
+      [
+       55,
+       78
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_pitch_link",
+       25
+      ],
+      [
+       "torso_link",
+       22
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 77,
+     "deepest_m": 0.0248,
+     "deepest_frame": 89,
+     "ranges": [
+      [
+       1,
+       10
+      ],
+      [
+       35,
+       100
+      ],
+      [
+       111,
+       111
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       63
+      ],
+      [
+       "right_elbow_link",
+       10
+      ],
+      [
+       "right_wrist_pitch_link",
+       3
+      ],
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_003_m1p25": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_003/m1p25",
+   "frames": 122,
+   "walk": [
+    18,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 62,
+     "deepest_m": 0.0189,
+     "deepest_frame": 68,
+     "ranges": [
+      [
+       18,
+       43
+      ],
+      [
+       46,
+       49
+      ],
+      [
+       52,
+       83
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_pitch_link",
+       32
+      ],
+      [
+       "torso_link",
+       30
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 78,
+     "deepest_m": 0.0269,
+     "deepest_frame": 91,
+     "ranges": [
+      [
+       0,
+       11
+      ],
+      [
+       35,
+       100
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       63
+      ],
+      [
+       "right_elbow_link",
+       12
+      ],
+      [
+       "right_wrist_pitch_link",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_029_m0p75": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_029/m0p75",
+   "frames": 137,
+   "walk": [
+    23,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 3,
+     "deepest_m": 0.005,
+     "deepest_frame": 19,
+     "ranges": [
+      [
+       18,
+       20
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       3
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 27,
+     "deepest_m": 0.0581,
+     "deepest_frame": 115,
+     "ranges": [
+      [
+       22,
+       22
+      ],
+      [
+       111,
+       136
+      ]
+     ],
+     "links": [
+      [
+       "right_knee_link",
+       16
+      ],
+      [
+       "right_hip_yaw_link",
+       10
+      ],
+      [
+       "left_hip_roll_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_029_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_029/m1p00",
+   "frames": 137,
+   "walk": [
+    23,
+    121
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 3,
+     "deepest_m": 0.0049,
+     "deepest_frame": 19,
+     "ranges": [
+      [
+       18,
+       20
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       3
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 27,
+     "deepest_m": 0.0557,
+     "deepest_frame": 115,
+     "ranges": [
+      [
+       110,
+       136
+      ]
+     ],
+     "links": [
+      [
+       "right_knee_link",
+       15
+      ],
+      [
+       "right_hip_yaw_link",
+       12
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_030_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_030/m1p00",
+   "frames": 135,
+   "walk": [
+    15,
+    116
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 2,
+     "deepest_m": 0.0071,
+     "deepest_frame": 11,
+     "ranges": [
+      [
+       11,
+       12
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 119,
+     "deepest_m": 0.0799,
+     "deepest_frame": 11,
+     "ranges": [
+      [
+       0,
+       22
+      ],
+      [
+       25,
+       83
+      ],
+      [
+       87,
+       100
+      ],
+      [
+       112,
+       134
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       21
+      ],
+      [
+       "right_hip_yaw_link",
+       16
+      ],
+      [
+       "left_hip_roll_link",
+       16
+      ],
+      [
+       "torso_link",
+       15
+      ],
+      [
+       "pelvis",
+       14
+      ],
+      [
+       "right_knee_link",
+       14
+      ]
+     ]
+    }
+   }
+  },
+  "sub3_largebox_030_m1p50": {
+   "level_dir": "logs_system1/t14/step9d/sub3_largebox_030/m1p50",
+   "frames": 135,
+   "walk": [
+    15,
+    116
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 1,
+     "deepest_m": 0.0115,
+     "deepest_frame": 11,
+     "ranges": [
+      [
+       11,
+       11
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 120,
+     "deepest_m": 0.0734,
+     "deepest_frame": 9,
+     "ranges": [
+      [
+       0,
+       83
+      ],
+      [
+       88,
+       98
+      ],
+      [
+       110,
+       134
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_yaw_link",
+       53
+      ],
+      [
+       "left_hip_yaw_link",
+       19
+      ],
+      [
+       "left_wrist_pitch_link",
+       17
+      ],
+      [
+       "right_hip_yaw_link",
+       10
+      ],
+      [
+       "left_knee_link",
+       10
+      ],
+      [
+       "pelvis",
+       7
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_006_m0p90": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_006/m0p90",
+   "frames": 88,
+   "walk": [
+    15,
+    78
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 13,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 17,
+     "deepest_m": 0.0555,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       14
+      ],
+      [
+       76,
+       77
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       17
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_006_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_006/m1p00",
+   "frames": 88,
+   "walk": [
+    15,
+    78
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 13,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 17,
+     "deepest_m": 0.0537,
+     "deepest_frame": 3,
+     "ranges": [
+      [
+       0,
+       14
+      ],
+      [
+       76,
+       77
+      ]
+     ],
+     "links": [
+      [
+       "left_hip_yaw_link",
+       15
+      ],
+      [
+       "left_hip_roll_link",
+       2
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_042_m0p85": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_042/m0p85",
+   "frames": 154,
+   "walk": [
+    22,
+    120
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 15,
+     "deepest_m": 0.0079,
+     "deepest_frame": 137,
+     "ranges": [
+      [
+       10,
+       14
+      ],
+      [
+       16,
+       16
+      ],
+      [
+       84,
+       88
+      ],
+      [
+       135,
+       138
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       11
+      ],
+      [
+       "right_hip_yaw_link",
+       4
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 62,
+     "deepest_m": 0.0449,
+     "deepest_frame": 16,
+     "ranges": [
+      [
+       0,
+       0
+      ],
+      [
+       3,
+       19
+      ],
+      [
+       48,
+       66
+      ],
+      [
+       69,
+       82
+      ],
+      [
+       84,
+       84
+      ],
+      [
+       144,
+       153
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       52
+      ],
+      [
+       "head_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_042_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_042/m1p00",
+   "frames": 154,
+   "walk": [
+    22,
+    120
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 16,
+     "deepest_m": 0.0082,
+     "deepest_frame": 137,
+     "ranges": [
+      [
+       10,
+       14
+      ],
+      [
+       16,
+       16
+      ],
+      [
+       84,
+       89
+      ],
+      [
+       135,
+       138
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       12
+      ],
+      [
+       "right_hip_yaw_link",
+       4
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 71,
+     "deepest_m": 0.0475,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       0,
+       0
+      ],
+      [
+       2,
+       19
+      ],
+      [
+       47,
+       66
+      ],
+      [
+       68,
+       85
+      ],
+      [
+       116,
+       118
+      ],
+      [
+       143,
+       153
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       65
+      ],
+      [
+       "head_link",
+       6
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_043_m0p75": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_043/m0p75",
+   "frames": 161,
+   "walk": [
+    23,
+    135
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 85,
+     "deepest_m": 0.0401,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       0,
+       21
+      ],
+      [
+       23,
+       24
+      ],
+      [
+       27,
+       27
+      ],
+      [
+       37,
+       65
+      ],
+      [
+       82,
+       89
+      ],
+      [
+       93,
+       93
+      ],
+      [
+       109,
+       130
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       83
+      ],
+      [
+       "head_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 139,
+     "deepest_m": 0.0571,
+     "deepest_frame": 36,
+     "ranges": [
+      [
+       0,
+       135
+      ],
+      [
+       137,
+       139
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       135
+      ],
+      [
+       "head_link",
+       4
+      ]
+     ]
+    }
+   }
+  },
+  "sub4_suitcase_043_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub4_suitcase_043/m1p00",
+   "frames": 161,
+   "walk": [
+    23,
+    135
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 84,
+     "deepest_m": 0.0399,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       0,
+       22
+      ],
+      [
+       24,
+       24
+      ],
+      [
+       38,
+       56
+      ],
+      [
+       63,
+       67
+      ],
+      [
+       74,
+       75
+      ],
+      [
+       82,
+       89
+      ],
+      [
+       91,
+       93
+      ],
+      [
+       108,
+       130
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       82
+      ],
+      [
+       "head_link",
+       2
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 143,
+     "deepest_m": 0.0591,
+     "deepest_frame": 37,
+     "ranges": [
+      [
+       0,
+       142
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       140
+      ],
+      [
+       "head_link",
+       3
+      ]
+     ]
+    }
+   }
+  },
+  "sub8_smallbox_045_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub8_smallbox_045/m1p00",
+   "frames": 89,
+   "walk": [
+    9,
+    84
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 18,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 60,
+     "deepest_m": 0.0442,
+     "deepest_frame": 8,
+     "ranges": [
+      [
+       6,
+       8
+      ],
+      [
+       15,
+       71
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       57
+      ],
+      [
+       "right_hip_yaw_link",
+       2
+      ],
+      [
+       "right_knee_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub8_smallbox_045_m2p90": {
+   "level_dir": "logs_system1/t14/step9d/sub8_smallbox_045/m2p90",
+   "frames": 89,
+   "walk": [
+    9,
+    84
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 8,
+     "deepest_m": 0.0083,
+     "deepest_frame": 17,
+     "ranges": [
+      [
+       13,
+       20
+      ]
+     ],
+     "links": [
+      [
+       "left_wrist_pitch_link",
+       7
+      ],
+      [
+       "left_wrist_yaw_link",
+       1
+      ]
+     ]
+    },
+    "r1": {
+     "frames_penetrating": 56,
+     "deepest_m": 0.056,
+     "deepest_frame": 40,
+     "ranges": [
+      [
+       11,
+       66
+      ]
+     ],
+     "links": [
+      [
+       "torso_link",
+       37
+      ],
+      [
+       "left_wrist_pitch_link",
+       17
+      ],
+      [
+       "left_wrist_yaw_link",
+       1
+      ],
+      [
+       "left_wrist_roll_link",
+       1
+      ]
+     ]
+    }
+   }
+  },
+  "sub8_suitcase_020_m0p60": {
+   "level_dir": "logs_system1/t14/step9d/sub8_suitcase_020/m0p60",
+   "frames": 60,
+   "walk": [
+    13,
+    56
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 0,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 5,
+     "deepest_m": 0.0377,
+     "deepest_frame": 51,
+     "ranges": [
+      [
+       48,
+       52
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       5
+      ]
+     ]
+    }
+   }
+  },
+  "sub8_suitcase_020_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/sub8_suitcase_020/m1p00",
+   "frames": 60,
+   "walk": [
+    13,
+    56
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 0,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 4,
+     "deepest_m": 0.0393,
+     "deepest_frame": 51,
+     "ranges": [
+      [
+       49,
+       52
+      ]
+     ],
+     "links": [
+      [
+       "right_hip_yaw_link",
+       4
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m0p85": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m0p85",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0218,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "left_knee_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m0p90": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m0p90",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0218,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "left_knee_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m0p95": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m0p95",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0218,
+     "deepest_frame": 5,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "left_knee_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p00": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m1p00",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0218,
+     "deepest_frame": 5,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "left_knee_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p25": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m1p25",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 10,
+     "deepest_m": 0.0209,
+     "deepest_frame": 6,
+     "ranges": [
+      [
+       0,
+       9
+      ]
+     ],
+     "links": [
+      [
+       "left_knee_link",
+       10
+      ]
+     ]
+    }
+   }
+  },
+  "suitcasea_m1p50": {
+   "level_dir": "logs_system1/t14/step9d/suitcasea/m1p50",
+   "frames": 128,
+   "walk": [
+    31,
+    105
+   ],
+   "robots": {
+    "r0": {
+     "frames_penetrating": 0,
+     "deepest_m": 0.0,
+     "deepest_frame": 125,
+     "ranges": [],
+     "links": []
+    },
+    "r1": {
+     "frames_penetrating": 2,
+     "deepest_m": 0.006,
+     "deepest_frame": 7,
+     "ranges": [
+      [
+       0,
+       0
+      ],
+      [
+       7,
+       7
+      ]
+     ],
+     "links": [
+      [
+       "left_ankle_roll_link",
+       1
+      ],
+      [
+       "left_knee_link",
+       1
+      ]
+     ]
+    }
+   }
+  }
+ }
+}
