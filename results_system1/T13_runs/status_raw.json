@@ -1,5 +1,5 @@
 {
- "time": "2026-11-25 04:00",
+ "time": "2026-11-25 05:00",
  "runs": {
   "d_table": {
    "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_table",
@@ -24,7 +24,8 @@
      "1000": 0,
      "2000": 7,
      "3000": 35,
-     "4000": 35
+     "4000": 35,
+     "5000": 45
     },
     "stopped": null,
     "crashes": [],
@@ -38,31 +39,32 @@
     "1000": 0,
     "2000": 7,
     "3000": 35,
-    "4000": 35
+    "4000": 35,
+    "5000": 45
    },
    "metrics_dir": "train",
-   "iteration": 5342,
-   "s_per_it": 7.1455387969035655,
+   "iteration": 5877,
+   "s_per_it": 5.745237571070902,
    "nonfinite_keys_last50": [],
    "contact_v1_mean_last50": {
-    "ContactV1/r0_force_over_1n_in_should": 0.9402294839380773,
-    "ContactV1/r0_lost_in_should": 0.06001062713886887,
-    "ContactV1/r0_lost_termination_signals": 9.64,
-    "ContactV1/r0_penalty_links_mean": 0.0067808024088541665,
-    "ContactV1/r0_penalty_step_share": 0.006539510091145832,
-    "ContactV1/r0_reward_mean": 3.0008070995410288,
-    "ContactV1/r0_should_hand_steps": 119289.78,
-    "ContactV1/r1_force_over_1n_in_should": 0.948313838593352,
-    "ContactV1/r1_lost_in_should": 0.05234620768444717,
-    "ContactV1/r1_lost_termination_signals": 15.4,
-    "ContactV1/r1_penalty_links_mean": 0.004971923828125,
-    "ContactV1/r1_penalty_step_share": 0.0047210693359375,
-    "ContactV1/r1_reward_mean": 3.1496420739094417,
-    "ContactV1/r1_should_hand_steps": 131283.7
+    "ContactV1/r0_force_over_1n_in_should": 0.9438391799317886,
+    "ContactV1/r0_lost_in_should": 0.0563690564705822,
+    "ContactV1/r0_lost_termination_signals": 7.4,
+    "ContactV1/r0_penalty_links_mean": 0.005124918619791666,
+    "ContactV1/r0_penalty_step_share": 0.0049580891927083325,
+    "ContactV1/r0_reward_mean": 3.0020443950096767,
+    "ContactV1/r0_should_hand_steps": 118692.3,
+    "ContactV1/r1_force_over_1n_in_should": 0.940729543491337,
+    "ContactV1/r1_lost_in_should": 0.05954890840221217,
+    "ContactV1/r1_lost_termination_signals": 13.1,
+    "ContactV1/r1_penalty_links_mean": 0.0049074300130208335,
+    "ContactV1/r1_penalty_step_share": 0.004695231119791667,
+    "ContactV1/r1_reward_mean": 3.1516027178366977,
+    "ContactV1/r1_should_hand_steps": 130240.44
    },
-   "reward_mean_last": 0.09454677999019623,
+   "reward_mean_last": 0.09389754384756088,
    "train_alive": true,
-   "gpu": "0, 12708 MiB, 24564 MiB, 92 %"
+   "gpu": "0, 9793 MiB, 24564 MiB, 30 %"
   },
   "d_push": {
    "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_push",
@@ -107,28 +109,28 @@
     "5000": 50
    },
    "metrics_dir": "train",
-   "iteration": 5449,
-   "s_per_it": 5.639608671946917,
+   "iteration": 6071,
+   "s_per_it": 7.327258109522518,
    "nonfinite_keys_last50": [],
    "contact_v1_mean_last50": {
-    "ContactV1/r0_force_over_1n_in_should": 0.8430072072753283,
-    "ContactV1/r0_lost_in_should": 0.15286198665884052,
-    "ContactV1/r0_lost_termination_signals": 25.2,
-    "ContactV1/r0_penalty_links_mean": 0.012321093749999996,
-    "ContactV1/r0_penalty_step_share": 0.012105468749999994,
-    "ContactV1/r0_reward_mean": 2.937908637237548,
-    "ContactV1/r0_should_hand_steps": 142298.48,
-    "ContactV1/r1_force_over_1n_in_should": 0.7779125903857856,
-    "ContactV1/r1_lost_in_should": 0.2153049777855188,
-    "ContactV1/r1_lost_termination_signals": 19.72,
-    "ContactV1/r1_penalty_links_mean": 0.014642578125000003,
-    "ContactV1/r1_penalty_step_share": 0.014430468750000003,
-    "ContactV1/r1_reward_mean": 2.8799770757675174,
-    "ContactV1/r1_should_hand_steps": 142298.48
+    "ContactV1/r0_force_over_1n_in_should": 0.8548075291041053,
+    "ContactV1/r0_lost_in_should": 0.14149390441293502,
+    "ContactV1/r0_lost_termination_signals": 21.34,
+    "ContactV1/r0_penalty_links_mean": 0.015262499999999997,
+    "ContactV1/r0_penalty_step_share": 0.014973242187500005,
+    "ContactV1/r0_reward_mean": 2.9604884374618523,
+    "ContactV1/r0_should_hand_steps": 142056.32,
+    "ContactV1/r1_force_over_1n_in_should": 0.7848010201379454,
+    "ContactV1/r1_lost_in_should": 0.20844348563430562,
+    "ContactV1/r1_lost_termination_signals": 20.4,
+    "ContactV1/r1_penalty_links_mean": 0.014657812499999999,
+    "ContactV1/r1_penalty_step_share": 0.014408593749999999,
+    "ContactV1/r1_reward_mean": 2.9040150312423703,
+    "ContactV1/r1_should_hand_steps": 142056.32
    },
-   "reward_mean_last": 0.084241583943367,
+   "reward_mean_last": 0.08458705246448517,
    "train_alive": true,
-   "gpu": "0, 9124 MiB, 24564 MiB, 32 %"
+   "gpu": "0, 12034 MiB, 24564 MiB, 90 %"
   },
   "d_table_pa": {
    "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/d_table_pa",
@@ -153,7 +155,8 @@
      "1000": 19,
      "2000": 23,
      "3000": 5,
-     "4000": 33
+     "4000": 33,
+     "5000": 49
     },
     "stopped": null,
     "crashes": [],
@@ -167,31 +170,32 @@
     "1000": 19,
     "2000": 23,
     "3000": 5,
-    "4000": 33
+    "4000": 33,
+    "5000": 49
    },
    "metrics_dir": "train",
-   "iteration": 5414,
-   "s_per_it": 6.989435480907559,
+   "iteration": 5966,
+   "s_per_it": 5.3044829671271145,
    "nonfinite_keys_last50": [],
    "contact_v1_mean_last50": {
-    "ContactV1/r0_force_over_1n_in_should": 0.9615281100084373,
-    "ContactV1/r0_lost_in_should": 0.03862481851464469,
-    "ContactV1/r0_lost_termination_signals": 6.52,
-    "ContactV1/r0_penalty_links_mean": 0.007080078125000001,
-    "ContactV1/r0_penalty_step_share": 0.006817830403645833,
-    "ContactV1/r0_reward_mean": 3.07700441479683,
-    "ContactV1/r0_should_hand_steps": 119050.02,
-    "ContactV1/r1_force_over_1n_in_should": 0.957794283511487,
-    "ContactV1/r1_lost_in_should": 0.04250734875700099,
-    "ContactV1/r1_lost_termination_signals": 14.1,
-    "ContactV1/r1_penalty_links_mean": 0.006365356445312501,
-    "ContactV1/r1_penalty_step_share": 0.006020711263020835,
-    "ContactV1/r1_reward_mean": 3.212148504257203,
-    "ContactV1/r1_should_hand_steps": 129241.44
+    "ContactV1/r0_force_over_1n_in_should": 0.9545547306015318,
+    "ContactV1/r0_lost_in_should": 0.0456086328615183,
+    "ContactV1/r0_lost_termination_signals": 6.38,
+    "ContactV1/r0_penalty_links_mean": 0.0075783284505208355,
+    "ContactV1/r0_penalty_step_share": 0.007326253255208332,
+    "ContactV1/r0_reward_mean": 3.0624192325274144,
+    "ContactV1/r0_should_hand_steps": 118456.18,
+    "ContactV1/r1_force_over_1n_in_should": 0.9597015411202983,
+    "ContactV1/r1_lost_in_should": 0.040615293380539326,
+    "ContactV1/r1_lost_termination_signals": 13.0,
+    "ContactV1/r1_penalty_links_mean": 0.0061466471354166665,
+    "ContactV1/r1_penalty_step_share": 0.0058062744140625015,
+    "ContactV1/r1_reward_mean": 3.2309501061836867,
+    "ContactV1/r1_should_hand_steps": 128979.08
    },
-   "reward_mean_last": 0.14145252108573914,
+   "reward_mean_last": 0.14304278790950775,
    "train_alive": true,
-   "gpu": "0, 12712 MiB, 24564 MiB, 92 %"
+   "gpu": "0, 9798 MiB, 24564 MiB, 57 %"
   }
  }
 }
