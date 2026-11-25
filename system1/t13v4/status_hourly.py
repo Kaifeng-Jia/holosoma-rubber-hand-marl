@@ -153,7 +153,7 @@ def main():
     ok = [name for name in runs if "sha256 match" in ((ROOT / "logs_system1/t13v4/copyback" / name / "copyback.txt").read_text()
                                                        if (ROOT / "logs_system1/t13v4/copyback" / name / "copyback.txt").exists() else "")]
     if runs and len(ok) == len(runs):
-        lines += ["", "第一轮三个 run 都已结束、拷回并逐个核对 sha256：第一轮的卡可以释放。"]
+        lines += ["", "第一轮三个 run 都已结束、拷回并逐个核对 sha256。按任务书第 8 节第 3 条（Kevin 2026-11-25），三台云机关机、不释放，留给第二轮。"]
     text = "\n".join(lines) + "\n"
     a.out.parent.mkdir(parents=True, exist_ok=True)
     old = a.out.read_text() if a.out.exists() else ""
