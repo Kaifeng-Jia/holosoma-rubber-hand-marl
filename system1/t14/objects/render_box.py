@@ -46,7 +46,7 @@ OBJECT_RGBA = (0.76, 0.80, 0.86, 1.0)
 SKIN, OBJ = "0.80 0.70 0.62 1", "0.76 0.80 0.86 1"
 PW, PH = 480, 400
 RED, BLUE = (0.9, 0.1, 0.1, 1.0), (0.1, 0.3, 0.95, 1.0)
-CLASS_ZH = dict(b="推/拉/拖", c="原地抬起放下")
+CLASS_ZH = dict(a="抱着往前走（一前一后）", b="推/拉/拖", c="原地抬起放下")
 
 
 def save_jpg(img, path, limit=1_500_000):
@@ -145,7 +145,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--solve", type=Path, required=True)
     ap.add_argument("--levels", type=Path, required=True)
-    ap.add_argument("--cls", required=True, choices=("b", "c"))
+    ap.add_argument("--cls", required=True, choices=("a", "b", "c"))
+    ap.add_argument("--clip-start", type=int, default=0, help="step 9 clips: solve frame 0 = sequence frame clip-start (the person is drawn there)")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--video-out", type=Path, default=None)
     a = ap.parse_args()
@@ -218,8 +219,9 @@ def main():
     rows = []
     s_close = scene_for(1.0, PW, PH)
     s_full = scene_for(1.0, PW + 120, PH)
+    off = a.clip_start
     for t in frames:
-        ph = person.render(t, person.lookat(t), person.heading(t) + 90 + 30, 1.6 / person.scale, -15, PW, PH)
+        ph = person.render(t + off, person.lookat(t + off), person.heading(t + off) + 90 + 30, 1.6 / person.scale, -15, PW, PH)
         ph = caption(ph, [f"人 · 帧 {t}（{t / 30:.2f} s）"], small)
         cam = robot_close_cam(q1, t)
         rc = caption(render_robot(s_close, cam, q1[t], o1[t], robot_arrows(q1, t), hide_robot1=True), [f"机器人 0 · 1.0 倍 · 帧 {t}"], small)
@@ -234,7 +236,8 @@ def main():
     ce = l1["contact_position_error_3d"]
     head = Image.new("RGB", (rows[0].width, 60), "white")
     d = ImageDraw.Draw(head)
-    d.text((10, 4), f"{CLASS_ZH[a.cls]} · {rec['sequence']} · 盒子 {' × '.join(f'{x:.2f}' for x in lv['source_box_m'])} m · 角色检查 {lv['role_status']}", fill=(0, 0, 0), font=font)
+    clip = f" · 片段 {off}–{off + len(q1) - 1}（帧号从片段起点算）" if off else ""
+    d.text((10, 4), f"{CLASS_ZH[a.cls]} · {rec['sequence']}{clip} · 盒子 {' × '.join(f'{x:.2f}' for x in lv['source_box_m'])} m · 角色检查 {lv['role_status']}", fill=(0, 0, 0), font=font)
     d.text((10, 32), f"1.0 倍：接触保持率 {l1['contact_retention']['pooled']}，最大穿透 {max(l1['max_penetration_cm'].values()):.2f} cm，两机最小距离 {l1['robot_robot_min_distance_cm']:.1f} cm，"
                      f"三维接触误差 r0 {ce['r0']['distance']['mean_cm'] if ce['r0']['distance'] else '—'} cm · 红 = 手心法向，蓝 = 手指方向", fill=(0, 0, 0), font=small)
     sheet = Image.new("RGB", (rows[0].width, 60 + PH * len(rows)), "white")
@@ -287,7 +290,7 @@ def main():
         vcam = f.camera_for(np.concatenate(pts), VW, VH, float(np.degrees(np.arctan2(qb[0, 1, 1] - qb[0, 0, 1], qb[0, 1, 0] - qb[0, 0, 0]))) - 90 + 30, -25)
         from scipy.ndimage import gaussian_filter1d
         plook = gaussian_filter1d(np.array([person.lookat(t) for t in range(len(person.V))]), 10, axis=0, mode="nearest")
-        paz = person.heading(frames[1]) + 90 + 30
+        paz = person.heading(frames[1] + off) + 90 + 30
         cmd = [imageio_ffmpeg.get_ffmpeg_exe(), "-hide_banner", "-loglevel", "error", "-n", "-f", "rawvideo", "-pix_fmt", "rgb24", "-s", f"{2 * VW}x{VH}", "-r", "30",
                "-i", "-", "-an", "-c:v", "libx264", "-threads", "2", "-crf", "22", "-preset", "fast", "-pix_fmt", "yuv420p", "-movflags", "+faststart", str(vp)]
         proc = subprocess.Popen(cmd, stdin=subprocess.PIPE)
@@ -296,7 +299,7 @@ def main():
             q, o = data[m]
             for t in range(len(q)):
                 if t not in pcache:
-                    pcache[t] = caption(person.render(t, plook[t], paz, 2.6, -18, VW, VH, arrows=False), [f"人 · {rec['sequence']} · {t / 30:.2f} s"], small).convert("RGB")
+                    pcache[t] = caption(person.render(t + off, plook[t + off], paz, 2.6, -18, VW, VH, arrows=False), [f"人 · {rec['sequence']} · {t / 30:.2f} s"], small).convert("RGB")
                 rimg = caption(render_robot(sv[m], vcam, q[t], o[t]), [f"两台机器人 · {m:.2f} 倍 · {t / 30:.2f} s"], small).convert("RGB")
                 frame = Image.new("RGB", (2 * VW, VH))
                 frame.paste(pcache[t], (0, 0))

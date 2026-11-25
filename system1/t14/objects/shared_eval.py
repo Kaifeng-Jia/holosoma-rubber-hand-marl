@@ -175,6 +175,8 @@ def evaluate(cand_dir, source_dir, gates):
     rr = C["pc"].min_distance(pair)
     # 3-D contact-position error
     tg, nm = human_targets(rec)
+    off = int(rec.get("clip_start") or 0)  # step 9 clips (role_solve --frames): frame 0 of the solve = sequence frame clip_start
+    tg, nm = tg[off:], nm[off:]
     Pl = cg.robot_palms_local(robot, pair, obj, C["offs"])
     ce = {}
     Ms = [np.asarray(recs[r]["candidate"]["Q0" if r == 0 else "Q1"]) for r in (0, 1)]

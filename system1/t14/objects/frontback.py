@@ -6,10 +6,13 @@ episode of the screen (lift episode start .. stop).
   axis (box frame at the clip's first frame) closest to it, sign sigma so that +sigma e_k points forward. The target = the box
   lengthened along k only (width and height kept) to L = m x 2 w (1.0 x = two copies end to end); role 0's region = the
   source box itself (its end), the target extends forward; target centre c_T = sigma (L / 2 - w / 2) e_k in the box frame;
-  target frame = box frame moved to c_T.
+  target frame = box frame moved to c_T and turned by R_t (identity for sigma = +1, 180 deg about the box's vertical for
+  sigma = -1), so that role 0's region is always at the -e_k end of the target (the step-8 level rule partner.region_maps:
+  role 0 keeps the -e_k end, role 1 the +e_k end). The box is symmetric, so R_t changes no geometry.
 * Partner region map: T180 = rotation by 180 deg about the target's vertical axis through its centre (role 0's region -> the
-  far end, facing back). In the step-8 notation M0(x) = x - c_T, M1(x) = R180 (x - c_T).
-* Object: role 0's view A(t) = O(t) Trans(c_T); role 1's view B(t) = S D0(t) S^-1 A(0) with S = the 180-deg map at frame 0.
+  far end, facing back). In the step-8 notation M0(x) = R_t^T (x - c_T), M1(x) = R180 M0(x); the candidate record holds the
+  level-1.0 maps (Q0 = R_t^T, c0 = -w/2 e_k, Q1 = R180 R_t^T, c1 = +w/2 e_k) and partner.region_maps gives level m.
+* Object: role 0's view A(t) = O(t) Trans(c_T) R_t; role 1's view B(t) = S D0(t) S^-1 A(0) with S = the 180-deg map at frame 0.
   Shared P(t): translation = A(t)'s (the demonstration's; both walk the same way), rotation = slerp midpoint of A and B
   (one-sided tilts removed).
 * Partner person (role 1):
@@ -66,8 +69,9 @@ def build(human0, names, O, size, m):
     L1, Lm = 2 * w, m * 2 * w
     e = np.eye(3)[k]
     cT = sigma * (Lm / 2 - w / 2) * e
-    A = O @ affine(np.eye(3), cT)
     R180 = rz180()
+    Rt = np.eye(3) if sigma > 0 else R180
+    A = O @ affine(Rt, cT)
     T180 = affine(R180, np.zeros(3))
     S = A[0] @ T180 @ np.linalg.inv(A[0])
     D0 = O @ np.linalg.inv(O[0])
@@ -86,11 +90,13 @@ def build(human0, names, O, size, m):
     legs[..., :2] += off
     human1[:, il] = legs
     D = legs[:, 0, :2] - pel_att[:, :2]
-    Q0, c0 = np.eye(3), -cT
-    Q1, c1 = R180, -R180 @ cT
-    cand = dict(Q0=Q0.tolist(), c0=c0.tolist(), Q1=Q1.tolist(), c1=c1.tolist(), axis=k, L1=L1, parity0=1, parity1=1, id=f"front-back axis{k} sigma{sigma:+.0f}")
-    return dict(P=P, A=A, B=B, S=S, G=G, cand=cand, human1=human1, rot1=G[:, :3, :3], D=D, k=k, sigma=sigma, walk_axis_angle_deg=ang, walk_dir=wd,
-                L1=L1, Lm=Lm, cT=cT, leg_offset=off)
+    Q0, Q1 = Rt.T, R180 @ Rt.T
+    cand = dict(Q0=Q0.tolist(), c0=(-w / 2 * e).tolist(), Q1=Q1.tolist(), c1=(w / 2 * e).tolist(), axis=k, L1=L1, parity0=1, parity1=1,
+                id=f"front-back axis{k} sigma{sigma:+.0f}")
+    M0 = affine(Q0, -Rt.T @ cT)  # level-m maps (box frame -> target frame)
+    M1 = affine(Q1, -Q1 @ cT)
+    return dict(P=P, A=A, B=B, S=S, G=G, cand=cand, M0=M0, M1=M1, human1=human1, rot1=G[:, :3, :3], D=D, k=k, sigma=sigma, walk_axis_angle_deg=ang,
+                walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=off)
 
 
 def diag(D, s):

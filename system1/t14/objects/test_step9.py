@@ -6,6 +6,7 @@ import numpy as np
 
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 import frontback as fb  # noqa: E402
+sys.path.insert(0, str(Path(__file__).resolve().parents[3] / "scripts"))
 import step8_rejudge as rj  # noqa: E402
 
 NAMES = list(fb.LOWER) + ["Torso", "L_Wrist", "R_Wrist"]
@@ -47,6 +48,29 @@ def test_turn_breaks_consistency():
     H, O = straight_carry(turn_deg=180.0)
     C = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0)
     assert np.linalg.norm(C["D"], axis=1).max() > 0.3
+
+
+def test_region_maps_both_directions():
+    """level maps of the record (partner.region_maps on the level-1.0 candidate) = the construction's maps, for a box frame
+    whose walking axis points forward (sigma +1) and backwards (sigma -1); role 0's own object point and its target point coincide in the world (A M0 = O), the
+    partner's object-attached map G O = P M1."""
+    import partner as pt
+    rng = np.random.default_rng(0)
+    for flip in (False, True):
+        H, O = straight_carry()
+        if flip:  # the box frame turned by 180 deg about its vertical (same box): its +x axis points backwards -> sigma = -1
+            O = O @ pt.affine(np.diag([-1.0, -1.0, 1.0]), np.zeros(3))
+        for m in (1.0, 1.5):
+            C = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), m)
+            Q0, c0, Q1, c1 = pt.region_maps(C["cand"], C["k"], C["L1"], C["Lm"])
+            assert np.allclose(pt.affine(Q0, c0), C["M0"]) and np.allclose(pt.affine(Q1, c1), C["M1"])
+            x = np.c_[rng.normal(size=(5, 3)) * 0.1, np.ones(5)]
+            for t in (0, 30, 60):
+                assert np.allclose((C["A"][t] @ C["M0"] @ x.T).T, (O[t] @ x.T).T)
+                assert np.allclose((C["G"][t] @ O[t] @ x.T).T, (C["P"][t] @ C["M1"] @ x.T).T)
+            # role 0's region is at the -e_k end of the target, role 1's at the +e_k end
+            assert C["M0"][C["k"], 3] < 0 < C["M1"][C["k"], 3]
+        assert C["sigma"] == (-1.0 if flip else 1.0)
 
 
 def test_added_drift():

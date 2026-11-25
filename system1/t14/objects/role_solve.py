@@ -18,6 +18,16 @@ Modes
 Families: box (step-7 objects; capture mesh nearest points as the human side) and table (Push / Pull; round 6: the training
 table at its real size with phys poses, human side on the OMOMO capture table moved by omomo_table's similarity).
 
+Step 9 switches (off = the step-8 behaviour above, unchanged):
+  --frames A:B           solve only frames A..B-1 of the sequence (the screen's carry episode); everything (person, palms, object
+                         poses, contact flags, palm targets) is cut before preprocessing; the record holds clip_start = A.
+  --construction frontback   (role mode, box family; no --cand) the front-back partner of frontback.py at level m: shared
+                         target P, role 0 = the demonstration, role 1 = the constructed partner person (upper body and palms
+                         carried by G(t) = P T180 A^-1, legs reversed); role 1's own object = G O, its palm targets rotated by G,
+                         its contact flags = role 0's; role 1's prior = the existing first stage (as in source mode) solved on the
+                         partner person with its own object (the partner is not an isometric copy, so the source's first stage
+                         cannot be mapped); role 0's prior = the source's first stage (as step 8). Region maps = frontback's.
+
     hsretargeting_s1/bin/python -B system1/t14/objects/role_solve.py --family box --object smallbox --sequence sub10_smallbox_007 \
         --mode source --tag smallboxb --out logs_system1/t14/step8/<...>
 """
@@ -147,7 +157,11 @@ def main():
     ap.add_argument("--target-urdf", type=Path, default=None, help="table family: the level's training-table URDF")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--max-frames", type=int, default=None)
+    ap.add_argument("--frames", default=None, help="step 9: A:B, solve frames A..B-1 only")
+    ap.add_argument("--construction", choices=("partner", "frontback"), default="partner", help="step 9: frontback (role mode, box family)")
     a = ap.parse_args()
+    if a.construction == "frontback" and not (a.mode == "role" and a.family == "box"):
+        raise SystemExit("--construction frontback is for role mode, box family")
     t0 = time.time()
     for k in ("source", "cand", "target_urdf"):  # the solver changes directory below
         if getattr(a, k) is not None:
@@ -214,11 +228,33 @@ def main():
     human_raw52, names52 = human.copy(), list(constants.DEMO_JOINTS)
     wq = load_intermimic_wrist_quaternions(OMOMO_NEW / f"{seq}.pt")
     palm_rot, cal_err = build_pt_wrist_palm_orientation_targets(human_raw52, wq, names52)
+    clip_start = 0
+    if a.frames is not None:  # step 9: the clip only (cut before preprocessing, as step9_diag.load_role0)
+        fa, fb_ = (int(x) for x in a.frames.split(":"))
+        clip_start = fa
+        human, raw_poses, palms, h_sd, palm_rot = human[fa:fb_], raw_poses[fa:fb_], palms[fa:fb_], h_sd[fa:fb_], palm_rot[fa:fb_]
+        human_raw52 = human_raw52[fa:fb_]
+        assert len(human) == fb_ - fa
     T = len(human)
     n = a.max_frames or T
     # ---------------------------------------------------------------- level geometry (target) and scene
     cand = None
-    if a.mode == "role":
+    FB = None
+    if a.mode == "role" and a.construction == "frontback":
+        import frontback as fbm
+        from types import SimpleNamespace as _NS
+        names54 = list(constants.DEMO_JOINTS) + list(PALM_KEYS)
+        h0_, p0_, _ = preprocess_motion_data(np.concatenate([human, palms], 1), _NS(demo_joints=names54), motion_config.toe_names, scale=s, object_poses=raw_poses)
+        O_ = pt.mj_to_mat(convert_object_poses_to_mujoco_order(create_grounded_nominal_object_poses(p0_, s)))
+        FB = fbm.build(h0_, names54, O_, src_size, a.m)
+        cand = FB["cand"]
+        axis, L1 = int(cand["axis"]), float(cand["L1"])
+        Lm = a.m * L1
+        assert abs(Lm - FB["Lm"]) < 1e-9
+        tsize = np.array(src_size, float)
+        tsize[axis] = Lm
+        tgt = write_box_scene(name, tsize, out / "assets_target")
+    elif a.mode == "role":
         cand = json.loads(a.cand.read_text())
         axis, L1 = int(cand["axis"]), float(cand["L1"])
         Lm = a.m * L1
@@ -260,7 +296,13 @@ def main():
     own_phys_mj = convert_object_poses_to_mujoco_order(poses0)
     own_robot_mj = own_nom_mj if a.family == "box" else own_phys_mj  # r = 1 boxes: nominal; tables: the real-size training table (round 6)
     O = pt.mj_to_mat(own_robot_mj)
-    C = pt.construction(O, cand, axis, L1, Lm)
+    if FB is None:
+        C = pt.construction(O, cand, axis, L1, Lm)
+    else:  # front-back: the construction was built above on the same preprocessed data
+        assert np.allclose(pt.mj_to_mat(own_nom_mj), O_) and np.allclose(human0, h0_)
+        Q0_, c0_, Q1_, c1_ = pt.region_maps(cand, axis, L1, Lm)
+        assert np.allclose(pt.affine(Q0_, c0_), FB["M0"]) and np.allclose(pt.affine(Q1_, c1_), FB["M1"])
+        C = dict(S=FB["S"], P=FB["P"], M0=FB["M0"], M1=FB["M1"])
     S, P = C["S"], C["P"]
     improper = np.linalg.det(S[:3, :3]) < 0
     shared_mj = pt.mat_to_mj(P)
@@ -272,6 +314,13 @@ def main():
         human_r, nom_r = human0, own_nom_mj
         pw, fw = palm_rot[..., :, 2], palm_rot[..., :, 0]
         own_r = O
+    elif FB is not None:  # front-back partner: constructed person, own object G O, palm targets rotated by G
+        G = FB["G"]
+        human_r = FB["human1"]
+        own_r = G @ O
+        nom_r = pt.mat_to_mj(G @ pt.mj_to_mat(own_nom_mj))
+        pw = np.einsum("tij,thj->thi", G[:, :3, :3], palm_rot[..., :, 2])
+        fw = np.einsum("tij,thj->thi", G[:, :3, :3], palm_rot[..., :, 0])
     else:
         Rs, ts = S[:3, :3], S[:3, 3]
         human_r = human0 @ Rs.T + ts
@@ -324,7 +373,7 @@ def main():
     if disp:
         shift[:2] = np.concatenate(disp)[:, :2].mean(0)
     # ---------------------------------------------------------------- prior: the role's Stage-1 solve, shifted
-    if a.mode == "source":
+    if a.mode == "source" or (FB is not None and a.role == 1):  # step 9: the partner's own first stage on the partner person
         constants52 = SimpleNamespace(**vars(constants))
         constants52.DEMO_JOINTS = names52
         constants52.JOINTS_MAPPING = {k_: v_ for k_, v_ in constants.JOINTS_MAPPING.items() if k_ not in PALM_KEYS}
@@ -333,13 +382,14 @@ def main():
         k1["nominal_tracking_tau"] = base.nominal_tracking_tau
         k1["scene_xml_path"] = src_assets["scene"]  # r = 1: the scene's box is already x s (Stage 1 = the nominal-scaled scene)
         ret1 = InteractionMeshRetargeter(**k1)
-        h52 = human0[:, :52]
+        h52 = (human0 if a.mode == "source" else human_r)[:, :52]
+        s1_nom_mj = own_nom_mj if a.mode == "source" else nom_r  # MuJoCo order; nominal0 order = (qw qx qy qz x y z)
         foot1 = extract_foot_sticking_sequence_velocity(h52[:n], ret1.demo_joints, motion_config.toe_names)
         foot1[0][motion_config.toe_names[0]] = False
         foot1[0][motion_config.toe_names[1]] = False
-        q_init1 = _compute_q_init_base("object_interaction", "smplh", h52[:n], nominal0[:n], constants52)
+        q_init1 = _compute_q_init_base("object_interaction", "smplh", h52[:n], s1_nom_mj[:n][:, [3, 4, 5, 6, 0, 1, 2]], constants52)
         t1 = time.time()
-        q1, *_ = ret1.retarget_motion(human_joint_motions=h52[:n], object_poses=own_nom_mj[:n], object_poses_augmented=own_nom_mj[:n],
+        q1, *_ = ret1.retarget_motion(human_joint_motions=h52[:n], object_poses=s1_nom_mj[:n], object_poses_augmented=s1_nom_mj[:n],
                                       object_points_local_demo=demo, object_points_local=demo, foot_sticking_sequences=foot1,
                                       q_a_init=q_init1, q_nominal_list=None, original=True, dest_res_path=str(out / f"{a.tag}_nominal_scaled.npz"))
         stage1 = np.asarray(q1, dtype=np.float64)
@@ -350,7 +400,7 @@ def main():
         stage1 = np.load(sp)["qpos"].astype(np.float64)
         stage1_rec = dict(file=str(sp), sha256=sha(sp))
     prior = stage1[:n, :36].copy()
-    if a.role == 1:
+    if a.role == 1 and FB is None:
         index, sign = g1_sagittal_joint_map(G1_29DOF_JOINT_NAMES)
         ident = np.tile(np.array([0, 0, 0, 1.0, 0, 0, 0]), (n, 1))
         prior = map_robot(prior, ident, S[:3, :3], S[:3, 3], -1 if improper else 1, index, sign)
@@ -381,7 +431,10 @@ def main():
                target=tgt, stage1=stage1_rec, anchor_term=arec, palm_fit=fit, palm_track=dict(weight=5.0, finger_weight=5.0, calibration_p90_deg=np.round(cal_err, 6).tolist()),
                foot=dict(rule="person toe speed < 0.01 m/s after Gaussian sigma 8; support foot locked at segment start +-1 mm", support_share=np.round(sup.mean(0), 4).tolist()),
                sim_scene=sim_rec, physx_dump=dump_sha, scene=str(scene), robot_palm_offsets_m={k: np.round(x, 6).tolist() for k, x in offsets.items()},
-               invalid_object_pose_frames=invalid, frames=n, python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
+               invalid_object_pose_frames=invalid, frames=n, clip_start=clip_start, clip_frames=a.frames, construction=a.construction,
+               frontback=None if FB is None else dict(walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"], leg_offset_m=FB["leg_offset"].tolist(),
+                                                     M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s)),
+               python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                seconds=round(time.time() - t0, 1), stage2_seconds=round(time.time() - t2, 1), finite=bool(np.isfinite(q).all()), qpos_shape=list(q.shape),
                object_locked_max_err=float(np.abs(q[:, -7:] - shared_mj[:n]).max()), peak_rss_gb=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2, 3),
                command=" ".join(sys.argv))
