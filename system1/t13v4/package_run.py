@@ -145,9 +145,14 @@ def main():
         w.writeheader()
         w.writerows(comp)
     # training-time diagnostics
-    met = [json.loads(x) for x in open(ROOT / "logs_system1/t13v4/runs" / a.run / "train/metrics.jsonl") if x.strip()]
+    dec = json.loads((ROOT / "logs_system1/t13v4/runs" / a.run / "decision.json").read_text())
+    last_it = int(dec["final_checkpoint_iteration"])  # file iteration of the checkpoint evaluated; later iterations are not used
+    met_all = [json.loads(x) for x in open(ROOT / "logs_system1/t13v4/runs" / a.run / "train/metrics.jsonl") if x.strip()]
+    met = [m for m in met_all if int(m["iteration"]) <= last_it]
     keys = sorted({k for m in met for k in m if k.startswith("ContactV1/")})
-    diag = dict(iterations=len(met), keys=keys, last50={}, whole_run={})
+    diag = dict(rule="train/metrics.jsonl rows with iteration <= the evaluated checkpoint's file iteration; last50 = the last 50 of those",
+                iterations_used=len(met), first_iteration=int(met[0]["iteration"]), last_iteration=int(met[-1]["iteration"]),
+                iterations_in_file=len(met_all), last_iteration_in_file=int(met_all[-1]["iteration"]), keys=keys, last50={}, whole_run={})
     for k in keys:
         v = [m[k] for m in met if isinstance(m.get(k), (int, float))]
         if v:
