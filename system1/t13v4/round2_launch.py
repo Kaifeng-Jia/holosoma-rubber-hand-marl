@@ -72,7 +72,7 @@ def one(run, h, rec, local_head, sonic_sha, launch):
                 r["stopped"] = name
             save()
         return ok
-    env = f"source {S1}/s1_env.sh; cd {S1}/duet-system1"
+    env = f"source {S1}/s1_env.sh; [[ -f /etc/network_turbo ]] && source /etc/network_turbo; cd {S1}/duet-system1"  # AutoDL proxy for GitHub (as setup_cloud_fresh.sh)
     pull = "git fetch -q origin && git checkout -q system1-sonic && git pull -q --ff-only origin system1-sonic"
     rc, out, err = ssh(h["ssh"], f"{env}; ({pull}) || (sleep 10; git -c http.version=HTTP/1.1 fetch -q origin && git checkout -q system1-sonic && "
                                  f"git -c http.version=HTTP/1.1 pull -q --ff-only origin system1-sonic); git rev-parse HEAD")  # one HTTP/1.1 retry (try 1: curl 16 HTTP2)
@@ -123,7 +123,11 @@ def one(run, h, rec, local_head, sonic_sha, launch):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--launch", action="store_true")
+    ap.add_argument("--only", choices=ROUND2, default=None, help="bring up this run only (record round2_launch_<run>.json)")
     a = ap.parse_args()
+    global REC
+    if a.only:
+        REC = REC.with_name(f"round2_launch_{a.only}.json")
     hosts = json.loads(HOSTS.read_text())
     r2 = hosts.get("round2") or {}
     if sorted(r2) != sorted(ROUND2):
@@ -132,14 +136,22 @@ def main():
     src = (ROOT / "system1/sonic_controller.py").read_text()  # the laptop's SONIC root (default of S1_SONIC_ROOT), without importing torch
     ck = Path(next(x for x in src.splitlines() if x.startswith("SONIC_ROOT")).split('"')[-2]) / "sonic_release/last.pt"
     rec = dict(started=now(), local_head=local_head, local_sonic_checkpoint=str(ck), local_sonic_sha256=sha(ck), launch=a.launch, runs={})
-    ts = [threading.Thread(target=one, args=(run, r2[run], rec, local_head, rec["local_sonic_sha256"], a.launch)) for run in ROUND2]
+    ts = [threading.Thread(target=one, args=(run, r2[run], rec, local_head, rec["local_sonic_sha256"], a.launch)) for run in ROUND2 if a.only in (None, run)]
     for t in ts:
         t.start()
     for t in ts:
         t.join()
     launched = [run for run, v in rec["runs"].items() if any(s["name"] == "launch" and s["ok"] for s in v["steps"])]
     rec.update(ended=now(), launched=launched)
-    if a.launch and sorted(launched) == sorted(ROUND2):
+    REC.write_text(json.dumps(rec, indent=1) + "\n")
+    every = set()  # launched over every record of round 2 (a run may have been brought up by its own --only invocation)
+    for f in sorted(REC.parent.glob("round2_launch*.json")):
+        if "_try" in f.name:
+            continue
+        x = json.loads(f.read_text())
+        every |= {r for r, v in x.get("runs", {}).items() if any(s["name"] == "launch" and s["ok"] for s in v["steps"])}
+    rec["launched_all_records"] = sorted(every)
+    if a.launch and sorted(every) == sorted(ROUND2) and json.loads(HOSTS.read_text()).get("runs") != r2:
         hosts = json.loads(HOSTS.read_text())
         hosts.setdefault("round1", hosts.get("runs"))
         hosts["runs"] = r2
@@ -151,7 +163,7 @@ def main():
         rec["crontab"] = subprocess.run(["crontab", "-l"], capture_output=True, text=True).stdout
     REC.write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps({k: v for k, v in rec.items() if k != "crontab"}, indent=1)[-3000:])
-    return 0 if (not a.launch or sorted(launched) == sorted(ROUND2)) else 1
+    return 0 if (not a.launch or set(launched) == {r for r in ROUND2 if a.only in (None, r)}) else 1
 
 
 if __name__ == "__main__":
