@@ -1,0 +1,37 @@
+{
+ "started": "2026-11-25T01:07:01-05:00",
+ "steps": [
+  {
+   "name": "render_largeboxa",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step9b/largeboxa/m1p25/r0 --levels /home/kevin/duet-system1/logs_system1/t14/step9b/largeboxa/levels.json --cls a --clip-start 60 --side-level 1.25 --out /home/kevin/duet-system1/results_system1/T14_retargeting/step9b/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step9",
+   "started": "01:07:01",
+   "avail_gb": 22.3,
+   "rc": 0,
+   "done": "01:08:22"
+  },
+  {
+   "name": "render_suitcasea",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve /home/kevin/duet-system1/logs_system1/t14/step9b/suitcasea/m1p00/r0 --levels /home/kevin/duet-system1/logs_system1/t14/step9b/suitcasea/levels.json --cls a --clip-start 65 --side-level 1.0 --out /home/kevin/duet-system1/results_system1/T14_retargeting/step9b/figures --video-out /home/kevin/duet-system1/exports_system1/T14_videos/step9",
+   "started": "01:07:04",
+   "avail_gb": 21.4,
+   "rc": 0,
+   "done": "01:09:27"
+  }
+ ],
+ "summary": {
+  "largeboxa": {
+   "object": "largebox",
+   "sequence": "sub7_largebox_045",
+   "frames": "60:185",
+   "main": true,
+   "render_rc": 0
+  },
+  "suitcasea": {
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_006",
+   "frames": "65:193",
+   "main": true,
+   "render_rc": 0
+  }
+ }
+}

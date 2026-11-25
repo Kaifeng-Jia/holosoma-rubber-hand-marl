@@ -50,6 +50,7 @@ log = dict(started=datetime.now(NY).isoformat(timespec="seconds"), steps=[], sum
 lock = threading.Lock()
 slots = None
 DEADLINE = None
+LOGFILE = "driver.json"
 
 
 def now():
@@ -64,7 +65,7 @@ def avail():
 
 def save():
     with lock:
-        (L / "driver.json").write_text(json.dumps(log, indent=1, ensure_ascii=False) + "\n")
+        (L / LOGFILE).write_text(json.dumps(log, indent=1, ensure_ascii=False) + "\n")
 
 
 def tagm(m):
@@ -274,18 +275,20 @@ class Clip:
             e = self.evals.get(m)
             if e is not None:
                 out[f"{m:.2f}"] = conv(e, m, self.d / tagm(m), json.loads((self.d / tagm(m) / "r0/run_record.json").read_text()))
-        if "1.00" not in out:
+        if not out:
             return
-        e1 = self.evals[1.0]
-        status = "一前一后 1.0 倍：" + ("适用" if e1["applicable"] else "不适用（" + "、".join(e1["failed"]) + "）")
-        rec0 = json.loads((self.d / "m1p00/r0/run_record.json").read_text())
+        side = 1.0 if "1.00" in out else min(float(k) for k in out)  # the side-by-side sheet: 1.0, else the lowest solved level
+        e1 = self.evals[side]
+        from step9_tables import ZH
+        status = f"一前一后 {side:.2f} 倍：" + ("适用" if e1["applicable"] else "不适用（" + "、".join(ZH.get(x, x) for x in e1["failed"]) + "）")
+        rec0 = json.loads((self.d / tagm(side) / "r0/run_record.json").read_text())
         srec = json.loads((self.src / "run_record.json").read_text())
         lv = dict(tag=self.tag, role_status=status, applicable=bool(e1["applicable"]), selected=None, a=a, first_free_level_above_1=free,
                   report_levels=[float(k) for k in out if free is None or float(k) != free], levels=out,
-                  source_box_m=srec["target"]["size"], solve_r0=str(self.d / "m1p00/r0"), clip_start=rec0["clip_start"])
+                  source_box_m=srec["target"]["size"], solve_r0=str(self.d / tagm(side) / "r0"), clip_start=rec0["clip_start"], side_level=side)
         (self.d / "levels.json").write_text(json.dumps(lv, indent=1, ensure_ascii=False) + "\n")
-        rc = run([SO, "-B", "system1/t14/objects/render_box.py", "--solve", self.d / "m1p00/r0", "--levels", self.d / "levels.json", "--cls", "a",
-                  "--clip-start", rec0["clip_start"], "--out", FIG, "--video-out", VID], f"render_{self.tag}", 4.3, self.d / "render.log")
+        rc = run([SO, "-B", "system1/t14/objects/render_box.py", "--solve", self.d / tagm(side) / "r0", "--levels", self.d / "levels.json", "--cls", "a",
+                  "--clip-start", rec0["clip_start"], "--side-level", side, "--out", FIG, "--video-out", VID], f"render_{self.tag}", 4.3, self.d / "render.log")
         self.sm["render_rc"] = rc
         save()
 
@@ -324,13 +327,41 @@ class Decide:
 decide = Decide()
 
 
+def render_only(tags, parallel):
+    """pictures + video of main clips from the finished driver's summary (driver.json is read, not written; record in
+    render_only.json): levels a, 1.0, 1.25, 1.5 and the first free level above 1.5 that have an evaluation."""
+    global LOGFILE
+    done = json.loads((L / "driver.json").read_text())["summary"]
+    LOGFILE = "render_only.json"
+    rows = {MAIN.get(r["sequence"], r["sequence"]): r for r in csv.DictReader(open(TURNS)) if r["straight"] == "True"}
+
+    def one(tag):
+        c = Clip(rows[tag])
+        sm = done[tag]
+        rep = [m for m in (sm.get("report_levels") or [1.0, 1.25, 1.5])]
+        for m in rep:
+            f = c.d / tagm(m) / "eval.json"
+            c.evals[m] = json.loads(f.read_text()) if f.exists() else None
+        c.render([m for m in rep if c.evals.get(m) is not None], sm.get("a"), sm.get("first_free_above_1p5"))
+    ts = [threading.Thread(target=one, args=(t,)) for t in tags]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    print("RENDER_ONLY_DONE", flush=True)
+
+
 def main():
     global slots, DEADLINE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--parallel", type=int, default=6)
     ap.add_argument("--deadline", default="08:15", help="HH:MM America/New_York today: no new worker after it")
+    ap.add_argument("--render-only", nargs="*", default=None, help="tags of main clips: pictures + video only (after the driver)")
     a = ap.parse_args()
     slots = threading.BoundedSemaphore(a.parallel)
+    if a.render_only is not None:
+        DEADLINE = now().replace(hour=23, minute=59)
+        return render_only(a.render_only, a.parallel)
     hh, mm = (int(x) for x in a.deadline.split(":"))
     DEADLINE = now().replace(hour=hh, minute=mm, second=0, microsecond=0)
     log.update(parallel=a.parallel, deadline=DEADLINE.isoformat(timespec="seconds"), grid=GRID)

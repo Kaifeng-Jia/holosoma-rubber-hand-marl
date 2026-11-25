@@ -1,0 +1,4 @@
+clip,sequence,object,frames,main,gravity_deg,pelvis_mismatch_max_m_1p0,applicable_1p0,failed_1p0,rr_intersect_1p0,min_free_level,applicable_min_free,failed_min_free,a,first_free_above_1p5,levels_tried,note
+largeboxa,sub7_largebox_045,largebox,60:185,True,10.6063,0.3662,,r1 求解失败（第一阶段 RuntimeError: CVXPY solve failed: infeasible，停在第 122/125 帧）,,1.25,False,V0 重力、非手部位穿透 r1、接触保持率,,,1.00 1.25 1.50,
+smallboxa,sub4_smallbox_047,smallbox,36:172,True,13.1097,0.1789,,r1 求解失败（第一阶段 RuntimeError: CVXPY solve failed: infeasible，停在第 134/136 帧）,,,,,,,1.00 1.25 1.50,
+suitcasea,sub8_suitcase_006,suitcase,65:193,True,2.108,0.1903,False,支撑脚漂移 r1、非手部位穿透 r1、两机间隙、主运动,31,1.55,False,非手部位穿透 r1、两机间隙、接触保持率、主运动,,1.55,1.00 1.25 1.50 1.55,

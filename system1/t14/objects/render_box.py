@@ -147,6 +147,7 @@ def main():
     ap.add_argument("--levels", type=Path, required=True)
     ap.add_argument("--cls", required=True, choices=("a", "b", "c"))
     ap.add_argument("--clip-start", type=int, default=0, help="step 9 clips: solve frame 0 = sequence frame clip-start (the person is drawn there)")
+    ap.add_argument("--side-level", type=float, default=1.0, help="level of the side-by-side sheet (step 9: the lowest solved level when 1.0 has no solve)")
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--video-out", type=Path, default=None)
     a = ap.parse_args()
@@ -215,30 +216,31 @@ def main():
         return dict(lookat=look, distance=1.6, azimuth=yaw + 90 + 30, elevation=-15)
 
     # ---------------------------------------------------------------- side-by-side sheet (level 1.0)
-    q1, o1 = data[1.0]
+    sl = a.side_level
+    q1, o1 = data[sl]
     rows = []
-    s_close = scene_for(1.0, PW, PH)
-    s_full = scene_for(1.0, PW + 120, PH)
+    s_close = scene_for(sl, PW, PH)
+    s_full = scene_for(sl, PW + 120, PH)
     off = a.clip_start
     for t in frames:
         ph = person.render(t + off, person.lookat(t + off), person.heading(t + off) + 90 + 30, 1.6 / person.scale, -15, PW, PH)
         ph = caption(ph, [f"人 · 帧 {t}（{t / 30:.2f} s）"], small)
         cam = robot_close_cam(q1, t)
-        rc = caption(render_robot(s_close, cam, q1[t], o1[t], robot_arrows(q1, t), hide_robot1=True), [f"机器人 0 · 1.0 倍 · 帧 {t}"], small)
+        rc = caption(render_robot(s_close, cam, q1[t], o1[t], robot_arrows(q1, t), hide_robot1=True), [f"机器人 0 · {sl:.2f} 倍 · 帧 {t}"], small)
         s_full.set_pose(q1[t], o1[t])
         fc = f.camera_for(f.bounds(s_full), PW + 120, PH, float(np.degrees(np.arctan2(*(q1[t, 1, 1::-1] - q1[t, 0, 1::-1])))) - 90 + 30, -25)
-        fu = caption(render_robot(s_full, fc, q1[t], o1[t]), [f"两台 · 1.0 倍 · 帧 {t}"], small)
+        fu = caption(render_robot(s_full, fc, q1[t], o1[t]), [f"两台 · {sl:.2f} 倍 · 帧 {t}"], small)
         row = Image.new("RGB", (PW * 2 + PW + 120, PH), "white")
         for i, im in enumerate((ph, rc, fu)):
             row.paste(im.convert("RGB"), (i * PW, 0))
         rows.append(row)
-    l1 = L[1.0]
+    l1 = L[sl]
     ce = l1["contact_position_error_3d"]
     head = Image.new("RGB", (rows[0].width, 60), "white")
     d = ImageDraw.Draw(head)
     clip = f" · 片段 {off}–{off + len(q1) - 1}（帧号从片段起点算）" if off else ""
     d.text((10, 4), f"{CLASS_ZH[a.cls]} · {rec['sequence']}{clip} · 盒子 {' × '.join(f'{x:.2f}' for x in lv['source_box_m'])} m · 角色检查 {lv['role_status']}", fill=(0, 0, 0), font=font)
-    d.text((10, 32), f"1.0 倍：接触保持率 {l1['contact_retention']['pooled']}，最大穿透 {max(l1['max_penetration_cm'].values()):.2f} cm，两机最小距离 {l1['robot_robot_min_distance_cm']:.1f} cm，"
+    d.text((10, 32), f"{sl:.2f} 倍：接触保持率 {l1['contact_retention']['pooled']}，最大穿透 {max(l1['max_penetration_cm'].values()):.2f} cm，两机最小距离 {l1['robot_robot_min_distance_cm']:.1f} cm，"
                      f"三维接触误差 r0 {ce['r0']['distance']['mean_cm'] if ce['r0']['distance'] else '—'} cm · 红 = 手心法向，蓝 = 手指方向", fill=(0, 0, 0), font=small)
     sheet = Image.new("RGB", (rows[0].width, 60 + PH * len(rows)), "white")
     sheet.paste(head, (0, 0))
