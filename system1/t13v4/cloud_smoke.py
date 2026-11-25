@@ -91,7 +91,8 @@ def main():
     if ok:
         ck = rec["stages"][-1]["last_checkpoint"]
         out = d / "validation"
-        argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", plan["task"], "--controller", "policy", *plan["validation_flags"],
+        argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", plan["task"], "--controller", plan.get("validation_controller", "policy"),
+                *plan["validation_flags"], *plan.get("validation_extra", []),
                 "--checkpoint", ck, "--device", "cuda:0", "--states", plan["validation_states"], "--model-id", f"t13v4_cloud_smoke__{a.run}",
                 "--output-dir", str(out)]
         t0 = time.time()

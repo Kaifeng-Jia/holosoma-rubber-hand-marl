@@ -8,6 +8,10 @@ three contact items; everything else = the paper D recipe of the task):
   d_push      train_plan5_push.py --skill push, paper D Push recipe: critic-only warm-up (50 its) from the single-robot prior
               (158 -> 159 inputs, new weights zero), then actor + critic with --resume (lr actor 1e-5, critic 1e-3)
   d_table_pa  d_table + --per-agent-reward (insurance; T13 v4 section 1, launched only when Kevin says so)
+  c_out_table / c_out_push  (round 2, task book section 8 item 2) d_table / d_push exactly, structure C-out: + --sonic-residual
+              --sonic-tf32 --sonic-residual-kind out --c-train-diag (the T03 C-out flags) --t13v4-cout; validation with
+              --controller sonic_residual --t13v4-cout. c_out_push keeps d_push's critic-only warm-up; its actor starts fresh
+              (T03 C-out Pull recipe on the Plan5 path), output layer zero (a = 0: scheme A at iteration 0)
 
 Protocol (section 3), 2048 environments: checkpoint every 1000 its; validation every 2000 its on the T13 v4 validation states
 (system1/t13v4/states_t14r6C/<task>_validation_states.json; deterministic, randomisation off, noise off, the d_final_5070
@@ -47,9 +51,12 @@ PUSH = ["scripts/train_plan5_push.py", "--skill", "push", "--steps-per-env", "24
         "--t14-reference", f"{W}/push/t14_reference.json"]
 VAL_FLAGS = dict(table=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/table/t14_reference.json"],
                  push=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/push/t14_reference.json", "--push-placement-proof", PROOF])
+COUT = ["--sonic-residual", "--sonic-tf32", "--sonic-residual-kind", "out", "--c-train-diag", "--t13v4-cout"]  # T03 C-out flags + round-2 switch
 RUNS = dict(d_table=dict(task="table", train=TABLE, warmup=0),
             d_push=dict(task="push", train=PUSH, warmup=50),
-            d_table_pa=dict(task="table", train=[*TABLE, "--per-agent-reward"], warmup=0))
+            d_table_pa=dict(task="table", train=[*TABLE, "--per-agent-reward"], warmup=0),
+            c_out_table=dict(task="table", train=[*TABLE, *COUT], warmup=0, controller="sonic_residual", val_extra=["--t13v4-cout"]),
+            c_out_push=dict(task="push", train=[*PUSH, *COUT], warmup=50, controller="sonic_residual", val_extra=["--t13v4-cout"]))
 BASE = dict(save=1000, val=2000, stop_after=8000, patience=4000, max_it=20000)
 
 
@@ -122,6 +129,8 @@ def main():
                     applies_to="validation points, stop rule, maximum iterations, final checkpoint")
     plan = dict(run=a.run, task=run["task"], num_envs=a.num_envs, gpu=a.gpu, rules=R, iteration_counting=counting, warmup_iterations=warm, stages=stages,
                 validation_states=f"{STATES}/{run['task']}_validation_states.json", validation_flags=VAL_FLAGS[run["task"]])
+    if "controller" in run:  # round 2 (C-out): validation controller and extra flags (keys absent for round 1 = unchanged plan)
+        plan.update(validation_controller=run["controller"], validation_extra=run["val_extra"])
     if a.dry_run:
         print(json.dumps(plan, indent=1))
         return 0
@@ -163,7 +172,8 @@ def main():
             it = pending()[0]
             out = d / "validation" / f"it{it - warm:05d}"
             out.parent.mkdir(exist_ok=True)
-            argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", run["task"], "--controller", "policy", *VAL_FLAGS[run["task"]],
+            argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", run["task"], "--controller", run.get("controller", "policy"),
+                    *VAL_FLAGS[run["task"]], *run.get("val_extra", []),
                     "--checkpoint", str(main_dir / f"model_{it:05d}.pt"), "--device", "cuda:0", "--states", plan["validation_states"],
                     "--model-id", f"t13v4_validation__{a.run}__it{it - warm:05d}", "--output-dir", str(out)]
             vlog = (d / "validation" / f"it{it - warm:05d}.stdout.log").open("w")

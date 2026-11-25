@@ -22,6 +22,7 @@ p.add_argument('--output-dir',type=Path,required=True)
 p.add_argument('--limit',type=int,default=0)
 p.add_argument('--reference-variant',type=Path,default=None)
 p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
+p.add_argument('--t13v4-cout',action='store_true',help='System1 T13 v4 round 2: C-out checkpoints (--controller sonic_residual) with --obs-v1 / --critic-v1; default off = unchanged')
 p.add_argument('--controller',choices=('policy','sonic','sonic_residual','sonic_planner'),default='policy',help='System1: policy (paper actor), sonic (scheme A), sonic_residual (scheme C checkpoint) or sonic_planner (scheme B)')
 p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
 p.add_argument('--device',default='cuda:0')
@@ -39,7 +40,8 @@ p.add_argument('--obs-v1-noise',choices=('off','on'),default='off',help='System1
 p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
 p.add_argument('--t14-reference',type=Path,default=None,help='System1 T13 v4 section 0: T14 round 6 C reference manifest (table / push; system1/t13v4/t14_reference.py); off = original reference')
 a=p.parse_args()
-if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
+if (a.obs_v1 or a.critic_v1) and (a.controller not in (('policy','sonic_residual') if a.t13v4_cout else ('policy',)) or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only (C-out: --t13v4-cout)')
+if a.t13v4_cout and not (a.controller=='sonic_residual' and a.obs_v1):p.error('--t13v4-cout: --controller sonic_residual with --obs-v1')
 if a.obs_v1_noise=='on' and not a.obs_v1:p.error('--obs-v1-noise on needs --obs-v1')
 if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
 if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
@@ -95,6 +97,7 @@ if a.obs_v1 or a.critic_v1:  # System1 T13 v4 (off = unchanged): observation v1 
     _noise=a.obs_v1_noise=='on'  # T13 v4 section 5: the 'noise on' evaluation group; default off = unchanged
     config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise))
     T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
+    if a.t13v4_cout:T13V4_EVAL['cout']=True  # round 2 C-out (key absent when off)
 hand=None
 if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
     sys.path.insert(0,str(ROOT))
@@ -152,10 +155,11 @@ def main():
         zero_teammate_obs=bool(ablation and ablation['zero_teammate_obs'])
         if state.get('placement_provenance') != placement_provenance:
             raise ValueError('Checkpoint and evaluation placement differ')
-        if a.case=='table' and a.controller=='policy' and (state.get('system1_t14_reference') or {}).get('manifest_sha256')!=(T14_REFERENCE or {}).get('manifest_sha256'):
+        if a.case=='table' and (a.controller=='policy' or a.t13v4_cout) and (state.get('system1_t14_reference') or {}).get('manifest_sha256')!=(T14_REFERENCE or {}).get('manifest_sha256'):
             raise ValueError('Checkpoint and evaluation T14 reference differ')  # System1 T13 v4 (both absent = unchanged)
         if state.get('plan5_skill',a.case) != a.case:
             raise ValueError('Checkpoint skill differs from evaluation case')
+        if a.t13v4_cout and (state.get('system1_sonic_residual_kind')!='out' or not state.get('system1_t13v4_cout')):raise ValueError('--t13v4-cout needs a T13 v4 round-2 C-out checkpoint')
         if a.controller=='sonic_residual' and not state.get('system1_sonic_residual'):
             raise ValueError('--controller sonic_residual needs a scheme C checkpoint')
         if a.controller=='policy' and state.get('system1_sonic_residual'):

@@ -53,6 +53,8 @@ PARSER.add_argument("--sonic-residual-kind", choices=("v1", "in", "out"), defaul
                     help="System1 T03 C v2: v1 (default, unchanged), in (C-in: clipped input residual), out (C-out: output residual)")
 PARSER.add_argument("--c-train-diag", action="store_true",
                     help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
+PARSER.add_argument("--t13v4-cout", action="store_true",
+                    help="System1 T13 v4 round 2 (C-out-Table / C-out-Push): allow the T13 v4 switches (--obs-v1, --critic-v1, --contact-v1, --system1-randomization) together with --sonic-residual --sonic-residual-kind out; plan5 path: fresh actor (T03 C-out Pull recipe), frozen prior normalizer; default off = unchanged")
 PARSER.add_argument("--object-mass-kg", type=float, default=None,
                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
 # System1 T13 v4 (all default off = unchanged)
@@ -219,9 +221,11 @@ if ARGS.system1_randomization:  # System1 T10b recipe on the Plan5 path (T13 v4 
     from system1.t10b.randomization import randomization_config
     _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
     CONFIG = replace(CONFIG, randomization=_rand_cfg)
+if ARGS.t13v4_cout and not (ARGS.sonic_residual and ARGS.sonic_residual_kind == "out" and ARGS.obs_v1):
+    PARSER.error("--t13v4-cout: C-out (--sonic-residual --sonic-residual-kind out) with --obs-v1")
 T13V4 = None
 if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None:  # System1 T13 v4 (off = unchanged)
-    if ARGS.sonic_residual or ARGS.from_scratch or ARGS.zero_teammate_obs:
+    if (ARGS.sonic_residual and not ARGS.t13v4_cout) or ARGS.from_scratch or ARGS.zero_teammate_obs:
         PARSER.error("T13 v4 switches: D only (C-out path: separate switch)")
     sys.path.insert(0, str(REPO_ROOT))
     from system1.t13v4.config_v1 import apply_t13v4
@@ -340,6 +344,8 @@ def _ramped_weight(*, iteration: int, start_iteration: int, target: float, ramp:
 def _checkpoint_state(learner, *, iteration: int, smooth_schedule: dict | None) -> dict:
     state = learner.training_state_dict(iteration=iteration)
     state['plan5_skill'] = ARGS.skill
+    if ARGS.t13v4_cout:
+        state['system1_t13v4_cout'] = dict(actor_init="fresh (T03 C-out Pull recipe), frozen prior normalizer (obs-v1 remap), output layer zero", round=2)
     if ARGS.sonic_residual:
         state['system1_sonic_residual'] = True
         if ARGS.sonic_residual_kind != "v1":
@@ -486,7 +492,8 @@ def main() -> None:
             T13V4["mappo_dims"] = patch_dims(teammate=5 if ARGS.obs_v1 else 4, critic=585 if ARGS.critic_v1 else 527)
             if ARGS.obs_v1:
                 models = initialize_plan5_v1_model_bundle(SOURCE_CHECKPOINT, ppo_config, critic=T13V4["mappo_dims"]["critic_obs"],
-                                                          device=env.device, expected_sha256=initialization_kwargs.get("expected_sha256"))
+                                                          device=env.device, expected_sha256=initialization_kwargs.get("expected_sha256"),
+                                                          fresh_actor=ARGS.t13v4_cout)  # T13 v4 round 2 C-out: T03 C-out Pull recipe
             else:
                 models = initialize_plan5_model_bundle(SOURCE_CHECKPOINT, ppo_config, device=env.device, **initialization_kwargs)
             layout_kwargs["layout"] = HomogeneousAgentBatchLayout(actor_obs_dim=T13V4["mappo_dims"]["actor_input"])

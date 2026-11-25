@@ -12,6 +12,8 @@ Initializers:
     columns 0..153 (actor block) copied, the 2 partner-position columns copied from the prior's 2 teammate-position
     columns, the prior's 2 teammate-velocity columns dropped (obs v1 removes that input), the 3 object columns zero; the
     frozen normalizer gets the prior's mean / var for the copied inputs and mean 0, var 1 for the object inputs.
+    fresh_actor=True (T13 v4 round 2 C-out-Push, the T03 C-out Pull recipe on the Plan5 path): the actor keeps its random
+    initialization (not loaded), the frozen normalizer is built from the prior exactly as above.
 """
 from __future__ import annotations
 
@@ -102,7 +104,8 @@ def remap_prior_normalizer(state: dict) -> dict:
     return out
 
 
-def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, device: str = "cpu", expected_sha256: str | None = None):
+def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, device: str = "cpu", expected_sha256: str | None = None,
+                                     fresh_actor: bool = False):
     import holosoma.agents.mappo.initialization as init_mod
     from holosoma.agents.mappo.initialization import FrozenEmpiricalNormalization, Plan5ModelBundle, _sha256
     from holosoma.agents.ppo.ppo import EmpiricalNormalization
@@ -118,7 +121,8 @@ def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, de
         raise ValueError("Plan 5 actor checkpoint compatibility mismatch")
     obs_dim_dict = {"actor_obs": 154, "teammate_obs": 5, "critic_obs": critic}
     actor, critic_net = _networks(config, obs_dim_dict, 29, device)
-    actor.load_state_dict(remap_prior_actor_state(ckpt["actor_model_state_dict"], teammate=5), strict=True)
+    if not fresh_actor:  # fresh_actor (T13 v4 round 2 C-out-Push): random actor as T03 C-out Pull (--from-scratch), normalizer below as is
+        actor.load_state_dict(remap_prior_actor_state(ckpt["actor_model_state_dict"], teammate=5), strict=True)
     an = FrozenEmpiricalNormalization(159, device=device)
     an.load_state_dict(remap_prior_normalizer(ckpt["actor_obs_normalizer_state_dict"]), strict=True)
     an.eval()
