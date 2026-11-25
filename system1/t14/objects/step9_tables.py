@@ -46,7 +46,10 @@ def solve_status(d):
 def level_row(clip, sm, m):
     d = L / clip / tagm(m)
     g = json.loads((L / clip / f"gates_{tagm(m)}.json").read_text())
+    lb = g["diag"].get("leg_box") or {}
     row = dict(clip=clip, sequence=sm["sequence"], object=sm["object"], frames=sm["frames"], level=f"{m:.2f}", L_m=g["diag"]["L_m"],
+               walk=None if not g["diag"].get("walk") else f"{g['diag']['walk']['w0']}:{g['diag']['walk']['w1']}",
+               partner_legs_to_box_min_m=(lb.get("partner") or {}).get("min_m"), partner_legs_in_box_frames=(lb.get("partner") or {}).get("frames_inside"),
                gravity_deg=g["gravity_deg"], persons_pelvis_net_m=f"{g['main_motion']['person_r0_m']} / {g['main_motion']['person_r1_m']}",
                pelvis_mismatch_max_m=g["diag"]["pelvis_mismatch_max_m"], pelvis_mismatch_mean_m=g["diag"]["pelvis_mismatch_mean_m"],
                pelvis_mismatch_max_person_m=g["diag"]["pelvis_mismatch_max_person_scale_m"])
@@ -67,6 +70,8 @@ def level_row(clip, sm, m):
                max_pen_r0_cm=e["max_penetration_cm"]["r0"], max_pen_r1_cm=e["max_penetration_cm"]["r1"],
                contact_err_r0_cm=(ce["r0"]["distance"] or {}).get("mean_cm"), contact_err_r1_cm=(ce["r1"]["distance"] or {}).get("mean_cm"),
                robots_pelvis_net_m=f"{e['main_motion']['robot_r0_m']} / {e['main_motion']['robot_r1_m']}",
+               robots_pelvis_net_solver_m=f"{e['main_motion'].get('robot_r0_solver_m')} / {e['main_motion'].get('robot_r1_solver_m')}",
+               robot_limit_solver_m=e["main_motion"].get("robot_limit_solver_m"),
                toe_drift_max_r0_cm=max((e["foot_slide"]["r0"][f"foot_slide_{s}"]["drift_max_cm"] or 0) for s in ("left", "right")),
                toe_drift_max_r1_cm=max((e["foot_slide"]["r1"][f"foot_slide_{s}"]["drift_max_cm"] or 0) for s in ("left", "right")),
                torso_tilt_r0_deg=e["posture"]["r0"]["torso_tilt_deg"], torso_tilt_r1_deg=e["posture"]["r1"]["torso_tilt_deg"],

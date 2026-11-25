@@ -54,8 +54,10 @@ slots = None
 DEADLINE = None
 LOGFILE = "driver.json"
 FB_ARGS = []
+SOLVE_EXTRA = []
 SRC_ROOT = None
 EXTENSION = True
+SKIP_FAILED_UP = False
 
 
 def now():
@@ -163,7 +165,7 @@ class Clip:
                 dst.parent.mkdir(parents=True, exist_ok=True)
                 (d / f"r{r}").rename(dst)
             cmd = [HS, "-B", "system1/t14/objects/role_solve.py", "--family", "box", "--object", self.obj, "--sequence", self.seq, "--mode", "role",
-                   "--construction", "frontback", "--role", r, "--m", m, "--frames", self.frames, "--tag", self.tag, "--out", d / f"r{r}", *FB_ARGS]
+                   "--construction", "frontback", "--role", r, "--m", m, "--frames", self.frames, "--tag", self.tag, "--out", d / f"r{r}", *FB_ARGS, *SOLVE_EXTRA]
             if r == 0:
                 cmd += ["--source", self.src]
             jobs.append((cmd, f"solve_{self.tag}_{tagm(m)}_r{r}", 2.0, d / f"r{r}.log"))
@@ -208,6 +210,8 @@ class Clip:
             self.levels([m])
             x = self.inter(m)
             if x is None:
+                if SKIP_FAILED_UP:  # step 9c run 2: a failed solve says nothing about crowding; go on lengthening
+                    continue
                 return None
             if not x:
                 return m
@@ -240,7 +244,8 @@ class Clip:
         self.levels([1.0, 1.25, 1.5])
         decide.early(self)
         a = self.search_down() if self.inter(1.0) is False else None
-        free = self.search_up(UP) if self.inter(1.5) else None
+        crowded = self.inter(1.5) or (SKIP_FAILED_UP and self.inter(1.5) is None and (self.inter(1.25) or self.inter(1.0)))
+        free = self.search_up(UP) if crowded else None
         rep = sorted({1.0, 1.25, 1.5} | ({a} if a is not None else set()) | ({free} if free is not None else set()))
         self.sm.update(a=a, first_free_above_1p5=free, report_levels=rep,
                        applicable_levels=[m for m in rep if (self.evals.get(m) or {}).get("applicable")])
@@ -356,6 +361,28 @@ def render_only(tags, parallel):
     print("RENDER_ONLY_DONE", flush=True)
 
 
+def search_up_only(tags, start):
+    """step 9c: continue the 'lengthen while crowded' search of main clips whose 1.5 level has no evaluation (a failed
+    solve) and whose 1.0 / 1.25 levels intersect: levels start, start + 0.05, ... <= 3.0 until the first level without
+    intersection (fully evaluated). Record in search_up.json (driver.json is read, not written)."""
+    global LOGFILE
+    LOGFILE = "search_up.json"
+    rows = {MAIN.get(r["sequence"], r["sequence"]): r for r in csv.DictReader(open(TURNS)) if r["straight"] == "True"}
+    grid = [m for m in UP if m >= start - 1e-9]
+
+    def one(tag):
+        c = Clip(rows[tag])
+        free = c.search_up(grid)
+        c.sm.update(search_from=start, first_free_above_1p5=free, min_free=free)
+        save()
+    ts = [threading.Thread(target=one, args=(t,)) for t in tags]
+    for t in ts:
+        t.start()
+    for t in ts:
+        t.join()
+    print("SEARCH_UP_DONE", flush=True)
+
+
 def main():
     global slots, DEADLINE
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
@@ -367,8 +394,15 @@ def main():
     ap.add_argument("--fb-legs", choices=("all", "walk"), default="all")
     ap.add_argument("--source-root", type=Path, default=None, help="reuse the source solves under this directory")
     ap.add_argument("--no-extension", action="store_true")
+    ap.add_argument("--search-up", nargs="*", default=None, help="tags: continue the up-search from --search-from (step 9c)")
+    ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own", help="role_solve --fb-human-frame (step 9c run 2: target)")
+    ap.add_argument("--skip-failed-up", action="store_true", help="the up-search goes on past a level whose solve failed, and starts "
+                    "when 1.5 failed while 1.0 or 1.25 intersect (step 9c run 2)")
+    ap.add_argument("--search-from", type=float, default=1.55)
     a = ap.parse_args()
-    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION
+    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION, SOLVE_EXTRA, SKIP_FAILED_UP
+    SOLVE_EXTRA = ["--fb-human-frame", a.fb_human_frame] if a.fb_human_frame != "own" else []
+    SKIP_FAILED_UP = a.skip_failed_up
     L = ROOT / f"logs_system1/t14/{a.step}"
     EXP = ROOT / f"exports_system1/T14_references/{a.step.replace('step9b', 'step9')}"
     VID = ROOT / f"exports_system1/T14_videos/{a.step.replace('step9b', 'step9')}"
@@ -377,13 +411,16 @@ def main():
     SRC_ROOT = (ROOT / a.source_root) if a.source_root and not a.source_root.is_absolute() else a.source_root
     EXTENSION = not a.no_extension
     L.mkdir(parents=True, exist_ok=True)
-    log.update(step=a.step, fb_args=FB_ARGS, source_root=None if SRC_ROOT is None else str(SRC_ROOT), extension_enabled=EXTENSION)
+    log.update(step=a.step, fb_args=FB_ARGS, solve_extra=SOLVE_EXTRA, skip_failed_up=SKIP_FAILED_UP, source_root=None if SRC_ROOT is None else str(SRC_ROOT),
+               extension_enabled=EXTENSION)
     slots = threading.BoundedSemaphore(a.parallel)
     if a.render_only is not None:
         DEADLINE = now().replace(hour=23, minute=59)
         return render_only(a.render_only, a.parallel)
     hh, mm = (int(x) for x in a.deadline.split(":"))
     DEADLINE = now().replace(hour=hh, minute=mm, second=0, microsecond=0)
+    if a.search_up is not None:
+        return search_up_only(a.search_up, a.search_from)
     log.update(parallel=a.parallel, deadline=DEADLINE.isoformat(timespec="seconds"), grid=GRID)
     rows = [r for r in csv.DictReader(open(TURNS)) if r["straight"] == "True"]
     main_rows = [r for r in rows if r["sequence"] in MAIN]
