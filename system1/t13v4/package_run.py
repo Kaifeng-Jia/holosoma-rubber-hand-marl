@@ -5,8 +5,9 @@
                  column set of the T10b package (results_system1/T10b_friction_margin/episodes.csv) plus group / simulator / noise;
   summary.csv    per group: completions of the 50 perturbed states (nominal reported separately, not counted), object-position RMSE
                  of the completed episodes, failure classes;
-  comparison.csv Isaac completions next to the paper D of the same task (T03 d_final_5070, seeds 721-723; original reference,
-                 original observation, no randomization; its test states differ: new reference, states regenerated);
+  comparison.csv completions next to the paper D of the same task (T03 d_final_5070, seeds 721-723; original reference,
+                 original observation, no randomization; its test states differ: new reference, states regenerated); Table (no T03
+                 row): paper D Table Isaac / MuJoCo from T10 (isaac_vs_mujoco.csv) and the T10b pilot (D Table + randomization);
   training_diag.csv / .json  internal diagnostics from the copied-back training metrics (train/metrics.jsonl): per robot, the
                  hand-force-in-should share, lost-contact termination signals (term 2) and penalty step share (term 3); last 50
                  iterations and whole run;
@@ -136,10 +137,23 @@ def main():
             comp.append(dict(source="paper D (T03 d_final_5070; original reference / observation, no randomization)", training_seed=r["training_seed"],
                              level_cm=r["perturbation_level_cm"], n_completed=r["n_completed"], n_episodes=r["n_episodes"], checkpoint_iteration=r["checkpoint_iteration"],
                              states_sha256=r["states_sha256"], note="different test states (new reference, states regenerated)"))
+    if task == "table":  # task book section 5 item 6: Table has no T03 row; paper D Table from T10, and the T10b randomized pilot
+        for r in csv.DictReader(open(ROOT / "results_system1/T10_sim2sim/isaac_vs_mujoco.csv")):
+            if r["task"] == "table" and r["scheme"] == "D":
+                for sim, k in (("Isaac", "isaac_5070_n_completed"), ("MuJoCo", "mujoco_n_completed")):
+                    comp.append(dict(source=f"paper D Table ({sim}; T10 isaac_vs_mujoco.csv; original reference / observation, no randomization)",
+                                     training_seed=r["training_seed"], level_cm=r["perturbation_level_cm"], n_completed=r[k], n_episodes=r["n_episodes"],
+                                     checkpoint_iteration=None, states_sha256=r["isaac_states_sha256"], note="different test states (new reference, states regenerated)"))
+        for r in csv.DictReader(open(ROOT / "results_system1/T10b_friction_margin/retrain/finals/d_table_seed721_rand/comparison.csv")):
+            if r["policy"] == "pilot":
+                comp.append(dict(source=f"T10b pilot D Table + randomization ({'Isaac' if r['simulator'] == 'isaac' else 'MuJoCo'}; T10b retrain/finals)",
+                                 training_seed=721, level_cm=r["level_cm"], n_completed=r["n_completed"], n_episodes=r["n_episodes"], checkpoint_iteration=14000,
+                                 states_sha256=r["states_sha256"], note="original reference / observation; different test states"))
     for s in summ:
-        if s["simulator"] == "isaac" and "n_completed" in s:
-            comp.append(dict(source=f"T13 v4 {a.run} (Isaac, noise {s['noise']})", training_seed=721, level_cm=s["level_cm"], n_completed=s["n_completed"],
-                             n_episodes=s["n_perturbed"], checkpoint_iteration=None, states_sha256=s["states_sha256"], note=""))
+        if "n_completed" in s:
+            comp.append(dict(source=f"T13 v4 {a.run} ({'Isaac' if s['simulator'] == 'isaac' else 'MuJoCo'}, noise {s['noise']})", training_seed=721,
+                             level_cm=s["level_cm"], n_completed=s["n_completed"], n_episodes=s["n_perturbed"], checkpoint_iteration=None,
+                             states_sha256=s["states_sha256"], note=""))
     with open(out / "comparison.csv", "w", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(comp[0]))
         w.writeheader()

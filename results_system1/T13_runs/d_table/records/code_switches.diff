@@ -1,0 +1,204 @@
+diff --git a/scripts/evaluate_paper_supplement.py b/scripts/evaluate_paper_supplement.py
+index 157ab76..c85a31b 100644
+--- a/scripts/evaluate_paper_supplement.py
++++ b/scripts/evaluate_paper_supplement.py
+@@ -35,10 +35,12 @@ p.add_argument('--hand-friction',type=float,default=None,help='System1 T10b fric
+ p.add_argument('--sim2sim-dump',type=Path,default=None,help='System1 T10 sim2sim: write the PhysX scene (collision convexes, masses, joints, materials, solver, PD constants) to this directory and record per step observations / actions / PD targets / substep torques / body poses (and SONIC inputs) per episode; off = unchanged')
+ p.add_argument('--record-torques',action='store_true',help='System1 T04 v4: save every physics substep torque (post-clip, joint_control term) per episode to <state>.torques.npz and add per-joint saturation fractions (|tau| >= 0.95 x limit) to the episode result; off = unchanged')
+ p.add_argument('--obs-v1',action='store_true',help='System1 T13 v4: observation v1 (actor 159), noise off; checkpoints trained with --obs-v1; off = unchanged')
++p.add_argument('--obs-v1-noise',choices=('off','on'),default='off',help='System1 T13 v4 section 5: observation-v1 training noise in the evaluation (with --obs-v1); off = unchanged (noise off)')
+ p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
+ p.add_argument('--t14-reference',type=Path,default=None,help='System1 T13 v4 section 0: T14 round 6 C reference manifest (table / push; system1/t13v4/t14_reference.py); off = original reference')
+ a=p.parse_args()
+ if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
++if a.obs_v1_noise=='on' and not a.obs_v1:p.error('--obs-v1-noise on needs --obs-v1')
+ if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
+ if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
+ if a.finger_mode=='learn' and a.controller in ('sonic','sonic_planner'):p.error('A/B with hands: --finger-mode track (geometric grip) or locked')
+@@ -90,8 +92,9 @@ config=replace(config,observation=g1_29dof_core4d_smalltable_evaluation_observat
+ T13V4_EVAL=None
+ if a.obs_v1 or a.critic_v1:  # System1 T13 v4 (off = unchanged): observation v1 with noise off (validation / evaluation)
+     from holosoma.config_values.marl.g1.observation_v1 import observation_v1
+-    config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False))
+-    T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=False,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
++    _noise=a.obs_v1_noise=='on'  # T13 v4 section 5: the 'noise on' evaluation group; default off = unchanged
++    config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise))
++    T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
+ hand=None
+ if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
+     sys.path.insert(0,str(ROOT))
+@@ -267,7 +270,7 @@ def main():
+             return 0
+         manifest=dict(reference_variant=None if a.reference_variant is None else str(a.reference_variant),reference_variant_sha256=None if a.reference_variant is None else sha(a.reference_variant),case=a.case,model_id=a.model_id,checkpoint=str(checkpoint),checkpoint_sha256=sha(checkpoint),
+                       v3_ablation=ablation,checkpoint_iteration=state['iter'],states_sha256=sha(a.states),reference_frames=n,
+-                      horizon_control_steps=n,dt=env.dt,inference='actor_mean_only_critic_forbidden',observation_noise=False,
++                      horizon_control_steps=n,dt=env.dt,inference='actor_mean_only_critic_forbidden',observation_noise=bool(T13V4_EVAL and T13V4_EVAL['noise']),
+                       physics=physics,robot_urdf=config.robot.asset.urdf_file,object_urdf=config.robot.object.object_urdf_path,
+                       placement_provenance=placement_provenance,
+                       runtime_reference_check=runtime_reference_check,
+@@ -278,7 +281,7 @@ def main():
+         if T13V4_EVAL is not None:  # System1 T13 v4: observation v1, noise off (v1 internal noise state must be off)
+             st=getattr(env,'_system1_obs_v1',None)
+             T13V4_EVAL['obs_v1_noise_enabled_in_env']=None if st is None else bool(st.noise_enabled)
+-            if st is not None and st.noise_enabled:raise RuntimeError('observation-v1 noise must be off in evaluation')
++            if st is not None and bool(st.noise_enabled)!=bool(T13V4_EVAL['noise']):raise RuntimeError('observation-v1 noise state differs from --obs-v1-noise')
+             manifest['system1_t13v4']=T13V4_EVAL
+         if T14_REFERENCE is not None:
+             manifest['system1_t14_reference']=T14_REFERENCE
+diff --git a/system1/sim2sim/mj_env.py b/system1/sim2sim/mj_env.py
+index c5fddd8..f7804da 100644
+--- a/system1/sim2sim/mj_env.py
++++ b/system1/sim2sim/mj_env.py
+@@ -253,6 +253,7 @@ class PairEnv:
+         from holosoma.envs.marl.paired_motion_reference import PairedMotionReference
+         self.ss = SceneSpec(dump_dir)
+         self.task = task
++        self.obs_v1 = False  # T13 v4 switch (mj_eval --obs-v1); off = unchanged
+         self.model, self.spec, self.info = build_model(self.ss, task)
+         self.data = mujoco.MjData(self.model)
+         m = self.model
+@@ -408,8 +409,29 @@ class PairEnv:
+         mate = np.concatenate([quat_rotate_inverse(heading, rp_w, w_last=True).numpy()[:, :2],
+                                quat_rotate_inverse(heading, rv_w, w_last=True).numpy()[:, :2]], axis=-1)
+         mate = np.clip(mate, -1.0, 1.0)
++        if self.obs_v1:  # T13 v4 (off = unchanged): teammate v1 = partner neck (2) + object (3), own torso-heading frame, noise off
++            mate = self._teammate_v1(st)
+         return actor, mate
+ 
++    def _teammate_v1(self, st):
++        """holosoma.managers.observation.terms.marl_v1 NeckPartnerRelPosBV1 / ObjectRelPosBV1 with noise off: neck point =
++        NECK_POINT_TORSO_M on torso_link; heading = torso_link yaw only; partner term clipped +-PARTNER_CLIP_M (horizontal 2),
++        object term (object root origin minus own neck) clipped +-OBJECT_CLIP_M (3). Group term order: neck..., object..."""
++        from holosoma.managers.observation.terms.marl_v1 import NECK_POINT_TORSO_M, OBJECT_CLIP_M, PARTNER_CLIP_M
++        from holosoma.utils.rotations import quat_apply, quat_rotate_inverse
++        T = lambda x: torch.tensor(np.asarray(x), dtype=torch.float64)  # noqa: E731
++        k = self.body_list.index("torso_link")
++        pos = T(st["body_pos"][:, k])
++        quat = T(st["body_quat_xyzw"][:, k])
++        neck = pos + quat_apply(quat, T(NECK_POINT_TORSO_M).expand(2, 3), w_last=True)
++        x, y, z, w = quat.unbind(-1)
++        half = 0.5 * torch.atan2(2.0 * (w * z + x * y), 1.0 - 2.0 * (y * y + z * z))
++        zero = torch.zeros_like(half)
++        heading = torch.stack((zero, zero, torch.sin(half), torch.cos(half)), dim=-1)
++        partner = quat_rotate_inverse(heading, neck.flip(0) - neck, w_last=True)[:, :2].numpy()
++        obj = quat_rotate_inverse(heading, T(st["obj_pos"]).expand(2, 3) - neck, w_last=True).numpy()
++        return np.concatenate([np.clip(partner, -PARTNER_CLIP_M, PARTNER_CLIP_M), np.clip(obj, -OBJECT_CLIP_M, OBJECT_CLIP_M)], axis=-1)
++
+     # -- termination (JointBadTrackingZOnly: robot orientation by torso gravity z, object position / orientation)
+     def termination(self, st=None, t=None):
+         from holosoma.utils.rotations import quat_rotate_inverse
+diff --git a/system1/sim2sim/mj_eval.py b/system1/sim2sim/mj_eval.py
+index 7e3cdc9..c411ed0 100644
+--- a/system1/sim2sim/mj_eval.py
++++ b/system1/sim2sim/mj_eval.py
+@@ -147,6 +147,9 @@ def main():
+     ap.add_argument("--limit", type=int, default=0)
+     ap.add_argument("--onnx", type=Path, default=None, help="T10b: actor ONNX of another checkpoint (default: the T10 export of the final)")
+     ap.add_argument("--checkpoint", type=Path, default=None, help="T10b: the checkpoint that ONNX was exported from (recorded; required with --onnx)")
++    ap.add_argument("--dump", type=Path, default=None, help="T13 v4: Isaac scene export of this run (default: the T10 export of --scheme / --task)")
++    ap.add_argument("--states", type=Path, default=None, help="T13 v4: frozen state file of this run's Isaac finals (default: the T10 / T03 one)")
++    ap.add_argument("--obs-v1", action="store_true", help="T13 v4: observation v1 (teammate 5, noise off; D only); off = unchanged")
+     a = ap.parse_args()
+     if (a.onnx is None) != (a.checkpoint is None):
+         raise ValueError("--onnx and --checkpoint go together")
+@@ -154,7 +157,12 @@ def main():
+         raise FileExistsError(a.out)
+     a.out.mkdir(parents=True)
+     dump = ROOT / "logs_system1/t10/isaac" / (dict(D="d_", **{"C-in": "cin_", "C-out": "cout_"})[a.scheme] + a.task) / "dump"
++    if a.dump is not None:
++        dump = a.dump.resolve()
++    if a.obs_v1 and a.scheme != "D":
++        raise ValueError("--obs-v1: D only")
+     env = PairEnv(dump, a.task)
++    env.obs_v1 = a.obs_v1
+     name = f"{a.scheme.replace('-', '').lower()}_{a.task}_seed{a.seed}"
+     onnx = ROOT / "exports_system1/t10/onnx" / f"{name}.onnx" if a.onnx is None else a.onnx.resolve()
+     pd_note = "isaac"
+@@ -178,7 +186,7 @@ def main():
+             for r in range(2):
+                 env.model.actuator_ctrlrange[env.act[r]] = np.stack([-env.tau_lim, env.tau_lim], axis=1)
+             pd_note = "official deploy kp/kd (policy_parameters.hpp formulas) + official sim2sim motor effort limits"
+-    states_path = states_for(a.task, a.level, a.scheme, a.seed)
++    states_path = states_for(a.task, a.level, a.scheme, a.seed) if a.states is None else a.states.resolve()
+     states = json.loads(states_path.read_text())["states"][: a.limit or None]
+     manifest = dict(task=a.task, scheme=a.scheme, seed=a.seed, level=a.level, pd=a.pd, pd_note=pd_note, onnx=str(onnx), onnx_sha256=sha(onnx),
+                     checkpoint_sha256=checkpoint_for(a.scheme, a.task, a.seed) if a.checkpoint is None else sha(a.checkpoint),
+@@ -186,6 +194,8 @@ def main():
+                     isaac_dump=str(dump.relative_to(ROOT)), scene_json_sha256=sha(dump / "scene.json"), convexes_sha256=sha(dump / "collision_convexes.npz"),
+                     kp=env.kp.tolist(), kd=env.kd.tolist(), torque_limits=env.tau_lim.tolist(), sim_dt=float(env.model.opt.timestep), decimation=4,
+                     sonic_encoder_sha256=sha(ctrl.sonic.enc._model_path) if False else None, command=[sys.executable, *sys.argv])
++    if a.obs_v1:
++        manifest["obs_v1"] = dict(teammate=5, noise=False, actor_input=159)
+     if a.scheme in ("C-in", "C-out"):
+         from system1.sim2sim.sonic_mj import HF
+         manifest.update(sonic_encoder=str(HF / "model_encoder.onnx"), sonic_encoder_sha256=sha(HF / "model_encoder.onnx"),
+diff --git a/system1/sim2sim/onnx_check.py b/system1/sim2sim/onnx_check.py
+index 9a15e64..dee2f1f 100644
+--- a/system1/sim2sim/onnx_check.py
++++ b/system1/sim2sim/onnx_check.py
+@@ -76,11 +76,14 @@ def algo_config(task):
+ 
+ 
+ def extra_checkpoints(specs):
+-    """--extra-checkpoint SCHEME,TASK,SEED,NAME,PATH (T10b: a pilot's final checkpoint); NAME is the ONNX file stem."""
++    """--extra-checkpoint SCHEME,TASK,SEED,NAME,PATH[,v1] (T10b: a pilot's final checkpoint); NAME is the ONNX file stem.
++    T13 v4: a sixth field "v1" = a checkpoint trained with observation v1 (actor input 154 + teammate 5 = 159)."""
+     out = []
+     for s in specs:
+-        scheme, task, seed, name, path = s.split(",")
+-        out.append(dict(scheme=scheme, task=task, seed=int(seed), name=name, checkpoint=str(Path(path).resolve()), checkpoint_sha256=sha(path)))
++        f = s.split(",")
++        scheme, task, seed, name, path = f[:5]
++        v1 = len(f) > 5 and f[5] == "v1"
++        out.append(dict(scheme=scheme, task=task, seed=int(seed), name=name, checkpoint=str(Path(path).resolve()), checkpoint_sha256=sha(path), obs_v1=v1))
+     return out
+ 
+ 
+@@ -88,7 +91,14 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
+     import onnxruntime as ort
+     from holosoma.agents.mappo.core4d_smalltable_initialization import initialize_core4d_smalltable_model_bundle
+     for c in (checkpoints(tasks) if cks is None else cks):
+-        m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
++        if c.get("obs_v1"):  # T13 v4 (off = unchanged): the evaluator's v1 bundle (teammate 5, critic 585)
++            sys.path.insert(0, str(ROOT))
++            from system1.t13v4.mappo_v1 import initialize_core4d_v1_model_bundle
++            m = initialize_core4d_v1_model_bundle(algo_config(c["task"]), teammate=5, critic=585, device="cpu")
++            dim = 159
++        else:
++            m = initialize_core4d_smalltable_model_bundle(algo_config(c["task"]), device="cpu")
++            dim = 158
+         ck = torch.load(c["checkpoint"], map_location="cpu", weights_only=False)
+         m.actor.load_state_dict(ck["actor_model_state_dict"], strict=True)
+         m.actor_obs_normalizer.load_state_dict(ck["actor_obs_normalizer_state_dict"], strict=True)
+@@ -98,12 +108,12 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
+         name = c.get("name") or f"{c['scheme'].replace('-', '').lower()}_{c['task']}_seed{c['seed']}"
+         path = Path(onnx_dir) / f"{name}.onnx"
+         path.parent.mkdir(parents=True, exist_ok=True)
+-        torch.onnx.export(wrap, torch.zeros(1, 158), str(path), input_names=["obs"], output_names=["action"],
++        torch.onnx.export(wrap, torch.zeros(1, dim), str(path), input_names=["obs"], output_names=["action"],
+                           dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}}, opset_version=17, dynamo=False)
+         rng = np.random.default_rng(0)
+         mean = m.actor_obs_normalizer._mean.numpy()
+         std = m.actor_obs_normalizer._std.numpy()
+-        x = np.concatenate([rng.standard_normal((500, 158)), mean + std * rng.standard_normal((500, 158))]).astype(np.float32)
++        x = np.concatenate([rng.standard_normal((500, dim)), mean + std * rng.standard_normal((500, dim))]).astype(np.float32)
+         with torch.no_grad():  # the evaluator path: normaliser(update=False) then act_inference
+             ref = m.actor.act_inference({"actor_obs": m.actor_obs_normalizer(torch.from_numpy(x), update=False)}).numpy()
+         sess = ort.InferenceSession(str(path), providers=["CPUExecutionProvider"])
+@@ -112,14 +122,14 @@ def actors(onnx_dir, rows_out, tasks=("table", "bucket"), cks=None):
+         # float64 control (same graph, double precision): separates conversion errors from float32 rounding
+         w64 = ActorOnnx(m.actor, m.actor_obs_normalizer).double().eval()
+         p64 = Path(onnx_dir) / f"{name}_float64_check.onnx"
+-        torch.onnx.export(w64, torch.zeros(1, 158, dtype=torch.float64), str(p64), input_names=["obs"], output_names=["action"],
++        torch.onnx.export(w64, torch.zeros(1, dim, dtype=torch.float64), str(p64), input_names=["obs"], output_names=["action"],
+                           dynamic_axes={"obs": {0: "batch"}, "action": {0: "batch"}}, opset_version=17, dynamo=False)
+         with torch.no_grad():
+             ref64 = w64(torch.from_numpy(x.astype(np.float64))).numpy()
+         from onnx.reference import ReferenceEvaluator  # onnxruntime CPU has no float64 Elu; the ONNX reference evaluator runs the graph
+         got64 = ReferenceEvaluator(str(p64)).run(None, {"obs": x.astype(np.float64)})[0]
+         half = len(x) // 2
+-        rows_out.append(dict(item="actor", name=name, scheme=c["scheme"], task=c["task"], seed=c["seed"], n=len(x), max_abs_diff=err, tol=TOL,
++        rows_out.append(dict(item="actor", name=name, scheme=c["scheme"], task=c["task"], seed=c["seed"], n=len(x), **({"input_dim": dim} if c.get("obs_v1") else {}), max_abs_diff=err, tol=TOL,
+                              passed=err < TOL, max_abs_diff_N01_half=float(np.abs(got - ref)[:half].max()),
+                              max_abs_diff_normaliser_half=float(np.abs(got - ref)[half:].max()), max_abs_action=float(np.abs(ref).max()),
+                              max_rel_diff=float((np.abs(got - ref) / np.maximum(np.abs(ref), 1e-3)).max()),
