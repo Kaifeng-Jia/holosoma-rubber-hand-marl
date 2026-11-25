@@ -52,7 +52,11 @@ def added_drift(robot_pos, source_pos, flag):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--logdir", type=Path, default=None, help="default logs_system1/t14/step8 (the step-8 rerun: logs_system1/t14/step8b)")
     a = ap.parse_args()
+    global L
+    if a.logdir is not None:
+        L = a.logdir if a.logdir.is_absolute() else ROOT / a.logdir
     import support
     from reference_geometry_pilot import RobotFK
     from holosoma_retargeting.config_types.data_type import SMPLH_DEMO_JOINTS

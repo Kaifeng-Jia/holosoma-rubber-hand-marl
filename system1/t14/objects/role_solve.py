@@ -160,7 +160,7 @@ def main():
     ap.add_argument("--frames", default=None, help="step 9: A:B, solve frames A..B-1 only")
     ap.add_argument("--construction", choices=("partner", "frontback"), default="partner", help="step 9: frontback (role mode, box family)")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box", help="step 9c: frontback partner turn about the world vertical")
-    ap.add_argument("--fb-legs", choices=("all", "walk"), default="all", help="step 9c: reverse only the walking segment")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy"), default="all", help="step 9c: reverse only the walking segment")
     ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own",
                     help="frontback, Stage 2: 'target' = the person-side object frame of the interaction mesh is the role's own object "
                          "frame carried by its region map (own_r M_r^-1, points M_r demo), so that it differs from the robot-side "
@@ -257,8 +257,8 @@ def main():
         h0_, p0_, _ = preprocess_motion_data(np.concatenate([human, palms], 1), _NS(demo_joints=names54), motion_config.toe_names, scale=s, object_poses=raw_poses)
         O_ = pt.mj_to_mat(convert_object_poses_to_mujoco_order(create_grounded_nominal_object_poses(p0_, s)))
         fa_, fb_e = (int(x) for x in a.frames.split(":")) if a.frames else (0, len(human))
-        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs == "walk" else None
-        if a.fb_legs == "walk" and walk is None:
+        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy") else None
+        if a.fb_legs in ("walk", "walk_scopy") and walk is None:
             raise SystemExit("no swing segment in the clip")
         FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk)
         cand = FB["cand"]

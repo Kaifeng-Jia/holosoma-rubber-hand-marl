@@ -118,6 +118,25 @@ def test_swing_segments():
     assert 8 <= sw[0]["start"] <= 12 and 23 <= sw[0]["stop"] <= 28 and 38 <= sw[1]["start"] <= 42, sw
 
 
+def test_walk_scopy_lift_and_put_down():
+    """step 9d: outside the walking segment the partner's legs are the S copy of the demonstration's legs plus one horizontal
+    offset each (pre / post); across both boundaries the mean displacement of the four foot points is zero (least squares)."""
+    H, O = straight_carry(T=61)
+    rng = np.random.default_rng(1)
+    H = H + rng.normal(scale=0.01, size=H.shape)  # some leg motion in the lift / put-down segments
+    walk = dict(w0=10, w1=50)
+    C = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0, turn="world", legs="walk_scopy", walk=walk)
+    C9c = fb.build(H, NAMES, O, np.array([0.3, 0.4, 0.3]), 1.0, turn="world", legs="walk", walk=walk)
+    il = [NAMES.index(n) for n in fb.LOWER]
+    legs, S = C["human1"][:, il], C["S"]
+    Sx = H[:, il] @ S[:3, :3].T + S[:3, 3]
+    assert np.allclose(legs[10:50], C9c["human1"][10:50][:, il])  # walking segment as step 9c
+    dp, dq = np.r_[C["pre_offset"], 0.0], np.r_[C["post_offset"], 0.0]
+    assert np.allclose(legs[:10], Sx[:10] + dp) and np.allclose(legs[50:], Sx[50:] + dq)
+    feet = [fb.LOWER.index(n) for n in ("L_Ankle", "L_Toe", "R_Ankle", "R_Toe")]
+    assert np.allclose((legs[10, feet, :2] - legs[9, feet, :2]).mean(0), 0) and np.allclose((legs[50, feet, :2] - legs[49, feet, :2]).mean(0), 0)
+
+
 def test_added_drift():
     T = 20
     rob, src = np.zeros((T, 3)), np.zeros((T, 3))

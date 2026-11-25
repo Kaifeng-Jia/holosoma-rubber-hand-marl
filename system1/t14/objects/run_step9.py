@@ -131,7 +131,8 @@ class Clip:
         self.frames = f"{row['start']}:{row['stop']}"
         self.tag = MAIN.get(self.seq, self.seq)
         self.d = L / self.tag
-        self.src = (SRC_ROOT or (L / "src")) / self.tag
+        reuse = (SRC_ROOT / self.tag) if SRC_ROOT is not None else None  # reuse a finished source solve; else solve it under L/src
+        self.src = reuse if (reuse is not None and (reuse / "run_record.json").exists()) else L / "src" / self.tag
         self.main = self.seq in MAIN
         self.evals = {}
         self.sm = log["summary"].setdefault(self.tag, dict(object=self.obj, sequence=self.seq, frames=self.frames, main=self.main))
@@ -391,7 +392,7 @@ def main():
     ap.add_argument("--render-only", nargs="*", default=None, help="tags of main clips: pictures + video only (after the driver)")
     ap.add_argument("--step", default="step9b", help="output name: logs_system1/t14/<step>, exports, results_system1/T14_retargeting/<step>")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk"), default="all")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy"), default="all")
     ap.add_argument("--source-root", type=Path, default=None, help="reuse the source solves under this directory")
     ap.add_argument("--no-extension", action="store_true")
     ap.add_argument("--search-up", nargs="*", default=None, help="tags: continue the up-search from --search-from (step 9c)")

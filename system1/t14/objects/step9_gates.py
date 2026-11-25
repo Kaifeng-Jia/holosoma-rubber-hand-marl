@@ -66,12 +66,12 @@ def main():
     ap.add_argument("--levels", required=True)
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
-    ap.add_argument("--fb-legs", choices=("all", "walk"), default="all")
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy"), default="all")
     a = ap.parse_args()
     fr = tuple(int(x) for x in a.frames.split(":"))
     h0, names, nom, size, s = load_role0(a.object, a.sequence, fr)
     walk = None
-    if a.fb_legs == "walk":
+    if a.fb_legs in ("walk", "walk_scopy"):
         import frontback as fb
         import omomo_motion as om
         walk = fb.walking_segment(om.load_sequences({a.object})[a.sequence], *fr)

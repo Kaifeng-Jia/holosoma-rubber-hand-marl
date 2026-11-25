@@ -38,6 +38,12 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 about the vertical, + the least-squares horizontal offset (over the clip, as before): reversed inside the
                 walking segment, and before / after it the partner stands still with the legs of its boundary frame (pose and
                 position).
+  legs="walk_scopy"  (step 9d, Kevin 2026-11-25 03:50) the walking segment exactly as legs="walk"; before it (lift) and after it
+                (put down) the partner's legs (Pelvis, hips, knees, ankles, toes) = the S copy of the demonstration's legs at the
+                same frame (its knee bend and stepping), moved horizontally as a whole so that its feet meet the reversed walking
+                segment: pre = S x(t) + d_pre, d_pre = least-squares horizontal offset of the four foot points (ankles, toes) of
+                S x(w0 - 1) onto the walking legs at w0; post = S x(t) + d_post with S x(w1) onto the walking legs at w1 - 1. The
+                upper body stays object-attached (G), as in every variant.
 """
 from __future__ import annotations
 
@@ -128,7 +134,7 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
     G = P @ T180 @ np.linalg.inv(A)  # world -> world map carrying role 0's object-attached points to the partner
     human1 = np.zeros_like(human0)
     human1[:, iu] = np.einsum("tij,tkj->tki", G[:, :3, :3], human0[:, iu]) + G[:, None, :3, 3]
-    if legs == "walk":
+    if legs in ("walk", "walk_scopy"):
         w0, w1 = int(walk["w0"]), int(walk["w1"])
         idx = np.clip(w0 + w1 - 1 - np.arange(T), w0, w1 - 1)  # reversed inside [w0, w1), held before / after
         rev = human0[idx][:, il]
@@ -140,6 +146,18 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
     pel_att = np.einsum("tij,tj->ti", G[:, :3, :3], pel) + G[:, :3, 3]
     off = (pel_att[:, :2] - leg_xyz[:, 0, :2]).mean(0)  # least-squares horizontal offset (index 0 of LOWER = Pelvis)
     leg_xyz[..., :2] += off
+    d_pre = d_post = None
+    if legs == "walk_scopy":
+        feet = [LOWER.index(n) for n in ("L_Ankle", "L_Toe", "R_Ankle", "R_Toe")]
+        Sx = human0[:, il] @ S[:3, :3].T + S[:3, 3]  # the S copy of the demonstration's legs, every frame
+        if w0 > 0:
+            d_pre = (leg_xyz[w0, feet, :2] - Sx[w0 - 1, feet, :2]).mean(0)
+            leg_xyz[:w0] = Sx[:w0]
+            leg_xyz[:w0, :, :2] += d_pre
+        if w1 < T:
+            d_post = (leg_xyz[w1 - 1, feet, :2] - Sx[w1, feet, :2]).mean(0)
+            leg_xyz[w1:] = Sx[w1:]
+            leg_xyz[w1:, :, :2] += d_post
     human1[:, il] = leg_xyz
     D = leg_xyz[:, 0, :2] - pel_att[:, :2]
     Q0, Q1 = Rt.T, R180 @ Rt.T
@@ -148,7 +166,8 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
     M0 = affine(Q0, -Rt.T @ cT)  # level-m maps (box frame -> target frame)
     M1 = affine(Q1, -Q1 @ cT)
     return dict(P=P, A=A, B=B, S=S, G=G, cand=cand, M0=M0, M1=M1, human1=human1, rot1=G[:, :3, :3], D=D, k=k, sigma=sigma, walk_axis_angle_deg=ang,
-                walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=off, turn=turn, legs=legs, walk=walk, leg_source_frame=idx)
+                walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=off, turn=turn, legs=legs, walk=walk, leg_source_frame=idx,
+                pre_offset=None if d_pre is None else d_pre.tolist(), post_offset=None if d_post is None else d_post.tolist())
 
 
 def box_sd(p, M, size):
