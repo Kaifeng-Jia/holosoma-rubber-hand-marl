@@ -1,0 +1,395 @@
+diff --git a/scripts/evaluate_paper_supplement.py b/scripts/evaluate_paper_supplement.py
+index c85a31b..7dae4d9 100644
+--- a/scripts/evaluate_paper_supplement.py
++++ b/scripts/evaluate_paper_supplement.py
+@@ -22,6 +22,7 @@ p.add_argument('--output-dir',type=Path,required=True)
+ p.add_argument('--limit',type=int,default=0)
+ p.add_argument('--reference-variant',type=Path,default=None)
+ p.add_argument('--object-mass-kg',type=float,default=None,help='System1 T04 mass variant; default keeps the original asset')
++p.add_argument('--t13v4-cout',action='store_true',help='System1 T13 v4 round 2: C-out checkpoints (--controller sonic_residual) with --obs-v1 / --critic-v1; default off = unchanged')
+ p.add_argument('--controller',choices=('policy','sonic','sonic_residual','sonic_planner'),default='policy',help='System1: policy (paper actor), sonic (scheme A), sonic_residual (scheme C checkpoint) or sonic_planner (scheme B)')
+ p.add_argument('--b-variant',choices=('B-open','B0','B1-0','B1-2','B1-4'),default=None,help='System1 scheme B variant (T02 v2); required with --controller sonic_planner')
+ p.add_argument('--device',default='cuda:0')
+@@ -39,7 +40,8 @@ p.add_argument('--obs-v1-noise',choices=('off','on'),default='off',help='System1
+ p.add_argument('--critic-v1',action='store_true',help='System1 T13 v4: the checkpoint was trained with --critic-v1 (critic 585); only its size contract is checked (actor-only evaluation)')
+ p.add_argument('--t14-reference',type=Path,default=None,help='System1 T13 v4 section 0: T14 round 6 C reference manifest (table / push; system1/t13v4/t14_reference.py); off = original reference')
+ a=p.parse_args()
+-if (a.obs_v1 or a.critic_v1) and (a.controller!='policy' or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only')
++if (a.obs_v1 or a.critic_v1) and (a.controller not in (('policy','sonic_residual') if a.t13v4_cout else ('policy',)) or a.finger_mode is not None):p.error('--obs-v1/--critic-v1: D policy checkpoints with rubber hands only (C-out: --t13v4-cout)')
++if a.t13v4_cout and not (a.controller=='sonic_residual' and a.obs_v1):p.error('--t13v4-cout: --controller sonic_residual with --obs-v1')
+ if a.obs_v1_noise=='on' and not a.obs_v1:p.error('--obs-v1-noise on needs --obs-v1')
+ if (a.finger_mode is None)!=(a.hand_reference is None):p.error('--finger-mode and --hand-reference go together')
+ if a.finger_mode is not None and a.case not in ('bucket','table'):p.error('--finger-mode: bucket/table for now (Push/Pull hands: plan5 path, separate)')
+@@ -95,6 +97,7 @@ if a.obs_v1 or a.critic_v1:  # System1 T13 v4 (off = unchanged): observation v1
+     _noise=a.obs_v1_noise=='on'  # T13 v4 section 5: the 'noise on' evaluation group; default off = unchanged
+     config=replace(config,observation=observation_v1(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise))
+     T13V4_EVAL=dict(obs_v1=a.obs_v1,critic_v1=a.critic_v1,noise=_noise,teammate=5 if a.obs_v1 else 4,critic=585 if a.critic_v1 else 527)
++    if a.t13v4_cout:T13V4_EVAL['cout']=True  # round 2 C-out (key absent when off)
+ hand=None
+ if a.finger_mode is not None:  # System1 T06/T07 (off = unchanged)
+     sys.path.insert(0,str(ROOT))
+@@ -152,10 +155,11 @@ def main():
+         zero_teammate_obs=bool(ablation and ablation['zero_teammate_obs'])
+         if state.get('placement_provenance') != placement_provenance:
+             raise ValueError('Checkpoint and evaluation placement differ')
+-        if a.case=='table' and a.controller=='policy' and (state.get('system1_t14_reference') or {}).get('manifest_sha256')!=(T14_REFERENCE or {}).get('manifest_sha256'):
++        if a.case=='table' and (a.controller=='policy' or a.t13v4_cout) and (state.get('system1_t14_reference') or {}).get('manifest_sha256')!=(T14_REFERENCE or {}).get('manifest_sha256'):
+             raise ValueError('Checkpoint and evaluation T14 reference differ')  # System1 T13 v4 (both absent = unchanged)
+         if state.get('plan5_skill',a.case) != a.case:
+             raise ValueError('Checkpoint skill differs from evaluation case')
++        if a.t13v4_cout and (state.get('system1_sonic_residual_kind')!='out' or not state.get('system1_t13v4_cout')):raise ValueError('--t13v4-cout needs a T13 v4 round-2 C-out checkpoint')
+         if a.controller=='sonic_residual' and not state.get('system1_sonic_residual'):
+             raise ValueError('--controller sonic_residual needs a scheme C checkpoint')
+         if a.controller=='policy' and state.get('system1_sonic_residual'):
+diff --git a/scripts/train_core4d_smalltable.py b/scripts/train_core4d_smalltable.py
+index a2cb6f1..14937ea 100644
+--- a/scripts/train_core4d_smalltable.py
++++ b/scripts/train_core4d_smalltable.py
+@@ -50,6 +50,8 @@ PARSER.add_argument("--sonic-residual-kind", choices=("v1", "in", "out"), defaul
+                     help="System1 T03 C v2: v1 (default, unchanged), in (C-in: clipped input residual), out (C-out: output residual)")
+ PARSER.add_argument("--c-train-diag", action="store_true",
+                     help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
++PARSER.add_argument("--t13v4-cout", action="store_true",
++                    help="System1 T13 v4 round 2 (C-out-Table / C-out-Push): allow the T13 v4 switches (--obs-v1, --critic-v1, --contact-v1, --system1-randomization) together with --sonic-residual --sonic-residual-kind out; plan5 path: fresh actor (T03 C-out Pull recipe), frozen prior normalizer; default off = unchanged")
+ PARSER.add_argument("--object-mass-kg", type=float, default=None,
+                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
+ PARSER.add_argument("--episode-telemetry", action="store_true")
+@@ -240,9 +242,11 @@ if ARGS.system1_randomization:  # System1 T10b (off = unchanged)
+     from system1.t10b.randomization import randomization_config
+     _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
+     CONFIG = replace(CONFIG, randomization=_rand_cfg)
++if ARGS.t13v4_cout and not (ARGS.sonic_residual and ARGS.sonic_residual_kind == "out" and ARGS.finger_mode is None and not ARGS.per_agent_reward):
++    PARSER.error("--t13v4-cout: C-out (--sonic-residual --sonic-residual-kind out) with the rubber hands, no --per-agent-reward")
+ T13V4 = None
+ if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None or ARGS.per_agent_reward:  # System1 T13 v4 (off = unchanged)
+-    if ARGS.finger_mode is not None or ARGS.sonic_residual:
++    if ARGS.finger_mode is not None or (ARGS.sonic_residual and not ARGS.t13v4_cout):
+         PARSER.error("T13 v4 switches: D with the rubber hands only (C-out path: separate switch)")
+     sys.path.insert(0, str(REPO_ROOT))
+     from system1.t13v4.config_v1 import apply_t13v4
+@@ -310,6 +314,8 @@ def _with_system1(state: dict) -> dict:
+         state["system1_hand_reference_sha256"] = _sha256(ARGS.hand_reference.expanduser().resolve())
+     if T14_REFERENCE is not None:
+         state["system1_t14_reference"] = T14_REFERENCE
++    if ARGS.t13v4_cout:
++        state["system1_t13v4_cout"] = dict(actor_init="fresh (core4d path: as every Table run), output layer zero", round=2)
+     if ARGS.sonic_residual:
+         state["system1_sonic_residual"] = True
+         if ARGS.sonic_residual_kind != "v1":
+diff --git a/scripts/train_plan5_push.py b/scripts/train_plan5_push.py
+index 18217d9..863463a 100644
+--- a/scripts/train_plan5_push.py
++++ b/scripts/train_plan5_push.py
+@@ -53,6 +53,8 @@ PARSER.add_argument("--sonic-residual-kind", choices=("v1", "in", "out"), defaul
+                     help="System1 T03 C v2: v1 (default, unchanged), in (C-in: clipped input residual), out (C-out: output residual)")
+ PARSER.add_argument("--c-train-diag", action="store_true",
+                     help="System1 T03 C v2: write scheme C diagnostics into metrics.jsonl every 100 iterations (default off)")
++PARSER.add_argument("--t13v4-cout", action="store_true",
++                    help="System1 T13 v4 round 2 (C-out-Table / C-out-Push): allow the T13 v4 switches (--obs-v1, --critic-v1, --contact-v1, --system1-randomization) together with --sonic-residual --sonic-residual-kind out; plan5 path: fresh actor (T03 C-out Pull recipe), frozen prior normalizer; default off = unchanged")
+ PARSER.add_argument("--object-mass-kg", type=float, default=None,
+                     help="System1 T04: object mass variant (inertia scaled by the same ratio); default keeps the original asset")
+ # System1 T13 v4 (all default off = unchanged)
+@@ -219,9 +221,11 @@ if ARGS.system1_randomization:  # System1 T10b recipe on the Plan5 path (T13 v4
+     from system1.t10b.randomization import randomization_config
+     _rand_cfg, RANDOMIZATION = randomization_config(CONFIG.randomization)
+     CONFIG = replace(CONFIG, randomization=_rand_cfg)
++if ARGS.t13v4_cout and not (ARGS.sonic_residual and ARGS.sonic_residual_kind == "out" and ARGS.obs_v1):
++    PARSER.error("--t13v4-cout: C-out (--sonic-residual --sonic-residual-kind out) with --obs-v1")
+ T13V4 = None
+ if ARGS.obs_v1 or ARGS.critic_v1 or ARGS.contact_v1 is not None:  # System1 T13 v4 (off = unchanged)
+-    if ARGS.sonic_residual or ARGS.from_scratch or ARGS.zero_teammate_obs:
++    if (ARGS.sonic_residual and not ARGS.t13v4_cout) or ARGS.from_scratch or ARGS.zero_teammate_obs:
+         PARSER.error("T13 v4 switches: D only (C-out path: separate switch)")
+     sys.path.insert(0, str(REPO_ROOT))
+     from system1.t13v4.config_v1 import apply_t13v4
+@@ -340,6 +344,8 @@ def _ramped_weight(*, iteration: int, start_iteration: int, target: float, ramp:
+ def _checkpoint_state(learner, *, iteration: int, smooth_schedule: dict | None) -> dict:
+     state = learner.training_state_dict(iteration=iteration)
+     state['plan5_skill'] = ARGS.skill
++    if ARGS.t13v4_cout:
++        state['system1_t13v4_cout'] = dict(actor_init="fresh (T03 C-out Pull recipe), frozen prior normalizer (obs-v1 remap), output layer zero", round=2)
+     if ARGS.sonic_residual:
+         state['system1_sonic_residual'] = True
+         if ARGS.sonic_residual_kind != "v1":
+@@ -486,7 +492,8 @@ def main() -> None:
+             T13V4["mappo_dims"] = patch_dims(teammate=5 if ARGS.obs_v1 else 4, critic=585 if ARGS.critic_v1 else 527)
+             if ARGS.obs_v1:
+                 models = initialize_plan5_v1_model_bundle(SOURCE_CHECKPOINT, ppo_config, critic=T13V4["mappo_dims"]["critic_obs"],
+-                                                          device=env.device, expected_sha256=initialization_kwargs.get("expected_sha256"))
++                                                          device=env.device, expected_sha256=initialization_kwargs.get("expected_sha256"),
++                                                          fresh_actor=ARGS.t13v4_cout)  # T13 v4 round 2 C-out: T03 C-out Pull recipe
+             else:
+                 models = initialize_plan5_model_bundle(SOURCE_CHECKPOINT, ppo_config, device=env.device, **initialization_kwargs)
+             layout_kwargs["layout"] = HomogeneousAgentBatchLayout(actor_obs_dim=T13V4["mappo_dims"]["actor_input"])
+diff --git a/system1/t13v4/cloud_runs.py b/system1/t13v4/cloud_runs.py
+index e7b5dfd..8c76219 100644
+--- a/system1/t13v4/cloud_runs.py
++++ b/system1/t13v4/cloud_runs.py
+@@ -8,6 +8,10 @@ three contact items; everything else = the paper D recipe of the task):
+   d_push      train_plan5_push.py --skill push, paper D Push recipe: critic-only warm-up (50 its) from the single-robot prior
+               (158 -> 159 inputs, new weights zero), then actor + critic with --resume (lr actor 1e-5, critic 1e-3)
+   d_table_pa  d_table + --per-agent-reward (insurance; T13 v4 section 1, launched only when Kevin says so)
++  c_out_table / c_out_push  (round 2, task book section 8 item 2) d_table / d_push exactly, structure C-out: + --sonic-residual
++              --sonic-tf32 --sonic-residual-kind out --c-train-diag (the T03 C-out flags) --t13v4-cout; validation with
++              --controller sonic_residual --t13v4-cout. c_out_push keeps d_push's critic-only warm-up; its actor starts fresh
++              (T03 C-out Pull recipe on the Plan5 path), output layer zero (a = 0: scheme A at iteration 0)
+ 
+ Protocol (section 3), 2048 environments: checkpoint every 1000 its; validation every 2000 its on the T13 v4 validation states
+ (system1/t13v4/states_t14r6C/<task>_validation_states.json; deterministic, randomisation off, noise off, the d_final_5070
+@@ -47,9 +51,12 @@ PUSH = ["scripts/train_plan5_push.py", "--skill", "push", "--steps-per-env", "24
+         "--t14-reference", f"{W}/push/t14_reference.json"]
+ VAL_FLAGS = dict(table=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/table/t14_reference.json"],
+                  push=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/push/t14_reference.json", "--push-placement-proof", PROOF])
++COUT = ["--sonic-residual", "--sonic-tf32", "--sonic-residual-kind", "out", "--c-train-diag", "--t13v4-cout"]  # T03 C-out flags + round-2 switch
+ RUNS = dict(d_table=dict(task="table", train=TABLE, warmup=0),
+             d_push=dict(task="push", train=PUSH, warmup=50),
+-            d_table_pa=dict(task="table", train=[*TABLE, "--per-agent-reward"], warmup=0))
++            d_table_pa=dict(task="table", train=[*TABLE, "--per-agent-reward"], warmup=0),
++            c_out_table=dict(task="table", train=[*TABLE, *COUT], warmup=0, controller="sonic_residual", val_extra=["--t13v4-cout"]),
++            c_out_push=dict(task="push", train=[*PUSH, *COUT], warmup=50, controller="sonic_residual", val_extra=["--t13v4-cout"]))
+ BASE = dict(save=1000, val=2000, stop_after=8000, patience=4000, max_it=20000)
+ 
+ 
+@@ -122,6 +129,8 @@ def main():
+                     applies_to="validation points, stop rule, maximum iterations, final checkpoint")
+     plan = dict(run=a.run, task=run["task"], num_envs=a.num_envs, gpu=a.gpu, rules=R, iteration_counting=counting, warmup_iterations=warm, stages=stages,
+                 validation_states=f"{STATES}/{run['task']}_validation_states.json", validation_flags=VAL_FLAGS[run["task"]])
++    if "controller" in run:  # round 2 (C-out): validation controller and extra flags (keys absent for round 1 = unchanged plan)
++        plan.update(validation_controller=run["controller"], validation_extra=run["val_extra"])
+     if a.dry_run:
+         print(json.dumps(plan, indent=1))
+         return 0
+@@ -163,7 +172,8 @@ def main():
+             it = pending()[0]
+             out = d / "validation" / f"it{it - warm:05d}"
+             out.parent.mkdir(exist_ok=True)
+-            argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", run["task"], "--controller", "policy", *VAL_FLAGS[run["task"]],
++            argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", run["task"], "--controller", run.get("controller", "policy"),
++                    *VAL_FLAGS[run["task"]], *run.get("val_extra", []),
+                     "--checkpoint", str(main_dir / f"model_{it:05d}.pt"), "--device", "cuda:0", "--states", plan["validation_states"],
+                     "--model-id", f"t13v4_validation__{a.run}__it{it - warm:05d}", "--output-dir", str(out)]
+             vlog = (d / "validation" / f"it{it - warm:05d}.stdout.log").open("w")
+diff --git a/system1/t13v4/cloud_smoke.py b/system1/t13v4/cloud_smoke.py
+index 92d70a2..53bdb92 100644
+--- a/system1/t13v4/cloud_smoke.py
++++ b/system1/t13v4/cloud_smoke.py
+@@ -91,7 +91,8 @@ def main():
+     if ok:
+         ck = rec["stages"][-1]["last_checkpoint"]
+         out = d / "validation"
+-        argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", plan["task"], "--controller", "policy", *plan["validation_flags"],
++        argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", plan["task"], "--controller", plan.get("validation_controller", "policy"),
++                *plan["validation_flags"], *plan.get("validation_extra", []),
+                 "--checkpoint", ck, "--device", "cuda:0", "--states", plan["validation_states"], "--model-id", f"t13v4_cloud_smoke__{a.run}",
+                 "--output-dir", str(out)]
+         t0 = time.time()
+diff --git a/system1/t13v4/mappo_v1.py b/system1/t13v4/mappo_v1.py
+index 6067d8a..f4c6d84 100644
+--- a/system1/t13v4/mappo_v1.py
++++ b/system1/t13v4/mappo_v1.py
+@@ -12,6 +12,8 @@ Initializers:
+     columns 0..153 (actor block) copied, the 2 partner-position columns copied from the prior's 2 teammate-position
+     columns, the prior's 2 teammate-velocity columns dropped (obs v1 removes that input), the 3 object columns zero; the
+     frozen normalizer gets the prior's mean / var for the copied inputs and mean 0, var 1 for the object inputs.
++    fresh_actor=True (T13 v4 round 2 C-out-Push, the T03 C-out Pull recipe on the Plan5 path): the actor keeps its random
++    initialization (not loaded), the frozen normalizer is built from the prior exactly as above.
+ """
+ from __future__ import annotations
+ 
+@@ -102,7 +104,8 @@ def remap_prior_normalizer(state: dict) -> dict:
+     return out
+ 
+ 
+-def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, device: str = "cpu", expected_sha256: str | None = None):
++def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, device: str = "cpu", expected_sha256: str | None = None,
++                                     fresh_actor: bool = False):
+     import holosoma.agents.mappo.initialization as init_mod
+     from holosoma.agents.mappo.initialization import FrozenEmpiricalNormalization, Plan5ModelBundle, _sha256
+     from holosoma.agents.ppo.ppo import EmpiricalNormalization
+@@ -118,7 +121,8 @@ def initialize_plan5_v1_model_bundle(checkpoint_path, config, *, critic: int, de
+         raise ValueError("Plan 5 actor checkpoint compatibility mismatch")
+     obs_dim_dict = {"actor_obs": 154, "teammate_obs": 5, "critic_obs": critic}
+     actor, critic_net = _networks(config, obs_dim_dict, 29, device)
+-    actor.load_state_dict(remap_prior_actor_state(ckpt["actor_model_state_dict"], teammate=5), strict=True)
++    if not fresh_actor:  # fresh_actor (T13 v4 round 2 C-out-Push): random actor as T03 C-out Pull (--from-scratch), normalizer below as is
++        actor.load_state_dict(remap_prior_actor_state(ckpt["actor_model_state_dict"], teammate=5), strict=True)
+     an = FrozenEmpiricalNormalization(159, device=device)
+     an.load_state_dict(remap_prior_normalizer(ckpt["actor_obs_normalizer_state_dict"]), strict=True)
+     an.eval()
+diff --git a/system1/t13v4/round2_smoke_local.py b/system1/t13v4/round2_smoke_local.py
+new file mode 100644
+index 0000000..ac27b9f
+--- /dev/null
++++ b/system1/t13v4/round2_smoke_local.py
+@@ -0,0 +1,171 @@
++#!/usr/bin/env python3
++"""T13 v4 round 2 (task book section 8 item 2): local smoke of C-out-Table / C-out-Push on the laptop 5070 before "可以开卡".
++
++The command lines come from cloud_runs.py --dry-run (the cloud plan, 4096 environments); only the environment count, the
++iteration counts, the save interval, the output directories and the interpreter are replaced (an 8 GB laptop GPU cannot hold
++4096 environments). Per run:
++  1. training stages as planned (c_out_push: critic-only warm-up, then actor + critic with --resume), shortened;
++  2. checkpoint checks: C-out kind and round-2 marker in the checkpoint, MAPPO sizes (actor 159, critic 585), the actor's output
++     layer is zero at iteration 0 (and still zero after the critic-only warm-up);
++  3. iteration-0 check (as T03 C v2): the zero-output C-out checkpoint reproduces scheme A (--controller sonic) on the first 3
++     validation states, every trajectory array identical (system1/tests/t03_iter0_compare.py);
++  4. the cloud validation command (--controller sonic_residual --t13v4-cout, observation v1, noise off) on the last smoke
++     checkpoint, first 3 validation states: complete summary;
++  5. metrics: finite, contact v1 and scheme C diagnostics present; s/it; peak GPU memory (nvidia-smi, 1 s polling).
++Writes logs_system1/t13v4/round2/smoke_local/<run>/smoke.json.
++
++    python3 system1/t13v4/round2_smoke_local.py --run c_out_table --num-envs 512 --iterations 20
++"""
++from __future__ import annotations
++
++import argparse
++import json
++import os
++import subprocess
++import sys
++import threading
++import time
++from pathlib import Path
++
++ROOT = Path(__file__).resolve().parents[2]
++sys.path.insert(0, str(ROOT / "system1/t13v4"))
++from cloud_smoke import metrics_summary, overflow_lines, sha  # noqa: E402
++
++PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
++OUT = ROOT / "logs_system1/t13v4/round2/smoke_local"
++
++
++class GpuPeak:
++    def __init__(self):
++        self.peak, self.stop = 0, False
++        self.t = threading.Thread(target=self.run, daemon=True)
++        self.t.start()
++
++    def run(self):
++        while not self.stop:
++            try:
++                v = subprocess.run(["nvidia-smi", "--query-gpu=memory.used", "--format=csv,noheader,nounits"], capture_output=True, text=True).stdout
++                self.peak = max(self.peak, int(v.split()[0]))
++            except Exception:
++                pass
++            time.sleep(1)
++
++    def done(self):
++        self.stop = True
++        self.t.join()
++        return self.peak
++
++
++def setv(argv, k, v):
++    argv = list(argv)
++    argv[argv.index(k) + 1] = str(v)
++    return argv
++
++
++def ev(argv, log, env):
++    t0 = time.time()
++    with open(log, "w") as f:
++        rc = subprocess.run(argv, cwd=ROOT, env=env, stdout=f, stderr=subprocess.STDOUT).returncode
++    return rc, round(time.time() - t0, 1)
++
++
++def ckpt_checks(path, warm_or_zero):
++    import torch
++    st = torch.load(path, map_location="cpu", weights_only=False)
++    actor = st["actor_model_state_dict"]
++    lin = [k for k, v in actor.items() if k.endswith("weight") and v.ndim == 2]
++    last_w, last_b = actor[lin[-1]], actor[lin[-1].replace("weight", "bias")]
++    first = [v for k, v in actor.items() if k.endswith("weight") and v.ndim == 2][0]
++    meta = st.get("plan5_mappo") or st.get("core4d_smalltable_mappo") or {}
++    out = dict(file=str(path), sha256=sha(path), sonic_residual=st.get("system1_sonic_residual"), kind=st.get("system1_sonic_residual_kind"),
++               t13v4_cout=st.get("system1_t13v4_cout"), actor_input_dim=int(first.shape[1]), output_layer=lin[-1], output_shape=list(last_w.shape),
++               output_layer_abs_max=float(max(last_w.abs().max(), last_b.abs().max())), mappo_meta={k: meta.get(k) for k in ("actor_obs_dim", "critic_obs_dim", "num_agents", "action_dim")},
++               t14_reference=(st.get("system1_t14_reference") or {}).get("manifest_sha256"))
++    out["passed"] = bool(out["sonic_residual"] and out["kind"] == "out" and out["t13v4_cout"] and out["actor_input_dim"] == 159
++                         and out["output_shape"][0] == 29 and (out["output_layer_abs_max"] == 0.0 if warm_or_zero else True))
++    return out
++
++
++def main():
++    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
++    ap.add_argument("--run", choices=("c_out_table", "c_out_push"), required=True)
++    ap.add_argument("--num-envs", type=int, default=512)
++    ap.add_argument("--iterations", type=int, default=20)
++    ap.add_argument("--warmup-iterations", type=int, default=3)
++    ap.add_argument("--save-interval", type=int, default=10)
++    a = ap.parse_args()
++    plan = json.loads(subprocess.run([sys.executable, str(ROOT / "system1/t13v4/cloud_runs.py"), "--run", a.run, "--num-envs", "4096", "--out", "/cloud",
++                                      "--python", PY, "--dry-run"], capture_output=True, text=True, check=True).stdout)
++    d = OUT / a.run
++    d.mkdir(parents=True, exist_ok=False)
++    env = dict(os.environ, CUDA_VISIBLE_DEVICES="0", WORLD_SIZE="1")
++    rec = dict(run=a.run, num_envs=a.num_envs, iterations=a.iterations, warmup_iterations=a.warmup_iterations, cloud_plan=plan, stages=[],
++               git_head=subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip(),
++               git_status=subprocess.run(["git", "-C", str(ROOT), "status", "--porcelain"], capture_output=True, text=True).stdout)
++    ok, warm_ck = True, None
++    for st in plan["stages"]:
++        argv = setv(setv(st["argv"], "--num-envs", a.num_envs), "--output-dir", d / st["name"])
++        if st["name"] == "train_warmup":
++            argv = setv(setv(argv, "--iterations", a.warmup_iterations), "--save-interval", a.warmup_iterations)
++        else:
++            argv = setv(setv(argv, "--iterations", a.iterations), "--save-interval", a.save_interval)
++            if "--resume" in argv:
++                argv = setv(argv, "--resume", warm_ck)
++        gp = GpuPeak()
++        rc, sec = ev(argv, d / f"{st['name']}.stdout.log", env)
++        out_dir = d / st["name"]
++        cks = sorted(out_dir.glob("model_*.pt"))
++        ms = [json.loads(x) for x in (out_dir / "metrics.jsonl").read_text().splitlines() if x.strip()] if (out_dir / "metrics.jsonl").exists() else []
++        keys = sorted({k for m in ms for k in m})
++        s = dict(name=st["name"], argv=argv, returncode=rc, seconds=sec, gpu_peak_mib=gp.done(), checkpoints=[c.name for c in cks],
++                 overflow_lines=overflow_lines(d / f"{st['name']}.stdout.log"), contact_v1_keys=[k for k in keys if k.startswith("ContactV1/")][:20],
++                 scheme_c_keys=[k for k in keys if "SchemeC" in k or k.startswith("C/") or "sonic" in k.lower()][:20], **metrics_summary(out_dir / "metrics.jsonl"))
++        if cks:
++            s["first_checkpoint"] = ckpt_checks(cks[0], cks[0].name == "model_00000.pt" or st["name"] == "train_warmup")
++            s["last_checkpoint"] = ckpt_checks(cks[-1], st["name"] == "train_warmup")
++        rec["stages"].append(s)
++        print(st["name"], rc, sec, s.get("s_per_it_median_after_3"), s["gpu_peak_mib"], s["nonfinite_keys"], flush=True)
++        if rc != 0 or not cks or s["nonfinite_keys"] or not s["first_checkpoint"]["passed"] or not s["last_checkpoint"]["passed"]:
++            ok = False
++            break
++        if st["name"] == "train_warmup":
++            warm_ck = cks[-1]
++    task = plan["task"]
++    if ok:  # iteration-0 check: the zero-output checkpoint (table: model_00000.pt of the main stage; push: the warm-up's last) vs scheme A
++        zero = d / "train" / "model_00000.pt" if task == "table" else Path(warm_ck)
++        root = d / "iter0"
++        root.mkdir()
++        vf = [x for x in plan["validation_flags"] if x not in ("--obs-v1", "--critic-v1")]  # scheme A has no policy observation
++        common = ["--case", task, "--device", "cuda:0", "--states", plan["validation_states"], "--limit", "3"]
++        rA, _ = ev([PY, "-B", "scripts/evaluate_paper_supplement.py", *common, *vf, "--controller", "sonic", "--model-id", f"r2_iter0_{task}_A",
++                    "--output-dir", str(root / f"{task}_sonic")], d / "iter0_A.log", env)
++        rC, _ = ev([PY, "-B", "scripts/evaluate_paper_supplement.py", *common, *plan["validation_flags"], *plan["validation_extra"], "--controller",
++                    "sonic_residual", "--checkpoint", str(zero), "--model-id", f"r2_iter0_{task}_cout", "--output-dir", str(root / f"{task}_sonic_residual")],
++                   d / "iter0_C.log", env)
++        rcmp, _ = ev([PY, "-B", "system1/tests/t03_iter0_compare.py", "--root", str(root), "--cases", task, "--checkpoints", f"{task}={zero}",
++                      "--out", str(d / "iter0_vs_A.json")], d / "iter0_compare.log", env)
++        cmp_ = json.loads((d / "iter0_vs_A.json").read_text()) if (d / "iter0_vs_A.json").exists() else {}
++        rec["iter0"] = dict(checkpoint=str(zero), rc_A=rA, rc_C=rC, rc_compare=rcmp, passed=cmp_.get("passed"), result=cmp_.get("cases"))
++        ok = ok and bool(cmp_.get("passed"))
++        print("iter0", rA, rC, rcmp, cmp_.get("passed"), flush=True)
++    if ok:  # the cloud validation command on the last smoke checkpoint
++        ck = d / "train" / rec["stages"][-1]["checkpoints"][-1]
++        argv = [PY, "-B", "scripts/evaluate_paper_supplement.py", "--case", task, "--controller", plan["validation_controller"], *plan["validation_flags"],
++                *plan["validation_extra"], "--checkpoint", str(ck), "--device", "cuda:0", "--states", plan["validation_states"], "--limit", "3",
++                "--model-id", f"t13v4_round2_smoke__{a.run}", "--output-dir", str(d / "validation")]
++        gp = GpuPeak()
++        rc, sec = ev(argv, d / "validation.stdout.log", env)
++        sm = json.loads((d / "validation/summary.json").read_text()) if (d / "validation/summary.json").exists() else {}
++        mf = json.loads((d / "validation/run_manifest.json").read_text()) if (d / "validation/run_manifest.json").exists() else {}
++        rec["validation"] = dict(argv=argv, returncode=rc, seconds=sec, gpu_peak_mib=gp.done(), complete=sm.get("complete"), episodes=len(sm.get("episodes", [])),
++                                 system1_t13v4=mf.get("system1_t13v4"), scheme_c_kind=mf.get("system1_scheme_c_kind"), controller=mf.get("controller"))
++        ok = rc == 0 and sm.get("complete") is True and len(sm.get("episodes", [])) == 3
++        print("validation", rc, sec, sm.get("complete"), flush=True)
++    rec["passed"] = ok
++    (d / "smoke.json").write_text(json.dumps(rec, indent=1, default=str) + "\n")
++    print("SMOKE", a.run, "passed" if ok else "FAILED", flush=True)
++    return 0 if ok else 1
++
++
++if __name__ == "__main__":
++    raise SystemExit(main())

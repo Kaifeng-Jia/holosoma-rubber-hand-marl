@@ -1,0 +1,71 @@
+{
+ "run": "c_out_table",
+ "task": "table",
+ "num_envs": 4096,
+ "gpu": "0",
+ "rules": {
+  "save": 500,
+  "val": 1000,
+  "stop_after": 4000,
+  "patience": 2000,
+  "max_it": 10000,
+  "earliest_stop": 6000
+ },
+ "iteration_counting": {
+  "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+  "warmup_iterations": 0,
+  "counted_iteration": "checkpoint file number - warmup_iterations",
+  "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+ },
+ "warmup_iterations": 0,
+ "stages": [
+  {
+   "name": "train",
+   "argv": [
+    "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+    "-B",
+    "scripts/train_core4d_smalltable.py",
+    "--experiment",
+    "smalltable5kg_A",
+    "--reward-variant",
+    "bucket_A_no_rel_no_height",
+    "--steps-per-env",
+    "24",
+    "--seed",
+    "721",
+    "--obs-v1",
+    "--critic-v1",
+    "--system1-randomization",
+    "--contact-v1",
+    "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+    "--t14-reference",
+    "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+    "--sonic-residual",
+    "--sonic-tf32",
+    "--sonic-residual-kind",
+    "out",
+    "--c-train-diag",
+    "--t13v4-cout",
+    "--num-envs",
+    "4096",
+    "--save-interval",
+    "500",
+    "--iterations",
+    "10000",
+    "--output-dir",
+    "<cloud runs dir>/c_out_table/train"
+   ]
+  }
+ ],
+ "validation_states": "system1/t13v4/states_t14r6C/table_validation_states.json",
+ "validation_flags": [
+  "--obs-v1",
+  "--critic-v1",
+  "--t14-reference",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json"
+ ],
+ "validation_controller": "sonic_residual",
+ "validation_extra": [
+  "--t13v4-cout"
+ ]
+}

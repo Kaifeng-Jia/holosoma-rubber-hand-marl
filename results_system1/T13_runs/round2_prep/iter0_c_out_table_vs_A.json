@@ -1,0 +1,63 @@
+{
+ "check": "T03 iteration 0: scheme C (zero output layer) vs scheme A, TF32 off, same frozen states",
+ "root": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/iter0",
+ "passed": true,
+ "cases": {
+  "table": {
+   "episodes": 3,
+   "trajectories": 3,
+   "max_abs_trajectory_diff": 0.0,
+   "episode_field_diffs": [],
+   "per_trajectory": {
+    "nominal.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_000.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    },
+    "perturbed_001.trajectory.npz": {
+     "dof_pos": 0.0,
+     "dof_vel": 0.0,
+     "episode_step": 0.0,
+     "hand_object_normal_force_w": 0.0,
+     "object_pos_w": 0.0,
+     "object_quat_xyzw": 0.0,
+     "reference_frame": 0.0,
+     "reference_object_pos_w": 0.0,
+     "reference_object_quat_xyzw": 0.0,
+     "reward_reference_frame": 0.0,
+     "root_pos": 0.0,
+     "root_quat_xyzw": 0.0,
+     "root_velocity": 0.0
+    }
+   },
+   "identical": true,
+   "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00000.pt",
+   "checkpoint_sha256": "77a3e9bbf04c9aee36ea897c10dc425ec3c4a02444fdeea79e0be4879e6bc798"
+  }
+ }
+}

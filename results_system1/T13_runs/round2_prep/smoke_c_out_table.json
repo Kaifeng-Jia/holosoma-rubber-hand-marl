@@ -1,0 +1,313 @@
+{
+ "run": "c_out_table",
+ "num_envs": 512,
+ "iterations": 20,
+ "warmup_iterations": 3,
+ "cloud_plan": {
+  "run": "c_out_table",
+  "task": "table",
+  "num_envs": 4096,
+  "gpu": "0",
+  "rules": {
+   "save": 500,
+   "val": 1000,
+   "stop_after": 4000,
+   "patience": 2000,
+   "max_it": 10000,
+   "earliest_stop": 6000
+  },
+  "iteration_counting": {
+   "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+   "warmup_iterations": 0,
+   "counted_iteration": "checkpoint file number - warmup_iterations",
+   "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+  },
+  "warmup_iterations": 0,
+  "stages": [
+   {
+    "name": "train",
+    "argv": [
+     "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+     "-B",
+     "scripts/train_core4d_smalltable.py",
+     "--experiment",
+     "smalltable5kg_A",
+     "--reward-variant",
+     "bucket_A_no_rel_no_height",
+     "--steps-per-env",
+     "24",
+     "--seed",
+     "721",
+     "--obs-v1",
+     "--critic-v1",
+     "--system1-randomization",
+     "--contact-v1",
+     "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+     "--t14-reference",
+     "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+     "--sonic-residual",
+     "--sonic-tf32",
+     "--sonic-residual-kind",
+     "out",
+     "--c-train-diag",
+     "--t13v4-cout",
+     "--num-envs",
+     "4096",
+     "--save-interval",
+     "500",
+     "--iterations",
+     "10000",
+     "--output-dir",
+     "/cloud/c_out_table/train"
+    ]
+   }
+  ],
+  "validation_states": "system1/t13v4/states_t14r6C/table_validation_states.json",
+  "validation_flags": [
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json"
+  ],
+  "validation_controller": "sonic_residual",
+  "validation_extra": [
+   "--t13v4-cout"
+  ]
+ },
+ "stages": [
+  {
+   "name": "train",
+   "argv": [
+    "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+    "-B",
+    "scripts/train_core4d_smalltable.py",
+    "--experiment",
+    "smalltable5kg_A",
+    "--reward-variant",
+    "bucket_A_no_rel_no_height",
+    "--steps-per-env",
+    "24",
+    "--seed",
+    "721",
+    "--obs-v1",
+    "--critic-v1",
+    "--system1-randomization",
+    "--contact-v1",
+    "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+    "--t14-reference",
+    "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+    "--sonic-residual",
+    "--sonic-tf32",
+    "--sonic-residual-kind",
+    "out",
+    "--c-train-diag",
+    "--t13v4-cout",
+    "--num-envs",
+    "512",
+    "--save-interval",
+    "10",
+    "--iterations",
+    "20",
+    "--output-dir",
+    "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train"
+   ],
+   "returncode": 0,
+   "seconds": 98.1,
+   "gpu_peak_mib": 4758,
+   "checkpoints": [
+    "model_00000.pt",
+    "model_00010.pt",
+    "model_00020.pt"
+   ],
+   "overflow_lines": [],
+   "contact_v1_keys": [
+    "ContactV1/r0_force_over_1n_in_should",
+    "ContactV1/r0_lost_in_should",
+    "ContactV1/r0_lost_termination_signals",
+    "ContactV1/r0_penalty_links_mean",
+    "ContactV1/r0_penalty_step_share",
+    "ContactV1/r0_reward_mean",
+    "ContactV1/r0_should_hand_steps",
+    "ContactV1/r1_force_over_1n_in_should",
+    "ContactV1/r1_lost_in_should",
+    "ContactV1/r1_lost_termination_signals",
+    "ContactV1/r1_penalty_links_mean",
+    "ContactV1/r1_penalty_step_share",
+    "ContactV1/r1_reward_mean",
+    "ContactV1/r1_should_hand_steps"
+   ],
+   "scheme_c_keys": [],
+   "iterations": 20,
+   "s_per_it_median_after_3": 3.6266393159748986,
+   "nonfinite_keys": [],
+   "first_checkpoint": {
+    "file": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00000.pt",
+    "sha256": "77a3e9bbf04c9aee36ea897c10dc425ec3c4a02444fdeea79e0be4879e6bc798",
+    "sonic_residual": true,
+    "kind": "out",
+    "t13v4_cout": {
+     "actor_init": "fresh (core4d path: as every Table run), output layer zero",
+     "round": 2
+    },
+    "actor_input_dim": 159,
+    "output_layer": "actor_module.module.6.weight",
+    "output_shape": [
+     29,
+     128
+    ],
+    "output_layer_abs_max": 0.0,
+    "mappo_meta": {
+     "actor_obs_dim": 159,
+     "critic_obs_dim": 585,
+     "num_agents": 2,
+     "action_dim": 29
+    },
+    "t14_reference": "7070ff9a7ca836dd63dd9286bdf85b58ba71cd4b9b47497690826512877d5940",
+    "passed": true
+   },
+   "last_checkpoint": {
+    "file": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00020.pt",
+    "sha256": "98a276db846217a46036adb504a4d326dbc36d2e5b87ad90cee5442f2385170f",
+    "sonic_residual": true,
+    "kind": "out",
+    "t13v4_cout": {
+     "actor_init": "fresh (core4d path: as every Table run), output layer zero",
+     "round": 2
+    },
+    "actor_input_dim": 159,
+    "output_layer": "actor_module.module.6.weight",
+    "output_shape": [
+     29,
+     128
+    ],
+    "output_layer_abs_max": 0.05089440196752548,
+    "mappo_meta": {
+     "actor_obs_dim": 159,
+     "critic_obs_dim": 585,
+     "num_agents": 2,
+     "action_dim": 29
+    },
+    "t14_reference": "7070ff9a7ca836dd63dd9286bdf85b58ba71cd4b9b47497690826512877d5940",
+    "passed": true
+   }
+  }
+ ],
+ "git_head": "2d29c4e7b45d3f3e3b55e0beb70e5dfe6e5f7f2a",
+ "git_status": " M scripts/evaluate_paper_supplement.py\n M scripts/train_core4d_smalltable.py\n M scripts/train_plan5_push.py\n M system1/t13v4/cloud_runs.py\n M system1/t13v4/cloud_smoke.py\n M system1/t13v4/mappo_v1.py\n?? system1/t13v4/round2_smoke_local.py\n",
+ "iter0": {
+  "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00000.pt",
+  "rc_A": 0,
+  "rc_C": 0,
+  "rc_compare": 0,
+  "passed": true,
+  "result": {
+   "table": {
+    "episodes": 3,
+    "trajectories": 3,
+    "max_abs_trajectory_diff": 0.0,
+    "episode_field_diffs": [],
+    "per_trajectory": {
+     "nominal.trajectory.npz": {
+      "dof_pos": 0.0,
+      "dof_vel": 0.0,
+      "episode_step": 0.0,
+      "hand_object_normal_force_w": 0.0,
+      "object_pos_w": 0.0,
+      "object_quat_xyzw": 0.0,
+      "reference_frame": 0.0,
+      "reference_object_pos_w": 0.0,
+      "reference_object_quat_xyzw": 0.0,
+      "reward_reference_frame": 0.0,
+      "root_pos": 0.0,
+      "root_quat_xyzw": 0.0,
+      "root_velocity": 0.0
+     },
+     "perturbed_000.trajectory.npz": {
+      "dof_pos": 0.0,
+      "dof_vel": 0.0,
+      "episode_step": 0.0,
+      "hand_object_normal_force_w": 0.0,
+      "object_pos_w": 0.0,
+      "object_quat_xyzw": 0.0,
+      "reference_frame": 0.0,
+      "reference_object_pos_w": 0.0,
+      "reference_object_quat_xyzw": 0.0,
+      "reward_reference_frame": 0.0,
+      "root_pos": 0.0,
+      "root_quat_xyzw": 0.0,
+      "root_velocity": 0.0
+     },
+     "perturbed_001.trajectory.npz": {
+      "dof_pos": 0.0,
+      "dof_vel": 0.0,
+      "episode_step": 0.0,
+      "hand_object_normal_force_w": 0.0,
+      "object_pos_w": 0.0,
+      "object_quat_xyzw": 0.0,
+      "reference_frame": 0.0,
+      "reference_object_pos_w": 0.0,
+      "reference_object_quat_xyzw": 0.0,
+      "reward_reference_frame": 0.0,
+      "root_pos": 0.0,
+      "root_quat_xyzw": 0.0,
+      "root_velocity": 0.0
+     }
+    },
+    "identical": true,
+    "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00000.pt",
+    "checkpoint_sha256": "77a3e9bbf04c9aee36ea897c10dc425ec3c4a02444fdeea79e0be4879e6bc798"
+   }
+  }
+ },
+ "validation": {
+  "argv": [
+   "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+   "-B",
+   "scripts/evaluate_paper_supplement.py",
+   "--case",
+   "table",
+   "--controller",
+   "sonic_residual",
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+   "--t13v4-cout",
+   "--checkpoint",
+   "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/train/model_00020.pt",
+   "--device",
+   "cuda:0",
+   "--states",
+   "system1/t13v4/states_t14r6C/table_validation_states.json",
+   "--limit",
+   "3",
+   "--model-id",
+   "t13v4_round2_smoke__c_out_table",
+   "--output-dir",
+   "/home/kevin/duet-system1/logs_system1/t13v4/round2/smoke_local/c_out_table/validation"
+  ],
+  "returncode": 0,
+  "seconds": 76.2,
+  "gpu_peak_mib": 3775,
+  "complete": true,
+  "episodes": 3,
+  "system1_t13v4": {
+   "obs_v1": true,
+   "critic_v1": true,
+   "noise": false,
+   "teammate": 5,
+   "critic": 585,
+   "cout": true,
+   "mappo_dims": {
+    "actor_obs": 154,
+    "teammate_obs": 5,
+    "actor_input": 159,
+    "critic_obs": 585
+   },
+   "obs_v1_noise_enabled_in_env": false
+  },
+  "scheme_c_kind": "out",
+  "controller": "sonic_residual"
+ },
+ "passed": true
+}
