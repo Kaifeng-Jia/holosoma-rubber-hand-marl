@@ -39,9 +39,206 @@
    "reachable_60s_after": false,
    "done": true,
    "ended": "2026-11-26T12:53:39-05:00"
+  },
+  {
+   "step": "finals_off",
+   "cmd": "python3 system1/t13v4/run_finals_isaac.py --run c_out_table",
+   "started": "2026-11-26T12:53:42-05:00",
+   "gpu_lock_acquired": "2026-11-26T12:53:42-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:00:50-05:00",
+   "passed": true,
+   "detail": [
+    {
+     "name": "c_out_table_pm2",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-26T13:59:11-05:00"
+    },
+    {
+     "name": "c_out_table_pm8",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-26T14:00:50-05:00"
+    }
+   ]
+  },
+  {
+   "step": "dump",
+   "cmd": "python3 system1/t13v4/run_isaac_dump.py c_out_table",
+   "started": "2026-11-26T14:00:50-05:00",
+   "gpu_lock_acquired": "2026-11-26T14:00:50-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:01:47-05:00",
+   "passed": true,
+   "detail": {
+    "rc": 0,
+    "files": [
+     "scene.json",
+     "collision_convexes.npz",
+     "runtime_reference.npz",
+     "nominal.sim2sim.npz"
+    ]
+   }
+  },
+  {
+   "step": "finals_on",
+   "cmd": "python3 system1/t13v4/run_finals_isaac.py --run c_out_table --noise on",
+   "started": "2026-11-26T14:01:47-05:00",
+   "gpu_lock_acquired": "2026-11-26T14:01:47-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:56:57-05:00",
+   "passed": true,
+   "detail": [
+    {
+     "name": "c_out_table_pm2_noise_on",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-26T14:56:56-05:00"
+    },
+    {
+     "name": "c_out_table_pm8_noise_on",
+     "rc": 0,
+     "episodes": 51,
+     "states": 51,
+     "summary": true,
+     "complete": true,
+     "ended": "2026-11-26T14:56:57-05:00"
+    }
+   ]
+  },
+  {
+   "step": "onnx",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/onnx_check.py --out logs_system1/t13v4/sim2sim/onnx_c_out_table --onnx-dir exports_system1/t13v4/onnx --extra-checkpoint C-out,table,721,c_out_table_t13v4,logs_system1/t13v4/runs/c_out_table/train/model_10000.pt,v1",
+   "started": "2026-11-26T14:01:47-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:01:51-05:00",
+   "passed": true,
+   "detail": {
+    "float64_graph_vs_torch": 6.750155989720952e-14,
+    "float32": 2.1457672119140625e-05
+   }
+  },
+  {
+   "step": "checks",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/t13v4/check_sim2sim_v1.py --run c_out_table --task table --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/c_out_table_t13v4.onnx --out logs_system1/t13v4/sim2sim/checks_c_out_table --scheme C-out --qstar-inputs isaac",
+   "started": "2026-11-26T14:01:51-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:02:46-05:00",
+   "passed": true,
+   "detail": {
+    "initial_n": 102,
+    "initial_max": {
+     "joint_pos_max_abs_rad": 0.0,
+     "joint_vel_max_abs": 0.0,
+     "root_pos_max_abs_m": 2.975166302210397e-08,
+     "root_ori_max_angle_rad": 7.884953353001448e-08,
+     "root_lin_vel_max_abs": 7.442744698327175e-09,
+     "root_ang_vel_max_abs": 5.95273772496796e-08,
+     "object_pos_max_abs_m": 0.0,
+     "object_ori_angle_rad": 0.0
+    },
+    "obs_max": 1.3658668556182363e-06,
+    "cout": {
+     "sonic_actor_obs_max_abs_diff": 8.344650268554688e-07,
+     "sonic_tokenizer_max_abs_diff": 2.384185791015625e-07,
+     "sonic_inputs_passed": true,
+     "sonic_action_onnx_vs_isaac_max_abs_diff": 8.106231689453125e-06,
+     "sonic_target_onnx_vs_isaac_max_abs_rad": 2.86102294921875e-06,
+     "q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad": 2.8610211542101638e-06,
+     "q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad": 3.4120521412717153e-06,
+     "q_star_passed": true,
+     "threshold": 0.0001,
+     "qstar_inputs": "isaac",
+     "q_star_isaac_recorded_sonic_inputs_vs_isaac_pd_target_max_abs_rad": 2.9218308519318725e-06,
+     "sonic_action_onnx_on_isaac_recorded_inputs_vs_isaac_max_abs_diff": 8.106231689453125e-06,
+     "q_star_rule": "q* = SONIC ONNX on the Isaac-recorded SONIC inputs + D scale * clip(a recorded) vs the Isaac PD target < 1e-4, and the SONIC inputs < 1e-4 (separately); Kevin 2026-11-26",
+     "report_only_mujoco_built_q_star_steps_over_threshold": []
+    }
+   }
+  },
+  {
+   "step": "mujoco_pm2",
+   "cmd": "taskset -c 0-3 /home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme C-out --seed 721 --level 2 --dump logs_system1/t13v4/isaac_dump/c_out_table/dump --states system1/t13v4/states_t14r6C/table_pm2_states.json --obs-v1 --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/c_out_table_t13v4.onnx --checkpoint logs_system1/t13v4/runs/c_out_table/train/model_10000.pt --out /home/kevin/duet-system1/logs_system1/t13v4/mj_finals/c_out_table_pm2",
+   "started": "2026-11-26T14:02:46-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:06:41-05:00"
+  },
+  {
+   "step": "mujoco_pm8",
+   "cmd": "taskset -c 4-7 /home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python -B system1/sim2sim/mj_eval.py --task table --scheme C-out --seed 721 --level 8 --dump logs_system1/t13v4/isaac_dump/c_out_table/dump --states system1/t13v4/states_t14r6C/table_pm8_states.json --obs-v1 --onnx /home/kevin/duet-system1/exports_system1/t13v4/onnx/c_out_table_t13v4.onnx --checkpoint logs_system1/t13v4/runs/c_out_table/train/model_10000.pt --out /home/kevin/duet-system1/logs_system1/t13v4/mj_finals/c_out_table_pm8",
+   "started": "2026-11-26T14:02:46-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:06:46-05:00",
+   "passed": true,
+   "detail": {
+    "complete": [
+     true,
+     true
+    ]
+   }
+  },
+  {
+   "step": "videos",
+   "cmd": "bash system1/t13v4/run_videos.sh c_out_table exports_system1/T13_videos/c_out_table 2",
+   "started": "2026-11-26T14:06:46-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T14:14:34-05:00",
+   "passed": true,
+   "detail": [
+    "nominal close rc 0 2026-11-26T14:09:19-05:00",
+    "nominal full rc 0 2026-11-26T14:09:23-05:00",
+    "nominal hands rc 0 2026-11-26T14:11:52-05:00",
+    "perturbed_000 full rc 0 2026-11-26T14:12:01-05:00",
+    "perturbed_000 close rc 0 2026-11-26T14:14:23-05:00",
+    "perturbed_000 hands rc 0 2026-11-26T14:14:34-05:00"
+   ]
+  },
+  {
+   "step": "contact",
+   "cmd": "taskset -c 0-15 /home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python -B system1/t13v4/contact_stats_t13.py --run c_out_table --workers 6",
+   "started": "2026-11-26T14:56:57-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T15:01:42-05:00",
+   "passed": true,
+   "detail": "contact_summary.csv"
+  },
+  {
+   "step": "package",
+   "cmd": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t13v4/package_run.py --run c_out_table",
+   "started": "2026-11-26T15:01:42-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T15:01:43-05:00",
+   "passed": true,
+   "detail": {
+    "isaac_noise_off_pm2": "44/50",
+    "isaac_noise_off_pm8": "43/50",
+    "isaac_noise_on_pm2": "38/50",
+    "isaac_noise_on_pm8": "35/50",
+    "mujoco_noise_off_pm2": "6/50",
+    "mujoco_noise_off_pm8": "7/50"
+   }
+  },
+  {
+   "step": "drive",
+   "cmd": "python3 system1/transfer/drive_upload.py --task T13_runs/c_out_table exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_nominal_close.mp4 exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_nominal_full.mp4 exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_nominal_hands.mp4 exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_perturbed_000_close.mp4 exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_perturbed_000_full.mp4 exports_system1/T13_videos/c_out_table/c_out_table_seed721_pm2_perturbed_000_hands.mp4",
+   "started": "2026-11-26T15:01:43-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T15:02:27-05:00",
+   "passed": true,
+   "detail": "6 videos"
   }
  ],
- "state": "running",
+ "state": "done (README_CN.md by hand; numbers in summary.csv)",
  "cloud_shutdown": {
   "step": "cloud_shutdown",
   "machine": "199",
@@ -66,5 +263,14 @@
   "reachable_60s_after": false,
   "done": true,
   "ended": "2026-11-26T12:53:39-05:00"
+ },
+ "ended": "2026-11-26T15:02:27-05:00",
+ "results": {
+  "isaac_noise_off_pm2": "44/50",
+  "isaac_noise_off_pm8": "43/50",
+  "isaac_noise_on_pm2": "38/50",
+  "isaac_noise_on_pm8": "35/50",
+  "mujoco_noise_off_pm2": "6/50",
+  "mujoco_noise_off_pm8": "7/50"
  }
 }
