@@ -1,7 +1,7 @@
 # T14 第 9g 步第 0 项："不穿进物体"约束覆盖哪些连杆（只报告，不改）
 
-- **依据：**Kevin 2026-11-26 01:40："先报'不穿进物体'硬约束覆盖哪些连杆（只报告，不改）"；任务书 §12 第 9g 步。
-- **时间：**2026-11-26 01:40–02:05（纽约），本机 CPU。
+- **依据：**Kevin 2026-11-26 01:37："先报'不穿进物体'硬约束覆盖哪些连杆（只报告，不改）"；任务书 §12 第 9g 步。
+- **时间：**2026-11-26 01:37–01:41（纽约），本机 CPU。
 - **方法：**`system1/t14/objects/step9g_constraint_links.py`，只读。
   - 读求解器的约束代码 `interaction_mesh_retargeter.py`（`_update_jacobians_and_phis_from_q` 和 "Non-penetration constraints" 一段），再把它的筛选规则用在 9f 实际求解的场景文件上。
   - 场景文件取自 `logs_system1/t14/step9f/suitcasea/m1p00/` 的 r0、r1。

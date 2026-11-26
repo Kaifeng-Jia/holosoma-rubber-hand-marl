@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""T14 step 9g item 0 (Kevin 2026-11-26 01:40): which robot links the solver's "no penetration into the object" constraint
+"""T14 step 9g item 0 (Kevin 2026-11-26 01:37): which robot links the solver's "no penetration into the object" constraint
 covers. Report only (read only, CPU); nothing in the solver is changed.
 
 The constraint (src/holosoma_retargeting/.../src/interaction_mesh_retargeter.py, _update_jacobians_and_phis_from_q and the

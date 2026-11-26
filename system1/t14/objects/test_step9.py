@@ -313,7 +313,13 @@ def test_mirror_construction():
         a0 = C["P"][t] @ C["M0"] @ np.r_[loc, 1]
         a1 = C["P"][t] @ C["M1"] @ np.r_[loc, 1]
         assert np.allclose(Ref @ a0[:3] + 2 * p[t] * e, a1[:3], atol=1e-9)
-    assert np.allclose(C["own1"], np.einsum("tij,tjk->tik", C["Sm"], C["Ob"]))
+    assert np.allclose(C["own1"], np.einsum("tij,tjk->tik", C["Sm"], C["Ob"])) and np.allclose(C["own1_real"], np.einsum("tij,tjk->tik", C["Sm"], O))
+    for t in (0, 30, 70):  # the mirrored person holds the mirrored real box as the demonstration holds its box
+        jj = [NAMES9G.index(n) for n in fb.swap_lr(NAMES9G)]
+        rel0 = (H[t] - O[t][:3, 3]) @ O[t][:3, :3]
+        rel1 = (C["human1"][t] - C["own1_real"][t][:3, 3]) @ C["own1_real"][t][:3, :3]
+        up = [NAMES9G.index(n) for n in ("Torso", "L_Wrist", "R_Wrist", "L_Palm", "R_Palm", "Pelvis", "L_Hip", "R_Hip")]
+        assert np.allclose(rel1[up], rel0[jj][up])
     rs = C["r1_source"]
     assert rs["swap_lr"]
     rebuilt = (np.einsum("tij,tkj->tki", rs["R"], fb.lerp_at(H, rs["frame"])) + rs["t"][:, None])[:, sw]

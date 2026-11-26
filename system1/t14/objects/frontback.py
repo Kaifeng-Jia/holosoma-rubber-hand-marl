@@ -61,7 +61,7 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 shared P(t): translation = A(t)'s, rotation = slerp midpoint of A(t) and B(t) (as step 9c). d = least-squares
                 horizontal offset putting own1 on the far end of the shared target: mean_t (P(t) M1 - S O(tau(t))) origin, xy.
                 Hand targets: the region maps M0 / M1 of the box's own symmetry (as step 9c). Gp = own1 O^-1 (own box = Gp O).
-  legs="mirror"  (step 9g, Kevin 2026-11-26 01:40, task book section 12 step 9g: upper body spatially symmetric, lower body
+  legs="mirror"  (step 9g, Kevin 2026-11-26 01:37, task book section 12 step 9g: upper body spatially symmetric, lower body
                 temporally symmetric; turn is not used). Walking direction e = the demonstration's pelvis displacement over the walking
                 segment, horizontal. Mirror plane {x : x.e = p(t)} perpendicular to e; p(t) = p0 + (pelvis(clip(t, w0, w1-1)) -
                 pelvis(w0)).e: inside the walking segment it moves forward with the demonstration's pelvis by the same distance, fixed
@@ -81,8 +81,10 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 centre kept; Ob), lengthened to m x 2 w; shared P(t): rotation constant (level), centre = the attached target centre
                 with its coordinate along e replaced by p(t) (on the plane; lateral position and height = the demonstration's).
                 Hand targets: M1 = (the target's own mirror about its centre plane) M0 (improper; partner hands exchanged).
-                Partner's own box = Sm(t) Ob(t) (role_solve appends the local flip F as for every improper map); role 0's own box in
-                the solver = Ob (level), so that both person-side frames differ from the shared target by a translation only.
+                Partner's own box = Sm(t) O(t) (the mirrored real box; role_solve appends the local flip F as for every improper
+                map): Stage 1, anchors and the prior shift use it (role 0: O). The Stage-2 person-side frame (--fb-human-frame
+                target) uses the LEVELLED own boxes (role 0: Ob, role 1: Sm Ob = own1), so that both differ from the level shared
+                target by a translation only (interaction-mesh frame rule of step 9c).
 Every variant also returns r1_source: per partner frame t the source frame and the rigid map (R, t) that carried the
 demonstration's legs there (reversed / held legs: R180 and the least-squares offset; S copies: S and d_pre / d_post), for
 the support-drift source of the partner (step9_eval.py --r1-source construction).
@@ -446,7 +448,8 @@ def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt
                 id=f"front-back mirror axis{k} sigma{sigma:+.0f}")
     M0 = affine(Q0, -Q0 @ cT)
     M1 = affine(Rk, np.zeros(3)) @ M0
-    own1 = Sm @ Ob  # the partner's own box: the mirror of the levelled demonstration box (improper; role_solve appends F)
+    own1 = Sm @ Ob  # the partner's levelled own box (Stage-2 person-side frame; improper, role_solve appends F)
+    own1_real = Sm @ O  # the partner's own box = the mirror of the demonstration's real box (Stage 1, anchors, prior shift)
     Gp = own1 @ np.linalg.inv(O)
     legpel = legm[:, names.index("Pelvis")]
     D = legpel[:, :2] - mir[:, names.index("Pelvis"), :2]  # reversed-walk pelvis (p_f mirror) - mirrored pelvis, horizontal (diagnostic)
@@ -464,7 +467,7 @@ def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt
                   leg_ik=ikrec)
     return dict(P=P, A=A, B=A.copy(), S=Sm[0].copy(), G=Gp, Gp=Gp, cand=cand, M0=M0, M1=M1, human1=human1, rot1=np.repeat(Ref[None], T, 0), D=D, k=k, sigma=sigma,
                 walk_axis_angle_deg=ang, walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=(2 * pf * e)[:2], turn="mirror", legs="mirror", walk=walk,
-                leg_source_frame=tau, pre_offset=None, post_offset=None, tau=tau, Ob=Ob, own1=own1, Sm=Sm, plane=p, Ref=Ref, diag9g=diag9g,
+                leg_source_frame=tau, pre_offset=None, post_offset=None, tau=tau, Ob=Ob, own1=own1, own1_real=own1_real, Sm=Sm, plane=p, Ref=Ref, diag9g=diag9g,
                 r1_source=dict(frame=tau, R=np.repeat(Ref[None], T, 0), t=np.repeat((2 * pf * e)[None], T, 0), swap_lr=True))
 
 

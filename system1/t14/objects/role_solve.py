@@ -332,13 +332,10 @@ def main():
         human_r, nom_r = human0, own_nom_mj
         pw, fw = palm_rot[..., :, 2], palm_rot[..., :, 0]
         own_r = O
-        if MIR:  # step 9g: role 0's own box in the solver = the levelled demonstration box (person-side frame = the level target's, translated)
-            own_r = FB["Ob"]
-            nom_r = pt.mat_to_mj(own_r)
-    elif MIR:  # step 9g: the partner = the constructed mirror person (already left / right exchanged); own box Sm Ob F; palms mirrored
+    elif MIR:  # step 9g: the partner = the constructed mirror person (already left / right exchanged); own box = the mirrored real box Sm O F; palms mirrored
         assert improper and hidx == [1, 0]
         human_r = FB["human1"]
-        own_r = FB["own1"] @ pt.affine(F, np.zeros(3))
+        own_r = FB["own1_real"] @ pt.affine(F, np.zeros(3))
         nom_r = pt.mat_to_mj(own_r)
         Rf = FB["Ref"]
         pw = (palm_rot[..., :, 2] @ Rf.T)[:, hidx]
@@ -464,6 +461,9 @@ def main():
         Meff = Mr @ pt.affine(F, np.zeros(3))
         assert np.linalg.det(Meff[:3, :3]) > 0
         Nr = pt.mj_to_mat(nom_r)
+        if MIR:  # step 9g: the person-side frame of Stage 2 = the role's LEVELLED own box (role 0: Ob, role 1: Sm Ob F), so that it differs
+            # from the level shared target by a translation only; Stage 1, anchors and the prior shift keep the real boxes
+            Nr = FB["Ob"] if a.role == 0 else FB["own1"] @ pt.affine(F, np.zeros(3))
         nom2 = pt.mat_to_mj(Nr @ np.linalg.inv(Meff))
         demo2 = demo_r @ Meff[:3, :3].T + Meff[:3, 3]
         assert np.allclose(np.einsum("tij,pj->tpi", pt.mj_to_mat(nom2)[:, :3, :3], demo2) + pt.mj_to_mat(nom2)[:, None, :3, 3],
