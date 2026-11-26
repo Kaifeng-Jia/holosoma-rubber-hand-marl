@@ -1,0 +1,35 @@
+{
+ "run": "c_out_push",
+ "steps": 309,
+ "threshold": 0.0001,
+ "mujoco_built_inputs": {
+  "qstar_max": 0.0099949069163916,
+  "action_max": 0.02923107147216797,
+  "steps_qstar_over_threshold": [
+   294
+  ],
+  "tokenizer_input_max_abs_diff": 2.086162567138672e-07
+ },
+ "isaac_recorded_inputs": {
+  "qstar_max": 2.6770430778810805e-06,
+  "action_max": 1.621246337890625e-05,
+  "steps_qstar_over_threshold": []
+ },
+ "encoder_token_differences": [
+  {
+   "step": 294,
+   "robot": 0,
+   "components": 1,
+   "max_token_diff": 0.0625
+  }
+ ],
+ "token_values_unique_at_worst": 15,
+ "worst_step": {
+  "step": 294,
+  "robot": 0,
+  "noise_1e6_action_change_max": 0.02922821044921875,
+  "noise_1e6_share_over_1e3": 0.455
+ },
+ "command": "system1/t13v4/cout_qstar_diag.py --run c_out_push --task push --out results_system1/T13_runs/c_out_push/checks_qstar_diag.json",
+ "rules": "T13 round 2, C-out: read-only diagnosis of a failed q* step check (check_sim2sim_v1.py --scheme C-out, T10c threshold 1e-4).\nFor every control step of the run's Isaac nominal export: SONIC ONNX on the MuJoCo-built SONIC inputs (as the check) and on the\nIsaac-recorded SONIC inputs (sonic_tokenizer, sonic_actor_obs of the export); per step the largest action / q* difference to the\nIsaac record; the encoder token (64 values, quantised) differences between the two inputs; at the worst step, the action change\nunder N(0, 1e-6) noise on the tokenizer input (200 draws). Nothing is changed; writes one json.\n\n    sim2sim_s1/bin/python -B system1/t13v4/cout_qstar_diag.py --run c_out_push --task push --out results_system1/T13_runs/c_out_push/checks_qstar_diag.json\n"
+}
