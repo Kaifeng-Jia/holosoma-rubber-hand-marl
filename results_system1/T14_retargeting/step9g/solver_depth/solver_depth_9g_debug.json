@@ -1,0 +1,189 @@
+{
+ "rules": "what the Stage-2 constraint itself saw on a solved level: per robot, the deepest penetration (-distance, m) of the covered\n    non-hand geoms into the object geoms (mj_geomDistance on the level's scene_sim.xml at the solved qpos, all frames), its body and\n    frame, next to the verdict's additional non-hand proxy penetration (eval.json).",
+ "rows": [
+  {
+   "level": "logs_system1/t14/step9g/largeboxa/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.03687
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_roll_link",
+     "frame": 87,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.05361
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/largeboxa/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.03678
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_roll_link",
+     "frame": 87,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.05364
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/largeboxa/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.03681
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_roll_link",
+     "frame": 87,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.05363
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/suitcasea/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/suitcasea/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/suitcasea/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/suitcasea/m1p25",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9g/suitcasea/m1p50",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  }
+ ]
+}

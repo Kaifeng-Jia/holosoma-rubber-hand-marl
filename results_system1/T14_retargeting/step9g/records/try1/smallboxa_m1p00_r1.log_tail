@@ -1,0 +1,8 @@
+    q, cost = self.iterate(
+              ^^^^^^^^^^^^^
+  File "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py", line 2736, in iterate
+    q_n, cost = self.solve_single_iteration(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py", line 2491, in solve_single_iteration
+    raise RuntimeError(f"CVXPY solve failed: {problem.status}")
+RuntimeError: CVXPY solve failed: infeasible

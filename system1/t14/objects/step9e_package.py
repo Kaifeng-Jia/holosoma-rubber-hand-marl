@@ -40,7 +40,7 @@ def main():
     a = ap.parse_args()
     L, OUT, VID = ROOT / f"logs_system1/t14/{a.step}", ROOT / f"results_system1/T14_retargeting/{a.step}", ROOT / f"exports_system1/T14_videos/{a.step}"
     d = json.loads((L / "driver.json").read_text())
-    DG = "diag9e" if a.step == "step9e" else "diag9f"  # per-level phase diagnosis (step9e_diag.py; the file in each level dir is diag9e.json)
+    DG = "diag" + a.step[len("step"):]  # per-level phase diagnosis (diag9e, diag9f, diag9g) (step9e_diag.py; the file in each level dir is diag9e.json)
     for sub in ("evals", "levels", "diag", DG, "side_check_9d_drift", "records/run_records", "records/failed_logs", "records/gates_logs"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
     inv = []
