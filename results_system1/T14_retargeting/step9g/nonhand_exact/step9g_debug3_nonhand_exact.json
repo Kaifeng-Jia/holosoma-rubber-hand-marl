@@ -1,0 +1,77 @@
+{
+ "rules": "T14 step 9g item 1 (Kevin 2026-11-26): re-judge finished evaluations with the non-hand penetration measured on the actual\ncollision shapes (nonhand_exact.py); no solve is re-run. Read only on the solves, writes only under --out.\n\nSets and the verdict that is re-judged (\"old\"):\n  * step8b: the 57 candidates of the step-8 rerun (logs_system1/t14/step8b/cands/<seq>/<cand>/m1p00/eval.json); old verdict =\n    the round-6 re-judge of these solves (results_system1/T14_retargeting/step8b/step8b_rejudge.csv, new_applicable / new_failed),\n    the verdict step 8b reported; Push / Pull selection rule as step8b_compare.py (applicable candidates, smallest joint fit\n    error rounded to 1e-10, ties by ID);\n  * step9f, step9g: every level with an eval.json under <logdir>/<clip>/m<level>/; old verdict = eval.json (applicable, failed);\n    reported levels and clip summary from the driver json (--driver; summary[clip].report_levels).\nNew verdict = the old failed items with \"V0 non-hand penetration r0 / r1\" replaced by the new measure (limit 0.01 m, unchanged);\nevery other item as it was. The source solve of each level is the one in the evaluation's own command (--source).\n\n    sonic_s1/bin/python -B system1/t14/objects/rejudge_nonhand_exact.py --set step9f --driver logs_system1/t14/step9f/driver.json         --out logs_system1/t14/rejudge_exact/step9f --workers 1\n    ... --table-only (tables from the per-level jsons) --results <dir>\n",
+ "command": "system1/t14/objects/rejudge_nonhand_exact.py --set step9g --driver logs_system1/t14/step9g/driver_debug3.json --out logs_system1/t14/rejudge_exact/step9g_debug3 --workers 1 --results logs_system1/t14/rejudge_exact/tables --name step9g_debug3_nonhand_exact",
+ "summary": {
+  "largeboxa": {
+   "sequence": "sub7_largebox_045",
+   "report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "unsolved_report_levels": [],
+   "applicable_old": [],
+   "applicable_new": [
+    1.25,
+    1.5
+   ],
+   "driver_applicable_levels": [],
+   "clip_applicable_old": false,
+   "clip_applicable_new": true
+  },
+  "smallboxa": {
+   "sequence": "sub4_smallbox_047",
+   "report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "evaluated_report_levels": [],
+   "unsolved_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_old": [],
+   "applicable_new": [],
+   "driver_applicable_levels": [],
+   "clip_applicable_old": false,
+   "clip_applicable_new": false
+  },
+  "suitcasea": {
+   "sequence": "sub8_suitcase_006",
+   "report_levels": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "evaluated_report_levels": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "unsolved_report_levels": [],
+   "applicable_old": [
+    1.25,
+    1.5
+   ],
+   "applicable_new": [
+    1.25,
+    1.5
+   ],
+   "driver_applicable_levels": [
+    1.25,
+    1.5
+   ],
+   "clip_applicable_old": true,
+   "clip_applicable_new": true
+  }
+ }
+}

@@ -1,0 +1,340 @@
+{
+ "rules": "T14 step 9g item 3 (Kevin 2026-11-26): which constraint group makes the partner's Stage-1 solve of smallboxa infeasible\n(frame 105). Report only: the solver is not changed. Read only on the step-9g inputs; writes only under --out-dir.\n\nMethod: role_solve.py is run with the failing level's exact command (output dir moved to --out-dir), with three read-only hooks\non the retargeter (holosoma_retargeting.src.interaction_mesh_retargeter):\n  * cvxpy.Problem is recorded when solve_single_iteration builds it (objective, constraint list in construction order);\n  * _update_jacobians_and_phis_from_q / _compute_self_collision_constraints record their pairs and signed distances;\n  * solve_single_iteration: when it raises \"CVXPY solve failed: infeasible\", the recorded QP is analysed, then the error is\n    re-raised (so the run ends as before).\nConstraint groups in construction order (solve_single_iteration): Laplacian equality (1, always satisfiable through its free\nvariable) | foot constraints (nominal foot height 2 per foot link when enabled, foot sticking XY 2 per sticking foot, foot-lock Z\n2 per locked foot) | non-penetration, one per pair within the collision threshold (robot-object pairs, robot-ground pairs) |\nself-collision | joint limits (2) | step size (one second-order cone ||dq_a|| <= step_size). The analysis:\n  1. feasibility (objective 0, Clarabel) of: all groups; all groups but one (each group left out in turn); each group alone\n     (with the Laplacian equality);\n  2. L1 elastic relaxation: every inequality row gets its own non-negative slack (the Laplacian equality and the step-size cone\n     stay hard; dq_a = 0 satisfies both), minimise the sum of the slacks; per group the slack sum, and the rows that need slack\n     (pair geoms and their signed distance, joint names) -> the smallest total violation and where it sits;\n  3. the state at the failing call: frame, iteration of that frame, foot sticking flags, the closest pairs per group, joints at\n     a limit.\n\n    hsretargeting_s1/bin/python -B system1/t14/objects/step9g_s105_diag.py --out-dir logs_system1/t14/step9g_s105/m1p00 --         <role_solve.py arguments without --out>\n",
+ "frame": 105,
+ "iteration_of_frame": 1,
+ "init_t": false,
+ "retried_without_step_size": false,
+ "step_size": 0.2,
+ "penetration_tolerance": 0.001,
+ "collision_detection_threshold": 0.1,
+ "elastic": false,
+ "foot_sticking": {
+  "L_Toe": "False",
+  "R_Toe": "True"
+ },
+ "foot_links": [
+  "left_ankle_roll_sphere_1_link",
+  "right_ankle_roll_sphere_1_link",
+  "left_ankle_roll_sphere_2_link",
+  "right_ankle_roll_sphere_2_link",
+  "left_ankle_roll_sphere_3_link",
+  "right_ankle_roll_sphere_3_link",
+  "left_ankle_roll_sphere_4_link",
+  "right_ankle_roll_sphere_4_link"
+ ],
+ "counts": {
+  "laplacian equality": 1,
+  "foot sticking": 8,
+  "non-penetration ground": 18,
+  "non-penetration object": 27,
+  "joint limit lower": 1,
+  "joint limit upper": 1,
+  "step size": 1
+ },
+ "feasibility": {
+  "all": "infeasible",
+  "all but foot sticking": "optimal",
+  "foot sticking alone": "optimal",
+  "all but non-penetration ground": "optimal",
+  "non-penetration ground alone": "optimal",
+  "all but non-penetration object": "optimal",
+  "non-penetration object alone": "optimal",
+  "all but joint limit lower": "infeasible",
+  "joint limit lower alone": "optimal",
+  "all but joint limit upper": "infeasible",
+  "joint limit upper alone": "optimal",
+  "all but step size": "optimal",
+  "step size alone": "optimal",
+  "non-penetration object + step size": "optimal",
+  "non-penetration object + joint limit lower": "optimal",
+  "non-penetration object + joint limit upper": "optimal"
+ },
+ "l1_relaxation": {
+  "status": "optimal",
+  "total_slack": 0.005041,
+  "per_group": {
+   "foot sticking": {
+    "rows": 16,
+    "slack_sum": 0.002839,
+    "slack_max": 0.001548,
+    "rows_with_slack": 2
+   },
+   "non-penetration ground": {
+    "rows": 18,
+    "slack_sum": 0.0,
+    "slack_max": 0.0,
+    "rows_with_slack": 0
+   },
+   "non-penetration object": {
+    "rows": 27,
+    "slack_sum": 0.002203,
+    "slack_max": 0.002203,
+    "rows_with_slack": 1
+   },
+   "joint limit lower": {
+    "rows": 36,
+    "slack_sum": 0.0,
+    "slack_max": 0.0,
+    "rows_with_slack": 0
+   },
+   "joint limit upper": {
+    "rows": 36,
+    "slack_sum": 0.0,
+    "slack_max": 0.0,
+    "rows_with_slack": 0
+   }
+  },
+  "rows_needing_slack": [
+   {
+    "group": "non-penetration object",
+    "row": 22,
+    "entry": 0,
+    "slack": 0.002203,
+    "pair": [
+     "right_hip_pitch_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.012514
+   },
+   {
+    "group": "foot sticking",
+    "row": 6,
+    "entry": 1,
+    "slack": 0.001548
+   },
+   {
+    "group": "foot sticking",
+    "row": 3,
+    "entry": 1,
+    "slack": 0.00129
+   }
+  ]
+ },
+ "joints_at_limit": [
+  {
+   "joint": "right_hip_roll_joint",
+   "q": 0.5236,
+   "lb": -2.9671,
+   "ub": 0.5236
+  },
+  {
+   "joint": "right_knee_joint",
+   "q": -0.0873,
+   "lb": -0.0873,
+   "ub": 2.8798
+  },
+  {
+   "joint": "right_ankle_roll_joint",
+   "q": -0.2618,
+   "lb": -0.2618,
+   "ub": 0.2618
+  },
+  {
+   "joint": "left_wrist_pitch_joint",
+   "q": 0.3,
+   "lb": -0.1,
+   "ub": 0.3
+  },
+  {
+   "joint": "left_wrist_yaw_joint",
+   "q": 0.05,
+   "lb": -0.05,
+   "ub": 0.05
+  },
+  {
+   "joint": "right_wrist_roll_joint",
+   "q": 0.2,
+   "lb": -0.1,
+   "ub": 0.2
+  },
+  {
+   "joint": "right_wrist_pitch_joint",
+   "q": 0.3,
+   "lb": -0.1,
+   "ub": 0.3
+  },
+  {
+   "joint": "right_wrist_yaw_joint",
+   "q": -0.05,
+   "lb": -0.05,
+   "ub": 0.05
+  }
+ ],
+ "closest_pairs": {
+  "non-penetration object": [
+   {
+    "pair": [
+     "pelvis_contour_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.012658
+   },
+   {
+    "pair": [
+     "right_hip_pitch_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.012514
+   },
+   {
+    "pair": [
+     "waist_support_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.008503
+   },
+   {
+    "pair": [
+     "right_rubber_hand_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.006242
+   },
+   {
+    "pair": [
+     "torso_link",
+     "smallbox"
+    ],
+    "signed_distance_m": -0.000994
+   },
+   {
+    "pair": [
+     "left_rubber_hand_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.002227
+   },
+   {
+    "pair": [
+     "right_wrist_pitch_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.007237
+   },
+   {
+    "pair": [
+     "right_hip_roll_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.009751
+   },
+   {
+    "pair": [
+     "right_wrist_yaw_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.010006
+   },
+   {
+    "pair": [
+     "left_wrist_pitch_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.011792
+   },
+   {
+    "pair": [
+     "right_wrist_roll_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.012311
+   },
+   {
+    "pair": [
+     "left_wrist_roll_link",
+     "smallbox"
+    ],
+    "signed_distance_m": 0.017145
+   }
+  ],
+  "non-penetration ground": [
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_link"
+    ],
+    "signed_distance_m": -0.001004
+   },
+   {
+    "pair": [
+     "ground",
+     "right_ankle_roll_link"
+    ],
+    "signed_distance_m": -0.001
+   },
+   {
+    "pair": [
+     "ground",
+     "right_ankle_roll_sphere_5_link"
+    ],
+    "signed_distance_m": 0.001215
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_sphere_2_link"
+    ],
+    "signed_distance_m": 0.001686
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_sphere_1_link"
+    ],
+    "signed_distance_m": 0.002216
+   },
+   {
+    "pair": [
+     "ground",
+     "right_ankle_roll_sphere_3_link"
+    ],
+    "signed_distance_m": 0.003005
+   },
+   {
+    "pair": [
+     "ground",
+     "right_ankle_roll_sphere_4_link"
+    ],
+    "signed_distance_m": 0.015309
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_sphere_4_link"
+    ],
+    "signed_distance_m": 0.03182
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_sphere_3_link"
+    ],
+    "signed_distance_m": 0.032457
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_pitch_link"
+    ],
+    "signed_distance_m": 0.034709
+   },
+   {
+    "pair": [
+     "ground",
+     "left_ankle_roll_sphere_5_link"
+    ],
+    "signed_distance_m": 0.03569
+   },
+   {
+    "pair": [
+     "ground",
+     "left_knee_link"
+    ],
+    "signed_distance_m": 0.047263
+   }
+  ],
+  "self-collision": []
+ },
+ "analysis_seconds": 0.2,
+ "error": "CVXPY solve failed: infeasible"
+}
