@@ -165,7 +165,7 @@ def write_csv(path, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--set", choices=("step8b", "step9f", "step9g"), required=True)
+    ap.add_argument("--set", choices=("step8b", "step9f", "step9g", "step9g2"), required=True)
     ap.add_argument("--logdir", type=Path, default=None)
     ap.add_argument("--driver", type=Path, default=None, help="step 9: driver json with summary[clip].report_levels")
     ap.add_argument("--out", type=Path, required=True)

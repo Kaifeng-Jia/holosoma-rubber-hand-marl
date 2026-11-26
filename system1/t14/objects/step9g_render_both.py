@@ -4,6 +4,9 @@ driver run, labelled with both verdicts (non-hand penetration on the actual coll
 "旧量法"; rejudge_nonhand_exact.py). Same pictures as the driver's render (run_step9.Clip.render -> render_box.py: levels a, 1.0,
 1.25, 1.5 and the first free level above 1.5 that have an evaluation; side-by-side at 1.0, else the lowest solved level); the
 levels json is written next to the driver's as levels_both.json (the driver's levels.json is not touched). Render only, CPU.
+--clearance-exact (step 9g second fix, Kevin 2026-11-26 10:29): "新量法" also judges the two-robot clearance on the actual collision
+shapes (rejudge_clearance_exact.py: the eval's two-robot minimum distance >= -1 cm); "旧量法" = the eval's own verdict (both
+on boxes). Default: as before.
 
     sonic_s1/bin/python -B system1/t14/objects/step9g_render_both.py --logdir logs_system1/t14/step9g --rejudge logs_system1/t14/rejudge_exact/step9g \
         --fig-out results_system1/T14_retargeting/step9g/figures_all22 [--video-out exports_system1/T14_videos/step9g_all22] [--no-video CLIP ...] CLIP ...
@@ -49,6 +52,9 @@ def one(clip, sm, a, video):
         e = json.loads(f.read_text())
         x = json.loads((a.rejudge / clip / f"{tagm(m)}.json").read_text())
         nf = replace_nonhand(e["failed"], x["new"])
+        if a.clearance_exact:
+            from rejudge_clearance_exact import LIMIT_M, with_clearance
+            nf = with_clearance(nf, e["robot_robot_min_distance_cm"] / 100.0 >= LIMIT_M - 1e-10)
         both[m] = dict(new=(not nf, nf), old=(e["applicable"], e["failed"]))
         lv = conv(e, m, d / tagm(m), json.loads((d / tagm(m) / "r0/run_record.json").read_text()))
         lv["verdict_lines"] = [f"新量法：{verdict(not nf, nf)}", f"旧量法：{verdict(e['applicable'], e['failed'])}"]
@@ -86,6 +92,7 @@ def main():
     ap.add_argument("--video-out", type=Path, default=None)
     ap.add_argument("--no-video", nargs="*", default=[], help="clips rendered without video (video already made from the same solves)")
     ap.add_argument("--parallel", type=int, default=1)
+    ap.add_argument("--clearance-exact", action="store_true", help="the new verdict also uses the exact two-robot clearance (step 9g second fix)")
     a = ap.parse_args()
     for k in ("logdir", "rejudge", "fig_out", "video_out"):
         v = getattr(a, k)
