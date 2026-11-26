@@ -1,0 +1,3328 @@
+{
+ "rules": "what the Stage-2 constraint itself saw on a solved level: per robot, the deepest penetration (-distance, m) of the covered\n    non-hand geoms into the object geoms (mj_geomDistance on the level's scene_sim.xml at the solved qpos, all frames), its body and\n    frame, next to the verdict's additional non-hand proxy penetration (eval.json).",
+ "rows": [
+  {
+   "level": "logs_system1/t14/step9f/largeboxa/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00969
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/largeboxa/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00948
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/largeboxa/m1p25",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00835
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/largeboxa/m1p50",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00936
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/smallboxa/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00105,
+     "body": "left_wrist_yaw_link",
+     "frame": 17,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00941
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_yaw_link",
+     "frame": 4,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.04969
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/smallboxa/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00105,
+     "body": "left_wrist_yaw_link",
+     "frame": 17,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00914
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_yaw_link",
+     "frame": 8,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.04828
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/smallboxa/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "left_wrist_yaw_link",
+     "frame": 17,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.0156
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_yaw_link",
+     "frame": 8,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.04653
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/smallboxa/m1p55",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "left_wrist_yaw_link",
+     "frame": 17,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.0156
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_yaw_link",
+     "frame": 8,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.04652
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0051
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 35,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.02948
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00894
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 35,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.03091
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00746
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01227,
+     "body": "left_hip_roll_link",
+     "frame": 11,
+     "frames_over_1mm": 12,
+     "verdict_additional_proxy_penetration_m": 0.04403
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p55",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00715
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01397,
+     "body": "torso_link",
+     "frame": 17,
+     "frames_over_1mm": 32,
+     "verdict_additional_proxy_penetration_m": 0.05302
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p60",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00688
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01409,
+     "body": "torso_link",
+     "frame": 17,
+     "frames_over_1mm": 30,
+     "verdict_additional_proxy_penetration_m": 0.05317
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p65",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00652
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00983,
+     "body": "right_knee_link",
+     "frame": 0,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.04545
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p70",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00627
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01738,
+     "body": "torso_link",
+     "frame": 19,
+     "frames_over_1mm": 33,
+     "verdict_additional_proxy_penetration_m": 0.04858
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p75",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00484
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.10638,
+     "body": "right_hip_roll_link",
+     "frame": 88,
+     "frames_over_1mm": 87,
+     "verdict_additional_proxy_penetration_m": 0.12738
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub10_largebox_086/m1p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00483
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 35,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.03048
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "right_hip_yaw_link",
+     "frame": 86,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.03232
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00982,
+     "body": "left_ankle_roll_link",
+     "frame": 104,
+     "frames_over_1mm": 24,
+     "verdict_additional_proxy_penetration_m": 0.0751
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00113,
+     "body": "right_hip_yaw_link",
+     "frame": 86,
+     "frames_over_1mm": 12,
+     "verdict_additional_proxy_penetration_m": 0.03792
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01166,
+     "body": "left_ankle_roll_link",
+     "frame": 104,
+     "frames_over_1mm": 27,
+     "verdict_additional_proxy_penetration_m": 0.05561
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0013,
+     "body": "right_hip_yaw_link",
+     "frame": 86,
+     "frames_over_1mm": 9,
+     "verdict_additional_proxy_penetration_m": 0.03978
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01925,
+     "body": "left_knee_link",
+     "frame": 102,
+     "frames_over_1mm": 27,
+     "verdict_additional_proxy_penetration_m": 0.04502
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p55",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00103,
+     "body": "right_hip_yaw_link",
+     "frame": 86,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.04039
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.02135,
+     "body": "left_knee_link",
+     "frame": 102,
+     "frames_over_1mm": 33,
+     "verdict_additional_proxy_penetration_m": 0.0466
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p60",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00106,
+     "body": "right_hip_yaw_link",
+     "frame": 83,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.04159
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.02163,
+     "body": "left_knee_link",
+     "frame": 102,
+     "frames_over_1mm": 30,
+     "verdict_additional_proxy_penetration_m": 0.05068
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub15_suitcase_051/m1p65",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99",
+    "main motion"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00122,
+     "body": "right_hip_yaw_link",
+     "frame": 86,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.04277
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01751,
+     "body": "left_knee_link",
+     "frame": 102,
+     "frames_over_1mm": 33,
+     "verdict_additional_proxy_penetration_m": 0.07518
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub17_suitcase_007/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00134,
+     "body": "left_hip_yaw_link",
+     "frame": 16,
+     "frames_over_1mm": 9,
+     "verdict_additional_proxy_penetration_m": 0.04423
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "left_wrist_pitch_link",
+     "frame": 6,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.05764
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub17_suitcase_007/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_yaw_link",
+     "frame": 18,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.04449
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "left_wrist_pitch_link",
+     "frame": 6,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.05815
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub17_suitcase_007/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.04515
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_roll_link",
+     "frame": 27,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.05895
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p55",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00168,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.00805
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0011,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.04182
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p60",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00161,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.0084
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00123,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.04177
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p65",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00161,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.0084
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00128,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.03693
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p70",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00161,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.0084
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00128,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.03733
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p75",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00161,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.0084
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00126,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.03498
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00161,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 9,
+     "verdict_additional_proxy_penetration_m": 0.01039
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00126,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.03485
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00168,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.01293
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00128,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.0348
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00168,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.01342
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00128,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.03471
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00168,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.01366
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00128,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.03975
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00167,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.01409
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00103,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.03837
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_031/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00167,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.01268
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00117,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.03429
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m0p75",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "left_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.00872
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "left_hip_yaw_link",
+     "frame": 82,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.04734
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.00863
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "left_hip_yaw_link",
+     "frame": 82,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.04722
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.00881
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00105,
+     "body": "left_hip_yaw_link",
+     "frame": 82,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.04702
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.00883
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00105,
+     "body": "left_hip_yaw_link",
+     "frame": 82,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.04698
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.00914
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_knee_link",
+     "frame": 83,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.04432
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00113,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.00926
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_knee_link",
+     "frame": 83,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.04133
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00105,
+     "body": "left_wrist_yaw_link",
+     "frame": 3,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.0103
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_hip_roll_link",
+     "frame": 85,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.01899
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_032/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00106,
+     "body": "left_wrist_yaw_link",
+     "frame": 3,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.01102
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0011,
+     "body": "right_shoulder_yaw_link",
+     "frame": 90,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.01687
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00138,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01868
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "right_knee_link",
+     "frame": 95,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.06715
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00142,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.02053
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "right_hip_yaw_link",
+     "frame": 89,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.06465
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00143,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02253
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "right_hip_yaw_link",
+     "frame": 89,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.06198
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00145,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02432
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "right_hip_yaw_link",
+     "frame": 89,
+     "frames_over_1mm": 9,
+     "verdict_additional_proxy_penetration_m": 0.06295
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00147,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.02443
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00117,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 18,
+     "verdict_additional_proxy_penetration_m": 0.06252
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_034/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00155,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02459
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "torso_link",
+     "frame": 7,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.05688
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p65",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01374
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 3,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.02088
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p70",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 3,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.0136
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 2,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.02114
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p75",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 4,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.01349
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 2,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.02122
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.01334
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 3,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.02127
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01322
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00103,
+     "body": "right_wrist_yaw_link",
+     "frame": 3,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.0215
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01311
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 1,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.02137
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01294
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "right_wrist_yaw_link",
+     "frame": 1,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.02149
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "torso_link",
+     "frame": 2,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01282
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00109,
+     "body": "torso_link",
+     "frame": 6,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.02162
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.01218
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00106,
+     "body": "torso_link",
+     "frame": 6,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.02185
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_036/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "torso_link",
+     "frame": 1,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.01153
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00107,
+     "body": "torso_link",
+     "frame": 5,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02167
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 10,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00891
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 89,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.03699
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 8,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00895
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 89,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.03697
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 12,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.00884
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_yaw_link",
+     "frame": 0,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.03696
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 11,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.00881
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 89,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.03695
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 11,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00766
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 79,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.03691
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub1_suitcase_039/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_shoulder_yaw_link",
+     "frame": 11,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00655
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00115,
+     "body": "right_wrist_yaw_link",
+     "frame": 7,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.03867
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_003/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_roll_link",
+     "frame": 0,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01401
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00118,
+     "body": "torso_link",
+     "frame": 73,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.02658
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_003/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_roll_link",
+     "frame": 0,
+     "frames_over_1mm": 20,
+     "verdict_additional_proxy_penetration_m": 0.01828
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00142,
+     "body": "torso_link",
+     "frame": 74,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.02792
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_003/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_pitch_link",
+     "frame": 13,
+     "frames_over_1mm": 19,
+     "verdict_additional_proxy_penetration_m": 0.02065
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00118,
+     "body": "torso_link",
+     "frame": 74,
+     "frames_over_1mm": 17,
+     "verdict_additional_proxy_penetration_m": 0.02961
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00663
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_knee_link",
+     "frame": 122,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.06471
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.00677
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_knee_link",
+     "frame": 122,
+     "frames_over_1mm": 9,
+     "verdict_additional_proxy_penetration_m": 0.06441
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00687
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_yaw_link",
+     "frame": 120,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.06408
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00698
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_hip_yaw_link",
+     "frame": 120,
+     "frames_over_1mm": 12,
+     "verdict_additional_proxy_penetration_m": 0.06379
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00711
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 9,
+     "frames_over_1mm": 11,
+     "verdict_additional_proxy_penetration_m": 0.06341
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00791
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00101,
+     "body": "left_knee_link",
+     "frame": 124,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.06106
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_029/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 3,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0085
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_knee_link",
+     "frame": 122,
+     "frames_over_1mm": 13,
+     "verdict_additional_proxy_penetration_m": 0.05865
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_030/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 21,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.00753
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01183,
+     "body": "right_hip_yaw_link",
+     "frame": 128,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.0719
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_030/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 21,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.0076
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.08632,
+     "body": "right_hip_yaw_link",
+     "frame": 134,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.08924
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub3_largebox_030/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 21,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.00771
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00744,
+     "body": "left_hip_yaw_link",
+     "frame": 6,
+     "frames_over_1mm": 22,
+     "verdict_additional_proxy_penetration_m": 0.06685
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_pitch_link",
+     "frame": 0,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01034
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_pitch_link",
+     "frame": 0,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01034
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_pitch_link",
+     "frame": 0,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01033
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00184,
+     "body": "left_wrist_pitch_link",
+     "frame": 4,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.01057
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00272,
+     "body": "left_wrist_pitch_link",
+     "frame": 2,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01033
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_006/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00238,
+     "body": "left_wrist_pitch_link",
+     "frame": 2,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.01033
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.05026
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00156,
+     "body": "right_ankle_roll_link",
+     "frame": 153,
+     "frames_over_1mm": 1,
+     "verdict_additional_proxy_penetration_m": 0.00558
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.05069
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0051,
+     "body": "right_ankle_roll_link",
+     "frame": 153,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.00675
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.05072
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00859,
+     "body": "right_ankle_roll_link",
+     "frame": 153,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.00863
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0507
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01219,
+     "body": "right_ankle_roll_link",
+     "frame": 153,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.01225
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.05086
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00725,
+     "body": "left_ankle_roll_link",
+     "frame": 152,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.00911
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.05153
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01522,
+     "body": "right_ankle_roll_link",
+     "frame": 151,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.01528
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_042/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 support drift r1",
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0111
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.01131,
+     "body": "right_ankle_roll_link",
+     "frame": 149,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.01161
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p70",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00106,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.03383
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0017,
+     "body": "torso_link",
+     "frame": 113,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.02932
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p75",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00108,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.03386
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00138,
+     "body": "torso_link",
+     "frame": 113,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02933
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0011,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.00905
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00109,
+     "body": "torso_link",
+     "frame": 113,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.02935
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1",
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00113,
+     "body": "torso_link",
+     "frame": 0,
+     "frames_over_1mm": 7,
+     "verdict_additional_proxy_penetration_m": 0.01781
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.00109,
+     "body": "torso_link",
+     "frame": 114,
+     "frames_over_1mm": 8,
+     "verdict_additional_proxy_penetration_m": 0.02934
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 44,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.03039
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 138,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.02935
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m0p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 44,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.03076
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 138,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.02936
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "torso_link",
+     "frame": 16,
+     "frames_over_1mm": 17,
+     "verdict_additional_proxy_penetration_m": 0.03108
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 138,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.0294
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00117,
+     "body": "torso_link",
+     "frame": 15,
+     "frames_over_1mm": 19,
+     "verdict_additional_proxy_penetration_m": 0.03314
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 138,
+     "frames_over_1mm": 6,
+     "verdict_additional_proxy_penetration_m": 0.03141
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub4_suitcase_043/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 non-hand penetration r1"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00118,
+     "body": "torso_link",
+     "frame": 15,
+     "frames_over_1mm": 29,
+     "verdict_additional_proxy_penetration_m": 0.03633
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "torso_link",
+     "frame": 138,
+     "frames_over_1mm": 10,
+     "verdict_additional_proxy_penetration_m": 0.02927
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00102,
+     "body": "left_wrist_pitch_link",
+     "frame": 28,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.01053
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.00521
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p25",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00104,
+     "body": "left_wrist_pitch_link",
+     "frame": 28,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01057
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0011,
+     "body": "left_wrist_yaw_link",
+     "frame": 40,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.00543
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p50",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00107,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01079
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 9,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00696
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p55",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00109,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01082
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 9,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00694
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p60",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0011,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.01087
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 9,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00679
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p65",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00112,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 14,
+     "verdict_additional_proxy_penetration_m": 0.01091
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 9,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00657
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p70",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00114,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01095
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 10,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00635
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p75",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00116,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.011
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "right_wrist_pitch_link",
+     "frame": 10,
+     "frames_over_1mm": 2,
+     "verdict_additional_proxy_penetration_m": 0.00625
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p80",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00118,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01104
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 3,
+     "verdict_additional_proxy_penetration_m": 0.00634
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p85",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00121,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01107
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.00673
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p90",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00124,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 15,
+     "verdict_additional_proxy_penetration_m": 0.01128
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.0068
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m1p95",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00127,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01112
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.00683
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m2p00",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00131,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01135
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 4,
+     "verdict_additional_proxy_penetration_m": 0.00691
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_smallbox_045/m2p05",
+   "applicable": false,
+   "failed": [
+    "V0 non-hand penetration r0",
+    "V0 robot-robot clearance",
+    "section-4 contact retention >= 0.99"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.00135,
+     "body": "left_wrist_yaw_link",
+     "frame": 28,
+     "frames_over_1mm": 16,
+     "verdict_additional_proxy_penetration_m": 0.01194
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.001,
+     "body": "left_wrist_yaw_link",
+     "frame": 65,
+     "frames_over_1mm": 5,
+     "verdict_additional_proxy_penetration_m": 0.007
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p60",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 2e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p65",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p70",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p75",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 1e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p80",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 2e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p85",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p90",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m0p95",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 2e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m1p00",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 4e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m1p25",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/sub8_suitcase_020/m1p50",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 2e-05
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p60",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p65",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p70",
+   "applicable": false,
+   "failed": [
+    "V0 robot-robot clearance"
+   ],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p75",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p80",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p85",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p90",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m0p95",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m1p00",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m1p25",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  },
+  {
+   "level": "logs_system1/t14/step9f/suitcasea/m1p50",
+   "applicable": true,
+   "failed": [],
+   "robots": {
+    "r0": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    },
+    "r1": {
+     "solver_shape_max_penetration_m": 0.0,
+     "body": null,
+     "frame": null,
+     "frames_over_1mm": 0,
+     "verdict_additional_proxy_penetration_m": 0.0
+    }
+   }
+  }
+ ]
+}

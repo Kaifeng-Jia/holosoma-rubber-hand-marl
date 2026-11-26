@@ -1,0 +1,4625 @@
+{
+ "rules": "T14 step 9g item 0 (Kevin 2026-11-26 01:40): which robot links the solver's \"no penetration into the object\" constraint\ncovers. Report only (read only, CPU); nothing in the solver is changed.\n\nThe constraint (src/holosoma_retargeting/.../src/interaction_mesh_retargeter.py, _update_jacobians_and_phis_from_q and the\n\"Non-penetration constraints\" block): every SQP iteration, mj_collision with all geom margins set to\ncollision_detection_threshold (default 0.1 m) gives candidate geom pairs; a pair is kept when one geom belongs to the object\nbody (<name>_link) and neither geom has contype = conaffinity = 0; for kept pairs within 0.1 m, the linearized distance\nmust stay >= -penetration_tolerance (hard in Stage 1; in Stage 2 role_solve enables elastic constraints: L1 slack with weight\n1e5 per metre). So a robot geom is covered iff MuJoCo's own contact filter lets it touch an object geom:\n(contype_r & conaffinity_o) or (contype_o & conaffinity_r), the two bodies are not excluded (<exclude>), and they are not\nparent / child (the object body is a child of the world). This script applies exactly that filter to the scene files of\nactual step-9f solves (Stage 2: <level>/r<k>/scene_sim.xml; Stage 1 of the partner: the source-box scene in\n<level>/r1/assets_source/), and lists for every robot body: its collision geoms, contype / conaffinity, covered or not.\nIt also checks the filter empirically: mj_collision with margin 0.1 m at the solved poses of the level, counting the\nobject pairs that actually appear per robot body.\n\n    hsretargeting_s1/bin/python -B system1/t14/objects/step9g_constraint_links.py --level logs_system1/t14/step9f/suitcasea/m1p00 --out <json> [--csv <csv>]\n",
+ "level": "logs_system1/t14/step9f/suitcasea/m1p00",
+ "scenes": {
+  "stage2_r0": {
+   "scene": "/home/kevin/duet-system1/logs_system1/t14/step9f/suitcasea/m1p00/r0/scene_sim.xml",
+   "object_body": "suitcase_link",
+   "object_geoms": [
+    {
+     "geom": "suitcase",
+     "contype": 4,
+     "conaffinity": 0,
+     "type": 6,
+     "size": [
+      0.1924,
+      0.1404,
+      0.1881
+     ]
+    }
+   ],
+   "geoms": [
+    {
+     "body": "pelvis",
+     "geom": "geom1",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis",
+     "geom": "physx_pelvis_0",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "geom3",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "pelvis_contour_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "geom5",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "left_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "geom7",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "left_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "physx_left_hip_roll_link_1",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "geom10",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "left_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "physx_left_hip_yaw_link_2",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "geom13",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "left_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "physx_left_knee_link_3",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "geom16",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "left_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "geom18",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "left_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "geom20",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "left_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_4",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_5",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_6",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_7",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_8",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_9",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_10",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "geom29",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "left_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "geom31",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "left_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "geom33",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "left_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "geom35",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "left_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "geom37",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "left_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "geom39",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "right_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "geom41",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "right_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "physx_right_hip_roll_link_11",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "geom44",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "right_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "physx_right_hip_yaw_link_12",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "geom47",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "right_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "physx_right_knee_link_13",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "geom50",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "right_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "geom52",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "right_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "geom54",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "right_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_14",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_15",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_16",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_17",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_18",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_19",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_20",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "geom63",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "right_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "geom65",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "right_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "geom67",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "right_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "geom69",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "right_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "geom71",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "right_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "waist_yaw_link",
+     "geom": "geom73",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_roll_link",
+     "geom": "geom74",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom75",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "torso_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom77",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom78",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "head_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom80",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_21",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_22",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_23",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_24",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_head_link_25",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "geom86",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "waist_support_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "geom88",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "left_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "geom90",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "left_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "geom92",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "left_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "physx_left_shoulder_yaw_link_26",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "geom95",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "left_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "physx_left_elbow_link_27",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "geom98",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "left_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "physx_left_wrist_roll_link_28",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "geom101",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "left_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "physx_left_wrist_pitch_link_29",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "geom104",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "left_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "physx_left_wrist_yaw_link_30",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "geom107",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "left_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "physx_left_rubber_hand_link_31",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "geom110",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "left_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "geom112",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "left_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "geom114",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "right_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "geom116",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "right_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "geom118",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "right_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "physx_right_shoulder_yaw_link_32",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "geom121",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "right_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "physx_right_elbow_link_33",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "geom124",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "right_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "physx_right_wrist_roll_link_34",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "geom127",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "right_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "physx_right_wrist_pitch_link_35",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "geom130",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "right_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "physx_right_wrist_yaw_link_36",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "geom133",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "right_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "physx_right_rubber_hand_link_37",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "geom136",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "right_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "geom138",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "right_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    }
+   ],
+   "empirical_object_pairs_frames": {
+    "world": 30,
+    "right_rubber_hand_link": 128,
+    "left_rubber_hand_link": 128,
+    "pelvis": 3
+   },
+   "frames": 128
+  },
+  "stage2_r1": {
+   "scene": "/home/kevin/duet-system1/logs_system1/t14/step9f/suitcasea/m1p00/r1/scene_sim.xml",
+   "object_body": "suitcase_link",
+   "object_geoms": [
+    {
+     "geom": "suitcase",
+     "contype": 4,
+     "conaffinity": 0,
+     "type": 6,
+     "size": [
+      0.1924,
+      0.1404,
+      0.1881
+     ]
+    }
+   ],
+   "geoms": [
+    {
+     "body": "pelvis",
+     "geom": "geom1",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis",
+     "geom": "physx_pelvis_0",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "geom3",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "pelvis_contour_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "geom5",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "left_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "geom7",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "left_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "physx_left_hip_roll_link_1",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "geom10",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "left_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "physx_left_hip_yaw_link_2",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "geom13",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "left_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "physx_left_knee_link_3",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "geom16",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "left_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "geom18",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "left_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "geom20",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "left_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_4",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_5",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_6",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_7",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_8",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_9",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "physx_left_ankle_roll_link_10",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "geom29",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "left_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "geom31",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "left_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "geom33",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "left_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "geom35",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "left_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "geom37",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "left_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "geom39",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "right_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "geom41",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "right_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "physx_right_hip_roll_link_11",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "geom44",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "right_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "physx_right_hip_yaw_link_12",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "geom47",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "right_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "physx_right_knee_link_13",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "geom50",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "right_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "geom52",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "right_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "geom54",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "right_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_14",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_15",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_16",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_17",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_18",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_19",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "physx_right_ankle_roll_link_20",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "geom63",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "right_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "geom65",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "right_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "geom67",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "right_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "geom69",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "right_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "geom71",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "right_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "waist_yaw_link",
+     "geom": "geom73",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_roll_link",
+     "geom": "geom74",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom75",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "torso_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom77",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom78",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "head_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom80",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_21",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_22",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_23",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_torso_link_24",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "physx_head_link_25",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "geom86",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "waist_support_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "geom88",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "left_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "geom90",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "left_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "geom92",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "left_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "physx_left_shoulder_yaw_link_26",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "geom95",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "left_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "physx_left_elbow_link_27",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "geom98",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "left_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "physx_left_wrist_roll_link_28",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "geom101",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "left_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "physx_left_wrist_pitch_link_29",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "geom104",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "left_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "physx_left_wrist_yaw_link_30",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "geom107",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "left_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "physx_left_rubber_hand_link_31",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "geom110",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "left_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "geom112",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "left_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "geom114",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "right_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "geom116",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "right_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "geom118",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "right_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "physx_right_shoulder_yaw_link_32",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "geom121",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "right_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "physx_right_elbow_link_33",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "geom124",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "right_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "physx_right_wrist_roll_link_34",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "geom127",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "right_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "physx_right_wrist_pitch_link_35",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "geom130",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "right_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "physx_right_wrist_yaw_link_36",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "geom133",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "right_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "physx_right_rubber_hand_link_37",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 4,
+     "group": 3,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "geom136",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "right_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "geom138",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "right_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": false
+    }
+   ],
+   "empirical_object_pairs_frames": {
+    "world": 30,
+    "right_rubber_hand_link": 128,
+    "left_rubber_hand_link": 128,
+    "right_wrist_yaw_link": 42
+   },
+   "frames": 128
+  },
+  "stage1_r1": {
+   "scene": "logs_system1/t14/step9f/suitcasea/m1p00/r1/assets_source/g1_29dof_w_suitcase.xml",
+   "object_body": "suitcase_link",
+   "object_geoms": [
+    {
+     "geom": "suitcase",
+     "contype": 1,
+     "conaffinity": 1,
+     "type": 6,
+     "size": [
+      0.0962,
+      0.1404,
+      0.1881
+     ]
+    }
+   ],
+   "geoms": [
+    {
+     "body": "pelvis",
+     "geom": "geom1",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "geom2",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "pelvis_contour_link",
+     "geom": "pelvis_contour_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "geom4",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_pitch_link",
+     "geom": "left_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "geom6",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_roll_link",
+     "geom": "left_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "geom8",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_hip_yaw_link",
+     "geom": "left_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "geom10",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_knee_link",
+     "geom": "left_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "geom12",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_intermediate_1_link",
+     "geom": "left_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "geom14",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_pitch_link",
+     "geom": "left_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "geom16",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_link",
+     "geom": "left_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "geom18",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_3_link",
+     "geom": "left_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "geom20",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_4_link",
+     "geom": "left_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "geom22",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_5_link",
+     "geom": "left_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "geom24",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_1_link",
+     "geom": "left_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "geom26",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_ankle_roll_sphere_2_link",
+     "geom": "left_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "geom28",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_pitch_link",
+     "geom": "right_hip_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "geom30",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_roll_link",
+     "geom": "right_hip_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "geom32",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_hip_yaw_link",
+     "geom": "right_hip_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "geom34",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_knee_link",
+     "geom": "right_knee_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "geom36",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_intermediate_1_link",
+     "geom": "right_ankle_intermediate_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "geom38",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_pitch_link",
+     "geom": "right_ankle_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "geom40",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_link",
+     "geom": "right_ankle_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "geom42",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_3_link",
+     "geom": "right_ankle_roll_sphere_3_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "geom44",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_4_link",
+     "geom": "right_ankle_roll_sphere_4_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "geom46",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_5_link",
+     "geom": "right_ankle_roll_sphere_5_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "geom48",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_1_link",
+     "geom": "right_ankle_roll_sphere_1_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "geom50",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_ankle_roll_sphere_2_link",
+     "geom": "right_ankle_roll_sphere_2_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "waist_yaw_link",
+     "geom": "geom52",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_roll_link",
+     "geom": "geom53",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom54",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "torso_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom56",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom57",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "torso_link",
+     "geom": "head_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "torso_link",
+     "geom": "geom59",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "geom60",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "waist_support_link",
+     "geom": "waist_support_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "geom62",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_pitch_link",
+     "geom": "left_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "geom64",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_roll_link",
+     "geom": "left_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "geom66",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_shoulder_yaw_link",
+     "geom": "left_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "geom68",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_elbow_link",
+     "geom": "left_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "geom70",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_roll_link",
+     "geom": "left_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "geom72",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_pitch_link",
+     "geom": "left_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "geom74",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_wrist_yaw_link",
+     "geom": "left_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "geom76",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_rubber_hand_link",
+     "geom": "left_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "geom78",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_thumb_link",
+     "geom": "left_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "geom80",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "left_pinky_link",
+     "geom": "left_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "geom82",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_pitch_link",
+     "geom": "right_shoulder_pitch_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "geom84",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_roll_link",
+     "geom": "right_shoulder_roll_link",
+     "type": 5,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "geom86",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_shoulder_yaw_link",
+     "geom": "right_shoulder_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "geom88",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_elbow_link",
+     "geom": "right_elbow_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "geom90",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_roll_link",
+     "geom": "right_wrist_roll_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "geom92",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_pitch_link",
+     "geom": "right_wrist_pitch_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "geom94",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_wrist_yaw_link",
+     "geom": "right_wrist_yaw_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "geom96",
+     "type": 7,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_rubber_hand_link",
+     "geom": "right_rubber_hand_link",
+     "type": 7,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "geom98",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_thumb_link",
+     "geom": "right_thumb_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "geom100",
+     "type": 2,
+     "contype": 0,
+     "conaffinity": 0,
+     "group": 1,
+     "collision_enabled": false,
+     "covered": false
+    },
+    {
+     "body": "right_pinky_link",
+     "geom": "right_pinky_link",
+     "type": 2,
+     "contype": 1,
+     "conaffinity": 1,
+     "group": 0,
+     "collision_enabled": true,
+     "covered": true
+    }
+   ]
+  }
+ },
+ "per_body": {
+  "stage2_r0": {
+   "pelvis": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "pelvis_contour_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_hip_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_hip_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_knee_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_link": {
+    "geoms": 9,
+    "covered": 7,
+    "enabled": 8
+   },
+   "left_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_hip_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_hip_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_knee_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_link": {
+    "geoms": 9,
+    "covered": 7,
+    "enabled": 8
+   },
+   "right_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "waist_yaw_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "waist_roll_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "torso_link": {
+    "geoms": 11,
+    "covered": 5,
+    "enabled": 7
+   },
+   "waist_support_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_elbow_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_pitch_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_rubber_hand_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_thumb_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_pinky_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_elbow_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_pitch_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_rubber_hand_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_thumb_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_pinky_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   }
+  },
+  "stage2_r1": {
+   "pelvis": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "pelvis_contour_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_hip_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_hip_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_knee_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_link": {
+    "geoms": 9,
+    "covered": 7,
+    "enabled": 8
+   },
+   "left_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_hip_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_hip_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_knee_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_link": {
+    "geoms": 9,
+    "covered": 7,
+    "enabled": 8
+   },
+   "right_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "waist_yaw_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "waist_roll_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "torso_link": {
+    "geoms": 11,
+    "covered": 5,
+    "enabled": 7
+   },
+   "waist_support_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_shoulder_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_elbow_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_pitch_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_wrist_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_rubber_hand_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "left_thumb_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "left_pinky_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_shoulder_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_elbow_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_roll_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_pitch_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_wrist_yaw_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_rubber_hand_link": {
+    "geoms": 3,
+    "covered": 1,
+    "enabled": 2
+   },
+   "right_thumb_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   },
+   "right_pinky_link": {
+    "geoms": 2,
+    "covered": 0,
+    "enabled": 1
+   }
+  },
+  "stage1_r1": {
+   "pelvis": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "pelvis_contour_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_hip_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_hip_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_knee_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_hip_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_hip_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_hip_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_knee_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_intermediate_1_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_3_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_4_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_5_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_1_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_ankle_roll_sphere_2_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "waist_yaw_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "waist_roll_link": {
+    "geoms": 1,
+    "covered": 0,
+    "enabled": 0
+   },
+   "torso_link": {
+    "geoms": 6,
+    "covered": 2,
+    "enabled": 2
+   },
+   "waist_support_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_shoulder_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_elbow_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_wrist_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_wrist_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_wrist_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_rubber_hand_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_thumb_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "left_pinky_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_shoulder_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_shoulder_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_shoulder_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_elbow_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_wrist_roll_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_wrist_pitch_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_wrist_yaw_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_rubber_hand_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_thumb_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   },
+   "right_pinky_link": {
+    "geoms": 2,
+    "covered": 1,
+    "enabled": 1
+   }
+  }
+ }
+}
