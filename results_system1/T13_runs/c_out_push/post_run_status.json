@@ -1,0 +1,70 @@
+{
+ "run": "c_out_push",
+ "started": "2026-11-26T09:31:42-05:00",
+ "steps": [
+  {
+   "step": "copyback",
+   "cmd": "bash system1/t13v4/copyback.sh c_out_push",
+   "started": "2026-11-26T09:31:42-05:00",
+   "rc": 0,
+   "ended": "2026-11-26T10:00:50-05:00",
+   "passed": true,
+   "detail": {
+    "copyback": "sha256 match 1473 files 2026-11-26T10:00:50-05:00",
+    "final_checkpoint": "model_09025.pt",
+    "exists": true
+   }
+  },
+  {
+   "step": "cloud_shutdown",
+   "machine": "196",
+   "started": "2026-11-26T10:00:50-05:00",
+   "copyback_sha256_match": true,
+   "missing_local": [],
+   "checks": [
+    {
+     "time": "2026-11-26T10:00:55-05:00",
+     "others": [],
+     "gpu_compute": [],
+     "platform_processes": 9
+    }
+   ],
+   "gate_passed": true,
+   "command": "shutdown",
+   "shutdown_sent": true,
+   "shutdown_time": "2026-11-26T10:01:00-05:00",
+   "rc": 0,
+   "stdout": "",
+   "stderr": "Connection to connect.nmb1.seetacloud.com closed by remote host.\n",
+   "reachable_60s_after": false,
+   "done": true,
+   "ended": "2026-11-26T10:02:01-05:00"
+  }
+ ],
+ "state": "running",
+ "cloud_shutdown": {
+  "step": "cloud_shutdown",
+  "machine": "196",
+  "started": "2026-11-26T10:00:50-05:00",
+  "copyback_sha256_match": true,
+  "missing_local": [],
+  "checks": [
+   {
+    "time": "2026-11-26T10:00:55-05:00",
+    "others": [],
+    "gpu_compute": [],
+    "platform_processes": 9
+   }
+  ],
+  "gate_passed": true,
+  "command": "shutdown",
+  "shutdown_sent": true,
+  "shutdown_time": "2026-11-26T10:01:00-05:00",
+  "rc": 0,
+  "stdout": "",
+  "stderr": "Connection to connect.nmb1.seetacloud.com closed by remote host.\n",
+  "reachable_60s_after": false,
+  "done": true,
+  "ended": "2026-11-26T10:02:01-05:00"
+ }
+}
