@@ -218,6 +218,113 @@ def test_reverse_warp_whole_body():
     assert np.allclose(C["P"][:, :3, :3], C["A"][:, :3, :3], atol=1e-9)
 
 
+NAMES9G = list(fb.LOWER) + ["Torso", "L_Wrist", "R_Wrist", "L_Palm", "R_Palm"]
+
+
+def carry_9g(T=80, w0=12, w1=66, dirdeg=20.0):
+    """a person with leg geometry standing [0, w0), walking 1.2 m with a non-uniform speed [w0, w1), standing after; walking
+    direction dirdeg from +x; a 0.3 m box carried rigidly 0.45 m ahead of the pelvis, tilted 15 deg during the lift (frames < w0)."""
+    th = np.radians(dirdeg)
+    e = np.array([np.cos(th), np.sin(th), 0.0])
+    lat = np.array([-np.sin(th), np.cos(th), 0.0])
+    u = np.clip((np.arange(T) - w0) / (w1 - 1 - w0), 0, 1)
+    x = 1.2 * (u + 0.15 * np.sin(2 * np.pi * u) / (2 * np.pi))  # monotone, speed varies
+    loc = {"Pelvis": (0, 0, 0.95), "L_Hip": (0, 0.1, 0.9), "R_Hip": (0, -0.1, 0.9), "L_Knee": (0.06, 0.1, 0.5), "R_Knee": (0.06, -0.1, 0.5),
+           "L_Ankle": (0, 0.1, 0.1), "R_Ankle": (0, -0.1, 0.1), "L_Toe": (0.13, 0.1, 0.03), "R_Toe": (0.13, -0.1, 0.03), "Torso": (0, 0, 1.2),
+           "L_Wrist": (0.3, 0.18, 1.0), "R_Wrist": (0.3, -0.14, 1.0), "L_Palm": (0.33, 0.16, 1.0), "R_Palm": (0.33, -0.12, 1.0)}
+    H = np.zeros((T, len(NAMES9G), 3))
+    for j, n in enumerate(NAMES9G):
+        a, b, c = loc[n]
+        H[:, j] = (x[:, None] + a) * e + b * lat + np.array([0, 0, c])
+    H[:, :, 2] += 0.01 * np.sin(np.arange(T) / 3.0)[:, None]  # small bob
+    O = np.tile(np.eye(4), (T, 1, 1))
+    for t in range(T):
+        tilt = np.radians(15.0) if t < w0 else 0.0
+        O[t, :3, :3] = Rotation.from_euler("zy", [dirdeg, np.degrees(tilt)], degrees=True).as_matrix()
+        O[t, :3, 3] = (x[t] + 0.45) * e + np.array([0, 0, 0.9])
+    return H, O, e, x
+
+
+def test_distance_tau():
+    x = np.r_[np.zeros(5), np.cumsum(np.linspace(0.01, 0.05, 30)), np.full(5, 1.0)]
+    w0, w1 = 5, 35
+    tau, xs = fb.distance_tau(x, w0, w1)
+    assert np.isclose(tau[0], w1 - 1) and np.isclose(tau[-1], w0)
+    xi = np.interp(tau, np.arange(len(x)), x)
+    assert np.allclose(xi, x[w0] + x[w1 - 1] - x[w0:w1], atol=1e-6)  # the reversed walk has covered the demonstration's distance
+    assert np.all(np.diff(tau) <= 1e-12)
+
+
+def test_leg_ik():
+    T = 4
+    Hh = np.zeros((T, 3))
+    A = np.array([[0, 0, -0.7], [0.1, 0, -0.6], [0, 0, -0.85], [0, 0, -0.95]])
+    K0 = np.tile([0.2, 0, -0.4], (T, 1))
+    K, over, exc = fb.leg_ik(Hh, A, 0.42, 0.42, K0)
+    ok = ~over
+    assert np.allclose(np.linalg.norm(K[ok] - Hh[ok], axis=1), 0.42) and np.allclose(np.linalg.norm(K[ok] - A[ok], axis=1), 0.42)
+    assert np.all(K[ok, 0] > 0)  # bends toward the hint
+    assert over.tolist() == [False, False, True, True] and exc[3] > 0
+
+
+def test_mirror_construction():
+    """step 9g rules: upper body = the mirror at the same frame (left / right exchanged); plane moves with the pelvis inside the
+    walk only; box level with its centre on the plane; walk feet = the reversed walk by distance about the fixed plane; lift /
+    put-down feet held; knees by IK; hand targets of the partner = the mirror of role 0's; r1_source rebuilds the feet."""
+    H, O, e, x = carry_9g()
+    T, w0, w1 = len(O), 12, 66
+    walk = dict(w0=w0, w1=w1)
+    size = np.array([0.3, 0.4, 0.3])
+    C = fb.build(H, NAMES9G, O, size, 1.25, legs="mirror", walk=walk)
+    Ref, p = C["Ref"], C["plane"]
+    assert np.allclose(Ref @ e, -e) and np.linalg.det(C["S"][:3, :3]) < 0
+    sw = [NAMES9G.index(n) for n in fb.swap_lr(NAMES9G)]
+    mir = (H @ Ref.T + 2 * p[:, None, None] * e)[:, sw]
+    for n in ("Pelvis", "L_Hip", "R_Hip", "Torso", "L_Wrist", "R_Wrist", "L_Palm", "R_Palm"):
+        j = NAMES9G.index(n)
+        assert np.allclose(C["human1"][:, j], mir[:, j]), n
+    pe = H[:, 0] @ e
+    assert np.allclose(p[:w0 + 1], p[w0]) and np.allclose(p[w1 - 1:], p[w1 - 1])
+    assert np.allclose(p[w0:w1] - p[w0], pe[w0:w1] - pe[w0])
+    R = C["P"][:, :3, :3]
+    assert np.allclose(R, R[0]) and np.allclose(np.abs(R[0][2]), np.eye(3)[np.argmax(np.abs(R[0][2]))])  # level, constant
+    assert np.allclose(C["P"][:, :3, 3] @ e, p)  # centre on the plane
+    assert np.allclose(C["P"][:, 2, 3], C["A"][:, 2, 3])  # height = the demonstration's
+    feet = [NAMES9G.index(n) for n in ("L_Ankle", "L_Toe", "R_Ankle", "R_Toe")]
+    assert np.allclose(C["human1"][:w0, feet], C["human1"][0, feet]) and np.allclose(C["human1"][w1:, feet], C["human1"][-1, feet])
+    tau = C["tau"]
+    pf = C["diag9g"]["plane_fixed_legs"]
+    exp = (fb.lerp_at(H, tau) @ Ref.T + 2 * pf * e)[:, sw]
+    assert np.allclose(C["human1"][:, feet], exp[:, feet], atol=1e-6)
+    # the reversed walk's pelvis meets the mirrored pelvis along e (monotone walk)
+    assert np.allclose(exp[:, 0] @ e, C["human1"][:, 0] @ e, atol=1e-4)
+    for sd in ("L", "R"):
+        hj, kj, aj = (NAMES9G.index(f"{sd}_{n}") for n in ("Hip", "Knee", "Ankle"))
+        th = np.linalg.norm(C["human1"][:, kj] - C["human1"][:, hj], axis=1)
+        sh = np.linalg.norm(C["human1"][:, aj] - C["human1"][:, kj], axis=1)
+        ok = np.linalg.norm(C["human1"][:, aj] - C["human1"][:, hj], axis=1) < C["diag9g"]["leg_ik"][sd]["thigh_m"] + C["diag9g"]["leg_ik"][sd]["shank_m"]
+        assert ok.any() and np.allclose(th[ok], C["diag9g"]["leg_ik"][sd]["thigh_m"], atol=1e-4) and np.allclose(sh[ok], C["diag9g"]["leg_ik"][sd]["shank_m"], atol=1e-4)
+    assert np.linalg.det(C["M1"][:3, :3]) < 0
+    import partner as pt
+    Q0, c0, Q1, c1 = pt.region_maps(C["cand"], C["cand"]["axis"], C["L1"], C["Lm"])
+    assert np.allclose(pt.affine(Q0, c0), C["M0"]) and np.allclose(pt.affine(Q1, c1), C["M1"])
+    loc = np.array([0.05, -0.1, 0.07])
+    for t in (0, 30, 70):  # rigid carry: the mirror of role 0's contact point is the partner's (same frame)
+        a0 = C["P"][t] @ C["M0"] @ np.r_[loc, 1]
+        a1 = C["P"][t] @ C["M1"] @ np.r_[loc, 1]
+        assert np.allclose(Ref @ a0[:3] + 2 * p[t] * e, a1[:3], atol=1e-9)
+    assert np.allclose(C["own1"], np.einsum("tij,tjk->tik", C["Sm"], C["Ob"]))
+    rs = C["r1_source"]
+    assert rs["swap_lr"]
+    rebuilt = (np.einsum("tij,tkj->tki", rs["R"], fb.lerp_at(H, rs["frame"])) + rs["t"][:, None])[:, sw]
+    assert np.allclose(rebuilt[:, feet], C["human1"][:, feet], atol=1e-6)
+    # person-side frames: role 0 (Ob M0^-1) and role 1 (Sm Ob F (M1 F)^-1) differ from the shared target by a translation only
+    F = np.diag([1.0, 1.0, -1.0, 1.0])
+    f0 = C["Ob"] @ np.linalg.inv(C["M0"])
+    f1 = C["own1"] @ F @ np.linalg.inv(C["M1"] @ F)
+    assert np.allclose(f0[:, :3, :3], R) and np.allclose(f1[:, :3, :3], R)
+
+
 def test_added_drift():
     T = 20
     rob, src = np.zeros((T, 3)), np.zeros((T, 3))

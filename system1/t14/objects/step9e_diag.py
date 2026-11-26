@@ -145,6 +145,8 @@ def main():
             src0 = sfeet[f"{side}_foot_position_m"][:T]
             if r == 1 and r1_mode == "construction":
                 rs = gates["r1_source"]
+                if rs.get("swap_lr"):  # step 9g (mirror): left / right feet exchanged, as step9_eval.py
+                    src0 = sfeet[f"{'right' if side == 'left' else 'left'}_foot_position_m"][:T]
                 fr = np.asarray(rs["frame"], float)
                 if np.allclose(fr, np.round(fr)):
                     srcf = src0[np.round(fr).astype(int)]

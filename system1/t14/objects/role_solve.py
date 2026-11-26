@@ -160,9 +160,10 @@ def main():
     ap.add_argument("--frames", default=None, help="step 9: A:B, solve frames A..B-1 only")
     ap.add_argument("--construction", choices=("partner", "frontback"), default="partner", help="step 9: frontback (role mode, box family)")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box", help="step 9c: frontback partner turn about the world vertical")
-    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp"), default="all",
+    ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror"), default="all",
                     help="step 9c: reverse only the walking segment; 9d: + S-copy legs in lift / put down; 9e: + the whole S copy there; "
-                         "9f: the whole demonstration reversed, its three segments time-aligned (frontback.py)")
+                         "9f: the whole demonstration reversed, its three segments time-aligned; 9g (mirror): upper body = the mirror at "
+                         "the same frame, legs = the walk reversed by walked distance, box level (frontback.py)")
     ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own",
                     help="frontback, Stage 2: 'target' = the person-side object frame of the interaction mesh is the role's own object "
                          "frame carried by its region map (own_r M_r^-1, points M_r demo), so that it differs from the robot-side "
@@ -259,8 +260,8 @@ def main():
         h0_, p0_, _ = preprocess_motion_data(np.concatenate([human, palms], 1), _NS(demo_joints=names54), motion_config.toe_names, scale=s, object_poses=raw_poses)
         O_ = pt.mj_to_mat(convert_object_poses_to_mujoco_order(create_grounded_nominal_object_poses(p0_, s)))
         fa_, fb_e = (int(x) for x in a.frames.split(":")) if a.frames else (0, len(human))
-        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp") else None
-        if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp") and walk is None:
+        walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror") else None
+        if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror") and walk is None:
             raise SystemExit("no swing segment in the clip")
         FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk)
         cand = FB["cand"]
@@ -326,10 +327,22 @@ def main():
     hidx = [0, 1] if (a.role == 0 or not improper) else [1, 0]
     F = np.diag([1.0, 1.0, -1.0]) if (improper and a.role == 1) else np.eye(3)  # role-1 own-object frame S O F is proper (table local XY mirror)
     names_role = list(constants.DEMO_JOINTS)
+    MIR = FB is not None and FB["legs"] == "mirror"
     if a.role == 0:
         human_r, nom_r = human0, own_nom_mj
         pw, fw = palm_rot[..., :, 2], palm_rot[..., :, 0]
         own_r = O
+        if MIR:  # step 9g: role 0's own box in the solver = the levelled demonstration box (person-side frame = the level target's, translated)
+            own_r = FB["Ob"]
+            nom_r = pt.mat_to_mj(own_r)
+    elif MIR:  # step 9g: the partner = the constructed mirror person (already left / right exchanged); own box Sm Ob F; palms mirrored
+        assert improper and hidx == [1, 0]
+        human_r = FB["human1"]
+        own_r = FB["own1"] @ pt.affine(F, np.zeros(3))
+        nom_r = pt.mat_to_mj(own_r)
+        Rf = FB["Ref"]
+        pw = (palm_rot[..., :, 2] @ Rf.T)[:, hidx]
+        fw = (palm_rot[..., :, 0] @ Rf.T)[:, hidx]
     elif FB is not None and FB["legs"] == "reverse_warp":  # step 9f: everything of the partner at the demonstration time tau(t)
         tau_ = FB["tau"]
         human_r = FB["human1"]
@@ -476,7 +489,8 @@ def main():
                frontback=None if FB is None else dict(human_frame=a.fb_human_frame, turn=FB["turn"], legs=FB["legs"], walk=FB["walk"], walk_axis_angle_deg=FB["walk_axis_angle_deg"], sigma=FB["sigma"],
                                                      leg_offset_m=FB["leg_offset"].tolist(), gravity_deg_S=pt.gravity_deg(FB["S"]),
                                                      M0=FB["M0"].tolist(), M1=FB["M1"].tolist(), pelvis_mismatch=fbm.diag(FB["D"], s),
-                                                     **({"warp_segments": FB["warp_segments"], "offset_d_m": FB["offset_d"]} if FB["legs"] == "reverse_warp" else {})),
+                                                     **({"warp_segments": FB["warp_segments"], "offset_d_m": FB["offset_d"]} if FB["legs"] == "reverse_warp" else {}),
+                                                     **({"diag9g": FB["diag9g"]} if FB["legs"] == "mirror" else {})),
                python=sys.executable, holosoma_retargeting_module=str(Path(holosoma_retargeting.__file__).resolve()),
                seconds=round(time.time() - t0, 1), stage2_seconds=round(time.time() - t2, 1), finite=bool(np.isfinite(q).all()), qpos_shape=list(q.shape),
                object_locked_max_err=float(np.abs(q[:, -7:] - shared_mj[:n]).max()), peak_rss_gb=round(resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024 ** 2, 3),

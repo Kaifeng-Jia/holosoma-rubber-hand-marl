@@ -63,6 +63,8 @@ def evaluate(cand_dir, source_dir, gates, r1_source="reversed"):
             if r == 1 and r1_source == "construction":  # the source frame and rigid map that built the partner's legs at each frame
                 rs = gates["r1_source"]
                 fr, R_, t_ = np.asarray(rs["frame"], float), np.asarray(rs["R"]), np.asarray(rs["t"])
+                if rs.get("swap_lr"):  # step 9g (mirror): the partner's left foot is the mirrored demonstration's right foot
+                    src0 = sfeet[f"{'right' if side == 'left' else 'left'}_foot_position_m"][:T]
                 assert len(fr) == T, (len(fr), T)
                 alt = rj.added_drift(rf[f"{side}_foot_position_m"], src, flags[:T, k])[0]  # the earlier (whole clip reversed) source
                 if np.allclose(fr, np.round(fr)):
@@ -113,7 +115,8 @@ def main():
     ap.add_argument("--r1-source", choices=("reversed", "construction"), default="reversed",
                     help="support-drift source of the partner: 'reversed' = the source solve played backwards over the whole clip "
                          "(steps 9b-9d); 'construction' = at each frame the source frame and rigid map that built the partner's legs "
-                         "(gates r1_source; step 9e: walking segment reversed, lift / put down S copies at the same frame)")
+                         "(gates r1_source; step 9e: walking segment reversed, lift / put down S copies at the same frame; step 9g: mirrored, "
+                         "left / right feet exchanged)")
     a = ap.parse_args()
     res = evaluate(a.cand_dir, a.source, json.loads(a.gates.read_text()), a.r1_source)
     if a.pair_out is not None:

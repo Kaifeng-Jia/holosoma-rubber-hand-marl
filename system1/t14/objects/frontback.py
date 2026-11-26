@@ -61,6 +61,28 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 shared P(t): translation = A(t)'s, rotation = slerp midpoint of A(t) and B(t) (as step 9c). d = least-squares
                 horizontal offset putting own1 on the far end of the shared target: mean_t (P(t) M1 - S O(tau(t))) origin, xy.
                 Hand targets: the region maps M0 / M1 of the box's own symmetry (as step 9c). Gp = own1 O^-1 (own box = Gp O).
+  legs="mirror"  (step 9g, Kevin 2026-11-26 01:40, task book section 12 step 9g: upper body spatially symmetric, lower body
+                temporally symmetric; turn is not used). Walking direction e = the demonstration's pelvis displacement over the walking
+                segment, horizontal. Mirror plane {x : x.e = p(t)} perpendicular to e; p(t) = p0 + (pelvis(clip(t, w0, w1-1)) -
+                pelvis(w0)).e: inside the walking segment it moves forward with the demonstration's pelvis by the same distance, fixed
+                before / after it; p0 = least squares (over the clip) of the target centre attached to the demonstration's box (the
+                lengthened target's centre). Mirror Sm(t): x -> Ref x + 2 p(t) e, Ref = I - 2 e e^T (improper).
+                Rule 1 (upper body): the partner = Sm(t) applied to the demonstration at the SAME frame, left / right exchanged
+                (every joint and the palms; pelvis and hips too).
+                Rule 2 (lower body): walking segment: ankles and toes = the demonstration's walking legs played backwards with the
+                playback set by walked distance (distance_tau: x(tau) = x(w0) + x(w1-1) - x(t), x = pelvis along e), mirrored about
+                the fixed plane p_f = p0 + (x(w1-1) - x(w0)) / 2 (then the reversed walk's pelvis meets the mirrored pelvis along e
+                at every frame), left / right exchanged; lift / put down: ankles and toes held at the reversed walk's first / last
+                stance (source frames tau(w0) = w1-1 / tau(w1-1) = w0); pelvis and hips = the mirror (rule 1); knees in every
+                segment by two-segment IK from the mirrored hip to the ankle (the demonstration's own thigh / shank lengths; bend
+                side = the reversed knee in the walking segment, the mirrored knee in lift / put down). Overextension (hip-ankle
+                distance > thigh + shank) is counted in diag9g.
+                Rule 3 (box): the target = the demonstration's box levelled (long axis k along e, its frame-0 vertical axis vertical,
+                centre kept; Ob), lengthened to m x 2 w; shared P(t): rotation constant (level), centre = the attached target centre
+                with its coordinate along e replaced by p(t) (on the plane; lateral position and height = the demonstration's).
+                Hand targets: M1 = (the target's own mirror about its centre plane) M0 (improper; partner hands exchanged).
+                Partner's own box = Sm(t) Ob(t) (role_solve appends the local flip F as for every improper map); role 0's own box in
+                the solver = Ob (level), so that both person-side frames differ from the shared target by a translation only.
 Every variant also returns r1_source: per partner frame t the source frame and the rigid map (R, t) that carried the
 demonstration's legs there (reversed / held legs: R180 and the least-squares offset; S copies: S and d_pre / d_post), for
 the support-drift source of the partner (step9_eval.py --r1-source construction).
@@ -208,6 +230,8 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
         if turn != "world":
             raise ValueError("legs='reverse_warp' is defined with turn='world'")
         return _reverse_warp(human0, names, O, size, m, walk, A, S, T180, k, sigma, ang, wd, w, e, L1, Lm, cT, Rt, R180, pel)
+    if legs == "mirror":
+        return _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel)
     D0 = O @ np.linalg.inv(O[0])
     B = S @ D0 @ np.linalg.inv(S) @ A[0]
     P = A.copy()
@@ -303,6 +327,145 @@ def _reverse_warp(human0, names, O, size, m, walk, A, S, T180, k, sigma, ang, wd
                 leg_source_frame=tau, pre_offset=None, post_offset=None, tau=tau, warp_segments=segs, own1=own1, offset_d=d.tolist(),
                 own_vs_far_end_m=np.linalg.norm(own1[:, :3, 3] - far[:, :3, 3], axis=1),
                 r1_source=dict(frame=tau, R=np.repeat(Rs[None], T, 0), t=np.repeat(Md[:3, 3][None], T, 0)))
+
+
+def swap_lr(names):
+    """names with L_ / R_ exchanged (the partner's left joint = the mirrored demonstration's right joint)."""
+    return [("R_" + n[2:]) if n.startswith("L_") else (("L_" + n[2:]) if n.startswith("R_") else n) for n in names]
+
+
+def distance_tau(x, w0, w1):
+    """step 9g rule 2 (Kevin 2026-11-26): walking-segment source times by walked distance. x [T] = the demonstration's pelvis
+    along the walking direction; inside [w0, w1) made non-decreasing (running maximum). Partner frame t in [w0, w1) <- the
+    demonstration time tau(t) with x(tau) = x(w0) + x(w1 - 1) - x(t) (the reversed walk has covered the same distance as the
+    demonstration), fractional, linear inverse; tau(w0) = w1 - 1, tau(w1 - 1) = w0. Returns tau [w1 - w0], xs (the monotone x)."""
+    xs = np.maximum.accumulate(np.asarray(x, float)[w0:w1])
+    n = w1 - w0
+    if n == 1:
+        return np.array([float(w0)]), xs
+    xs_ = xs + 1e-9 * np.arange(n)  # strictly increasing for the inverse (flat runs: the first frame of the run)
+    tgt = xs_[0] + xs_[-1] - xs_
+    return w0 + np.interp(tgt, xs_, np.arange(n, dtype=float)), xs
+
+
+def leg_ik(H, A, a, b, K0):
+    """two-segment leg IK per frame: hip H [T, 3], ankle A [T, 3], thigh a, shank b (scalars), bend hint K0 [T, 3] (the knee lies
+    in the plane of H, A, K0, on K0's side). Hip-ankle distance >= a + b (overextension): the knee on the line H-A at the
+    fraction a / (a + b), bones stretched; counted. Returns K [T, 3], over [T] bool, excess [T] = |A - H| - (a + b)."""
+    dv = A - H
+    d = np.linalg.norm(dv, axis=1)
+    u = dv / np.maximum(d, 1e-9)[:, None]
+    h = K0 - H
+    n = h - np.sum(h * u, axis=1)[:, None] * u
+    nn = np.linalg.norm(n, axis=1)
+    fallback = np.cross(u, np.array([0.0, 0.0, 1.0]))
+    n = np.where(nn[:, None] > 1e-9, n / np.maximum(nn, 1e-12)[:, None], fallback / np.maximum(np.linalg.norm(fallback, axis=1), 1e-12)[:, None])
+    over = d >= a + b
+    along = np.where(over, d * a / (a + b), (a * a - b * b + d * d) / (2 * np.maximum(d, 1e-9)))
+    r = np.where(over, 0.0, np.sqrt(np.maximum(a * a - along * along, 0.0)))
+    return H + along[:, None] * u + r[:, None] * n, over, d - (a + b)
+
+
+def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel):
+    """step 9g construction (legs="mirror"); see the module docstring."""
+    T = len(O)
+    w0, w1 = int(walk["w0"]), int(walk["w1"])
+    if w1 - w0 < 2:
+        raise ValueError("walking segment shorter than 2 frames")
+    dv = pel[w1 - 1, :2] - pel[w0, :2]
+    e2 = dv / np.linalg.norm(dv)
+    e = np.r_[e2, 0.0]  # walking direction: the demonstration's pelvis over the walking segment, horizontal
+    ang_e_clip = float(np.degrees(np.arccos(np.clip(e2 @ wd, -1, 1))))
+    R0 = O[0][:3, :3]
+    v = int(np.argmax(np.abs(R0[2, :])))  # the box axis closest to the vertical at frame 0
+    if v == k:
+        raise ValueError("lengthening axis is the vertical box axis")
+    u_ = 3 - k - v
+    Rb = np.zeros((3, 3))
+    Rb[:, k] = sigma * e  # +sigma e_k forward, as the lengthening rule
+    Rb[:, v] = np.sign(R0[2, v]) * np.array([0.0, 0.0, 1.0])
+    Rb[:, u_] = np.cross(Rb[:, (u_ + 1) % 3], Rb[:, (u_ + 2) % 3])
+    assert abs(np.linalg.det(Rb) - 1) < 1e-9
+    Ob = O.copy()
+    Ob[:, :3, :3] = Rb  # the demonstration's box levelled (rule 3: level, long axis along the walking direction), centre kept
+    ek = np.eye(3)[k]
+    cT = sigma * (Lm / 2 - w / 2) * ek
+    A = Ob @ affine(Rt, cT)  # the level target attached to the demonstration's box (role 0's region at the target's -e_k end)
+    RA = A[0, :3, :3].copy()
+    xp = pel @ e
+    tt = np.clip(np.arange(T), w0, w1 - 1)
+    dp = xp[tt] - xp[w0]  # the plane moves with the demonstration's pelvis inside the walking segment only (rule 1)
+    cen = A[:, :3, 3]
+    p0 = float(np.mean(cen @ e - dp))  # least squares: the plane path closest to the attached target centre over the clip
+    p = p0 + dp
+    P = A.copy()
+    P[:, :3, :3] = RA
+    P[:, :3, 3] = cen + (p - cen @ e)[:, None] * e  # rule 3: centre on the plane; lateral position and height = the attached target's
+    Ref = np.eye(3) - 2 * np.outer(e, e)
+    Sm = np.tile(np.eye(4), (T, 1, 1))
+    Sm[:, :3, :3] = Ref
+    Sm[:, :3, 3] = 2 * p[:, None] * e
+    perm = [names.index(x) for x in swap_lr(names)]
+    mir = (human0 @ Ref.T + Sm[:, None, :3, 3])[:, perm]  # rule 1: the mirror at the same frame, left / right exchanged
+    human1 = mir.copy()  # upper body, palms, pelvis and hips stay the mirror
+    # rule 2: legs. Walking segment: the demonstration's walking legs reversed by walked distance, mirrored about the FIXED plane
+    # p_f (the reversed walk then advances exactly with the moving plane; its pelvis meets the mirrored pelvis along e);
+    # lift / put down: feet held at the reversed walk's first / last stance; knees by IK from the mirrored hips.
+    tau_w, xs = distance_tau(xp, w0, w1)
+    tau = np.empty(T)
+    tau[:w0], tau[w0:w1], tau[w1:] = tau_w[0], tau_w, tau_w[-1]
+    pf = p0 + (xs[-1] - xs[0]) / 2
+    src = lerp_at(human0, tau)
+    legm = (src @ Ref.T + 2 * pf * e)[:, perm]  # the reversed (and held) source legs mirrored about p_f, left / right exchanged
+    il = {n: names.index(n) for n in LOWER}
+    for sd in ("L", "R"):
+        for j in ("Ankle", "Toe"):
+            human1[:, il[f"{sd}_{j}"]] = legm[:, il[f"{sd}_{j}"]]
+    ikrec = {}
+    seg = np.where(np.arange(T) < w0, 0, np.where(np.arange(T) < w1, 1, 2))
+    for sd in ("L", "R"):
+        H, Kd, Ad = mir[:, il[f"{sd}_Hip"]], mir[:, il[f"{sd}_Knee"]], mir[:, il[f"{sd}_Ankle"]]
+        a_ = float(np.median(np.linalg.norm(Kd - H, axis=1)))  # the (mirrored) demonstration's own thigh / shank lengths
+        b_ = float(np.median(np.linalg.norm(Ad - Kd, axis=1)))
+        hint = np.where((seg == 1)[:, None], legm[:, il[f"{sd}_Knee"]], Kd)  # bend side: the reversed knee (walk) / the mirrored knee (lift, put down)
+        K, over, exc = leg_ik(H, human1[:, il[f"{sd}_Ankle"]], a_, b_, hint)
+        human1[:, il[f"{sd}_Knee"]] = K
+        hip_gap = np.linalg.norm(H - legm[:, il[f"{sd}_Hip"]], axis=1)  # mirrored hip (t) vs the reversed walk's hip (tau): what the IK absorbs
+        knee_move = np.linalg.norm(K - hint, axis=1)
+        ikrec[sd] = dict(thigh_m=round(a_, 4), shank_m=round(b_, 4),
+                         **{ph: dict(frames=int((seg == q).sum()), overextended_frames=int((over & (seg == q)).sum()),
+                                     max_excess_m=round(float(exc[seg == q].max()), 4) if (seg == q).any() else None,
+                                     hip_vs_reversed_hip_max_m=round(float(hip_gap[seg == q].max()), 4) if (seg == q).any() else None,
+                                     knee_vs_hint_max_m=round(float(knee_move[seg == q].max()), 4) if (seg == q).any() else None)
+                            for q, ph in enumerate(("lift", "walk", "put_down"))})
+    Q0 = Rt.T
+    Rk = np.eye(3)
+    Rk[k, k] = -1.0  # the target's own mirror plane (perpendicular to its long axis, through its centre)
+    Q1 = Rk @ Q0
+    cand = dict(Q0=Q0.tolist(), c0=(-w / 2 * ek).tolist(), Q1=Q1.tolist(), c1=(w / 2 * ek).tolist(), axis=k, L1=L1, parity0=1, parity1=-1,
+                id=f"front-back mirror axis{k} sigma{sigma:+.0f}")
+    M0 = affine(Q0, -Q0 @ cT)
+    M1 = affine(Rk, np.zeros(3)) @ M0
+    own1 = Sm @ Ob  # the partner's own box: the mirror of the levelled demonstration box (improper; role_solve appends F)
+    Gp = own1 @ np.linalg.inv(O)
+    legpel = legm[:, names.index("Pelvis")]
+    D = legpel[:, :2] - mir[:, names.index("Pelvis"), :2]  # reversed-walk pelvis (p_f mirror) - mirrored pelvis, horizontal (diagnostic)
+    att_dev = (A[:, :3, 3] - P[:, :3, 3]) @ e  # the attached target centre (the demonstration's box) minus the plane, along e
+    diag9g = dict(walk_dir=e2.tolist(), walk_dir_vs_clip_net_deg=round(ang_e_clip, 3), vertical_box_axis=v, plane_p0=round(p0, 5), plane_fixed_legs=round(float(pf), 5),
+                  plane_travel_m=round(float(dp[-1]), 5),
+                  attached_vs_plane_along_e_m={ph: dict(max_abs=round(float(np.abs(att_dev[seg == q]).max()), 4), mean=round(float(att_dev[seg == q].mean()), 4))
+                                               for q, ph in enumerate(("lift", "walk", "put_down")) if (seg == q).any()},
+                  demo_box_vs_level_box_deg=dict(  # rotation angle between the demonstration's box and the levelled one; tilt = its vertical axis vs world vertical
+                      rotation_max=round(float(np.degrees(np.arccos(np.clip((np.einsum("tij,ij->t", O[:, :3, :3], Rb) - 1) / 2, -1, 1))).max()), 3),
+                      tilt_max=round(float(np.degrees(np.arccos(np.clip(np.sign(R0[2, v]) * O[:, 2, v], -1, 1))).max()), 3)),
+                  tau_walk=dict(first=round(float(tau_w[0]), 4), last=round(float(tau_w[-1]), 4),
+                                speed_ratio_max=round(float(np.abs(np.diff(tau_w)).max()), 4) if len(tau_w) > 1 else None,
+                                held_lift_source_frame=round(float(tau_w[0]), 4), held_put_down_source_frame=round(float(tau_w[-1]), 4)),
+                  leg_ik=ikrec)
+    return dict(P=P, A=A, B=A.copy(), S=Sm[0].copy(), G=Gp, Gp=Gp, cand=cand, M0=M0, M1=M1, human1=human1, rot1=np.repeat(Ref[None], T, 0), D=D, k=k, sigma=sigma,
+                walk_axis_angle_deg=ang, walk_dir=wd, L1=L1, Lm=Lm, cT=cT, Rt=Rt, leg_offset=(2 * pf * e)[:2], turn="mirror", legs="mirror", walk=walk,
+                leg_source_frame=tau, pre_offset=None, post_offset=None, tau=tau, Ob=Ob, own1=own1, Sm=Sm, plane=p, Ref=Ref, diag9g=diag9g,
+                r1_source=dict(frame=tau, R=np.repeat(Ref[None], T, 0), t=np.repeat((2 * pf * e)[None], T, 0), swap_lr=True))
 
 
 def box_sd(p, M, size):
