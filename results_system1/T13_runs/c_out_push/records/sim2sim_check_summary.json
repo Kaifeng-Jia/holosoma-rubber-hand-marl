@@ -1,0 +1,81 @@
+{
+ "run": "c_out_push",
+ "task": "push",
+ "rules": "T13 v4 section 2 / 5 item 3: MuJoCo-side checks of observation v1 with the T10 thresholds, for one finished run (read only, CPU).\n\n1. Initial states: every frozen +/-2 / +/-8 test state (nominal + 50) loaded into MuJoCo (mj_env.PairEnv.reset: reference frame 0\n   + the evaluator's yaw_transform) versus the state Isaac had after its reset in this run's laptop-5070 finals\n   (logs_system1/t13v4/finals/<run>_pm{2,8}/<state>.initial.json; state-file sha256 checked against the finals' launch record).\n   Pass: joints 1e-4 rad, robot root and object positions 1e-4 m (T10 step 1).\n2. Observation v1 (noise off): for every control step of this run's Isaac nominal episode with scene export\n   (logs_system1/t13v4/isaac_dump/<run>: dump/nominal.sim2sim.npz holds the per-step observations and robot states;\n   eval/nominal.trajectory.npz holds the object pose of the same frames), that state is written into MuJoCo and the 159-D actor\n   input is built by mj_env (obs_v1 on) and compared per dimension with the Isaac observation. Pass: every dimension < 1e-4.\n   Also: MuJoCo forward kinematics of all Isaac bodies, and the actor ONNX on the recorded observations vs the Isaac actions.\n\n    sim2sim_s1/bin/python -B system1/t13v4/check_sim2sim_v1.py --run d_push --task push --onnx exports_system1/t13v4/onnx/d_push_t13v4.onnx         --out logs_system1/t13v4/sim2sim/checks_d_push\n",
+ "initial_states": {
+  "n_states": 102,
+  "all_passed": true,
+  "max": {
+   "joint_pos_max_abs_rad": 0.0,
+   "joint_vel_max_abs": 0.0,
+   "root_pos_max_abs_m": 5.9508457939116965e-08,
+   "root_ori_max_angle_rad": 8.429369702178807e-08,
+   "root_lin_vel_max_abs": 5.958864335298131e-08,
+   "root_ang_vel_max_abs": 1.4891054500587586e-08,
+   "object_pos_max_abs_m": 0.0,
+   "object_ori_angle_rad": 0.0
+  },
+  "thresholds": {
+   "joint_rad": 0.0001,
+   "position_m": 0.0001
+  },
+  "state_files": [
+   {
+    "level": 2,
+    "states": "system1/t13v4/states_t14r6C/push_pm2_states.json",
+    "states_sha256": "a6933d54b221932bf2c3a28c8e7c3a4720a80960d586a8f83286e9c43875f986",
+    "isaac_eval_dir": "logs_system1/t13v4/finals/c_out_push_pm2"
+   },
+   {
+    "level": 8,
+    "states": "system1/t13v4/states_t14r6C/push_pm8_states.json",
+    "states_sha256": "2edd4351519fe01054a1fe2d501755e8628e79b559c9d6f3f8f7241ce1d59aaf",
+    "isaac_eval_dir": "logs_system1/t13v4/finals/c_out_push_pm8"
+   }
+  ]
+ },
+ "observations": {
+  "steps": 309,
+  "obs_max_abs_diff": 1.3718400634354921e-06,
+  "obs_worst_dims": [
+   "neck_partner_rel_pos_b_x",
+   "base_ang_vel_0",
+   "base_ang_vel_2",
+   "base_ang_vel_1",
+   "motion_ref_ori_b_2"
+  ],
+  "teammate_v1_max_abs_diff": 1.3718400634354921e-06,
+  "obs_passed": true,
+  "threshold": 0.0001,
+  "fk_body_pos_max_m": 5.781364053047966e-07,
+  "fk_body_ori_max_rad": 0.0013457514293930344,
+  "trajectory_vs_dump_root_pos_max_m": 0.0,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 8.58306884765625e-06
+ },
+ "inputs": {
+  "dump": "logs_system1/t13v4/isaac_dump/c_out_push/dump",
+  "scene_json_sha256": "c319fcce6387e92be5fd8fbc25509e87860d65087fa8c2f78879edd5ad30bbdd",
+  "record_sha256": "f45c1fdabb2459177c291d8a7f96ed7981d3a572ff00226b4e5dd06bdfff313f",
+  "trajectory_sha256": "a0b10f98e10a8f7cd5ab270f0f172dc4a38d156635365fea09eba85d325cf0de",
+  "onnx": "/home/kevin/duet-system1/exports_system1/t13v4/onnx/c_out_push_t13v4.onnx",
+  "onnx_sha256": "94aa4382f71b4e1e1b7257c5b3549dad6e4a4e7314a2c564bd42ee2d85b4ae49"
+ },
+ "cout": {
+  "sonic_actor_obs_max_abs_diff": 1.430511474609375e-06,
+  "sonic_tokenizer_max_abs_diff": 2.086162567138672e-07,
+  "sonic_inputs_passed": true,
+  "sonic_action_onnx_vs_isaac_max_abs_diff": 0.02923107147216797,
+  "sonic_target_onnx_vs_isaac_max_abs_rad": 0.009994909167289734,
+  "q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad": 0.0099949069163916,
+  "q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad": 0.00999497484481493,
+  "q_star_passed": true,
+  "threshold": 0.0001,
+  "qstar_inputs": "isaac",
+  "q_star_isaac_recorded_sonic_inputs_vs_isaac_pd_target_max_abs_rad": 2.6770430778810805e-06,
+  "sonic_action_onnx_on_isaac_recorded_inputs_vs_isaac_max_abs_diff": 1.621246337890625e-05,
+  "q_star_rule": "q* = SONIC ONNX on the Isaac-recorded SONIC inputs + D scale * clip(a recorded) vs the Isaac PD target < 1e-4, and the SONIC inputs < 1e-4 (separately); Kevin 2026-11-26",
+  "report_only_mujoco_built_q_star_steps_over_threshold": [
+   294
+  ]
+ }
+}
