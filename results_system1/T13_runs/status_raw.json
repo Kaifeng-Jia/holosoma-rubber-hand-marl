@@ -1,5 +1,5 @@
 {
- "time": "2026-11-26 10:00",
+ "time": "2026-11-26 11:00",
  "runs": {
   "c_out_table": {
    "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/c_out_table",
@@ -49,157 +49,55 @@
     "8000": 24
    },
    "metrics_dir": "train",
-   "iteration": 9074,
-   "s_per_it": 7.591910272487439,
+   "iteration": 9540,
+   "s_per_it": 7.798404389875941,
    "nonfinite_keys_last50": [],
    "contact_v1_mean_last50": {
-    "ContactV1/r0_force_over_1n_in_should": 0.9202294005819027,
-    "ContactV1/r0_lost_in_should": 0.08005980764333911,
-    "ContactV1/r0_lost_termination_signals": 15.34,
-    "ContactV1/r0_penalty_links_mean": 0.0062957763671875,
-    "ContactV1/r0_penalty_step_share": 0.006087239583333333,
-    "ContactV1/r0_reward_mean": 2.966840246518453,
-    "ContactV1/r0_should_hand_steps": 118270.88,
-    "ContactV1/r1_force_over_1n_in_should": 0.9271563918668028,
-    "ContactV1/r1_lost_in_should": 0.07316365769775969,
-    "ContactV1/r1_lost_termination_signals": 29.14,
-    "ContactV1/r1_penalty_links_mean": 0.010673828125,
-    "ContactV1/r1_penalty_step_share": 0.010133666992187502,
-    "ContactV1/r1_reward_mean": 3.1963480971256892,
-    "ContactV1/r1_should_hand_steps": 131945.68
+    "ContactV1/r0_force_over_1n_in_should": 0.928752538970302,
+    "ContactV1/r0_lost_in_should": 0.07146955210656626,
+    "ContactV1/r0_lost_termination_signals": 12.3,
+    "ContactV1/r0_penalty_links_mean": 0.007815755208333334,
+    "ContactV1/r0_penalty_step_share": 0.0075189208984375,
+    "ContactV1/r0_reward_mean": 2.9800287040074664,
+    "ContactV1/r0_should_hand_steps": 119015.5,
+    "ContactV1/r1_force_over_1n_in_should": 0.926838800323351,
+    "ContactV1/r1_lost_in_should": 0.07348416809234436,
+    "ContactV1/r1_lost_termination_signals": 28.94,
+    "ContactV1/r1_penalty_links_mean": 0.011102498372395835,
+    "ContactV1/r1_penalty_step_share": 0.0105316162109375,
+    "ContactV1/r1_reward_mean": 3.203544678092003,
+    "ContactV1/r1_should_hand_steps": 132567.02
    },
-   "reward_mean_last": 0.0908665657043457,
+   "reward_mean_last": 0.09142699092626572,
    "train_alive": true,
-   "gpu": "0, 14182 MiB, 24564 MiB, 93 %"
+   "gpu": "0, 14182 MiB, 24564 MiB, 95 %"
   },
   "c_out_push": {
-   "dir": "/root/autodl-tmp/system1/logs/t13v4/runs/c_out_push",
-   "exists": true,
-   "launch": {
-    "run": "c_out_push",
-    "num_envs": 4096,
-    "rules": {
-     "save": 500,
-     "val": 1000,
-     "stop_after": 4000,
-     "patience": 2000,
-     "max_it": 10000,
-     "earliest_stop": 6000
-    },
-    "warmup_iterations": 25,
-    "started": "2026-11-25T16:30:38-05:00",
-    "git_head": "e9aab0c73a160c2cb9b524c128d275ad3bce3540"
-   },
-   "state": {
-    "curve": {
-     "1000": 22,
-     "2000": 37,
-     "3000": 36,
-     "4000": 37,
-     "5000": 48,
-     "6000": 44,
-     "7000": 49,
-     "8000": 47,
-     "9000": 49
-    },
-    "stopped": {
-     "time": "2026-11-26T09:21:39-05:00",
-     "at_validation_iteration": 9000,
-     "curve": {
-      "1000": 22,
-      "2000": 37,
-      "3000": 36,
-      "4000": 37,
-      "5000": 48,
-      "6000": 44,
-      "7000": 49,
-      "8000": 47,
-      "9000": 49
+   "shutdown": {
+    "step": "cloud_shutdown",
+    "machine": "196",
+    "started": "2026-11-26T10:00:50-05:00",
+    "copyback_sha256_match": true,
+    "missing_local": [],
+    "checks": [
+     {
+      "time": "2026-11-26T10:00:55-05:00",
+      "others": [],
+      "gpu_compute": [],
+      "platform_processes": 9
      }
-    },
-    "crashes": [],
-    "resumed": null,
-    "status": "stopped by rule",
-    "warmup_returncode": 0,
-    "train_pid": 48492,
-    "train_started": "2026-11-25T16:34:59-05:00",
-    "final_checkpoint_iteration": 9025,
-    "final_checkpoint_counted_iteration": 9000,
-    "ended": "2026-11-26T09:23:39-05:00"
-   },
-   "decision": {
-    "run": "c_out_push",
-    "status": "stopped by rule",
-    "stopped_by_rule": {
-     "time": "2026-11-26T09:21:39-05:00",
-     "at_validation_iteration": 9000,
-     "curve": {
-      "1000": 22,
-      "2000": 37,
-      "3000": 36,
-      "4000": 37,
-      "5000": 48,
-      "6000": 44,
-      "7000": 49,
-      "8000": 47,
-      "9000": 49
-     }
-    },
-    "final_checkpoint_iteration": 9025,
-    "final_checkpoint_counted_iteration": 9000,
-    "iteration_counting": {
-     "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
-     "warmup_iterations": 25,
-     "counted_iteration": "checkpoint file number - warmup_iterations",
-     "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
-    },
-    "validation_curve": {
-     "1000": 22,
-     "2000": 37,
-     "3000": 36,
-     "4000": 37,
-     "5000": 48,
-     "6000": 44,
-     "7000": 49,
-     "8000": 47,
-     "9000": 49
-    },
-    "ended": "2026-11-26T09:23:39-05:00"
-   },
-   "curve": {
-    "1000": 22,
-    "2000": 37,
-    "3000": 36,
-    "4000": 37,
-    "5000": 48,
-    "6000": 44,
-    "7000": 49,
-    "8000": 47,
-    "9000": 49
-   },
-   "metrics_dir": "train",
-   "iteration": 9382,
-   "s_per_it": 7.789764450513758,
-   "nonfinite_keys_last50": [],
-   "contact_v1_mean_last50": {
-    "ContactV1/r0_force_over_1n_in_should": 0.752529101076195,
-    "ContactV1/r0_lost_in_should": 0.2426741898679688,
-    "ContactV1/r0_lost_termination_signals": 43.52,
-    "ContactV1/r0_penalty_links_mean": 0.034584765624999986,
-    "ContactV1/r0_penalty_step_share": 0.03420605468750001,
-    "ContactV1/r0_reward_mean": 2.740053721046447,
-    "ContactV1/r0_should_hand_steps": 143363.86,
-    "ContactV1/r1_force_over_1n_in_should": 0.6715121350839407,
-    "ContactV1/r1_lost_in_should": 0.32039045679212047,
-    "ContactV1/r1_lost_termination_signals": 43.98,
-    "ContactV1/r1_penalty_links_mean": 0.044007617187499994,
-    "ContactV1/r1_penalty_step_share": 0.04346406249999999,
-    "ContactV1/r1_reward_mean": 2.6489295820236203,
-    "ContactV1/r1_should_hand_steps": 143363.86
-   },
-   "reward_mean_last": 0.06523638963699341,
-   "train_alive": false,
-   "gpu": "0, 1 MiB, 24564 MiB, 0 %"
+    ],
+    "gate_passed": true,
+    "command": "shutdown",
+    "shutdown_sent": true,
+    "shutdown_time": "2026-11-26T10:01:00-05:00",
+    "rc": 0,
+    "stdout": "",
+    "stderr": "Connection to connect.nmb1.seetacloud.com closed by remote host.\n",
+    "reachable_60s_after": false,
+    "done": true,
+    "ended": "2026-11-26T10:02:01-05:00"
+   }
   }
  }
 }
