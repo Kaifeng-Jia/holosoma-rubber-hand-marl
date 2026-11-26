@@ -88,6 +88,19 @@ class SonicOnnx:
         target = self.default + self.scale * self.last_action
         return action.numpy(), target.numpy(), dict(sonic_actor_obs=an, sonic_tokenizer=tn)
 
+    def act_recorded(self, tokenizer, actor_obs):
+        """SONIC on given (e.g. Isaac-recorded) inputs: tokenizer [batch, n] and actor observation [batch, m] exactly as act()
+        builds them (g1 mode id 0); stateless (history and last action are inside actor_obs). Returns action, target (SONIC
+        joint order); T13 round 2 q* check (Kevin 2026-11-26). act() and its state are not touched."""
+        tn, an = np.asarray(tokenizer, np.float32), np.asarray(actor_obs, np.float32)
+        x = np.concatenate([np.zeros((len(tn), 4), np.float32), tn[:, 3:]], axis=1).astype(np.float32)
+        out = []
+        for i in range(len(tn)):
+            t = self.enc.run(None, {"obs_dict": x[i:i + 1]})[0]
+            out.append(self.dec.run(None, {"obs_dict": np.concatenate([t, an[i:i + 1]], axis=1).astype(np.float32)})[0][0])
+        action = torch.as_tensor(np.stack(out))
+        return action.numpy(), (self.default + self.scale * action.clamp(-self.clip, self.clip)).numpy()
+
 
 class ActorOnnx:
     def __init__(self, path):

@@ -13,6 +13,10 @@
  10 package    results_system1/T13_runs/<run>/ tables (package_run.py), videos to Drive (T13_runs/<run>), keyframes, SHA256SUMS,
               commit and push (flock .git/s1_status.lock, as status_hourly.py)
 
+C-out q* (step 6; Kevin 2026-11-26 after c_out_push stopped at step 294, a quantisation flip of one SONIC encoder token):
+check_sim2sim_v1.py --qstar-inputs isaac = q* from SONIC ONNX on the Isaac-recorded SONIC inputs (< 1e-4) and the SONIC inputs
+themselves (< 1e-4), checked separately, both must pass. --resume-from checks: continue a run stopped at step 6 from step 6
+(steps 1-5 are not re-run; their outputs are verified again; finals_on is re-run only if its exit records are incomplete).
 Any failed check stops the run's pipeline at that step (no retry, no protocol change); the state is written to
 results_system1/T13_runs/<run>/post_run_status.json (committed) and shown by status_hourly.py. The Isaac steps of different runs
 never overlap (flock logs_system1/t13v4/post_run/gpu.lock). Log: logs_system1/t13v4/post_run/<run>/.
@@ -45,8 +49,9 @@ def now():
 
 
 class Pipe:
-    def __init__(self, run, dry=False):
+    def __init__(self, run, dry=False, resume=None):
         import os
+        self.resume = resume
         self.dry = dry  # --verify-existing: run no command, evaluate every check on the existing outputs (smoke test)
         self.run, self.task = run, CASE[run]
         self.scheme = "C-out" if run.startswith("c_out_") else "D"  # round 2 (task book section 8 item 2)
@@ -55,6 +60,15 @@ class Pipe:
         self.out = ROOT / "results_system1/T13_runs" / run
         self.out.mkdir(parents=True, exist_ok=True)
         self.status = dict(run=run, started=now(), steps=[], state="running")
+        if resume:  # keep the earlier records (history); the steps from `resume` on are appended again
+            old = json.loads((self.out / "post_run_status.json").read_text())
+            assert old["state"] == f"stopped at {resume}", old["state"]
+            self.status = old
+            self.status["steps"].append(dict(step="resume", time=now(), from_step=resume, previous_state=old["state"], previous_stopped=old.get("stopped"),
+                                             reason="Kevin 2026-11-26: C-out q* on the Isaac-recorded SONIC inputs (< 1e-4) and the SONIC inputs "
+                                                    "(< 1e-4), separately, both must pass (check_sim2sim_v1.py --qstar-inputs isaac)"))
+            self.status.update(state="running", resumed=now())
+            self.status.pop("stopped", None)
         self.env = dict(os.environ)
         self.lock = threading.Lock()
         self.save()
@@ -204,6 +218,8 @@ class Pipe:
     def go(self):
         r, t = self.run, self.task
         rd = ROOT / "logs_system1/t13v4/runs" / r
+        if self.resume == "checks":
+            return self.go_from_checks(rd)
         # 1 copyback
         rec = self.sh("copyback", ["bash", "system1/t13v4/copyback.sh", r])
         txt = (ROOT / "logs_system1/t13v4/copyback" / r / "copyback.txt").read_text()
@@ -242,9 +258,46 @@ class Pipe:
         rows = list(csv.DictReader(open(ROOT / f"logs_system1/t13v4/sim2sim/onnx_{r}/onnx_check.csv")))
         f64 = max(float(x["float64_onnx_vs_torch"]) for x in rows)
         self.check(rec, rec["rc"] == 0 and onnx.exists() and f64 <= 1e-10, dict(float64_graph_vs_torch=f64, float32=max(float(x["max_abs_diff"]) for x in rows)))
+        self.go_rest(ck, seed, dd, onnx, th, on)
+
+    def go_from_checks(self, rd):
+        """--resume-from checks: verify the outputs of steps 1-5 again (nothing re-run), re-run finals_on only if incomplete,
+        then steps 6-10 exactly as go()."""
+        r = self.run
+        txt = (ROOT / "logs_system1/t13v4/copyback" / r / "copyback.txt").read_text()
+        dec = json.loads((rd / "decision.json").read_text())
+        ck = rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt"
+        a = json.loads((rd / "launch.json").read_text())["stages"][-1]["argv"]
+        seed = int(a[a.index("--seed") + 1])
+        dd = ROOT / "logs_system1/t13v4/isaac_dump" / r / "dump"
+        ex = json.loads((ROOT / "logs_system1/t13v4/isaac_dump" / r / "exit.json").read_text())
+        onnx = ROOT / "exports_system1/t13v4/onnx" / f"{r}_t13v4.onnx"
+        rows = list(csv.DictReader(open(ROOT / f"logs_system1/t13v4/sim2sim/onnx_{r}/onnx_check.csv")))
+        f64 = max(float(x["float64_onnx_vs_torch"]) for x in rows)
+        off_ok, _ = self.finals_ok("off")
+        cs = self.status.get("cloud_shutdown") or {}
+        files = ["scene.json", "collision_convexes.npz", "runtime_reference.npz", "nominal.sim2sim.npz"]
+        d = dict(copyback_sha256_match="sha256 match" in txt, final_checkpoint=ck.name, checkpoint_exists=ck.exists(),
+                 cloud_shutdown_done=cs.get("done"), finals_off_complete=off_ok, dump_rc=ex["rc"], dump_files=all((dd / f).exists() for f in files),
+                 onnx_exists=onnx.exists(), onnx_float64=f64)
+        rec = dict(step="resume_verify", started=now())
+        with self.lock:
+            self.status["steps"].append(rec)
+        self.check(rec, d["copyback_sha256_match"] and d["checkpoint_exists"] and off_ok and ex["rc"] == 0 and d["dump_files"] and onnx.exists() and f64 <= 1e-10, d)
+        on_ok, _ = self.finals_ok("on")
+        on, th = {}, None
+        if on_ok:
+            on["rec"] = next(x for x in reversed(self.status["steps"]) if x.get("step") == "finals_on")
+        else:
+            th = threading.Thread(target=lambda: on.update(rec=self.sh("finals_on", ["python3", "system1/t13v4/run_finals_isaac.py", "--run", r, "--noise", "on"], gpu=True)))
+            th.start()
+        self.go_rest(ck, seed, dd, onnx, th, on)
+
+    def go_rest(self, ck, seed, dd, onnx, th, on):
+        r, t = self.run, self.task
         # 6 MuJoCo checks
         rec = self.sh("checks", [SIM, "-B", "system1/t13v4/check_sim2sim_v1.py", "--run", r, "--task", t, "--onnx", onnx, "--out", f"logs_system1/t13v4/sim2sim/checks_{r}",
-                                 *(["--scheme", "C-out"] if self.scheme == "C-out" else [])], env=CPU)
+                                 *(["--scheme", "C-out", "--qstar-inputs", "isaac"] if self.scheme == "C-out" else [])], env=CPU)
         s = json.loads((ROOT / f"logs_system1/t13v4/sim2sim/checks_{r}/summary.json").read_text())
         cout_ok = self.scheme != "C-out" or (s["cout"]["sonic_inputs_passed"] and s["cout"]["q_star_passed"])  # round 2: SONIC inputs and q* (T10c thresholds)
         self.check(rec, s["initial_states"]["all_passed"] and s["observations"]["obs_passed"] and s["initial_states"]["n_states"] == 102 and cout_ok,
@@ -271,7 +324,8 @@ class Pipe:
         rc = (V / "logs/rc.txt").read_text().splitlines() if (V / "logs/rc.txt").exists() else []
         self.check(rec, len(rc) == 6 and all(" rc 0 " in x for x in rc), rc)
         # 4 (join) noise on
-        th.join()
+        if th is not None:
+            th.join()
         ok, d = self.finals_ok("on")
         self.check(on["rec"], ok, d)
         # 9 contact
@@ -306,6 +360,8 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", required=True, choices=sorted(CASE))
     ap.add_argument("--verify-existing", action="store_true", help="smoke test: no command is run; every check on the existing outputs")
+    ap.add_argument("--resume-from", choices=("checks",), default=None, help="continue a run stopped at step 6 (checks) from step 6 "
+                    "(Kevin 2026-11-26, C-out q* rule); steps 1-5 verified, not re-run")
     ap.add_argument("--shutdown-check-only", action="store_true", help="smoke test: the cloud-shutdown gate only (read-only ssh, never a shutdown)")
     a = ap.parse_args()
     if a.shutdown_check_only:
@@ -315,7 +371,7 @@ def main():
         dec = json.loads((rd / "decision.json").read_text()) if (rd / "decision.json").exists() else {}
         p.cloud_shutdown(rd, rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt", cb.read_text() if cb.exists() else "", check_only=True)
         return 0
-    Pipe(a.run, dry=a.verify_existing).go()
+    Pipe(a.run, dry=a.verify_existing, resume=a.resume_from).go()
     return 0
 
 

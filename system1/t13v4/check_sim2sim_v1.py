@@ -80,6 +80,13 @@ def main():
     ap.add_argument("--scheme", choices=("D", "C-out"), default="D",
                     help="round 2 C-out: also SONIC's inputs (unmodified reference, its own last action) and q* = SONIC target + D scale * "
                          "clip(a) step by step against the Isaac record (as T10c check_observations.py --runs cout_*); D = unchanged")
+    ap.add_argument("--qstar-inputs", choices=("mujoco", "isaac"), default="mujoco",
+                    help="C-out q* pass rule. mujoco (as T10c): SONIC ONNX on the MuJoCo-built SONIC inputs. isaac (Kevin 2026-11-26, "
+                         "T13 round 2, after c_out_push step 294): SONIC ONNX on the Isaac-recorded SONIC inputs (sonic_tokenizer, "
+                         "sonic_actor_obs of the export) + D scale * clip(a recorded) vs the Isaac PD target < 1e-4; the SONIC inputs "
+                         "themselves are checked separately (< 1e-4); both must pass. The MuJoCo-built q* stays in the summary (report "
+                         "only): SONIC's encoder output is quantised (steps of 0.0625), so a 1e-7 input difference can flip one "
+                         "token component at a rounding boundary")
     ap.add_argument("--base", type=Path, default=None, help="Isaac export directory (default logs_system1/t13v4/isaac_dump/<run>)")
     ap.add_argument("--no-initial", action="store_true", help="test: skip the initial-state check (needs the run's Isaac finals)")
     a = ap.parse_args()
@@ -97,7 +104,8 @@ def main():
             w.writerows(irows)
     imax = {k: max(x[k] for x in irows) for k in irows[0] if k.endswith(("_rad", "_m", "_abs"))} if irows else {}
     cout = sonic = None
-    s_err = dict(actor_obs=0.0, tokenizer=0.0, action=0.0, target=0.0, q_rec=0.0, q_onnx=0.0)
+    s_err = dict(actor_obs=0.0, tokenizer=0.0, action=0.0, target=0.0, q_rec=0.0, q_onnx=0.0, q_isaac=0.0, action_isaac=0.0)
+    q_rec_steps = []  # steps whose MuJoCo-built q* is >= TOL (report only with --qstar-inputs isaac)
     if a.scheme == "C-out":
         import torch
         from system1.sim2sim.sonic_mj import ActorOnnx as _A, COutController, SonicOnnx
@@ -141,7 +149,15 @@ def main():
             s_err["target"] = max(s_err["target"], float(np.abs(target_s - z["sonic_target_s"][k]).max()))
             th = target_s[:, sonic.s2h].astype(np.float64)
             pd_rec = z["pd_target"][k, 0].reshape(2, 29).astype(np.float64)
-            s_err["q_rec"] = max(s_err["q_rec"], float(np.abs(th + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max()))
+            q_rec_k = float(np.abs(th + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max())
+            s_err["q_rec"] = max(s_err["q_rec"], q_rec_k)
+            if q_rec_k >= TOL:
+                q_rec_steps.append(k)
+            if a.qstar_inputs == "isaac":
+                act_i, tgt_i = sonic.act_recorded(z["sonic_tokenizer"][k], z["sonic_actor_obs"][k])
+                s_err["action_isaac"] = max(s_err["action_isaac"], float(np.abs(act_i - z["sonic_action"][k]).max()))
+                s_err["q_isaac"] = max(s_err["q_isaac"], float(np.abs(tgt_i[:, sonic.s2h].astype(np.float64)
+                                                                      + cout.residual(z["actions"][k, 0].reshape(2, 29).astype(np.float64)) - pd_rec).max()))
             mine = np.concatenate([actor, mate], axis=1)
             s_err["q_onnx"] = max(s_err["q_onnx"], float(np.abs(th + cout.residual(act_c(mine)) - pd_rec).max()))
     from system1.sim2sim.sonic_mj import ActorOnnx
@@ -168,6 +184,13 @@ def main():
                                sonic_target_onnx_vs_isaac_max_abs_rad=s_err["target"], q_star_from_recorded_actions_vs_isaac_pd_target_max_abs_rad=s_err["q_rec"],
                                q_star_from_mujoco_obs_and_actor_onnx_vs_isaac_pd_target_max_abs_rad=s_err["q_onnx"], q_star_passed=bool(s_err["q_rec"] < TOL),
                                threshold=TOL)
+        if a.qstar_inputs == "isaac":
+            summary["cout"].update(qstar_inputs="isaac", q_star_passed=bool(s_err["q_isaac"] < TOL),
+                                   q_star_isaac_recorded_sonic_inputs_vs_isaac_pd_target_max_abs_rad=s_err["q_isaac"],
+                                   sonic_action_onnx_on_isaac_recorded_inputs_vs_isaac_max_abs_diff=s_err["action_isaac"],
+                                   q_star_rule="q* = SONIC ONNX on the Isaac-recorded SONIC inputs + D scale * clip(a recorded) vs the Isaac PD "
+                                               "target < 1e-4, and the SONIC inputs < 1e-4 (separately); Kevin 2026-11-26",
+                                   report_only_mujoco_built_q_star_steps_over_threshold=q_rec_steps)
     if a.no_initial:
         summary["initial_states"]["note"] = "skipped (--no-initial, test)"
     (a.out / "summary.json").write_text(json.dumps(summary, indent=1) + "\n")
