@@ -263,8 +263,12 @@ def main():
         x = L[m]
         hd = Image.new("RGB", (HW, GH), "white")
         dd = ImageDraw.Draw(hd)
-        lab = f"{m:.2f} 倍" + ("（a）" if m == lv["a"] else "") + ("（1.0 以上第一个不相交档）" if m == lv.get("first_free_level_above_1") else "")
-        lines = [lab, f"盒长 {x['length_along_axis_m']:.2f} m", f"保持率 {x['contact_retention']['pooled']}", f"最大穿透 {max(x['max_penetration_cm'].values()):.2f} cm",
+        lab = f"{m:.2f} 倍" + ("（a）" if m == lv["a"] else "") + (f"（{lv.get('first_free_label', '1.0 以上第一个不相交档')}）" if m == lv.get("first_free_level_above_1") else "")
+        if "first_free_label" in lv and dd.textlength(lab, font=font) > HW - 20:  # optional field (step 9g2): the label, wrapped to the header column
+            k = lab.index("（")
+            lab = [lab[:k], "  " + lab[k:]]
+        lab = lab if isinstance(lab, list) else [lab]
+        lines = [*lab, f"盒长 {x['length_along_axis_m']:.2f} m", f"保持率 {x['contact_retention']['pooled']}", f"最大穿透 {max(x['max_penetration_cm'].values()):.2f} cm",
                  f"两机最小距离 {x['robot_robot_min_distance_cm']:.1f} cm", f"相交帧 {x['robot_robot_intersect_frames']}",
                  f"脚漂移最大 r0 {max((v['drift_max_cm'] or 0) for k, v in x['foot_slide'].items() if k.startswith('r0')):.1f} / r1 {max((v['drift_max_cm'] or 0) for k, v in x['foot_slide'].items() if k.startswith('r1')):.1f} cm"]
         for s_ in x.get("verdict_lines") or []:  # step 9g item 4 (optional field): the level's verdict under both non-hand measures,
@@ -276,7 +280,7 @@ def main():
                 cur += ch
             lines.append(cur)
         for j, s_ in enumerate(lines):
-            dd.text((10, 10 + 32 * j), s_, fill=(0, 0, 0), font=font if j == 0 else small)
+            dd.text((10, 10 + 32 * j), s_, fill=(0, 0, 0), font=font if j < len(lab) else small)
         grid.paste(hd, (0, GH * i))
         s = scene_for(m, GW, GH)
         for j, t in enumerate(frames):

@@ -69,7 +69,7 @@ def one(clip, sm, a, video):
     src = Path(e1["command"].split("--source ")[1].split()[0])
     srec = json.loads((src / "run_record.json").read_text())
     lv = dict(tag=clip, role_status=status, applicable=bool(b["new"][0]), applicable_old_measure=bool(b["old"][0]), selected=None, a=sm.get("a"),
-              first_free_level_above_1=free, report_levels=[float(k) for k in out if free is None or float(k) != free], levels=out,
+              first_free_level_above_1=free, first_free_label="1.5 以上第一个不相交档", report_levels=[float(k) for k in out if free is None or float(k) != free], levels=out,
               source_box_m=srec["target"]["size"], solve_r0=str(d / tagm(side) / "r0"), clip_start=rec0["clip_start"], side_level=side,
               verdicts={f"{m:.2f}": dict(new_applicable=v["new"][0], new_failed=v["new"][1], old_applicable=v["old"][0], old_failed=v["old"][1]) for m, v in both.items()})
     (d / "levels_both.json").write_text(json.dumps(lv, indent=1, ensure_ascii=False) + "\n")

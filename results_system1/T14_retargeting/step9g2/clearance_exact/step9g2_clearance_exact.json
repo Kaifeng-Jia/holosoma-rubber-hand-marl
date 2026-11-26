@@ -1,0 +1,351 @@
+{
+ "rules": "T14 step 9g, second fix, item 1 (Kevin 2026-11-26, received 10:29): re-judge the two-robot clearance with the actual collision shapes,\nas the reported \"two-robot minimum distance\" already is (shared_eval / step9_eval: dual_stretch.PairCollision depth=\"exact\" =\nthe 23 PhysX link shapes of both robots, every cross-robot link pair, mj_geomDistance); the cross-robot OBB proxy\n(reference_geometry_round2_checks.CollisionProxy, robot_robot_clearance_m) is no longer used. Limit unchanged: >= -0.01 m.\nOnly the verdict is recomputed: the exact minimum distance is the one stored in each eval.json (robot_robot_min_distance_cm,\ncomputed on the same frames as the proxy); no solve and no geometry is re-run. Read only.\n\nThree verdicts side by side per evaluated level / candidate:\n  A  non-hand penetration on the per-link boxes, clearance on the OBB proxies (the verdict of the run itself; step8b: the\n     round-6 re-judge it reported);\n  B  non-hand penetration on the collision shapes (step 9g item 1, rejudge_nonhand_exact.py tables), clearance on the proxies;\n  C  both on the collision shapes (this script): B with \"V0 robot-robot clearance\" decided by the exact minimum distance.\nEvery other item as it was. step8b: Push / Pull selection rule as step8b_compare.py (applicable candidates, smallest joint fit\nerror rounded to 1e-10, ties by ID), under A, B and C.\n\n    python3 system1/t14/objects/rejudge_clearance_exact.py --set step9g --nonhand <rejudge_nonhand_exact csv> --logdir logs_system1/t14/step9g         --out <dir> [--name <stem>]\n",
+ "command": "system1/t14/objects/rejudge_clearance_exact.py --set step9g2 --nonhand results_system1/T14_retargeting/step9g2/nonhand_exact/step9g2_nonhand_exact.csv --out results_system1/T14_retargeting/step9g2/clearance_exact",
+ "nonhand_table": "results_system1/T14_retargeting/step9g2/nonhand_exact/step9g2_nonhand_exact.csv",
+ "summary": {
+  "largeboxa": {
+   "sequence": "sub7_largebox_045",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    1.25,
+    1.5
+   ]
+  },
+  "smallboxa": {
+   "sequence": "sub4_smallbox_047",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5,
+    1.7
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [
+    1.7
+   ]
+  },
+  "suitcasea": {
+   "sequence": "sub8_suitcase_006",
+   "evaluated_report_levels": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [
+    1.25,
+    1.5
+   ],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub3_largebox_030": {
+   "sequence": "sub3_largebox_030",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub3_largebox_003": {
+   "sequence": "sub3_largebox_003",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub3_largebox_029": {
+   "sequence": "sub3_largebox_029",
+   "evaluated_report_levels": [
+    0.85,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub10_largebox_086": {
+   "sequence": "sub10_largebox_086",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub8_smallbox_045": {
+   "sequence": "sub8_smallbox_045",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5,
+    2.25
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [
+    2.25
+   ]
+  },
+  "sub1_suitcase_031": {
+   "sequence": "sub1_suitcase_031",
+   "evaluated_report_levels": [
+    0.7,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub1_suitcase_032": {
+   "sequence": "sub1_suitcase_032",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub1_suitcase_034": {
+   "sequence": "sub1_suitcase_034",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [
+    1.25,
+    1.5
+   ],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    1.25,
+    1.5
+   ]
+  },
+  "sub4_suitcase_006": {
+   "sequence": "sub4_suitcase_006",
+   "evaluated_report_levels": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [
+    1.25,
+    1.5
+   ],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub4_suitcase_042": {
+   "sequence": "sub4_suitcase_042",
+   "evaluated_report_levels": [
+    0.9,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.9,
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub17_suitcase_019": {
+   "sequence": "sub17_suitcase_019",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5,
+    1.65
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub17_suitcase_017": {
+   "sequence": "sub17_suitcase_017",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5,
+    1.8
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub15_suitcase_051": {
+   "sequence": "sub15_suitcase_051",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub1_suitcase_036": {
+   "sequence": "sub1_suitcase_036",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub4_suitcase_043": {
+   "sequence": "sub4_suitcase_043",
+   "evaluated_report_levels": [
+    0.75,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.75,
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub8_suitcase_020": {
+   "sequence": "sub8_suitcase_020",
+   "evaluated_report_levels": [
+    0.65,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_B": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.65,
+    1.0,
+    1.25,
+    1.5
+   ]
+  },
+  "sub17_suitcase_007": {
+   "sequence": "sub17_suitcase_007",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": []
+  },
+  "sub5_suitcase_046": {
+   "sequence": "sub5_suitcase_046",
+   "evaluated_report_levels": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.5
+   ],
+   "applicable_C": [
+    1.5
+   ]
+  },
+  "sub1_suitcase_039": {
+   "sequence": "sub1_suitcase_039",
+   "evaluated_report_levels": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "applicable_A": [],
+   "applicable_B": [
+    1.25,
+    1.5
+   ],
+   "applicable_C": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ]
+  }
+ }
+}

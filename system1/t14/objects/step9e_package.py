@@ -50,8 +50,9 @@ def main():
         inv.append(dict(kind=kind, path=str(p.relative_to(ROOT)) if p.is_relative_to(ROOT) else str(p), bytes=p.stat().st_size, sha256=sha(p)))
 
     shutil.copy2(L / "driver.json", OUT / "records/driver.json")
-    shutil.copy2(L / "driver.log", OUT / "records/driver.log")
-    for n in ("run.sh", "run_all22.sh", "driver_debug3.json", "driver_debug3.log"):
+    if (L / "driver.log").exists() or not (L / "run_all22.log").exists():
+        shutil.copy2(L / "driver.log", OUT / "records/driver.log")
+    for n in ("run.sh", "run_all22.sh", "run_all22.log", "post22.sh", "driver_debug3.json", "driver_debug3.log"):  # step 9g2: driver log = run_all22.log
         if (L / n).exists():
             shutil.copy2(L / n, OUT / "records" / n)
     for n in ("run.sh", "jobs.txt", "diag_rc.txt"):

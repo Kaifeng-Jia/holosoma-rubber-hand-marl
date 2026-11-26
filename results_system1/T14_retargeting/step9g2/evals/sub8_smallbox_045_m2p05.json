@@ -1,0 +1,590 @@
+{
+ "applicable": false,
+ "failed": [
+  "V0 non-hand penetration r1",
+  "V0 robot-robot clearance"
+ ],
+ "V0": {
+  "gravity": {
+   "value_deg": 0.0,
+   "limit": 5.0,
+   "passed": true
+  },
+  "support_drift_r0": {
+   "value_m": 0.10502,
+   "limit": 0.01,
+   "passed": false,
+   "support_frames": 73
+  },
+  "support_speed_r0_info": {
+   "value_mps": 0.61181,
+   "limit": 0.01
+  },
+  "nonhand_penetration_r0": {
+   "value_m": 0.0,
+   "limit": 0.01,
+   "passed": true
+  },
+  "support_drift_r1": {
+   "value_m": 0.48339,
+   "limit": 0.01,
+   "passed": false,
+   "support_frames": 73
+  },
+  "support_speed_r1_info": {
+   "value_mps": 1.94194,
+   "limit": 0.01
+  },
+  "nonhand_penetration_r1": {
+   "value_m": 0.06333,
+   "limit": 0.01,
+   "passed": false
+  },
+  "robot_robot_clearance": {
+   "value_m": -0.10391,
+   "limit": -0.01,
+   "passed": false
+  }
+ },
+ "contact_retention": {
+  "r0": 1.0,
+  "r1": 1.0
+ },
+ "condition_frames": {
+  "r0": 176,
+  "r1": 176
+ },
+ "contact_acceptance_passed": true,
+ "main_motion": {
+  "rule": "pelvis net horizontal displacement / s > 1.0 m (screen class a), persons of both roles",
+  "limit_m": 1.0,
+  "person_r0_m": 2.4608,
+  "person_r1_m": 1.986,
+  "person_r0_solver_m": 1.7607,
+  "person_r1_solver_m": 1.4209,
+  "limit_solver_m": 0.7155,
+  "passed": true,
+  "robot_r0_m": 1.8951,
+  "robot_r1_m": 2.4966,
+  "robot_r0_solver_m": 1.3559,
+  "robot_r1_solver_m": 1.7862,
+  "robot_limit_solver_m": 0.7155,
+  "smpl_scale": 0.7154783010482788,
+  "robots_passed": true,
+  "persons_passed": true
+ },
+ "max_penetration_cm": {
+  "r0": 0.285,
+  "r1": 0.211
+ },
+ "frames_penetrating": {
+  "r0": 1.0,
+  "r1": 1.0
+ },
+ "robot_robot_min_distance_cm": -4.659,
+ "robot_robot_intersect_frames": 9,
+ "contact_position_error_3d": {
+  "r0": {
+   "distance": {
+    "frames": 178,
+    "mean_cm": 5.76,
+    "p95_cm": 7.93
+   },
+   "normal_signed_mean_cm": -1.1
+  },
+  "r1": {
+   "distance": {
+    "frames": 178,
+    "mean_cm": 5.97,
+    "p95_cm": 8.86
+   },
+   "normal_signed_mean_cm": -0.76
+  }
+ },
+ "foot_slide": {
+  "r0": {
+   "foot_slide_left": {
+    "support_frames": 0,
+    "segments": 0,
+    "drift_max_cm": null,
+    "drift_mean_of_segments_cm": null,
+    "robot_toe_speed_p95_mps": null,
+    "robot_toe_speed_max_mps": null,
+    "share_above_0p01mps": null
+   },
+   "foot_slide_right": {
+    "support_frames": 4,
+    "segments": 1,
+    "drift_max_cm": 0.073,
+    "drift_mean_of_segments_cm": 0.073,
+    "robot_toe_speed_p95_mps": 0.0295,
+    "robot_toe_speed_max_mps": 0.033,
+    "share_above_0p01mps": 0.25
+   }
+  },
+  "r1": {
+   "foot_slide_left": {
+    "support_frames": 6,
+    "segments": 1,
+    "drift_max_cm": 0.034,
+    "drift_mean_of_segments_cm": 0.034,
+    "robot_toe_speed_p95_mps": 0.0318,
+    "robot_toe_speed_max_mps": 0.039,
+    "share_above_0p01mps": 0.3333
+   },
+   "foot_slide_right": {
+    "support_frames": 0,
+    "segments": 0,
+    "drift_max_cm": null,
+    "drift_mean_of_segments_cm": null,
+    "robot_toe_speed_p95_mps": null,
+    "robot_toe_speed_max_mps": null,
+    "share_above_0p01mps": null
+   }
+  }
+ },
+ "posture": {
+  "r0": {
+   "torso_tilt_deg": {
+    "robot_mean": 32.32,
+    "person_mean": 25.98,
+    "max_abs_diff": 20.09
+   },
+   "pelvis_height_cm": {
+    "robot_mean": 72.97,
+    "person_mean": 67.91,
+    "max_abs_diff": 6.92
+   },
+   "elbow_angle_left_deg": {
+    "robot_mean": 85.68,
+    "person_mean": 89.87,
+    "max_abs_diff": 17.31
+   },
+   "elbow_angle_right_deg": {
+    "robot_mean": 86.91,
+    "person_mean": 84.96,
+    "max_abs_diff": 22.99
+   },
+   "elbow_position_error_left_cm": {
+    "mean": 4.87,
+    "p95": 6.6
+   },
+   "elbow_position_error_right_cm": {
+    "mean": 5.27,
+    "p95": 8.41
+   },
+   "contact_frames": 89
+  },
+  "r1": {
+   "torso_tilt_deg": {
+    "robot_mean": 31.98,
+    "person_mean": 25.98,
+    "max_abs_diff": 17.67
+   },
+   "pelvis_height_cm": {
+    "robot_mean": 72.88,
+    "person_mean": 67.91,
+    "max_abs_diff": 8.78
+   },
+   "elbow_angle_left_deg": {
+    "robot_mean": 88.28,
+    "person_mean": 84.96,
+    "max_abs_diff": 20.49
+   },
+   "elbow_angle_right_deg": {
+    "robot_mean": 89.47,
+    "person_mean": 89.87,
+    "max_abs_diff": 23.24
+   },
+   "elbow_position_error_left_cm": {
+    "mean": 6.25,
+    "p95": 9.24
+   },
+   "elbow_position_error_right_cm": {
+    "mean": 5.53,
+    "p95": 9.36
+   },
+   "contact_frames": 89
+  }
+ },
+ "solves": {
+  "r0": {
+   "seconds": 63.1,
+   "finite": true,
+   "shift_xy_m": [
+    -0.02092,
+    -0.00442
+   ],
+   "object_locked_max_err": 0.0
+  },
+  "r1": {
+   "seconds": 98.7,
+   "finite": true,
+   "shift_xy_m": [
+    0.02001,
+    0.00754
+   ],
+   "object_locked_max_err": 0.0
+  }
+ },
+ "target_urdf": "/home/kevin/duet-system1/logs_system1/t14/step9g2/sub8_smallbox_045/m2p05/r0/assets_target/smallbox.urdf",
+ "target_urdf_sha256": "dd47153a07b54a31d1393683ad161d2d90dd7059579721a4f9ff34d91e573084",
+ "frames": 89,
+ "support_drift_round6": {
+  "r0": {
+   "value_m": 0.00135,
+   "limit": 0.01,
+   "passed": true,
+   "per_foot": {
+    "left": {
+     "windows": 0,
+     "frames": 0,
+     "value_m": null
+    },
+    "right": {
+     "windows": 1,
+     "frames": 4,
+     "value_m": 0.00135
+    }
+   },
+   "old_window_value_m": 0.10502,
+   "source": "source solve, same frame"
+  },
+  "r1": {
+   "value_m": 0.0002,
+   "limit": 0.01,
+   "passed": true,
+   "per_foot": {
+    "left": {
+     "windows": 1,
+     "frames": 6,
+     "value_m": 0.0002,
+     "reversed_source_value_m": 0.0
+    },
+    "right": {
+     "windows": 0,
+     "frames": 0,
+     "value_m": null
+    }
+   },
+   "old_window_value_m": 0.48339,
+   "source": "source solve at the construction's source frame, moved by its rigid map (gates r1_source)"
+  }
+ },
+ "pelvis_mismatch": {
+  "axis": 0,
+  "sigma": 1.0,
+  "walk_axis_angle_deg": 24.85,
+  "L_m": 0.7029,
+  "pelvis_mismatch_max_m": 0.1352,
+  "pelvis_mismatch_mean_m": 0.0721,
+  "pelvis_mismatch_max_person_scale_m": 0.189,
+  "partner_initial_pelvis_distance_m": 1.2802,
+  "partner_min_pelvis_distance_m": 0.9404,
+  "shared_vs_demo_rotation_max_deg": 0.0,
+  "leg_offset_m": [
+   -0.7096,
+   -0.2073
+  ],
+  "turn": "world",
+  "legs": "mirror",
+  "walk": {
+   "w0": 9,
+   "w1": 84,
+   "swings": [
+    {
+     "foot": "left",
+     "start": 9,
+     "stop": 28
+    },
+    {
+     "foot": "right",
+     "start": 26,
+     "stop": 44
+    },
+    {
+     "foot": "left",
+     "start": 42,
+     "stop": 60
+    },
+    {
+     "foot": "right",
+     "start": 59,
+     "stop": 75
+    },
+    {
+     "foot": "left",
+     "start": 73,
+     "stop": 84
+    }
+   ]
+  },
+  "leg_box": {
+   "partner": {
+    "min_m": 0.0384,
+    "min_frame": 1,
+    "frames_inside": 0,
+    "first5_m": [
+     0.046,
+     0.038,
+     0.044,
+     0.071,
+     0.078
+    ],
+    "last5_m": [
+     0.21,
+     0.201,
+     0.195,
+     0.192,
+     0.189
+    ]
+   },
+   "demo": {
+    "min_m": 0.1019,
+    "min_frame": 0,
+    "frames_inside": 0,
+    "first5_m": [
+     0.102,
+     0.106,
+     0.113,
+     0.129,
+     0.153
+    ],
+    "last5_m": [
+     0.155,
+     0.143,
+     0.137,
+     0.134,
+     0.132
+    ]
+   }
+  },
+  "box_tilt_frame0_deg": 3.252,
+  "diag9g": {
+   "walk_dir": [
+    -0.959892852287623,
+    -0.28036710243381224
+   ],
+   "walk_dir_vs_clip_net_deg": 0.577,
+   "vertical_box_axis": 2,
+   "plane_p0": -0.42571,
+   "plane_fixed_legs": 0.36963,
+   "plane_travel_m": 1.59069,
+   "attached_vs_plane_along_e_m": {
+    "lift": {
+     "max_abs": 0.2116,
+     "mean": -0.1558
+    },
+    "walk": {
+     "max_abs": 0.1226,
+     "mean": 0.0086
+    },
+    "put_down": {
+     "max_abs": 0.1623,
+     "mean": 0.1513
+    }
+   },
+   "demo_box_vs_level_box_deg": {
+    "rotation_max": 44.579,
+    "tilt_max": 33.931
+   },
+   "walk_distance": "pelvis_feet",
+   "walked_distance_m": 1.73042,
+   "tau_walk": {
+    "first": 83.0,
+    "last": 9.0,
+    "speed_ratio_max": 2.7454,
+    "held_lift_source_frame": 83.0,
+    "held_put_down_source_frame": 9.0
+   },
+   "leg_ik": {
+    "L": {
+     "thigh_m": 0.2649,
+     "shank_m": 0.3165,
+     "lift": {
+      "frames": 9,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0147,
+      "hip_vs_reversed_hip_max_m": 0.0973,
+      "knee_vs_hint_max_m": 0.0201
+     },
+     "walk": {
+      "frames": 75,
+      "overextended_frames": 15,
+      "max_excess_m": 0.0421,
+      "hip_vs_reversed_hip_max_m": 0.1349,
+      "knee_vs_hint_max_m": 0.092
+     },
+     "put_down": {
+      "frames": 5,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0792,
+      "hip_vs_reversed_hip_max_m": 0.0709,
+      "knee_vs_hint_max_m": 0.0079
+     }
+    },
+    "R": {
+     "thigh_m": 0.2796,
+     "shank_m": 0.3097,
+     "lift": {
+      "frames": 9,
+      "overextended_frames": 9,
+      "max_excess_m": 0.0481,
+      "hip_vs_reversed_hip_max_m": 0.1919,
+      "knee_vs_hint_max_m": 0.243
+     },
+     "walk": {
+      "frames": 75,
+      "overextended_frames": 15,
+      "max_excess_m": 0.0502,
+      "hip_vs_reversed_hip_max_m": 0.1438,
+      "knee_vs_hint_max_m": 0.1338
+     },
+     "put_down": {
+      "frames": 5,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0582,
+      "hip_vs_reversed_hip_max_m": 0.1011,
+      "knee_vs_hint_max_m": 0.2041
+     }
+    }
+   }
+  },
+  "prediag_9g": {
+   "palms_vs_contact_points": {
+    "r0_L_Palm": {
+     "lift": {
+      "frames": 9,
+      "dist_mean": 0.2022,
+      "dist_max": 0.2538,
+      "sd_to_shared_box_min": 0.0784,
+      "sd_to_shared_box_max": 0.1856
+     },
+     "walk": {
+      "frames": 75,
+      "dist_mean": 0.0746,
+      "dist_max": 0.1888,
+      "sd_to_shared_box_min": -0.0202,
+      "sd_to_shared_box_max": 0.0784
+     },
+     "put_down": {
+      "frames": 5,
+      "dist_mean": 0.2162,
+      "dist_max": 0.225,
+      "sd_to_shared_box_min": 0.0009,
+      "sd_to_shared_box_max": 0.0031
+     }
+    },
+    "r0_R_Palm": {
+     "lift": {
+      "frames": 9,
+      "dist_mean": 0.1001,
+      "dist_max": 0.1582,
+      "sd_to_shared_box_min": 0.0091,
+      "sd_to_shared_box_max": 0.0931
+     },
+     "walk": {
+      "frames": 75,
+      "dist_mean": 0.0541,
+      "dist_max": 0.0991,
+      "sd_to_shared_box_min": -0.0336,
+      "sd_to_shared_box_max": 0.0432
+     },
+     "put_down": {
+      "frames": 5,
+      "dist_mean": 0.0814,
+      "dist_max": 0.0916,
+      "sd_to_shared_box_min": -0.0341,
+      "sd_to_shared_box_max": -0.0264
+     }
+    },
+    "r1_L_Palm": {
+     "lift": {
+      "frames": 9,
+      "dist_mean": 0.1001,
+      "dist_max": 0.1582,
+      "sd_to_shared_box_min": 0.0091,
+      "sd_to_shared_box_max": 0.0931
+     },
+     "walk": {
+      "frames": 75,
+      "dist_mean": 0.0541,
+      "dist_max": 0.0991,
+      "sd_to_shared_box_min": -0.0336,
+      "sd_to_shared_box_max": 0.0432
+     },
+     "put_down": {
+      "frames": 5,
+      "dist_mean": 0.0814,
+      "dist_max": 0.0916,
+      "sd_to_shared_box_min": -0.0341,
+      "sd_to_shared_box_max": -0.0264
+     }
+    },
+    "r1_R_Palm": {
+     "lift": {
+      "frames": 9,
+      "dist_mean": 0.2022,
+      "dist_max": 0.2538,
+      "sd_to_shared_box_min": 0.0784,
+      "sd_to_shared_box_max": 0.1856
+     },
+     "walk": {
+      "frames": 75,
+      "dist_mean": 0.0746,
+      "dist_max": 0.1888,
+      "sd_to_shared_box_min": -0.0202,
+      "sd_to_shared_box_max": 0.0784
+     },
+     "put_down": {
+      "frames": 5,
+      "dist_mean": 0.2162,
+      "dist_max": 0.225,
+      "sd_to_shared_box_min": 0.0009,
+      "sd_to_shared_box_max": 0.0031
+     }
+    }
+   },
+   "feet_vs_boxes": {
+    "lift": {
+     "frames": 9,
+     "min_to_shared_box": 0.0101,
+     "inside_shared": 0,
+     "min_to_own_box": 0.0384,
+     "inside_own": 0
+    },
+    "walk": {
+     "frames": 75,
+     "min_to_shared_box": 0.1715,
+     "inside_shared": 0,
+     "min_to_own_box": 0.2237,
+     "inside_own": 0
+    },
+    "put_down": {
+     "frames": 5,
+     "min_to_shared_box": 0.0507,
+     "inside_shared": 0,
+     "min_to_own_box": 0.1892,
+     "inside_own": 0
+    }
+   },
+   "pelvis_steps": {
+    "partner_max_m": 0.0313,
+    "partner_max_at_frame": 42,
+    "demo_max_m": 0.0313,
+    "at_w0": 0.0231,
+    "at_w1": 0.0098
+   },
+   "feet_steps": {
+    "partner_max_m": 0.1003,
+    "at_w0": 0.0,
+    "at_w1": 0.0
+   }
+  }
+ },
+ "pair": "/home/kevin/duet-system1/exports_system1/T14_references/step9g2/sub8_smallbox_045_m2p05/pair_fps30.npz",
+ "pair_sha256": "72d0fce3de29670dadbbb10bc9cfad46b4676eb42ffdad34ad9cf67407857fbf",
+ "rules": "T14 step 9: verdict of one front-back level (two robots solved by role_solve.py --construction frontback). Read only, CPU.\n\nSame verdict as step 8 (shared_eval.evaluate: V0 gravity on S, non-hand penetration, two-robot clearance, section-4 contact\nretention >= 0.99; Section 4's penetration criterion has no baseline and is not used), with two items as Kevin set them:\n  * support drift (Kevin 2026-11-24 18:40 item 1, the step-8 re-judge): V0 quantity and limit (step8_rejudge.added_drift, 0.01 m),\n    windows = each role's own person's support segments of round 6 (support.py on the solve's saved human joints). Source robot\n    of role 0 = the source solve at the same frame; of role 1 = the source solve played backwards in time (the partner's legs\n    are the demonstration's legs reversed and turned about the vertical: a rigid motion, the same feet). The step-8 window\n    values are kept as information (old_window_*). --r1-source construction (step 9e): role 1's source at frame t = the\n    source solve at the construction's source frame, moved by the same rigid map (gates r1_source), so that it matches\n    constructions that reverse only the walking segment (the whole-clip-reversed value is kept as information).\n  * main motion (Kevin 2026-11-25: the screen's class-a threshold): pelvis net horizontal displacement over the clip / s > 1.0 m,\n    for the two persons (pre-solve gate, step9_gates.py) and for the two solved robots (root position of each solve); in step\n    9c's words the robots' displacement (solver scale) > 1.0 m x s, the same test; both scales are recorded.\nWrites the evaluation json and (optionally) the pair npz in the step-7 format.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_eval.py --cand-dir <level dir with r0/ r1/> --source <source solve>         --gates <gates_m<tag>.json> --out <eval.json> [--pair-out <pair_fps30.npz>]\n",
+ "shared_eval_rules": "T14 step 8: verdict and metrics of one candidate pair of the new partner construction (two robots solved around the shared\ntrajectory by role_solve.py). Read only, CPU.\n\nVerdict (existing numbers only, Kevin 2026-11-24 step-7 decision 4):\n  * V0 (scripts/reference_geometry_round2_checks.py, frozen) items named by Kevin:\n      gravity            relative_gravity_deviation_deg <= 5 (S's linear part vs the vertical; partner.gravity_deg);\n      support drift      <side>_support_added_drift_m <= 0.01 m per robot (V0 support windows of the source robot: foot bottom\n                         <= 4 cm, foot speed <= 0.15 m/s for >= 0.1 s; drift of the robot minus the source robot's; role 1's\n                         source = the source robot moved by S, whose drift is the same);\n      non-hand penetration  additional_nonhand_proxy_penetration_m <= 0.01 m per robot (round-2 CollisionProxy: robot vs the\n                         shared target minus the source robot vs the source object);\n      two-robot clearance   robot_robot_clearance_m >= -0.01 m (CollisionProxy, cross-robot OBB proxies);\n    (V0 support added speed is reported, not part of Kevin's list);\n  * section-4 contact acceptance: CoCarry contact retention >= 0.99 for each robot (person's hand within 0.10 m of the captured\n    object and the shared object moving faster than 0.03 m/s on the person's scale; robot hand signed distance >= -0.02 m,\n    exact convex distance to the target boxes). Section 4's penetration criterion compares with \"OmniRetarget as is\", which has\n    no result for these sequences; it is not used (reported numbers only);\n  * main motion of the shared trajectory (partner.main_motion, screen thresholds) \u2014 evaluated before solving.\nMetrics as rounds 6 / step 7: exact max penetration, robot-robot exact distance, 3-D contact-position error (person's palm ->\nnearest captured-surface point, moved by the role's region map; table family: capture -> training similarity first), hand\nmetrics, foot slide (posture_metrics rule), posture vs the person (posture_metrics.analyse on each robot's solve).\n\n    sonic_s1/bin/python -B system1/t14/objects/shared_eval.py --cand-dir <dir with r0/ r1/> --source <source solve> --out <json>\n",
+ "command": "system1/t14/objects/step9_eval.py --cand-dir /home/kevin/duet-system1/logs_system1/t14/step9g2/sub8_smallbox_045/m2p05 --source /home/kevin/duet-system1/logs_system1/t14/step9d/src/sub8_smallbox_045 --gates /home/kevin/duet-system1/logs_system1/t14/step9g2/sub8_smallbox_045/gates_m2p05.json --out /home/kevin/duet-system1/logs_system1/t14/step9g2/sub8_smallbox_045/m2p05/eval.json --pair-out /home/kevin/duet-system1/exports_system1/T14_references/step9g2/sub8_smallbox_045_m2p05/pair_fps30.npz --r1-source construction"
+}

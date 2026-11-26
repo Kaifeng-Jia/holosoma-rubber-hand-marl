@@ -1,0 +1,10 @@
+Traceback (most recent call last):
+  File "/home/kevin/duet-system1/system1/t14/objects/step9e_package.py", line 130, in <module>
+    main()
+  File "/home/kevin/duet-system1/system1/t14/objects/step9e_package.py", line 53, in main
+    shutil.copy2(L / "driver.log", OUT / "records/driver.log")
+  File "/usr/lib/python3.10/shutil.py", line 434, in copy2
+    copyfile(src, dst, follow_symlinks=follow_symlinks)
+  File "/usr/lib/python3.10/shutil.py", line 254, in copyfile
+    with open(src, 'rb') as fsrc:
+FileNotFoundError: [Errno 2] No such file or directory: '/home/kevin/duet-system1/logs_system1/t14/step9g2/driver.log'

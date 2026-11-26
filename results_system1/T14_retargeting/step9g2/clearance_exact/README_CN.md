@@ -70,6 +70,7 @@
   - A / B / C 三种判定及各自的未通过项；
   - 对应的 `eval.json` 路径。
   - json 是按片段（step8b 按序列）的汇总，step8b 含 A / B / C 各自选出的摆法。
+- `step9g2_clearance_exact.csv / .json`：第 3 条（9g2 重跑）的同一张表，12:40 写入，说明见 `../README_CN.md`。
 - 输入：
   - 9g 续第 1 条的非手重判表（`../../step9g/nonhand_exact/*_nonhand_exact.csv`），提供 A、B 的判定；
   - `logs_system1/t14/{step8b,step9f,step9g}/` 下的 `eval.json`。

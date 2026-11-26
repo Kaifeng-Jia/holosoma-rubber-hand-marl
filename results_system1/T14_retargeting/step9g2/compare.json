@@ -1,0 +1,71 @@
+{
+ "rules": "T14 step 9g second fix, item 3 (Kevin 2026-11-26, received 10:29): before (step 9g, walked distance = the pelvis) vs after\n(step 9g2, walked distance = mean of the pelvis and both ankles) on the 22 debug clips, both judged with penetration and two-robot\nclearance on the actual collision shapes (verdict C, rejudge_clearance_exact.py). Per clip:\n  * the largest single-frame foot displacement over the first 15 frames of the reversed walk, person side (partner person's\n    ankles and toes, solver scale) and robot side (solved partner robot r1 at level 1.0, ankle-roll links), and the\n    demonstration's own largest step over its walk (step9g_feet_ik_table.py);\n  * the largest leg stretch in the walking segment (hip-to-ankle distance minus thigh + shank, both legs) and the overextended\n    walking frames per leg;\n  * the applicable reported levels and the failed items per reported level.\nTotals: applicable clips and reported levels before / after. Read only; writes compare.csv and compare.json.\n\n    python3 system1/t14/objects/step9g2_compare.py --before results_system1/T14_retargeting/step9g --after results_system1/T14_retargeting/step9g2\n",
+ "totals": {
+  "before": {
+   "clips": 14,
+   "levels": 41,
+   "reported_evaluated": 73,
+   "applicable_clip_names": [
+    "largeboxa",
+    "suitcasea",
+    "sub3_largebox_003",
+    "sub3_largebox_029",
+    "sub8_smallbox_045",
+    "sub1_suitcase_031",
+    "sub1_suitcase_034",
+    "sub4_suitcase_006",
+    "sub4_suitcase_042",
+    "sub1_suitcase_036",
+    "sub4_suitcase_043",
+    "sub8_suitcase_020",
+    "sub5_suitcase_046",
+    "sub1_suitcase_039"
+   ]
+  },
+  "after": {
+   "clips": 12,
+   "levels": 34,
+   "reported_evaluated": 78,
+   "applicable_clip_names": [
+    "largeboxa",
+    "smallboxa",
+    "suitcasea",
+    "sub8_smallbox_045",
+    "sub1_suitcase_034",
+    "sub4_suitcase_006",
+    "sub4_suitcase_042",
+    "sub1_suitcase_036",
+    "sub4_suitcase_043",
+    "sub8_suitcase_020",
+    "sub5_suitcase_046",
+    "sub1_suitcase_039"
+   ]
+  },
+  "ranges_m": {
+   "foot_step_walk_start_max_m_before": [
+    0.0334,
+    0.2215
+   ],
+   "foot_step_walk_start_max_m_after": [
+    0.0293,
+    0.0933
+   ],
+   "robot_r1_1p00_foot_step_walk_start_max_m_before": [
+    0.0455,
+    0.2013
+   ],
+   "robot_r1_1p00_foot_step_walk_start_max_m_after": [
+    0.0372,
+    0.0915
+   ],
+   "leg_stretch_walk_max_m_before": [
+    -0.1245,
+    0.048
+   ],
+   "leg_stretch_walk_max_m_after": [
+    -0.1249,
+    0.0796
+   ]
+  }
+ }
+}
