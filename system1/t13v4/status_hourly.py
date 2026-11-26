@@ -93,6 +93,10 @@ def collect(ssh, d):
 
 
 def row(name, r):
+    if "shutdown" in r:
+        sd = r["shutdown"]
+        return (f"| {name} | 已结束；云机已关机（{sd.get('shutdown_time')}，只关机、未释放） | | | | | |" if sd.get("done") else
+                f"| {name} | 已结束；已发关机命令（{sd.get('shutdown_time')}），60 s 后仍连得上 | | | | | |")
     if "error" in r:
         return f"| {name} | 连不上：{r['error'][:80]} | | | | | |"
     rules = (r.get("launch") or {}).get("rules") or {}
@@ -131,13 +135,17 @@ def main():
     ap.add_argument("--out", type=Path, default=OUT)
     a = ap.parse_args()
     runs = {Path(a.local).name: dict(ssh=None, dir=a.local)} if a.local else json.loads(HOSTS.read_text())["runs"]
-    res = {name: collect(v.get("ssh"), v["dir"]) for name, v in runs.items()}
+    res = {}
+    for name, v in runs.items():  # T13 section 8 (2026-11-26 03:20): a machine shut down by post_run.py is not contacted any more
+        ps = ROOT / "results_system1/T13_runs" / name / "post_run_status.json"
+        sd = (json.loads(ps.read_text()).get("cloud_shutdown") if ps.exists() else None) or {}
+        res[name] = dict(shutdown=sd) if sd.get("shutdown_sent") else collect(v.get("ssh"), v["dir"])
     now = datetime.now(NY).strftime("%Y-%m-%d %H:%M")
     lines = [f"# T13 训练状态（{now} 纽约时间，每小时自动更新）", "",
              "| run | 迭代（预热后计数）/ 上限 | 最近一次验证（轮: 完成数） | s/轮 | 预计结束 | 应接触时手力 > 1 N（r0 / r1，近 50 轮） | 异常 |",
              "|---|---|---|---|---|---|---|"]
     lines += [row(n, r) for n, r in res.items()]
-    gpus = {n: r.get("gpu") for n, r in res.items() if "error" not in r}
+    gpus = {n: r.get("gpu") for n, r in res.items() if "error" not in r and "shutdown" not in r}
     lines += ["", "GPU：" + "；".join(f"{n} {g}" for n, g in gpus.items())]
     # section 5 / 6: local post-run pipeline per run (system1/t13v4/post_run.py), and the round-1 release line
     post = []
@@ -146,6 +154,9 @@ def main():
         if ps.exists():
             st = json.loads(ps.read_text())
             post.append(f"{name} {st.get('state')}" + (f"（{'，'.join(f'{k} {v}' for k, v in st['results'].items())}）" if st.get("results") else ""))
+            sd = st.get("cloud_shutdown") or {}
+            if sd.get("done") is False and not sd.get("shutdown_sent") and sd.get("reason"):
+                post.append(f"{name} 云机没有关机：{sd['reason'][:120]}")
         elif (ROOT / "results_system1/T13_runs" / name / "summary.csv").exists():
             post.append(f"{name} 本机评测已完成（见 results_system1/T13_runs/{name}/）")
     if post:
@@ -154,7 +165,9 @@ def main():
                                                        if (ROOT / "logs_system1/t13v4/copyback" / name / "copyback.txt").exists() else "")]
     if runs and len(ok) == len(runs):
         if all(n.startswith("c_out_") for n in runs):  # round 2
-            lines += ["", "第二轮两个 run 都已结束、拷回并逐个核对 sha256：第二轮的卡可以关机（释放与否由 Kevin 决定）。"]
+            shut = [n for n in runs if res[n].get("shutdown", {}).get("done")]
+            lines += ["", "第二轮两个 run 都已结束、拷回并逐个核对 sha256" + ("；两台云机已自动关机（只关机、未释放，释放与否由 Kevin 决定）。" if len(shut) == len(runs) else
+                                                              f"；已自动关机：{('、'.join(shut)) or '无'}（释放与否由 Kevin 决定）。")]
         else:
             lines += ["", "第一轮三个 run 都已结束、拷回并逐个核对 sha256。按任务书第 8 节第 3 条（Kevin 2026-11-25），三台云机关机、不释放，留给第二轮。"]
     text = "\n".join(lines) + "\n"

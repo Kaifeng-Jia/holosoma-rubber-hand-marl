@@ -121,6 +121,86 @@ class Pipe:
                 g("pull", "--no-edit", "--no-rebase")
                 g("push", "origin", "system1-sonic")
 
+    def cloud_shutdown(self, rd, ck, copyback_txt, check_only=False):
+        """T13 section 8 addendum (2026-11-26 03:20): after the verified copy-back, `shutdown` on the run's cloud machine (power
+        off only, never a release), when all of these hold:
+          (a) copyback.txt says "sha256 match" (every file of the cloud run directory, sha256 equal);
+          (b) present locally: the final checkpoint, decision.json, launch.json, state.json, the logs (train.stdout.log,
+              train/metrics.jsonl) and the run config (train/run_config.json);
+          (c) the machine runs no other process: nothing but the platform's own (PID 1, supervisord and its direct children =
+              sshd listener, jupyter-lab, tensorboard, proxy, autopanel; tensorboard's data server) and this check's own ssh
+              session, and no GPU compute process; checked up to 3 times, 60 s apart.
+        Otherwise no shutdown; the reason is written to post_run_status.json (cloud_shutdown) and committed. Either way the local
+        evaluation goes on (it only uses the local copy). The shutdown time is written to post_run_status.json."""
+        import time
+        v = json.loads((ROOT / "logs_system1/t13v4/cloud/hosts.json").read_text())["runs"][self.run]
+        ssh = [*v["ssh"][:-1], "-o", "BatchMode=yes", "-o", "ConnectTimeout=15", v["ssh"][-1]]
+        need = [ck, rd / "decision.json", rd / "launch.json", rd / "state.json", rd / "train.stdout.log", rd / "train/metrics.jsonl", rd / "train/run_config.json"]
+        missing = [str(p.relative_to(rd)) for p in need if not p.exists()]
+        rec = dict(step="cloud_shutdown", machine=v.get("machine"), started=now(), copyback_sha256_match="sha256 match" in copyback_txt, missing_local=missing, checks=[])
+        if not check_only:
+            with self.lock:
+                self.status["steps"].append(rec)
+                self.status["cloud_shutdown"] = rec
+            self.save()
+        ok = rec["copyback_sha256_match"] and not missing
+        tries = 1 if (check_only or self.dry) else (3 if ok else 0)  # check-only / dry: one read-only look even when (a) or (b) fails
+        for k in range(tries):
+            c = self.cloud_processes(ssh)
+            rec["checks"].append(c)
+            if c.get("error") is None and not c["others"] and not c["gpu_compute"]:
+                break
+            if k < tries - 1:
+                time.sleep(60)
+        last = rec["checks"][-1] if rec["checks"] else {}
+        ok = ok and last.get("error") is None and not last.get("others") and not last.get("gpu_compute")
+        rec["gate_passed"] = bool(ok)
+        if not ok or check_only or self.dry:
+            rec.update(done=False, ended=now(), reason=None if ok else ("copy-back not verified" if not rec["copyback_sha256_match"] else
+                       f"missing locally: {missing}" if missing else f"other processes / GPU use / check error on the machine: {last}"))
+            if check_only or self.dry:
+                print(json.dumps(rec, indent=1, ensure_ascii=False), flush=True)
+                return rec
+            self.save()
+            self.commit(f"cloud machine NOT shut down ({rec['reason'][:80]})")
+            return rec
+        p = subprocess.run([*ssh, "shutdown"], capture_output=True, text=True, timeout=120)
+        rec.update(command="shutdown", shutdown_sent=True, shutdown_time=now(), rc=p.returncode, stdout=p.stdout[-300:], stderr=p.stderr[-300:])
+        time.sleep(60)
+        q = subprocess.run([*ssh, "true"], capture_output=True, text=True, timeout=60)
+        rec.update(reachable_60s_after=q.returncode == 0, done=q.returncode != 0, ended=now())
+        self.save()
+        self.commit(f"cloud machine {v.get('machine')} shut down {rec['shutdown_time']}" if rec["done"] else "cloud machine shutdown sent, still reachable")
+        return rec
+
+    @staticmethod
+    def cloud_processes(ssh):
+        """read-only: the processes and GPU compute processes on the machine, minus the platform's own and this session's."""
+        cmd = "echo SELF $$ $PPID; ps -eo pid=,ppid=,args=; echo __GPU__; nvidia-smi --query-compute-apps=pid,process_name --format=csv,noheader 2>&1; echo __END__"
+        try:
+            p = subprocess.run([*ssh, cmd], capture_output=True, text=True, timeout=90)
+        except subprocess.TimeoutExpired:
+            return dict(time=now(), error="ssh timeout")
+        if p.returncode != 0 or "__END__" not in p.stdout:
+            return dict(time=now(), error=f"ssh rc {p.returncode}: {p.stderr.strip()[-200:]}")
+        lines = p.stdout.splitlines()
+        self_pid, sess = (int(x) for x in lines[0].split()[1:3])
+        gi = lines.index("__GPU__")
+        procs = []
+        for ln in lines[1:gi]:
+            f = ln.split(None, 2)
+            if len(f) >= 2 and f[0].isdigit():
+                procs.append((int(f[0]), int(f[1]), f[2] if len(f) > 2 else ""))
+        sup = {pid for pid, pp, a in procs if pp == 1 and "supervisord" in a}
+        base = {1} | sup | {pid for pid, pp, a in procs if pp in sup}
+        base |= {pid for pid, pp, a in procs if pp in base and "tensorboard_data_server" in a}
+        mine = {self_pid, sess} | {pid for pid, pp, a in procs if pp == self_pid}
+        others = [dict(pid=pid, ppid=pp, args=a[:160]) for pid, pp, a in procs if pid not in base and pid not in mine]
+        gpu = [x.strip() for x in lines[gi + 1:lines.index("__END__")] if x.strip()]
+        if any("fail" in x.lower() or "error" in x.lower() for x in gpu):
+            return dict(time=now(), error=f"nvidia-smi: {gpu[:2]}")
+        return dict(time=now(), others=others, gpu_compute=gpu, platform_processes=len(base))
+
     def go(self):
         r, t = self.run, self.task
         rd = ROOT / "logs_system1/t13v4/runs" / r
@@ -130,6 +210,15 @@ class Pipe:
         dec = json.loads((rd / "decision.json").read_text()) if (rd / "decision.json").exists() else {}
         ck = rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt"
         self.check(rec, "sha256 match" in txt and ck.exists(), dict(copyback=txt.strip().splitlines()[-1], final_checkpoint=ck.name, exists=ck.exists()))
+        # 1b shut the cloud machine down (task book T13 section 8, 2026-11-26 03:20); never stops the local evaluation
+        if r.startswith("c_out_"):
+            try:
+                self.cloud_shutdown(rd, ck, txt)
+            except Exception as ex:  # noqa: BLE001  (no shutdown; reported; the local evaluation goes on)
+                with self.lock:
+                    self.status["cloud_shutdown"] = dict(step="cloud_shutdown", done=False, ended=now(), reason=f"error in the shutdown step: {ex!r}"[:300])
+                self.save()
+                self.commit("cloud machine NOT shut down (error in the shutdown step)")
         a = json.loads((rd / "launch.json").read_text())["stages"][-1]["argv"]  # cloud_launch.py: stages = warm-up, training
         seed = int(a[a.index("--seed") + 1])
         # 2 finals noise off
@@ -217,7 +306,15 @@ def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--run", required=True, choices=sorted(CASE))
     ap.add_argument("--verify-existing", action="store_true", help="smoke test: no command is run; every check on the existing outputs")
+    ap.add_argument("--shutdown-check-only", action="store_true", help="smoke test: the cloud-shutdown gate only (read-only ssh, never a shutdown)")
     a = ap.parse_args()
+    if a.shutdown_check_only:
+        p = Pipe(a.run, dry=True)
+        rd = ROOT / "logs_system1/t13v4/runs" / a.run
+        cb = ROOT / "logs_system1/t13v4/copyback" / a.run / "copyback.txt"
+        dec = json.loads((rd / "decision.json").read_text()) if (rd / "decision.json").exists() else {}
+        p.cloud_shutdown(rd, rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt", cb.read_text() if cb.exists() else "", check_only=True)
+        return 0
     Pipe(a.run, dry=a.verify_existing).go()
     return 0
 
