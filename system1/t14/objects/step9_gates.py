@@ -150,10 +150,10 @@ def prediag_9g(C, h0, names, O, size, s):
     return out
 
 
-def gates(h0, names, O, size, s, m, turn="box", legs="all", walk=None):
+def gates(h0, names, O, size, s, m, turn="box", legs="all", walk=None, walk_distance="pelvis"):
     import frontback as fb
     import partner as pt
-    C = fb.build(h0, names, O, size, m, turn=turn, legs=legs, walk=walk)
+    C = fb.build(h0, names, O, size, m, turn=turn, legs=legs, walk=walk, walk_distance=walk_distance)
     ip = names.index("Pelvis")
     p0, p1 = h0[:, ip], C["human1"][:, ip]
     net0 = float(np.linalg.norm(p0[-1, :2] - p0[0, :2])) / s
@@ -192,6 +192,8 @@ def main():
     ap.add_argument("--out", type=Path, required=True)
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
     ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror"), default="all")
+    ap.add_argument("--fb-walk-distance", choices=("pelvis", "pelvis_feet"), default="pelvis",
+                    help="--fb-legs mirror: walked distance of the time alignment (frontback.py; step 9g second fix: pelvis_feet)")
     a = ap.parse_args()
     fr = tuple(int(x) for x in a.frames.split(":"))
     h0, names, nom, size, s = load_role0(a.object, a.sequence, fr)
@@ -204,7 +206,7 @@ def main():
     a.out.mkdir(parents=True, exist_ok=True)
     out = dict(object=a.object, sequence=a.sequence, frames=list(fr), smpl_scale=s, box_size_solver_m=np.round(size, 4).tolist(), levels={})
     for m in (float(x) for x in a.levels.split(",")):
-        g = gates(h0, names, O, size, s, m, a.fb_turn, a.fb_legs, walk)
+        g = gates(h0, names, O, size, s, m, a.fb_turn, a.fb_legs, walk, a.fb_walk_distance)
         (a.out / f"gates_{level_tag(m)}.json").write_text(json.dumps(g, indent=1) + "\n")
         out["levels"][f"{m:.2f}"] = {k: g[k] for k in ("gravity_deg", "main_motion", "passed", "diag")}
     prev = json.loads((a.out / "diag.json").read_text()) if (a.out / "diag.json").exists() else None

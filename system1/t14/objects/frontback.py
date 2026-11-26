@@ -77,6 +77,12 @@ Step 9c options (Kevin 2026-11-25 01:52; defaults = the step-9b construction abo
                 segment by two-segment IK from the mirrored hip to the ankle (the demonstration's own thigh / shank lengths; bend
                 side = the reversed knee in the walking segment, the mirrored knee in lift / put down). Overextension (hip-ankle
                 distance > thigh + shank) is counted in diag9g.
+                walk_distance (step 9g second fix, Kevin 2026-11-26 10:29; build(..., walk_distance=)): "pelvis" (default, step 9g
+                as run) = x above; "pelvis_feet" = x is the mean of the pelvis and the two ankles (the feet), horizontal position
+                along e, the same definition on both sides of x(tau) = x(w0) + x(w1-1) - x(t) (the demonstration at t, the
+                reversed walk's source at tau). Only tau changes: the fixed plane p_f, the moving plane p(t), the mirror and
+                everything else stay as above (p_f from the pelvis, so the reversed walk's pelvis still meets the mirrored pelvis
+                at the first and last walking frames).
                 Rule 3 (box): the target = the demonstration's box levelled (long axis k along e, its frame-0 vertical axis vertical,
                 centre kept; Ob), lengthened to m x 2 w; shared P(t): rotation constant (level), centre = the attached target centre
                 with its coordinate along e replaced by p(t) (on the plane; lateral position and height = the demonstration's).
@@ -205,7 +211,7 @@ def poses_at(M, tau):
     return out
 
 
-def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
+def build(human0, names, O, size, m, turn="box", legs="all", walk=None, walk_distance="pelvis"):
     """human0 [T, J, 3] role 0 (solver world), names [J], O [T, 4, 4] own object (box frame) poses, size [3] box (solver units),
     m level. Returns dict with P, A, cand (Q0, c0, Q1, c1, axis, L1, Lm), human1, rot1 [T, 3, 3] (hands' rotation), D, k, sigma.
     turn: "box" (step 9b) or "world" (step 9c); legs: "all" (step 9b) or "walk" (step 9c, walk = walking_segment(...))."""
@@ -232,8 +238,10 @@ def build(human0, names, O, size, m, turn="box", legs="all", walk=None):
         if turn != "world":
             raise ValueError("legs='reverse_warp' is defined with turn='world'")
         return _reverse_warp(human0, names, O, size, m, walk, A, S, T180, k, sigma, ang, wd, w, e, L1, Lm, cT, Rt, R180, pel)
+    if walk_distance != "pelvis" and legs != "mirror":
+        raise ValueError("walk_distance is a legs='mirror' option")
     if legs == "mirror":
-        return _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel)
+        return _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel, walk_distance)
     D0 = O @ np.linalg.inv(O[0])
     B = S @ D0 @ np.linalg.inv(S) @ A[0]
     P = A.copy()
@@ -368,7 +376,19 @@ def leg_ik(H, A, a, b, K0):
     return H + along[:, None] * u + r[:, None] * n, over, d - (a + b)
 
 
-def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel):
+WALK_DISTANCE = ("pelvis", "pelvis_feet")
+
+
+def walked_x(human0, names, e, walk_distance):
+    """[T] the walked-distance coordinate along e (step 9g rule 2): the pelvis, or the mean of the pelvis and both ankles."""
+    if walk_distance == "pelvis":
+        return human0[:, names.index("Pelvis")] @ e
+    if walk_distance == "pelvis_feet":
+        return np.mean([human0[:, names.index(n)] @ e for n in ("Pelvis", "L_Ankle", "R_Ankle")], axis=0)
+    raise ValueError(walk_distance)
+
+
+def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt, R180, pel, walk_distance="pelvis"):
     """step 9g construction (legs="mirror"); see the module docstring."""
     T = len(O)
     w0, w1 = int(walk["w0"]), int(walk["w1"])
@@ -413,9 +433,10 @@ def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt
     # rule 2: legs. Walking segment: the demonstration's walking legs reversed by walked distance, mirrored about the FIXED plane
     # p_f (the reversed walk then advances exactly with the moving plane; its pelvis meets the mirrored pelvis along e);
     # lift / put down: feet held at the reversed walk's first / last stance; knees by IK from the mirrored hips.
-    tau_w, xs = distance_tau(xp, w0, w1)
+    tau_w, xs_w = distance_tau(walked_x(human0, names, e, walk_distance), w0, w1)
     tau = np.empty(T)
     tau[:w0], tau[w0:w1], tau[w1:] = tau_w[0], tau_w, tau_w[-1]
+    xs = np.maximum.accumulate(xp[w0:w1])  # the pelvis (= distance_tau's xs when walk_distance="pelvis")
     pf = p0 + (xs[-1] - xs[0]) / 2
     src = lerp_at(human0, tau)
     legm = (src @ Ref.T + 2 * pf * e)[:, perm]  # the reversed (and held) source legs mirrored about p_f, left / right exchanged
@@ -461,6 +482,7 @@ def _mirror_9g(human0, names, O, size, m, walk, k, sigma, ang, wd, w, L1, Lm, Rt
                   demo_box_vs_level_box_deg=dict(  # rotation angle between the demonstration's box and the levelled one; tilt = its vertical axis vs world vertical
                       rotation_max=round(float(np.degrees(np.arccos(np.clip((np.einsum("tij,ij->t", O[:, :3, :3], Rb) - 1) / 2, -1, 1))).max()), 3),
                       tilt_max=round(float(np.degrees(np.arccos(np.clip(np.sign(R0[2, v]) * O[:, 2, v], -1, 1))).max()), 3)),
+                  **({} if walk_distance == "pelvis" else dict(walk_distance=walk_distance, walked_distance_m=round(float(xs_w[-1] - xs_w[0]), 5))),
                   tau_walk=dict(first=round(float(tau_w[0]), 4), last=round(float(tau_w[-1]), 4),
                                 speed_ratio_max=round(float(np.abs(np.diff(tau_w)).max()), 4) if len(tau_w) > 1 else None,
                                 held_lift_source_frame=round(float(tau_w[0]), 4), held_put_down_source_frame=round(float(tau_w[-1]), 4)),

@@ -164,6 +164,9 @@ def main():
                     help="step 9c: reverse only the walking segment; 9d: + S-copy legs in lift / put down; 9e: + the whole S copy there; "
                          "9f: the whole demonstration reversed, its three segments time-aligned; 9g (mirror): upper body = the mirror at "
                          "the same frame, legs = the walk reversed by walked distance, box level (frontback.py)")
+    ap.add_argument("--fb-walk-distance", choices=("pelvis", "pelvis_feet"), default="pelvis",
+                    help="--fb-legs mirror: walked distance of the time alignment (frontback.py; step 9g second fix: pelvis_feet = mean "
+                         "of the pelvis and both ankles)")
     ap.add_argument("--fb-human-frame", choices=("own", "target"), default="own",
                     help="frontback, Stage 2: 'target' = the person-side object frame of the interaction mesh is the role's own object "
                          "frame carried by its region map (own_r M_r^-1, points M_r demo), so that it differs from the robot-side "
@@ -263,7 +266,7 @@ def main():
         walk = fbm.walking_segment(v, fa_, fb_e) if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror") else None
         if a.fb_legs in ("walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror") and walk is None:
             raise SystemExit("no swing segment in the clip")
-        FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk)
+        FB = fbm.build(h0_, names54, O_, src_size, a.m, turn=a.fb_turn, legs=a.fb_legs, walk=walk, walk_distance=a.fb_walk_distance)
         cand = FB["cand"]
         axis, L1 = int(cand["axis"]), float(cand["L1"])
         Lm = a.m * L1

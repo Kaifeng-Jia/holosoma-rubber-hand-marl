@@ -62,6 +62,20 @@ EXTENSION = True
 SKIP_FAILED_UP = False
 ALL_MAIN = False
 EVAL_EXTRA = []
+NO_RENDER = False  # --no-render: no pictures / video from the driver (step 9g second fix: step9g_render_both.py afterwards, at most 2 renders)
+T13_YIELD = None  # --t13-yield N: while a T13 post-run (local evaluation) is running, at most N workers of this driver run
+RUNNING = [0]
+
+
+def t13_running():
+    """True while any results_system1/T13_runs/*/post_run_status.json says state "running" (T13 local evaluation first)."""
+    for f in (ROOT / "results_system1/T13_runs").glob("*/post_run_status.json"):
+        try:
+            if json.loads(f.read_text()).get("state") == "running":
+                return True
+        except (OSError, ValueError):
+            return True  # being written: treat as running
+    return False
 
 
 def now():
@@ -94,8 +108,9 @@ def run(cmd, name, need, logf):
                 save()
                 return None
             with lock:
-                ok = avail() - need >= 8.0
+                ok = avail() - need >= 8.0 and (T13_YIELD is None or RUNNING[0] < T13_YIELD or not t13_running())
                 if ok:
+                    RUNNING[0] += 1
                     rec = dict(name=name, cmd=" ".join(map(str, cmd)), started=now().strftime("%T"), avail_gb=round(avail(), 1))
                     log["steps"].append(rec)
                     logf.parent.mkdir(parents=True, exist_ok=True)
@@ -107,6 +122,8 @@ def run(cmd, name, need, logf):
             time.sleep(10)
         save()
         rc = p.wait()
+        with lock:
+            RUNNING[0] -= 1
         f.close()
         rec.update(rc=rc, done=now().strftime("%T"))
         save()
@@ -258,7 +275,7 @@ class Clip:
         self.sm["min_free"] = min((m for m in self.evals if self.inter(m) is False), default=None)
         save()
         decide.update(self)
-        if self.main or not ALL_MAIN:  # step 9e (--all-main): pictures + video of the three debug clips only
+        if (self.main or not ALL_MAIN) and not NO_RENDER:  # step 9e (--all-main): pictures + video of the three debug clips only
             self.render(rep, a, free)
         self.done = True
 
@@ -403,6 +420,8 @@ def main():
     ap.add_argument("--step", default="step9b", help="output name: logs_system1/t14/<step>, exports, results_system1/T14_retargeting/<step>")
     ap.add_argument("--fb-turn", choices=("box", "world"), default="box")
     ap.add_argument("--fb-legs", choices=("all", "walk", "walk_scopy", "full_scopy", "reverse_warp", "mirror"), default="all")
+    ap.add_argument("--fb-walk-distance", choices=("pelvis", "pelvis_feet"), default="pelvis",
+                    help="step9_gates / role_solve --fb-walk-distance (step 9g second fix: pelvis_feet); default = not passed")
     ap.add_argument("--source-root", type=Path, nargs="*", default=None, help="reuse the source solves under these directories (first that has the clip)")
     ap.add_argument("--all-main", action="store_true", help="step 9e: every straight clip (the 22) runs the main protocol (a, 1.0, 1.25, 1.5, "
                     "first free above 1.5), all at once, no extension gate; pictures + video for the three debug clips only")
@@ -413,21 +432,26 @@ def main():
     ap.add_argument("--skip-failed-up", action="store_true", help="the up-search goes on past a level whose solve failed, and starts "
                     "when 1.5 failed while 1.0 or 1.25 intersect (step 9c run 2)")
     ap.add_argument("--search-from", type=float, default=1.55)
+    ap.add_argument("--no-render", action="store_true", help="no pictures / video from the driver (default: as before)")
+    ap.add_argument("--t13-yield", type=int, default=None, help="while a T13 post-run is running (post_run_status.json state "
+                    "'running'), start a worker only if fewer than N of this driver's are running (default: off)")
     a = ap.parse_args()
-    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION, SOLVE_EXTRA, SKIP_FAILED_UP, ALL_MAIN, EVAL_EXTRA
+    global L, EXP, VID, FIG, FB_ARGS, SRC_ROOT, EXTENSION, SOLVE_EXTRA, SKIP_FAILED_UP, ALL_MAIN, EVAL_EXTRA, T13_YIELD, NO_RENDER
+    T13_YIELD = a.t13_yield
+    NO_RENDER = a.no_render
     SOLVE_EXTRA = ["--fb-human-frame", a.fb_human_frame] if a.fb_human_frame != "own" else []
     SKIP_FAILED_UP = a.skip_failed_up
     L = ROOT / f"logs_system1/t14/{a.step}"
     EXP = ROOT / f"exports_system1/T14_references/{a.step.replace('step9b', 'step9')}"
     VID = ROOT / f"exports_system1/T14_videos/{a.step.replace('step9b', 'step9')}"
     FIG = ROOT / f"results_system1/T14_retargeting/{a.step}/figures"
-    FB_ARGS = ["--fb-turn", a.fb_turn, "--fb-legs", a.fb_legs]
+    FB_ARGS = ["--fb-turn", a.fb_turn, "--fb-legs", a.fb_legs] + (["--fb-walk-distance", a.fb_walk_distance] if a.fb_walk_distance != "pelvis" else [])
     SRC_ROOT = None if a.source_root is None else [r if r.is_absolute() else ROOT / r for r in a.source_root]
     EXTENSION = not a.no_extension
     ALL_MAIN = a.all_main
     EVAL_EXTRA = ["--r1-source", a.r1_source] if a.r1_source != "reversed" else []
     L.mkdir(parents=True, exist_ok=True)
-    log.update(step=a.step, fb_args=FB_ARGS, solve_extra=SOLVE_EXTRA, eval_extra=EVAL_EXTRA, skip_failed_up=SKIP_FAILED_UP,
+    log.update(t13_yield=T13_YIELD, no_render=NO_RENDER, step=a.step, fb_args=FB_ARGS, solve_extra=SOLVE_EXTRA, eval_extra=EVAL_EXTRA, skip_failed_up=SKIP_FAILED_UP,
                source_root=None if SRC_ROOT is None else [str(r) for r in SRC_ROOT], extension_enabled=EXTENSION, all_main=ALL_MAIN)
     slots = threading.BoundedSemaphore(a.parallel)
     if a.render_only is not None:

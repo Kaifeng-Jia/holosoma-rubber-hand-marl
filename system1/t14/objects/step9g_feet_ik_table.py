@@ -12,7 +12,7 @@ not changed):
   * the solved partner robot at level 1.0 when it was solved: the same step on its ankle-roll links (solver scale) over the same
     start frames (MuJoCo forward kinematics on the solve's own scene).
 The construction is rebuilt exactly as step9_gates.py does (load_role0, walking_segment, frontback.build at m = 1.0 with the
-driver's --fb-turn / --fb-legs) and checked against the level's gates_m1p00.json (leg IK diagnostics equal). Read only.
+driver's --fb-turn / --fb-legs / --fb-walk-distance) and checked against the level's gates_m1p00.json (leg IK diagnostics equal). Read only.
 
     hsretargeting_s1/bin/python -B system1/t14/objects/step9g_feet_ik_table.py --logdir logs_system1/t14/step9g --out <csv>
 """
@@ -60,6 +60,8 @@ def main():
     drv = json.loads((L / a.driver).read_text())
     turn, legs = drv["fb_args"][1], drv["fb_args"][3]
     assert legs == "mirror", drv["fb_args"]
+    fa = drv["fb_args"]
+    wdist = fa[fa.index("--fb-walk-distance") + 1] if "--fb-walk-distance" in fa else "pelvis"  # step 9g second fix
     rows = []
 
     def mx(*v):  # a segment with no frames (e.g. no lift before the walk) has max_excess_m None
@@ -69,7 +71,7 @@ def main():
         fr = tuple(int(x) for x in sm["frames"].split(":"))
         h0, names, nom, size, s = load_role0(sm["object"], sm["sequence"], fr)
         walk = fb.walking_segment(om.load_sequences({sm["object"]})[sm["sequence"]], *fr)
-        C = fb.build(h0, names, pt.mj_to_mat(nom), size, 1.0, turn=turn, legs=legs, walk=walk)
+        C = fb.build(h0, names, pt.mj_to_mat(nom), size, 1.0, turn=turn, legs=legs, walk=walk, walk_distance=wdist)
         g = json.loads((L / clip / "gates_m1p00.json").read_text())
         ik, ikg = C["diag9g"]["leg_ik"], g["diag"]["diag9g"]["leg_ik"]
         assert json.loads(json.dumps(ik)) == ikg, clip
