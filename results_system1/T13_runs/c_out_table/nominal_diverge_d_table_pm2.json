@@ -1,0 +1,384 @@
+{
+ "rules": "T13 round 2, read-only diagnosis: where the MuJoCo closed loop leaves the Isaac one on the nominal test state of a finished\nrun (same state, same actor ONNX / SONIC, Isaac PD in MuJoCo, observation noise off). Compares the two nominal trajectories\n(logs_system1/t13v4/finals/<run>_pm<level>/nominal.trajectory.npz and logs_system1/t13v4/mj_finals/<run>_pm<level>/...) frame by\nframe over the frames both have: the object position error to the reference in each simulator, the object distance between the\nsimulators, the largest robot-root distance between the simulators, and the object height minus the reference's; plus the first\nframe at which the object / root distances exceed 1, 5 and 10 cm. No simulation is run.\n\n    sim2sim_s1/bin/python -B system1/t13v4/nominal_diverge.py --run c_out_table --level 2 --out results_system1/T13_runs/c_out_table/nominal_diverge.json\n",
+ "run": "d_table",
+ "level": 2,
+ "frames_isaac": 688,
+ "frames_mujoco": 688,
+ "frames_compared": 688,
+ "first_step_object_mujoco_vs_isaac_over_m": {
+  "0.01": 228,
+  "0.05": 250,
+  "0.1": 393
+ },
+ "first_step_root_mujoco_vs_isaac_over_m": {
+  "0.01": 21,
+  "0.05": 148,
+  "0.1": 305
+ },
+ "inputs": {
+  "logs_system1/t13v4/finals/d_table_pm2/nominal.trajectory.npz": "bee108bef61e9351ad0deebff304a8ba466f3187a76be9c799bd5c1827f6410e",
+  "logs_system1/t13v4/mj_finals/d_table_pm2/nominal.trajectory.npz": "5d2d710830b5746b070c4c7e389d1659d3a69d60f9bd72c28571add18e272988"
+ },
+ "rows": [
+  {
+   "step": 0,
+   "time_s": 0.0,
+   "object_err_isaac_m": 0.0,
+   "object_err_mujoco_m": 0.0,
+   "object_mujoco_vs_isaac_m": 0.0,
+   "root_mujoco_vs_isaac_max_m": 0.0,
+   "object_dz_isaac_m": 0.0,
+   "object_dz_mujoco_m": 0.0
+  },
+  {
+   "step": 20,
+   "time_s": 0.4,
+   "object_err_isaac_m": 0.0099,
+   "object_err_mujoco_m": 0.0113,
+   "object_mujoco_vs_isaac_m": 0.0019,
+   "root_mujoco_vs_isaac_max_m": 0.0098,
+   "object_dz_isaac_m": -0.0049,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 40,
+   "time_s": 0.8,
+   "object_err_isaac_m": 0.01,
+   "object_err_mujoco_m": 0.0113,
+   "object_mujoco_vs_isaac_m": 0.0019,
+   "root_mujoco_vs_isaac_max_m": 0.028,
+   "object_dz_isaac_m": -0.0049,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 60,
+   "time_s": 1.2,
+   "object_err_isaac_m": 0.01,
+   "object_err_mujoco_m": 0.0114,
+   "object_mujoco_vs_isaac_m": 0.0019,
+   "root_mujoco_vs_isaac_max_m": 0.0119,
+   "object_dz_isaac_m": -0.0048,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 80,
+   "time_s": 1.6,
+   "object_err_isaac_m": 0.0098,
+   "object_err_mujoco_m": 0.011,
+   "object_mujoco_vs_isaac_m": 0.0019,
+   "root_mujoco_vs_isaac_max_m": 0.0155,
+   "object_dz_isaac_m": -0.0048,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 100,
+   "time_s": 2.0,
+   "object_err_isaac_m": 0.0098,
+   "object_err_mujoco_m": 0.011,
+   "object_mujoco_vs_isaac_m": 0.0019,
+   "root_mujoco_vs_isaac_max_m": 0.0157,
+   "object_dz_isaac_m": -0.0047,
+   "object_dz_mujoco_m": -0.0047
+  },
+  {
+   "step": 120,
+   "time_s": 2.4,
+   "object_err_isaac_m": 0.0098,
+   "object_err_mujoco_m": 0.011,
+   "object_mujoco_vs_isaac_m": 0.0017,
+   "root_mujoco_vs_isaac_max_m": 0.0112,
+   "object_dz_isaac_m": -0.0047,
+   "object_dz_mujoco_m": -0.0047
+  },
+  {
+   "step": 140,
+   "time_s": 2.8,
+   "object_err_isaac_m": 0.009,
+   "object_err_mujoco_m": 0.0101,
+   "object_mujoco_vs_isaac_m": 0.0015,
+   "root_mujoco_vs_isaac_max_m": 0.0384,
+   "object_dz_isaac_m": -0.0044,
+   "object_dz_mujoco_m": -0.0044
+  },
+  {
+   "step": 160,
+   "time_s": 3.2,
+   "object_err_isaac_m": 0.0102,
+   "object_err_mujoco_m": 0.0112,
+   "object_mujoco_vs_isaac_m": 0.0015,
+   "root_mujoco_vs_isaac_max_m": 0.0586,
+   "object_dz_isaac_m": -0.0051,
+   "object_dz_mujoco_m": -0.0051
+  },
+  {
+   "step": 180,
+   "time_s": 3.6,
+   "object_err_isaac_m": 0.0099,
+   "object_err_mujoco_m": 0.0114,
+   "object_mujoco_vs_isaac_m": 0.0054,
+   "root_mujoco_vs_isaac_max_m": 0.0196,
+   "object_dz_isaac_m": -0.0047,
+   "object_dz_mujoco_m": -0.0048
+  },
+  {
+   "step": 200,
+   "time_s": 4.0,
+   "object_err_isaac_m": 0.0244,
+   "object_err_mujoco_m": 0.0254,
+   "object_mujoco_vs_isaac_m": 0.0043,
+   "root_mujoco_vs_isaac_max_m": 0.0476,
+   "object_dz_isaac_m": -0.0239,
+   "object_dz_mujoco_m": -0.0239
+  },
+  {
+   "step": 220,
+   "time_s": 4.4,
+   "object_err_isaac_m": 0.0616,
+   "object_err_mujoco_m": 0.0583,
+   "object_mujoco_vs_isaac_m": 0.0064,
+   "root_mujoco_vs_isaac_max_m": 0.028,
+   "object_dz_isaac_m": -0.0449,
+   "object_dz_mujoco_m": -0.045
+  },
+  {
+   "step": 240,
+   "time_s": 4.8,
+   "object_err_isaac_m": 0.1064,
+   "object_err_mujoco_m": 0.0875,
+   "object_mujoco_vs_isaac_m": 0.025,
+   "root_mujoco_vs_isaac_max_m": 0.0336,
+   "object_dz_isaac_m": -0.0618,
+   "object_dz_mujoco_m": -0.0618
+  },
+  {
+   "step": 260,
+   "time_s": 5.2,
+   "object_err_isaac_m": 0.0666,
+   "object_err_mujoco_m": 0.0792,
+   "object_mujoco_vs_isaac_m": 0.0637,
+   "root_mujoco_vs_isaac_max_m": 0.0714,
+   "object_dz_isaac_m": -0.0645,
+   "object_dz_mujoco_m": -0.0635
+  },
+  {
+   "step": 280,
+   "time_s": 5.6,
+   "object_err_isaac_m": 0.0757,
+   "object_err_mujoco_m": 0.0783,
+   "object_mujoco_vs_isaac_m": 0.0084,
+   "root_mujoco_vs_isaac_max_m": 0.038,
+   "object_dz_isaac_m": -0.0601,
+   "object_dz_mujoco_m": -0.0592
+  },
+  {
+   "step": 300,
+   "time_s": 6.0,
+   "object_err_isaac_m": 0.101,
+   "object_err_mujoco_m": 0.1237,
+   "object_mujoco_vs_isaac_m": 0.0339,
+   "root_mujoco_vs_isaac_max_m": 0.0899,
+   "object_dz_isaac_m": -0.0644,
+   "object_dz_mujoco_m": -0.0567
+  },
+  {
+   "step": 320,
+   "time_s": 6.4,
+   "object_err_isaac_m": 0.093,
+   "object_err_mujoco_m": 0.1195,
+   "object_mujoco_vs_isaac_m": 0.0327,
+   "root_mujoco_vs_isaac_max_m": 0.0568,
+   "object_dz_isaac_m": -0.0615,
+   "object_dz_mujoco_m": -0.0616
+  },
+  {
+   "step": 340,
+   "time_s": 6.8,
+   "object_err_isaac_m": 0.0856,
+   "object_err_mujoco_m": 0.0853,
+   "object_mujoco_vs_isaac_m": 0.0247,
+   "root_mujoco_vs_isaac_max_m": 0.0298,
+   "object_dz_isaac_m": -0.0611,
+   "object_dz_mujoco_m": -0.0632
+  },
+  {
+   "step": 360,
+   "time_s": 7.2,
+   "object_err_isaac_m": 0.1063,
+   "object_err_mujoco_m": 0.1423,
+   "object_mujoco_vs_isaac_m": 0.044,
+   "root_mujoco_vs_isaac_max_m": 0.0375,
+   "object_dz_isaac_m": -0.0632,
+   "object_dz_mujoco_m": -0.0593
+  },
+  {
+   "step": 380,
+   "time_s": 7.6,
+   "object_err_isaac_m": 0.0948,
+   "object_err_mujoco_m": 0.1305,
+   "object_mujoco_vs_isaac_m": 0.0634,
+   "root_mujoco_vs_isaac_max_m": 0.0946,
+   "object_dz_isaac_m": -0.0672,
+   "object_dz_mujoco_m": -0.0644
+  },
+  {
+   "step": 400,
+   "time_s": 8.0,
+   "object_err_isaac_m": 0.0674,
+   "object_err_mujoco_m": 0.1471,
+   "object_mujoco_vs_isaac_m": 0.132,
+   "root_mujoco_vs_isaac_max_m": 0.1166,
+   "object_dz_isaac_m": -0.0558,
+   "object_dz_mujoco_m": -0.0506
+  },
+  {
+   "step": 420,
+   "time_s": 8.4,
+   "object_err_isaac_m": 0.062,
+   "object_err_mujoco_m": 0.1322,
+   "object_mujoco_vs_isaac_m": 0.1227,
+   "root_mujoco_vs_isaac_max_m": 0.1324,
+   "object_dz_isaac_m": -0.0497,
+   "object_dz_mujoco_m": -0.0499
+  },
+  {
+   "step": 440,
+   "time_s": 8.8,
+   "object_err_isaac_m": 0.0543,
+   "object_err_mujoco_m": 0.1278,
+   "object_mujoco_vs_isaac_m": 0.1526,
+   "root_mujoco_vs_isaac_max_m": 0.1521,
+   "object_dz_isaac_m": -0.0436,
+   "object_dz_mujoco_m": -0.043
+  },
+  {
+   "step": 460,
+   "time_s": 9.2,
+   "object_err_isaac_m": 0.0677,
+   "object_err_mujoco_m": 0.0998,
+   "object_mujoco_vs_isaac_m": 0.1497,
+   "root_mujoco_vs_isaac_max_m": 0.1745,
+   "object_dz_isaac_m": -0.0318,
+   "object_dz_mujoco_m": -0.0322
+  },
+  {
+   "step": 480,
+   "time_s": 9.6,
+   "object_err_isaac_m": 0.1173,
+   "object_err_mujoco_m": 0.0712,
+   "object_mujoco_vs_isaac_m": 0.1854,
+   "root_mujoco_vs_isaac_max_m": 0.1971,
+   "object_dz_isaac_m": -0.0159,
+   "object_dz_mujoco_m": -0.0164
+  },
+  {
+   "step": 500,
+   "time_s": 10.0,
+   "object_err_isaac_m": 0.1405,
+   "object_err_mujoco_m": 0.0482,
+   "object_mujoco_vs_isaac_m": 0.1809,
+   "root_mujoco_vs_isaac_max_m": 0.1905,
+   "object_dz_isaac_m": -0.0039,
+   "object_dz_mujoco_m": -0.0046
+  },
+  {
+   "step": 520,
+   "time_s": 10.4,
+   "object_err_isaac_m": 0.1394,
+   "object_err_mujoco_m": 0.0474,
+   "object_mujoco_vs_isaac_m": 0.1782,
+   "root_mujoco_vs_isaac_max_m": 0.1948,
+   "object_dz_isaac_m": 0.003,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 540,
+   "time_s": 10.8,
+   "object_err_isaac_m": 0.1608,
+   "object_err_mujoco_m": 0.0413,
+   "object_mujoco_vs_isaac_m": 0.1881,
+   "root_mujoco_vs_isaac_max_m": 0.2087,
+   "object_dz_isaac_m": 0.0059,
+   "object_dz_mujoco_m": 0.0017
+  },
+  {
+   "step": 560,
+   "time_s": 11.2,
+   "object_err_isaac_m": 0.1654,
+   "object_err_mujoco_m": 0.0462,
+   "object_mujoco_vs_isaac_m": 0.1737,
+   "root_mujoco_vs_isaac_max_m": 0.1951,
+   "object_dz_isaac_m": 0.0017,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 580,
+   "time_s": 11.6,
+   "object_err_isaac_m": 0.1652,
+   "object_err_mujoco_m": 0.0461,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.1765,
+   "object_dz_isaac_m": 0.0015,
+   "object_dz_mujoco_m": 0.0015
+  },
+  {
+   "step": 600,
+   "time_s": 12.0,
+   "object_err_isaac_m": 0.1652,
+   "object_err_mujoco_m": 0.0461,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.2025,
+   "object_dz_isaac_m": 0.0015,
+   "object_dz_mujoco_m": 0.0015
+  },
+  {
+   "step": 620,
+   "time_s": 12.4,
+   "object_err_isaac_m": 0.1652,
+   "object_err_mujoco_m": 0.046,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.191,
+   "object_dz_isaac_m": 0.0014,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 640,
+   "time_s": 12.8,
+   "object_err_isaac_m": 0.1652,
+   "object_err_mujoco_m": 0.0461,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.1869,
+   "object_dz_isaac_m": 0.0014,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 660,
+   "time_s": 13.2,
+   "object_err_isaac_m": 0.1651,
+   "object_err_mujoco_m": 0.0461,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.1841,
+   "object_dz_isaac_m": 0.0014,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 680,
+   "time_s": 13.6,
+   "object_err_isaac_m": 0.1652,
+   "object_err_mujoco_m": 0.0461,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.202,
+   "object_dz_isaac_m": 0.0014,
+   "object_dz_mujoco_m": 0.0014
+  },
+  {
+   "step": 687,
+   "time_s": 13.74,
+   "object_err_isaac_m": 0.1651,
+   "object_err_mujoco_m": 0.0462,
+   "object_mujoco_vs_isaac_m": 0.1736,
+   "root_mujoco_vs_isaac_max_m": 0.201,
+   "object_dz_isaac_m": 0.0014,
+   "object_dz_mujoco_m": 0.0014
+  }
+ ]
+}

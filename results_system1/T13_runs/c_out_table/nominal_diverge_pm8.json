@@ -1,0 +1,204 @@
+{
+ "rules": "T13 round 2, read-only diagnosis: where the MuJoCo closed loop leaves the Isaac one on the nominal test state of a finished\nrun (same state, same actor ONNX / SONIC, Isaac PD in MuJoCo, observation noise off). Compares the two nominal trajectories\n(logs_system1/t13v4/finals/<run>_pm<level>/nominal.trajectory.npz and logs_system1/t13v4/mj_finals/<run>_pm<level>/...) frame by\nframe over the frames both have: the object position error to the reference in each simulator, the object distance between the\nsimulators, the largest robot-root distance between the simulators, and the object height minus the reference's; plus the first\nframe at which the object / root distances exceed 1, 5 and 10 cm. No simulation is run.\n\n    sim2sim_s1/bin/python -B system1/t13v4/nominal_diverge.py --run c_out_table --level 2 --out results_system1/T13_runs/c_out_table/nominal_diverge.json\n",
+ "run": "c_out_table",
+ "level": 8,
+ "frames_isaac": 688,
+ "frames_mujoco": 337,
+ "frames_compared": 337,
+ "first_step_object_mujoco_vs_isaac_over_m": {
+  "0.01": 173,
+  "0.05": 214,
+  "0.1": 276
+ },
+ "first_step_root_mujoco_vs_isaac_over_m": {
+  "0.01": 18,
+  "0.05": 68,
+  "0.1": 247
+ },
+ "inputs": {
+  "logs_system1/t13v4/finals/c_out_table_pm8/nominal.trajectory.npz": "bcb9ec4fcd1db0d46f2920b71b8e0501d59a8282188cfae32f7f0f709adcd50d",
+  "logs_system1/t13v4/mj_finals/c_out_table_pm8/nominal.trajectory.npz": "c3611a793b89fb0021e5dbcb144c7f913e5ed35ecd13360073b94530a17dee49"
+ },
+ "rows": [
+  {
+   "step": 0,
+   "time_s": 0.0,
+   "object_err_isaac_m": 0.0,
+   "object_err_mujoco_m": 0.0,
+   "object_mujoco_vs_isaac_m": 0.0,
+   "root_mujoco_vs_isaac_max_m": 0.0,
+   "object_dz_isaac_m": 0.0,
+   "object_dz_mujoco_m": 0.0
+  },
+  {
+   "step": 20,
+   "time_s": 0.4,
+   "object_err_isaac_m": 0.005,
+   "object_err_mujoco_m": 0.0049,
+   "object_mujoco_vs_isaac_m": 0.0006,
+   "root_mujoco_vs_isaac_max_m": 0.0131,
+   "object_dz_isaac_m": -0.0049,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 40,
+   "time_s": 0.8,
+   "object_err_isaac_m": 0.005,
+   "object_err_mujoco_m": 0.0049,
+   "object_mujoco_vs_isaac_m": 0.0006,
+   "root_mujoco_vs_isaac_max_m": 0.0151,
+   "object_dz_isaac_m": -0.0049,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 60,
+   "time_s": 1.2,
+   "object_err_isaac_m": 0.005,
+   "object_err_mujoco_m": 0.0049,
+   "object_mujoco_vs_isaac_m": 0.0006,
+   "root_mujoco_vs_isaac_max_m": 0.0404,
+   "object_dz_isaac_m": -0.0048,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 80,
+   "time_s": 1.6,
+   "object_err_isaac_m": 0.0049,
+   "object_err_mujoco_m": 0.0051,
+   "object_mujoco_vs_isaac_m": 0.0014,
+   "root_mujoco_vs_isaac_max_m": 0.059,
+   "object_dz_isaac_m": -0.0048,
+   "object_dz_mujoco_m": -0.0049
+  },
+  {
+   "step": 100,
+   "time_s": 2.0,
+   "object_err_isaac_m": 0.005,
+   "object_err_mujoco_m": 0.0051,
+   "object_mujoco_vs_isaac_m": 0.0016,
+   "root_mujoco_vs_isaac_max_m": 0.0614,
+   "object_dz_isaac_m": -0.0047,
+   "object_dz_mujoco_m": -0.0047
+  },
+  {
+   "step": 120,
+   "time_s": 2.4,
+   "object_err_isaac_m": 0.005,
+   "object_err_mujoco_m": 0.0051,
+   "object_mujoco_vs_isaac_m": 0.0016,
+   "root_mujoco_vs_isaac_max_m": 0.0546,
+   "object_dz_isaac_m": -0.0047,
+   "object_dz_mujoco_m": -0.0047
+  },
+  {
+   "step": 140,
+   "time_s": 2.8,
+   "object_err_isaac_m": 0.0046,
+   "object_err_mujoco_m": 0.0049,
+   "object_mujoco_vs_isaac_m": 0.0016,
+   "root_mujoco_vs_isaac_max_m": 0.0384,
+   "object_dz_isaac_m": -0.0044,
+   "object_dz_mujoco_m": -0.0044
+  },
+  {
+   "step": 160,
+   "time_s": 3.2,
+   "object_err_isaac_m": 0.0055,
+   "object_err_mujoco_m": 0.0057,
+   "object_mujoco_vs_isaac_m": 0.0017,
+   "root_mujoco_vs_isaac_max_m": 0.0729,
+   "object_dz_isaac_m": -0.0051,
+   "object_dz_mujoco_m": -0.0051
+  },
+  {
+   "step": 180,
+   "time_s": 3.6,
+   "object_err_isaac_m": 0.0425,
+   "object_err_mujoco_m": 0.0214,
+   "object_mujoco_vs_isaac_m": 0.0252,
+   "root_mujoco_vs_isaac_max_m": 0.0369,
+   "object_dz_isaac_m": -0.004,
+   "object_dz_mujoco_m": -0.0048
+  },
+  {
+   "step": 200,
+   "time_s": 4.0,
+   "object_err_isaac_m": 0.044,
+   "object_err_mujoco_m": 0.027,
+   "object_mujoco_vs_isaac_m": 0.034,
+   "root_mujoco_vs_isaac_max_m": 0.0287,
+   "object_dz_isaac_m": -0.0203,
+   "object_dz_mujoco_m": -0.024
+  },
+  {
+   "step": 220,
+   "time_s": 4.4,
+   "object_err_isaac_m": 0.0492,
+   "object_err_mujoco_m": 0.0519,
+   "object_mujoco_vs_isaac_m": 0.0499,
+   "root_mujoco_vs_isaac_max_m": 0.0413,
+   "object_dz_isaac_m": -0.0429,
+   "object_dz_mujoco_m": -0.0448
+  },
+  {
+   "step": 240,
+   "time_s": 4.8,
+   "object_err_isaac_m": 0.0594,
+   "object_err_mujoco_m": 0.0677,
+   "object_mujoco_vs_isaac_m": 0.0532,
+   "root_mujoco_vs_isaac_max_m": 0.0422,
+   "object_dz_isaac_m": -0.0544,
+   "object_dz_mujoco_m": -0.0611
+  },
+  {
+   "step": 260,
+   "time_s": 5.2,
+   "object_err_isaac_m": 0.0768,
+   "object_err_mujoco_m": 0.0669,
+   "object_mujoco_vs_isaac_m": 0.056,
+   "root_mujoco_vs_isaac_max_m": 0.1449,
+   "object_dz_isaac_m": -0.0588,
+   "object_dz_mujoco_m": -0.0636
+  },
+  {
+   "step": 280,
+   "time_s": 5.6,
+   "object_err_isaac_m": 0.0998,
+   "object_err_mujoco_m": 0.0804,
+   "object_mujoco_vs_isaac_m": 0.1226,
+   "root_mujoco_vs_isaac_max_m": 0.1827,
+   "object_dz_isaac_m": -0.0646,
+   "object_dz_mujoco_m": -0.0652
+  },
+  {
+   "step": 300,
+   "time_s": 6.0,
+   "object_err_isaac_m": 0.0793,
+   "object_err_mujoco_m": 0.1233,
+   "object_mujoco_vs_isaac_m": 0.1583,
+   "root_mujoco_vs_isaac_max_m": 0.2404,
+   "object_dz_isaac_m": -0.0621,
+   "object_dz_mujoco_m": -0.056
+  },
+  {
+   "step": 320,
+   "time_s": 6.4,
+   "object_err_isaac_m": 0.142,
+   "object_err_mujoco_m": 0.1854,
+   "object_mujoco_vs_isaac_m": 0.302,
+   "root_mujoco_vs_isaac_max_m": 0.3401,
+   "object_dz_isaac_m": -0.0613,
+   "object_dz_mujoco_m": -0.0576
+  },
+  {
+   "step": 336,
+   "time_s": 6.72,
+   "object_err_isaac_m": 0.1361,
+   "object_err_mujoco_m": 0.2413,
+   "object_mujoco_vs_isaac_m": 0.3323,
+   "root_mujoco_vs_isaac_max_m": 0.4037,
+   "object_dz_isaac_m": -0.0624,
+   "object_dz_mujoco_m": -0.0623
+  }
+ ]
+}
