@@ -33,8 +33,15 @@ def sha(p):
 
 
 def main():
+    import argparse
+    global L, OUT, VID
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--step", default="step9e", help="step 9f: step9f (same layout; 9e-only files are copied when present)")
+    a = ap.parse_args()
+    L, OUT, VID = ROOT / f"logs_system1/t14/{a.step}", ROOT / f"results_system1/T14_retargeting/{a.step}", ROOT / f"exports_system1/T14_videos/{a.step}"
     d = json.loads((L / "driver.json").read_text())
-    for sub in ("evals", "levels", "diag", "diag9e", "side_check_9d_drift", "records/run_records", "records/failed_logs", "records/gates_logs"):
+    DG = "diag9e" if a.step == "step9e" else "diag9f"  # per-level phase diagnosis (step9e_diag.py; the file in each level dir is diag9e.json)
+    for sub in ("evals", "levels", "diag", DG, "side_check_9d_drift", "records/run_records", "records/failed_logs", "records/gates_logs"):
         (OUT / sub).mkdir(parents=True, exist_ok=True)
     inv = []
 
@@ -44,11 +51,19 @@ def main():
 
     shutil.copy2(L / "driver.json", OUT / "records/driver.json")
     shutil.copy2(L / "driver.log", OUT / "records/driver.log")
-    shutil.copy2(L / "run.sh", OUT / "records/run.sh")
-    shutil.copy2(L / "diag9e/run.sh", OUT / "records/diag9e_run.sh")
-    shutil.copy2(L / "diag9e/jump.json", OUT / "jump.json")
-    for n in ("drift_recheck.json", "drift_recheck.csv", "run.sh", "run.log"):
-        shutil.copy2(R1C / n, OUT / "side_check_9d_drift" / n)
+    for n in ("run.sh", "run_all22.sh", "driver_debug3.json", "driver_debug3.log"):
+        if (L / n).exists():
+            shutil.copy2(L / n, OUT / "records" / n)
+    for n in ("run.sh", "jobs.txt", "diag_rc.txt"):
+        if (L / DG / n).exists():
+            shutil.copy2(L / DG / n, OUT / "records" / f"{DG}_{n}")
+    if (L / "diag9e/jump.json").exists():
+        shutil.copy2(L / "diag9e/jump.json", OUT / "jump.json")
+    if a.step == "step9e":
+        for n in ("drift_recheck.json", "drift_recheck.csv", "run.sh", "run.log"):
+            shutil.copy2(R1C / n, OUT / "side_check_9d_drift" / n)
+    else:
+        (OUT / "side_check_9d_drift").rmdir()
     for g in sorted((L / "records").glob("gates_*.log")):
         shutil.copy2(g, OUT / "records/gates_logs" / g.name)
     seqs = set()
@@ -81,7 +96,7 @@ def main():
                     txt = lg.read_text(errors="replace").replace("\r", "\n").splitlines()
                     (OUT / "records/failed_logs" / f"{tag}_{m}_r{r}.log").write_text("\n".join(txt[-40:]) + "\n")
             if (lv / "diag9e.json").exists():
-                shutil.copy2(lv / "diag9e.json", OUT / "diag9e" / f"{tag}_{m}.json")
+                shutil.copy2(lv / "diag9e.json", OUT / DG / f"{tag}_{m}.json")
             if (lv / "eval.json").exists():
                 shutil.copy2(lv / "eval.json", OUT / "evals" / f"{tag}_{m}.json")
                 e = json.loads((lv / "eval.json").read_text())

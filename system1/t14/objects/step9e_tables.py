@@ -99,7 +99,11 @@ def phase_text(diag, item):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--logdir", type=Path, default=None, help="default logs_system1/t14/step9e (step 9f: logs_system1/t14/step9f)")
     a = ap.parse_args()
+    global L
+    if a.logdir is not None:
+        L = a.logdir if a.logdir.is_absolute() else ROOT / a.logdir
     st9.L = L
     drv = json.loads((L / "driver.json").read_text())
     lv_rows, clip_rows = [], []

@@ -145,7 +145,15 @@ def main():
             src0 = sfeet[f"{side}_foot_position_m"][:T]
             if r == 1 and r1_mode == "construction":
                 rs = gates["r1_source"]
-                src = np.einsum("tij,tj->ti", np.asarray(rs["R"]), src0[np.asarray(rs["frame"])]) + np.asarray(rs["t"])
+                fr = np.asarray(rs["frame"], float)
+                if np.allclose(fr, np.round(fr)):
+                    srcf = src0[np.round(fr).astype(int)]
+                else:  # step 9f: fractional source times, linear interpolation as step9_eval.py
+                    i0 = np.clip(np.floor(fr).astype(int), 0, len(src0) - 1)
+                    i1 = np.clip(i0 + 1, 0, len(src0) - 1)
+                    f_ = (fr - i0)[:, None]
+                    srcf = src0[i0] * (1 - f_) + src0[i1] * f_
+                src = np.einsum("tij,tj->ti", np.asarray(rs["R"]), srcf) + np.asarray(rs["t"])
             else:
                 src = src0[::-1] if r == 1 else src0
             wins = []
