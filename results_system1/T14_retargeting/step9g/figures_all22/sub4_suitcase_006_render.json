@@ -1,0 +1,30 @@
+{
+ "rules": "T14 step 7, layer 1 pictures (round-6 style, Fig. 4 look: U5 g1_native_execution preset, Unitree grey robots, light-blue\nobject, chequered floor). Render only, CPU (MuJoCo EGL).\n\nFrames: contact start / middle / end = first, middle, last frame in which a hand of the person touches the object (SMPL-X hand\nvertex within 1.5 cm of the captured mesh), 30 Hz.\n  * side-by-side sheet (<tag>_sidebyside.jpg): one row per frame; columns = the person with the captured object (SMPL-X mesh,\n    skin colour, original OMOMO world), robot 0 with the box (level 1.0), both robots with the box (level 1.0). Close-up\n    views: look-at = mean of pelvis, neck and the two palm points, azimuth = that body's heading + 90 + 30 deg, elevation\n    -15 deg, distance 1.6 m (robot) / 1.6 m / smpl_scale (person); arrows: palm normal (red) and finger direction (blue), 10 cm\n    (robot) and 10 cm / smpl_scale (person). Full view of both robots: U5 camera_for fitted to the robots and box, azimuth =\n    robot-0 -> robot-1 direction - 90 + 30 deg, elevation -25 deg.\n  * level grid (<tag>_levels_grid.jpg): one row per reported level (a, 1.0, 1.25, 1.5, plus the first level without\n    intersection when 1.0 already intersects), columns = the three frames, one camera per column fitted to the largest level;\n    a header per row with the level's numbers.\n  * video (<tag>_levels.mp4, logs only, Drive): left the person, right both robots; the whole sequence once per level.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/objects/render_box.py --solve <solve> --levels <levels.json> --out <dir> --video-out <dir>\n",
+ "frames": [
+  0,
+  44,
+  87
+ ],
+ "levels": [
+  1.0,
+  1.25,
+  1.5
+ ],
+ "sidebyside": {
+  "file": "sub4_suitcase_006_sidebyside.jpg",
+  "jpeg_quality": 90
+ },
+ "grid": {
+  "file": "sub4_suitcase_006_levels_grid.jpg",
+  "jpeg_quality": 90
+ },
+ "video": {
+  "file": "/home/kevin/duet-system1/exports_system1/T14_videos/step9g/sub4_suitcase_006_levels.mp4",
+  "bytes": 1395503,
+  "levels": [
+   1.0,
+   1.25,
+   1.5
+  ]
+ }
+}

@@ -1,0 +1,40 @@
+ 69%|██████▉   | 94/136 [00:59<00:28,  1.47it/s, cost=0.318]
+ 69%|██████▉   | 94/136 [00:59<00:28,  1.47it/s, cost=0.327]
+ 70%|██████▉   | 95/136 [00:59<00:27,  1.48it/s, cost=0.327]
+ 70%|██████▉   | 95/136 [01:00<00:27,  1.48it/s, cost=0.372]
+ 71%|███████   | 96/136 [01:00<00:26,  1.49it/s, cost=0.372]
+ 71%|███████   | 96/136 [01:01<00:26,  1.49it/s, cost=0.541]
+ 71%|███████▏  | 97/136 [01:01<00:26,  1.50it/s, cost=0.541]
+ 71%|███████▏  | 97/136 [01:02<00:26,  1.50it/s, cost=0.577]
+ 72%|███████▏  | 98/136 [01:02<00:26,  1.44it/s, cost=0.577]
+ 72%|███████▏  | 98/136 [01:02<00:26,  1.44it/s, cost=0.534]
+ 73%|███████▎  | 99/136 [01:02<00:24,  1.48it/s, cost=0.534]
+ 73%|███████▎  | 99/136 [01:03<00:24,  1.48it/s, cost=0.519]
+ 74%|███████▎  | 100/136 [01:03<00:23,  1.51it/s, cost=0.519]
+ 74%|███████▎  | 100/136 [01:03<00:23,  1.51it/s, cost=0.519]
+ 74%|███████▍  | 101/136 [01:03<00:23,  1.48it/s, cost=0.519]
+ 74%|███████▍  | 101/136 [01:04<00:23,  1.48it/s, cost=0.526]
+ 75%|███████▌  | 102/136 [01:04<00:20,  1.70it/s, cost=0.526]
+ 75%|███████▌  | 102/136 [01:04<00:20,  1.70it/s, cost=0.532]
+ 76%|███████▌  | 103/136 [01:04<00:19,  1.66it/s, cost=0.532]
+ 76%|███████▌  | 103/136 [01:05<00:19,  1.66it/s, cost=0.511]
+ 76%|███████▋  | 104/136 [01:05<00:16,  1.95it/s, cost=0.511]
+ 76%|███████▋  | 104/136 [01:05<00:16,  1.95it/s, cost=0.538]
+ 77%|███████▋  | 105/136 [01:05<00:14,  2.19it/s, cost=0.538]
+ 77%|███████▋  | 105/136 [01:05<00:19,  1.60it/s, cost=0.538]
+Traceback (most recent call last):
+  File "/home/kevin/duet-system1/system1/t14/objects/role_solve.py", line 504, in <module>
+    raise SystemExit(main())
+                     ^^^^^^
+  File "/home/kevin/duet-system1/system1/t14/objects/role_solve.py", line 432, in main
+    q1, *_ = ret1.retarget_motion(human_joint_motions=h52[:n], object_poses=s1_nom_mj[:n], object_poses_augmented=s1_nom_mj[:n],
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py", line 956, in retarget_motion
+    q, cost = self.iterate(
+              ^^^^^^^^^^^^^
+  File "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py", line 2736, in iterate
+    q_n, cost = self.solve_single_iteration(
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/src/interaction_mesh_retargeter.py", line 2491, in solve_single_iteration
+    raise RuntimeError(f"CVXPY solve failed: {problem.status}")
+RuntimeError: CVXPY solve failed: infeasible

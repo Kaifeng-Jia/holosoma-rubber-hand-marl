@@ -1,0 +1,242 @@
+{
+ "level_dir": "logs_system1/t14/step9g/sub3_largebox_029/m0p90",
+ "T": 137,
+ "walk": [
+  23,
+  121
+ ],
+ "applicable": false,
+ "failed": [
+  "V0 non-hand penetration r1",
+  "V0 robot-robot clearance"
+ ],
+ "source_penetration_max_m": 0.0,
+ "robots": {
+  "r0": {
+   "nonhand": {
+    "limit_m": 0.01,
+    "value_m": 0.0026,
+    "phases": {
+     "lift": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     },
+     "walk": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     },
+     "put_down": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     }
+    }
+   },
+   "retention": {
+    "value": 1.0,
+    "limit": 0.99,
+    "hands": {
+     "left": {
+      "condition_frames": 136,
+      "lost_frames": 0,
+      "phases": {
+       "lift": {
+        "frames": 0,
+        "ranges": []
+       },
+       "walk": {
+        "frames": 0,
+        "ranges": []
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 22,
+       "walk": 98,
+       "put_down": 16
+      }
+     },
+     "right": {
+      "condition_frames": 136,
+      "lost_frames": 0,
+      "phases": {
+       "lift": {
+        "frames": 0,
+        "ranges": []
+       },
+       "walk": {
+        "frames": 0,
+        "ranges": []
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 22,
+       "walk": 98,
+       "put_down": 16
+      }
+     }
+    }
+   },
+   "support_drift": {
+    "source": "same frame",
+    "limit_m": 0.01,
+    "windows_over_limit": {
+     "left": [],
+     "right": []
+    }
+   }
+  },
+  "r1": {
+   "nonhand": {
+    "limit_m": 0.01,
+    "value_m": 0.0132,
+    "phases": {
+     "lift": {
+      "frames": 1,
+      "ranges": [
+       [
+        13,
+        14
+       ]
+      ],
+      "deepest_m": 0.0132,
+      "links": [
+       [
+        "right_hip_yaw_link",
+        1
+       ]
+      ]
+     },
+     "walk": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     },
+     "put_down": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     }
+    }
+   },
+   "retention": {
+    "value": 0.9963,
+    "limit": 0.99,
+    "hands": {
+     "left": {
+      "condition_frames": 136,
+      "lost_frames": 0,
+      "phases": {
+       "lift": {
+        "frames": 0,
+        "ranges": []
+       },
+       "walk": {
+        "frames": 0,
+        "ranges": []
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 22,
+       "walk": 98,
+       "put_down": 16
+      }
+     },
+     "right": {
+      "condition_frames": 136,
+      "lost_frames": 1,
+      "phases": {
+       "lift": {
+        "frames": 0,
+        "ranges": []
+       },
+       "walk": {
+        "frames": 1,
+        "ranges": [
+         [
+          36,
+          37
+         ]
+        ]
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 22,
+       "walk": 98,
+       "put_down": 16
+      }
+     }
+    }
+   },
+   "support_drift": {
+    "source": "construction",
+    "limit_m": 0.01,
+    "windows_over_limit": {
+     "left": [],
+     "right": []
+    }
+   }
+  }
+ },
+ "rules": "T14 step 9e: where (lift / walk / put down) and which body parts make a front-back level fail. Diagnostic only (read\nonly, CPU); the verdict itself is step9_eval.py's eval.json and is not changed here.\n\nPhases from the level's gates file (walk = [w0, w1) of the demonstration; partner frames use the same clip frame):\nlift = [0, w0), walk = [w0, w1), put down = [w1, T). For each robot, with the verdict's own quantities (shared_eval.evaluate):\n  * non-hand penetration: additional proxy penetration per frame = max(0, -non-hand proxy clearance of the robot vs the shared\n    target) - the source robot's own penetration vs the source box at the same frame (V0 round 2); frames above the 0.01 m\n    limit per phase, the deepest value per phase, and the robot links of the CollisionProxy witnesses on those frames;\n  * two-robot clearance: frames with cross-robot proxy clearance < -0.01 m per phase, the link pairs of the witnesses;\n  * contact retention: condition frames (person's hand within 0.10 m of its box and the object moving > 0.03 m/s) on which\n    the robot hand's exact signed distance is < -0.02 m, per phase and hand;\n  * support drift (round-6 windows, step9_eval --r1-source as in eval.json): per foot, the windows whose added drift exceeds\n    0.01 m, their frames and phase.\nWrites one json per level (default <level dir>/diag9e.json).\n\n    sonic_s1/bin/python -B system1/t14/objects/step9e_diag.py --level-dir <dir with r0/ r1/ eval.json> --source <source solve>\n        --gates <gates_m<tag>.json> [--out <json>]\n",
+ "robot_robot": {
+  "limit_m": -0.01,
+  "min_m": -0.0394,
+  "phases": {
+   "lift": {
+    "frames": 1,
+    "ranges": [
+     [
+      0,
+      1
+     ]
+    ],
+    "deepest_m": 0.0128,
+    "link_pairs": [
+     [
+      "r0 head_link / r1 head_link",
+      1
+     ]
+    ]
+   },
+   "walk": {
+    "frames": 0,
+    "ranges": [],
+    "link_pairs": []
+   },
+   "put_down": {
+    "frames": 5,
+    "ranges": [
+     [
+      132,
+      137
+     ]
+    ],
+    "deepest_m": 0.0394,
+    "link_pairs": [
+     [
+      "r0 head_link / r1 head_link",
+      5
+     ]
+    ]
+   }
+  }
+ }
+}

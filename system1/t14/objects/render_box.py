@@ -267,6 +267,14 @@ def main():
         lines = [lab, f"盒长 {x['length_along_axis_m']:.2f} m", f"保持率 {x['contact_retention']['pooled']}", f"最大穿透 {max(x['max_penetration_cm'].values()):.2f} cm",
                  f"两机最小距离 {x['robot_robot_min_distance_cm']:.1f} cm", f"相交帧 {x['robot_robot_intersect_frames']}",
                  f"脚漂移最大 r0 {max((v['drift_max_cm'] or 0) for k, v in x['foot_slide'].items() if k.startswith('r0')):.1f} / r1 {max((v['drift_max_cm'] or 0) for k, v in x['foot_slide'].items() if k.startswith('r1')):.1f} cm"]
+        for s_ in x.get("verdict_lines") or []:  # step 9g item 4 (optional field): the level's verdict under both non-hand measures,
+            cur = ""                             # wrapped to the header column
+            for ch in s_:
+                if cur and ch not in "）、，；" and dd.textlength(cur + ch, font=small) > HW - 20:
+                    lines.append(cur)
+                    cur = "  "
+                cur += ch
+            lines.append(cur)
         for j, s_ in enumerate(lines):
             dd.text((10, 10 + 32 * j), s_, fill=(0, 0, 0), font=font if j == 0 else small)
         grid.paste(hd, (0, GH * i))

@@ -1,0 +1,347 @@
+{
+ "level_dir": "logs_system1/t14/step9g/sub3_largebox_030/m1p00",
+ "T": 135,
+ "walk": [
+  15,
+  116
+ ],
+ "applicable": false,
+ "failed": [
+  "V0 non-hand penetration r0",
+  "V0 non-hand penetration r1",
+  "V0 robot-robot clearance",
+  "section-4 contact retention >= 0.99"
+ ],
+ "source_penetration_max_m": 0.0198,
+ "robots": {
+  "r0": {
+   "nonhand": {
+    "limit_m": 0.01,
+    "value_m": 0.0329,
+    "phases": {
+     "lift": {
+      "frames": 1,
+      "ranges": [
+       [
+        1,
+        2
+       ]
+      ],
+      "deepest_m": 0.0113,
+      "links": [
+       [
+        "right_wrist_pitch_link",
+        1
+       ]
+      ]
+     },
+     "walk": {
+      "frames": 37,
+      "ranges": [
+       [
+        60,
+        81
+       ],
+       [
+        90,
+        92
+       ],
+       [
+        93,
+        107
+       ]
+      ],
+      "deepest_m": 0.0329,
+      "links": [
+       [
+        "torso_link",
+        37
+       ]
+      ]
+     },
+     "put_down": {
+      "frames": 0,
+      "ranges": [],
+      "links": []
+     }
+    }
+   },
+   "retention": {
+    "value": 0.9552,
+    "limit": 0.99,
+    "hands": {
+     "left": {
+      "condition_frames": 134,
+      "lost_frames": 3,
+      "phases": {
+       "lift": {
+        "frames": 1,
+        "ranges": [
+         [
+          1,
+          2
+         ]
+        ]
+       },
+       "walk": {
+        "frames": 2,
+        "ranges": [
+         [
+          80,
+          82
+         ]
+        ]
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 14,
+       "walk": 101,
+       "put_down": 19
+      }
+     },
+     "right": {
+      "condition_frames": 134,
+      "lost_frames": 9,
+      "phases": {
+       "lift": {
+        "frames": 9,
+        "ranges": [
+         [
+          1,
+          10
+         ]
+        ]
+       },
+       "walk": {
+        "frames": 0,
+        "ranges": []
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 14,
+       "walk": 101,
+       "put_down": 19
+      }
+     }
+    }
+   },
+   "support_drift": {
+    "source": "same frame",
+    "limit_m": 0.01,
+    "windows_over_limit": {
+     "left": [],
+     "right": []
+    }
+   }
+  },
+  "r1": {
+   "nonhand": {
+    "limit_m": 0.01,
+    "value_m": 0.0553,
+    "phases": {
+     "lift": {
+      "frames": 1,
+      "ranges": [
+       [
+        1,
+        2
+       ]
+      ],
+      "deepest_m": 0.0111,
+      "links": [
+       [
+        "left_wrist_pitch_link",
+        1
+       ]
+      ]
+     },
+     "walk": {
+      "frames": 42,
+      "ranges": [
+       [
+        63,
+        80
+       ],
+       [
+        86,
+        107
+       ],
+       [
+        112,
+        116
+       ]
+      ],
+      "deepest_m": 0.0553,
+      "links": [
+       [
+        "torso_link",
+        38
+       ],
+       [
+        "right_hip_yaw_link",
+        4
+       ]
+      ]
+     },
+     "put_down": {
+      "frames": 5,
+      "ranges": [
+       [
+        116,
+        121
+       ]
+      ],
+      "deepest_m": 0.0406,
+      "links": [
+       [
+        "right_hip_yaw_link",
+        5
+       ]
+      ]
+     }
+    }
+   },
+   "retention": {
+    "value": 0.959,
+    "limit": 0.99,
+    "hands": {
+     "left": {
+      "condition_frames": 134,
+      "lost_frames": 9,
+      "phases": {
+       "lift": {
+        "frames": 9,
+        "ranges": [
+         [
+          1,
+          10
+         ]
+        ]
+       },
+       "walk": {
+        "frames": 0,
+        "ranges": []
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 14,
+       "walk": 101,
+       "put_down": 19
+      }
+     },
+     "right": {
+      "condition_frames": 134,
+      "lost_frames": 2,
+      "phases": {
+       "lift": {
+        "frames": 0,
+        "ranges": []
+       },
+       "walk": {
+        "frames": 2,
+        "ranges": [
+         [
+          80,
+          82
+         ]
+        ]
+       },
+       "put_down": {
+        "frames": 0,
+        "ranges": []
+       }
+      },
+      "condition_by_phase": {
+       "lift": 14,
+       "walk": 101,
+       "put_down": 19
+      }
+     }
+    }
+   },
+   "support_drift": {
+    "source": "construction",
+    "limit_m": 0.01,
+    "windows_over_limit": {
+     "left": [],
+     "right": []
+    }
+   }
+  }
+ },
+ "rules": "T14 step 9e: where (lift / walk / put down) and which body parts make a front-back level fail. Diagnostic only (read\nonly, CPU); the verdict itself is step9_eval.py's eval.json and is not changed here.\n\nPhases from the level's gates file (walk = [w0, w1) of the demonstration; partner frames use the same clip frame):\nlift = [0, w0), walk = [w0, w1), put down = [w1, T). For each robot, with the verdict's own quantities (shared_eval.evaluate):\n  * non-hand penetration: additional proxy penetration per frame = max(0, -non-hand proxy clearance of the robot vs the shared\n    target) - the source robot's own penetration vs the source box at the same frame (V0 round 2); frames above the 0.01 m\n    limit per phase, the deepest value per phase, and the robot links of the CollisionProxy witnesses on those frames;\n  * two-robot clearance: frames with cross-robot proxy clearance < -0.01 m per phase, the link pairs of the witnesses;\n  * contact retention: condition frames (person's hand within 0.10 m of its box and the object moving > 0.03 m/s) on which\n    the robot hand's exact signed distance is < -0.02 m, per phase and hand;\n  * support drift (round-6 windows, step9_eval --r1-source as in eval.json): per foot, the windows whose added drift exceeds\n    0.01 m, their frames and phase.\nWrites one json per level (default <level dir>/diag9e.json).\n\n    sonic_s1/bin/python -B system1/t14/objects/step9e_diag.py --level-dir <dir with r0/ r1/ eval.json> --source <source solve>\n        --gates <gates_m<tag>.json> [--out <json>]\n",
+ "robot_robot": {
+  "limit_m": -0.01,
+  "min_m": -0.1639,
+  "phases": {
+   "lift": {
+    "frames": 4,
+    "ranges": [
+     [
+      0,
+      4
+     ]
+    ],
+    "deepest_m": 0.1639,
+    "link_pairs": [
+     [
+      "r0 head_link / r1 head_link",
+      4
+     ]
+    ]
+   },
+   "walk": {
+    "frames": 51,
+    "ranges": [
+     [
+      62,
+      83
+     ],
+     [
+      86,
+      116
+     ]
+    ],
+    "deepest_m": 0.0648,
+    "link_pairs": [
+     [
+      "r0 right_rubber_hand_link / r1 left_rubber_hand_link",
+      51
+     ]
+    ]
+   },
+   "put_down": {
+    "frames": 19,
+    "ranges": [
+     [
+      116,
+      135
+     ]
+    ],
+    "deepest_m": 0.1226,
+    "link_pairs": [
+     [
+      "r0 head_link / r1 head_link",
+      18
+     ],
+     [
+      "r0 right_rubber_hand_link / r1 left_rubber_hand_link",
+      1
+     ]
+    ]
+   }
+  }
+ }
+}

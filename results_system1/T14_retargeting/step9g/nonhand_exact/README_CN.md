@@ -6,7 +6,7 @@
   - 重判：03:25:42–03:27:25。用时：9g 调试 3 条 8 档 6.5 s，9f 138 档 62.9 s，第 8 步重跑 57 个候选 38.7 s。
 - **机器：**kevin-Legion-R9000P-ADR10，只用 CPU，1 个进程。另外 5 个进程同时在跑第 2 条的 22 条片段。
 - **没有重新求解。**判定里只换了非手部位穿透这一项，其余各项原样保留。
-- **9g 的 22 条片段**跑完后，用同一个脚本重判，结果另放在 `../all22/`。
+- **9g 的 22 条片段**跑完后，用同一个脚本重判（05:03:24–05:03:37，118 个评测档，6 个进程，13 s），结果在本目录 `step9g_all22_nonhand_exact.csv / .json`，汇总在 `../README_CN.md`。
 
 ## 结论
 
@@ -135,5 +135,6 @@
 - `step8b_nonhand_exact.csv/json`、`step9f_nonhand_exact.csv/json`、`step9g_debug3_nonhand_exact.csv/json`：
   - 每行一个候选或一个档：旧判定、旧值、新值、新值所在帧和部位、超过门槛的帧数和部位、新判定。
   - json 里是每条序列或片段的汇总；第 8 步重跑另有按规则的选择。
-- `records/`：`run.sh`、`run.log`。每档的新量法明细在本地 `logs_system1/t14/rejudge_exact/`。
+- `step9g_all22_nonhand_exact.csv/json`：9g 22 条片段，同上口径（第 2 条）。
+- `records/`：`run.sh`、`run_log.txt`；22 条的命令在 `../records/post22.sh`，输出 `records/step9g_all22_log.txt`。每档的新量法明细在本地 `logs_system1/t14/rejudge_exact/`。
 - `SHA256SUMS`。
