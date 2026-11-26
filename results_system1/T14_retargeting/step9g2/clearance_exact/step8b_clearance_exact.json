@@ -1,0 +1,127 @@
+{
+ "rules": "T14 step 9g, second fix, item 1 (Kevin 2026-11-26 10:2x): re-judge the two-robot clearance with the actual collision shapes,\nas the reported \"two-robot minimum distance\" already is (shared_eval / step9_eval: dual_stretch.PairCollision depth=\"exact\" =\nthe 23 PhysX link shapes of both robots, every cross-robot link pair, mj_geomDistance); the cross-robot OBB proxy\n(reference_geometry_round2_checks.CollisionProxy, robot_robot_clearance_m) is no longer used. Limit unchanged: >= -0.01 m.\nOnly the verdict is recomputed: the exact minimum distance is the one stored in each eval.json (robot_robot_min_distance_cm,\ncomputed on the same frames as the proxy); no solve and no geometry is re-run. Read only.\n\nThree verdicts side by side per evaluated level / candidate:\n  A  non-hand penetration on the per-link boxes, clearance on the OBB proxies (the verdict of the run itself; step8b: the\n     round-6 re-judge it reported);\n  B  non-hand penetration on the collision shapes (step 9g item 1, rejudge_nonhand_exact.py tables), clearance on the proxies;\n  C  both on the collision shapes (this script): B with \"V0 robot-robot clearance\" decided by the exact minimum distance.\nEvery other item as it was. step8b: Push / Pull selection rule as step8b_compare.py (applicable candidates, smallest joint fit\nerror rounded to 1e-10, ties by ID), under A, B and C.\n\n    python3 system1/t14/objects/rejudge_clearance_exact.py --set step9g --nonhand <rejudge_nonhand_exact csv> --logdir logs_system1/t14/step9g         --out <dir> [--name <stem>]\n",
+ "command": "system1/t14/objects/rejudge_clearance_exact.py --set step8b --nonhand results_system1/T14_retargeting/step9g/nonhand_exact/step8b_nonhand_exact.csv --out results_system1/T14_retargeting/step9g2/clearance_exact",
+ "nonhand_table": "results_system1/T14_retargeting/step9g/nonhand_exact/step8b_nonhand_exact.csv",
+ "summary": {
+  "largeboxc": {
+   "evaluated": 8,
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [],
+   "selected_A": null,
+   "selected_B": null,
+   "selected_C": null,
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  },
+  "pull": {
+   "evaluated": 2,
+   "applicable_A": [
+    "c05"
+   ],
+   "applicable_B": [
+    "c05"
+   ],
+   "applicable_C": [
+    "c05"
+   ],
+   "selected_A": "c05",
+   "selected_B": "c05",
+   "selected_C": "c05",
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  },
+  "push": {
+   "evaluated": 23,
+   "applicable_A": [
+    "c09",
+    "c15",
+    "c27",
+    "c31",
+    "c41",
+    "c43"
+   ],
+   "applicable_B": [
+    "c00",
+    "c04",
+    "c06",
+    "c09",
+    "c13",
+    "c15",
+    "c18",
+    "c20",
+    "c27",
+    "c31",
+    "c41",
+    "c43",
+    "c48",
+    "c50"
+   ],
+   "applicable_C": [
+    "c00",
+    "c04",
+    "c06",
+    "c09",
+    "c13",
+    "c15",
+    "c18",
+    "c20",
+    "c27",
+    "c31",
+    "c41",
+    "c43",
+    "c48",
+    "c50"
+   ],
+   "selected_A": "c09",
+   "selected_B": "c00",
+   "selected_C": "c00",
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": true
+  },
+  "smallboxb": {
+   "evaluated": 4,
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [],
+   "selected_A": null,
+   "selected_B": null,
+   "selected_C": null,
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  },
+  "smallboxc": {
+   "evaluated": 8,
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [],
+   "selected_A": null,
+   "selected_B": null,
+   "selected_C": null,
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  },
+  "suitcaseb": {
+   "evaluated": 4,
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [],
+   "selected_A": null,
+   "selected_B": null,
+   "selected_C": null,
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  },
+  "suitcasec": {
+   "evaluated": 8,
+   "applicable_A": [],
+   "applicable_B": [],
+   "applicable_C": [],
+   "selected_A": null,
+   "selected_B": null,
+   "selected_C": null,
+   "selection_changed_B_to_C": false,
+   "selection_changed_A_to_C": false
+  }
+ }
+}
