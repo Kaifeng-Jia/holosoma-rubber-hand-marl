@@ -1,0 +1,21 @@
+# T14 一前一后训练任务：参考截图（开训前给 Kevin 看）
+
+- **依据：**Kevin 2026-11-26 决定（"T14 第 9g2 步之后"）第二项第 1、2、6 条。本文件 2026-11-27 00:25（纽约）写入，后续阶段会在这里补。
+- **参考：**sub8_suitcase_020，1.0 倍。直接取 9g2 已有的求解结果，没有重解：`logs_system1/t14/step9g2/sub8_suitcase_020/m1p00`，判定 C 适用。
+  - 构造代码冻结在 `b170599`，即 9g2 运行时的 commit。`frontback.py`、`role_solve.py`、`partner.py`、`step9_eval.py`、`step9_gates.py` 从那以后没有改动，sha256 记在 `source_manifest.json`。
+  - 30 Hz 双机参考有 60 帧（OMOMO 序列帧 103–162），原样复制。
+  - 用 Table 参考当时用的转换脚本 `scripts/synthesize_core4d_smalltable_runtime_reference.py` 转成 50 Hz，得到 99 帧（1.96 s）。在时间对齐的帧上，关节、根、物体和 30 Hz 原值的差都是 0。
+- **箱子：**构造里 1.0 倍的加长箱子，0.192 × 0.562 × 0.376 m，单个 box 碰撞体，原点在箱子中心。
+  - 质量 5 kg，惯量按均匀密度箱子算。
+  - 摩擦和恢复系数取 Table Transport 的（0.5, 0.5, 0），和桌子一样通过实验配置设置，不写在 URDF 里。
+- **资产：**`src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/`（清单 `t14_reference.json`），生成脚本 `system1/t14/frontback_train/prepare_reference.py`。
+- **截图：**`reference/frontback_reference_sidebyside.jpg`，脚本 `system1/t14/frontback_train/render_reference.py`。
+  - 画的是 50 Hz 训练参考本身。
+  - 三个时刻按事先写好的规则取：
+    - 抱起 = 箱子高度第一次比第 0 帧高 2 cm，参考帧 2；
+    - 走路中段 = 两台骨盆的平均水平位移第一次达到全程一半，参考帧 55；
+    - 放下 = 箱子高度最后一次比末帧高 2 cm，参考帧 96。
+- **视频：**Drive `DuetMimic_transfer/T14_frontback/frontback_reference_sub8_suitcase_020_m1p00.mp4`，左边是人，右边是两台机器人，50 Hz 全程。清单见 `drive_manifest.csv`。
+- **参考本身的一个事实：**箱子在第 0 帧离地 4.5 cm，最后一帧离地 6.2 cm（箱底最低点，箱子水平没有倾斜），整段参考里箱子都没有着地。
+  - 原因是 OMOMO 的这个片段从"离地"开始、到"落地"之前结束：前后紧挨着的 96–102 帧、163–170 帧是 floor 段。
+  - 这一点没有改。

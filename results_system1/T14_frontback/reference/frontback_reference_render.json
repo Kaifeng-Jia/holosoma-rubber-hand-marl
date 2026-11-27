@@ -1,0 +1,39 @@
+{
+ "rules": "T14 front-back training task, item 2.6 (Kevin 2026-11-26): pictures of the training reference before training. Render only,\nCPU (MuJoCo EGL), step-9 picture style (render_box.py: Fig. 4 look, Unitree grey robots, light-blue box, chequered floor).\n\nWhat is drawn: the 50 Hz training reference itself (system1_t14fb/table/core4d_pair_runtime_fps50.npz: both robots' root pose\nand joints, the box pose) with the training URDF box (5 kg, size of the construction's level-1.0 box), next to the person of\nthe OMOMO clip (sub8_suitcase_020, sequence frames 103-162, 30 Hz; person frame = 103 + round(0.6 k) for reference frame k).\nThree moments, fixed by rule on the reference before looking at the pictures:\n  * 抱起 (lift): first frame whose box height exceeds the first frame's by 2 cm;\n  * 走路中段 (mid-walk): first frame at which the mean horizontal pelvis displacement of the two robots (from frame 0, along the\n    net displacement direction) reaches half of its value at the last frame;\n  * 放下 (put down): last frame whose box height exceeds the last frame's by 2 cm.\nSheet: one row per moment; columns = the person with the captured object (close-up as render_box), robot 0 close-up (robot 1\nhidden), both robots (full view). Video (--video-out): left the person, right both robots, the whole reference at 50 Hz.\n\n    CUDA_VISIBLE_DEVICES= MUJOCO_GL=egl PYOPENGL_PLATFORM=egl __EGL_VENDOR_LIBRARY_FILENAMES=/usr/share/glvnd/egl_vendor.d/50_mesa.json       sonic_s1/bin/python -B system1/t14/frontback_train/render_reference.py --out results_system1/T14_frontback/reference       --video-out exports_system1/T14_videos/frontback_train\n",
+ "moments_reference_frame": {
+  "lift": 2,
+  "mid_walk": 55,
+  "put_down": 96
+ },
+ "moments_person_sequence_frame": {
+  "lift": 104,
+  "mid_walk": 136,
+  "put_down": 161
+ },
+ "object_height_m": {
+  "lift": 0.2566382486195458,
+  "mid_walk": 0.7632938197385014,
+  "put_down": 0.2712149110641494
+ },
+ "object_height_first_last_m": [
+  0.23333776999792888,
+  0.24991118532032314
+ ],
+ "sheet": {
+  "file": "frontback_reference_sidebyside.jpg",
+  "jpeg_quality": 90
+ },
+ "inputs": {
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/frontback_box5kg_training.urdf": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/t14_reference.json": "7ee4f8f177d594498cc039bc441db321d1846e904a3a17c2caa7ff429ece2551",
+  "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r0/run_record.json": "051007c5b0bcff87c95080b5a056f1ab40f76d462d9a890c7bb9a5489054cbc7"
+ },
+ "video": {
+  "file": "exports_system1/T14_videos/frontback_train/frontback_reference_sub8_suitcase_020_m1p00.mp4",
+  "bytes": 425586,
+  "sha256": "18afdeba2225ef8cbb01f9e677892a9b524c170d977f1554d8f005e9818e8cea",
+  "fps": 50,
+  "frames": 99
+ }
+}

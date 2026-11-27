@@ -1,0 +1,64 @@
+{
+  "decision": "Kevin 2026-11-26: front-back training task = D on the Table Transport path; reference sub8_suitcase_020, level 1.0, frozen 9g2 construction; object = the construction's lengthened box, 5 kg, Table Transport friction",
+  "files": {
+    "interaction_artifact": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/interaction_vectors_v1.npz",
+      "sha256": "c2b6d7308387da0b494221d39b7b08f740c7bd4c9539aeefb8029cb555df85ef"
+    },
+    "object_urdf": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/frontback_box5kg_training.urdf",
+      "sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97"
+    },
+    "runtime_reference": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz",
+      "sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b"
+    },
+    "source_manifest": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/source_manifest.json",
+      "sha256": "a1ffeceb3d912f82b21f7ba62b4f50cb1ddd7f0d71e1fdc1ae9f99c3235b64ce"
+    },
+    "source_pair": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/sub8_suitcase_020_m1p00_pair_fps30.npz",
+      "sha256": "c72213006c9392ab75ede96e7750164ea1c293ab52a2230acee6dfbc7a587849"
+    },
+    "training_promotion": {
+      "path": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/training_asset_manifest.json",
+      "sha256": "6c449811c88f1199c41dc7d34c10f0bef87f350a23fc87aba5e1d40887b2db7b"
+    }
+  },
+  "name": "t14_frontback_sub8_suitcase_020_m1p00",
+  "object_replacement": {
+    "box_size_m": [
+      0.192391586,
+      0.561845118,
+      0.376174771
+    ],
+    "material_static_dynamic_restitution": [
+      0.5,
+      0.5,
+      0.0
+    ],
+    "object_mass_kg": 5.0,
+    "object_name": "frontback_box",
+    "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/frontback_box5kg_training.urdf",
+    "object_urdf_sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+    "reference_fps": 50,
+    "reference_frames": 99
+  },
+  "parent_experiment": "smalltable5kg_A",
+  "schema": "system1_t14_reference_v1",
+  "t14_solve_dirs": [
+    "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r0",
+    "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r1"
+  ],
+  "task": "table",
+  "unchanged_vs_table": {
+    "experiment": "smalltable5kg_A",
+    "fps": 50,
+    "material": true,
+    "object_mass_kg": true,
+    "object_points_seed42": true,
+    "reward_formulas": true,
+    "robot_urdf": true
+  }
+}

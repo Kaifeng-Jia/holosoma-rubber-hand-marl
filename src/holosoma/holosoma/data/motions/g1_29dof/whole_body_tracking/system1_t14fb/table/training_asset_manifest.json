@@ -1,0 +1,39 @@
+{
+  "allowed_reward_variant": "A",
+  "contact_target": "not_used_for_smalltable_A",
+  "control_hz": 50,
+  "experiment_id": "smalltable5kg_A",
+  "fixed_chain_reference_equivalence_max_m": 4.494775313252277e-16,
+  "formal_training_authorized": false,
+  "interaction_artifact_sha256": "c2b6d7308387da0b494221d39b7b08f740c7bd4c9539aeefb8029cb555df85ef",
+  "object_box_size_m": [
+    0.192391586,
+    0.561845118,
+    0.376174771
+  ],
+  "object_collider_type": "convex_hull",
+  "object_inertia": "uniform-density box",
+  "object_mass_kg": 5.0,
+  "object_material_static_dynamic_restitution": [
+    0.5,
+    0.5,
+    0.0
+  ],
+  "object_name": "frontback_box",
+  "object_points": 100,
+  "physics_hz": 200,
+  "physics_loading_check": "pending: front-back smoke (system1/t14/frontback_train)",
+  "preparation_script_sha256": "b0d8ae5e2d34ff5d8d73df94cca7c8d3720448adc7c51940983c900443751aa7",
+  "reference_fps": 50,
+  "reference_frames": 99,
+  "runtime_reference_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+  "source_pair_sha256": "c72213006c9392ab75ede96e7750164ea1c293ab52a2230acee6dfbc7a587849",
+  "system1_t14_reference": {
+    "runtime_source": "exports_system1/T14_references/frontback_train/sub8_suitcase_020_m1p00/core4d_pair_runtime_fps50.npz",
+    "source": "T14 front-back, sub8_suitcase_020, level 1.0, frozen 9g2 construction",
+    "table_manifest_sha256": "9716fe3a4240b550c97c71db089d0ace8ac9e93bacca0700fa6aaf243f9bb145"
+  },
+  "training_object_urdf_sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+  "training_ready": true,
+  "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+}

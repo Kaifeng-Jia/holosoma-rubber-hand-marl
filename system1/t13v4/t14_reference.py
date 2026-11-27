@@ -176,16 +176,31 @@ def table_experiment(experiment, manifest_path):
     if experiment.experiment_id != d["parent_experiment"]:
         raise ValueError("T14 Table reference is for smalltable5kg_A only")
     f = d["files"]
-    if f["object_urdf"]["sha256"] != experiment.object_urdf_sha256:
+    ob = d.get("object_replacement")  # T14 front-back task (Kevin 2026-11-26): another object on the same path; absent = as before
+    if ob is None and f["object_urdf"]["sha256"] != experiment.object_urdf_sha256:
         raise ValueError("T14 Table reference must keep the training URDF")
+    if ob is not None:
+        if (ob["object_urdf"] != f["object_urdf"]["path"] or ob["object_urdf_sha256"] != f["object_urdf"]["sha256"]
+                or float(ob["object_mass_kg"]) != experiment.object_mass_kg
+                or tuple(float(x) for x in ob["material_static_dynamic_restitution"]) != tuple(experiment.material_static_dynamic_restitution)
+                or int(ob["reference_fps"]) != experiment.reference_fps):
+            raise ValueError("T14 object replacement must keep the Table Transport mass, material and fps")
+        with np.load(PACKAGE / f["runtime_reference"]["path"], allow_pickle=False) as z:
+            if int(z["agent_joint_pos"].shape[0]) != int(ob["reference_frames"]):
+                raise ValueError("object replacement: reference_frames differs from the runtime reference")
     prom = json.loads((PACKAGE / f["training_promotion"]["path"]).read_text())
     if prom.get("training_ready") is not True or prom["runtime_reference_sha256"] != f["runtime_reference"]["sha256"]:
         raise ValueError("T14 Table promotion manifest inconsistent")
     new = replace(experiment, source_pair_sha256=f["source_pair"]["sha256"],
                   runtime_reference_file=f["runtime_reference"]["path"], runtime_reference_sha256=f["runtime_reference"]["sha256"],
                   training_promotion_file=f["training_promotion"]["path"], training_promotion_sha256=f["training_promotion"]["sha256"])
+    if ob is not None:
+        new = replace(new, object_name=ob["object_name"], object_urdf_file=ob["object_urdf"], object_urdf_sha256=ob["object_urdf_sha256"],
+                      reference_frames=int(ob["reference_frames"]))
     return new, dict(manifest=str(Path(manifest_path).resolve().relative_to(ROOT)), manifest_sha256=msha, name=d["name"],
-                     runtime_reference_sha256=f["runtime_reference"]["sha256"])
+                     runtime_reference_sha256=f["runtime_reference"]["sha256"],
+                     **({} if ob is None else dict(object_replacement=dict(object_urdf_sha256=ob["object_urdf_sha256"],
+                                                                         reference_frames=int(ob["reference_frames"])))))
 
 
 def check_labels(labels_npz, manifest_path, task):

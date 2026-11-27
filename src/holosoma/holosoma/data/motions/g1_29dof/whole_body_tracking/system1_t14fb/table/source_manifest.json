@@ -1,0 +1,44 @@
+{
+ "pair_sha256": "c72213006c9392ab75ede96e7750164ea1c293ab52a2230acee6dfbc7a587849",
+ "kind": "t14_step9g2_frontback",
+ "decision": "Kevin 2026-11-26: front-back training reference = sub8_suitcase_020, level 1.0, frozen 9g2 construction",
+ "sequence": "sub8_suitcase_020",
+ "clip_frames_omomo_30hz": "103:163",
+ "level_m": 1.0,
+ "construction": "frontback, --fb-turn world --fb-legs mirror --fb-walk-distance pelvis_feet --fb-human-frame target (step 9g2)",
+ "eval": "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/eval.json",
+ "eval_sha256": "d90e09eff2df417f269ea1173e8e2a4b79102c254a8db04a43353127082fefc2",
+ "verdict_C_applicable": true,
+ "solve_dirs": [
+  "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r0",
+  "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r1"
+ ],
+ "solve_run_record_sha256": [
+  "051007c5b0bcff87c95080b5a056f1ab40f76d462d9a890c7bb9a5489054cbc7",
+  "dd88aa02cec934e8907b40dd34158ba05234750c85a9988ceaf66b07b9b5b92c"
+ ],
+ "target_box_urdf": "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00/r0/assets_target/suitcase.urdf",
+ "target_box_urdf_sha256": "c19155819e1b797be830d64b35e756767bbfdafc0feacdc140688386340c829c",
+ "construction_code": {
+  "system1/t14/objects/frontback.py": {
+   "sha256": "5cdd5479652e6b6a5e7dced0c7be185a5c2b0ba753833450a14184573472a655",
+   "last_commit": "b170599fe07f47757fe6be06bd6a3330b1b96a05"
+  },
+  "system1/t14/objects/role_solve.py": {
+   "sha256": "5335add623b22f222a8858efb390eb96c2a1cbf769a36481e93eccd372ac8699",
+   "last_commit": "b170599fe07f47757fe6be06bd6a3330b1b96a05"
+  },
+  "system1/t14/objects/partner.py": {
+   "sha256": "f33aafafdd4c28741622d29e58ec8f9dcdc267059c6880409a2984984d8733be",
+   "last_commit": "5de0867e5d87c606477c5ee31bdd15f5e1031945"
+  },
+  "system1/t14/objects/step9_eval.py": {
+   "sha256": "2915b244a2afbf67b26a4d8bdda29d34070bf6b08145cc8345d9dd71c5d0d8d3",
+   "last_commit": "799bb9b9b6d843f46a267ab38b9b2b1f917e1044"
+  },
+  "system1/t14/objects/step9_gates.py": {
+   "sha256": "2740d616237cd4500a51beb58c8c4feb91adf458cfb7e7bf9546798543cdd5dc",
+   "last_commit": "b170599fe07f47757fe6be06bd6a3330b1b96a05"
+  }
+ }
+}
