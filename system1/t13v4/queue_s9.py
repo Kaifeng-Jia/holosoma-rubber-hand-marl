@@ -2,9 +2,15 @@
 """Kevin 2026-11-27: one machine queue for T13 section 9 (continued runs to counted 10000) and the T14 front-back training task,
 on the cloud machines 199 / 196 / 210 (opened by the cloud Claude; this script never starts a machine).
 
-Queue, longest expected run first (Kevin): d_frontback -> d_push_to10k -> d_table_to10k -> c_out_push_to10k. A task is "ready"
-when its local smoke passed (d_frontback: logs_system1/t14/frontback_train/smoke, smoke.json passed and the T10 gate summary
-passed; *_to10k: continue_prep.py --smoke, smoke.json passed).
+Queue (Kevin 2026-11-27, second decision): d_push_to10k -> d_table_to10k -> c_out_push_to10k -> d_frontback (first version:
+d_frontback first). A task is "ready" when its local smoke passed (d_frontback: logs_system1/t14/frontback_train/smoke,
+smoke.json passed and the T10 gate summary passed; *_to10k: continue_prep.py --smoke, smoke.json passed), except Kevin's
+decisions in KEVIN (they replace the smoke result; recorded in the state file and the public table):
+  * c_out_push_to10k ready: the local smoke ran at 512 environments; the KL-adaptive actor learning rate depends on the batch,
+    so the smoke's actor learning-rate item does not count (rc 0 and every other item passed are still required); the judge is
+    cloud_runs.py's same section 9 resume check on the first 10 cloud iterations at 4096 environments (fails -> stopped, Kevin);
+  * d_frontback not ready: robot 1's left hand sits on the box's +y end face, unlike the person; Kevin chooses the training
+    clip after the grasp-face report, then puts it back in the queue.
 
 Every --poll seconds (default 600 = "每 10 分钟试连 SSH"), per machine:
   * not up yet: try ssh; reachable and idle (no process besides the platform's own, no GPU compute process; post_run.py's
@@ -53,7 +59,12 @@ from system1.t13v4.round2_launch import L, RUNS, S1, now, sha, ssh  # noqa: E402
 HOSTS = ROOT / "logs_system1/t13v4/cloud/hosts.json"
 STATE = ROOT / "logs_system1/t13v4/cloud/queue_state.json"
 PUB = ROOT / "results_system1/T13_runs/queue_status.json"
-QUEUE = ("d_frontback", "d_push_to10k", "d_table_to10k", "c_out_push_to10k")
+QUEUE = ("d_push_to10k", "d_table_to10k", "c_out_push_to10k", "d_frontback")  # Kevin 2026-11-27 (second decision)
+KEVIN = dict(  # Kevin 2026-11-27 readiness decisions (replace the local smoke result)
+    c_out_push_to10k=dict(ready="smoke rc 0 and every item but the actor learning rate passed",
+                          note="Kevin 2026-11-27: local 512-env actor learning-rate item does not count; judged by the cloud resume check at 4096 envs"),
+    d_frontback=dict(ready=False, note="Kevin 2026-11-27: not ready; Kevin chooses the training clip after the grasp-face report"),
+)
 MACHINES = ("199", "196", "210")
 WAIT_MAX = 3600  # s a free machine waits for a queued task that is not ready yet (e.g. awaiting Kevin), then shutdown by the rule
 ENV = f"source {S1}/s1_env.sh; [[ -f /etc/network_turbo ]] && source /etc/network_turbo; cd {S1}/duet-system1"
@@ -61,6 +72,16 @@ lock = threading.Lock()
 
 
 def ready(task):
+    k = KEVIN.get(task)
+    if k is not None and k["ready"] is False:
+        return False
+    if k is not None and task.endswith("_to10k"):
+        p = ROOT / "logs_system1/t13v4/continue" / task / "smoke/smoke.json"
+        if not p.exists():
+            return False
+        sm = json.loads(p.read_text())
+        items = (sm.get("check") or {}).get("items") or {}
+        return sm.get("rc") == 0 and bool(items) and all(v for kk, v in items.items() if kk != "ratio_actor_learning_rate_mean")
     if task == "d_frontback":
         sm = ROOT / "logs_system1/t14/frontback_train/smoke/train/d_frontback/smoke.json"
         g = ROOT / "logs_system1/t13v4/sim2sim/checks_d_frontback_smoke/summary.json"
@@ -365,6 +386,13 @@ def main():
     ap.add_argument("--dry-run", action="store_true", help="no shutdown, no launch, no state file / commit")
     a = ap.parse_args()
     q = Queue(a.dry_run)
+    if q.s["queue"] != list(QUEUE):
+        q.event("queue order changed (Kevin 2026-11-27)", old=q.s["queue"], new=list(QUEUE))
+        q.s["queue"] = list(QUEUE)
+    for t, k in KEVIN.items():
+        if q.s["tasks"][t].get("note") != k["note"]:
+            q.s["tasks"][t]["note"] = k["note"]
+            q.event("Kevin readiness decision", task=t, rule=k["ready"])
     q.event("queue started", ready={t: ready(t) for t in QUEUE}, local_head=q.local_head)
     q.save(commit=True)
     while True:
