@@ -51,12 +51,22 @@ PUSH = ["scripts/train_plan5_push.py", "--skill", "push", "--steps-per-env", "24
         "--t14-reference", f"{W}/push/t14_reference.json"]
 VAL_FLAGS = dict(table=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/table/t14_reference.json"],
                  push=["--obs-v1", "--critic-v1", "--t14-reference", f"{W}/push/t14_reference.json", "--push-placement-proof", PROOF])
+FB = "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/t14_reference.json"
+FB_LAB = "system1/t14/frontback_train/labels/frontback_m1p00_labels.npz"
+# T14 front-back training task (Kevin 2026-11-26): d_table exactly, only the reference manifest (front-back reference + 5 kg box)
+# and the contact labels made from it change; validation on its own copy of the Table validation states (same values)
+FRONTBACK = [FB if x == f"{W}/table/t14_reference.json" else FB_LAB if x == f"{LAB}/table_t14r6C_k1p0_labels.npz" else x for x in TABLE]
 COUT = ["--sonic-residual", "--sonic-tf32", "--sonic-residual-kind", "out", "--c-train-diag", "--t13v4-cout"]  # T03 C-out flags + round-2 switch
 RUNS = dict(d_table=dict(task="table", train=TABLE, warmup=0),
             d_push=dict(task="push", train=PUSH, warmup=50),
             d_table_pa=dict(task="table", train=[*TABLE, "--per-agent-reward"], warmup=0),
             c_out_table=dict(task="table", train=[*TABLE, *COUT], warmup=0, controller="sonic_residual", val_extra=["--t13v4-cout"]),
-            c_out_push=dict(task="push", train=[*PUSH, *COUT], warmup=50, controller="sonic_residual", val_extra=["--t13v4-cout"]))
+            c_out_push=dict(task="push", train=[*PUSH, *COUT], warmup=50, controller="sonic_residual", val_extra=["--t13v4-cout"]),
+            # fixed budget (Kevin 2026-11-26): train to the maximum (counted 10000 at 4096 environments), no stop rule; validation
+            # every val its for the curve only
+            d_frontback=dict(task="table", train=FRONTBACK, warmup=0, fixed_budget=True,
+                             val_flags=["--obs-v1", "--critic-v1", "--t14-reference", FB],
+                             val_states="system1/t14/frontback_train/states/table_validation_states.json"))
 BASE = dict(save=1000, val=2000, stop_after=8000, patience=4000, max_it=20000)
 
 
@@ -128,7 +138,11 @@ def main():
                     warmup_iterations=warm, counted_iteration="checkpoint file number - warmup_iterations",
                     applies_to="validation points, stop rule, maximum iterations, final checkpoint")
     plan = dict(run=a.run, task=run["task"], num_envs=a.num_envs, gpu=a.gpu, rules=R, iteration_counting=counting, warmup_iterations=warm, stages=stages,
-                validation_states=f"{STATES}/{run['task']}_validation_states.json", validation_flags=VAL_FLAGS[run["task"]])
+                validation_states=run.get("val_states", f"{STATES}/{run['task']}_validation_states.json"),
+                validation_flags=run.get("val_flags", VAL_FLAGS[run["task"]]))
+    if run.get("fixed_budget"):  # key absent for the T13 runs = unchanged plan
+        plan.update(fixed_budget=dict(decision="Kevin 2026-11-26: fixed training budget, counted iterations to max_it, no stop rule",
+                                      max_counted_iterations=R["max_it"]))
     if "controller" in run:  # round 2 (C-out): validation controller and extra flags (keys absent for round 1 = unchanged plan)
         plan.update(validation_controller=run["controller"], validation_extra=run["val_extra"])
     if a.dry_run:
@@ -164,7 +178,7 @@ def main():
             (d / "validation_curve.json").write_text(json.dumps(dict(sorted(state["curve"].items())), indent=1))
             vproc = None
             curve = {k: v for k, v in state["curve"].items() if v is not None}
-            if state["stopped"] is None and curve and stop_decision(curve, R) and proc is not None and proc.poll() is None:
+            if state["stopped"] is None and not run.get("fixed_budget") and curve and stop_decision(curve, R) and proc is not None and proc.poll() is None:
                 proc.send_signal(signal.SIGINT)
                 state["stopped"] = dict(time=now(), at_validation_iteration=vit, curve=dict(sorted(curve.items())))
             save()
@@ -173,7 +187,7 @@ def main():
             out = d / "validation" / f"it{it - warm:05d}"
             out.parent.mkdir(exist_ok=True)
             argv = [a.python, "-B", "scripts/evaluate_paper_supplement.py", "--case", run["task"], "--controller", run.get("controller", "policy"),
-                    *VAL_FLAGS[run["task"]], *run.get("val_extra", []),
+                    *plan["validation_flags"], *run.get("val_extra", []),
                     "--checkpoint", str(main_dir / f"model_{it:05d}.pt"), "--device", "cuda:0", "--states", plan["validation_states"],
                     "--model-id", f"t13v4_validation__{a.run}__it{it - warm:05d}", "--output-dir", str(out)]
             vlog = (d / "validation" / f"it{it - warm:05d}.stdout.log").open("w")

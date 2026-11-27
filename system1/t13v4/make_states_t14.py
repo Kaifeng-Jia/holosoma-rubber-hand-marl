@@ -73,10 +73,14 @@ def max_value_diff(a, b):
                    float(np.abs(np.subtract(sa[i]["robot_yaw_rad"], sb[i]["robot_yaw_rad"])).max())) for i in sa)
 
 
+DECISION = "Kevin 2026-11-24: T13 v4 section 0 item 4"
+OBJECT_URDF = None  # --frontback: the box URDF for the frame-0 check (default: the Table / Push objects, as before)
+
+
 def generate(case):
     man = json.loads(MANIFEST[case].read_text())
     block = dict(t14_reference=man["name"], t14_reference_manifest=str(MANIFEST[case].relative_to(ROOT)),
-                 t14_reference_manifest_sha256=sha(MANIFEST[case]), decision="Kevin 2026-11-24: T13 v4 section 0 item 4",
+                 t14_reference_manifest_sha256=sha(MANIFEST[case]), decision=DECISION,
                  generator="scripts/paper_evaluation_utils.make_states")
     pm2 = make_states(case, seed=TEST_SEED)
     pm8 = scaled(pm2, 4.0)
@@ -129,13 +133,13 @@ def check(case, recs):
     import dual_stretch as ds
     import eval_core4d_hulls as eh
     robot = cs.Robot("physx")
-    meshes = eh.dump_object_meshes("table", 1.0) if case == "table" else eh.urdf_box_meshes(ds.TABLE["push"][0])
+    meshes = (eh.urdf_box_meshes(OBJECT_URDF) if OBJECT_URDF is not None else
+              eh.dump_object_meshes("table", 1.0) if case == "table" else eh.urdf_box_meshes(ds.TABLE["push"][0]))
     ev = eh.ObjectRobotDistance(meshes, robot, depth="exact")
     pc = ds.PairCollision(robot, depth="exact")
     res = {}
     new = ROOT / "src/holosoma" / json.loads(MANIFEST[case].read_text())["files"]["runtime_reference" if case == "table" else "motion"]["path"]
-    for which, runtime in (("new", new),
-                           ("old", RUNTIME_OLD[case])):
+    for which, runtime in (("new", new),) + ((("old", RUNTIME_OLD[case]),) if OBJECT_URDF is None else ()):
         root, dof, jn, obj = frame0(case, runtime)
         perm = [jn.index(n) for n in robot.dofs]
         for name, rec in recs.items():
@@ -160,9 +164,24 @@ def check(case, recs):
 
 
 def main():
+    global OUT, DECISION, OBJECT_URDF
+    import argparse
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--frontback", action="store_true", help="T14 front-back training task (Kevin 2026-11-26): Table Transport states "
+                    "(same generators and seeds, case table) for the front-back reference, into system1/t14/frontback_train/states; "
+                    "old files = the T13 v4 Table files; frame-0 check on the box URDF (default: Table and Push, as before)")
+    a = ap.parse_args()
+    cases = ("table", "push")
+    if a.frontback:
+        MANIFEST["table"] = WBT / "system1_t14fb/table/t14_reference.json"
+        OBJECT_URDF = WBT / "system1_t14fb/table/frontback_box5kg_training.urdf"
+        OLD["table"] = {k: OUT / f"table_{k}_states.json" for k in ("pm2", "pm8", "validation")}
+        OUT = ROOT / "system1/t14/frontback_train/states"
+        DECISION = "Kevin 2026-11-26: T14 front-back training task, Table Transport test states"
+        cases = ("table",)
     OUT.mkdir(parents=True, exist_ok=True)
     summary = {}
-    for case in ("table", "push"):
+    for case in cases:
         files, recs = generate(case)
         summary[case] = dict(files=files, frame0_check=check(case, recs))
         print(case, json.dumps(summary[case], indent=1), flush=True)

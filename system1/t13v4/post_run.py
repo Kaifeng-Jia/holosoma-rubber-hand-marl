@@ -38,6 +38,8 @@ from zoneinfo import ZoneInfo
 ROOT = Path(__file__).resolve().parents[2]
 NY = ZoneInfo("America/New_York")
 CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
+CASE.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task (Kevin 2026-11-26); _smoke: pre-training T10 gate
+STATES_DIR = dict(d_frontback="system1/t14/frontback_train/states", d_frontback_smoke="system1/t14/frontback_train/states")
 SO = "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python"
 SIM = "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python"
 HS = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
@@ -227,7 +229,7 @@ class Pipe:
         ck = rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt"
         self.check(rec, "sha256 match" in txt and ck.exists(), dict(copyback=txt.strip().splitlines()[-1], final_checkpoint=ck.name, exists=ck.exists()))
         # 1b shut the cloud machine down (task book T13 section 8, 2026-11-26 03:20); never stops the local evaluation
-        if r.startswith("c_out_"):
+        if r.startswith("c_out_") or r == "d_frontback":  # d_frontback: T14 front-back task, "按 T13 的规则拷回、核对、关机"
             try:
                 self.cloud_shutdown(rd, ck, txt)
             except Exception as ex:  # noqa: BLE001  (no shutdown; reported; the local evaluation goes on)
@@ -309,7 +311,7 @@ class Pipe:
         ts = []
         for lv, cores in ((2, "0-3"), (8, "4-7")):
             cmd = ["taskset", "-c", cores, SIM, "-B", "system1/sim2sim/mj_eval.py", "--task", t, "--scheme", self.scheme, "--seed", seed, "--level", lv,
-                   "--dump", dd.relative_to(ROOT), "--states", f"system1/t13v4/states_t14r6C/{t}_pm{lv}_states.json", "--obs-v1", "--onnx", onnx,
+                   "--dump", dd.relative_to(ROOT), "--states", f"{STATES_DIR.get(r, 'system1/t13v4/states_t14r6C')}/{t}_pm{lv}_states.json", "--obs-v1", "--onnx", onnx,
                    "--checkpoint", ck.relative_to(ROOT), "--out", mj / f"{r}_pm{lv}"]
             ts.append(threading.Thread(target=lambda c=cmd, lv=lv: recs.append(self.sh(f"mujoco_pm{lv}", c, env=dict(CPU, OMP_NUM_THREADS="1")))))
         for x in ts:

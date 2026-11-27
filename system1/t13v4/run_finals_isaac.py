@@ -30,7 +30,9 @@ NY = ZoneInfo("America/New_York")
 PY = "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python"
 SLOTS = ("16-23", "24-31")
 STATES = ROOT / "system1/t13v4/states_t14r6C"
+STATES_RUN = dict(d_frontback=ROOT / "system1/t14/frontback_train/states", d_frontback_smoke=ROOT / "system1/t14/frontback_train/states")
 CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
+CASE.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task (Kevin 2026-11-26); _smoke: pre-training T10 gate
 
 
 def now():
@@ -58,7 +60,7 @@ def build(run, level, out, slot, noise="off"):
     argv = list(json.loads(val.read_text())["argv"])
     assert argv[2] == "scripts/evaluate_paper_supplement.py" and "--obs-v1" in argv, argv
     argv[0] = PY
-    states = STATES / f"{CASE[run]}_pm{level}_states.json"
+    states = STATES_RUN.get(run, STATES) / f"{CASE[run]}_pm{level}_states.json"
     name = f"{run}_pm{level}" + ("_noise_on" if noise == "on" else "")
     replace(argv, "--checkpoint", ck)
     replace(argv, "--states", states)

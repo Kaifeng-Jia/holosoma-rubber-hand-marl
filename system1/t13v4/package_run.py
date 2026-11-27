@@ -42,6 +42,7 @@ from system1.sim2sim.failure_t10s import causes as mj_causes  # noqa: E402
 from system1.t10b.phases import termination_errors, termination_reason  # noqa: E402
 
 CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
+CASE.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task (Kevin 2026-11-26); _smoke: pre-training T10 gate
 
 
 def sha(p):
@@ -138,7 +139,7 @@ def main():
             comp.append(dict(source="paper D (T03 d_final_5070; original reference / observation, no randomization)", training_seed=r["training_seed"],
                              level_cm=r["perturbation_level_cm"], n_completed=r["n_completed"], n_episodes=r["n_episodes"], checkpoint_iteration=r["checkpoint_iteration"],
                              states_sha256=r["states_sha256"], note="different test states (new reference, states regenerated)"))
-    if task == "table":  # task book section 5 item 6: Table has no T03 row; paper D Table from T10, and the T10b randomized pilot
+    if task == "table" and not a.run.startswith("d_frontback"):  # task book section 5 item 6: Table has no T03 row; paper D Table from T10, and the T10b randomized pilot (front-back: other task, no paper row)
         for r in csv.DictReader(open(ROOT / "results_system1/T10_sim2sim/isaac_vs_mujoco.csv")):
             if r["task"] == "table" and r["scheme"] == "D":
                 for sim, k in (("Isaac", "isaac_5070_n_completed"), ("MuJoCo", "mujoco_n_completed")):

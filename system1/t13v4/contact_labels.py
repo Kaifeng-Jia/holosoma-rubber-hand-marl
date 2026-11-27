@@ -83,8 +83,8 @@ def human_core4d(task):
     return hand, part, 15, dict(sequence=str(seq), object_key=cfg["obj_key"])
 
 
-def human_omomo(seq):
-    """per source frame (30 Hz): [T, 1 person, 2 hands], [T, 1, L]."""
+def human_omomo(seq, key="omomo_largetable"):
+    """per source frame (30 Hz): [T, 1 person, 2 hands], [T, 1, L]. key: captured object (default: the Push table, as before)."""
     import joblib
     import smplx
     import torch
@@ -101,7 +101,7 @@ def human_omomo(seq):
     with torch.no_grad():
         V = mdl(betas=torch.tensor(np.repeat(v["betas"], T, 0), dtype=torch.float32), global_orient=torch.tensor(v["root_orient"], dtype=torch.float32),
                 body_pose=torch.tensor(v["pose_body"], dtype=torch.float32), transl=torch.tensor(v["trans"], dtype=torch.float32)).vertices.numpy().astype(np.float64)
-    obj = cp.obj("omomo_largetable")
+    obj = cp.obj(key)
     hv, seg = cp.hand_vertex_ids(), segment_vertex_ids()
     hand = np.full((T, 1, 2), -np.inf)
     part = np.full((T, 1, len(LINKS)), -np.inf)
@@ -113,7 +113,7 @@ def human_omomo(seq):
             d, j = obj["tree"].query(pl)
             hand[t, 0, hi] = (-np.sign(np.einsum("ij,ij->i", pl - obj["p"][j], obj["n"][j])) * d).max() * sc
         part[t, 0] = part_max_sd(obj, Vl, sc, seg)
-    return hand, part, 30, dict(sequence=seq, object_key="omomo_largetable")
+    return hand, part, 30, dict(sequence=seq, object_key=key)
 
 
 # ------------------------------------------------------------------------------------------------- robot side
@@ -135,10 +135,14 @@ def robot_palms_obj(robot, offs, root_pos, root_quat_xyzw, dof, obj_pos, obj_qua
 
 def main():
     ap = argparse.ArgumentParser()
-    ap.add_argument("--task", choices=("table", "push"), required=True)
+    ap.add_argument("--task", choices=("table", "push", "frontback"), required=True)
     ap.add_argument("--runtime", type=Path, required=True, help="table: paired runtime fps50 npz; push: single-robot fps50 npz")
     ap.add_argument("--object-k", type=float, default=1.0, help="table: object scale of the reference (PhysX pieces x k)")
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--object-urdf", type=Path, default=None, help="frontback: the training object URDF (box)")
+    ap.add_argument("--sequence", default="sub8_suitcase_020", help="frontback: OMOMO sequence of the demonstration")
+    ap.add_argument("--object-key", default="omomo_suitcase", help="frontback: captured object (logs_system1/t14/obj_cache key)")
+    ap.add_argument("--clip-start", type=int, default=103, help="frontback: OMOMO frame of reference frame 0 (30 Hz)")
     a = ap.parse_args()
     import contact_gap as cg
     import contact_stats as cs
@@ -146,7 +150,8 @@ def main():
     robot = cs.Robot("physx")
     offs = cg.palm_offsets()
     z = np.load(a.runtime, allow_pickle=True)
-    if a.task == "table":
+    offset, swap1 = 0, False
+    if a.task in ("table", "frontback"):
         import eval_core4d_hulls as eh
         names = [str(n) for n in z["joint_names"]]
         dof = z["agent_joint_pos"][:, :, [names.index(n) for n in robot.dofs]].astype(np.float64)   # [F, 2, 29]
@@ -155,10 +160,19 @@ def main():
         root_q = quat_wxyz_to_xyzw(z["agent_body_quat_w"][:, :, bi].astype(np.float64))
         obj_pos, obj_q = z["object_pos_w"].astype(np.float64), quat_wxyz_to_xyzw(z["object_quat_w"].astype(np.float64))
         palms = robot_palms_obj(robot, offs, root_pos, root_q, dof, obj_pos, obj_q)              # [F, 2, 2, 3]
-        surf = UnionSurface(eh.dump_object_meshes("table", a.object_k))
-        hand, part, fps_src, hinfo = human_core4d("table")
-        persons = [0, 1]
-        geometry = f"T10 PhysX pieces of the Table training object x {a.object_k}"
+        if a.task == "table":
+            surf = UnionSurface(eh.dump_object_meshes("table", a.object_k))
+            hand, part, fps_src, hinfo = human_core4d("table")
+            persons = [0, 1]
+            geometry = f"T10 PhysX pieces of the Table training object x {a.object_k}"
+        else:  # T14 front-back (Kevin 2026-11-26): one demonstrator (OMOMO, 30 Hz); robot 0 = the demonstrator, robot 1 = the
+            # demonstrator at the same frame with left / right exchanged (rule 1 of the frozen 9g2 mirror construction: the partner's
+            # hand-box distances are the demonstrator's, hands exchanged, role_solve h_sd); reference frame 0 = OMOMO frame clip-start
+            surf = UnionSurface(eh.urdf_box_meshes(a.object_urdf))
+            hand, part, fps_src, hinfo = human_omomo(a.sequence, a.object_key)
+            hinfo.update(clip_start=a.clip_start, robot1="demonstrator, same frame, left / right exchanged (hands and links)")
+            persons, offset, swap1 = [0, 0], a.clip_start, True
+            geometry = f"training object URDF boxes {a.object_urdf}"
     else:
         import dual_stretch as ds
         from eval_core4d_hulls import urdf_box_meshes
@@ -174,9 +188,13 @@ def main():
         persons = [0, 0]
         geometry = f"training table URDF boxes {ds.TABLE['push'][0].name}"
     F = len(palms)
-    src = np.clip(np.round(np.arange(F) / 50.0 * fps_src).astype(int), 0, len(hand) - 1)
+    src = np.clip(np.round(np.arange(F) / 50.0 * fps_src).astype(int) + offset, 0, len(hand) - 1)
     should = np.stack([hand[src, p] >= CONTACT_M for p in persons], 1)            # [F, 2, 2]
     far = np.stack([part[src, p] < -FAR_M for p in persons], 1)                   # [F, 2, L]
+    if swap1:  # robot 1: hands and left / right links exchanged
+        sw = {n: n.replace("left_", "@").replace("right_", "left_").replace("@", "right_") for n in LINKS}
+        should[:, 1] = should[:, 1, ::-1]
+        far[:, 1] = far[:, 1][:, [LINKS.index(sw[n]) for n in LINKS]]
     point, dist = surf.nearest(palms)
     # the simulator tracks wrist_yaw_link, not the rubber hand (fixed joint): palm point also in the wrist_yaw_link frame
     wrist = []

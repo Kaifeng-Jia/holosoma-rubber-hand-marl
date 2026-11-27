@@ -1,0 +1,105 @@
+{
+ "rules": "T13 v4 section 0 item 4: test and validation initial states on the T14 round 6 C references (Kevin 2026-11-24).\n\nGenerators and seeds = the original ones:\n  * +/-2 test: scripts/paper_evaluation_utils.make_states(case, seed=241003) (nominal + 50 states, independent uniform per robot\n    world XY within +/-2 cm and yaw within +/-2 deg);\n  * +/-8 test: the +/-2 draws scaled exactly by 4.0 (method of the V3 extended evaluation, recorded in its pm8 files);\n  * validation: the T10b generator = make_states(case, seed=20261120); Table had one (system1/t10b/validation_states), Push had\n    none and gets 50 +/-2 states here. Every validation state is checked against every +/-2 and +/-8 test state: no duplicate.\nThe states are perturbations relative to the reference's first frame (robot_xy_m, robot_yaw_rad; the evaluator applies them\nwith paper_evaluation_utils.yaw_transform to the nominal roots); so the regenerated values equal the old files' values. Each new\nfile carries a system1_t13v4 block naming the T14 reference it belongs to.\n\nAlso checked here (geometry only, no simulation): every state applied to frame 0 of the new reference (and, for comparison, of\nthe old one) - largest robot-object penetration per robot (simulator collision shapes, MuJoCo mj_geomDistance as T14) and the\nsmallest robot-robot distance.\n\n    sonic_s1/bin/python -B system1/t13v4/make_states_t14.py\n",
+ "table": {
+  "files": {
+   "pm2": {
+    "path": "system1/t14/frontback_train/states/table_pm2_states.json",
+    "sha256": "7b2402fbdd9a0c41c5be211a8c3de0117c4b4e64db9bb83164f74500d8a2397f",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "pm8": {
+    "path": "system1/t14/frontback_train/states/table_pm8_states.json",
+    "sha256": "1bd3e492beafd99384e0490f4cbf16bd5cf24667d816c97264449973b7cf1076",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   },
+   "validation": {
+    "path": "system1/t14/frontback_train/states/table_validation_states.json",
+    "sha256": "396f16783b3748709c784b3fb6897ddc0e02cd82a77dfbc4a296db48c4d8ed54",
+    "states": 51,
+    "max_abs_value_difference_vs_old": 0.0
+   }
+  },
+  "frame0_check": {
+   "new_pm2": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+    "max_robot_object_penetration_cm": {
+     "r0": 2.973,
+     "r1": 3.432
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 51,
+     "r1": 40
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 2.973,
+     "r1": 3.432
+    },
+    "robot_robot_min_distance_cm": 22.579,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 25.41
+    }
+   },
+   "new_pm8": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+    "max_robot_object_penetration_cm": {
+     "r0": 11.46,
+     "r1": 13.288
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 51,
+     "r1": 39
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 11.46,
+     "r1": 13.288
+    },
+    "robot_robot_min_distance_cm": 16.525,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 25.41
+    }
+   },
+   "new_validation": {
+    "states": 51,
+    "runtime": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz",
+    "runtime_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+    "max_robot_object_penetration_cm": {
+     "r0": 3.372,
+     "r1": 3.107
+    },
+    "states_with_robot_object_penetration": {
+     "r0": 51,
+     "r1": 41
+    },
+    "hand_signed_distance_max_cm": {
+     "r0": 3.372,
+     "r1": 3.107
+    },
+    "robot_robot_min_distance_cm": 21.972,
+    "states_robot_robot_intersect": 0,
+    "nominal": {
+     "penetration_cm": [
+      0.1,
+      0.1
+     ],
+     "robot_robot_cm": 25.41
+    }
+   }
+  }
+ }
+}
