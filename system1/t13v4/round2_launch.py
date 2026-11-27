@@ -40,6 +40,8 @@ NY = ZoneInfo("America/New_York")
 CRON = ["0 * * * * cd /home/kevin/duet-system1 && /usr/bin/python3 system1/t13v4/status_hourly.py >> logs_system1/t13v4/cloud/status_cron.log 2>&1",
         "*/10 * * * * cd /home/kevin/duet-system1 && /usr/bin/python3 system1/t13v4/post_run_watch.py >> logs_system1/t13v4/post_run/watch_cron.log 2>&1"]
 ROUND2 = ("c_out_table", "c_out_push")
+ROUNDS = dict(round2=ROUND2, t14fb=("d_frontback",))  # --round t14fb: T14 front-back training task (Kevin 2026-11-26); default round2 = unchanged
+SMOKE_DIR = "smoke_cloud_r2"
 lock = threading.Lock()
 
 
@@ -81,16 +83,17 @@ def one(run, h, rec, local_head, sonic_sha, launch):
         return
     py = ("import hashlib,sys;sys.path.insert(0,'.');from system1 import sonic_controller as sc;p=sc.DEFAULT_CHECKPOINT;"
           "print(p);print(hashlib.sha256(open(p,'rb').read()).hexdigest() if p.exists() else 'MISSING')")
-    rc, out, err = ssh(h["ssh"], f"{env}; $S1_PY -c {shlex.quote(py)}")  # the cloud's hssim_s1 (system python3 has no torch)
-    lines = out.splitlines()
-    if not step("sonic_weights", rc == 0 and len(lines) >= 2 and lines[-1] == sonic_sha, path=lines[0] if lines else None,
-                cloud_sha256=lines[-1] if lines else None, local_sha256=sonic_sha, rc=rc, err=err):
-        return
+    if run.startswith("c_out_"):  # SONIC weights: C-out runs only (structure D does not load SONIC)
+        rc, out, err = ssh(h["ssh"], f"{env}; $S1_PY -c {shlex.quote(py)}")  # the cloud's hssim_s1 (system python3 has no torch)
+        lines = out.splitlines()
+        if not step("sonic_weights", rc == 0 and len(lines) >= 2 and lines[-1] == sonic_sha, path=lines[0] if lines else None,
+                    cloud_sha256=lines[-1] if lines else None, local_sha256=sonic_sha, rc=rc, err=err):
+            return
     rc, out, err = ssh(h["ssh"], "nvidia-smi --query-compute-apps=pid --format=csv,noheader | wc -l; nvidia-smi --query-gpu=name,memory.total,memory.used --format=csv,noheader")
     lines = out.splitlines()
     if not step("gpu_idle", rc == 0 and lines and lines[0].strip() == "0", nvidia=lines[1:], rc=rc):
         return
-    sm_dir = f"{L}/smoke_cloud_r2"
+    sm_dir = f"{L}/{SMOKE_DIR}"
     rc, out, err = ssh(h["ssh"], f"{env}; mkdir -p {sm_dir}; nohup python3 system1/t13v4/cloud_smoke.py --run {run} --num-envs 4096 --iterations 10 "
                                  f"--out {sm_dir} > {sm_dir}/{run}.log 2>&1 < /dev/null & echo $! > {sm_dir}/{run}.pid; cat {sm_dir}/{run}.pid")
     if not step("smoke_started", rc == 0, pid=out, err=err):
@@ -123,15 +126,20 @@ def one(run, h, rec, local_head, sonic_sha, launch):
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--launch", action="store_true")
-    ap.add_argument("--only", choices=ROUND2, default=None, help="bring up this run only (record round2_launch_<run>.json)")
+    ap.add_argument("--round", choices=tuple(ROUNDS), default="round2", help="hosts.json key and run set (t14fb: d_frontback; default round2)")
+    ap.add_argument("--only", choices=sum(ROUNDS.values(), ()), default=None, help="bring up this run only (record <round>_launch_<run>.json)")
     a = ap.parse_args()
-    global REC
+    global REC, ROUND2, SMOKE_DIR
+    ROUND2 = ROUNDS[a.round]
+    if a.round != "round2":
+        REC = REC.with_name(f"{a.round}_launch.json")
+        SMOKE_DIR = f"smoke_cloud_{a.round}"
     if a.only:
-        REC = REC.with_name(f"round2_launch_{a.only}.json")
+        REC = REC.with_name(f"{a.round}_launch_{a.only}.json")
     hosts = json.loads(HOSTS.read_text())
-    r2 = hosts.get("round2") or {}
+    r2 = hosts.get(a.round) or {}
     if sorted(r2) != sorted(ROUND2):
-        raise SystemExit(f"hosts.json round2 must name {ROUND2}, has {sorted(r2)}")
+        raise SystemExit(f"hosts.json {a.round} must name {ROUND2}, has {sorted(r2)}")
     local_head = subprocess.run(["git", "-C", str(ROOT), "rev-parse", "HEAD"], capture_output=True, text=True).stdout.strip()
     src = (ROOT / "system1/sonic_controller.py").read_text()  # the laptop's SONIC root (default of S1_SONIC_ROOT), without importing torch
     ck = Path(next(x for x in src.splitlines() if x.startswith("SONIC_ROOT")).split('"')[-2]) / "sonic_release/last.pt"
@@ -145,7 +153,7 @@ def main():
     rec.update(ended=now(), launched=launched)
     REC.write_text(json.dumps(rec, indent=1) + "\n")
     every = set()  # launched over every record of round 2 (a run may have been brought up by its own --only invocation)
-    for f in sorted(REC.parent.glob("round2_launch*.json")):
+    for f in sorted(REC.parent.glob(f"{a.round}_launch*.json")):
         if "_try" in f.name:
             continue
         x = json.loads(f.read_text())
@@ -153,13 +161,16 @@ def main():
     rec["launched_all_records"] = sorted(every)
     if a.launch and sorted(every) == sorted(ROUND2) and json.loads(HOSTS.read_text()).get("runs") != r2:
         hosts = json.loads(HOSTS.read_text())
-        hosts.setdefault("round1", hosts.get("runs"))
+        if a.round == "round2":
+            hosts.setdefault("round1", hosts.get("runs"))
+        else:  # the runs followed so far are kept under their own key (round 2: hosts["round2"] already holds them)
+            hosts.setdefault(f"before_{a.round}", hosts.get("runs"))
         hosts["runs"] = r2
         HOSTS.write_text(json.dumps(hosts, indent=1) + "\n")
         cur = subprocess.run(["crontab", "-l"], capture_output=True, text=True)
         lines = cur.stdout.splitlines() if cur.returncode == 0 else []
         subprocess.run(["crontab", "-"], input="\n".join(lines + [c for c in CRON if c not in lines]) + "\n", text=True, check=True)
-        rec["hosts_switched_to_round2"] = True
+        rec[f"hosts_switched_to_{a.round}"] = True
         rec["crontab"] = subprocess.run(["crontab", "-l"], capture_output=True, text=True).stdout
     REC.write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps({k: v for k, v in rec.items() if k != "crontab"}, indent=1)[-3000:])
