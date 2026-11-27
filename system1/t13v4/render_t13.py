@@ -57,9 +57,12 @@ ISAAC_T12 = dict(push="logs_system1/post_train/d_final_5070/D_push_paper_seed721
              table="logs_system1/post_train/d_curve/D_table_paper_T-07_seed721/it12000_pm2")  # = contact_stats.runs() Isaac, seed 721, +/-2
 RUN_TASK = dict(d_push="push", d_table="table", d_table_pa="table", c_out_table="table", c_out_push="push")
 RUN_TASK.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task
+RUN_TASK.update(d_push_to10k="push", d_table_to10k="table", c_out_push_to10k="push")  # T13 section 9 continued runs (Kevin 2026-11-26 fixed budget, cloud_runs CONT)
 RUN_ZH = dict(d_push="D（T13 v4 d_push，种子 721）", d_table="D（T13 v4 d_table，种子 721）", d_table_pa="D（T13 v4 d_table_pa，种子 721）",
               c_out_table="C-out（T13 v4 c_out_table，种子 721）", c_out_push="C-out（T13 v4 c_out_push，种子 721）")
 RUN_ZH.update(d_frontback="D（T14 一前一后 d_frontback，种子 721）", d_frontback_smoke="D（一前一后冒烟 checkpoint）")
+RUN_ZH.update(d_push_to10k="D（T13 v4 d_push 续训到计数 10000，种子 721）", d_table_to10k="D（T13 v4 d_table 续训到计数 10000，种子 721）",
+              c_out_push_to10k="C-out（T13 v4 c_out_push 续训到计数 10000，种子 721）")  # T13 section 9 continued runs (Kevin 2026-11-26 fixed budget, cloud_runs CONT)
 ISAAC = {r: f"logs_system1/t13v4/finals/{r}_pm2" for r in RUN_TASK}
 MUJOCO = {r: f"logs_system1/t13v4/mj_finals/{r}_pm2" for r in RUN_TASK}
 STATE = "perturbed_000"  # overwritten by --state

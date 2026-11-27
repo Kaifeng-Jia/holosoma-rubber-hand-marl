@@ -33,6 +33,7 @@ STATES = ROOT / "system1/t13v4/states_t14r6C"
 STATES_RUN = dict(d_frontback=ROOT / "system1/t14/frontback_train/states", d_frontback_smoke=ROOT / "system1/t14/frontback_train/states")
 CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 CASE.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task (Kevin 2026-11-26); _smoke: pre-training T10 gate
+CASE.update(d_push_to10k="push", d_table_to10k="table", c_out_push_to10k="push")  # T13 section 9 continued runs (Kevin 2026-11-26 fixed budget, cloud_runs CONT)
 
 
 def now():

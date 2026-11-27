@@ -67,7 +67,48 @@ RUNS = dict(d_table=dict(task="table", train=TABLE, warmup=0),
             d_frontback=dict(task="table", train=FRONTBACK, warmup=0, fixed_budget=True,
                              val_flags=["--obs-v1", "--critic-v1", "--t14-reference", FB],
                              val_states="system1/t14/frontback_train/states/table_validation_states.json"))
+# T13 section 9 (Kevin 2026-11-26, fixed training budget): continue a run stopped by the rule from its last local checkpoint
+# (checkpoint file number, warm-up offset included) to counted max_it, same configuration (the base run's train argv), no stop
+# rule, validation every val its for the curve only; run dir <out>/<name>. Absent runs = unchanged plans.
+CONT = dict(d_push_to10k=dict(base="d_push", from_iteration=6025), d_table_to10k=dict(base="d_table", from_iteration=7500),
+            c_out_push_to10k=dict(base="c_out_push", from_iteration=9025))
+for _k, _v in CONT.items():
+    RUNS[_k] = dict(RUNS[_v["base"]], fixed_budget=True, continue_from=_v)
 BASE = dict(save=1000, val=2000, stop_after=8000, patience=4000, max_it=20000)
+# section 9: "续训后前 10 轮的 loss、奖励和续训前最后 10 轮量级对得上，对不上先停" - rule fixed before any continued run:
+# the first logged iteration = checkpoint iteration + 1, run_config start_iteration = checkpoint iteration, resume sha256 = the
+# local checkpoint's, critic learning rate equal to the pre-stop value (constant 0.001 in all three runs); and for each of
+# reward_mean, value_loss, |surrogate_loss|, entropy, resets per environment (reset_count / num_envs) and the actor learning rate
+# (KL-adaptive, changes every iteration) the mean over the first 10 continued iterations divided by the mean over the 10
+# iterations up to the checkpoint lies in [1/3, 3] (one order of magnitude band; the original runs' consecutive 10-iteration
+# windows over their last 1000 iterations varied by 0.37-2.7x at most for these keys).
+CONT_KEYS = ("reward_mean", "value_loss", "surrogate_loss_abs", "entropy", "resets_per_env", "actor_learning_rate_mean")
+CONT_BAND = (1 / 3, 3.0)
+
+
+def window_stats(rows, num_envs):
+    """mean over rows of the CONT_KEYS (stdlib only: the cloud's system python3 runs this file)."""
+    m = lambda f: sum(f(r) for r in rows) / len(rows)  # noqa: E731
+    return dict(reward_mean=m(lambda r: r["reward_mean"]), value_loss=m(lambda r: r["value_loss"]),
+                surrogate_loss_abs=m(lambda r: abs(r["surrogate_loss"])), entropy=m(lambda r: r["entropy"]),
+                resets_per_env=m(lambda r: r["reset_count"] / num_envs), actor_learning_rate_mean=m(lambda r: r["actor_learning_rate"]),
+                actor_learning_rate=rows[-1]["actor_learning_rate"], critic_learning_rate=rows[-1]["critic_learning_rate"],
+                iterations=[rows[0]["iteration"], rows[-1]["iteration"]])
+
+
+def continue_check(ref, rows, run_config, it0, resume_file_sha256=None):
+    """section 9 resume check: ref = continue_ref.json (pre-stop window), rows = first 10 metrics rows of the continued run.
+    The resumed checkpoint's sha256: run_config resume_checkpoint_sha256 (Table path); the Push path (train_plan5_push.py) does not
+    record it, there the sha256 of the file passed to --resume (computed by cloud_runs.py before the launch) is used."""
+    after = window_stats(rows, run_config["num_envs"])
+    rsha = run_config.get("resume_checkpoint_sha256") or resume_file_sha256
+    ratios = {k: (after[k] / ref["before"][k]) if ref["before"][k] else None for k in CONT_KEYS}
+    items = dict(first_iteration=rows[0]["iteration"] == it0 + 1, start_iteration=run_config.get("start_iteration") == it0,
+                 resume_sha256=rsha == ref["checkpoint_sha256"],
+                 critic_lr=after["critic_learning_rate"] == ref["before"]["critic_learning_rate"],
+                 **{f"ratio_{k}": r is not None and CONT_BAND[0] <= r <= CONT_BAND[1] for k, r in ratios.items()})
+    return dict(passed=all(items.values()), items=items, ratios=ratios, after=after, before=ref["before"], band=CONT_BAND,
+                resume_sha256_source="run_config" if run_config.get("resume_checkpoint_sha256") else "file passed to --resume")
 
 
 def rules(num_envs):
@@ -116,23 +157,45 @@ def main():
     ap.add_argument("--torch-threads", type=int, default=None, help="passed to the training script (section 4 B test result)")
     ap.add_argument("--poll", type=float, default=120.0)
     ap.add_argument("--dry-run", action="store_true")
+    ap.add_argument("--continue-checkpoint", type=Path, default=None, help="section 9 continued runs (*_to10k): the base run's checkpoint "
+                    "on this machine (its file number = CONT from_iteration)")
+    ap.add_argument("--continue-ref", type=Path, default=None, help="section 9: continue_ref.json (pre-stop 10-iteration window, checkpoint sha256)")
     a = ap.parse_args()
     if not a.python or not Path(a.python).exists():
         raise SystemExit(f"--python / S1_PY not set or missing: {a.python!r}")
     R, run = rules(a.num_envs), RUNS[a.run]
     warm = run["warmup"] // (1 if a.num_envs == 2048 else 2)
     d = a.out / a.run
+    cont = run.get("continue_from")  # section 9 continued run (absent = unchanged)
+    if cont:
+        if a.continue_checkpoint is None or a.continue_ref is None:
+            raise SystemExit("continued run: --continue-checkpoint and --continue-ref are required")
+        cref = json.loads(a.continue_ref.read_text())
+        it0 = int(a.continue_checkpoint.stem.split("_")[1])
+        if it0 != cont["from_iteration"] or cref["run"] != a.run or cref["from_iteration"] != it0:
+            raise SystemExit(f"continue checkpoint {a.continue_checkpoint.name} / ref {cref.get('run')} do not match {a.run} {cont}")
+        import hashlib
+        h = hashlib.sha256()
+        with open(a.continue_checkpoint, "rb") as f:
+            for b in iter(lambda: f.read(1 << 20), b""):
+                h.update(b)
+        ck_sha = h.hexdigest()
+        if ck_sha != cref["checkpoint_sha256"]:
+            raise SystemExit(f"continue checkpoint sha256 {ck_sha} != continue_ref {cref['checkpoint_sha256']}")
     git = lambda *x: subprocess.run(["git", "-C", str(ROOT), *x], capture_output=True, text=True).stdout  # noqa: E731
     env = dict(os.environ, CUDA_VISIBLE_DEVICES=a.gpu, LOCAL_RANK=str(400 + int(a.gpu)), WORLD_SIZE="1")
     extra = ["--num-envs", str(a.num_envs), "--save-interval", str(R["save"])] + ([] if a.torch_threads is None else ["--torch-threads", str(a.torch_threads)])
     stages = []
-    if warm:
+    if warm and not cont:
         stages.append(dict(name="train_warmup", argv=[a.python, "-B", *run["train"], *extra, "--iterations", str(warm), "--critic-only",
                                                       "--output-dir", str(d / "train_warmup")]))
     main_dir = d / "train"
     main_argv = [a.python, "-B", *run["train"], *extra, "--iterations", str(R["max_it"]), "--output-dir", str(main_dir)]
-    if warm:
+    if warm and not cont:
         main_argv += ["--resume", str(d / "train_warmup" / f"model_{warm:05d}.pt")]
+    if cont:  # section 9: resume the base run's checkpoint; iterations left to counted max_it (checkpoint numbering continues)
+        main_argv[main_argv.index("--iterations") + 1] = str(warm + R["max_it"] - it0)
+        main_argv += ["--resume", str(a.continue_checkpoint)]
     stages.append(dict(name="train", argv=main_argv))
     counting = dict(decision="Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
                     warmup_iterations=warm, counted_iteration="checkpoint file number - warmup_iterations",
@@ -143,6 +206,11 @@ def main():
     if run.get("fixed_budget"):  # key absent for the T13 runs = unchanged plan
         plan.update(fixed_budget=dict(decision="Kevin 2026-11-26: fixed training budget, counted iterations to max_it, no stop rule",
                                       max_counted_iterations=R["max_it"]))
+    if cont:
+        plan.update(continued=dict(decision="Kevin 2026-11-26 (T13 section 9): fixed budget; continue from the last local checkpoint to counted "
+                                            "max_it, configuration unchanged; validation for the curve only", base_run=cont["base"],
+                                   from_iteration=it0, from_counted_iteration=it0 - warm, checkpoint=str(a.continue_checkpoint),
+                                   checkpoint_sha256=cref["checkpoint_sha256"], continue_ref=cref, resume_check_rule=dict(keys=CONT_KEYS, band=CONT_BAND)))
     if "controller" in run:  # round 2 (C-out): validation controller and extra flags (keys absent for round 1 = unchanged plan)
         plan.update(validation_controller=run["controller"], validation_extra=run["val_extra"])
     if a.dry_run:
@@ -152,8 +220,10 @@ def main():
     (d / "launch.json").write_text(json.dumps(dict(plan, started=now(), git_head=git("rev-parse", "HEAD").strip(), git_status=git("status", "--porcelain"),
                                                    git_diff=git("diff"), python=a.python), indent=1))
     state = dict(curve={}, stopped=None, crashes=[], resumed=None, status="running")
+    if cont:
+        state["resume_check"] = None
     save = lambda: (d / "state.json").write_text(json.dumps(state, indent=1, default=str))  # noqa: E731
-    if warm:  # warm-up: one short stage, no validation
+    if warm and not cont:  # warm-up: one short stage, no validation (continued runs: none)
         log = (d / "train_warmup.stdout.log").open("w")
         rc = subprocess.run(stages[0]["argv"], cwd=ROOT, env=env, stdout=log, stderr=subprocess.STDOUT).returncode
         log.close()
@@ -169,9 +239,18 @@ def main():
     vproc = vit = None
 
     def pending():
-        return [i for i in ckpts(main_dir) if (i - warm) % R["val"] == 0 and i > warm and (i - warm) not in state["curve"]]
+        return [i for i in ckpts(main_dir) if (i - warm) % R["val"] == 0 and i > warm and (i - warm) not in state["curve"] and (not cont or i > it0)]
 
     while proc is not None and proc.poll() is None or vproc is not None or pending():
+        if cont and state["resume_check"] is None and (main_dir / "metrics.jsonl").exists():  # section 9 resume check, once
+            rows = [json.loads(x) for x in (main_dir / "metrics.jsonl").read_text().splitlines()[:10] if x.strip()]
+            if len(rows) == 10 and (main_dir / "run_config.json").exists():
+                state["resume_check"] = dict(continue_check(cref, rows, json.loads((main_dir / "run_config.json").read_text()), it0, ck_sha), time=now())
+                if not state["resume_check"]["passed"] and proc is not None and proc.poll() is None:
+                    proc.send_signal(signal.SIGINT)
+                    state["stopped"] = dict(time=now(), reason="section 9 resume check failed", resume_check=state["resume_check"])
+                    state["status"] = "stopped: resume check failed"
+                save()
         if vproc is not None and vproc.poll() is not None:
             summ = d / "validation" / f"it{vit:05d}" / "summary.json"
             state["curve"][vit] = completed_count(summ) if summ.exists() else None

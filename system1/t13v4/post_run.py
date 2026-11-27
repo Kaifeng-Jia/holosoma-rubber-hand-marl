@@ -39,6 +39,7 @@ ROOT = Path(__file__).resolve().parents[2]
 NY = ZoneInfo("America/New_York")
 CASE = {"d_push": "push", "d_table": "table", "d_table_pa": "table", "c_out_table": "table", "c_out_push": "push"}  # round 2: c_out_*
 CASE.update(d_frontback="table", d_frontback_smoke="table")  # T14 front-back training task (Kevin 2026-11-26); _smoke: pre-training T10 gate
+CASE.update(d_push_to10k="push", d_table_to10k="table", c_out_push_to10k="push")  # T13 section 9 continued runs (Kevin 2026-11-26 fixed budget, cloud_runs CONT)
 STATES_DIR = dict(d_frontback="system1/t14/frontback_train/states", d_frontback_smoke="system1/t14/frontback_train/states")
 SO = "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python"
 SIM = "/home/kevin/.holosoma_deps/miniconda3/envs/sim2sim_s1/bin/python"
@@ -48,6 +49,12 @@ CPU = dict(CUDA_VISIBLE_DEVICES="", OMP_NUM_THREADS="2", MKL_NUM_THREADS="2", OP
 
 def now():
     return datetime.now(NY).isoformat(timespec="seconds")
+
+
+def queue_managed(run):
+    """runs of the shared machine queue (queue_s9.py state file); absent file / run = as before"""
+    q = ROOT / "logs_system1/t13v4/cloud/queue_state.json"
+    return q.exists() and run in json.loads(q.read_text()).get("tasks", {})
 
 
 class Pipe:
@@ -189,6 +196,25 @@ class Pipe:
         self.commit(f"cloud machine {v.get('machine')} shut down {rec['shutdown_time']}" if rec["done"] else "cloud machine shutdown sent, still reachable")
         return rec
 
+    def queue_release(self, rd, ck, copyback_txt):
+        """Kevin 2026-11-27 (T13 section 9 + T14 front-back, one queue on 199 / 196 / 210): after the verified copy-back the machine
+        is not shut down here; when (a) and (b) of cloud_shutdown hold, logs_system1/t13v4/post_run/<run>/queue_release.json is
+        written and queue_s9.py starts the next queued task on that machine, or shuts it down by cloud_shutdown's rule (c) when the
+        queue is empty. Otherwise no marker (the machine stays up; reported in post_run_status.json)."""
+        need = [ck, rd / "decision.json", rd / "launch.json", rd / "state.json", rd / "train.stdout.log", rd / "train/metrics.jsonl", rd / "train/run_config.json"]
+        missing = [str(p.relative_to(rd)) for p in need if not p.exists()]
+        rec = dict(step="queue_release", started=now(), copyback_sha256_match="sha256 match" in copyback_txt, missing_local=missing)
+        rec["released"] = rec["copyback_sha256_match"] and not missing
+        with self.lock:
+            self.status["steps"].append(rec)
+            self.status["queue_release"] = rec
+        if rec["released"] and not self.dry:
+            (self.L / "queue_release.json").write_text(json.dumps(dict(rec, run=self.run, final_checkpoint=str(ck.relative_to(ROOT))), indent=1) + "\n")
+        rec["ended"] = now()
+        self.save()
+        self.commit("machine released to the queue" if rec["released"] else f"machine NOT released (copy-back {rec['copyback_sha256_match']}, missing {missing})")
+        return rec
+
     @staticmethod
     def cloud_processes(ssh):
         """read-only: the processes and GPU compute processes on the machine, minus the platform's own and this session's."""
@@ -229,7 +255,9 @@ class Pipe:
         ck = rd / "train" / f"model_{dec.get('final_checkpoint_iteration', -1):05d}.pt"
         self.check(rec, "sha256 match" in txt and ck.exists(), dict(copyback=txt.strip().splitlines()[-1], final_checkpoint=ck.name, exists=ck.exists()))
         # 1b shut the cloud machine down (task book T13 section 8, 2026-11-26 03:20); never stops the local evaluation
-        if r.startswith("c_out_") or r == "d_frontback":  # d_frontback: T14 front-back task, "按 T13 的规则拷回、核对、关机"
+        if queue_managed(r):  # Kevin 2026-11-27: shared machine queue (queue_s9.py) - release the machine, the queue starts the next task or shuts down
+            self.queue_release(rd, ck, txt)
+        elif r.startswith("c_out_") or r == "d_frontback":  # d_frontback: T14 front-back task, "按 T13 的规则拷回、核对、关机"
             try:
                 self.cloud_shutdown(rd, ck, txt)
             except Exception as ex:  # noqa: BLE001  (no shutdown; reported; the local evaluation goes on)

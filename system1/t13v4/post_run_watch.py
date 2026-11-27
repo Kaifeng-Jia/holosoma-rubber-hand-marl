@@ -38,6 +38,12 @@ def main():
         if not dec.get("ended"):
             print(now, run, "decision without end time; waiting")
             continue
+        if str(dec.get("status", "")).startswith("stopped: resume check"):  # T13 section 9: "对不上先停" - no evaluation; queue_s9.py reports
+            if not (d / "resume_check_failed.json").exists():
+                d.mkdir(parents=True, exist_ok=True)
+                (d / "resume_check_failed.json").write_text(json.dumps(dict(run=run, seen=now, cloud_decision=dec), indent=1) + "\n")
+            print(now, run, "stopped by the section 9 resume check; no post_run")
+            continue
         d.mkdir(parents=True, exist_ok=True)
         (d / "launched.json").write_text(json.dumps(dict(run=run, launched=now, cloud_decision=dec), indent=1) + "\n")
         # cron's PATH lacks ~/.local/bin (rclone for the Drive upload); set it explicitly for the pipeline
