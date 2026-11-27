@@ -1,0 +1,68 @@
+{
+ "updated": "2026-11-27T02:15:52-05:00",
+ "rule": "Kevin 2026-11-27: one queue on 199 / 196 / 210, longest first; next task on the same machine after a verified copy-back; shutdown when the queue is empty",
+ "queue": [
+  "d_frontback",
+  "d_push_to10k",
+  "d_table_to10k",
+  "c_out_push_to10k"
+ ],
+ "tasks": {
+  "d_frontback": {
+   "state": "queued",
+   "machine": null,
+   "started": null,
+   "launched": null,
+   "ended": null,
+   "released": null,
+   "note": null
+  },
+  "d_push_to10k": {
+   "state": "queued",
+   "machine": null,
+   "started": null,
+   "launched": null,
+   "ended": null,
+   "released": null,
+   "note": null
+  },
+  "d_table_to10k": {
+   "state": "queued",
+   "machine": null,
+   "started": null,
+   "launched": null,
+   "ended": null,
+   "released": null,
+   "note": null
+  },
+  "c_out_push_to10k": {
+   "state": "queued",
+   "machine": null,
+   "started": null,
+   "launched": null,
+   "ended": null,
+   "released": null,
+   "note": null
+  }
+ },
+ "machines": {
+  "199": {
+   "state": "not up",
+   "task": null,
+   "since": null,
+   "shutdown_time": null
+  },
+  "196": {
+   "state": "not up",
+   "task": null,
+   "since": null,
+   "shutdown_time": null
+  },
+  "210": {
+   "state": "not up",
+   "task": null,
+   "since": null,
+   "shutdown_time": null
+  }
+ }
+}
