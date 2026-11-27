@@ -1,11 +1,11 @@
 {
- "updated": "2026-11-27T02:15:52-05:00",
+ "updated": "2026-11-27T13:23:55-05:00",
  "rule": "Kevin 2026-11-27: one queue on 199 / 196 / 210, longest first; next task on the same machine after a verified copy-back; shutdown when the queue is empty",
  "queue": [
-  "d_frontback",
   "d_push_to10k",
   "d_table_to10k",
-  "c_out_push_to10k"
+  "c_out_push_to10k",
+  "d_frontback"
  ],
  "tasks": {
   "d_frontback": {
@@ -15,7 +15,7 @@
    "launched": null,
    "ended": null,
    "released": null,
-   "note": null
+   "note": "Kevin 2026-11-27: not ready; Kevin chooses the training clip after the grasp-face report"
   },
   "d_push_to10k": {
    "state": "queued",
@@ -42,7 +42,7 @@
    "launched": null,
    "ended": null,
    "released": null,
-   "note": null
+   "note": "Kevin 2026-11-27: local 512-env actor learning-rate item does not count; judged by the cloud resume check at 4096 envs"
   }
  },
  "machines": {
