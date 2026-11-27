@@ -1,0 +1,12 @@
+git 48bd064fc2bc5412eb1d5a32d01c4bb3ef1e70d5 start 2026-11-27T00:31:12-05:00
+launch check_noise_off avail 17 GB 2026-11-27T00:35:42-05:00
+check noise_off rc 0 2026-11-27T00:35:57-05:00
+launch check_noise_off_r2 avail 18 GB 2026-11-27T00:36:27-05:00
+check noise_off_r2 rc 0 2026-11-27T00:36:42-05:00
+launch check_noise_on avail 18 GB 2026-11-27T00:36:42-05:00
+check noise_on rc 0 2026-11-27T00:36:56-05:00
+launch train_smoke avail 18 GB 2026-11-27T00:36:56-05:00
+train smoke rc 0 2026-11-27T00:55:20-05:00
+{"run": "d_frontback", "passed": true, "stages": [["train", 0, 1028.0, 4.948824079998303, 0]], "validation": true}
+smoke run dir logs_system1/t13v4/runs/d_frontback_smoke 200
+stopped at gate 22 finals_smoke (MemAvailable 21 GB), PID 906105, 2026-11-27T01:54:59-05:00; continued by run_smoke_part2.sh (finals one level at a time, gate 17)

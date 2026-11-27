@@ -1,0 +1,32 @@
+{
+ "initial": true,
+ "n": 102,
+ "imax": {
+  "joint_pos_max_abs_rad": 0.0,
+  "joint_vel_max_abs": 0.0,
+  "root_pos_max_abs_m": 2.9670591206176766e-08,
+  "root_ori_max_angle_rad": 5.16191365590357e-08,
+  "root_lin_vel_max_abs": 2.9676372470532897e-08,
+  "root_ang_vel_max_abs": 1.187413825043393e-07,
+  "object_pos_max_abs_m": 0.0,
+  "object_ori_angle_rad": 0.0
+ },
+ "obs": {
+  "steps": 18,
+  "obs_max_abs_diff": 7.266254412052753e-07,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_4",
+   "base_ang_vel_1",
+   "base_ang_vel_0",
+   "neck_partner_rel_pos_b_y",
+   "motion_ref_ori_b_5"
+  ],
+  "teammate_v1_max_abs_diff": 6.483678757773781e-07,
+  "obs_passed": true,
+  "threshold": 0.0001,
+  "fk_body_pos_max_m": 4.0300361653367034e-07,
+  "fk_body_ori_max_rad": 0.0012291291398299426,
+  "trajectory_vs_dump_root_pos_max_m": 0.0,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.9073486328125e-06
+ }
+}

@@ -1,0 +1,61 @@
+{
+ "run": "d_frontback_smoke",
+ "initial_states": {
+  "n_states": 102,
+  "all_passed": true,
+  "max": {
+   "joint_pos_max_abs_rad": 0.0,
+   "joint_vel_max_abs": 0.0,
+   "root_pos_max_abs_m": 2.9670591206176766e-08,
+   "root_ori_max_angle_rad": 5.16191365590357e-08,
+   "root_lin_vel_max_abs": 2.9676372470532897e-08,
+   "root_ang_vel_max_abs": 1.187413825043393e-07,
+   "object_pos_max_abs_m": 0.0,
+   "object_ori_angle_rad": 0.0
+  },
+  "thresholds": {
+   "joint_rad": 0.0001,
+   "position_m": 0.0001
+  },
+  "state_files": [
+   {
+    "level": 2,
+    "states": "system1/t14/frontback_train/states/table_pm2_states.json",
+    "states_sha256": "7b2402fbdd9a0c41c5be211a8c3de0117c4b4e64db9bb83164f74500d8a2397f",
+    "isaac_eval_dir": "logs_system1/t13v4/finals/d_frontback_smoke_pm2"
+   },
+   {
+    "level": 8,
+    "states": "system1/t14/frontback_train/states/table_pm8_states.json",
+    "states_sha256": "1bd3e492beafd99384e0490f4cbf16bd5cf24667d816c97264449973b7cf1076",
+    "isaac_eval_dir": "logs_system1/t13v4/finals/d_frontback_smoke_pm8"
+   }
+  ]
+ },
+ "observations": {
+  "steps": 18,
+  "obs_max_abs_diff": 7.266254412052753e-07,
+  "obs_worst_dims": [
+   "motion_ref_ori_b_4",
+   "base_ang_vel_1",
+   "base_ang_vel_0",
+   "neck_partner_rel_pos_b_y",
+   "motion_ref_ori_b_5"
+  ],
+  "teammate_v1_max_abs_diff": 6.483678757773781e-07,
+  "obs_passed": true,
+  "threshold": 0.0001,
+  "fk_body_pos_max_m": 4.0300361653367034e-07,
+  "fk_body_ori_max_rad": 0.0012291291398299426,
+  "trajectory_vs_dump_root_pos_max_m": 0.0,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.9073486328125e-06
+ },
+ "inputs": {
+  "dump": "logs_system1/t13v4/isaac_dump/d_frontback_smoke/dump",
+  "scene_json_sha256": "b13fb6b63c35bf10696971b5a9aa483f2bf69028818db2cbf59646b377d0855e",
+  "record_sha256": "b972f1bbfe82fe473511123d71d8816feec63ab16f2fe7e38a10e44447f69e7a",
+  "trajectory_sha256": "b4c3dd9b633666bc7933c5fc5bf1c12bcf786aa6d02fb7ad46d5c3aed7d65738",
+  "onnx": "exports_system1/t13v4/onnx/d_frontback_smoke_t13v4.onnx",
+  "onnx_sha256": "b4278177d6ebf72f84790d8d9e85404dabcc13be58ee50cd734d21b00f5b4a30"
+ }
+}

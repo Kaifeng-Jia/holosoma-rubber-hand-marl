@@ -1,0 +1,22 @@
+part2 git 540b91b52366a67a6a8ffbdc1c6aba6962b13158 start 2026-11-27T01:54:59-05:00
+launch finals_smoke_pm2 avail 21 GB 2026-11-27T01:54:59-05:00
+finals pm2 rc 0 2026-11-27T01:56:08-05:00
+launch finals_smoke_pm8 avail 21 GB 2026-11-27T01:56:08-05:00
+finals pm8 rc 0 2026-11-27T01:57:18-05:00
+launch dump_smoke avail 21 GB 2026-11-27T01:57:18-05:00
+dump rc 0 2026-11-27T01:57:32-05:00
+onnx rc 0
+sim2sim checks rc 0 2026-11-27T01:57:38-05:00
+   "neck_partner_rel_pos_b_y",
+   "motion_ref_ori_b_5"
+  ],
+  "teammate_v1_max_abs_diff": 6.483678757773781e-07,
+  "obs_passed": true,
+  "threshold": 0.0001,
+  "fk_body_pos_max_m": 4.0300361653367034e-07,
+  "fk_body_ori_max_rad": 0.0012291291398299426,
+  "trajectory_vs_dump_root_pos_max_m": 0.0,
+  "actor_onnx_on_recorded_obs_vs_isaac_actions_max_abs": 1.9073486328125e-06
+ }
+}
+mujoco pm2 rc 0 end 2026-11-27T01:57:41-05:00

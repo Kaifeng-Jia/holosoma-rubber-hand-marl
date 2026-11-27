@@ -1,0 +1,507 @@
+{
+  "action_dim_per_agent": 29,
+  "actor_input_dim": 159,
+  "actor_learning_rate": 0.001,
+  "actor_observation_groups": {
+    "actor_obs": 154,
+    "teammate_obs": 5
+  },
+  "bucket_reference": "/home/kevin/duet-system1/src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/interaction_vectors_v1.npz",
+  "bucket_reward_contract": {
+    "artifact_sha256": "c2b6d7308387da0b494221d39b7b08f740c7bd4c9539aeefb8029cb555df85ef",
+    "block_weights_position_rotation_height_relation": [
+      1.0,
+      1.0,
+      0.0,
+      0.0
+    ],
+    "contact_detection": "current_physics_sample_any_hand_per_agent_normal_force",
+    "contact_error_normalization": "sum(alpha*(1-contact))/max(1,sum(alpha))",
+    "contact_gate_floor": 0.5,
+    "contact_gate_scale": 2.0,
+    "contact_target": "not_used_for_smalltable_A",
+    "contact_threshold_n": 1.0,
+    "height_sigma_m": 0.1,
+    "position_error_weights_xyz": [
+      1.0,
+      1.0,
+      2.0
+    ],
+    "position_sigma_m": 0.3,
+    "relation_distance_floor_m": 0.1,
+    "relation_sigma_m": 0.04,
+    "reward_composition": "unchanged_body_and_regularizers_plus_gated_interaction_block",
+    "rotation_sigma_rad": 0.4,
+    "runtime_reference_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+    "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+    "variant": "A_no_rel_no_height",
+    "version": "core4d_bucket_vectors_soft_contact_v1"
+  },
+  "clip_param": 0.2,
+  "control_hz": 50.0,
+  "critic_input_dim": 585,
+  "critic_learning_rate": 0.001,
+  "entropy_coef": 0.005,
+  "experiment": "smalltable5kg_A",
+  "experiment_contract": {
+    "experiment_id": "smalltable5kg_A",
+    "object_name": "frontback_box",
+    "object_urdf_sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+    "physics_contract": {
+      "control_hz": 50,
+      "material_static_dynamic_restitution": [
+        0.5,
+        0.5,
+        0.0
+      ],
+      "object_collider_type": "convex_hull",
+      "object_mass_kg": 5.0,
+      "physics_hz": 200
+    },
+    "reference_fps": 50,
+    "reference_frames": 99,
+    "runtime_reference_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+    "source_pair_sha256": "c72213006c9392ab75ede96e7750164ea1c293ab52a2230acee6dfbc7a587849",
+    "training_promotion_sha256": "6c449811c88f1199c41dc7d34c10f0bef87f350a23fc87aba5e1d40887b2db7b"
+  },
+  "gamma": 0.99,
+  "git_commit": "540b91b52366a67a6a8ffbdc1c6aba6962b13158",
+  "initialization": "fresh",
+  "interaction_contract": null,
+  "interaction_reference": null,
+  "iterations_requested": 200,
+  "lambda": 0.95,
+  "num_agents": 2,
+  "num_envs": 2048,
+  "object_collider_type": "convex_hull",
+  "object_physics": {
+    "com_pose_body_xyzw_first_envs": [
+      [
+        -0.05450456589460373,
+        0.01731337606906891,
+        -0.046346597373485565,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.06209679692983627,
+        -0.04185039550065994,
+        0.0738663375377655,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.043469998985528946,
+        -0.03718354180455208,
+        -0.0709313452243805,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.007692128419876099,
+        0.02800506353378296,
+        -0.06133061274886131,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.051817744970321655,
+        -0.05732695385813713,
+        0.06508314609527588,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        -0.008120015263557434,
+        -0.060297660529613495,
+        0.05955140292644501,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.0497264564037323,
+        0.0324992761015892,
+        -0.06163380295038223,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ],
+      [
+        0.07137736678123474,
+        -0.017415784299373627,
+        -0.05716454237699509,
+        0.0,
+        0.0,
+        0.0,
+        1.0
+      ]
+    ],
+    "dynamic_friction_range": [
+      0.1,
+      0.6
+    ],
+    "inertia_first_envs": [
+      [
+        0.14835041761398315,
+        0.0,
+        0.0,
+        0.0,
+        0.057928964495658875,
+        0.0,
+        0.0,
+        0.0,
+        0.11444328725337982
+      ],
+      [
+        0.1082715094089508,
+        0.0,
+        0.0,
+        0.0,
+        0.042278651148080826,
+        0.0,
+        0.0,
+        0.0,
+        0.08352485299110413
+      ],
+      [
+        0.10064121335744858,
+        0.0,
+        0.0,
+        0.0,
+        0.039299119263887405,
+        0.0,
+        0.0,
+        0.0,
+        0.07763855159282684
+      ],
+      [
+        0.17909638583660126,
+        0.0,
+        0.0,
+        0.0,
+        0.06993486732244492,
+        0.0,
+        0.0,
+        0.0,
+        0.13816192746162415
+      ],
+      [
+        0.17460350692272186,
+        0.0,
+        0.0,
+        0.0,
+        0.06818044930696487,
+        0.0,
+        0.0,
+        0.0,
+        0.13469594717025757
+      ],
+      [
+        0.18813589215278625,
+        0.0,
+        0.0,
+        0.0,
+        0.07346468418836594,
+        0.0,
+        0.0,
+        0.0,
+        0.14513535797595978
+      ],
+      [
+        0.15755580365657806,
+        0.0,
+        0.0,
+        0.0,
+        0.06152354180812836,
+        0.0,
+        0.0,
+        0.0,
+        0.12154467403888702
+      ],
+      [
+        0.10742902010679245,
+        0.0,
+        0.0,
+        0.0,
+        0.041949670761823654,
+        0.0,
+        0.0,
+        0.0,
+        0.08287493139505386
+      ]
+    ],
+    "mass_kg_first_envs": [
+      4.012295246124268,
+      5.49163818359375,
+      4.871334552764893,
+      4.420102119445801,
+      5.7973504066467285,
+      5.356125831604004,
+      5.002925395965576,
+      5.077686309814453
+    ],
+    "mass_kg_range": [
+      4.0,
+      6.0
+    ],
+    "material_first_envs": [
+      [
+        [
+          0.3947054445743561,
+          0.3581934869289398,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.4318143129348755,
+          0.11136553436517715,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.590582013130188,
+          0.5625587105751038,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.2258988916873932,
+          0.26263007521629333,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.5285532474517822,
+          0.4870515763759613,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.35921716690063477,
+          0.36329084634780884,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.349416047334671,
+          0.2284224033355713,
+          0.0
+        ]
+      ],
+      [
+        [
+          0.45518824458122253,
+          0.11563599854707718,
+          0.0
+        ]
+      ]
+    ],
+    "nominal_mass_kg": 5.0,
+    "randomized": true,
+    "restitution_range": [
+      0.0,
+      0.0
+    ],
+    "static_friction_range": [
+      0.1,
+      0.6
+    ]
+  },
+  "object_position_tracking_contract": null,
+  "object_urdf": "holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/frontback_box5kg_training.urdf",
+  "object_urdf_sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+  "object_z_error_weight": 1.0,
+  "physics_hz": 200.0,
+  "project": "Core4DSmallTableA",
+  "reference_fps": 50,
+  "reference_frames": 99,
+  "reference_policy": "non_looping_position_and_orientation_tracking",
+  "resume_checkpoint": null,
+  "resume_checkpoint_sha256": null,
+  "reward_terms": [
+    "motion_global_ref_position_error_exp",
+    "motion_global_ref_orientation_error_exp",
+    "motion_relative_body_position_error_exp",
+    "motion_relative_body_orientation_error_exp",
+    "motion_global_body_lin_vel",
+    "motion_global_body_ang_vel",
+    "action_rate_l2",
+    "limits_dof_pos",
+    "undesired_contacts",
+    "bucket_interaction",
+    "contact_v1"
+  ],
+  "reward_variant": "bucket_A_no_rel_no_height",
+  "runtime_reference": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/core4d_pair_runtime_fps50.npz",
+  "runtime_reference_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b",
+  "save_interval": 1000,
+  "scenario": "core4d_smalltable5kg_bucket_A_transfer",
+  "seed": 721,
+  "shared_actor": true,
+  "start_iteration": 0,
+  "started_unix_time": 1795757853.8271413,
+  "steps_per_env": 24,
+  "system1_randomization": {
+    "module_sha256": "250f587474087fc778e8558f98210a594c0bee515226990b9ac6816b08fc169a",
+    "ranges": {
+      "dof_pos_bias_rad": [
+        -0.01,
+        0.01
+      ],
+      "kd_scale": [
+        0.9,
+        1.1
+      ],
+      "kp_scale": [
+        0.9,
+        1.1
+      ],
+      "material_buckets": 64,
+      "object_com_offset_m": [
+        -0.08,
+        0.08
+      ],
+      "object_dynamic_friction": [
+        0.1,
+        0.6
+      ],
+      "object_inertia_scale": [
+        0.5,
+        1.5
+      ],
+      "object_mass_scale": [
+        0.8,
+        1.2
+      ],
+      "object_restitution": [
+        0.0,
+        0.0
+      ],
+      "object_static_friction": [
+        0.1,
+        0.6
+      ],
+      "push_interval_s": [
+        1.0,
+        3.0
+      ],
+      "push_max_vel": [
+        0.5,
+        0.5,
+        0.2,
+        0.52,
+        0.52,
+        0.78
+      ],
+      "recipe": "docs/system1/T10b_dr_ranges_zh.md (Kevin confirmed 2026-11-20; pushes revised f4ed7a6)",
+      "robot_dynamic_friction": [
+        0.3,
+        1.2
+      ],
+      "robot_restitution": [
+        0.0,
+        0.5
+      ],
+      "robot_static_friction": [
+        0.3,
+        1.6
+      ],
+      "torso_com_offset_m": {
+        "x": [
+          -0.025,
+          0.025
+        ],
+        "y": [
+          -0.05,
+          0.05
+        ],
+        "z": [
+          -0.075,
+          0.075
+        ]
+      }
+    },
+    "reset_terms": [
+      "push_randomizer_state",
+      "randomize_push_schedule",
+      "s1_pd_gain_reset"
+    ],
+    "setup_terms": [
+      "set_object_rigid_body_material_startup",
+      "push_randomizer_state",
+      "s1_robot_material_startup",
+      "s1_robot_torso_com_startup",
+      "s1_dof_pos_bias_startup",
+      "s1_object_material_startup",
+      "s1_object_mass_startup",
+      "s1_object_inertia_startup",
+      "s1_object_com_startup",
+      "s1_readback_check"
+    ],
+    "step_terms": [
+      "push_randomizer_state",
+      "s1_apply_pushes"
+    ]
+  },
+  "system1_t13v4": {
+    "contact_labels": "/home/kevin/duet-system1/system1/t14/frontback_train/labels/frontback_m1p00_labels.npz",
+    "contact_weight": 1.0,
+    "contact_weight_rule": "bucket_interaction weight 1.0 x (position 1.0 + orientation 1.0) / 2",
+    "critic_v1": true,
+    "mappo_dims": {
+      "actor_input": 159,
+      "actor_obs": 154,
+      "critic_obs": 585,
+      "teammate_obs": 5
+    },
+    "noise": true,
+    "obs_v1": true,
+    "per_agent": false
+  },
+  "system1_t14_reference": {
+    "manifest": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/t14_reference.json",
+    "manifest_sha256": "7ee4f8f177d594498cc039bc441db321d1846e904a3a17c2caa7ff429ece2551",
+    "name": "t14_frontback_sub8_suitcase_020_m1p00",
+    "object_replacement": {
+      "object_urdf_sha256": "2a35b1dc49b2f7e86a0454d65cf088ca830ef7d7bbaccdc935d74e3bc6afcf97",
+      "reference_frames": 99
+    },
+    "runtime_reference_sha256": "a8ae0a70569cea1c27030f301a010cc1ec2849d1ebcd3d3a8591208fdbd4973b"
+  },
+  "termination_terms": [
+    "reference_horizon",
+    "joint_bad_tracking",
+    "lost_contact_v1"
+  ],
+  "torch_threads": {
+    "actual": 16,
+    "env": {
+      "MKL_NUM_THREADS": null,
+      "OMP_NUM_THREADS": null,
+      "OPENBLAS_NUM_THREADS": "32"
+    },
+    "requested": null
+  },
+  "training_promotion": "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14fb/table/training_asset_manifest.json",
+  "training_promotion_sha256": "6c449811c88f1199c41dc7d34c10f0bef87f350a23fc87aba5e1d40887b2db7b",
+  "training_robot_urdf_sha256": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25"
+}
