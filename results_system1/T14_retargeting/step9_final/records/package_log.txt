@@ -1,0 +1,6 @@
+Traceback (most recent call last):
+  File "/home/kevin/duet-system1/system1/t14/objects/step9e_package.py", line 133, in <module>
+    main()
+  File "/home/kevin/duet-system1/system1/t14/objects/step9e_package.py", line 83, in main
+    src = next((Path(r) / tag for r in d["source_root"] if (Path(r) / tag / "run_record.json").exists()), L / "src" / tag)
+TypeError: 'NoneType' object is not iterable

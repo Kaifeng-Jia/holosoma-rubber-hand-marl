@@ -1,0 +1,646 @@
+{
+ "family": "box",
+ "object": "smalltable",
+ "task": null,
+ "sequence": "sub9_smalltable_020",
+ "tag": "sub9_smalltable_020",
+ "mode": "role",
+ "role": 0,
+ "m": 1.5,
+ "candidate": {
+  "Q0": [
+   [
+    -1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "c0": [
+   -0.13329338829387,
+   -0.0,
+   -0.0
+  ],
+  "Q1": [
+   [
+    1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    -1.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "c1": [
+   0.13329338829387,
+   0.0,
+   0.0
+  ],
+  "axis": 0,
+  "L1": 0.53317355317548,
+  "parity0": 1,
+  "parity1": -1,
+  "id": "front-back mirror axis0 sigma-1"
+ },
+ "axis": 0,
+ "L1": 0.53317355317548,
+ "Lm": 0.79976032976322,
+ "improper": true,
+ "S": [
+  [
+   0.074101478,
+   0.997250706,
+   0.0,
+   0.512672415
+  ],
+  [
+   0.997250706,
+   -0.074101478,
+   0.0,
+   -0.552180304
+  ],
+  [
+   0.0,
+   0.0,
+   1.0,
+   0.0
+  ],
+  [
+   0.0,
+   0.0,
+   0.0,
+   1.0
+  ]
+ ],
+ "shift_xy_m": [
+  0.01357,
+  -0.01973
+ ],
+ "smpl_scale": 0.7528956532478333,
+ "r": "1 (box x s)",
+ "target": {
+  "urdf": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/assets_target/smalltable.urdf",
+  "mesh": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/assets_target/smalltable.obj",
+  "scene": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/assets_target/g1_29dof_w_smalltable.xml",
+  "size": [
+   0.79976032976322,
+   0.27635232237964236,
+   0.26318472744296095
+  ]
+ },
+ "stage1": {
+  "file": "/home/kevin/duet-system1/logs_system1/t14/step9_final/src/sub9_smalltable_020/sub9_smalltable_020_nominal_scaled.npz",
+  "sha256": "cf2d291a730a14a8d31a90172668262abb8633381675366f80085f6a9d7036a4"
+ },
+ "anchor_term": {
+  "weight": 10.0,
+  "ramp_frames": 5,
+  "surface": "scene collision boxes of the shared target",
+  "windows": [
+   {
+    "hand": "left",
+    "source_hand": "left",
+    "start": 0,
+    "stop": 121,
+    "median_source_local": [
+     0.02784,
+     -0.14461,
+     0.11988
+    ],
+    "target_local": [
+     -0.29443,
+     0.14461,
+     0.11988
+    ],
+    "anchor_local": [
+     -0.29575,
+     0.13818,
+     0.11868
+    ],
+    "projection_m": 0.00668
+   },
+   {
+    "hand": "right",
+    "source_hand": "right",
+    "start": 0,
+    "stop": 121,
+    "median_source_local": [
+     0.03257,
+     0.14828,
+     0.10611
+    ],
+    "target_local": [
+     -0.29916,
+     -0.14828,
+     0.10611
+    ],
+    "anchor_local": [
+     -0.29911,
+     -0.13818,
+     0.10559
+    ],
+    "projection_m": 0.01012
+   }
+  ]
+ },
+ "palm_fit": {
+  "source_split": "train",
+  "frames": 167,
+  "rotation": [
+   [
+    0.18435556,
+    0.98285962,
+    1e-08
+   ],
+   [
+    -0.98285962,
+    0.18435556,
+    -0.0
+   ],
+   [
+    -1e-08,
+    -1e-08,
+    1.0
+   ]
+  ],
+  "translation": [
+   0.36309479,
+   0.06863701,
+   0.0088682
+  ],
+  "fit_residual_max_m": 6.897858617102607e-07,
+  "fit_residual_mean_m": 1.6883018542006462e-07
+ },
+ "palm_track": {
+  "weight": 5.0,
+  "finger_weight": 5.0,
+  "calibration_p90_deg": [
+   0.000114,
+   0.00018
+  ]
+ },
+ "foot": {
+  "rule": "person toe speed < 0.01 m/s after Gaussian sigma 8; support foot locked at segment start +-1 mm",
+  "support_share": [
+   0.0248,
+   0.0496
+  ]
+ },
+ "sim_scene": {
+  "scene_in": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/scene_simhands.xml",
+  "sim_urdf": "/home/kevin/duet-system1/src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf",
+  "kinematics_changed": {
+   "waist_roll_link": {
+    "old_pos": [
+     -0.0039635,
+     0.0,
+     0.035
+    ],
+    "new_pos": [
+     -0.0039635,
+     0.0,
+     0.044
+    ],
+    "old_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "new_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "torso_link": {
+    "old_pos": [
+     0.0,
+     0.0,
+     0.019
+    ],
+    "new_pos": [
+     0.0,
+     0.0,
+     0.0
+    ],
+    "old_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ],
+    "new_quat": [
+     1.0,
+     0.0,
+     0.0,
+     0.0
+    ]
+   },
+   "left_shoulder_pitch_link": {
+    "old_pos": [
+     0.0039563,
+     0.10022,
+     0.23778
+    ],
+    "new_pos": [
+     0.0039563,
+     0.10022,
+     0.24778
+    ],
+    "old_quat": [
+     0.990264,
+     0.139201,
+     1.38722e-05,
+     -9.86868e-05
+    ],
+    "new_quat": [
+     0.9902640744,
+     0.1392014837,
+     1.38722e-05,
+     -9.86868e-05
+    ]
+   },
+   "right_shoulder_pitch_link": {
+    "old_pos": [
+     0.0039563,
+     -0.10021,
+     0.23778
+    ],
+    "new_pos": [
+     0.0039563,
+     -0.10021,
+     0.24778
+    ],
+    "old_quat": [
+     0.990264,
+     -0.139201,
+     1.38722e-05,
+     9.86868e-05
+    ],
+    "new_quat": [
+     0.9902640744,
+     -0.1392014837,
+     1.38722e-05,
+     9.86868e-05
+    ]
+   }
+  },
+  "kinematics_skipped": [],
+  "robot_original_collision_geoms_ground_only": 48,
+  "physx_robot_shapes": {
+   "pelvis": {
+    "host": "pelvis",
+    "pieces": 1
+   },
+   "left_hip_roll_link": {
+    "host": "left_hip_roll_link",
+    "pieces": 1
+   },
+   "left_hip_yaw_link": {
+    "host": "left_hip_yaw_link",
+    "pieces": 1
+   },
+   "left_knee_link": {
+    "host": "left_knee_link",
+    "pieces": 1
+   },
+   "left_ankle_roll_link": {
+    "host": "left_ankle_roll_link",
+    "pieces": 7
+   },
+   "right_hip_roll_link": {
+    "host": "right_hip_roll_link",
+    "pieces": 1
+   },
+   "right_hip_yaw_link": {
+    "host": "right_hip_yaw_link",
+    "pieces": 1
+   },
+   "right_knee_link": {
+    "host": "right_knee_link",
+    "pieces": 1
+   },
+   "right_ankle_roll_link": {
+    "host": "right_ankle_roll_link",
+    "pieces": 7
+   },
+   "torso_link": {
+    "host": "torso_link",
+    "pieces": 4
+   },
+   "head_link": {
+    "host": "torso_link",
+    "pieces": 1
+   },
+   "left_shoulder_yaw_link": {
+    "host": "left_shoulder_yaw_link",
+    "pieces": 1
+   },
+   "left_elbow_link": {
+    "host": "left_elbow_link",
+    "pieces": 1
+   },
+   "left_wrist_roll_link": {
+    "host": "left_wrist_roll_link",
+    "pieces": 1
+   },
+   "left_wrist_pitch_link": {
+    "host": "left_wrist_pitch_link",
+    "pieces": 1
+   },
+   "left_wrist_yaw_link": {
+    "host": "left_wrist_yaw_link",
+    "pieces": 1
+   },
+   "left_rubber_hand_link": {
+    "host": "left_rubber_hand_link",
+    "pieces": 1
+   },
+   "right_shoulder_yaw_link": {
+    "host": "right_shoulder_yaw_link",
+    "pieces": 1
+   },
+   "right_elbow_link": {
+    "host": "right_elbow_link",
+    "pieces": 1
+   },
+   "right_wrist_roll_link": {
+    "host": "right_wrist_roll_link",
+    "pieces": 1
+   },
+   "right_wrist_pitch_link": {
+    "host": "right_wrist_pitch_link",
+    "pieces": 1
+   },
+   "right_wrist_yaw_link": {
+    "host": "right_wrist_yaw_link",
+    "pieces": 1
+   },
+   "right_rubber_hand_link": {
+    "host": "right_rubber_hand_link",
+    "pieces": 1
+   }
+  },
+  "physx_dump": {
+   "task": "table",
+   "scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+   "convexes_sha256": "f5ccf067d1acc0d87758c3bfc4b26a2968f3772c41739480d8017c29b4717714"
+  },
+  "object": {
+   "body": "smalltable_link",
+   "collision": "scene geoms",
+   "geoms": [
+    "smalltable"
+   ]
+  },
+  "scene_out": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/scene_sim.xml"
+ },
+ "physx_dump": {
+  "scene_sha256": "3ef9eb52833d9c75a587f596c3986984e5643742756d3c6f995166380df00a77",
+  "convexes_sha256": "f5ccf067d1acc0d87758c3bfc4b26a2968f3772c41739480d8017c29b4717714"
+ },
+ "scene": "/home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0/scene_sim.xml",
+ "robot_palm_offsets_m": {
+  "L_Palm": [
+   0.063785,
+   -0.042639,
+   0.008036
+  ],
+  "R_Palm": [
+   0.06378,
+   0.042687,
+   0.008938
+  ]
+ },
+ "invalid_object_pose_frames": 0,
+ "frames": 121,
+ "clip_start": 9,
+ "clip_frames": "9:130",
+ "construction": "frontback",
+ "human_frame": "target",
+ "frontback": {
+  "human_frame": "target",
+  "turn": "mirror",
+  "legs": "mirror",
+  "walk": {
+   "w0": 14,
+   "w1": 106,
+   "swings": [
+    {
+     "foot": "left",
+     "start": 14,
+     "stop": 24
+    },
+    {
+     "foot": "right",
+     "start": 24,
+     "stop": 41
+    },
+    {
+     "foot": "left",
+     "start": 41,
+     "stop": 57
+    },
+    {
+     "foot": "right",
+     "start": 57,
+     "stop": 73
+    },
+    {
+     "foot": "left",
+     "start": 75,
+     "stop": 89
+    },
+    {
+     "foot": "right",
+     "start": 90,
+     "stop": 106
+    }
+   ]
+  },
+  "walk_axis_angle_deg": 43.3054225106664,
+  "sigma": -1.0,
+  "leg_offset_m": [
+   1.4857630904381607,
+   -1.600259915937891
+  ],
+  "gravity_deg_S": 0.0,
+  "M0": [
+   [
+    -1.0,
+    0.0,
+    0.0,
+    -0.26658677658774
+   ],
+   [
+    0.0,
+    -1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "M1": [
+   [
+    1.0,
+    0.0,
+    0.0,
+    0.26658677658774
+   ],
+   [
+    0.0,
+    -1.0,
+    0.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    1.0,
+    0.0
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "pelvis_mismatch": {
+   "pelvis_mismatch_max_m": 0.1022,
+   "pelvis_mismatch_mean_m": 0.0549,
+   "pelvis_mismatch_max_person_scale_m": 0.1357
+  },
+  "diag9g": {
+   "walk_dir": [
+    0.6804037485592297,
+    -0.7328374573850251
+   ],
+   "walk_dir_vs_clip_net_deg": 3.118,
+   "vertical_box_axis": 2,
+   "plane_p0": 0.37674,
+   "plane_fixed_legs": 1.09182,
+   "plane_travel_m": 1.43017,
+   "attached_vs_plane_along_e_m": {
+    "lift": {
+     "max_abs": 0.1782,
+     "mean": -0.1324
+    },
+    "walk": {
+     "max_abs": 0.0385,
+     "mean": 0.0052
+    },
+    "put_down": {
+     "max_abs": 0.1361,
+     "mean": 0.0915
+    }
+   },
+   "demo_box_vs_level_box_deg": {
+    "rotation_max": 48.036,
+    "tilt_max": 27.48
+   },
+   "walk_distance": "pelvis_feet",
+   "walked_distance_m": 1.46185,
+   "tau_walk": {
+    "first": 105.0,
+    "last": 14.0,
+    "speed_ratio_max": 2.8666,
+    "held_lift_source_frame": 105.0,
+    "held_put_down_source_frame": 14.0
+   },
+   "leg_ik": {
+    "L": {
+     "thigh_m": 0.2907,
+     "shank_m": 0.2991,
+     "lift": {
+      "frames": 14,
+      "overextended_frames": 14,
+      "max_excess_m": 0.0376,
+      "hip_vs_reversed_hip_max_m": 0.1733,
+      "knee_vs_hint_max_m": 0.1205
+     },
+     "walk": {
+      "frames": 92,
+      "overextended_frames": 23,
+      "max_excess_m": 0.0301,
+      "hip_vs_reversed_hip_max_m": 0.1038,
+      "knee_vs_hint_max_m": 0.0925
+     },
+     "put_down": {
+      "frames": 15,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0056,
+      "hip_vs_reversed_hip_max_m": 0.1529,
+      "knee_vs_hint_max_m": 0.1323
+     }
+    },
+    "R": {
+     "thigh_m": 0.2939,
+     "shank_m": 0.306,
+     "lift": {
+      "frames": 14,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0033,
+      "hip_vs_reversed_hip_max_m": 0.0788,
+      "knee_vs_hint_max_m": 0.1193
+     },
+     "walk": {
+      "frames": 92,
+      "overextended_frames": 24,
+      "max_excess_m": 0.0222,
+      "hip_vs_reversed_hip_max_m": 0.0934,
+      "knee_vs_hint_max_m": 0.0842
+     },
+     "put_down": {
+      "frames": 15,
+      "overextended_frames": 0,
+      "max_excess_m": -0.0395,
+      "hip_vs_reversed_hip_max_m": 0.0741,
+      "knee_vs_hint_max_m": 0.1092
+     }
+    }
+   }
+  }
+ },
+ "python": "/home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python",
+ "holosoma_retargeting_module": "/home/kevin/duet-system1/src/holosoma_retargeting/holosoma_retargeting/__init__.py",
+ "seconds": 102.3,
+ "stage2_seconds": 95.1,
+ "finite": true,
+ "qpos_shape": [
+  121,
+  43
+ ],
+ "object_locked_max_err": 0.0,
+ "peak_rss_gb": 1.678,
+ "command": "system1/t14/objects/role_solve.py --family box --object smalltable --sequence sub9_smalltable_020 --mode role --construction frontback --role 0 --m 1.5 --frames 9:130 --tag sub9_smalltable_020 --out /home/kevin/duet-system1/logs_system1/t14/step9_final/sub9_smalltable_020/m1p50/r0 --fb-turn world --fb-legs mirror --fb-walk-distance pelvis_feet --fb-human-frame target --source /home/kevin/duet-system1/logs_system1/t14/step9_final/src/sub9_smalltable_020"
+}

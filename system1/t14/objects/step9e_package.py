@@ -80,7 +80,7 @@ def main():
             (OUT / "levels" / tag).mkdir(exist_ok=True)
             shutil.copy2(cd / "levels.json", OUT / "levels" / tag / "levels.json")
         seqs.add(s["sequence"])
-        src = next((Path(r) / tag for r in d["source_root"] if (Path(r) / tag / "run_record.json").exists()), L / "src" / tag)
+        src = next((Path(r) / tag for r in (d.get("source_root") or ()) if (Path(r) / tag / "run_record.json").exists()), L / "src" / tag)
         srec = json.loads((src / "run_record.json").read_text())
         shutil.copy2(src / "run_record.json", OUT / "records/run_records" / f"{tag}_src.json")
         q = sorted(src.glob("*_new_qpos.npz"))

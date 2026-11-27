@@ -1,0 +1,24 @@
+{
+ "rules": "T14 final test after step 9g2 (Kevin 2026-11-26): per-clip result table of the frozen 9g2 construction on the plasticbox and\nsmalltable straight clips, verdict C (non-hand penetration and two-robot clearance on the actual collision shapes, as the 22 debug\nclips). Read only; inputs are the package's own tables: clearance_exact/step9_final_clearance_exact.csv (verdict C per level),\nnonhand_exact/*.csv (exact non-hand penetration), evals/<clip>_<m>.json (contact retention, support drift as judged, main motion),\nfeet_ik.csv (foot steps and leg stretch, same definitions as step 9g2's compare.csv) and class_a_turns.csv (the clip list).\nWrites clips.csv (one row per clip), levels.csv (one row per evaluated level) and totals.json.\n\n    python3 system1/t14/objects/step9_final_table.py --dir results_system1/T14_retargeting/step9_final\n",
+ "totals": {
+  "clips": 7,
+  "objects": [
+   "plasticbox",
+   "smalltable"
+  ],
+  "applicable_clips": [
+   "sub12_plasticbox_053",
+   "sub12_smalltable_016",
+   "sub9_smalltable_020"
+  ],
+  "applicable_levels": 6,
+  "reported_levels": 22,
+  "evaluated_levels": 23,
+  "failed_item_counts_reported": {
+   "保持率": 10,
+   "漂移 r1": 6,
+   "两机间隙": 9,
+   "主运动": 3
+  }
+ }
+}
