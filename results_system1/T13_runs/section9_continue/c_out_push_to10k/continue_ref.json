@@ -1,0 +1,25 @@
+{
+ "run": "c_out_push_to10k",
+ "base_run": "c_out_push",
+ "from_iteration": 9025,
+ "checkpoint_local": "logs_system1/t13v4/runs/c_out_push/train/model_09025.pt",
+ "checkpoint_sha256": "c3293ee45e340de7b841b112d06e5ed1e51b551ae2a476d8312e34f333ef9b23",
+ "metrics": "logs_system1/t13v4/runs/c_out_push/train/metrics.jsonl",
+ "metrics_sha256": "fce8095f15baf471cee8e13521a8c6604e52252d47b86cc0c7951a93d4446a7b",
+ "base_num_envs": 4096,
+ "before": {
+  "reward_mean": 0.06827939003705978,
+  "value_loss": 0.30908152021467683,
+  "surrogate_loss_abs": 0.015499427007252962,
+  "entropy": 33.42460168838501,
+  "resets_per_env": 0.082861328125,
+  "actor_learning_rate_mean": 0.0002452656250000001,
+  "actor_learning_rate": 0.00038443359375000017,
+  "critic_learning_rate": 0.001,
+  "iterations": [
+   9016,
+   9025
+  ]
+ },
+ "made": "2026-11-27T02:13:53-05:00"
+}

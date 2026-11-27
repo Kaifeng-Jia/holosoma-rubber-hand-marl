@@ -1,0 +1,113 @@
+{
+ "run": "d_table_to10k",
+ "argv": [
+  "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+  "-B",
+  "scripts/train_core4d_smalltable.py",
+  "--experiment",
+  "smalltable5kg_A",
+  "--reward-variant",
+  "bucket_A_no_rel_no_height",
+  "--steps-per-env",
+  "24",
+  "--seed",
+  "721",
+  "--obs-v1",
+  "--critic-v1",
+  "--system1-randomization",
+  "--contact-v1",
+  "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+  "--t14-reference",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+  "--num-envs",
+  "2048",
+  "--save-interval",
+  "500",
+  "--iterations",
+  "12",
+  "--output-dir",
+  "/home/kevin/duet-system1/logs_system1/t13v4/continue/d_table_to10k/smoke/train",
+  "--resume",
+  "/home/kevin/duet-system1/logs_system1/t13v4/runs/d_table/train/model_07500.pt"
+ ],
+ "started": "2026-11-27T02:09:42-05:00",
+ "mem_available_gb": 21,
+ "rc": 0,
+ "ended": "2026-11-27T02:11:16-05:00",
+ "check": {
+  "passed": true,
+  "items": {
+   "first_iteration": true,
+   "start_iteration": true,
+   "resume_sha256": true,
+   "critic_lr": true,
+   "ratio_reward_mean": true,
+   "ratio_value_loss": true,
+   "ratio_surrogate_loss_abs": true,
+   "ratio_entropy": true,
+   "ratio_resets_per_env": true,
+   "ratio_actor_learning_rate_mean": true
+  },
+  "ratios": {
+   "reward_mean": 1.0254230820100707,
+   "value_loss": 0.8328178436384155,
+   "surrogate_loss_abs": 1.192485175191861,
+   "entropy": 0.9963574322929979,
+   "resets_per_env": 0.6862648221343873,
+   "actor_learning_rate_mean": 0.5603864734299517
+  },
+  "after": {
+   "reward_mean": 0.1001111090183258,
+   "value_loss": 0.241655241958797,
+   "surrogate_loss_abs": 0.01837957108335104,
+   "entropy": 33.512751502990724,
+   "resets_per_env": 0.067822265625,
+   "actor_learning_rate_mean": 0.00019094650205761323,
+   "actor_learning_rate": 0.00013168724279835395,
+   "critic_learning_rate": 0.001,
+   "iterations": [
+    7501,
+    7510
+   ]
+  },
+  "before": {
+   "reward_mean": 0.09762907698750496,
+   "value_loss": 0.29016578331589693,
+   "surrogate_loss_abs": 0.015412829832785063,
+   "entropy": 33.63527025222778,
+   "resets_per_env": 0.098828125,
+   "actor_learning_rate_mean": 0.00034074074074074085,
+   "actor_learning_rate": 0.0002962962962962964,
+   "critic_learning_rate": 0.001,
+   "iterations": [
+    7491,
+    7500
+   ]
+  },
+  "band": [
+   0.3333333333333333,
+   3.0
+  ],
+  "resume_sha256_source": "run_config"
+ },
+ "passed": true,
+ "rechecks": [
+  {
+   "time": "2026-11-27T02:13:53-05:00",
+   "note": "Push path run_config has no resume_checkpoint_sha256: the resumed file's sha256 is used; no threshold changed",
+   "passed": true,
+   "items": {
+    "first_iteration": true,
+    "start_iteration": true,
+    "resume_sha256": true,
+    "critic_lr": true,
+    "ratio_reward_mean": true,
+    "ratio_value_loss": true,
+    "ratio_surrogate_loss_abs": true,
+    "ratio_entropy": true,
+    "ratio_resets_per_env": true,
+    "ratio_actor_learning_rate_mean": true
+   }
+  }
+ ]
+}

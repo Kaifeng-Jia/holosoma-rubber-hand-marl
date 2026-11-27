@@ -1,0 +1,148 @@
+{
+ "base_stage_names": [
+  "train_warmup",
+  "train"
+ ],
+ "continued_stage_names": [
+  "train"
+ ],
+ "argv_equal_except_iterations_output_resume": true,
+ "base": {
+  "iterations": "10000",
+  "resume": "/cloud/c_out_push/train_warmup/model_00025.pt"
+ },
+ "continued": {
+  "iterations": "1000",
+  "resume": "/home/kevin/duet-system1/logs_system1/t13v4/runs/c_out_push/train/model_09025.pt"
+ },
+ "continued_plan": {
+  "run": "c_out_push_to10k",
+  "task": "push",
+  "num_envs": 4096,
+  "gpu": "0",
+  "rules": {
+   "save": 500,
+   "val": 1000,
+   "stop_after": 4000,
+   "patience": 2000,
+   "max_it": 10000,
+   "earliest_stop": 6000
+  },
+  "iteration_counting": {
+   "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+   "warmup_iterations": 25,
+   "counted_iteration": "checkpoint file number - warmup_iterations",
+   "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+  },
+  "warmup_iterations": 25,
+  "stages": [
+   {
+    "name": "train",
+    "argv": [
+     "/usr/bin/python3",
+     "-B",
+     "scripts/train_plan5_push.py",
+     "--skill",
+     "push",
+     "--steps-per-env",
+     "24",
+     "--seed",
+     "721",
+     "--actor-learning-rate",
+     "0.00001",
+     "--critic-learning-rate",
+     "0.001",
+     "--push-placement-proof",
+     "system1/evidence/preflight_push_registered.json",
+     "--obs-v1",
+     "--critic-v1",
+     "--system1-randomization",
+     "--contact-v1",
+     "system1/t13v4/labels_t14r6C/push_t14r6C_m1p00_labels.npz",
+     "--t14-reference",
+     "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/t14_reference.json",
+     "--sonic-residual",
+     "--sonic-tf32",
+     "--sonic-residual-kind",
+     "out",
+     "--c-train-diag",
+     "--t13v4-cout",
+     "--num-envs",
+     "4096",
+     "--save-interval",
+     "500",
+     "--iterations",
+     "1000",
+     "--output-dir",
+     "/cloud/c_out_push_to10k/train",
+     "--resume",
+     "/home/kevin/duet-system1/logs_system1/t13v4/runs/c_out_push/train/model_09025.pt"
+    ]
+   }
+  ],
+  "validation_states": "system1/t13v4/states_t14r6C/push_validation_states.json",
+  "validation_flags": [
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/t14_reference.json",
+   "--push-placement-proof",
+   "system1/evidence/preflight_push_registered.json"
+  ],
+  "fixed_budget": {
+   "decision": "Kevin 2026-11-26: fixed training budget, counted iterations to max_it, no stop rule",
+   "max_counted_iterations": 10000
+  },
+  "continued": {
+   "decision": "Kevin 2026-11-26 (T13 section 9): fixed budget; continue from the last local checkpoint to counted max_it, configuration unchanged; validation for the curve only",
+   "base_run": "c_out_push",
+   "from_iteration": 9025,
+   "from_counted_iteration": 9000,
+   "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/runs/c_out_push/train/model_09025.pt",
+   "checkpoint_sha256": "c3293ee45e340de7b841b112d06e5ed1e51b551ae2a476d8312e34f333ef9b23",
+   "continue_ref": {
+    "run": "c_out_push_to10k",
+    "base_run": "c_out_push",
+    "from_iteration": 9025,
+    "checkpoint_local": "logs_system1/t13v4/runs/c_out_push/train/model_09025.pt",
+    "checkpoint_sha256": "c3293ee45e340de7b841b112d06e5ed1e51b551ae2a476d8312e34f333ef9b23",
+    "metrics": "logs_system1/t13v4/runs/c_out_push/train/metrics.jsonl",
+    "metrics_sha256": "fce8095f15baf471cee8e13521a8c6604e52252d47b86cc0c7951a93d4446a7b",
+    "base_num_envs": 4096,
+    "before": {
+     "reward_mean": 0.06827939003705978,
+     "value_loss": 0.30908152021467683,
+     "surrogate_loss_abs": 0.015499427007252962,
+     "entropy": 33.42460168838501,
+     "resets_per_env": 0.082861328125,
+     "actor_learning_rate_mean": 0.0002452656250000001,
+     "actor_learning_rate": 0.00038443359375000017,
+     "critic_learning_rate": 0.001,
+     "iterations": [
+      9016,
+      9025
+     ]
+    },
+    "made": "2026-11-27T02:13:53-05:00"
+   },
+   "resume_check_rule": {
+    "keys": [
+     "reward_mean",
+     "value_loss",
+     "surrogate_loss_abs",
+     "entropy",
+     "resets_per_env",
+     "actor_learning_rate_mean"
+    ],
+    "band": [
+     0.3333333333333333,
+     3.0
+    ]
+   }
+  },
+  "validation_controller": "sonic_residual",
+  "validation_extra": [
+   "--t13v4-cout"
+  ]
+ }
+}

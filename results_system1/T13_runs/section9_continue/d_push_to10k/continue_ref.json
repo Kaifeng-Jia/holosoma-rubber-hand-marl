@@ -1,0 +1,25 @@
+{
+ "run": "d_push_to10k",
+ "base_run": "d_push",
+ "from_iteration": 6025,
+ "checkpoint_local": "logs_system1/t13v4/runs/d_push/train/model_06025.pt",
+ "checkpoint_sha256": "8cf4720cbe07d1362410f2f7be0b58b5c40958073d9108481a8cc19d6fec1ddc",
+ "metrics": "logs_system1/t13v4/runs/d_push/train/metrics.jsonl",
+ "metrics_sha256": "e08fcd71d8e1ebe18055b0819557b300ed43d5fcafa1763c9cd45779f30087d9",
+ "base_num_envs": 4096,
+ "before": {
+  "reward_mean": 0.08165478855371475,
+  "value_loss": 0.24447620823979382,
+  "surrogate_loss_abs": 0.013408939606451894,
+  "entropy": 34.98791324615478,
+  "resets_per_env": 0.0628173828125,
+  "actor_learning_rate_mean": 0.00030754687500000015,
+  "actor_learning_rate": 0.0002562890625000001,
+  "critic_learning_rate": 0.001,
+  "iterations": [
+   6016,
+   6025
+  ]
+ },
+ "made": "2026-11-27T02:13:52-05:00"
+}

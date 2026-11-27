@@ -1,0 +1,131 @@
+{
+ "base_stage_names": [
+  "train"
+ ],
+ "continued_stage_names": [
+  "train"
+ ],
+ "argv_equal_except_iterations_output_resume": true,
+ "base": {
+  "iterations": "10000",
+  "resume": null
+ },
+ "continued": {
+  "iterations": "2500",
+  "resume": "/home/kevin/duet-system1/logs_system1/t13v4/runs/d_table/train/model_07500.pt"
+ },
+ "continued_plan": {
+  "run": "d_table_to10k",
+  "task": "table",
+  "num_envs": 4096,
+  "gpu": "0",
+  "rules": {
+   "save": 500,
+   "val": 1000,
+   "stop_after": 4000,
+   "patience": 2000,
+   "max_it": 10000,
+   "earliest_stop": 6000
+  },
+  "iteration_counting": {
+   "decision": "Kevin 2026-11-24: training iterations are counted after the critic-only warm-up; the same rule for all three runs",
+   "warmup_iterations": 0,
+   "counted_iteration": "checkpoint file number - warmup_iterations",
+   "applies_to": "validation points, stop rule, maximum iterations, final checkpoint"
+  },
+  "warmup_iterations": 0,
+  "stages": [
+   {
+    "name": "train",
+    "argv": [
+     "/usr/bin/python3",
+     "-B",
+     "scripts/train_core4d_smalltable.py",
+     "--experiment",
+     "smalltable5kg_A",
+     "--reward-variant",
+     "bucket_A_no_rel_no_height",
+     "--steps-per-env",
+     "24",
+     "--seed",
+     "721",
+     "--obs-v1",
+     "--critic-v1",
+     "--system1-randomization",
+     "--contact-v1",
+     "system1/t13v4/labels_t14r6C/table_t14r6C_k1p0_labels.npz",
+     "--t14-reference",
+     "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json",
+     "--num-envs",
+     "4096",
+     "--save-interval",
+     "500",
+     "--iterations",
+     "2500",
+     "--output-dir",
+     "/cloud/d_table_to10k/train",
+     "--resume",
+     "/home/kevin/duet-system1/logs_system1/t13v4/runs/d_table/train/model_07500.pt"
+    ]
+   }
+  ],
+  "validation_states": "system1/t13v4/states_t14r6C/table_validation_states.json",
+  "validation_flags": [
+   "--obs-v1",
+   "--critic-v1",
+   "--t14-reference",
+   "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/table/t14_reference.json"
+  ],
+  "fixed_budget": {
+   "decision": "Kevin 2026-11-26: fixed training budget, counted iterations to max_it, no stop rule",
+   "max_counted_iterations": 10000
+  },
+  "continued": {
+   "decision": "Kevin 2026-11-26 (T13 section 9): fixed budget; continue from the last local checkpoint to counted max_it, configuration unchanged; validation for the curve only",
+   "base_run": "d_table",
+   "from_iteration": 7500,
+   "from_counted_iteration": 7500,
+   "checkpoint": "/home/kevin/duet-system1/logs_system1/t13v4/runs/d_table/train/model_07500.pt",
+   "checkpoint_sha256": "2839de188678e04eac5ec2ca35d08deb2c63c8d2d0fffda3d601586d7b2674ac",
+   "continue_ref": {
+    "run": "d_table_to10k",
+    "base_run": "d_table",
+    "from_iteration": 7500,
+    "checkpoint_local": "logs_system1/t13v4/runs/d_table/train/model_07500.pt",
+    "checkpoint_sha256": "2839de188678e04eac5ec2ca35d08deb2c63c8d2d0fffda3d601586d7b2674ac",
+    "metrics": "logs_system1/t13v4/runs/d_table/train/metrics.jsonl",
+    "metrics_sha256": "b2d0efc75ed149fcf9a9b74800fd4fd3278593258525e4fd974a26243ce9076d",
+    "base_num_envs": 4096,
+    "before": {
+     "reward_mean": 0.09762907698750496,
+     "value_loss": 0.29016578331589693,
+     "surrogate_loss_abs": 0.015412829832785063,
+     "entropy": 33.63527025222778,
+     "resets_per_env": 0.098828125,
+     "actor_learning_rate_mean": 0.00034074074074074085,
+     "actor_learning_rate": 0.0002962962962962964,
+     "critic_learning_rate": 0.001,
+     "iterations": [
+      7491,
+      7500
+     ]
+    },
+    "made": "2026-11-27T02:13:52-05:00"
+   },
+   "resume_check_rule": {
+    "keys": [
+     "reward_mean",
+     "value_loss",
+     "surrogate_loss_abs",
+     "entropy",
+     "resets_per_env",
+     "actor_learning_rate_mean"
+    ],
+    "band": [
+     0.3333333333333333,
+     3.0
+    ]
+   }
+  }
+ }
+}

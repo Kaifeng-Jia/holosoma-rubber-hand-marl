@@ -1,0 +1,103 @@
+{
+ "run": "c_out_push_to10k",
+ "argv": [
+  "/home/kevin/.holosoma_deps/miniconda3/envs/hssim_s1/bin/python",
+  "-B",
+  "scripts/train_plan5_push.py",
+  "--skill",
+  "push",
+  "--steps-per-env",
+  "24",
+  "--seed",
+  "721",
+  "--actor-learning-rate",
+  "0.00001",
+  "--critic-learning-rate",
+  "0.001",
+  "--push-placement-proof",
+  "system1/evidence/preflight_push_registered.json",
+  "--obs-v1",
+  "--critic-v1",
+  "--system1-randomization",
+  "--contact-v1",
+  "system1/t13v4/labels_t14r6C/push_t14r6C_m1p00_labels.npz",
+  "--t14-reference",
+  "src/holosoma/holosoma/data/motions/g1_29dof/whole_body_tracking/system1_t14r6C/push/t14_reference.json",
+  "--sonic-residual",
+  "--sonic-tf32",
+  "--sonic-residual-kind",
+  "out",
+  "--c-train-diag",
+  "--t13v4-cout",
+  "--num-envs",
+  "512",
+  "--save-interval",
+  "500",
+  "--iterations",
+  "12",
+  "--output-dir",
+  "/home/kevin/duet-system1/logs_system1/t13v4/continue/c_out_push_to10k/smoke/train",
+  "--resume",
+  "/home/kevin/duet-system1/logs_system1/t13v4/runs/c_out_push/train/model_09025.pt"
+ ],
+ "started": "2026-11-27T02:11:16-05:00",
+ "mem_available_gb": 21,
+ "rc": 0,
+ "ended": "2026-11-27T02:12:18-05:00",
+ "check": {
+  "passed": false,
+  "items": {
+   "first_iteration": true,
+   "start_iteration": true,
+   "resume_sha256": false,
+   "critic_lr": true,
+   "ratio_reward_mean": true,
+   "ratio_value_loss": true,
+   "ratio_surrogate_loss_abs": true,
+   "ratio_entropy": true,
+   "ratio_resets_per_env": true,
+   "ratio_actor_learning_rate_mean": false
+  },
+  "ratios": {
+   "reward_mean": 1.0639606632018757,
+   "value_loss": 1.4232869290959143,
+   "surrogate_loss_abs": 1.4838749082098577,
+   "entropy": 0.9984867129603493,
+   "resets_per_env": 0.9475545079552152,
+   "actor_learning_rate_mean": 0.25367904695164684
+  },
+  "after": {
+   "reward_mean": 0.07264658510684967,
+   "value_loss": 0.43991168774664413,
+   "surrogate_loss_abs": 0.02299921082769288,
+   "entropy": 33.37402067184449,
+   "resets_per_env": 0.078515625,
+   "actor_learning_rate_mean": 6.221875000000003e-05,
+   "actor_learning_rate": 7.593750000000004e-05,
+   "critic_learning_rate": 0.001,
+   "iterations": [
+    9026,
+    9035
+   ]
+  },
+  "before": {
+   "reward_mean": 0.06827939003705978,
+   "value_loss": 0.30908152021467683,
+   "surrogate_loss_abs": 0.015499427007252962,
+   "entropy": 33.42460168838501,
+   "resets_per_env": 0.082861328125,
+   "actor_learning_rate_mean": 0.0002452656250000001,
+   "actor_learning_rate": 0.00038443359375000017,
+   "critic_learning_rate": 0.001,
+   "iterations": [
+    9016,
+    9025
+   ]
+  },
+  "band": [
+   0.3333333333333333,
+   3.0
+  ]
+ },
+ "passed": false
+}
