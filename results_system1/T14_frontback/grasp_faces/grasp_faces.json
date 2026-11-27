@@ -1,0 +1,5634 @@
+{
+ "question": "Kevin 2026-11-27: grasp faces of the frozen 9g2 construction (report only)",
+ "definitions": "Grasp faces of the frozen 9g2 construction (Kevin 2026-11-27, report only; CPU; nothing of any reference is changed).\n\nQuestion: on which box face does each of the four robot hands touch the box, is it the face the corresponding person hand is\non, and how far is each palm from the box (median)? Clips: the step-9g2 debug clips with at least one applicable level (verdict\nC, results_system1/T14_retargeting/step9g2/compare.csv applicable_levels_after) and the 3 applicable clips of the final test\n(results_system1/T14_retargeting/step9_final/levels.csv applicable_C); level 1.00 if applicable, else the smallest applicable\nlevel. Not checked (Kevin): sub1_suitcase_036 (shoulder carry) and sub5_suitcase_046 (squat walk).\n\nMeasures: the same as palm_gap_check.py (the front-back training reference report), per pair frame of the 30 Hz solve:\n  construction  = frontback.build(..., turn=\"world\", legs=\"mirror\", walk_distance=\"pelvis_feet\") rebuilt with the prediag's\n                  own loaders (step9_diag.load_role0); checked against the solve's saved person joints and shared target P;\n  robot palm    = rubber-hand palm point (run_record robot_palm_offsets_m) by MuJoCo FK on the solve's own scene_sim.xml\n                  (robot qpos and object qpos of <tag>_new_qpos.npz); signed distance to the shared target box (frontback.box_sd,\n                  POSITIVE = OUTSIDE);\n  touched face  = the box face of the exact closest point between the hand's simulator collision hull\n                  (physx_<side>_rubber_hand_link geom, the solver's non-penetration geom) and the box (mujoco.mj_geomDistance\n                  witness on the box, nearest face in the shared-target frame) = palm_gap_check \"hull_contact_face\";\n  person face   = the face of the person palm carried into the shared target by the interaction-mesh map (Meff Nr^-1, the\n                  robot palm target if the deformation were the identity) = palm_gap_check \"im_target_nearest_face\"; also the\n                  nearest face of the person palm in the person's real own box (local axes = the shared target's) and the\n                  anchor-term face (run_record anchor_term.windows anchor_local);\n  person palm   = mean of the palm-side SMPL-X wrist vertices (solver person \"L_Palm\" / \"R_Palm\"); robot 1's person hand =\n                  the 9g2 mirror partner's hand (the demonstrator's other hand, mirrored); signed distance to the person's\n                  real own box.\nFace names: +/-x, +/-y, +/-z in the box frame; role per clip: \"end\" = the carry axis k (the axis stretched between the two\nrobots; the end face towards robot 0 / robot 1 by the side of each robot's pelvis), \"top\" / \"bottom\" = the local axis most\naligned with world z, \"side\" = the remaining axis (left / right as seen by robot 0 facing the box); per hand also as seen by\nits own robot facing the box (\"own left side\" / \"own right side\" / \"near end\" = the end face towards itself / \"far end\"). Per hand and clip: frame\ncounts of each face, the mode; \"match\" = the touched-face mode equals the person-face mode. Summary class_ per hand: \"match\" /\n\"mismatch\" when the three person faces (by label, geometric, interaction-mesh target) agree and the touched face equals / differs\nfrom them; \"person faces disagree\" otherwise. Distances to a face = unsigned\ndistance to that face's rectangle (to_face; the person palm = its interaction-mesh target point in the shared target), medians\nover all frames: robot palm to the touched face and to the person face, person palm to the person face and to the touched face\n(a small value = the person palm also lies near the touched face, e.g. at an edge).\n\nMain comparison (match_label): the robot's touched face on the shared box vs the person palm's nearest face on the person's\nREAL OWN box (the box the person holds; robot 1's person = the mirror partner and its mirrored box), carried to the shared box\nBY LABEL, the construction's correspondence: real own face (a, s) = levelled own face (a, s) (frontback rule 3 keeps the box\naxes: long axis k turned to the walking direction, the frame-0 vertical axis vertical), then the rotation part of M0 (role 0)\n/ M1 (role 1) (the own-box labels +/-x ... are not the shared target's labels: candidate Q0 = diag(-1, -1, 1) for the \"sigma-1\"\nclips). Second, geometric (match_mapped): the real face's direction carried by Meff Nr^-1 x real own box frame (includes the\nreal box's yaw / tilt against the levelled box, so near 45 degrees it can switch faces). Also reported: the interaction-mesh target face\n(person_face: the person palm POINT carried into the shared box; near an edge it can differ from the mapped face because the\nown box is one end of the stretched shared box), and viewer roles (view_roles: the robot's touched face as seen from the\nrobot's pelvis, the person's own-box face as seen from the person's pelvis; role_match) - the person may face the box\ndifferently from the robot, so the viewer roles are a second view, not the face correspondence.\n\nOutputs: logs_system1/t14/frontback_train/grasp_faces/<tag>.json + frames_<tag>.csv; summary grasp_faces.csv / .json; copies\nunder results_system1/T14_frontback/grasp_faces/. Check: sub8_suitcase_020 1.00 per-frame values equal palm_gap.csv.\n\n    CUDA_VISIBLE_DEVICES=\"\" .../hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip TAG   # one clip\n    CUDA_VISIBLE_DEVICES=\"\" .../hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --summary    # tables\n",
+ "skipped": [
+  "sub1_suitcase_036",
+  "sub5_suitcase_046"
+ ],
+ "clips": {
+  "largeboxa": {
+   "tag": "largeboxa",
+   "step": "step9g2",
+   "applicable": [
+    1.25,
+    1.5
+   ],
+   "object": "largebox",
+   "sequence": "sub7_largebox_045",
+   "frames": [
+    60,
+    185
+   ],
+   "level": 1.25,
+   "solve_dir": "logs_system1/t14/step9g2/largeboxa/m1p25",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 125,
+    "solve_frames": [
+     125,
+     125
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 7.394535539440028e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 7.611552943487254e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.6096871296621585,
+     0.2458106303612102,
+     0.2620953966227172
+    ],
+    "shared_box_size_m": [
+     0.609687,
+     0.245811,
+     0.262095
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.243875,
+     0.245811,
+     0.262095
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 15,
+     "w1": 109,
+     "frames": 125
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.4683,
+      -0.0449,
+      -0.0766
+     ],
+     "r1": [
+      0.4583,
+      -0.0418,
+      -0.0724
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.8977,
+     "r0_R": 0.8977,
+     "r1_L": 0.8977,
+     "r1_R": 0.8977
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 125,
+     "r0_R": 125,
+     "r1_L": 125,
+     "r1_R": 125
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+y": 125
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 105,
+      "-x": 20
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.84,
+     "person_own_box_face_counts": {
+      "+y": 125
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 125
+     },
+     "person_face_label_counts": {
+      "+y": 125
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 125,
+     "robot_palm_to_person_face_label_median_cm": 2.54,
+     "person_face_mapped_counts": {
+      "+y": 125
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 125,
+     "robot_palm_to_person_face_mapped_median_cm": 2.54,
+     "robot_touched_role_counts": {
+      "own left side": 125
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 125
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 125,
+     "view_squareness_min": {
+      "robot": 0.95,
+      "person": 0.985
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 2.54,
+     "robot_palm_to_person_face_median_cm": 2.54,
+     "person_palm_to_person_face_median_cm": 0.93,
+     "person_palm_to_touched_face_median_cm": 0.93,
+     "robot_palm_sd_median_cm": 2.54,
+     "robot_palm_sd_walk_median_cm": 2.75,
+     "person_palm_sd_own_box_median_cm": 0.55,
+     "person_palm_im_target_sd_median_cm": 0.04,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 3.67
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-x": 104,
+      "-y": 21
+     },
+     "touched_face": "-x",
+     "touched_face_role": "end towards r0",
+     "touched_face_own": "near end",
+     "touched_face_share": 0.832,
+     "person_face_counts": {
+      "-y": 125
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 125
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 104,
+      "-y": 21
+     },
+     "person_face_label_counts": {
+      "-y": 125
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 21,
+     "robot_palm_to_person_face_label_median_cm": 7.02,
+     "person_face_mapped_counts": {
+      "-y": 125
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 21,
+     "robot_palm_to_person_face_mapped_median_cm": 7.02,
+     "robot_touched_role_counts": {
+      "near end": 104,
+      "own right side": 21
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 0.832,
+     "person_role_counts": {
+      "own right side": 125
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 21,
+     "view_squareness_min": {
+      "robot": 0.95,
+      "person": 0.985
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.56,
+     "robot_palm_to_person_face_median_cm": 7.02,
+     "person_palm_to_person_face_median_cm": 0.27,
+     "person_palm_to_touched_face_median_cm": 8.48,
+     "robot_palm_sd_median_cm": 6.47,
+     "robot_palm_sd_walk_median_cm": 6.55,
+     "person_palm_sd_own_box_median_cm": 0.19,
+     "person_palm_im_target_sd_median_cm": 0.21,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.82,
+     "robot_palm_to_anchor_median_cm": 15.48
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 104,
+      "-y": 21
+     },
+     "touched_face": "+x",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 0.832,
+     "person_face_counts": {
+      "-y": 125
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 125
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 104,
+      "-y": 21
+     },
+     "person_face_label_counts": {
+      "-y": 125
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 21,
+     "robot_palm_to_person_face_label_median_cm": 7.02,
+     "person_face_mapped_counts": {
+      "-y": 125
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 21,
+     "robot_palm_to_person_face_mapped_median_cm": 7.02,
+     "robot_touched_role_counts": {
+      "near end": 104,
+      "own left side": 21
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 0.832,
+     "person_role_counts": {
+      "own left side": 125
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 21,
+     "view_squareness_min": {
+      "robot": 0.948,
+      "person": 0.985
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.57,
+     "robot_palm_to_person_face_median_cm": 7.02,
+     "person_palm_to_person_face_median_cm": 0.27,
+     "person_palm_to_touched_face_median_cm": 8.48,
+     "robot_palm_sd_median_cm": 6.49,
+     "robot_palm_sd_walk_median_cm": 6.55,
+     "person_palm_sd_own_box_median_cm": 0.19,
+     "person_palm_im_target_sd_median_cm": 0.21,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.85,
+     "robot_palm_to_anchor_median_cm": 15.58
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 125
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 105,
+      "+x": 20
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.84,
+     "person_own_box_face_counts": {
+      "+y": 125
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 125
+     },
+     "person_face_label_counts": {
+      "+y": 125
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 125,
+     "robot_palm_to_person_face_label_median_cm": 2.52,
+     "person_face_mapped_counts": {
+      "+y": 125
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 125,
+     "robot_palm_to_person_face_mapped_median_cm": 2.52,
+     "robot_touched_role_counts": {
+      "own right side": 125
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 125
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 125,
+     "view_squareness_min": {
+      "robot": 0.948,
+      "person": 0.985
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 2.52,
+     "robot_palm_to_person_face_median_cm": 2.52,
+     "person_palm_to_person_face_median_cm": 0.93,
+     "person_palm_to_touched_face_median_cm": 0.93,
+     "robot_palm_sd_median_cm": 2.52,
+     "robot_palm_sd_walk_median_cm": 2.75,
+     "person_palm_sd_own_box_median_cm": 0.55,
+     "person_palm_im_target_sd_median_cm": 0.04,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 3.73
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip largeboxa"
+  },
+  "smallboxa": {
+   "tag": "smallboxa",
+   "step": "step9g2",
+   "applicable": [
+    1.7
+   ],
+   "object": "smallbox",
+   "sequence": "sub4_smallbox_047",
+   "frames": [
+    36,
+    172
+   ],
+   "level": 1.7,
+   "solve_dir": "logs_system1/t14/step9g2/smallboxa/m1p70",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 136,
+    "solve_frames": [
+     136,
+     136
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 8.182520657568082e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 8.18402834390497e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.600022493221747,
+     0.2630149157216109,
+     0.11279270176482907
+    ],
+    "shared_box_size_m": [
+     0.600022,
+     0.263015,
+     0.112793
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.176477,
+     0.263015,
+     0.112793
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 19,
+     "w1": 121,
+     "frames": 136
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.3984,
+      -0.0468,
+      -0.0332
+     ],
+     "r1": [
+      0.4329,
+      -0.0629,
+      -0.0278
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.9092,
+     "r0_R": 0.9092,
+     "r1_L": 0.9092,
+     "r1_R": 0.9092
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 136,
+     "r0_R": 136,
+     "r1_L": 136,
+     "r1_R": 136
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 23,
+      "+y": 113
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.831,
+     "person_face_counts": {
+      "+y": 110,
+      "-z": 26
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.809,
+     "person_own_box_face_counts": {
+      "+y": 136
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 23,
+      "+y": 113
+     },
+     "person_face_label_counts": {
+      "+y": 136
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 113,
+     "robot_palm_to_person_face_label_median_cm": 1.7,
+     "person_face_mapped_counts": {
+      "+y": 136
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 113,
+     "robot_palm_to_person_face_mapped_median_cm": 1.7,
+     "robot_touched_role_counts": {
+      "near end": 23,
+      "own left side": 113
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.831,
+     "person_role_counts": {
+      "own left side": 136
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 113,
+     "view_squareness_min": {
+      "robot": 0.975,
+      "person": 0.983
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.7,
+     "robot_palm_to_person_face_median_cm": 1.7,
+     "person_palm_to_person_face_median_cm": 0.51,
+     "person_palm_to_touched_face_median_cm": 0.51,
+     "robot_palm_sd_median_cm": 1.7,
+     "robot_palm_sd_walk_median_cm": 1.48,
+     "person_palm_sd_own_box_median_cm": 0.31,
+     "person_palm_im_target_sd_median_cm": -0.42,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.42,
+     "robot_palm_to_anchor_median_cm": 4.39
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "+z": 118,
+      "-y": 18
+     },
+     "touched_face": "+z",
+     "touched_face_role": "top",
+     "touched_face_own": "top",
+     "touched_face_share": 0.868,
+     "person_face_counts": {
+      "-y": 136
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 136
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 118,
+      "-y": 18
+     },
+     "person_face_label_counts": {
+      "-y": 136
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 18,
+     "robot_palm_to_person_face_label_median_cm": 6.48,
+     "person_face_mapped_counts": {
+      "-y": 136
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 18,
+     "robot_palm_to_person_face_mapped_median_cm": 6.48,
+     "robot_touched_role_counts": {
+      "top": 118,
+      "own right side": 18
+     },
+     "robot_touched_role": "top",
+     "robot_touched_role_share": 0.868,
+     "person_role_counts": {
+      "own right side": 136
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 18,
+     "view_squareness_min": {
+      "robot": 0.979,
+      "person": 0.983
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.74,
+     "robot_palm_to_person_face_median_cm": 6.48,
+     "person_palm_to_person_face_median_cm": 0.79,
+     "person_palm_to_touched_face_median_cm": 9.24,
+     "robot_palm_sd_median_cm": 6.47,
+     "robot_palm_sd_walk_median_cm": 6.44,
+     "person_palm_sd_own_box_median_cm": 0.8,
+     "person_palm_im_target_sd_median_cm": 0.79,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.6,
+     "robot_palm_to_anchor_median_cm": 10.78
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+z": 45,
+      "-y": 91
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.669,
+     "person_face_counts": {
+      "-y": 136
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 136
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 45,
+      "-y": 91
+     },
+     "person_face_label_counts": {
+      "-y": 136
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 91,
+     "robot_palm_to_person_face_label_median_cm": 4.28,
+     "person_face_mapped_counts": {
+      "-y": 136
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 91,
+     "robot_palm_to_person_face_mapped_median_cm": 4.28,
+     "robot_touched_role_counts": {
+      "top": 45,
+      "own left side": 91
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.669,
+     "person_role_counts": {
+      "own left side": 136
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 91,
+     "view_squareness_min": {
+      "robot": 0.972,
+      "person": 0.983
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 4.28,
+     "robot_palm_to_person_face_median_cm": 4.28,
+     "person_palm_to_person_face_median_cm": 0.79,
+     "person_palm_to_touched_face_median_cm": 0.79,
+     "robot_palm_sd_median_cm": 4.28,
+     "robot_palm_sd_walk_median_cm": 4.21,
+     "person_palm_sd_own_box_median_cm": 0.8,
+     "person_palm_im_target_sd_median_cm": 0.79,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 6.36
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 24,
+      "+y": 112
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.824,
+     "person_face_counts": {
+      "+y": 110,
+      "-z": 26
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.809,
+     "person_own_box_face_counts": {
+      "+y": 136
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 24,
+      "+y": 112
+     },
+     "person_face_label_counts": {
+      "+y": 136
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 112,
+     "robot_palm_to_person_face_label_median_cm": 1.69,
+     "person_face_mapped_counts": {
+      "+y": 136
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 112,
+     "robot_palm_to_person_face_mapped_median_cm": 1.69,
+     "robot_touched_role_counts": {
+      "near end": 24,
+      "own right side": 112
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.824,
+     "person_role_counts": {
+      "own right side": 136
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 112,
+     "view_squareness_min": {
+      "robot": 0.968,
+      "person": 0.983
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.69,
+     "robot_palm_to_person_face_median_cm": 1.69,
+     "person_palm_to_person_face_median_cm": 0.51,
+     "person_palm_to_touched_face_median_cm": 0.51,
+     "robot_palm_sd_median_cm": 1.69,
+     "robot_palm_sd_walk_median_cm": 1.36,
+     "person_palm_sd_own_box_median_cm": 0.31,
+     "person_palm_im_target_sd_median_cm": -0.42,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.37,
+     "robot_palm_to_anchor_median_cm": 4.58
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip smallboxa"
+  },
+  "suitcasea": {
+   "tag": "suitcasea",
+   "step": "step9g2",
+   "applicable": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_006",
+   "frames": [
+    65,
+    193
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/suitcasea/m1p00",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 128,
+    "solve_frames": [
+     128,
+     128
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.073744424599624e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 4.222865834790923e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.384709300790144,
+     0.2808686276016271,
+     0.376102552740388
+    ],
+    "shared_box_size_m": [
+     0.384709,
+     0.280869,
+     0.376103
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.192355,
+     0.280869,
+     0.376103
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 31,
+     "w1": 105,
+     "frames": 128
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.4922,
+      0.1338,
+      0.0027
+     ],
+     "r1": [
+      0.4855,
+      0.138,
+      -0.0028
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.9081,
+     "r0_R": 0.9081,
+     "r1_L": 0.9081,
+     "r1_R": 0.9081
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 128,
+     "r0_R": 128,
+     "r1_L": 128,
+     "r1_R": 128
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+y": 128
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 128
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+y": 128
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 128
+     },
+     "person_face_label_counts": {
+      "+y": 128
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 128,
+     "robot_palm_to_person_face_label_median_cm": 3.56,
+     "person_face_mapped_counts": {
+      "+y": 128
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 128,
+     "robot_palm_to_person_face_mapped_median_cm": 3.56,
+     "robot_touched_role_counts": {
+      "own left side": 128
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 128
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 128,
+     "view_squareness_min": {
+      "robot": 0.861,
+      "person": 0.986
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.56,
+     "robot_palm_to_person_face_median_cm": 3.56,
+     "person_palm_to_person_face_median_cm": 1.14,
+     "person_palm_to_touched_face_median_cm": 1.14,
+     "robot_palm_sd_median_cm": 3.56,
+     "robot_palm_sd_walk_median_cm": 3.17,
+     "person_palm_sd_own_box_median_cm": -0.18,
+     "person_palm_im_target_sd_median_cm": 1.14,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 5.71
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-x": 49,
+      "-y": 79
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.617,
+     "person_face_counts": {
+      "-x": 106,
+      "-y": 22
+     },
+     "person_face": "-x",
+     "person_face_role": "end towards r0",
+     "person_face_own": "near end",
+     "person_face_share": 0.828,
+     "person_own_box_face_counts": {
+      "-y": 128
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 54,
+      "-y": 74
+     },
+     "person_face_label_counts": {
+      "-y": 128
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 79,
+     "robot_palm_to_person_face_label_median_cm": 1.86,
+     "person_face_mapped_counts": {
+      "-y": 128
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 79,
+     "robot_palm_to_person_face_mapped_median_cm": 1.86,
+     "robot_touched_role_counts": {
+      "near end": 49,
+      "own right side": 79
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.617,
+     "person_role_counts": {
+      "own right side": 128
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 79,
+     "view_squareness_min": {
+      "robot": 0.861,
+      "person": 0.986
+     },
+     "match": false,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.86,
+     "robot_palm_to_person_face_median_cm": 4.13,
+     "person_palm_to_person_face_median_cm": 1.22,
+     "person_palm_to_touched_face_median_cm": 2.18,
+     "robot_palm_sd_median_cm": 1.86,
+     "robot_palm_sd_walk_median_cm": 1.81,
+     "person_palm_sd_own_box_median_cm": -0.82,
+     "person_palm_im_target_sd_median_cm": 0.22,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 3.65
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 50,
+      "-y": 78
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.609,
+     "person_face_counts": {
+      "+x": 106,
+      "-y": 22
+     },
+     "person_face": "+x",
+     "person_face_role": "end towards r1",
+     "person_face_own": "near end",
+     "person_face_share": 0.828,
+     "person_own_box_face_counts": {
+      "-y": 128
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 51,
+      "-y": 77
+     },
+     "person_face_label_counts": {
+      "-y": 128
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 78,
+     "robot_palm_to_person_face_label_median_cm": 1.84,
+     "person_face_mapped_counts": {
+      "-y": 128
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 78,
+     "robot_palm_to_person_face_mapped_median_cm": 1.84,
+     "robot_touched_role_counts": {
+      "near end": 50,
+      "own left side": 78
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.609,
+     "person_role_counts": {
+      "own left side": 128
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 78,
+     "view_squareness_min": {
+      "robot": 0.855,
+      "person": 0.986
+     },
+     "match": false,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.84,
+     "robot_palm_to_person_face_median_cm": 3.59,
+     "person_palm_to_person_face_median_cm": 1.22,
+     "person_palm_to_touched_face_median_cm": 2.18,
+     "robot_palm_sd_median_cm": 1.84,
+     "robot_palm_sd_walk_median_cm": 1.77,
+     "person_palm_sd_own_box_median_cm": -0.82,
+     "person_palm_im_target_sd_median_cm": 0.22,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 3.82
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 108,
+      "+y": 20
+     },
+     "touched_face": "+x",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 0.844,
+     "person_face_counts": {
+      "+y": 128
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+y": 128
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 108,
+      "+y": 20
+     },
+     "person_face_label_counts": {
+      "+y": 128
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 20,
+     "robot_palm_to_person_face_label_median_cm": 6.69,
+     "person_face_mapped_counts": {
+      "+y": 128
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 20,
+     "robot_palm_to_person_face_mapped_median_cm": 6.69,
+     "robot_touched_role_counts": {
+      "near end": 108,
+      "own right side": 20
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 0.844,
+     "person_role_counts": {
+      "own right side": 128
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 20,
+     "view_squareness_min": {
+      "robot": 0.855,
+      "person": 0.986
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.4,
+     "robot_palm_to_person_face_median_cm": 6.69,
+     "person_palm_to_person_face_median_cm": 1.14,
+     "person_palm_to_touched_face_median_cm": 9.11,
+     "robot_palm_sd_median_cm": 6.35,
+     "robot_palm_sd_walk_median_cm": 6.44,
+     "person_palm_sd_own_box_median_cm": -0.18,
+     "person_palm_im_target_sd_median_cm": 1.14,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.52,
+     "robot_palm_to_anchor_median_cm": 10.77
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip suitcasea"
+  },
+  "sub8_smallbox_045": {
+   "tag": "sub8_smallbox_045",
+   "step": "step9g2",
+   "applicable": [
+    2.25
+   ],
+   "object": "smallbox",
+   "sequence": "sub8_smallbox_045",
+   "frames": [
+    26,
+    115
+   ],
+   "level": 2.25,
+   "solve_dir": "logs_system1/t14/step9g2/sub8_smallbox_045/m2p25",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 89,
+    "solve_frames": [
+     89,
+     89
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 3.9951058017351215e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 3.9142530883218285e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.7714865123478004,
+     0.2555098153746461,
+     0.10957417500246738
+    ],
+    "shared_box_size_m": [
+     0.771487,
+     0.25551,
+     0.109574
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.171441,
+     0.25551,
+     0.109574
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 9,
+     "w1": 84,
+     "frames": 89
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.5541,
+      0.0148,
+      0.0114
+     ],
+     "r1": [
+      0.5384,
+      0.0185,
+      0.0126
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.824,
+     "r0_R": 0.7966,
+     "r1_L": 0.7966,
+     "r1_R": 0.824
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 89,
+     "r0_R": 89,
+     "r1_L": 89,
+     "r1_R": 89
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+y": 89
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+z": 17,
+      "-x": 20,
+      "+y": 52
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.584,
+     "person_own_box_face_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 11,
+      "+y": 66,
+      "-x": 12
+     },
+     "person_face_label_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 0.787,
+     "match_label": true,
+     "match_label_frames": 70,
+     "robot_palm_to_person_face_label_median_cm": 2.67,
+     "person_face_mapped_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.787,
+     "match_mapped": true,
+     "match_mapped_frames": 70,
+     "robot_palm_to_person_face_mapped_median_cm": 2.67,
+     "robot_touched_role_counts": {
+      "own left side": 89
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "top": 19,
+      "own left side": 70
+     },
+     "person_role": "own left side",
+     "person_role_share": 0.787,
+     "role_match": true,
+     "role_match_frames": 70,
+     "view_squareness_min": {
+      "robot": 0.884,
+      "person": 0.913
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 2.67,
+     "robot_palm_to_person_face_median_cm": 2.67,
+     "person_palm_to_person_face_median_cm": 1.7,
+     "person_palm_to_touched_face_median_cm": 1.7,
+     "robot_palm_sd_median_cm": 2.58,
+     "robot_palm_sd_walk_median_cm": 2.83,
+     "person_palm_sd_own_box_median_cm": -0.47,
+     "person_palm_im_target_sd_median_cm": 0.96,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 5.63
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-y": 89
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-y": 45,
+      "-x": 44
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.506,
+     "person_own_box_face_counts": {
+      "-y": 89
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "-y": 88,
+      "-x": 1
+     },
+     "person_face_label_counts": {
+      "-y": 89
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 89,
+     "robot_palm_to_person_face_label_median_cm": 1.5,
+     "person_face_mapped_counts": {
+      "-y": 89
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 89,
+     "robot_palm_to_person_face_mapped_median_cm": 1.5,
+     "robot_touched_role_counts": {
+      "own right side": 89
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 89
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 89,
+     "view_squareness_min": {
+      "robot": 0.884,
+      "person": 0.9
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.5,
+     "robot_palm_to_person_face_median_cm": 1.5,
+     "person_palm_to_person_face_median_cm": 1.9,
+     "person_palm_to_touched_face_median_cm": 1.9,
+     "robot_palm_sd_median_cm": 1.5,
+     "robot_palm_sd_walk_median_cm": 1.24,
+     "person_palm_sd_own_box_median_cm": 0.34,
+     "person_palm_im_target_sd_median_cm": 0.92,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 5.8
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "-y": 89
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-y": 45,
+      "+x": 44
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.506,
+     "person_own_box_face_counts": {
+      "-y": 89
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 1,
+      "-y": 88
+     },
+     "person_face_label_counts": {
+      "-y": 89
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 89,
+     "robot_palm_to_person_face_label_median_cm": 1.54,
+     "person_face_mapped_counts": {
+      "-y": 89
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 89,
+     "robot_palm_to_person_face_mapped_median_cm": 1.54,
+     "robot_touched_role_counts": {
+      "own left side": 89
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 89
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 89,
+     "view_squareness_min": {
+      "robot": 0.902,
+      "person": 0.9
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.54,
+     "robot_palm_to_person_face_median_cm": 1.54,
+     "person_palm_to_person_face_median_cm": 1.9,
+     "person_palm_to_touched_face_median_cm": 1.9,
+     "robot_palm_sd_median_cm": 1.54,
+     "robot_palm_sd_walk_median_cm": 1.3,
+     "person_palm_sd_own_box_median_cm": 0.34,
+     "person_palm_im_target_sd_median_cm": 0.92,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 5.8
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+z": 1,
+      "+y": 88
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.989,
+     "person_face_counts": {
+      "+z": 17,
+      "+x": 20,
+      "+y": 52
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.584,
+     "person_own_box_face_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 14,
+      "+x": 12,
+      "+y": 63
+     },
+     "person_face_label_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 0.787,
+     "match_label": true,
+     "match_label_frames": 71,
+     "robot_palm_to_person_face_label_median_cm": 3.07,
+     "person_face_mapped_counts": {
+      "+z": 19,
+      "+y": 70
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.787,
+     "match_mapped": true,
+     "match_mapped_frames": 71,
+     "robot_palm_to_person_face_mapped_median_cm": 3.07,
+     "robot_touched_role_counts": {
+      "top": 1,
+      "own right side": 88
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.989,
+     "person_role_counts": {
+      "top": 19,
+      "own right side": 70
+     },
+     "person_role": "own right side",
+     "person_role_share": 0.787,
+     "role_match": true,
+     "role_match_frames": 71,
+     "view_squareness_min": {
+      "robot": 0.902,
+      "person": 0.913
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.07,
+     "robot_palm_to_person_face_median_cm": 3.07,
+     "person_palm_to_person_face_median_cm": 1.7,
+     "person_palm_to_touched_face_median_cm": 1.7,
+     "robot_palm_sd_median_cm": 2.59,
+     "robot_palm_sd_walk_median_cm": 2.79,
+     "person_palm_sd_own_box_median_cm": -0.47,
+     "person_palm_im_target_sd_median_cm": 0.96,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 5.55
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub8_smallbox_045"
+  },
+  "sub1_suitcase_034": {
+   "tag": "sub1_suitcase_034",
+   "step": "step9g2",
+   "applicable": [
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_034",
+   "frames": [
+    77,
+    177
+   ],
+   "level": 1.25,
+   "solve_dir": "logs_system1/t14/step9g2/sub1_suitcase_034/m1p25",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 100,
+    "solve_frames": [
+     100,
+     100
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.646676570769671e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.646676570769671e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.5338628777657486,
+     0.3118101558710484,
+     0.4175354029208786
+    ],
+    "shared_box_size_m": [
+     0.533863,
+     0.31181,
+     0.417535
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.213545,
+     0.31181,
+     0.417535
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 14,
+     "w1": 90,
+     "frames": 100
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.511,
+      0.0715,
+      -0.1666
+     ],
+     "r1": [
+      0.4894,
+      0.0717,
+      -0.1692
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.6637,
+     "r0_R": 0.707,
+     "r1_L": 0.707,
+     "r1_R": 0.6637
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 100,
+     "r0_R": 100,
+     "r1_L": 100,
+     "r1_R": 100
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+y": 83,
+      "-x": 17
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.83,
+     "person_face_counts": {
+      "+y": 75,
+      "-x": 25
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.75,
+     "person_own_box_face_counts": {
+      "+x": 100
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "end towards r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 84,
+      "-x": 16
+     },
+     "person_face_label_counts": {
+      "-x": 100
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "near end",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 17,
+     "robot_palm_to_person_face_label_median_cm": 7.42,
+     "person_face_mapped_counts": {
+      "+y": 10,
+      "-x": 90
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "near end",
+     "person_face_mapped_share": 0.9,
+     "match_mapped": false,
+     "match_mapped_frames": 27,
+     "robot_palm_to_person_face_mapped_median_cm": 7.42,
+     "robot_touched_role_counts": {
+      "own left side": 83,
+      "near end": 17
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.83,
+     "person_role_counts": {
+      "near end": 100
+     },
+     "person_role": "near end",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 17,
+     "view_squareness_min": {
+      "robot": 0.958,
+      "person": 0.812
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 4.41,
+     "robot_palm_to_person_face_median_cm": 4.41,
+     "person_palm_to_person_face_median_cm": 1.37,
+     "person_palm_to_touched_face_median_cm": 1.37,
+     "robot_palm_sd_median_cm": 4.41,
+     "robot_palm_sd_walk_median_cm": 4.33,
+     "person_palm_sd_own_box_median_cm": 0.77,
+     "person_palm_im_target_sd_median_cm": 1.28,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 9.05
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-x": 8,
+      "-y": 92
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.92,
+     "person_face_counts": {
+      "-x": 17,
+      "-y": 83
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.83,
+     "person_own_box_face_counts": {
+      "+y": 100
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-y": 100
+     },
+     "person_face_label_counts": {
+      "-y": 100
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 92,
+     "robot_palm_to_person_face_label_median_cm": 1.15,
+     "person_face_mapped_counts": {
+      "-x": 13,
+      "-y": 87
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.87,
+     "match_mapped": true,
+     "match_mapped_frames": 95,
+     "robot_palm_to_person_face_mapped_median_cm": 1.15,
+     "robot_touched_role_counts": {
+      "near end": 8,
+      "own right side": 92
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.92,
+     "person_role_counts": {
+      "own right side": 100
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 92,
+     "view_squareness_min": {
+      "robot": 0.958,
+      "person": 0.845
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.15,
+     "robot_palm_to_person_face_median_cm": 1.15,
+     "person_palm_to_person_face_median_cm": 0.49,
+     "person_palm_to_touched_face_median_cm": 0.49,
+     "robot_palm_sd_median_cm": 1.15,
+     "robot_palm_sd_walk_median_cm": 1.15,
+     "person_palm_sd_own_box_median_cm": 0.32,
+     "person_palm_im_target_sd_median_cm": 0.03,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.12,
+     "robot_palm_to_anchor_median_cm": 4.27
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 7,
+      "-y": 93
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.93,
+     "person_face_counts": {
+      "+x": 17,
+      "-y": 83
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.83,
+     "person_own_box_face_counts": {
+      "+y": 100
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-y": 100
+     },
+     "person_face_label_counts": {
+      "-y": 100
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 93,
+     "robot_palm_to_person_face_label_median_cm": 1.18,
+     "person_face_mapped_counts": {
+      "+x": 13,
+      "-y": 87
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.87,
+     "match_mapped": true,
+     "match_mapped_frames": 94,
+     "robot_palm_to_person_face_mapped_median_cm": 1.18,
+     "robot_touched_role_counts": {
+      "near end": 7,
+      "own left side": 93
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.93,
+     "person_role_counts": {
+      "own left side": 100
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 93,
+     "view_squareness_min": {
+      "robot": 0.962,
+      "person": 0.845
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.18,
+     "robot_palm_to_person_face_median_cm": 1.18,
+     "person_palm_to_person_face_median_cm": 0.49,
+     "person_palm_to_touched_face_median_cm": 0.49,
+     "robot_palm_sd_median_cm": 1.18,
+     "robot_palm_sd_walk_median_cm": 1.26,
+     "person_palm_sd_own_box_median_cm": 0.32,
+     "person_palm_im_target_sd_median_cm": 0.03,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.06,
+     "robot_palm_to_anchor_median_cm": 4.3
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 83,
+      "+x": 17
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.83,
+     "person_face_counts": {
+      "+y": 75,
+      "+x": 25
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.75,
+     "person_own_box_face_counts": {
+      "+x": 100
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "end towards r1",
+     "robot_palm_nearest_face_counts": {
+      "+y": 84,
+      "+x": 16
+     },
+     "person_face_label_counts": {
+      "+x": 100
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "near end",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 17,
+     "robot_palm_to_person_face_label_median_cm": 7.53,
+     "person_face_mapped_counts": {
+      "+y": 10,
+      "+x": 90
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "near end",
+     "person_face_mapped_share": 0.9,
+     "match_mapped": false,
+     "match_mapped_frames": 27,
+     "robot_palm_to_person_face_mapped_median_cm": 7.53,
+     "robot_touched_role_counts": {
+      "own right side": 83,
+      "near end": 17
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.83,
+     "person_role_counts": {
+      "near end": 100
+     },
+     "person_role": "near end",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 17,
+     "view_squareness_min": {
+      "robot": 0.962,
+      "person": 0.812
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 4.37,
+     "robot_palm_to_person_face_median_cm": 4.37,
+     "person_palm_to_person_face_median_cm": 1.37,
+     "person_palm_to_touched_face_median_cm": 1.37,
+     "robot_palm_sd_median_cm": 4.37,
+     "robot_palm_sd_walk_median_cm": 4.27,
+     "person_palm_sd_own_box_median_cm": 0.77,
+     "person_palm_im_target_sd_median_cm": 1.28,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 9.23
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub1_suitcase_034"
+  },
+  "sub4_suitcase_006": {
+   "tag": "sub4_suitcase_006",
+   "step": "step9g2",
+   "applicable": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_006",
+   "frames": [
+    45,
+    133
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/sub4_suitcase_006/m1p00",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 88,
+    "solve_frames": [
+     88,
+     88
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.102667899326008e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.136059022525785e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.39927508852361565,
+     0.2915028202302801,
+     0.3903424734752955
+    ],
+    "shared_box_size_m": [
+     0.399275,
+     0.291503,
+     0.390342
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.199638,
+     0.291503,
+     0.390342
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 15,
+     "w1": 78,
+     "frames": 88
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.4405,
+      -0.0403,
+      -0.0528
+     ],
+     "r1": [
+      0.4437,
+      -0.0479,
+      -0.0584
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.9434,
+     "r0_R": 0.9434,
+     "r1_L": 0.9434,
+     "r1_R": 0.9434
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 88,
+     "r0_R": 88,
+     "r1_L": 88,
+     "r1_R": 88
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+y": 88
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 88
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+y": 88
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 88
+     },
+     "person_face_label_counts": {
+      "+y": 88
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 88,
+     "robot_palm_to_person_face_label_median_cm": 1.94,
+     "person_face_mapped_counts": {
+      "+y": 88
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 88,
+     "robot_palm_to_person_face_mapped_median_cm": 1.94,
+     "robot_touched_role_counts": {
+      "own left side": 88
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 88
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 88,
+     "view_squareness_min": {
+      "robot": 0.971,
+      "person": 0.992
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.94,
+     "robot_palm_to_person_face_median_cm": 1.94,
+     "person_palm_to_person_face_median_cm": 2.26,
+     "person_palm_to_touched_face_median_cm": 2.26,
+     "robot_palm_sd_median_cm": 1.94,
+     "robot_palm_sd_walk_median_cm": 1.81,
+     "person_palm_sd_own_box_median_cm": -1.97,
+     "person_palm_im_target_sd_median_cm": -2.26,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.06,
+     "robot_palm_to_anchor_median_cm": 2.85
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-x": 27,
+      "-y": 61
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.693,
+     "person_face_counts": {
+      "-y": 88
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 88
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 27,
+      "-y": 61
+     },
+     "person_face_label_counts": {
+      "-y": 88
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 61,
+     "robot_palm_to_person_face_label_median_cm": 3.45,
+     "person_face_mapped_counts": {
+      "-y": 88
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 61,
+     "robot_palm_to_person_face_mapped_median_cm": 3.45,
+     "robot_touched_role_counts": {
+      "near end": 27,
+      "own right side": 61
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.693,
+     "person_role_counts": {
+      "own right side": 88
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 61,
+     "view_squareness_min": {
+      "robot": 0.971,
+      "person": 0.992
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.45,
+     "robot_palm_to_person_face_median_cm": 3.45,
+     "person_palm_to_person_face_median_cm": 2.42,
+     "person_palm_to_touched_face_median_cm": 2.42,
+     "robot_palm_sd_median_cm": 3.45,
+     "robot_palm_sd_walk_median_cm": 3.4,
+     "person_palm_sd_own_box_median_cm": -2.23,
+     "person_palm_im_target_sd_median_cm": -2.42,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 5.66
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 88
+     },
+     "touched_face": "+x",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-y": 88
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 88
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 88
+     },
+     "person_face_label_counts": {
+      "-y": 88
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 8.91,
+     "person_face_mapped_counts": {
+      "-y": 88
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 8.91,
+     "robot_touched_role_counts": {
+      "near end": 88
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 88
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.962,
+      "person": 0.992
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.48,
+     "robot_palm_to_person_face_median_cm": 8.91,
+     "person_palm_to_person_face_median_cm": 2.42,
+     "person_palm_to_touched_face_median_cm": 8.96,
+     "robot_palm_sd_median_cm": 6.48,
+     "robot_palm_sd_walk_median_cm": 6.47,
+     "person_palm_sd_own_box_median_cm": -2.23,
+     "person_palm_im_target_sd_median_cm": -2.42,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.85,
+     "robot_palm_to_anchor_median_cm": 16.57
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 88
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 88
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+y": 88
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 88
+     },
+     "person_face_label_counts": {
+      "+y": 88
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 88,
+     "robot_palm_to_person_face_label_median_cm": 2.04,
+     "person_face_mapped_counts": {
+      "+y": 88
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 88,
+     "robot_palm_to_person_face_mapped_median_cm": 2.04,
+     "robot_touched_role_counts": {
+      "own right side": 88
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 88
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 88,
+     "view_squareness_min": {
+      "robot": 0.962,
+      "person": 0.992
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 2.04,
+     "robot_palm_to_person_face_median_cm": 2.04,
+     "person_palm_to_person_face_median_cm": 2.26,
+     "person_palm_to_touched_face_median_cm": 2.26,
+     "robot_palm_sd_median_cm": 2.04,
+     "robot_palm_sd_walk_median_cm": 1.86,
+     "person_palm_sd_own_box_median_cm": -1.97,
+     "person_palm_im_target_sd_median_cm": -2.26,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.12,
+     "robot_palm_to_anchor_median_cm": 2.9
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub4_suitcase_006"
+  },
+  "sub4_suitcase_042": {
+   "tag": "sub4_suitcase_042",
+   "step": "step9g2",
+   "applicable": [
+    0.9,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_042",
+   "frames": [
+    29,
+    183
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/sub4_suitcase_042/m1p00",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 154,
+    "solve_frames": [
+     154,
+     154
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.0642023907698785e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.065183272812135e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.39899691675763543,
+     0.291299732543063,
+     0.3900705249908929
+    ],
+    "shared_box_size_m": [
+     0.398997,
+     0.2913,
+     0.390071
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.199498,
+     0.2913,
+     0.390071
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 22,
+     "w1": 120,
+     "frames": 154
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.3597,
+      0.0224,
+      -0.1052
+     ],
+     "r1": [
+      0.3598,
+      0.0268,
+      -0.1052
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.8084,
+     "r0_R": 0.8084,
+     "r1_L": 0.8084,
+     "r1_R": 0.8084
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 154,
+     "r0_R": 154,
+     "r1_L": 154,
+     "r1_R": 154
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 154
+     },
+     "touched_face": "-x",
+     "touched_face_role": "end towards r0",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 154
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 154
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 154
+     },
+     "person_face_label_counts": {
+      "+y": 154
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 7.73,
+     "person_face_mapped_counts": {
+      "+y": 154
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 7.73,
+     "robot_touched_role_counts": {
+      "near end": 154
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 154
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.903,
+      "person": 0.976
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.61,
+     "robot_palm_to_person_face_median_cm": 7.73,
+     "person_palm_to_person_face_median_cm": 2.18,
+     "person_palm_to_touched_face_median_cm": 10.3,
+     "robot_palm_sd_median_cm": 6.61,
+     "robot_palm_sd_walk_median_cm": 6.71,
+     "person_palm_sd_own_box_median_cm": -1.6,
+     "person_palm_im_target_sd_median_cm": -2.18,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.81,
+     "robot_palm_to_anchor_median_cm": 15.75
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-x": 154
+     },
+     "touched_face": "-x",
+     "touched_face_role": "end towards r0",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-y": 107,
+      "-x": 47
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.695,
+     "person_own_box_face_counts": {
+      "+y": 154
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 154
+     },
+     "person_face_label_counts": {
+      "-y": 154
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 8.32,
+     "person_face_mapped_counts": {
+      "-y": 154
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 8.32,
+     "robot_touched_role_counts": {
+      "near end": 154
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 154
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.903,
+      "person": 0.976
+     },
+     "match": false,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 6.62,
+     "robot_palm_to_person_face_median_cm": 8.32,
+     "person_palm_to_person_face_median_cm": 2.77,
+     "person_palm_to_touched_face_median_cm": 6.68,
+     "robot_palm_sd_median_cm": 6.62,
+     "robot_palm_sd_walk_median_cm": 6.7,
+     "person_palm_sd_own_box_median_cm": -2.23,
+     "person_palm_im_target_sd_median_cm": -2.49,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.87,
+     "robot_palm_to_anchor_median_cm": 16.57
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 154
+     },
+     "touched_face": "+x",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-y": 107,
+      "+x": 47
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.695,
+     "person_own_box_face_counts": {
+      "+y": 154
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 154
+     },
+     "person_face_label_counts": {
+      "-y": 154
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 8.12,
+     "person_face_mapped_counts": {
+      "-y": 154
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 8.12,
+     "robot_touched_role_counts": {
+      "near end": 154
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 154
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.923,
+      "person": 0.976
+     },
+     "match": false,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 6.58,
+     "robot_palm_to_person_face_median_cm": 8.12,
+     "person_palm_to_person_face_median_cm": 2.77,
+     "person_palm_to_touched_face_median_cm": 6.68,
+     "robot_palm_sd_median_cm": 6.58,
+     "robot_palm_sd_walk_median_cm": 6.66,
+     "person_palm_sd_own_box_median_cm": -2.23,
+     "person_palm_im_target_sd_median_cm": -2.49,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.81,
+     "robot_palm_to_anchor_median_cm": 16.58
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 154
+     },
+     "touched_face": "+x",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+y": 154
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-y": 154
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 154
+     },
+     "person_face_label_counts": {
+      "+y": 154
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 7.73,
+     "person_face_mapped_counts": {
+      "+y": 154
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 7.73,
+     "robot_touched_role_counts": {
+      "near end": 154
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 154
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.923,
+      "person": 0.976
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.63,
+     "robot_palm_to_person_face_median_cm": 7.73,
+     "person_palm_to_person_face_median_cm": 2.18,
+     "person_palm_to_touched_face_median_cm": 10.3,
+     "robot_palm_sd_median_cm": 6.63,
+     "robot_palm_sd_walk_median_cm": 6.76,
+     "person_palm_sd_own_box_median_cm": -1.6,
+     "person_palm_im_target_sd_median_cm": -2.18,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.87,
+     "robot_palm_to_anchor_median_cm": 15.81
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub4_suitcase_042"
+  },
+  "sub4_suitcase_043": {
+   "tag": "sub4_suitcase_043",
+   "step": "step9g2",
+   "applicable": [
+    0.75,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub4_suitcase_043",
+   "frames": [
+    35,
+    196
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/sub4_suitcase_043/m1p00",
+   "face_roles": {
+    "+x": "side, right of r0",
+    "-x": "side, left of r0",
+    "+y": "end towards r1",
+    "-y": "end towards r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 161,
+    "solve_frames": [
+     161,
+     161
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 7.093309162264916e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 7.766711496159928e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.1975040382831578,
+     0.5767751189215952,
+     0.3861709234596911
+    ],
+    "shared_box_size_m": [
+     0.197504,
+     0.576775,
+     0.386171
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.197504,
+     0.288388,
+     0.386171
+    ],
+    "carry_axis_k": "y",
+    "phases": {
+     "w0": 23,
+     "w1": 135,
+     "frames": 161
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.0503,
+      -0.4228,
+      -0.1219
+     ],
+     "r1": [
+      -0.0448,
+      0.4269,
+      -0.1096
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.7864,
+     "r0_R": 0.7864,
+     "r1_L": 0.7864,
+     "r1_R": 0.7864
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 161,
+     "r0_R": 161,
+     "r1_L": 161,
+     "r1_R": 161
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-y": 161
+     },
+     "touched_face": "-y",
+     "touched_face_role": "end towards r0",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 161
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+x": 161
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-y": 161
+     },
+     "person_face_label_counts": {
+      "-x": 161
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 7.76,
+     "person_face_mapped_counts": {
+      "-x": 161
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 7.76,
+     "robot_touched_role_counts": {
+      "near end": 161
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 161
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.867,
+      "person": 0.982
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.59,
+     "robot_palm_to_person_face_median_cm": 7.76,
+     "person_palm_to_person_face_median_cm": 1.88,
+     "person_palm_to_touched_face_median_cm": 13.59,
+     "robot_palm_sd_median_cm": 6.59,
+     "robot_palm_sd_walk_median_cm": 6.63,
+     "person_palm_sd_own_box_median_cm": -2.2,
+     "person_palm_im_target_sd_median_cm": -1.88,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.81,
+     "robot_palm_to_anchor_median_cm": 19.14
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-y": 33,
+      "+x": 128
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.795,
+     "person_face_counts": {
+      "+x": 161
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-x": 161
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "-y": 33,
+      "+x": 128
+     },
+     "person_face_label_counts": {
+      "+x": 161
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 128,
+     "robot_palm_to_person_face_label_median_cm": 1.63,
+     "person_face_mapped_counts": {
+      "+x": 161
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 128,
+     "robot_palm_to_person_face_mapped_median_cm": 1.63,
+     "robot_touched_role_counts": {
+      "near end": 33,
+      "own right side": 128
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.795,
+     "person_role_counts": {
+      "own right side": 161
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 128,
+     "view_squareness_min": {
+      "robot": 0.867,
+      "person": 0.982
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.63,
+     "robot_palm_to_person_face_median_cm": 1.63,
+     "person_palm_to_person_face_median_cm": 3.05,
+     "person_palm_to_touched_face_median_cm": 3.05,
+     "robot_palm_sd_median_cm": 1.63,
+     "robot_palm_sd_walk_median_cm": 1.63,
+     "person_palm_sd_own_box_median_cm": -2.03,
+     "person_palm_im_target_sd_median_cm": -3.05,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 2.02
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 40,
+      "+x": 121
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.752,
+     "person_face_counts": {
+      "+x": 161
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-x": 161
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 40,
+      "+x": 121
+     },
+     "person_face_label_counts": {
+      "+x": 161
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 121,
+     "robot_palm_to_person_face_label_median_cm": 1.72,
+     "person_face_mapped_counts": {
+      "+x": 161
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 121,
+     "robot_palm_to_person_face_mapped_median_cm": 1.72,
+     "robot_touched_role_counts": {
+      "near end": 40,
+      "own left side": 121
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.752,
+     "person_role_counts": {
+      "own left side": 161
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 121,
+     "view_squareness_min": {
+      "robot": 0.866,
+      "person": 0.982
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.72,
+     "robot_palm_to_person_face_median_cm": 1.72,
+     "person_palm_to_person_face_median_cm": 3.05,
+     "person_palm_to_touched_face_median_cm": 3.05,
+     "robot_palm_sd_median_cm": 1.72,
+     "robot_palm_sd_walk_median_cm": 1.72,
+     "person_palm_sd_own_box_median_cm": -2.03,
+     "person_palm_im_target_sd_median_cm": -3.05,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 2.13
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 161
+     },
+     "touched_face": "+y",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 161
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+x": 161
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 161
+     },
+     "person_face_label_counts": {
+      "-x": 161
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 7.75,
+     "person_face_mapped_counts": {
+      "-x": 161
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 7.75,
+     "robot_touched_role_counts": {
+      "near end": 161
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 161
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.866,
+      "person": 0.982
+     },
+     "match": false,
+     "touched_in_person_faces": false,
+     "robot_palm_to_touched_face_median_cm": 6.6,
+     "robot_palm_to_person_face_median_cm": 7.75,
+     "person_palm_to_person_face_median_cm": 1.88,
+     "person_palm_to_touched_face_median_cm": 13.59,
+     "robot_palm_sd_median_cm": 6.6,
+     "robot_palm_sd_walk_median_cm": 6.66,
+     "person_palm_sd_own_box_median_cm": -2.2,
+     "person_palm_im_target_sd_median_cm": -1.88,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.82,
+     "robot_palm_to_anchor_median_cm": 19.18
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub4_suitcase_043"
+  },
+  "sub8_suitcase_020": {
+   "tag": "sub8_suitcase_020",
+   "step": "step9g2",
+   "applicable": [
+    0.65,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub8_suitcase_020",
+   "frames": [
+    103,
+    163
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/sub8_suitcase_020/m1p00",
+   "face_roles": {
+    "+x": "side, right of r0",
+    "-x": "side, left of r0",
+    "+y": "end towards r1",
+    "-y": "end towards r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 60,
+    "solve_frames": [
+     60,
+     60
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.092039456755515e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.092039456755515e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.19239158580705817,
+     0.5618451184491197,
+     0.37617477092022394
+    ],
+    "shared_box_size_m": [
+     0.192392,
+     0.561845,
+     0.376175
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.192392,
+     0.280923,
+     0.376175
+    ],
+    "carry_axis_k": "y",
+    "phases": {
+     "w0": 13,
+     "w1": 56,
+     "frames": 60
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.1999,
+      -0.5384,
+      0.0146
+     ],
+     "r1": [
+      -0.1937,
+      0.5728,
+      0.037
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.9031,
+     "r0_R": 0.9031,
+     "r1_L": 0.9031,
+     "r1_R": 0.9031
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 60,
+     "r0_R": 60,
+     "r1_L": 60,
+     "r1_R": 60
+    },
+    "equals_palm_gap_csv": {
+     "rows": 240,
+     "ref_rows": 240,
+     "max_abs_m": {
+      "robot_palm_sd_shared_m": 0.0,
+      "hull_exact_sd_m": 0.0,
+      "person_palm_sd_real_own_m": 0.0,
+      "im_target_sd_m": 0.0,
+      "robot_palm_to_anchor_m": 0.0,
+      "hull_contact_to_palm_point_m": 0.0
+     },
+     "face_mismatch": {
+      "touched_face": 0,
+      "person_face_im": 0,
+      "anchor_face": 0,
+      "robot_palm_nearest_face": 0
+     },
+     "passed": true
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 60
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 60
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-x": 60
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 60
+     },
+     "person_face_label_counts": {
+      "-x": 60
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 60,
+     "robot_palm_to_person_face_label_median_cm": 4.69,
+     "person_face_mapped_counts": {
+      "-x": 60
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 60,
+     "robot_palm_to_person_face_mapped_median_cm": 4.69,
+     "robot_touched_role_counts": {
+      "own left side": 60
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 60
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 60,
+     "view_squareness_min": {
+      "robot": 0.863,
+      "person": 0.889
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 4.69,
+     "robot_palm_to_person_face_median_cm": 4.69,
+     "person_palm_to_person_face_median_cm": 2.46,
+     "person_palm_to_touched_face_median_cm": 2.46,
+     "robot_palm_sd_median_cm": 4.69,
+     "robot_palm_sd_walk_median_cm": 4.64,
+     "person_palm_sd_own_box_median_cm": 1.43,
+     "person_palm_im_target_sd_median_cm": 2.46,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 5.95
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "+x": 60
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+x": 48,
+      "-y": 12
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.8,
+     "person_own_box_face_counts": {
+      "+x": 60
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+x": 60
+     },
+     "person_face_label_counts": {
+      "+x": 60
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 60,
+     "robot_palm_to_person_face_label_median_cm": 0.75,
+     "person_face_mapped_counts": {
+      "+x": 60
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 60,
+     "robot_palm_to_person_face_mapped_median_cm": 0.75,
+     "robot_touched_role_counts": {
+      "own right side": 60
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 60
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 60,
+     "view_squareness_min": {
+      "robot": 0.863,
+      "person": 0.889
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 0.75,
+     "robot_palm_to_person_face_median_cm": 0.75,
+     "person_palm_to_person_face_median_cm": 3.15,
+     "person_palm_to_touched_face_median_cm": 3.15,
+     "robot_palm_sd_median_cm": -0.35,
+     "robot_palm_sd_walk_median_cm": 0.34,
+     "person_palm_sd_own_box_median_cm": -0.72,
+     "person_palm_im_target_sd_median_cm": -3.15,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 1.61
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 60
+     },
+     "touched_face": "+y",
+     "touched_face_role": "end towards r1",
+     "touched_face_own": "near end",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+x": 48,
+      "+y": 12
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.8,
+     "person_own_box_face_counts": {
+      "+x": 60
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+y": 60
+     },
+     "person_face_label_counts": {
+      "+x": 60
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 0,
+     "robot_palm_to_person_face_label_median_cm": 7.72,
+     "person_face_mapped_counts": {
+      "+x": 60
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": false,
+     "match_mapped_frames": 0,
+     "robot_palm_to_person_face_mapped_median_cm": 7.72,
+     "robot_touched_role_counts": {
+      "near end": 60
+     },
+     "robot_touched_role": "near end",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 60
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.831,
+      "person": 0.889
+     },
+     "match": false,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 6.34,
+     "robot_palm_to_person_face_median_cm": 7.72,
+     "person_palm_to_person_face_median_cm": 3.15,
+     "person_palm_to_touched_face_median_cm": 4.55,
+     "robot_palm_sd_median_cm": 6.34,
+     "robot_palm_sd_walk_median_cm": 6.44,
+     "person_palm_sd_own_box_median_cm": -0.72,
+     "person_palm_im_target_sd_median_cm": -3.15,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.85,
+     "robot_palm_to_anchor_median_cm": 14.13
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "-x": 60
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 60
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "-x": 60
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 60
+     },
+     "person_face_label_counts": {
+      "-x": 60
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 60,
+     "robot_palm_to_person_face_label_median_cm": 4.61,
+     "person_face_mapped_counts": {
+      "-x": 60
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 60,
+     "robot_palm_to_person_face_mapped_median_cm": 4.61,
+     "robot_touched_role_counts": {
+      "own right side": 60
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 60
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 60,
+     "view_squareness_min": {
+      "robot": 0.831,
+      "person": 0.889
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 4.61,
+     "robot_palm_to_person_face_median_cm": 4.61,
+     "person_palm_to_person_face_median_cm": 2.46,
+     "person_palm_to_touched_face_median_cm": 2.46,
+     "robot_palm_sd_median_cm": 4.61,
+     "robot_palm_sd_walk_median_cm": 4.58,
+     "person_palm_sd_own_box_median_cm": 1.43,
+     "person_palm_im_target_sd_median_cm": 2.46,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 6.0
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub8_suitcase_020"
+  },
+  "sub1_suitcase_039": {
+   "tag": "sub1_suitcase_039",
+   "step": "step9g2",
+   "applicable": [
+    0.95,
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "suitcase",
+   "sequence": "sub1_suitcase_039",
+   "frames": [
+    78,
+    171
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9g2/sub1_suitcase_039/m1p00",
+   "face_roles": {
+    "+x": "side, right of r0",
+    "-x": "side, left of r0",
+    "+y": "end towards r1",
+    "-y": "end towards r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 93,
+    "solve_frames": [
+     93,
+     93
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.646676348725066e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.646676348725066e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.21348050439986607,
+     0.6234315226311746,
+     0.4174090020708554
+    ],
+    "shared_box_size_m": [
+     0.213481,
+     0.623432,
+     0.417409
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.213481,
+     0.311716,
+     0.417409
+    ],
+    "carry_axis_k": "y",
+    "phases": {
+     "w0": 13,
+     "w1": 83,
+     "frames": 93
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.0727,
+      -0.5144,
+      -0.15
+     ],
+     "r1": [
+      -0.0625,
+      0.511,
+      -0.1528
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.7144,
+     "r0_R": 0.7151,
+     "r1_L": 0.7151,
+     "r1_R": 0.7144
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 93,
+     "r0_R": 93,
+     "r1_L": 93,
+     "r1_R": 93
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 93
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 77,
+      "-y": 16
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.828,
+     "person_own_box_face_counts": {
+      "-x": 93
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 93
+     },
+     "person_face_label_counts": {
+      "-x": 93
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 93,
+     "robot_palm_to_person_face_label_median_cm": 3.72,
+     "person_face_mapped_counts": {
+      "-x": 23,
+      "-y": 70
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "near end",
+     "person_face_mapped_share": 0.753,
+     "match_mapped": false,
+     "match_mapped_frames": 23,
+     "robot_palm_to_person_face_mapped_median_cm": 14.49,
+     "robot_touched_role_counts": {
+      "own left side": 93
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "near end": 93
+     },
+     "person_role": "near end",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.855,
+      "person": 0.774
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.72,
+     "robot_palm_to_person_face_median_cm": 3.72,
+     "person_palm_to_person_face_median_cm": 3.67,
+     "person_palm_to_touched_face_median_cm": 3.67,
+     "robot_palm_sd_median_cm": 3.72,
+     "robot_palm_sd_walk_median_cm": 3.59,
+     "person_palm_sd_own_box_median_cm": 2.19,
+     "person_palm_im_target_sd_median_cm": 3.67,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 14.83
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "-y": 15,
+      "+x": 78
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.839,
+     "person_face_counts": {
+      "-y": 10,
+      "+x": 83
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.892,
+     "person_own_box_face_counts": {
+      "-y": 93
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "end towards r0",
+     "robot_palm_nearest_face_counts": {
+      "-y": 15,
+      "+x": 78
+     },
+     "person_face_label_counts": {
+      "-y": 93
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "near end",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 15,
+     "robot_palm_to_person_face_label_median_cm": 11.31,
+     "person_face_mapped_counts": {
+      "-y": 23,
+      "+x": 70
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.753,
+     "match_mapped": true,
+     "match_mapped_frames": 85,
+     "robot_palm_to_person_face_mapped_median_cm": 3.55,
+     "robot_touched_role_counts": {
+      "near end": 15,
+      "own right side": 78
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.839,
+     "person_role_counts": {
+      "own right side": 93
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 78,
+     "view_squareness_min": {
+      "robot": 0.855,
+      "person": 0.768
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.55,
+     "robot_palm_to_person_face_median_cm": 3.55,
+     "person_palm_to_person_face_median_cm": 5.23,
+     "person_palm_to_touched_face_median_cm": 5.23,
+     "robot_palm_sd_median_cm": 3.55,
+     "robot_palm_sd_walk_median_cm": 2.77,
+     "person_palm_sd_own_box_median_cm": 1.23,
+     "person_palm_im_target_sd_median_cm": 5.23,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 16.48
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+y": 17,
+      "+x": 76
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.817,
+     "person_face_counts": {
+      "+y": 10,
+      "+x": 83
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.892,
+     "person_own_box_face_counts": {
+      "-y": 93
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "end towards r1",
+     "robot_palm_nearest_face_counts": {
+      "+y": 17,
+      "+x": 76
+     },
+     "person_face_label_counts": {
+      "+y": 93
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "near end",
+     "person_face_label_share": 1.0,
+     "match_label": false,
+     "match_label_frames": 17,
+     "robot_palm_to_person_face_label_median_cm": 11.31,
+     "person_face_mapped_counts": {
+      "+y": 23,
+      "+x": 70
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.753,
+     "match_mapped": true,
+     "match_mapped_frames": 87,
+     "robot_palm_to_person_face_mapped_median_cm": 3.54,
+     "robot_touched_role_counts": {
+      "near end": 17,
+      "own left side": 76
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.817,
+     "person_role_counts": {
+      "own left side": 93
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 76,
+     "view_squareness_min": {
+      "robot": 0.863,
+      "person": 0.768
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.54,
+     "robot_palm_to_person_face_median_cm": 3.54,
+     "person_palm_to_person_face_median_cm": 5.23,
+     "person_palm_to_touched_face_median_cm": 5.23,
+     "robot_palm_sd_median_cm": 3.54,
+     "robot_palm_sd_walk_median_cm": 2.66,
+     "person_palm_sd_own_box_median_cm": 1.23,
+     "person_palm_im_target_sd_median_cm": 5.23,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.69,
+     "robot_palm_to_anchor_median_cm": 15.94
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "-x": 93
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "-x": 77,
+      "+y": 16
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.828,
+     "person_own_box_face_counts": {
+      "-x": 93
+     },
+     "anchor_face": "-x",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "-x": 93
+     },
+     "person_face_label_counts": {
+      "-x": 93
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 93,
+     "robot_palm_to_person_face_label_median_cm": 3.67,
+     "person_face_mapped_counts": {
+      "-x": 23,
+      "+y": 70
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "near end",
+     "person_face_mapped_share": 0.753,
+     "match_mapped": false,
+     "match_mapped_frames": 23,
+     "robot_palm_to_person_face_mapped_median_cm": 14.46,
+     "robot_touched_role_counts": {
+      "own right side": 93
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "near end": 93
+     },
+     "person_role": "near end",
+     "person_role_share": 1.0,
+     "role_match": false,
+     "role_match_frames": 0,
+     "view_squareness_min": {
+      "robot": 0.863,
+      "person": 0.774
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 3.67,
+     "robot_palm_to_person_face_median_cm": 3.67,
+     "person_palm_to_person_face_median_cm": 3.67,
+     "person_palm_to_touched_face_median_cm": 3.67,
+     "robot_palm_sd_median_cm": 3.67,
+     "robot_palm_sd_walk_median_cm": 3.54,
+     "person_palm_sd_own_box_median_cm": 2.19,
+     "person_palm_im_target_sd_median_cm": 3.67,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 14.65
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub1_suitcase_039"
+  },
+  "sub12_plasticbox_053": {
+   "tag": "sub12_plasticbox_053",
+   "step": "step9_final",
+   "applicable": [
+    1.0,
+    1.25,
+    1.5
+   ],
+   "object": "plasticbox",
+   "sequence": "sub12_plasticbox_053",
+   "frames": [
+    32,
+    177
+   ],
+   "level": 1.0,
+   "solve_dir": "logs_system1/t14/step9_final/sub12_plasticbox_053/m1p00",
+   "face_roles": {
+    "+x": "side, right of r0",
+    "-x": "side, left of r0",
+    "+y": "end towards r1",
+    "-y": "end towards r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 145,
+    "solve_frames": [
+     145,
+     145
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 4.232782721547146e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 3.25747778751051e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.2822327053526709,
+     0.8132553537590466,
+     0.20368443275271533
+    ],
+    "shared_box_size_m": [
+     0.282233,
+     0.813255,
+     0.203684
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.282233,
+     0.406628,
+     0.203684
+    ],
+    "carry_axis_k": "y",
+    "phases": {
+     "w0": 27,
+     "w1": 125,
+     "frames": 145
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      0.0481,
+      -0.5697,
+      0.1596
+     ],
+     "r1": [
+      0.0387,
+      0.5768,
+      0.1571
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.8396,
+     "r0_R": 0.8396,
+     "r1_L": 0.8396,
+     "r1_R": 0.8396
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 145,
+     "r0_R": 145,
+     "r1_L": 145,
+     "r1_R": 145
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 145
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+z": 55,
+      "-x": 90
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.621,
+     "person_own_box_face_counts": {
+      "-x": 145
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 66,
+      "-x": 79
+     },
+     "person_face_label_counts": {
+      "-x": 145
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 145,
+     "robot_palm_to_person_face_label_median_cm": 1.61,
+     "person_face_mapped_counts": {
+      "-x": 145
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 145,
+     "robot_palm_to_person_face_mapped_median_cm": 1.61,
+     "robot_touched_role_counts": {
+      "own left side": 145
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 145
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 145,
+     "view_squareness_min": {
+      "robot": 0.935,
+      "person": 0.991
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.61,
+     "robot_palm_to_person_face_median_cm": 1.61,
+     "person_palm_to_person_face_median_cm": 2.4,
+     "person_palm_to_touched_face_median_cm": 2.4,
+     "robot_palm_sd_median_cm": 1.59,
+     "robot_palm_sd_walk_median_cm": 1.18,
+     "person_palm_sd_own_box_median_cm": 1.46,
+     "person_palm_im_target_sd_median_cm": 0.7,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 3.58
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "+x": 145
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+x": 145
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+x": 145
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 58,
+      "+x": 87
+     },
+     "person_face_label_counts": {
+      "+x": 145
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 145,
+     "robot_palm_to_person_face_label_median_cm": 1.23,
+     "person_face_mapped_counts": {
+      "+x": 145
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 145,
+     "robot_palm_to_person_face_mapped_median_cm": 1.23,
+     "robot_touched_role_counts": {
+      "own right side": 145
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 145
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 145,
+     "view_squareness_min": {
+      "robot": 0.935,
+      "person": 0.991
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.23,
+     "robot_palm_to_person_face_median_cm": 1.23,
+     "person_palm_to_person_face_median_cm": 2.26,
+     "person_palm_to_touched_face_median_cm": 2.26,
+     "robot_palm_sd_median_cm": 1.06,
+     "robot_palm_sd_walk_median_cm": 1.01,
+     "person_palm_sd_own_box_median_cm": 2.81,
+     "person_palm_im_target_sd_median_cm": 2.26,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 3.25
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+x": 145
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+x": 145
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 1.0,
+     "person_own_box_face_counts": {
+      "+x": 145
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 44,
+      "+x": 101
+     },
+     "person_face_label_counts": {
+      "+x": 145
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 145,
+     "robot_palm_to_person_face_label_median_cm": 1.2,
+     "person_face_mapped_counts": {
+      "+x": 145
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 145,
+     "robot_palm_to_person_face_mapped_median_cm": 1.2,
+     "robot_touched_role_counts": {
+      "own left side": 145
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own left side": 145
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 145,
+     "view_squareness_min": {
+      "robot": 0.943,
+      "person": 0.991
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.2,
+     "robot_palm_to_person_face_median_cm": 1.2,
+     "person_palm_to_person_face_median_cm": 2.26,
+     "person_palm_to_touched_face_median_cm": 2.26,
+     "robot_palm_sd_median_cm": 1.06,
+     "robot_palm_sd_walk_median_cm": 1.03,
+     "person_palm_sd_own_box_median_cm": 2.81,
+     "person_palm_im_target_sd_median_cm": 2.26,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 3.62
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "-x": 145
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 1.0,
+     "person_face_counts": {
+      "+z": 55,
+      "-x": 90
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.621,
+     "person_own_box_face_counts": {
+      "-x": 145
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 66,
+      "-x": 79
+     },
+     "person_face_label_counts": {
+      "-x": 145
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 145,
+     "robot_palm_to_person_face_label_median_cm": 1.44,
+     "person_face_mapped_counts": {
+      "-x": 145
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 1.0,
+     "match_mapped": true,
+     "match_mapped_frames": 145,
+     "robot_palm_to_person_face_mapped_median_cm": 1.44,
+     "robot_touched_role_counts": {
+      "own right side": 145
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 1.0,
+     "person_role_counts": {
+      "own right side": 145
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 145,
+     "view_squareness_min": {
+      "robot": 0.943,
+      "person": 0.991
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.44,
+     "robot_palm_to_person_face_median_cm": 1.44,
+     "person_palm_to_person_face_median_cm": 2.4,
+     "person_palm_to_touched_face_median_cm": 2.4,
+     "robot_palm_sd_median_cm": 1.41,
+     "robot_palm_sd_walk_median_cm": 1.21,
+     "person_palm_sd_own_box_median_cm": 1.46,
+     "person_palm_im_target_sd_median_cm": 0.7,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 3.77
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub12_plasticbox_053"
+  },
+  "sub12_smalltable_016": {
+   "tag": "sub12_smalltable_016",
+   "step": "step9_final",
+   "applicable": [
+    1.25,
+    1.5
+   ],
+   "object": "smalltable",
+   "sequence": "sub12_smalltable_016",
+   "frames": [
+    28,
+    150
+   ],
+   "level": 1.25,
+   "solve_dir": "logs_system1/t14/step9_final/sub12_smalltable_016/m1p25",
+   "face_roles": {
+    "+x": "side, right of r0",
+    "-x": "side, left of r0",
+    "+y": "end towards r1",
+    "-y": "end towards r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 122,
+    "solve_frames": [
+     122,
+     122
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.210298859026352e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.210298859026352e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.25846793862112305,
+     0.6698401924965464,
+     0.255169498087823
+    ],
+    "shared_box_size_m": [
+     0.258468,
+     0.66984,
+     0.255169
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.258468,
+     0.267936,
+     0.255169
+    ],
+    "carry_axis_k": "y",
+    "phases": {
+     "w0": 28,
+     "w1": 112,
+     "frames": 122
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.0976,
+      -0.5102,
+      0.1248
+     ],
+     "r1": [
+      -0.1088,
+      0.5169,
+      0.1337
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.7092,
+     "r0_R": 0.7092,
+     "r1_L": 0.7092,
+     "r1_R": 0.7092
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 122,
+     "r0_R": 122,
+     "r1_L": 122,
+     "r1_R": 122
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "-x": 88,
+      "+z": 12,
+      "-y": 22
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.721,
+     "person_face_counts": {
+      "-x": 102,
+      "-y": 16,
+      "+z": 4
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.836,
+     "person_own_box_face_counts": {
+      "-x": 122
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 3,
+      "-x": 119
+     },
+     "person_face_label_counts": {
+      "-x": 122
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 88,
+     "robot_palm_to_person_face_label_median_cm": 0.95,
+     "person_face_mapped_counts": {
+      "-x": 102,
+      "+y": 20
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.836,
+     "match_mapped": true,
+     "match_mapped_frames": 68,
+     "robot_palm_to_person_face_mapped_median_cm": 0.95,
+     "robot_touched_role_counts": {
+      "own left side": 88,
+      "top": 12,
+      "near end": 22
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.721,
+     "person_role_counts": {
+      "own left side": 122
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 88,
+     "view_squareness_min": {
+      "robot": 0.792,
+      "person": 0.987
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 0.95,
+     "robot_palm_to_person_face_median_cm": 0.95,
+     "person_palm_to_person_face_median_cm": 1.13,
+     "person_palm_to_touched_face_median_cm": 1.13,
+     "robot_palm_sd_median_cm": 0.95,
+     "robot_palm_sd_walk_median_cm": 1.53,
+     "person_palm_sd_own_box_median_cm": -0.36,
+     "person_palm_im_target_sd_median_cm": -0.69,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 5.46
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "+z": 3,
+      "+x": 68,
+      "-y": 51
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.557,
+     "person_face_counts": {
+      "+z": 2,
+      "+x": 81,
+      "-y": 39
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.664,
+     "person_own_box_face_counts": {
+      "+x": 122
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 3,
+      "+x": 116,
+      "-y": 3
+     },
+     "person_face_label_counts": {
+      "+x": 122
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 68,
+     "robot_palm_to_person_face_label_median_cm": 1.04,
+     "person_face_mapped_counts": {
+      "+x": 102,
+      "-y": 20
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.836,
+     "match_mapped": true,
+     "match_mapped_frames": 88,
+     "robot_palm_to_person_face_mapped_median_cm": 1.04,
+     "robot_touched_role_counts": {
+      "top": 3,
+      "own right side": 68,
+      "near end": 51
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.557,
+     "person_role_counts": {
+      "own right side": 122
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 68,
+     "view_squareness_min": {
+      "robot": 0.792,
+      "person": 0.987
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.04,
+     "robot_palm_to_person_face_median_cm": 1.04,
+     "person_palm_to_person_face_median_cm": 2.35,
+     "person_palm_to_touched_face_median_cm": 2.35,
+     "robot_palm_sd_median_cm": 1.04,
+     "robot_palm_sd_walk_median_cm": 1.08,
+     "person_palm_sd_own_box_median_cm": 0.07,
+     "person_palm_im_target_sd_median_cm": -0.89,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.57,
+     "robot_palm_to_anchor_median_cm": 4.53
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+z": 2,
+      "+x": 73,
+      "+y": 47
+     },
+     "touched_face": "+x",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.598,
+     "person_face_counts": {
+      "+z": 2,
+      "+x": 81,
+      "+y": 39
+     },
+     "person_face": "+x",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.664,
+     "person_own_box_face_counts": {
+      "+x": 122
+     },
+     "anchor_face": "+x",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 9,
+      "+x": 111,
+      "+y": 2
+     },
+     "person_face_label_counts": {
+      "+x": 122
+     },
+     "person_face_label": "+x",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 73,
+     "robot_palm_to_person_face_label_median_cm": 1.05,
+     "person_face_mapped_counts": {
+      "+x": 102,
+      "+y": 20
+     },
+     "person_face_mapped": "+x",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.836,
+     "match_mapped": true,
+     "match_mapped_frames": 93,
+     "robot_palm_to_person_face_mapped_median_cm": 1.05,
+     "robot_touched_role_counts": {
+      "top": 2,
+      "own left side": 73,
+      "near end": 47
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.598,
+     "person_role_counts": {
+      "own left side": 122
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 73,
+     "view_squareness_min": {
+      "robot": 0.785,
+      "person": 0.987
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.05,
+     "robot_palm_to_person_face_median_cm": 1.05,
+     "person_palm_to_person_face_median_cm": 2.35,
+     "person_palm_to_touched_face_median_cm": 2.35,
+     "robot_palm_sd_median_cm": 1.05,
+     "robot_palm_sd_walk_median_cm": 1.03,
+     "person_palm_sd_own_box_median_cm": 0.07,
+     "person_palm_im_target_sd_median_cm": -0.89,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.55,
+     "robot_palm_to_anchor_median_cm": 4.67
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "-x": 88,
+      "+z": 10,
+      "+y": 24
+     },
+     "touched_face": "-x",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.721,
+     "person_face_counts": {
+      "-x": 102,
+      "+y": 16,
+      "+z": 4
+     },
+     "person_face": "-x",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.836,
+     "person_own_box_face_counts": {
+      "-x": 122
+     },
+     "anchor_face": "+z",
+     "anchor_face_role": "top",
+     "robot_palm_nearest_face_counts": {
+      "+z": 2,
+      "-x": 120
+     },
+     "person_face_label_counts": {
+      "-x": 122
+     },
+     "person_face_label": "-x",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 88,
+     "robot_palm_to_person_face_label_median_cm": 1.15,
+     "person_face_mapped_counts": {
+      "-x": 102,
+      "-y": 20
+     },
+     "person_face_mapped": "-x",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.836,
+     "match_mapped": true,
+     "match_mapped_frames": 68,
+     "robot_palm_to_person_face_mapped_median_cm": 1.15,
+     "robot_touched_role_counts": {
+      "own right side": 88,
+      "top": 10,
+      "near end": 24
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.721,
+     "person_role_counts": {
+      "own right side": 122
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 88,
+     "view_squareness_min": {
+      "robot": 0.785,
+      "person": 0.987
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.15,
+     "robot_palm_to_person_face_median_cm": 1.15,
+     "person_palm_to_person_face_median_cm": 1.13,
+     "person_palm_to_touched_face_median_cm": 1.13,
+     "robot_palm_sd_median_cm": 1.15,
+     "robot_palm_sd_walk_median_cm": 1.52,
+     "person_palm_sd_own_box_median_cm": -0.36,
+     "person_palm_im_target_sd_median_cm": -0.69,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 5.67
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub12_smalltable_016"
+  },
+  "sub9_smalltable_020": {
+   "tag": "sub9_smalltable_020",
+   "step": "step9_final",
+   "applicable": [
+    1.5
+   ],
+   "object": "smalltable",
+   "sequence": "sub9_smalltable_020",
+   "frames": [
+    9,
+    130
+   ],
+   "level": 1.5,
+   "solve_dir": "logs_system1/t14/step9_final/sub9_smalltable_020/m1p50",
+   "face_roles": {
+    "+x": "end towards r1",
+    "-x": "end towards r0",
+    "+y": "side, left of r0",
+    "-y": "side, right of r0",
+    "+z": "top",
+    "-z": "bottom"
+   },
+   "checks": {
+    "frames": 121,
+    "solve_frames": [
+     121,
+     121
+    ],
+    "solve_person_r0_equals_rebuilt_h0_max_m": 5.266493685596174e-09,
+    "solve_person_r1_equals_rebuilt_human1_max_m": 5.178814044271007e-09,
+    "solve_P_equals_rebuilt_P_max": 0.0,
+    "solve_object_qpos_equals_qpos_36_43_max": 0.0,
+    "object_qpos_r0_vs_r1_max": 0.0,
+    "target_urdf_size_m": [
+     0.79976032976322,
+     0.27635232237964236,
+     0.26318472744296095
+    ],
+    "shared_box_size_m": [
+     0.79976,
+     0.276352,
+     0.263185
+    ],
+    "shared_box_size_equals_target_urdf": true,
+    "own_box_size_m": [
+     0.266587,
+     0.276352,
+     0.263185
+    ],
+    "carry_axis_k": "x",
+    "phases": {
+     "w0": 14,
+     "w1": 106,
+     "frames": 121
+    },
+    "vertical_axis": {
+     "axis": "z",
+     "median_world_z_in_box_frame": [
+      0.0,
+      0.0,
+      1.0
+     ]
+    },
+    "robot_pelvis_box_local_median_m": {
+     "r0": [
+      -0.5921,
+      0.033,
+      0.0411
+     ],
+     "r1": [
+      0.5924,
+      0.0382,
+      0.0507
+     ]
+    },
+    "person_face_map_alignment_min": {
+     "r0_L": 0.7065,
+     "r0_R": 0.7065,
+     "r1_L": 0.7065,
+     "r1_R": 0.7065
+    },
+    "label_map_rotation": {
+     "r0": [
+      [
+       -1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ],
+     "r1": [
+      [
+       1.0,
+       0.0,
+       0.0
+      ],
+      [
+       0.0,
+       -1.0,
+       0.0
+      ],
+      [
+       0.0,
+       0.0,
+       1.0
+      ]
+     ]
+    },
+    "robot_view_roles_equal_k_axis_roles_frames": {
+     "r0_L": 121,
+     "r0_R": 121,
+     "r1_L": 121,
+     "r1_R": 121
+    }
+   },
+   "hands": {
+    "r0_L": {
+     "person_hand": "demonstrator L_Palm",
+     "touched_face_counts": {
+      "+z": 28,
+      "+y": 93
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.769,
+     "person_face_counts": {
+      "+z": 26,
+      "+y": 89,
+      "-x": 6
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.736,
+     "person_own_box_face_counts": {
+      "-y": 121
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 28,
+      "+y": 93
+     },
+     "person_face_label_counts": {
+      "+y": 121
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 93,
+     "robot_palm_to_person_face_label_median_cm": 1.77,
+     "person_face_mapped_counts": {
+      "+x": 14,
+      "+y": 107
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.884,
+     "match_mapped": true,
+     "match_mapped_frames": 93,
+     "robot_palm_to_person_face_mapped_median_cm": 1.77,
+     "robot_touched_role_counts": {
+      "top": 28,
+      "own left side": 93
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.769,
+     "person_role_counts": {
+      "own left side": 121
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 93,
+     "view_squareness_min": {
+      "robot": 0.975,
+      "person": 0.965
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.77,
+     "robot_palm_to_person_face_median_cm": 1.77,
+     "person_palm_to_person_face_median_cm": 2.2,
+     "person_palm_to_touched_face_median_cm": 2.2,
+     "robot_palm_sd_median_cm": 1.77,
+     "robot_palm_sd_walk_median_cm": 1.8,
+     "person_palm_sd_own_box_median_cm": 0.82,
+     "person_palm_im_target_sd_median_cm": 0.1,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.06,
+     "robot_palm_to_anchor_median_cm": 5.21
+    },
+    "r0_R": {
+     "person_hand": "demonstrator R_Palm",
+     "touched_face_counts": {
+      "+z": 15,
+      "-x": 28,
+      "-y": 78
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.645,
+     "person_face_counts": {
+      "-x": 22,
+      "-y": 99
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.818,
+     "person_own_box_face_counts": {
+      "+y": 121
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 8,
+      "-y": 113
+     },
+     "person_face_label_counts": {
+      "-y": 121
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 78,
+     "robot_palm_to_person_face_label_median_cm": 0.96,
+     "person_face_mapped_counts": {
+      "-x": 14,
+      "-y": 107
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.884,
+     "match_mapped": true,
+     "match_mapped_frames": 83,
+     "robot_palm_to_person_face_mapped_median_cm": 0.96,
+     "robot_touched_role_counts": {
+      "top": 15,
+      "near end": 28,
+      "own right side": 78
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.645,
+     "person_role_counts": {
+      "own right side": 121
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 78,
+     "view_squareness_min": {
+      "robot": 0.905,
+      "person": 0.965
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 0.96,
+     "robot_palm_to_person_face_median_cm": 0.96,
+     "person_palm_to_person_face_median_cm": 1.01,
+     "person_palm_to_touched_face_median_cm": 1.01,
+     "robot_palm_sd_median_cm": 0.9,
+     "robot_palm_sd_walk_median_cm": 0.26,
+     "person_palm_sd_own_box_median_cm": 0.74,
+     "person_palm_im_target_sd_median_cm": -0.06,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.36,
+     "robot_palm_to_anchor_median_cm": 4.4
+    },
+    "r1_L": {
+     "person_hand": "mirror partner (demonstrator R_Palm, mirrored)",
+     "touched_face_counts": {
+      "+z": 14,
+      "+x": 28,
+      "-y": 79
+     },
+     "touched_face": "-y",
+     "touched_face_role": "side, right of r0",
+     "touched_face_own": "own left side",
+     "touched_face_share": 0.653,
+     "person_face_counts": {
+      "+x": 22,
+      "-y": 99
+     },
+     "person_face": "-y",
+     "person_face_role": "side, right of r0",
+     "person_face_own": "own left side",
+     "person_face_share": 0.818,
+     "person_own_box_face_counts": {
+      "+y": 121
+     },
+     "anchor_face": "-y",
+     "anchor_face_role": "side, right of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 9,
+      "-y": 112
+     },
+     "person_face_label_counts": {
+      "-y": 121
+     },
+     "person_face_label": "-y",
+     "person_face_label_own": "own left side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 79,
+     "robot_palm_to_person_face_label_median_cm": 0.96,
+     "person_face_mapped_counts": {
+      "+x": 14,
+      "-y": 107
+     },
+     "person_face_mapped": "-y",
+     "person_face_mapped_own": "own left side",
+     "person_face_mapped_share": 0.884,
+     "match_mapped": true,
+     "match_mapped_frames": 85,
+     "robot_palm_to_person_face_mapped_median_cm": 0.96,
+     "robot_touched_role_counts": {
+      "top": 14,
+      "near end": 28,
+      "own left side": 79
+     },
+     "robot_touched_role": "own left side",
+     "robot_touched_role_share": 0.653,
+     "person_role_counts": {
+      "own left side": 121
+     },
+     "person_role": "own left side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 79,
+     "view_squareness_min": {
+      "robot": 0.907,
+      "person": 0.965
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 0.96,
+     "robot_palm_to_person_face_median_cm": 0.96,
+     "person_palm_to_person_face_median_cm": 1.01,
+     "person_palm_to_touched_face_median_cm": 1.01,
+     "robot_palm_sd_median_cm": 0.86,
+     "robot_palm_sd_walk_median_cm": 0.43,
+     "person_palm_sd_own_box_median_cm": 0.74,
+     "person_palm_im_target_sd_median_cm": -0.06,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 6.4,
+     "robot_palm_to_anchor_median_cm": 4.49
+    },
+    "r1_R": {
+     "person_hand": "mirror partner (demonstrator L_Palm, mirrored)",
+     "touched_face_counts": {
+      "+z": 26,
+      "+y": 95
+     },
+     "touched_face": "+y",
+     "touched_face_role": "side, left of r0",
+     "touched_face_own": "own right side",
+     "touched_face_share": 0.785,
+     "person_face_counts": {
+      "+z": 26,
+      "+y": 89,
+      "+x": 6
+     },
+     "person_face": "+y",
+     "person_face_role": "side, left of r0",
+     "person_face_own": "own right side",
+     "person_face_share": 0.736,
+     "person_own_box_face_counts": {
+      "-y": 121
+     },
+     "anchor_face": "+y",
+     "anchor_face_role": "side, left of r0",
+     "robot_palm_nearest_face_counts": {
+      "+z": 26,
+      "+y": 95
+     },
+     "person_face_label_counts": {
+      "+y": 121
+     },
+     "person_face_label": "+y",
+     "person_face_label_own": "own right side",
+     "person_face_label_share": 1.0,
+     "match_label": true,
+     "match_label_frames": 95,
+     "robot_palm_to_person_face_label_median_cm": 1.77,
+     "person_face_mapped_counts": {
+      "-x": 14,
+      "+y": 107
+     },
+     "person_face_mapped": "+y",
+     "person_face_mapped_own": "own right side",
+     "person_face_mapped_share": 0.884,
+     "match_mapped": true,
+     "match_mapped_frames": 95,
+     "robot_palm_to_person_face_mapped_median_cm": 1.77,
+     "robot_touched_role_counts": {
+      "top": 26,
+      "own right side": 95
+     },
+     "robot_touched_role": "own right side",
+     "robot_touched_role_share": 0.785,
+     "person_role_counts": {
+      "own right side": 121
+     },
+     "person_role": "own right side",
+     "person_role_share": 1.0,
+     "role_match": true,
+     "role_match_frames": 95,
+     "view_squareness_min": {
+      "robot": 0.983,
+      "person": 0.965
+     },
+     "match": true,
+     "touched_in_person_faces": true,
+     "robot_palm_to_touched_face_median_cm": 1.77,
+     "robot_palm_to_person_face_median_cm": 1.77,
+     "person_palm_to_person_face_median_cm": 2.2,
+     "person_palm_to_touched_face_median_cm": 2.2,
+     "robot_palm_sd_median_cm": 1.77,
+     "robot_palm_sd_walk_median_cm": 1.81,
+     "person_palm_sd_own_box_median_cm": 0.82,
+     "person_palm_im_target_sd_median_cm": 0.1,
+     "hull_exact_sd_median_cm": -0.1,
+     "hull_contact_to_palm_point_median_cm": 7.12,
+     "robot_palm_to_anchor_median_cm": 5.24
+    }
+   },
+   "command": "CUDA_VISIBLE_DEVICES=\"\" /home/kevin/.holosoma_deps/miniconda3/envs/hsretargeting_s1/bin/python -B system1/t14/frontback_train/grasp_faces.py --clip sub9_smalltable_020"
+  }
+ },
+ "git_head": "9af3dade979be274ef87f59268d068aac9f84724",
+ "code_sha256": {
+  "system1/t14/frontback_train/grasp_faces.py": "06352dc43ab07a3f8a2c7b9ad98f52561ba483aa84c4677f6dc46e5172d1562e",
+  "system1/t14/frontback_train/palm_gap_check.py": "f84ce9421ecef8df7ddf422b4adddbfd069799fc8f7023cf46b05eb67cc1e39f",
+  "system1/t14/objects/frontback.py": "5cdd5479652e6b6a5e7dced0c7be185a5c2b0ba753833450a14184573472a655",
+  "system1/t14/objects/step9_diag.py": "9d66b5a6f9a74fc5dfe3c1ca278e258e7774957b63b33609c297c2eb9632d50f"
+ },
+ "csv_sha256": "036b622d9c40b23c5e5540c757c2620605040497f3082c3f8e7157fac06b44af"
+}

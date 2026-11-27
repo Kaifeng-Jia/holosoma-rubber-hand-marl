@@ -112,3 +112,11 @@
   - 所以手是用指尖那一端碰着箱子，手掌斜着，掌心点就离开箱面 4.7 cm。
   - 没有改求解项重跑，所以分不出这多出来的 1.75 cm 里锚点、交互网格、朝向、防穿透各占多少。
 - **人的手本身：**人的手部顶点每一帧都在 suitcase 网格里 2.4–6.0 cm，所以接触标签的 should_contact 全程为真，但人的掌心点在箱外。
+
+## 状态改为"未准备好"；各片段抓法（Kevin 2026-11-27 第二条决定第 2 条，只报告）
+
+- **队列：**d_frontback 先不开训，状态是"未准备好"，排在队尾。顺序是 d_push_to10k → d_table_to10k → c_out_push_to10k → d_frontback（`system1/t13v4/queue_s9.py` 的 `KEVIN`，提交 `d4b54b9`，13:23 重启队列）。
+  - 原因（Kevin）：机器人 1 的左手 60 帧都在箱子 +y 端面上，离 +x 侧面上的锚点 14.1 cm，抓法和人不一样。
+  - 由 Kevin 定用哪条片段训练，再放回队列。
+- **各片段抓法：**`grasp_faces/README_CN.md`，13 条片段 × 4 只手，量法和 `palm_gap_check.py` 相同。
+  - sub8_suitcase_020 1.00 的逐帧结果和 `palm_gap/palm_gap.csv` 完全相同。
