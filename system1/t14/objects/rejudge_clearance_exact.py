@@ -90,7 +90,7 @@ def summary(a, rows):
 
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
-    ap.add_argument("--set", choices=("step8b", "step9f", "step9g", "step9g2"), required=True)
+    ap.add_argument("--set", choices=("step8b", "step9f", "step9g", "step9g2", "step9_final"), required=True)
     ap.add_argument("--nonhand", type=Path, required=True, help="rejudge_nonhand_exact.py csv of this set (verdicts A and B)")
     ap.add_argument("--logdir", type=Path, default=None)
     ap.add_argument("--out", type=Path, required=True)

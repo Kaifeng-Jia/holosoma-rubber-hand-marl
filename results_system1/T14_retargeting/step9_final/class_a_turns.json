@@ -1,0 +1,15 @@
+{
+ "rules": "T14 step 9: does a class-a carry episode walk straight? Information only (nothing is solved or chosen from it).\n\nPer class-a episode of the screen (screen/episodes.csv; smallbox, largebox, suitcase), on the OMOMO original release\n(omomo_motion.py quantities, 30 Hz):\n  * walking direction = the pelvis net horizontal displacement over the episode (the screen's definition);\n  * heading(t) = horizontal (left hip - right hip) x up (the screen's definition); largest |heading - walking direction| over the\n    episode frames, and that angle at the episode's first frame (lift);\n  * box yaw change = the object's rotation about the vertical from the first to the last episode frame (unwrapped);\n  * \"straight\" = |heading - walking direction| < 45 deg at every frame of the episode (the screen's class-a angle, applied per\n    frame instead of to the mean heading).\nTypical order = the screen's typical-pick distance (layer1_choice.ranked), OMOMO_new availability as in step 7.\n\n    sonic_s1/bin/python -B system1/t14/objects/step9_turns.py --out results_system1/T14_retargeting/step9/class_a_turns.csv\n",
+ "summary": {
+  "plasticbox": {
+   "class_a_episodes": 37,
+   "straight": 3,
+   "most_typical_straight_in_omomo_new": "sub12_plasticbox_053 32-176"
+  },
+  "smalltable": {
+   "class_a_episodes": 73,
+   "straight": 4,
+   "most_typical_straight_in_omomo_new": "sub12_smalltable_016 28-149"
+  }
+ }
+}

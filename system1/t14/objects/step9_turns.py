@@ -34,11 +34,14 @@ OBJS = ("smallbox", "largebox", "suitcase")
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--out", type=Path, required=True)
+    ap.add_argument("--objects", nargs="*", default=list(OBJS), help="objects to screen (default: smallbox largebox suitcase; "
+                    "T14 final test after step 9g2, Kevin 2026-11-26: plasticbox smalltable)")
     a = ap.parse_args()
+    objs = tuple(a.objects)
     eps = list(csv.DictReader(open(ROOT / "results_system1/T14_retargeting/step7/screen/episodes.csv")))
     rank = {e["sequence"] + ":" + e["start"]: i for i, e in enumerate(lc.ranked(eps, "a"))}
-    cls_a = [e for e in eps if e.get("class_a") == "True" and e["object"] in OBJS]
-    seqs = om.load_sequences(set(OBJS))
+    cls_a = [e for e in eps if e.get("class_a") == "True" and e["object"] in objs]
+    seqs = om.load_sequences(set(objs))
     rows = []
     for e in cls_a:
         v = seqs[e["sequence"]]
@@ -65,7 +68,7 @@ def main():
         w.writeheader()
         w.writerows(rows)
     summ = {}
-    for o in OBJS:
+    for o in objs:
         r = [x for x in rows if x["object"] == o]
         st = [x for x in r if x["straight"]]
         first = next((x for x in st if x["in_omomo_new"] and x["typical_rank_in_class_a"] is not None), None)

@@ -433,6 +433,8 @@ def main():
                     "when 1.5 failed while 1.0 or 1.25 intersect (step 9c run 2)")
     ap.add_argument("--search-from", type=float, default=1.55)
     ap.add_argument("--no-render", action="store_true", help="no pictures / video from the driver (default: as before)")
+    ap.add_argument("--turns", type=Path, default=None, help="final test after step 9g2 (Kevin 2026-11-26): clip list of other objects "
+                    "(step9_turns.py --objects ...), every straight clip of it; needs --all-main (default: the 22 debug clips)")
     ap.add_argument("--t13-yield", type=int, default=None, help="while a T13 post-run is running (post_run_status.json state "
                     "'running'), start a worker only if fewer than N of this driver's are running (default: off)")
     a = ap.parse_args()
@@ -462,10 +464,15 @@ def main():
     if a.search_up is not None:
         return search_up_only(a.search_up, a.search_from)
     log.update(parallel=a.parallel, deadline=DEADLINE.isoformat(timespec="seconds"), grid=GRID)
-    rows = [r for r in csv.DictReader(open(TURNS)) if r["straight"] == "True"]
+    turns = TURNS if a.turns is None else (a.turns if a.turns.is_absolute() else ROOT / a.turns)
+    rows = [r for r in csv.DictReader(open(turns)) if r["straight"] == "True"]
     main_rows = [r for r in rows if r["sequence"] in MAIN]
     ext_rows = [r for r in rows if r["sequence"] not in MAIN]
-    assert len(main_rows) == 3 and len(rows) == 22, (len(main_rows), len(rows))
+    if a.turns is None:
+        assert len(main_rows) == 3 and len(rows) == 22, (len(main_rows), len(rows))
+    else:  # final test: other objects, no debug clip among them, the main protocol for every straight clip
+        assert ALL_MAIN and not main_rows and rows, (ALL_MAIN, len(main_rows), len(rows))
+        log.update(turns=str(turns), turns_sha256=__import__("hashlib").sha256(turns.read_bytes()).hexdigest())
     log["clips"] = [dict(object=r["object"], sequence=r["sequence"], frames=f"{r['start']}:{r['stop']}", main=r["sequence"] in MAIN) for r in rows]
     save()
     if ALL_MAIN:  # step 9e: the frozen construction on all 22 straight clips at once, main protocol for each

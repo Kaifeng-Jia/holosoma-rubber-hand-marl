@@ -37,6 +37,8 @@ def main():
     global L, OUT, VID
     ap = argparse.ArgumentParser()
     ap.add_argument("--step", default="step9e", help="step 9f: step9f (same layout; 9e-only files are copied when present)")
+    ap.add_argument("--turns", type=Path, default=ROOT / "results_system1/T14_retargeting/step9/class_a_turns.csv",
+                    help="clip list recorded in the inventory (final test after 9g2: results_system1/T14_retargeting/step9_final/class_a_turns.csv)")
     a = ap.parse_args()
     L, OUT, VID = ROOT / f"logs_system1/t14/{a.step}", ROOT / f"results_system1/T14_retargeting/{a.step}", ROOT / f"exports_system1/T14_videos/{a.step}"
     d = json.loads((L / "driver.json").read_text())
@@ -52,7 +54,7 @@ def main():
     shutil.copy2(L / "driver.json", OUT / "records/driver.json")
     if (L / "driver.log").exists() or not (L / "run_all22.log").exists():
         shutil.copy2(L / "driver.log", OUT / "records/driver.log")
-    for n in ("run.sh", "run_all22.sh", "run_all22.log", "post22.sh", "driver_debug3.json", "driver_debug3.log"):  # step 9g2: driver log = run_all22.log
+    for n in ("run.sh", "run_all22.sh", "run_all22.log", "post22.sh", "driver_debug3.json", "driver_debug3.log", "post.sh", "post.log"):  # step 9g2: driver log = run_all22.log
         if (L / n).exists():
             shutil.copy2(L / n, OUT / "records" / n)
     for n in ("run.sh", "jobs.txt", "diag_rc.txt"):
@@ -109,7 +111,7 @@ def main():
     for s in sorted(seqs):
         head.append(("OMOMO_new sequence", Path("/home/kevin/holosoma/OMOMO_new") / f"{s}.pt"))
     head += [("OMOMO original release (swing segments, person render)", Path("/home/kevin/holosoma/data/train_diffusion_manip_seq_joints24.p")),
-             ("clip list", ROOT / "results_system1/T14_retargeting/step9/class_a_turns.csv"),
+             ("clip list", a.turns if a.turns.is_absolute() else ROOT / a.turns),
              ("scene template", ROOT / "src/holosoma_retargeting/holosoma_retargeting/models/g1/g1_29dof_w_largebox.xml"),
              ("robot URDF (render / evaluation)", ROOT / "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf")]
     body = inv
