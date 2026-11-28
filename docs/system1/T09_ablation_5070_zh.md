@@ -74,3 +74,24 @@
 - `README_CN.md`、配置与 diff、`SHA256SUMS`。
 
 做完 push，按常规格式回报。
+
+## 精简版（Kevin 2026-11-28 同意；以这一节为准，上面的清单不再执行）
+
+**为什么只剩三项：** 第六稿的实验一节只保留三行组件消融，其余变体（no-wrist、source-size、copied-single-prior、奖励变体）已经不在论文里。
+
+**只评这三项，都是已有的最终 checkpoint，不训练：**
+
+| 序号 | 任务 | 变体 | 种子 | 档位 |
+|---|---|---|---|---|
+| 1 | Push | prescribed placement（第四稿消融表里的那一组） | V3 用的三个 | ±2、±8 |
+| 2 | Pull | from-scratch | 721、722、723 | ±2、±8 |
+| 3 | Pull | zero-teammate-obs | 721、722、723 | ±2、±8 |
+
+- **顺序：** 1 → 2 → 3。
+- **协议：** 和 `results_system1/T03/d_final_5070/` 完全相同（冻结初始状态、确定性动作、TF32 关闭、最终 checkpoint、每档 50 个回合、nominal 不计）。checkpoint 和状态文件按 sha256 与 V3 的记录核对。
+  - prescribed placement 在 V3 里只评过 ±2。±8 用 Push 现有的 ±8 状态文件（`push_pm8.json`，a58b2fae…）。
+  - 某一组的 checkpoint 找不到或对不上，就停下回报这一组，其余照做，不拿相近的代替。
+- **机器：** 只用本机 5070，最多同时 2 个评测，不开云端。云上队列的轮询照常，互不影响；云上有卡可接时，以云上队列为先，本机评测可以让出 GPU。
+- **不做：** 身体误差补算、其余变体、±4 和 ±6 档。
+- **配对检验：** 每个变体和同任务的 D（`d_final_5070` 里的 Push，`c2_main` 里的 Pull）按初始状态配对，三个种子合并做精确双侧 McNemar，每个种子也单独报。
+- **交付：** `results_system1/T09_ablation_5070/`：`episodes.csv`、`per_seed_summary.csv`、`group_summary.csv`、`paired_completion.csv`、`v3_vs_5070.csv`、`README_CN.md`、配置与 diff、`SHA256SUMS`。做完 push，按常规格式回报。
