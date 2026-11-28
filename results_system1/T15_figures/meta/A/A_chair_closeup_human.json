@@ -1,0 +1,254 @@
+{
+ "group": "A",
+ "task": "chair",
+ "task_name": "Chair Righting",
+ "selection": {
+  "rule": "middle of the longest run of person contact frames of robot 0's right hand (round-6 contact rule)",
+  "runs_source_frames": {
+   "left": [
+    [
+     58,
+     59
+    ],
+    [
+     68,
+     73
+    ]
+   ],
+   "right": [
+    [
+     56,
+     99
+    ]
+   ]
+  },
+  "right_hand_segment": [
+   56,
+   99
+  ],
+  "same_runs_both_hands": false,
+  "source_frame": 77,
+  "source_fps": 15,
+  "reference_frame_30hz": 154,
+  "time_s": 5.1333
+ },
+ "human_to_robot_scale": 0.7616803111061523,
+ "checks": {
+  "omni_sha256_equals_comparisons_csv": true,
+  "frames_ours_asis": [
+   235,
+   235
+  ],
+  "object_track_ours_vs_asis_max": 0.0,
+  "clip_means_vs_step6": {
+   "ours": {
+    "contact_error_3d_mean_cm": 5.63,
+    "step6_contact_error_3d_csv": [
+     "5.63"
+    ],
+    "palm_normal_angle_mean_deg": 3.4,
+    "step6_hand_metrics_csv": [
+     "3.4"
+    ]
+   },
+   "omni_asis": {
+    "contact_error_3d_mean_cm": 6.27,
+    "step6_contact_error_3d_csv": [
+     "6.27"
+    ],
+    "palm_normal_angle_mean_deg": 94.0,
+    "step6_hand_metrics_csv": [
+     "94.0"
+    ]
+   }
+  }
+ },
+ "inputs_sha256": {
+  "exports_system1/T14_references/r6/chair_k1p0_C/chair_new_fps30.npz": "28befbbe704d1e7daca262fde02e916004154f27bce5ed06df20ba7b796b4d05",
+  "exports_system1/T14_references/r3/asis_chair_k1p0/chair_omni_asis_fps30.npz": "ab9519784eb3e33e892df2f6e518e4048b657f638ca300441ad7925e5c5df1bc",
+  "exports_system1/T14_references/r6/chair_k1p0_C/chair_k1p0.urdf": "de1619ccd2b390df4aaa85d6dd8b9918a88e45a71fb63fb2e21833b158b08b20",
+  "src/holosoma/holosoma/data/robots/g1/main_mesh_collision_rubberhand.urdf": "7ed217f28ed6e3b1fa864bf0aadd527ed5ad319361ecefaeccd56e81306a4a25",
+  "captured_object_mesh": {
+   "path": "/home/kevin/datasets/CORE4D-V1-full/CORE4D_Real/object_models/chair/chair021_m.obj",
+   "sha256": "7fb3283f1b67c8d08bb1f68c51d15aab5e6c940b8571e704bca265701b776161"
+  }
+ },
+ "code_sha256": {
+  "system1/t15/group_a.py": "6baf360fae38f189445e209713be446037e63c684cd1c2e8421a30fd0a449bab",
+  "system1/t15/t15_scene.py": "4144a1c62c8de02c1cebfca929ab9d28b889b5d461308e79a9b469274c87ec53",
+  "system1/t14/human_render.py": "6f26213b1a149f3735b8395dbd85bf1dd5b2c0299609fc6c695a1e9f2bf51957",
+  "system1/t14/contact_error3d.py": "975c59532c9715a7ae7aff3d740badfbccb65718579cdd2afeda739d09ba6380",
+  "system1/t14/hand_metrics.py": "5c02b5ba62e509a0269eeed7f84ed3e2465b9051cda44636c5b09212089a263d"
+ },
+ "segmentation_classes": {
+  "background": 0,
+  "robot0": 1,
+  "robot1": 2,
+  "object": 3,
+  "person1": 4,
+  "person2": 5,
+  "ground": 6
+ },
+ "git_head": "83a1123af90aa3adc228df520ff700d4f9392c09",
+ "command": "/home/kevin/.holosoma_deps/miniconda3/envs/sonic_s1/bin/python -B system1/t15/group_a.py --out exports_system1/T15_figures/A",
+ "asset_id": "A_chair_closeup_human",
+ "image": "A_chair_closeup_human.png",
+ "kind": "person (SMPL-X, grey) + captured object",
+ "view": "closeup",
+ "frame": {
+  "reference_frame_30hz": 154,
+  "time_s": 5.1333,
+  "source_frame": 77,
+  "source_fps": 15
+ },
+ "camera": {
+  "settings": {
+   "lookat": [
+    0.19532281160354614,
+    0.4918614476919174,
+    0.7943389415740967
+   ],
+   "distance": 0.9894254736480929,
+   "azimuth": -75.02910527793259,
+   "elevation": -10.0
+  },
+  "resolution": [
+   2560,
+   1440
+  ],
+  "K": [
+   [
+    1738.2338276241662,
+    0.0,
+    1279.5
+   ],
+   [
+    0.0,
+    1738.2338276241662,
+    719.5
+   ],
+   [
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "world_to_camera": [
+   [
+    -0.9660571813583374,
+    -0.2583283483982086,
+    0.0,
+    0.31575476759913546
+   ],
+   [
+    -0.04485824704170227,
+    0.16775408387184143,
+    -0.9848077893257141,
+    0.708521248780239
+   ],
+   [
+    0.2544037401676178,
+    -0.9513806104660034,
+    -0.1736481785774231,
+    1.545617582568113
+   ],
+   [
+    0.0,
+    0.0,
+    0.0,
+    1.0
+   ]
+  ],
+  "near": 0.03999999910593033,
+  "far": 240.0,
+  "fovy_deg": 45.0,
+  "projection": "perspective",
+  "pixel_convention": "top-left pixel centre (0, 0), u right, v down; camera x right, y down, z forward",
+  "supersampling": "2x2 (rendered 5120 x 2880, MSAA 8, Lanczos downsample)"
+ },
+ "keypoints": {
+  "object_center": {
+   "world_xyz_m": [
+    -0.174223,
+    0.386311,
+    0.429865
+   ],
+   "uv": [
+    1910.16,
+    1306.73
+   ],
+   "camera_z_m": 1.0591,
+   "in_image": true,
+   "occluded": false,
+   "occlusion_reason": null,
+   "owner": "object"
+  },
+  "object_origin": {
+   "world_xyz_m": [
+    -0.174495,
+    0.386251,
+    0.42976
+   ],
+   "uv": [
+    1910.62,
+    1306.91
+   ],
+   "camera_z_m": 1.0591,
+   "in_image": true,
+   "occluded": false,
+   "occlusion_reason": null,
+   "owner": "object"
+  },
+  "person_left_palm": {
+   "world_xyz_m": [
+    0.293641,
+    0.378751,
+    0.692778
+   ],
+   "uv": [
+    1179.2,
+    836.38
+   ],
+   "camera_z_m": 1.1397,
+   "in_image": true,
+   "occluded": false,
+   "occlusion_reason": null,
+   "owner": "person1"
+  },
+  "person_right_palm": {
+   "world_xyz_m": [
+    0.038783,
+    0.583388,
+    0.797101
+   ],
+   "uv": [
+    1536.76,
+    759.13
+   ],
+   "camera_z_m": 0.862,
+   "in_image": true,
+   "occluded": false,
+   "occlusion_reason": null,
+   "owner": "person1"
+  }
+ },
+ "subject_extent": {
+  "height": 1.0,
+  "width": 0.8434,
+  "bbox_uv": [
+   297,
+   0,
+   2455,
+   1439
+  ],
+  "pixels": 0.3431
+ },
+ "ground_z_m": 0.0062950849533081055,
+ "person": "person 1 (robot 0's source)",
+ "hidden": "the other person",
+ "gl": {
+  "vendor": "NVIDIA Corporation",
+  "renderer": "NVIDIA GeForce RTX 5070 Laptop GPU/PCIe/SSE2",
+  "version": "4.6.0 NVIDIA 580.178.04"
+ }
+}

@@ -1,0 +1,450 @@
+{
+ "group": "A",
+ "git_head": "83a1123af90aa3adc228df520ff700d4f9392c09",
+ "git_status_system1_t15": "?? system1/t15/",
+ "versions": {
+  "mujoco": "4.0.0",
+  "numpy": "1.26.4",
+  "yourdfpy": "0.0.60",
+  "trimesh": "4.5.1",
+  "Pillow": "11.3.0",
+  "python": "3.11.15"
+ },
+ "tasks": {
+  "table": {
+   "selection": {
+    "rule": "middle of the longest run of person contact frames of robot 0's right hand (round-6 contact rule)",
+    "runs_source_frames": {
+     "left": [
+      [
+       48,
+       163
+      ]
+     ],
+     "right": [
+      [
+       47,
+       48
+      ],
+      [
+       50,
+       165
+      ]
+     ]
+    },
+    "right_hand_segment": [
+     50,
+     165
+    ],
+    "same_runs_both_hands": false,
+    "source_frame": 107,
+    "source_fps": 15,
+    "reference_frame_30hz": 214,
+    "time_s": 7.1333
+   },
+   "checks": {
+    "omni_sha256_equals_comparisons_csv": true,
+    "frames_ours_asis": [
+     413,
+     413
+    ],
+    "object_track_ours_vs_asis_max": 0.0,
+    "clip_means_vs_step6": {
+     "ours": {
+      "contact_error_3d_mean_cm": 1.48,
+      "step6_contact_error_3d_csv": [
+       "1.48"
+      ],
+      "palm_normal_angle_mean_deg": 3.5,
+      "step6_hand_metrics_csv": [
+       "3.5"
+      ]
+     },
+     "omni_asis": {
+      "contact_error_3d_mean_cm": 5.27,
+      "step6_contact_error_3d_csv": [
+       "5.27"
+      ],
+      "palm_normal_angle_mean_deg": 68.9,
+      "step6_hand_metrics_csv": [
+       "68.9"
+      ]
+     }
+    }
+   },
+   "images": [
+    "A_table_closeup_human",
+    "A_table_closeup_omni_asis",
+    "A_table_closeup_ours",
+    "A_table_full_human",
+    "A_table_full_omni_asis",
+    "A_table_full_ours"
+   ],
+   "cameras": {
+    "closeup": {
+     "lookat": [
+      -0.021366373283591256,
+      -0.6817842123315763,
+      0.671716389810487
+     ],
+     "distance": 0.9823470834048937,
+     "azimuth": 167.31070097335916,
+     "elevation": -10.0
+    },
+    "full": {
+     "lookat": [
+      -0.007840865626286692,
+      -0.5175105236505807,
+      0.6431831429191869
+     ],
+     "distance": 2.0459363815344505,
+     "azimuth": 197.31070097335916,
+     "elevation": -15.0
+    },
+    "closeup_person": {
+     "lookat": [
+      -0.19513394683599472,
+      -1.0321149826049805,
+      0.9134932160377502
+     ],
+     "distance": 1.3137598387558467,
+     "azimuth": 167.31070097335916,
+     "elevation": -10.0
+    },
+    "full_person": {
+     "lookat": [
+      -0.15665516636117266,
+      -0.8064108211632857,
+      0.8531516194343567
+     ],
+     "distance": 2.7361704392637383,
+     "azimuth": 197.31070097335916,
+     "elevation": -15.0
+    }
+   },
+   "metrics_at_frame": {
+    "ours": {
+     "r0_left": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 2.21,
+      "contact_error_normal_signed_cm": 0.82,
+      "contact_error_tangential_cm": 2.05,
+      "palm_normal_angle_deg": 3.31
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 1.22,
+      "contact_error_normal_signed_cm": 0.64,
+      "contact_error_tangential_cm": 1.04,
+      "palm_normal_angle_deg": 3.52
+     }
+    },
+    "omni_asis": {
+     "r0_left": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 7.61,
+      "contact_error_normal_signed_cm": 4.36,
+      "contact_error_tangential_cm": 6.24,
+      "palm_normal_angle_deg": 61.31
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 5.04,
+      "contact_error_normal_signed_cm": 2.66,
+      "contact_error_tangential_cm": 4.28,
+      "palm_normal_angle_deg": 73.8
+     }
+    }
+   }
+  },
+  "chair": {
+   "selection": {
+    "rule": "middle of the longest run of person contact frames of robot 0's right hand (round-6 contact rule)",
+    "runs_source_frames": {
+     "left": [
+      [
+       58,
+       59
+      ],
+      [
+       68,
+       73
+      ]
+     ],
+     "right": [
+      [
+       56,
+       99
+      ]
+     ]
+    },
+    "right_hand_segment": [
+     56,
+     99
+    ],
+    "same_runs_both_hands": false,
+    "source_frame": 77,
+    "source_fps": 15,
+    "reference_frame_30hz": 154,
+    "time_s": 5.1333
+   },
+   "checks": {
+    "omni_sha256_equals_comparisons_csv": true,
+    "frames_ours_asis": [
+     235,
+     235
+    ],
+    "object_track_ours_vs_asis_max": 0.0,
+    "clip_means_vs_step6": {
+     "ours": {
+      "contact_error_3d_mean_cm": 5.63,
+      "step6_contact_error_3d_csv": [
+       "5.63"
+      ],
+      "palm_normal_angle_mean_deg": 3.4,
+      "step6_hand_metrics_csv": [
+       "3.4"
+      ]
+     },
+     "omni_asis": {
+      "contact_error_3d_mean_cm": 6.27,
+      "step6_contact_error_3d_csv": [
+       "6.27"
+      ],
+      "palm_normal_angle_mean_deg": 94.0,
+      "step6_hand_metrics_csv": [
+       "94.0"
+      ]
+     }
+    }
+   },
+   "images": [
+    "A_chair_closeup_human",
+    "A_chair_closeup_omni_asis",
+    "A_chair_closeup_ours",
+    "A_chair_full_human",
+    "A_chair_full_omni_asis",
+    "A_chair_full_ours"
+   ],
+   "cameras": {
+    "closeup": {
+     "lookat": [
+      0.10180942338056813,
+      0.5600834877884221,
+      0.6235897425458341
+     ],
+     "distance": 0.7536259025846315,
+     "azimuth": -75.02910527793259,
+     "elevation": -10.0
+    },
+    "full": {
+     "lookat": [
+      0.06973903075616575,
+      0.553464378790995,
+      0.5953118602555623
+     ],
+     "distance": 1.8529053025935285,
+     "azimuth": -45.02910527793259,
+     "elevation": -15.0
+    },
+    "closeup_person": {
+     "lookat": [
+      0.19532281160354614,
+      0.4918614476919174,
+      0.7943389415740967
+     ],
+     "distance": 0.9894254736480929,
+     "azimuth": -75.02910527793259,
+     "elevation": -10.0
+    },
+    "full_person": {
+     "lookat": [
+      0.09575081574602948,
+      0.4778964895471308,
+      0.7313639003774662
+     ],
+     "distance": 2.432654849516383,
+     "azimuth": -45.02910527793259,
+     "elevation": -15.0
+    }
+   },
+   "metrics_at_frame": {
+    "ours": {
+     "r0_left": {
+      "person_hand_in_contact": false,
+      "contact_error_3d_cm": 20.66,
+      "contact_error_normal_signed_cm": 20.58,
+      "contact_error_tangential_cm": 1.92,
+      "palm_normal_angle_deg": 2.87
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 5.08,
+      "contact_error_normal_signed_cm": 4.76,
+      "contact_error_tangential_cm": 1.79,
+      "palm_normal_angle_deg": 3.56
+     }
+    },
+    "omni_asis": {
+     "r0_left": {
+      "person_hand_in_contact": false,
+      "contact_error_3d_cm": 18.04,
+      "contact_error_normal_signed_cm": 17.86,
+      "contact_error_tangential_cm": 2.52,
+      "palm_normal_angle_deg": 8.5
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 5.33,
+      "contact_error_normal_signed_cm": 3.26,
+      "contact_error_tangential_cm": 4.21,
+      "palm_normal_angle_deg": 70.51
+     }
+    }
+   }
+  },
+  "push": {
+   "selection": {
+    "rule": "middle of the longest run of person contact frames of robot 0's right hand (round-6 contact rule)",
+    "runs_source_frames": {
+     "left": [
+      [
+       4,
+       150
+      ]
+     ],
+     "right": [
+      [
+       4,
+       149
+      ]
+     ]
+    },
+    "right_hand_segment": [
+     4,
+     149
+    ],
+    "same_runs_both_hands": false,
+    "source_frame": 76,
+    "source_fps": 30,
+    "reference_frame_30hz": 76,
+    "time_s": 2.5333
+   },
+   "checks": {
+    "omni_sha256_equals_comparisons_csv": true,
+    "frames_ours_asis": [
+     186,
+     186
+    ],
+    "object_track_ours_vs_asis_max": 0.0,
+    "push_pair_vs_exported_m1p00_max": 0.0,
+    "clip_means_vs_step6": {
+     "ours": {
+      "contact_error_3d_mean_cm": 4.76,
+      "step6_contact_error_3d_csv": [
+       "4.76"
+      ],
+      "palm_normal_angle_mean_deg": 5.7,
+      "step6_hand_metrics_csv": [
+       "5.7"
+      ]
+     },
+     "omni_asis": {
+      "contact_error_3d_mean_cm": 14.95,
+      "step6_contact_error_3d_csv": [
+       "14.95"
+      ],
+      "palm_normal_angle_mean_deg": 74.0,
+      "step6_hand_metrics_csv": [
+       "74.0"
+      ]
+     }
+    }
+   },
+   "images": [
+    "A_push_closeup_human",
+    "A_push_closeup_omni_asis",
+    "A_push_closeup_ours",
+    "A_push_full_human",
+    "A_push_full_omni_asis",
+    "A_push_full_ours"
+   ],
+   "cameras": {
+    "closeup": {
+     "lookat": [
+      -0.43992657975153115,
+      0.16541049070579655,
+      0.4886115528655365
+     ],
+     "distance": 0.7289227977596656,
+     "azimuth": 11.841287801691095,
+     "elevation": -10.0
+    },
+    "full": {
+     "lookat": [
+      0.010294196864446492,
+      0.13972732296970192,
+      0.534764786853349
+     ],
+     "distance": 2.619875431735741,
+     "azimuth": 41.841287801691095,
+     "elevation": -15.0
+    },
+    "closeup_person": {
+     "lookat": [
+      -0.01227466574491215,
+      0.37500476177746406,
+      0.5323637663475183
+     ],
+     "distance": 0.973109766609544,
+     "azimuth": 11.841287801691095,
+     "elevation": -10.0
+    },
+    "full_person": {
+     "lookat": [
+      0.044461256724191184,
+      0.32653898031038353,
+      0.6173848158956727
+     ],
+     "distance": 3.497525907761525,
+     "azimuth": 41.841287801691095,
+     "elevation": -15.0
+    }
+   },
+   "metrics_at_frame": {
+    "ours": {
+     "r0_left": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 4.35,
+      "contact_error_normal_signed_cm": 3.6,
+      "contact_error_tangential_cm": 2.43,
+      "palm_normal_angle_deg": 4.93
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 3.8,
+      "contact_error_normal_signed_cm": 3.01,
+      "contact_error_tangential_cm": 2.32,
+      "palm_normal_angle_deg": 4.75
+     }
+    },
+    "omni_asis": {
+     "r0_left": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 10.23,
+      "contact_error_normal_signed_cm": -6.6,
+      "contact_error_tangential_cm": 7.82,
+      "palm_normal_angle_deg": 74.03
+     },
+     "r0_right": {
+      "person_hand_in_contact": true,
+      "contact_error_3d_cm": 17.31,
+      "contact_error_normal_signed_cm": 6.49,
+      "contact_error_tangential_cm": 16.05,
+      "palm_normal_angle_deg": 79.61
+     }
+    }
+   }
+  }
+ }
+}

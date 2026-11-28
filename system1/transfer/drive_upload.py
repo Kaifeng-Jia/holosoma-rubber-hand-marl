@@ -86,6 +86,8 @@ def run(cmd, rec):
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--task", required=True, help="Drive subfolder, same name as results_system1/<task>/")
+    ap.add_argument("--manifest", type=Path, default=None, help="manifest csv (default results_system1/<task>/drive_manifest.csv; "
+                    "T15: one manifest results_system1/T15_figures/drive_manifest.csv for the group folders T15_figures/<group>)")
     ap.add_argument("files", nargs="+", type=Path)
     a = ap.parse_args()
     files = check_allowed(a.files)
@@ -109,7 +111,7 @@ def main():
     bad = [r["file_name"] for r in rows if drive_sha.get(r["file_name"]) != r["sha256"] or drive_size.get(r["file_name"]) != r["bytes"]]
     rec.update(files=rows, source_dirs={str(k.relative_to(ROOT)): v for k, v in groups.items()}, drive_sha256_and_size_match=not bad, mismatched=bad)
     if not bad:
-        merge_manifest(ROOT / "results_system1" / a.task / "drive_manifest.csv", rows)
+        merge_manifest(a.manifest.resolve() if a.manifest else ROOT / "results_system1" / a.task / "drive_manifest.csv", rows)
     rec["ended"] = datetime.now(ny).isoformat(timespec="seconds")
     (log / "record.json").write_text(json.dumps(rec, indent=1) + "\n")
     print(json.dumps(dict(dest=dest, files=len(rows), drive_sha256_and_size_match=not bad, mismatched=bad, log=str(log.relative_to(ROOT))), indent=1))
